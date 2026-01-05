@@ -1,0 +1,329 @@
+﻿<dxwui:WinUIDialogWindow x:Class="Emdep.Geos.Modules.Hrm.Views.AddNewJobDescriptionsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.Hrm.Views"
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors" 
+             xmlns:HrmApplication="clr-namespace:Emdep.Geos.Modules.Hrm" 
+             xmlns:Validation ="clr-namespace:Emdep.Geos.UI.Validations;assembly=Emdep.Geos.UI.Validations" 
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+             xmlns:behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300"
+             TitleStyle="{DynamicResource WinUIDialogWindowTitleStyle}"
+             Style="{DynamicResource WinUIDialogWindowStyle}">
+
+    <dxwui:WinUIDialogWindow.Resources>
+        <DataTemplate x:Key="TemplateDiamond">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition>
+                        <ColumnDefinition.Style>
+                            <Style TargetType="{x:Type ColumnDefinition}">
+                                <Setter Property="Width" Value="105"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IdImage}" Value="0">
+                                        <Setter Property="Width" Value="0" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ColumnDefinition.Style>
+                    </ColumnDefinition>
+                    <ColumnDefinition />
+
+                </Grid.ColumnDefinitions>
+                <dxe:RatingEdit IsReadOnly="True" ItemsCount="{Binding IdImage}"  Grid.Column="0" HorizontalContentAlignment="Center">
+                    <dxe:RatingEdit.ItemStyle>
+                        <Style TargetType="dxe:RatingItem">
+                            <Setter Property="Background" Value="Gold" />
+                            <Setter Property="VerticalAlignment" Value="Stretch" />
+                            <Setter Property="HorizontalAlignment" Value="Left" />
+                            <Setter Property="BorderBrush" Value="Gold" />
+                            <Setter Property="Geometry">
+                                <Setter.Value>
+                                    <RectangleGeometry Rect="0,0,25,25">
+                                        <RectangleGeometry.Transform>
+                                            <RotateTransform CenterX="0" CenterY="0" Angle="45"/>
+                                        </RectangleGeometry.Transform>
+                                    </RectangleGeometry>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </dxe:RatingEdit.ItemStyle>
+                </dxe:RatingEdit>
+                <TextBlock Text="{Binding Value}" VerticalAlignment="Center" Grid.Column="1"/>
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="TemplateDiamondWithCircle">
+            <StackPanel Orientation="Horizontal">
+                <ItemsControl>
+                    <dxe:RatingEdit IsReadOnly="True" ItemsCount="{Binding IdImage}" Width="105" Grid.Column="0" HorizontalContentAlignment="Center" >
+                        <dxe:RatingEdit.ItemStyle>
+                            <Style TargetType="dxe:RatingItem">
+                                <Setter Property="Background" Value="Gold" />
+                                <Setter Property="VerticalAlignment" Value="Stretch" />
+                                <Setter Property="BorderBrush" Value="Gold" />
+                                <Setter Property="Geometry">
+                                    <Setter.Value>
+                                        <GeometryGroup FillRule="EvenOdd">
+                                            <EllipseGeometry Center="0,0" RadiusX="40" RadiusY="40" />
+                                            <EllipseGeometry Center="0,0" RadiusX="40" RadiusY="40" />
+                                            <RectangleGeometry Rect="-20,-20,40,40">
+                                                <RectangleGeometry.Transform>
+                                                    <RotateTransform CenterX="0" CenterY="0" Angle="45" />
+                                                </RectangleGeometry.Transform>
+                                            </RectangleGeometry>
+                                        </GeometryGroup>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </dxe:RatingEdit.ItemStyle>
+                    </dxe:RatingEdit>
+                </ItemsControl>
+                <TextBlock Text="{Binding Value}" VerticalAlignment="Center" HorizontalAlignment="Left" />
+            </StackPanel>
+        </DataTemplate>
+
+    </dxwui:WinUIDialogWindow.Resources>
+
+    <!--Sprint 41-HRM	M041-08	New configuration section Job Descriptions-To add new Job Descriptions -sdesai-->
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape"  Command="{Binding AddJobDescriptionsViewCancelButtonCommand}"/>
+    </dxwui:WinUIDialogWindow.InputBindings>
+
+    <Grid Margin="0,-50,0,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="55"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="155"/>
+            <ColumnDefinition Width="270"/>
+        </Grid.ColumnDefinitions>
+
+        <Label Content="{Binding WindowHeader}" HorizontalAlignment="Left" Style="{StaticResource LabelTitleStyle}" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" />
+
+        <Label Grid.Row="1" Grid.Column="0" Content="{DynamicResource JobDescriptionJDCode}" Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,10,0,10"/>
+        <dxe:TextEdit Text="{Binding JobDescriptionCode, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" Margin="0,0,0,0" Grid.Row="1" Grid.Column="1" Width="250" Height="30" VerticalAlignment="Center" HorizontalAlignment="Left" 
+                      AllowNullInput="True" InvalidValueBehavior="AllowLeaveEditor" 
+                      IsReadOnly="{Binding IsReadOnlyField,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
+            <dxe:TextEdit.EditValue>
+                <Binding Path="JobDescriptionCode" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                    <Binding.ValidationRules>
+                        <Validation:JobDescriptionValidation FieldName="JobDescriptionCode" ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True"/>
+                    </Binding.ValidationRules>
+                </Binding>
+            </dxe:TextEdit.EditValue>
+        </dxe:TextEdit>
+
+        <Label Grid.Row="2" Grid.Column="0" Content="{DynamicResource JobDescriptionTitle}" Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,10,0,10"/>
+
+        <dxe:TextEdit Text="{Binding JobDescriptionTitle, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" Margin="0,0,0,0" Grid.Row="2" Grid.Column="1" Width="250" Height="30" VerticalAlignment="Center" HorizontalAlignment="Left" 
+                      AllowNullInput="True" InvalidValueBehavior="AllowLeaveEditor" 
+                      IsReadOnly="{Binding IsReadOnlyField,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
+            <dxe:TextEdit.EditValue>
+                <Binding Path="JobDescriptionTitle" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                    <Binding.ValidationRules>
+                        <Validation:JobDescriptionValidation FieldName="JobDescriptionTitle" ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True"/>
+                    </Binding.ValidationRules>
+                </Binding>
+            </dxe:TextEdit.EditValue>
+        </dxe:TextEdit>
+
+        <Label Grid.Row="3" Grid.Column="0" Content="{DynamicResource JobDescriptionJobCode}" Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,10,0,10"/>
+
+        <dxe:TextEdit Text="{Binding JobDescriptionAbbreviation, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" Margin="0,0,0,0" Grid.Row="3" Grid.Column="1" Width="250" Height="30" VerticalAlignment="Center" HorizontalAlignment="Left" 
+                      AllowNullInput="True" InvalidValueBehavior="AllowLeaveEditor" 
+                      IsReadOnly="{Binding IsReadOnlyField,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
+        </dxe:TextEdit>
+
+        <Label Grid.Row="4" Grid.Column="0" Content="{DynamicResource JobDescriptionParent}" Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,10,0,10"/>
+        <dxe:ComboBoxEdit Grid.Row="4" Grid.Column="1" HorizontalAlignment="Left" 
+                         Width="250" Height="30" VerticalAlignment="Center"  ItemsSource="{Binding JobDescriptionListParent,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged }"                         
+                          DisplayMember="JobDescriptionTitle" ValueMember="IdJobDescription"
+                          AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True"
+                          SelectedIndex="{Binding SelectedParentIndex,Mode=TwoWay ,UpdateSourceTrigger=PropertyChanged }">
+
+        </dxe:ComboBoxEdit>
+
+        <Label Grid.Row="5" Grid.Column="0" Content="{DynamicResource JobDescriptionsDepartment}" Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,10,0,10"/>
+        <dxe:ComboBoxEdit Grid.Row="5" Grid.Column="1" HorizontalAlignment="Left" 
+                         Width="250" Height="30" VerticalAlignment="Center"  ItemsSource="{Binding DepartmentList,Mode=TwoWay}"
+                          DisplayMember="DepartmentName" ValueMember="IdDepartment" 
+                          AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True">
+            <dxe:ComboBoxEdit.SelectedIndex>
+                <Binding Path="SelectedIndexDepartment" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                    <Binding.ValidationRules>
+                        <Validation:JobDescriptionValidation FieldName="SelectedIndexDepartment" ValidationStep="UpdatedValue" />
+                    </Binding.ValidationRules>
+                </Binding>
+            </dxe:ComboBoxEdit.SelectedIndex>
+        </dxe:ComboBoxEdit>
+
+        <Label Grid.Row="6" Grid.Column="0" Content="{DynamicResource JobDescriptionsLevel}" Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,10,0,10"/>
+
+        <!--<dxe:ComboBoxEdit Grid.Row="6" Grid.Column="1" HorizontalAlignment="Left" 
+                          Height="30"  Width="250" ValueMember="IdLookupValue" VerticalAlignment="Center"
+                          ItemsSource="{Binding JDLevelList, Mode=TwoWay}"
+                          AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True" 
+                          ApplyItemTemplateToSelectedItem="True" IsTextEditable="False" DisplayMember="Level" >
+
+            <dxe:ComboBoxEdit.ItemTemplateSelector>
+                <UIHelper:JDLevelTemplateSelector/>
+            </dxe:ComboBoxEdit.ItemTemplateSelector>
+
+            <dxe:ComboBoxEdit.SelectedIndex>
+                <Binding Path="SelectedIndexLevel" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay"/>
+            </dxe:ComboBoxEdit.SelectedIndex>
+        </dxe:ComboBoxEdit>-->
+
+        <dxe:ComboBoxEdit Grid.Row="6" Grid.Column="1" HorizontalAlignment="Left" 
+                          Height="30"  Width="250" ValueMember="IdLookupValue" VerticalAlignment="Center"   
+                          ItemsSource="{Binding JDLevelList, Mode=TwoWay}"
+                          AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True" ApplyItemTemplateToSelectedItem="True" IsTextEditable="False" >
+            <dxe:ComboBoxEdit.ItemTemplateSelector>
+                <UIHelper:JDLevelTemplateSelector/>
+            </dxe:ComboBoxEdit.ItemTemplateSelector>
+
+            <dxe:ComboBoxEdit.SelectedIndex>
+                <Binding Path="SelectedIndexLevel" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                    <Binding.ValidationRules>
+                        <Validation:JobDescriptionValidation FieldName="SelectedIndexLevel" ValidationStep="UpdatedValue" />
+                    </Binding.ValidationRules>
+                </Binding>
+            </dxe:ComboBoxEdit.SelectedIndex>
+        </dxe:ComboBoxEdit>
+
+        <Label Grid.Row="7" Grid.Column="0" Content="{DynamicResource JobDescriptionsScope}" Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,10,0,10"/>
+        <dxe:ComboBoxEdit Grid.Row="7" Grid.Column="1" HorizontalAlignment="Left" 
+                          Height="30"  Width="250" VerticalAlignment="Center" 
+                          ItemsSource="{Binding JDScopeList, Mode=TwoWay}" DisplayMember="Value" ValueMember="IdLookupValue"
+                          AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True" IsTextEditable="False" >
+            <!--<dxe:ComboBoxEdit.ItemTemplateSelector>
+                <UIHelper:JDLevelTemplateSelector/>
+            </dxe:ComboBoxEdit.ItemTemplateSelector>-->
+
+            <dxe:ComboBoxEdit.SelectedIndex>
+                <Binding Path="SelectedIndexScope" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                    <Binding.ValidationRules>
+                        <Validation:JobDescriptionValidation FieldName="SelectedIndexScope" ValidationStep="UpdatedValue" />
+                    </Binding.ValidationRules>
+                </Binding>
+            </dxe:ComboBoxEdit.SelectedIndex>
+        </dxe:ComboBoxEdit>
+
+        <Label Grid.Row="8" Grid.Column="0" Content="{DynamicResource JobDescriptionFileName}" Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,10,0,10"/>
+
+        <dxe:ComboBoxEdit x:Name="jobDescriptipnFile" Grid.Row="8" Grid.Column="1" Grid.ColumnSpan="2" Height="30" Width="250"
+                          EditValue="{Binding AttachmentList, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                          ItemsSource="{Binding AttachmentList,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                          ScrollViewer.VerticalScrollBarVisibility="Auto"
+                          DisplayMember="OriginalFileName"
+                          HorizontalAlignment="Left"
+                          VerticalAlignment="Center"
+                          AllowDefaultButton="False"
+                          AutoComplete="True"
+                          ImmediatePopup="True"  Margin="0 0 0 0"
+                          ValidateOnEnterKeyPressed="True" 
+                          ValidateOnTextInput="True"
+                          IsTextEditable="False" Style="{DynamicResource ComboBoxEditStyle}" 
+                          
+                          IsEnabled="{Binding IsAcceptEnabled}">
+
+            <dxe:ComboBoxEdit.StyleSettings>
+                <dxe:TokenComboBoxStyleSettings  NewTokenPosition="Far" EnableTokenWrapping="True"  />
+            </dxe:ComboBoxEdit.StyleSettings>
+        </dxe:ComboBoxEdit>
+
+        <Button Content= "{DynamicResource ChooseJobDescriptionFile}"
+                    Height="30"  
+                    Grid.Row="9" Grid.Column="1"
+                    Width="140" 
+                    Margin="5,5,20,5"
+                    FontSize="16"
+                    HorizontalAlignment="Right"   
+                   VerticalAlignment="Center" 
+                   Command="{Binding ChooseFileCommand}" Style="{DynamicResource ButtonStyle}" 
+                   IsEnabled="{Binding IsAcceptEnabled}"
+                   Grid.ColumnSpan="2"/>
+
+        <Label Grid.Row="10" Grid.Column="0" Content="{DynamicResource JobDescriptionInUse}" Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,10,0,10"/>
+        <dxe:ToggleSwitch x:Name="chkInUse" Grid.Row="10" Grid.Column="1" Height="30" HorizontalAlignment="Left" VerticalAlignment="Center" ContentPlacement="Inside"
+                                                       CheckedStateContent="Yes" UncheckedStateContent="No" ToggleSwitchWidth="50" ToggleSwitchHeight="22" IsThreeState="False"                                
+                                               IsChecked="{Binding InUse,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                          IsReadOnly="{Binding IsReadOnlyField,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
+        </dxe:ToggleSwitch>
+
+        <Label Grid.Row="11" Grid.Column="0" Content="{DynamicResource JobDescriptionIsMandatory}" Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,10,0,10"/>
+        <dxe:ToggleSwitch x:Name="chkIsMandatory" Grid.Row="11" Grid.Column="1" Height="30" HorizontalAlignment="Left" VerticalAlignment="Center" ContentPlacement="Inside"
+                                                       CheckedStateContent="Yes" UncheckedStateContent="No" ToggleSwitchWidth="50" ToggleSwitchHeight="22" IsThreeState="False"                                
+                                               IsChecked="{Binding IsMandatory,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                          IsReadOnly="{Binding Source={x:Static HrmApplication:HrmCommon.Instance}, Path=IsPermissionReadOnly,Mode=OneTime,UpdateSourceTrigger=PropertyChanged}">
+        </dxe:ToggleSwitch>
+
+        <Label Grid.Row="12" Grid.Column="0" Content="{DynamicResource JobDescriptionIsRemote}" Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,10,0,10"/>
+        <dxe:ToggleSwitch x:Name="chkIsRemote" Grid.Row="12" Grid.Column="1" Height="30" HorizontalAlignment="Left" VerticalAlignment="Center" ContentPlacement="Inside"
+                                                       CheckedStateContent="Yes" UncheckedStateContent="No" ToggleSwitchWidth="50" ToggleSwitchHeight="22" IsThreeState="False"                                
+                                               IsChecked="{Binding IsRemote,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                          IsReadOnly="{Binding Source={x:Static HrmApplication:HrmCommon.Instance}, Path=IsPermissionReadOnly,Mode=OneTime,UpdateSourceTrigger=PropertyChanged}">
+        </dxe:ToggleSwitch>
+
+        <StackPanel Grid.Row="13" Grid.Column="1" Grid.ColumnSpan="2"
+                    HorizontalAlignment="Left" 
+                    Orientation="Horizontal"
+                    Margin="0,0,0,0"
+                    Width="250">
+
+            <Button Content="{DynamicResource JobDescriptionAcceptButton}"
+                    Command="{Binding AddJobDescriptionButtonCommand}"
+                    Height="30"
+                    Width="100"
+                    Margin="0,0,10,0"
+                    Style="{DynamicResource Button16Style}"
+                    VerticalAlignment="Bottom" 
+                    IsEnabled="{Binding IsAcceptEnabled}"/>
+
+
+            <Button Content="{DynamicResource JobDescriptionCancelButton}"
+                    Command="{Binding AddJobDescriptionsViewCancelButtonCommand}" 
+                    Height="30"
+                    Width="100"
+                    Margin="10,0,0,0"
+                    Style="{DynamicResource Button16Style}"
+                    VerticalAlignment="Bottom" />
+        </StackPanel>
+    </Grid>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="KeyDown">
+            <behaviors:InvokeDelegateCommandAction Command="{Binding CommandTextInput}" CommandParameter="{Binding Path=InvokeParameter, RelativeSource={RelativeSource Self}}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+</dxwui:WinUIDialogWindow>

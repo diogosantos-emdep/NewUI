@@ -1,0 +1,191 @@
+﻿<dxwui:WinUIDialogWindow x:Class="Emdep.Geos.Modules.Hrm.Views.AddDepartmentView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.Hrm.Views"
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"  
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:HrmApplication="clr-namespace:Emdep.Geos.Modules.Hrm"     
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"                         
+             xmlns:Validation ="clr-namespace:Emdep.Geos.UI.Validations;assembly=Emdep.Geos.UI.Validations" 
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+             xmlns:behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300"                           
+                         TitleStyle="{DynamicResource WinUIDialogWindowTitleStyle}"
+                          Style="{DynamicResource WinUIDialogWindowStyle}">
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape"  Command="{Binding AddDepartmentViewCancelButtonCommand}"/>
+    </dxwui:WinUIDialogWindow.InputBindings>
+
+    <Grid Margin="0,-50,0,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="55"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <!--<RowDefinition Height="40"/>-->
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="155"/>
+            <ColumnDefinition Width="220"/>
+        </Grid.ColumnDefinitions>
+
+        <Label Content="{Binding WindowHeader}" HorizontalAlignment="Left" Style="{StaticResource LabelTitleStyle}" 
+               Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" />
+
+        <Label Grid.Row="1" Grid.Column="0" Content="{DynamicResource CompanyName}" Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,10,0,10"/>
+
+        <dxe:TextEdit Text="{Binding DepartmentName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" Margin="0,0,0,0" Grid.Row="1" Grid.Column="1" Width="200" Height="30" VerticalAlignment="Center" HorizontalAlignment="Left" 
+                      AllowNullInput="True" InvalidValueBehavior="AllowLeaveEditor"
+                       IsReadOnly="{Binding IsReadOnlyField,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
+            <dxe:TextEdit.EditValue>
+                <Binding Path="DepartmentName" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                    <Binding.ValidationRules>
+                        <Validation:DepartmentValidation FieldName="DepartmentName" ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True"/>
+                    </Binding.ValidationRules>
+                </Binding>
+            </dxe:TextEdit.EditValue>
+        </dxe:TextEdit>
+
+        <Label Grid.Row="2" Grid.Column="0" Content="{DynamicResource DepartmentAbbreviation}" Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,10,0,10"/>
+
+        <dxe:TextEdit Text="{Binding DepartmentAbbreviation, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" Margin="0,0,0,0" Grid.Row="2" Grid.Column="1" Width="200" Height="30" VerticalAlignment="Center" HorizontalAlignment="Left" 
+                      AllowNullInput="True" InvalidValueBehavior="AllowLeaveEditor"
+                       IsReadOnly="{Binding IsReadOnlyField,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
+            
+        </dxe:TextEdit>
+
+
+        <Label Grid.Row="3" Grid.Column="0" Content="{DynamicResource DepartmentParent}" Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,10,0,10"/>
+
+
+        <dxe:ComboBoxEdit Grid.Row="3" Grid.Column="1" HorizontalAlignment="Left" 
+                         Width="200" Height="30" VerticalAlignment="Center"  ItemsSource="{Binding DepartmentList,Mode=TwoWay}"                         
+                          DisplayMember="DepartmentName" ValueMember="IdDepartment" 
+                          AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True"
+                          IsReadOnly="{Binding IsReadOnlyField,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
+
+            <dxe:ComboBoxEdit.SelectedIndex>
+                <Binding Path="SelectedIndexParentDepartment" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+
+                </Binding>
+            </dxe:ComboBoxEdit.SelectedIndex>
+
+            <dxe:ComboBoxEdit.ItemContainerStyle>
+                <Style TargetType="dxe:ComboBoxEditItem">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding DepartmentInUse}" Value="0">
+                            <Setter Property="IsEnabled" Value="False" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                    <Setter Property="IsEnabled" Value="True" />
+                </Style>
+            </dxe:ComboBoxEdit.ItemContainerStyle>
+
+        </dxe:ComboBoxEdit>
+
+        <Label Grid.Row="4" Grid.Column="0" Content="{DynamicResource DepartmentArea}" Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,10,0,10"/>
+
+
+        <dxe:ComboBoxEdit Grid.Row="4" Grid.Column="1" HorizontalAlignment="Left" 
+                         Width="200" Height="30" VerticalAlignment="Center"  ItemsSource="{Binding DepartmentAreaList,Mode=TwoWay}"                         
+                          DisplayMember="Value" ValueMember="IdLookupValue" 
+                          AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True"
+                          IsReadOnly="{Binding IsReadOnlyField,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
+
+            <dxe:ComboBoxEdit.SelectedIndex>
+                <Binding Path="SelectedIndexArea" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                    <Binding.ValidationRules>
+                        <Validation:DepartmentValidation FieldName="SelectedIndexArea" ValidationStep="UpdatedValue" />
+                    </Binding.ValidationRules>
+                </Binding>
+            </dxe:ComboBoxEdit.SelectedIndex>
+
+            <dxe:ComboBoxEdit.ItemContainerStyle>
+                <Style TargetType="dxe:ComboBoxEditItem">
+                    <Setter Property="IsEnabled" Value="{Binding InUse}" />
+                </Style>
+            </dxe:ComboBoxEdit.ItemContainerStyle>
+
+        </dxe:ComboBoxEdit>
+
+        <Label Grid.Row="5" Grid.Column="0" Content="{DynamicResource DepartmentHTMLColor}" Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,10,0,10"/>
+
+        <dxe:PopupColorEdit Grid.Row="5" Grid.Column="1" Width="200" Height="30" HorizontalAlignment="Left" 
+                            VerticalAlignment="Center" EditValue="{Binding DataContext.HTMLColor,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+                            IsReadOnly="{Binding IsReadOnlyField,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
+            <dxe:PopupColorEdit.Color>
+                <Binding Path="HTMLColor" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                    <Binding.ValidationRules>
+                        <Validation:DepartmentValidation FieldName="HTMLColor" ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True"/>
+                    </Binding.ValidationRules>
+                </Binding>
+            </dxe:PopupColorEdit.Color>
+            <dxmvvm:Interaction.Behaviors>
+                <dxmvvm:EventToCommand EventName="CustomDisplayText" Command="{Binding DataContext.OnColorValueChangingCommand,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" PassEventArgsToCommand="True"/>
+            </dxmvvm:Interaction.Behaviors>
+        </dxe:PopupColorEdit>
+
+        <!--Removed from UI as per [avpawar][GEOS2-2438][Identify the Job descriptions working remotely]-->
+        <!--<Label Grid.Row="6" Grid.Column="0" Content="{DynamicResource DepartmentIsIsolated}" Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,10,0,10"/>
+
+        <dxe:ToggleSwitch x:Name="chkIsIsolated" Grid.Row="6" Grid.Column="1" Height="30" HorizontalAlignment="Left" VerticalAlignment="Center" ContentPlacement="Inside"
+                                                       CheckedStateContent="Yes" UncheckedStateContent="No" ToggleSwitchWidth="50" ToggleSwitchHeight="22" IsThreeState="False"                                
+                                               IsChecked="{Binding IsIsolated,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                          IsReadOnly="{Binding IsReadOnlyField,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
+        </dxe:ToggleSwitch>-->
+
+        <Label Grid.Row="6" Grid.Column="0" Content="{DynamicResource DepartmentInUse}" Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,10,0,10"/>
+
+        <dxe:ToggleSwitch x:Name="chkInUse" Grid.Row="6" Grid.Column="1" Height="30" HorizontalAlignment="Left" VerticalAlignment="Center" ContentPlacement="Inside"
+                                                       CheckedStateContent="Yes" UncheckedStateContent="No" ToggleSwitchWidth="50" ToggleSwitchHeight="22" IsThreeState="False"                                
+                                               IsChecked="{Binding InUse,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                          IsReadOnly="{Binding IsReadOnlyField,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
+        </dxe:ToggleSwitch>
+
+        <StackPanel Grid.Row="7" Grid.Column="1" Grid.ColumnSpan="2"
+                    HorizontalAlignment="Left" 
+                    Orientation="Horizontal"
+                    Margin="0,0,0,0"
+                    Width="250">
+
+            <Button Content="{DynamicResource AcceptButton}"
+                    Command="{Binding AddDepartmentViewAcceptButtonCommand}"
+                    Height="30"
+                    Width="100"
+                    Margin="0,0,10,0"
+                    Style="{DynamicResource Button16Style}"
+                    VerticalAlignment="Bottom"
+                    IsEnabled="{Binding IsAcceptEnabled}"/>
+                    
+
+
+            <Button Content="{DynamicResource CancelButton}"
+                    Command="{Binding AddDepartmentViewCancelButtonCommand}" 
+                    Height="30"
+                    Width="100"
+                    Margin="10,0,0,0"
+                    Style="{DynamicResource Button16Style}"
+                    VerticalAlignment="Bottom" />
+        </StackPanel>
+
+    </Grid>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="KeyDown">
+            <behaviors:InvokeDelegateCommandAction Command="{Binding CommandTextInput}" CommandParameter="{Binding Path=InvokeParameter, RelativeSource={RelativeSource Self}}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+</dxwui:WinUIDialogWindow>

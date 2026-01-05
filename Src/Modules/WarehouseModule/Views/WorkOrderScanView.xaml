@@ -1,0 +1,80 @@
+﻿<dxwui:WinUIDialogWindow x:Class="Emdep.Geos.Modules.Warehouse.Views.WorkOrderScanView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.Warehouse.Views"
+             Style="{DynamicResource WinUIDialogWindowStyle}"
+             TitleStyle="{DynamicResource WinUIDialogWindowWorkOrderTitleStyle}" 
+             mc:Ignorable="d" Title="{Binding WindowHeader,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm" Height="250"  >
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape" Command="{Binding CommandCancelButton}" />
+    </dxwui:WinUIDialogWindow.InputBindings>
+    <Grid Width="800">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="360"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <dxe:ListBoxEdit Grid.Row="0" Grid.Column="1" ShowBorder="False" VerticalAlignment="Top" x:Name="listBoxEdit">
+            <dxe:ListBoxEdit.Items>
+                <dxe:ListBoxEditItem Content="{DynamicResource WorkOrderScanUserControlViewWorkOrder}" FontWeight="SemiBold" FontSize="20" HorizontalAlignment="Left"></dxe:ListBoxEditItem>
+                <dxe:ListBoxEditItem Content="{DynamicResource WorkOrderScanUserControlViewItem}" FontWeight="SemiBold" FontSize="20" HorizontalContentAlignment="Right" HorizontalAlignment="Right" Margin="30 0 0 0"></dxe:ListBoxEditItem>
+            </dxe:ListBoxEdit.Items>
+            <dxe:ListBoxEdit.SelectedIndex>
+                <Binding Path="DataContext.SelectedIndex" RelativeSource="{RelativeSource AncestorType=dxwui:WinUIDialogWindow}" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay"></Binding> 
+            </dxe:ListBoxEdit.SelectedIndex>
+            <dxe:ListBoxEdit.StyleSettings>
+                <dxe:RadioListBoxEditStyleSettings/>
+            </dxe:ListBoxEdit.StyleSettings>
+            <dxe:ListBoxEdit.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Horizontal"></StackPanel>
+                </ItemsPanelTemplate>
+            </dxe:ListBoxEdit.ItemsPanel>
+        </dxe:ListBoxEdit> 
+        
+        <Label Grid.Row="1" Grid.Column="0" Width="60" Style="{DynamicResource LabelBackgroundImageBrush}" HorizontalAlignment="Right" />
+
+        <dxe:TextEdit  Width="350"  Margin="5" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3"  ShowBorder="True"  Height="60" FontSize="40" VerticalContentAlignment="Center" HorizontalAlignment="Left" AcceptsReturn="False" AcceptsTab="False" TextWrapping="NoWrap"
+                       FocusManager.FocusedElement="{Binding ElementName=TextEditBarcode}" AllowUpdateTwoWayBoundPropertiesOnSynchronization="False"
+                       InvalidValueBehavior="AllowLeaveEditor"  TextTrimming="CharacterEllipsis" VerticalScrollBarVisibility="Disabled" x:Name="TextEditBarcode" >
+            <!--Background="{Binding WorkOrderBarcodeBackground}" BorderBrush="{Binding WorkOrderBarcodeBackground}"-->
+            <dxmvvm:Interaction.Behaviors>
+                <dxmvvm:EventToCommand EventName="KeyDown" Command="{Binding CommandScanBarcode}" PassEventArgsToCommand="True"/>
+                <dxmvvm:FocusBehavior SourceName="listBoxEdit" EventName="GotFocus"/>
+            </dxmvvm:Interaction.Behaviors>
+            <dxe:TextEdit.EditValue>
+                <Binding Path="WorkOrderBarcode" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay"/>
+            </dxe:TextEdit.EditValue>
+            <!--<dxe:TextEdit.BorderTemplate>
+                <ControlTemplate TargetType="{x:Type ContentControl}">
+                    <Border x:Name="border" Background="{TemplateBinding Background}" BorderThickness="1" BorderBrush="#FFA2A2A2">
+                        <ContentPresenter/>
+                    </Border>
+                </ControlTemplate>
+            </dxe:TextEdit.BorderTemplate>-->
+        </dxe:TextEdit>
+
+        <StackPanel Orientation="Horizontal"  Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left" Visibility="{Binding WorkOrderBarcodeErrorVisibility}" Height="25"  Grid.ColumnSpan="3" Margin="5,0,0,0">
+            <Image Height="24" Width="24" Source="/Emdep.Geos.Modules.Warehouse;component/Assets/Images/error.png" />
+            <TextBlock Text="{Binding WorkOrderBarcodeError}" Foreground="{Binding WorkOrderErrorColour}" FontWeight="SemiBold"  FontSize="20" VerticalAlignment="Center" HorizontalAlignment="Right" />
+        </StackPanel>
+
+        <Button Content="{DynamicResource WorkOrderScanUserControlViewCancel}" Grid.Column="1" Grid.Row="3"
+                Command="{Binding CommandCancelButton}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="5"
+                FontSize="16" Height="30" Width="100" Style="{DynamicResource Button16Style}"/>
+
+    </Grid>
+</dxwui:WinUIDialogWindow>

@@ -1,0 +1,177 @@
+﻿<dxwui:WinUIDialogWindow  x:Class="Emdep.Geos.Modules.Crm.Views.AddOrEditActionCommentsView"
+                          xmlns:ViewModels="clr-namespace:Emdep.Geos.Modules.Crm.ViewModels"
+                            xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                            xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                            xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                            xmlns:local="clr-namespace:Emdep.Geos.Modules.Crm.Views"
+                            xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"
+                            xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol" 
+                            xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+                            xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+                            xmlns:UIConverter="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+                            xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+                            xmlns:behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+                            mc:Ignorable="d"
+                            Height="600" Width="800" >
+    <!--d:DesignHeight="300" d:DesignWidth="300">-->
+
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape" Command="{Binding AddorEditActionsViewCancelButtonCommand}" />
+    </dxwui:WinUIDialogWindow.InputBindings>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="500"/>
+            <RowDefinition Height="40"/>
+        </Grid.RowDefinitions>
+
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+
+        <TextBlock Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" FontWeight="Bold" Style="{DynamicResource TextBlock30Style}"
+                       Text="{Binding Header}"/>
+
+        <StackPanel Grid.Row="0"
+                       Grid.Column="2" Grid.ColumnSpan="4"
+                       HorizontalAlignment="Right"
+                       VerticalAlignment="Bottom"
+                       Orientation="Horizontal">
+
+            <RadioButton
+                        Margin="0,0,15,0"
+                        HorizontalAlignment="Right"
+                        Content="{DynamicResource LeadEditSplitViewCommentTextNormal}"
+                        GroupName="commentTextType"
+                        IsChecked="{Binding DataContext.IsNormal,RelativeSource={RelativeSource AncestorType=Grid,Mode=FindAncestor},Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" >
+                <dxmvvm:Interaction.Behaviors>
+                    <dxmvvm:EventToCommand Command="{Binding DataContext.IsnormalPreviewMouseRightButtonDown ,
+                                                        RelativeSource={RelativeSource AncestorType=Grid}}" 
+                                                        EventName="Click"                                                           
+                                                        CommandParameter="{Binding ElementName=BindableRichTextBox_Editor}"
+                                                        PassEventArgsToCommand="True">
+                    </dxmvvm:EventToCommand>
+                </dxmvvm:Interaction.Behaviors>
+            </RadioButton>
+
+            <RadioButton
+                         Margin="0,0,5,0"
+                         HorizontalAlignment="Left"
+                         Content="{DynamicResource LeadEditSplitViewCommentTextRtf}"
+                         GroupName="commentTextType"                                              
+                         IsChecked="{Binding DataContext.IsRtf, RelativeSource={RelativeSource AncestorType=Grid,Mode=FindAncestor},UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
+                <dxmvvm:Interaction.Behaviors>
+                    <dxmvvm:EventToCommand Command="{Binding DataContext.IsnormalPreviewMouseRightButtonDown ,
+                                                        RelativeSource={RelativeSource AncestorType=Grid}}" 
+                                                        EventName="Click"                                                           
+                                                        CommandParameter="{Binding ElementName=BindableRichTextBox_Editor}"
+                                                        PassEventArgsToCommand="True">
+                    </dxmvvm:EventToCommand>
+                </dxmvvm:Interaction.Behaviors>
+            </RadioButton>
+        </StackPanel>
+
+        <UIHelper:BindableRichTextBox  Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="6"
+                                            x:Name="BindableRichTextBox_Editor"
+                                            Height="{Binding DataContext.CommentboxHeight,RelativeSource={RelativeSource FindAncestor,
+                                            AncestorType={x:Type Grid}},UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+                                            Width="800"
+                                            
+                                            Style="{DynamicResource RichTextBoxStyle}"
+                                            Document="{Binding DataContext.NewActionComment,
+                                            Converter={UIConverter:RtfToFlowDocumentConverter},  RelativeSource={RelativeSource FindAncestor,
+                                            AncestorType={x:Type Grid}}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"                                       
+                                            Visibility="{Binding DataContext.Richtextboxrtf, RelativeSource={RelativeSource FindAncestor,
+                                            AncestorType={x:Type Grid}}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+
+        </UIHelper:BindableRichTextBox>
+
+        <TextBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="6"
+                                            x:Name="BindableRichTextBox_Editor1"
+                                            TextWrapping="Wrap"
+                                            AcceptsReturn="True" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                            Height="{Binding DataContext.CommentboxHeight,RelativeSource={RelativeSource FindAncestor,
+                                            AncestorType={x:Type Grid}},UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+                                            Width="800"
+                                            
+                                            Text="{Binding DataContext.NewActionComment,
+                                             RelativeSource={RelativeSource FindAncestor,
+                                            AncestorType={x:Type Grid}}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                            Visibility="{Binding DataContext.Textboxnormal, RelativeSource={RelativeSource FindAncestor,
+                                            AncestorType={x:Type Grid}}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
+
+        </TextBox>
+
+
+        <StackPanel Grid.Row="2" Grid.Column="1" 
+                    HorizontalAlignment="Center" 
+                    Orientation="Horizontal"
+                    Width="290">
+
+            <Button Content="{DynamicResource CommonAccept}"
+                    Command="{Binding AddorEditActionsViewSaveCommentCommand}"
+                    CommandParameter="{ Binding ElementName=BindableRichTextBox_Editor }"
+                    Height="30"
+                    Width="100"
+                    Margin="0,10,30,0"
+                   />
+
+            <Button Content="{DynamicResource CommonCancel}"
+                    Command="{Binding AddorEditActionsViewCancelButtonCommand}"
+                    Height="30"
+                    Width="100"
+                    Margin="10,10,0,0"
+                    />
+        </StackPanel>
+    </Grid>
+
+    <!--<Grid MinHeight="300" MaxHeight="500">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="300" />
+            <ColumnDefinition Width="860" />
+        </Grid.ColumnDefinitions>
+
+        <dxlc:GroupBox x:Name="CommentGroupBox">
+            
+        </dxlc:GroupBox>
+
+        <StackPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
+                    HorizontalAlignment="Center" 
+                    Orientation="Horizontal"
+                    Width="290">
+
+            <Button Content="{DynamicResource CommonAccept}"
+                    Command="{Binding AddNewActionsViewAcceptButtonCommand}"
+                    Height="30"
+                    Width="100"
+                    Margin="0,10,30,0"
+                    VerticalAlignment="Bottom"
+                   />
+
+            <Button Content="{DynamicResource CommonCancel}"
+                    Command="{Binding AddorEditActionsViewCancelButtonCommand}"
+                    Height="30"
+                    Width="100"
+                    Margin="10,10,0,0"
+                    VerticalAlignment="Bottom"
+                    />
+        </StackPanel>
+    </Grid>-->
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="KeyDown">
+            <behaviors:InvokeDelegateCommandAction Command="{Binding CommandTextInput}" CommandParameter="{Binding Path=InvokeParameter, RelativeSource={RelativeSource Self}}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+</dxwui:WinUIDialogWindow>

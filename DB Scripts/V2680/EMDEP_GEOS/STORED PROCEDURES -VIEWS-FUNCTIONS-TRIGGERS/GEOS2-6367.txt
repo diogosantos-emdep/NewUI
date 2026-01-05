@@ -1,0 +1,1235 @@
+DELIMITER $$
+drop procedure if exists emdep_geos.HRM_GetEmployeeTripExpensesReport_V2680$$
+CREATE procedure emdep_geos.HRM_GetEmployeeTripExpensesReport_V2680(
+   IN _idEmployeeTrip   int(10) UNSIGNED,
+   IN _IdCurrencyTo     tinyint(4) UNSIGNED)
+BEGIN
+   /*
+    [nsatpute][07.10.2025][GEOS2-6367]
+   */
+   
+
+   DECLARE fromDate                     DATE;
+   DECLARE toDate                       DATE;
+   DECLARE _latestDate                  datetime;
+   DECLARE _IdReporter                  int;
+   DECLARE _IdCompanyLocation           smallint(5) UNSIGNED;
+   DECLARE _PaidByOthers                float;
+   DECLARE _ConvertedPaidByOthers       float;
+   DECLARE _PlantCurrencyPaidByOthers   float;
+   DECLARE _IdCompany                   smallint(5) UNSIGNED;
+
+
+   SET _latestDate =
+          (SELECT max(CurrencyConversionDate)
+           FROM emdep_geos.currency_conversions);
+
+   SET _IdReporter =
+          (SELECT IdEmployee
+           FROM employee_expense_reports
+           WHERE IdLinkedTrip = _idEmployeeTrip
+           LIMIT 1);
+   SET _IdCompanyLocation =
+          (SELECT IdCompany
+           FROM employee_expense_reports
+           WHERE IdLinkedTrip = _idEmployeeTrip
+           LIMIT 1);
+
+
+
+   SELECT MIN(eer.FromDate) AS FromDate, MAX(eer.ToDate) AS ToDate
+   INTO fromDate, toDate
+   FROM emdep_geos.employee_expenses ee
+        INNER JOIN emdep_geos.employee_expense_reports eer
+           ON eer.IdEmployeeExpenseReport = ee.IdEmployeeExpenseReport
+   WHERE eer.IdLinkedTrip = _idEmployeeTrip;
+
+   IF _IdCurrencyTo = 0
+   THEN
+      SET _IdCurrencyTo =
+             (SELECT IdCurrency
+              FROM employee_trips
+              WHERE IdEmployeeTrip = _idEmployeeTrip
+              LIMIT 1);
+   END IF;
+
+   SET _IdCompany =
+          (SELECT IdCompany
+           FROM employee_expense_reports
+           WHERE     IdLinkedTrip = _idEmployeeTrip
+                 AND IdCurrency = _IdCurrencyTo
+           LIMIT 1);
+
+   IF _IdCompany IS NULL
+   THEN
+      SET _IdCompany =
+             (SELECT IdCompany
+              FROM employee_expense_reports
+              WHERE IdLinkedTrip = _idEmployeeTrip
+              LIMIT 1);
+   END IF;
+
+
+   DROP TEMPORARY TABLE IF EXISTS GetFinalIdCompanyLocation;
+
+   CREATE TEMPORARY TABLE IF NOT EXISTS GetFinalIdCompanyLocation
+   AS
+      (SELECT IdCompany
+       FROM employee_expense_reports
+       WHERE IdLinkedTrip = _idEmployeeTrip);
+
+   DROP TEMPORARY TABLE IF EXISTS GetFinalEmployeeExpenseAttendees;
+
+   CREATE TEMPORARY TABLE IF NOT EXISTS GetFinalEmployeeExpenseAttendees
+   AS
+      (SELECT ee.IdEmployeeExpenseReport
+       FROM employee_expense_attendees eea
+            INNER JOIN emdep_geos.employee_expenses ee
+               ON ee.IdEmployeeExpense = eea.IdEmployeeExpense
+            INNER JOIN emdep_geos.employee_expense_reports eer
+               ON eer.IdEmployeeExpenseReport = ee.IdEmployeeExpenseReport
+       WHERE     ee.IsDeleted = 0
+             AND eea.IdEmployee = _IdReporter
+             AND eer.IdCompany IN
+                    (SELECT IdCompany FROM GetFinalIdCompanyLocation));
+
+
+
+   DROP TEMPORARY TABLE IF EXISTS GetFinalExchangeRate;
+
+   CREATE TEMPORARY TABLE IF NOT EXISTS GetFinalExchangeRate
+   AS
+      (SELECT ee.IdEmployeeExpense,
+              eer.IdCurrencyFrom,
+              eer.IdCurrencyTo,
+              ee.ExpenseDate,
+              COALESCE(
+                 ee.ExchangeRate,
+                 (SELECT cc.CurrencyConversionRate
+                  FROM currency_conversions cc
+                  WHERE     cc.IdCurrencyConversionFrom = eer.IdCurrencyFrom
+                        AND cc.IdCurrencyConversionTo = _IdCurrencyTo
+                        AND date(cc.CurrencyConversionDate) <=
+                            date(ee.ExpenseDate)
+                  ORDER BY cc.CurrencyConversionDate DESC
+                  LIMIT 1))
+                 AS ExchangeRate
+       FROM employee_expenses ee
+            INNER JOIN employee_expense_reports eer
+               ON eer.IdEmployeeExpenseReport = ee.IdEmployeeExpenseReport
+       WHERE eer.IdLinkedTrip = _idEmployeeTrip);
+
+   DROP TEMPORARY TABLE IF EXISTS GetFinalExchangeRateNew;
+
+   CREATE TEMPORARY TABLE IF NOT EXISTS GetFinalExchangeRateNew
+   AS
+      (SELECT *
+       FROM GetFinalExchangeRate);
+
+   DROP TEMPORARY TABLE IF EXISTS GetFinalExchangeRatePersonalCredit;
+
+   CREATE TEMPORARY TABLE IF NOT EXISTS GetFinalExchangeRatePersonalCredit
+   AS
+      (SELECT *
+       FROM GetFinalExchangeRate);
+
+   DROP TEMPORARY TABLE IF EXISTS GetFinalExchangeRateBankTransfer;
+
+   CREATE TEMPORARY TABLE IF NOT EXISTS GetFinalExchangeRateBankTransfer
+   AS
+      (SELECT *
+       FROM GetFinalExchangeRate);
+
+   DROP TEMPORARY TABLE IF EXISTS GetFinalExchangeRateCompanyCard;
+
+   CREATE TEMPORARY TABLE IF NOT EXISTS GetFinalExchangeRateCompanyCard
+   AS
+      (SELECT *
+       FROM GetFinalExchangeRate);
+
+   DROP TEMPORARY TABLE IF EXISTS GetFinalExchangeRateCompanyvoucher;
+
+   CREATE TEMPORARY TABLE IF NOT EXISTS GetFinalExchangeRateCompanyvoucher
+   AS
+      (SELECT *
+       FROM GetFinalExchangeRate);
+
+
+   DROP TEMPORARY TABLE IF EXISTS GetFinalEmployeeExpenseAttendeesExchangeRate;
+
+   CREATE TEMPORARY TABLE IF NOT EXISTS GetFinalEmployeeExpenseAttendeesExchangeRate
+   AS
+      (SELECT ee.IdEmployeeExpense,
+              eer.IdCurrencyFrom,
+              eer.IdCurrencyTo,
+              ee.ExpenseDate,
+              COALESCE(
+                 ee.ExchangeRate,
+                 (SELECT cc.CurrencyConversionRate
+                  FROM currency_conversions cc
+                  WHERE     cc.IdCurrencyConversionFrom = eer.IdCurrencyFrom
+                        AND cc.IdCurrencyConversionTo = _IdCurrencyTo
+                        AND date(cc.CurrencyConversionDate) <=
+                            date(ee.ExpenseDate)
+                  ORDER BY cc.CurrencyConversionDate DESC
+                  LIMIT 1))
+                 AS ExchangeRate
+       FROM employee_expenses ee
+            INNER JOIN employee_expense_reports eer
+               ON eer.IdEmployeeExpenseReport = ee.IdEmployeeExpenseReport
+       WHERE eer.IdEmployeeExpenseReport IN
+                (SELECT IdEmployeeExpenseReport
+                 FROM GetFinalEmployeeExpenseAttendees));
+
+
+
+   DROP TEMPORARY TABLE IF EXISTS GetCompanyAndEmployee;
+
+   CREATE TEMPORARY TABLE IF NOT EXISTS GetCompanyAndEmployee
+   AS
+      (SELECT et.IdEmployeeTrip,
+              et.Code
+                 AS TripCode,
+              ee.IdEmployeeExpense,
+              eer.IdEmployeeExpenseReport,
+              eer.Code
+                 AS ExpenseReportCode,
+              comp.IdCompany,
+              comp.Alias
+                 AS PlantName,
+              comp.Alias
+                 AS CompanyPlant,
+              comp.RegisteredName
+                 AS CompanyName,
+              fromDate
+                 AS FromDate,
+              toDate
+                 AS toDate,
+              DATEDIFF(eer.ToDate, eer.FromDate) + 1
+                 AS NumberOfDays,
+              eer.Name
+                 AS Title,
+              eer.Name
+                 AS TripTitle,
+              eer.IdReason,
+              lv.Value
+                 AS Reason,
+              lv.Value
+                 AS TripReason,
+              ifnull(max(eer.modificationdate),max(eer.CreationDate))
+                 AS SubmitDate,
+              emp.IdEmployee,
+              CASE
+                 WHEN emp.DisplayName = '' OR emp.DisplayName IS NULL
+                 THEN
+                    CONCAT(emp.FirstName, ' ', emp.LastName)
+                 ELSE
+                    emp.DisplayName
+              END
+                 AS EmployeeName,
+              cou.ISO
+                 AS OrganizationISO,
+              compOrg.Alias
+                 AS Organization,
+              dep.IdDepartment,
+              dep.DepartmentName,
+              jd.IdJobDescription,
+              jd.JobDescriptionTitle,
+              jd.JobDescriptionTitle
+                 AS JobTitle
+       FROM emdep_geos.employee_expenses ee
+            INNER JOIN emdep_geos.employee_expense_reports eer
+               ON eer.IdEmployeeExpenseReport = ee.IdEmployeeExpenseReport
+            INNER JOIN employee_trips et
+               ON et.IdEmployeeTrip = eer.IdLinkedTrip
+            INNER JOIN emdep_geos.companies comp
+               ON eer.IdCompany = comp.IdCompany
+            INNER JOIN emdep_geos.lookup_values lv
+               ON lv.IdLookupValue = eer.IdReason
+            INNER JOIN emdep_geos.employees emp
+               ON emp.IdEmployee = eer.IdEmployee
+            INNER JOIN emdep_geos.countries cou
+               ON cou.IdCountry = comp.IdCountry
+            INNER JOIN emdep_geos.employee_job_descriptions ejd
+               ON eer.IdEmployee = ejd.IdEmployee
+            INNER JOIN emdep_geos.companies compOrg
+               ON ejd.IdCompany = compOrg.IdCompany
+            INNER JOIN emdep_geos.job_descriptions jd
+               ON ejd.IdJobDescription = jd.IdJobDescription
+            INNER JOIN emdep_geos.departments dep
+               ON dep.IdDepartment = jd.IdDepartment
+       WHERE     eer.IdLinkedTrip = _idEmployeeTrip
+             AND ee.IsDeleted = 0
+             AND eer.IsDeleted = 0
+             AND ejd.IsMainJobDescription = 1
+             AND ejd.JobDescriptionEndDate IS NULL
+             AND date(JobDescriptionStartDate) <= date(CURDATE())
+       GROUP BY eer.IdLinkedTrip
+       ORDER BY ee.IdEmployeeExpenseReport DESC);
+
+   SELECT * FROM GetCompanyAndEmployee;
+
+
+   DROP TEMPORARY TABLE IF EXISTS TempAttendee;
+
+   CREATE TEMPORARY TABLE IF NOT EXISTS TempAttendee
+   AS
+      (SELECT ROUND(IFNULL(SUM(Amount + Tip), 0), 2)
+                 AS PaidByOthers,
+                (IFNULL(SUM(Amount + Tip), 0))
+              / (IFNULL(
+                    ROUND(
+                       coalesce((SELECT CurrencyConversionRate
+                         FROM emdep_geos.currency_conversions cc
+                         WHERE     cc.IdCurrencyConversionFrom =
+                                   eer.IdCurrency
+                               AND cc.IdCurrencyConversionTo = _IdCurrencyTo
+                         ORDER BY cc.IdCurrencyConversion DESC
+                         LIMIT 1),(1/(SELECT CurrencyConversionRate
+                         FROM emdep_geos.currency_conversions cc
+                         WHERE     cc.IdCurrencyConversionFrom = _IdCurrencyTo                                   
+                               AND cc.IdCurrencyConversionTo = eer.IdCurrency
+                         ORDER BY cc.IdCurrencyConversion DESC
+                         LIMIT 1))),
+                       4),
+                    0))
+                 AS ConvertedPaidByOthers,
+              ROUND(
+                 IFNULL(SUM((Amount + Tip) * empExchRate.ExchangeRate), 0),
+                 2)
+                 AS PlantCurrencyPaidByOthers,
+              eer.IdCurrency,
+              eer.IdEmployeeExpenseReport
+       FROM employee_expense_attendees eea
+            INNER JOIN employee_expenses ee
+               ON ee.IdEmployeeExpense = eea.IdEmployeeExpense
+            INNER JOIN employee_expense_reports eer
+               ON eer.IdEmployeeExpenseReport = ee.IdEmployeeExpenseReport
+            INNER JOIN GetFinalExchangeRate empExchRate
+               ON empExchRate.IdEmployeeExpense = ee.IdEmployeeExpense
+       WHERE     ee.IsDeleted = 0
+             AND eea.IdEmployee = _IdReporter
+             AND (DATE_FORMAT(ee.ExpenseDate, '%Y-%m-%d') BETWEEN DATE_FORMAT(
+                                                                     (SELECT ExpenseDate
+                                                                      FROM employee_expenses
+                                                                      WHERE IdEmployeeExpenseReport IN
+                                                                               (SELECT IdEmployeeExpenseReport
+                                                                                FROM emdep_geos.employee_expense_reports
+                                                                                WHERE IdLinkedTrip =
+                                                                                      _idEmployeeTrip)
+                                                                      ORDER BY ExpenseDate
+                                                                      LIMIT 1),
+                                                                     '%Y-%m-%d')
+                                                              AND DATE_FORMAT(
+                                                                     (SELECT ExpenseDate
+                                                                      FROM employee_expenses
+                                                                      WHERE IdEmployeeExpenseReport IN
+                                                                               (SELECT IdEmployeeExpenseReport
+                                                                                FROM emdep_geos.employee_expense_reports
+                                                                                WHERE IdLinkedTrip =
+                                                                                      _idEmployeeTrip)
+                                                                      ORDER BY ExpenseDate DESC
+                                                                      LIMIT 1),
+                                                                     '%Y-%m-%d'))
+             AND eea.IsDeleted = 0
+             AND eer.IdCompany = _IdCompanyLocation
+       GROUP BY eer.IdEmployeeExpenseReport);
+
+
+
+   SELECT PaidByOthers, ConvertedPaidByOthers, PlantCurrencyPaidByOthers
+   INTO _PaidByOthers, _ConvertedPaidByOthers, _PlantCurrencyPaidByOthers
+   FROM TempAttendee;
+
+
+   DROP TEMPORARY TABLE IF EXISTS GetTravelLiquidation;
+
+   CREATE TEMPORARY TABLE IF NOT EXISTS GetTravelLiquidation
+   AS
+      (SELECT eer.IdEmployeeExpenseReport,
+              eer.IdCurrencyFrom
+                 AS ReportFrom,
+              eer.IdCurrencyTo
+                 AS ReportTo,
+              cur.IdCurrency
+                 AS IdCurrencyFrom,
+              cur.IsoCode
+                 AS PlantCurrency,
+              gcur.IdCurrency
+                 AS IdCurrencyTo,
+              gcur.IsoCode
+                 AS CurrencyName,
+              c.IdCompany,
+              c.Alias,
+              ROUND(eer.Advances, 2)
+                 AS CashAdvanced,   
+              (  (ROUND(eer.Advances, 2))
+               / (IFNULL(
+                     ROUND(
+                        (COALESCE(
+(SELECT             
+                 ee2.ExchangeRate 
+       FROM employee_expenses ee2
+            INNER JOIN employee_expense_reports eer2
+               ON eer2.IdEmployeeExpenseReport = ee2.IdEmployeeExpenseReport
+       WHERE eer2.IdCurrencyFrom =_IdCurrencyTo  and eer2.IdCurrencyTo = eer.IdCurrency and  eer2.IdLinkedTrip = _idEmployeeTrip limit 1)
+                        ,
+                 (SELECT cc.CurrencyConversionRate
+                  FROM currency_conversions cc
+                  WHERE     cc.IdCurrencyConversionFrom = eer.IdCurrency
+                        AND cc.IdCurrencyConversionTo = _IdCurrencyTo
+                        AND date(cc.CurrencyConversionDate) <=
+                            date(eer.FromDate)
+                  ORDER BY cc.CurrencyConversionDate DESC
+                  LIMIT 1),(1/ (SELECT cc.CurrencyConversionRate
+                  FROM currency_conversions cc
+                  WHERE     cc.IdCurrencyConversionFrom = _IdCurrencyTo
+                        AND cc.IdCurrencyConversionTo = eer.IdCurrency
+                        AND date(cc.CurrencyConversionDate) <=
+                            date(eer.FromDate)
+                  ORDER BY cc.CurrencyConversionDate DESC
+                  LIMIT 1)))),
+                        4),
+                     0)))
+                 AS ConvertedCashAdvanced,
+              (  (ROUND(eer.Advances, 2))
+               * (IFNULL(
+                     ROUND(
+                        (SELECT CurrencyConversionRate
+                         FROM emdep_geos.currency_conversions cc
+                         WHERE     cc.IdCurrencyConversionFrom =
+                                   eer.IdCurrencyFrom
+                               AND cc.IdCurrencyConversionTo = _IdCurrencyTo
+                         ORDER BY cc.IdCurrencyConversion DESC
+                         LIMIT 1),
+                        4),
+                     0)))
+                 AS PlantCurrencyCashAdvanced,
+              IFNULL(
+                 (SELECT SUM(ee.Amount + ee.Tip) AS Cash
+                  FROM emdep_geos.employee_expenses ee
+                  WHERE     ee.IdEmployeeExpenseReport =
+                            eer.IdEmployeeExpenseReport
+                        AND ee.IsDeleted = 0),
+                 0)
+                 AS TotalExpense,
+              IFNULL(
+                 (SELECT SUM(ee.Amount + ee.Tip) AS Cash
+                  FROM emdep_geos.employee_expenses ee
+                  WHERE     ee.IdPaymentMethod = 1538
+                        AND ee.IdEmployeeExpenseReport =
+                            eer.IdEmployeeExpenseReport
+                        AND ee.IsDeleted = 0),
+                 0)
+                 AS TotalCash,
+              IFNULL(
+                 (SELECT SUM(ee.Amount + ee.Tip) AS Cash
+                  FROM emdep_geos.employee_expenses ee
+                  WHERE     ee.IdPaymentMethod = 1539
+                        AND ee.IdEmployeeExpenseReport =
+                            eer.IdEmployeeExpenseReport
+                        AND ee.IsDeleted = 0),
+                 0)
+                 AS PersonalCredit,
+              IFNULL(
+                 (SELECT SUM(ee.Amount + ee.Tip) AS Cash
+                  FROM emdep_geos.employee_expenses ee
+                  WHERE     ee.IdPaymentMethod = 1549
+                        AND ee.IdEmployeeExpenseReport =
+                            eer.IdEmployeeExpenseReport
+                        AND ee.IsDeleted = 0),
+                 0)
+                 AS BankTransfer,
+              IFNULL(
+                 (SELECT SUM(ee.Amount + ee.Tip) AS Cash
+                  FROM emdep_geos.employee_expenses ee
+                  WHERE     ee.IdPaymentMethod = 1624
+                        AND ee.IdEmployeeExpenseReport =
+                            eer.IdEmployeeExpenseReport
+                        AND ee.IsDeleted = 0),
+                 0)
+                 AS CompanyCard,
+              IFNULL(
+                 (SELECT SUM(ee.Amount + ee.Tip) AS Cash
+                  FROM emdep_geos.employee_expenses ee
+                  WHERE     ee.IdPaymentMethod = 1714
+                        AND ee.IdEmployeeExpenseReport =
+                            eer.IdEmployeeExpenseReport
+                        AND ee.IsDeleted = 0),
+                 0)
+                 AS Companyvoucher,
+              IFNULL(
+                 ROUND(
+                    (SELECT CurrencyConversionRate
+                     FROM emdep_geos.currency_conversions cc
+                     WHERE     cc.IdCurrencyConversionFrom =
+                               eer.IdCurrencyFrom
+                           AND cc.IdCurrencyConversionTo = _IdCurrencyTo
+                     ORDER BY cc.IdCurrencyConversion DESC
+                     LIMIT 1),
+                    4),
+                 0)
+                 AS CurrencyConversionRate,
+              (  (IFNULL(
+                     (SELECT SUM(ee.Amount + ee.Tip) AS Cash
+                      FROM emdep_geos.employee_expenses ee
+                      WHERE     ee.IdEmployeeExpenseReport =
+                                eer.IdEmployeeExpenseReport
+                            AND ee.IsDeleted = 0),
+                     0))
+               * (IFNULL(
+                     ROUND(
+                        (coalesce((SELECT CurrencyConversionRate
+                         FROM emdep_geos.currency_conversions cc
+                         WHERE     cc.IdCurrencyConversionFrom =
+                                   eer.IdCurrency
+                               AND cc.IdCurrencyConversionTo = _IdCurrencyTo
+                         ORDER BY cc.IdCurrencyConversion DESC
+                         LIMIT 1),(1/(SELECT CurrencyConversionRate
+                         FROM emdep_geos.currency_conversions cc
+                         WHERE     cc.IdCurrencyConversionFrom = _IdCurrencyTo                                   
+                               AND cc.IdCurrencyConversionTo = eer.IdCurrency
+                         ORDER BY cc.IdCurrencyConversion DESC
+                         LIMIT 1)))),
+                        4),
+                     0)))
+                 AS ConvertedTotalExpense,
+              (  (IFNULL(
+                     (SELECT SUM(ee.Amount + ee.Tip) AS Cash
+                      FROM emdep_geos.employee_expenses ee
+                      WHERE     ee.IdPaymentMethod = 1538
+                            AND ee.IdEmployeeExpenseReport =
+                                eer.IdEmployeeExpenseReport
+                            AND ee.IsDeleted = 0),
+                     0))
+               * IFNULL(
+                    ROUND(
+                       coalesce((SELECT CurrencyConversionRate
+                         FROM emdep_geos.currency_conversions cc
+                         WHERE     cc.IdCurrencyConversionFrom =
+                                   eer.IdCurrency
+                               AND cc.IdCurrencyConversionTo = _IdCurrencyTo
+                         ORDER BY cc.IdCurrencyConversion DESC
+                         LIMIT 1),(1/(SELECT CurrencyConversionRate
+                         FROM emdep_geos.currency_conversions cc
+                         WHERE     cc.IdCurrencyConversionFrom = _IdCurrencyTo                                   
+                               AND cc.IdCurrencyConversionTo = eer.IdCurrency
+                         ORDER BY cc.IdCurrencyConversion DESC
+                         LIMIT 1))),
+                       4),
+                    0))
+                 AS ConvertedTotalCash,
+              (  (IFNULL(
+                     (SELECT SUM(ee.Amount + ee.Tip) AS Cash
+                      FROM emdep_geos.employee_expenses ee
+                      WHERE     ee.IdPaymentMethod = 1539
+                            AND ee.IdEmployeeExpenseReport =
+                                eer.IdEmployeeExpenseReport
+                            AND ee.IsDeleted = 0),
+                     0))
+               * (IFNULL(
+                     ROUND(
+                        coalesce((SELECT CurrencyConversionRate
+                         FROM emdep_geos.currency_conversions cc
+                         WHERE     cc.IdCurrencyConversionFrom =
+                                   eer.IdCurrency
+                               AND cc.IdCurrencyConversionTo = _IdCurrencyTo
+                         ORDER BY cc.IdCurrencyConversion DESC
+                         LIMIT 1),(1/(SELECT CurrencyConversionRate
+                         FROM emdep_geos.currency_conversions cc
+                         WHERE     cc.IdCurrencyConversionFrom = _IdCurrencyTo                                   
+                               AND cc.IdCurrencyConversionTo = eer.IdCurrency
+                         ORDER BY cc.IdCurrencyConversion DESC
+                         LIMIT 1))),
+                        4),
+                     0)))
+                 AS ConvertedPersonalCredit,
+              (  (IFNULL(
+                     (SELECT SUM(ee.Amount + ee.Tip) AS Cash
+                      FROM emdep_geos.employee_expenses ee
+                      WHERE     ee.IdPaymentMethod = 1549
+                            AND ee.IdEmployeeExpenseReport =
+                                eer.IdEmployeeExpenseReport
+                            AND ee.IsDeleted = 0),
+                     0))
+               * (IFNULL(
+                     ROUND(
+                        coalesce((SELECT CurrencyConversionRate
+                         FROM emdep_geos.currency_conversions cc
+                         WHERE     cc.IdCurrencyConversionFrom =
+                                   eer.IdCurrency
+                               AND cc.IdCurrencyConversionTo = _IdCurrencyTo
+                         ORDER BY cc.IdCurrencyConversion DESC
+                         LIMIT 1),(1/(SELECT CurrencyConversionRate
+                         FROM emdep_geos.currency_conversions cc
+                         WHERE     cc.IdCurrencyConversionFrom = _IdCurrencyTo                                   
+                               AND cc.IdCurrencyConversionTo = eer.IdCurrency
+                         ORDER BY cc.IdCurrencyConversion DESC
+                         LIMIT 1))),
+                        4),
+                     0)))
+                 AS ConvertedBankTransfer,
+              (  (IFNULL(
+                     (SELECT SUM(ee.Amount + ee.Tip) AS Cash
+                      FROM emdep_geos.employee_expenses ee
+                      WHERE     ee.IdPaymentMethod = 1624
+                            AND ee.IdEmployeeExpenseReport =
+                                eer.IdEmployeeExpenseReport
+                            AND ee.IsDeleted = 0),
+                     0))
+               * (IFNULL(
+                     ROUND(
+                        coalesce((SELECT CurrencyConversionRate
+                         FROM emdep_geos.currency_conversions cc
+                         WHERE     cc.IdCurrencyConversionFrom =
+                                   eer.IdCurrency
+                               AND cc.IdCurrencyConversionTo = _IdCurrencyTo
+                         ORDER BY cc.IdCurrencyConversion DESC
+                         LIMIT 1),(1/(SELECT CurrencyConversionRate
+                         FROM emdep_geos.currency_conversions cc
+                         WHERE     cc.IdCurrencyConversionFrom = _IdCurrencyTo                                   
+                               AND cc.IdCurrencyConversionTo = eer.IdCurrency
+                         ORDER BY cc.IdCurrencyConversion DESC
+                         LIMIT 1))),
+                        4),
+                     0)))
+                 AS ConvertedCompanyCard,
+              (  (IFNULL(
+                     (SELECT SUM(ee.Amount + ee.Tip) AS Cash
+                      FROM emdep_geos.employee_expenses ee
+                      WHERE     ee.IdPaymentMethod = 1714
+                            AND ee.IdEmployeeExpenseReport =
+                                eer.IdEmployeeExpenseReport
+                            AND ee.IsDeleted = 0),
+                     0))
+               * (IFNULL(
+                     ROUND(
+                        coalesce((SELECT CurrencyConversionRate
+                         FROM emdep_geos.currency_conversions cc
+                         WHERE     cc.IdCurrencyConversionFrom =
+                                   eer.IdCurrency
+                               AND cc.IdCurrencyConversionTo = _IdCurrencyTo
+                         ORDER BY cc.IdCurrencyConversion DESC
+                         LIMIT 1),(1/(SELECT CurrencyConversionRate
+                         FROM emdep_geos.currency_conversions cc
+                         WHERE     cc.IdCurrencyConversionFrom = _IdCurrencyTo                                   
+                               AND cc.IdCurrencyConversionTo = eer.IdCurrency
+                         ORDER BY cc.IdCurrencyConversion DESC
+                         LIMIT 1))),
+                        4),
+                     0)))
+                 AS ConvertedCompanyvoucher,
+                 
+                --- paid by others should be here
+                 
+              (IFNULL(
+                  (SELECT SUM(
+                             (ee.Amount + ee.Tip) * empExchRate.ExchangeRate)
+                             AS Cash
+                   FROM emdep_geos.employee_expenses ee
+                        INNER JOIN GetFinalExchangeRate empExchRate
+                           ON empExchRate.IdEmployeeExpense =
+                              ee.IdEmployeeExpense
+                   WHERE     ee.IdEmployeeExpenseReport =
+                             eer.IdEmployeeExpenseReport
+                         AND ee.IsDeleted = 0),
+                  0))
+                 AS PlantCurrencyTotalExpense,
+              (IFNULL(
+                  (SELECT SUM(
+                             (ee.Amount + ee.Tip) * empExchRate.ExchangeRate)
+                             AS Cash
+                   FROM emdep_geos.employee_expenses ee
+                        INNER JOIN GetFinalExchangeRateNew empExchRate
+                           ON empExchRate.IdEmployeeExpense =
+                              ee.IdEmployeeExpense
+                   WHERE     ee.IdPaymentMethod = 1538
+                         AND ee.IdEmployeeExpenseReport =
+                             eer.IdEmployeeExpenseReport
+                         AND ee.IsDeleted = 0),
+                  0))
+                 AS PlantCurrencyTotalCash,
+              (IFNULL(
+                  (SELECT SUM(
+                             (ee.Amount + ee.Tip) * empExchRate.ExchangeRate)
+                             AS Cash
+                   FROM emdep_geos.employee_expenses ee
+                        INNER JOIN
+                        GetFinalExchangeRatePersonalCredit empExchRate
+                           ON empExchRate.IdEmployeeExpense =
+                              ee.IdEmployeeExpense
+                   WHERE     ee.IdPaymentMethod = 1539
+                         AND ee.IdEmployeeExpenseReport =
+                             eer.IdEmployeeExpenseReport
+                         AND ee.IsDeleted = 0),
+                  0))
+                 AS PlantCurrencyPersonalCredit,
+              (IFNULL(
+                  (SELECT SUM(
+                             (ee.Amount + ee.Tip) * empExchRate.ExchangeRate)
+                             AS Cash
+                   FROM emdep_geos.employee_expenses ee
+                        INNER JOIN
+                        GetFinalExchangeRateBankTransfer empExchRate
+                           ON empExchRate.IdEmployeeExpense =
+                              ee.IdEmployeeExpense
+                   WHERE     ee.IdPaymentMethod = 1549
+                         AND ee.IdEmployeeExpenseReport =
+                             eer.IdEmployeeExpenseReport
+                         AND ee.IsDeleted = 0),
+                  0))
+                 AS PlantCurrencyBankTransfer,
+              (IFNULL(
+                  (SELECT SUM(
+                             (ee.Amount + ee.Tip) * empExchRate.ExchangeRate)
+                             AS Cash
+                   FROM emdep_geos.employee_expenses ee
+                        INNER JOIN
+                        GetFinalExchangeRateCompanyCard empExchRate
+                           ON empExchRate.IdEmployeeExpense =
+                              ee.IdEmployeeExpense
+                   WHERE     ee.IdPaymentMethod = 1624
+                         AND ee.IdEmployeeExpenseReport =
+                             eer.IdEmployeeExpenseReport
+                         AND ee.IsDeleted = 0),
+                  0))
+                 AS PlantCurrencyCompanyCard,
+              (IFNULL(
+                  (SELECT SUM(
+                             (ee.Amount + ee.Tip) * empExchRate.ExchangeRate)
+                             AS Cash
+                   FROM emdep_geos.employee_expenses ee
+                        INNER JOIN
+                        GetFinalExchangeRateCompanyvoucher empExchRate
+                           ON empExchRate.IdEmployeeExpense =
+                              ee.IdEmployeeExpense
+                   WHERE     ee.IdPaymentMethod = 1714
+                         AND ee.IdEmployeeExpenseReport =
+                             eer.IdEmployeeExpenseReport
+                         AND ee.IsDeleted = 0),
+                  0))
+                 AS PlantCurrencyCompanyvoucher,
+              NULL
+                 AS Last
+       FROM employee_expense_reports eer
+            INNER JOIN emdep_geos.companies c ON eer.IdCompany = c.IdCompany
+            INNER JOIN emdep_geos.countries cou
+               ON c.IdCountry = cou.IdCountry
+            INNER JOIN emdep_geos.currencies cur
+               ON cur.IdCurrency = cou.IdOfficialCurrency
+            INNER JOIN emdep_geos.currencies gcur
+               ON eer.IdCurrency = gcur.IdCurrency
+       WHERE eer.IdLinkedTrip = _idEmployeeTrip AND eer.IsDeleted = 0
+       GROUP BY eer.IdEmployeeExpenseReport);
+
+   SELECT tl.IdEmployeeExpenseReport,
+          tl.ReportFrom,
+          tl.ReportTo,
+          tl.IdCurrencyFrom,
+          tl.PlantCurrency,
+          tl.IdCurrencyTo,
+          tl.CurrencyName,
+          tl.CashAdvanced,
+          tl.ConvertedCashAdvanced,
+          tl.PlantCurrencyCashAdvanced,
+          tl.TotalExpense,
+          tl.TotalCash,
+          tl.PersonalCredit,
+          tl.BankTransfer,
+          tl.CompanyCard,
+          tl.Companyvoucher,
+          tl.CurrencyConversionRate,
+          tl.ConvertedTotalExpense,
+          tl.ConvertedTotalCash,
+          tl.ConvertedPersonalCredit,
+          tl.ConvertedBankTransfer,
+          tl.ConvertedCompanyCard,
+          tl.ConvertedCompanyvoucher,
+          tl.IdCompany,
+          tl.Alias,
+          ROUND(tl.PlantCurrencyTotalExpense, 2)
+             AS PlantCurrencyTotalExpense,
+          ROUND(tl.PlantCurrencyTotalCash, 2)
+             AS PlantCurrencyTotalCash,
+          ROUND(tl.PlantCurrencyPersonalCredit, 2)
+             AS PlantCurrencyPersonalCredit,
+          ROUND(tl.PlantCurrencyBankTransfer, 2)
+             AS PlantCurrencyBankTransfer,
+          ROUND(tl.PlantCurrencyCompanyCard, 2)
+             AS PlantCurrencyCompanyCard,
+          ROUND(tl.PlantCurrencyCompanyvoucher, 2)
+             AS PlantCurrencyCompanyvoucher,
+          ta.PaidByOthers
+             AS _PaidByOthers,
+          _ConvertedPaidByOthers,
+          _PlantCurrencyPaidByOthers
+   FROM GetTravelLiquidation tl
+        LEFT JOIN TempAttendee ta ON ta.IdCurrency = tl.ReportTo;
+
+
+
+   SELECT eer.IdEmployeeExpenseReport,
+          eer.IdCompany,
+          eer.IdCurrency,
+          cemb.Amount,
+          cemb.IdEmployeeProfile,
+          lv.Value,
+          jd.JobDescriptionTitle,
+          jd.JobDescriptionTitle
+             AS JobTitle,
+          CASE
+             WHEN jd.JobDescriptionTitle LIKE "%Director%" THEN "true"
+             ELSE "false"
+          END
+             AS DailyAmountMealbudget,
+          SUM(
+             CASE
+                WHEN TempAttendee.IdEmployeeExpense IS NULL
+                THEN
+                   IFNULL(
+                      ROUND((ee.Amount + ee.Tip) * empExchRate.ExchangeRate,
+                            2),
+                      0)
+                WHEN TempAttendee.IdEmployeeExpense IS NOT NULL
+                THEN
+                   ROUND(
+                      IFNULL(
+                         (  (ee.Amount + ee.Tip)
+                          * empExchRate.ExchangeRate
+                          / (TempAttendee.AttendeeCount + 1)),
+                         0),
+                      2)
+                ELSE
+                   0
+             END)
+             AS MealExpense,
+          CASE
+             WHEN WEEK(eer.FromDate) = WEEK(eer.ToDate)
+             THEN
+                CONCAT('Average WK', WEEK(eer.FromDate))
+             ELSE
+                CONCAT('Average WK',
+                       WEEK(eer.FromDate),
+                       '/',
+                       WEEK(eer.ToDate))
+          END
+             AS TripWeeks,
+          (ABS(DATEDIFF(eer.FromDate, eer.ToDate))) + 1
+             AS TripDays,
+          _IdCurrencyTo,
+          _IdCompany
+   FROM employee_expense_reports eer
+        INNER JOIN company_employee_meal_budgets cemb
+           ON cemb.IdCompany = _IdCompany AND cemb.IdCurrency = _IdCurrencyTo
+        INNER JOIN emdep_geos.lookup_values lv
+           ON lv.IdLookupValue = cemb.IdEmployeeProfile
+        INNER JOIN emdep_geos.employees emp
+           ON emp.IdEmployee = eer.IdEmployee
+        INNER JOIN emdep_geos.employee_job_descriptions ejd
+           ON eer.IdEmployee = ejd.IdEmployee
+        INNER JOIN emdep_geos.companies compOrg
+           ON ejd.IdCompany = compOrg.IdCompany
+        INNER JOIN emdep_geos.job_descriptions jd
+           ON ejd.IdJobDescription = jd.IdJobDescription
+        INNER JOIN employee_expenses ee
+           ON     ee.IdEmployeeExpenseReport = eer.IdEmployeeExpenseReport
+              AND ee.IdExpenseType IN (1540,
+                                       1541,
+                                       1554,
+                                       1555)
+        LEFT JOIN
+        (SELECT IdEmployeeExpense, COUNT(IdEmployeeExpense) AS AttendeeCount
+         FROM emdep_geos.employee_expense_attendees
+         GROUP BY IdEmployeeExpense) AS TempAttendee
+           ON ee.IdEmployeeExpense = TempAttendee.IdEmployeeExpense
+        INNER JOIN GetFinalExchangeRate empExchRate
+           ON empExchRate.IdEmployeeExpense = ee.IdEmployeeExpense
+   WHERE     eer.IdLinkedTrip = _idEmployeeTrip
+         AND ejd.IsMainJobDescription = 1
+         AND ee.IsDeleted = 0
+         AND eer.IsDeleted = 0
+         AND ejd.JobDescriptionEndDate IS NULL
+         AND date(JobDescriptionStartDate) <= date(CURDATE())
+         AND CASE
+                WHEN jd.JobDescriptionTitle LIKE "%Director%"
+                THEN
+                   cemb.IdEmployeeProfile = 1626
+                ELSE
+                   cemb.IdEmployeeProfile = 1625
+             END;
+
+
+
+   DROP TEMPORARY TABLE IF EXISTS GetTravelExpenses;
+
+   CREATE TEMPORARY TABLE IF NOT EXISTS GetTravelExpenses
+   AS
+      (SELECT *
+       FROM (SELECT ee.IdEmployeeExpense,
+                    ee.ExpenseDate
+                       AS TicketDate,
+                    lv.IdLookupValue
+                       AS IdType,
+                    lv.Value
+                       AS Type,
+                    ee.Summary
+                       AS TicketSummary,
+                    ee.Amount
+                       AS TicketAmount,
+                    ee.Tip,
+                    cur.IdCurrency,
+                    cur.IsoCode
+                       AS TicketCurrency,
+                    lvpay.IdLookupValue
+                       AS IdPayment,
+                    lvpay.Value
+                       AS PaymentMethod,
+                    CASE
+                       WHEN eea.IdEmployeeExpense IS NULL THEN 'NO'
+                       ELSE 'YES'
+                    END
+                       AS FileInclude,
+                    comp.IdCompany,
+                    comp.Alias
+                       AS ReportedPlant,
+                    ROUND((ee.Amount + ee.Tip), 2)
+                       AS TotalTicketAmount,
+                    (  (ee.Amount + ee.Tip)
+                     / IFNULL(TempAttendee.AttendeeCount + 1, 1))
+                       AS AttendeeCount,
+                    ROUND(
+                         ((ee.Amount + ee.Tip) / empExchRate.ExchangeRate)
+                       / (IFNULL(TempAttendee.AttendeeCount, 0) + 1),
+                       2)
+                       AS TotalCountedAmount,
+                    ROUND((empExchRate.ExchangeRate), 4)
+                       AS ConversionRate,
+                    empExchRate.IdCurrencyFrom,
+                    empExchRate.IdCurrencyTo,
+                     ROUND((ee.Amount + ee.Tip) / empExchRate.ExchangeRate, 2) AS TotalTicketAmountCurrencyPlant
+                    , ROUND(((ee.Amount + ee.Tip) / IFNULL(TempAttendee.AttendeeCount + 1, 1)) / empExchRate.ExchangeRate, 2) AS TotalCountedAmountCurrencyPlant
+                    , ROUND((ROUND(((ee.Amount + ee.Tip) / empExchRate.ExchangeRate) / (IFNULL(TempAttendee.AttendeeCount, 0) + 1), 2)) / empExchRate.ExchangeRate, 2) AS TotalCountedAmountCurrencyPlantOld
+                    , eer.IdEmployeeExpenseReport
+             FROM emdep_geos.employee_expenses ee
+                  INNER JOIN emdep_geos.lookup_values lv
+                     ON lv.IdLookupValue = ee.IdExpenseType
+                  INNER JOIN emdep_geos.currencies cur
+                     ON cur.IdCurrency = ee.IdCurrency
+                  INNER JOIN emdep_geos.lookup_values lvpay
+                     ON lvpay.IdLookupValue = ee.IdPaymentMethod
+                  LEFT JOIN employee_expense_attachments eea
+                     ON eea.IdEmployeeExpense = ee.IdEmployeeExpense
+                  INNER JOIN emdep_geos.employee_expense_reports eer
+                     ON eer.IdEmployeeExpenseReport =
+                        ee.IdEmployeeExpenseReport
+                  INNER JOIN emdep_geos.companies comp
+                     ON eer.IdCompany = comp.IdCompany
+                  LEFT JOIN
+                  (SELECT IdEmployeeExpense,
+                          COUNT(IdEmployeeExpense) AS AttendeeCount
+                   FROM emdep_geos.employee_expense_attendees
+                   GROUP BY IdEmployeeExpense) AS TempAttendee
+                     ON ee.IdEmployeeExpense = TempAttendee.IdEmployeeExpense
+                  INNER JOIN GetFinalExchangeRate empExchRate
+                     ON empExchRate.IdEmployeeExpense = ee.IdEmployeeExpense
+             WHERE     Date(eer.FromDate) >= Date(fromDate)
+                   AND DATE(eer.ToDate) <= DATE(toDate)
+                   AND eer.IdLinkedTrip = _idEmployeeTrip
+                   AND ee.IsDeleted = 0
+                   AND eer.IsDeleted = 0
+             UNION
+             SELECT ee.IdEmployeeExpense,
+                    ee.ExpenseDate
+                       AS TicketDate,
+                    lv.IdLookupValue
+                       AS IdType,
+                    lv.Value
+                       AS Type,
+                    ee.Summary
+                       AS TicketSummary,
+                    ee.Amount
+                       AS TicketAmount,
+                    ee.Tip,
+                    cur.IdCurrency,
+                    cur.IsoCode
+                       AS TicketCurrency,
+                    lvpay.IdLookupValue
+                       AS IdPayment,
+                    'Paid by Other'
+                       AS PaymentMethod,
+                    CASE
+                       WHEN eea.IdEmployeeExpense IS NULL THEN 'NO'
+                       ELSE 'YES'
+                    END
+                       AS FileInclude,
+                    comp.IdCompany,
+                    comp.Alias
+                       AS ReportedPlant,
+                    ROUND((ee.Amount + ee.Tip), 2)
+                       AS TotalTicketAmount,
+                    (  (ee.Amount + ee.Tip)
+                     / IFNULL(TempAttendee.AttendeeCount + 1, 1))
+                       AS AttendeeCount,
+                    ROUND(
+                         ((ee.Amount + ee.Tip) / empExchRate.ExchangeRate)
+                       / (IFNULL(TempAttendee.AttendeeCount, 0) + 1),
+                       2)
+                       AS TotalCountedAmount,
+                    ROUND((empExchRate.ExchangeRate), 4)
+                       AS ConversionRate,
+                    empExchRate.IdCurrencyFrom,
+                    empExchRate.IdCurrencyTo,                   
+                          ROUND(
+                             (ee.Amount + ee.Tip) / empExchRate.ExchangeRate,
+                             2)  AS TotalTicketAmountCurrencyPlant,
+                   
+                          ROUND(
+                               (  (ee.Amount + ee.Tip)
+                                / IFNULL(TempAttendee.AttendeeCount + 1, 1))
+                             / empExchRate.ExchangeRate,
+                             2)   AS TotalCountedAmountCurrencyPlant,
+                    
+                          ROUND(
+                               (ROUND(
+                                     (  (ee.Amount + ee.Tip)
+                                      / empExchRate.ExchangeRate)
+                                   / (  IFNULL(TempAttendee.AttendeeCount, 0)
+                                      + 1),
+                                   2))
+                             / empExchRate.ExchangeRate,
+                             2)                       AS TotalCountedAmountCurrencyPlantOld,
+                    eer.IdEmployeeExpenseReport
+             FROM emdep_geos.employee_expenses ee
+                  INNER JOIN emdep_geos.lookup_values lv
+                     ON lv.IdLookupValue = ee.IdExpenseType
+                  INNER JOIN emdep_geos.currencies cur
+                     ON cur.IdCurrency = ee.IdCurrency
+                  INNER JOIN emdep_geos.lookup_values lvpay
+                     ON lvpay.IdLookupValue = ee.IdPaymentMethod
+                  LEFT JOIN employee_expense_attachments eea
+                     ON eea.IdEmployeeExpense = ee.IdEmployeeExpense
+                  INNER JOIN emdep_geos.employee_expense_reports eer
+                     ON eer.IdEmployeeExpenseReport =
+                        ee.IdEmployeeExpenseReport
+                  INNER JOIN emdep_geos.companies comp
+                     ON eer.IdCompany = comp.IdCompany
+                  LEFT JOIN
+                  (SELECT IdEmployeeExpense,
+                          COUNT(IdEmployeeExpense) AS AttendeeCount
+                   FROM emdep_geos.employee_expense_attendees
+                   GROUP BY IdEmployeeExpense) AS TempAttendee
+                     ON ee.IdEmployeeExpense = TempAttendee.IdEmployeeExpense
+                  LEFT JOIN
+                  GetFinalEmployeeExpenseAttendeesExchangeRate empExchRate
+                     ON empExchRate.IdEmployeeExpense = ee.IdEmployeeExpense
+             WHERE     ee.IdEmployeeExpense IN
+                          (SELECT IdEmployeeExpense
+                           FROM employee_expense_attendees
+                           WHERE     ee.IsDeleted = 0
+                                 AND IdEmployee = _IdReporter
+                                 AND eer.IdCompany IN
+                                        (SELECT IdCompany
+                                         FROM GetFinalIdCompanyLocation)
+                                 AND (DATE_FORMAT(ee.ExpenseDate, '%Y-%m-%d') BETWEEN DATE_FORMAT(
+                                                                                         (SELECT ExpenseDate
+                                                                                          FROM employee_expenses
+                                                                                          WHERE IdEmployeeExpenseReport IN
+                                                                                                   (SELECT IdEmployeeExpenseReport
+                                                                                                    FROM emdep_geos.employee_expense_reports
+                                                                                                    WHERE IdLinkedTrip =
+                                                                                                          _idEmployeeTrip)
+                                                                                          ORDER BY ExpenseDate
+                                                                                          LIMIT 1),
+                                                                                         '%Y-%m-%d')
+                                                                                  AND DATE_FORMAT(
+                                                                                         (SELECT ExpenseDate
+                                                                                          FROM employee_expenses
+                                                                                          WHERE IdEmployeeExpenseReport IN
+                                                                                                   (SELECT IdEmployeeExpenseReport
+                                                                                                    FROM emdep_geos.employee_expense_reports
+                                                                                                    WHERE IdLinkedTrip =
+                                                                                                          _idEmployeeTrip)
+                                                                                          ORDER BY ExpenseDate DESC
+                                                                                          LIMIT 1),
+                                                                                         '%Y-%m-%d')))
+                   AND ee.IsDeleted = 0
+                   AND eer.IsDeleted = 0
+             GROUP BY ee.IdEmployeeExpense) AS subquery_alias);
+
+
+
+   SELECT *
+   FROM GetTravelExpenses
+   ORDER BY TicketDate, IdEmployeeExpense;
+
+   DROP TEMPORARY TABLE IF EXISTS GetExpensesIds;
+
+   CREATE TEMPORARY TABLE IF NOT EXISTS GetExpensesIds
+   AS
+      (SELECT *
+       FROM GetTravelExpenses
+       ORDER BY TicketDate, IdEmployeeExpense);
+
+   DROP TEMPORARY TABLE IF EXISTS GetExpensesIds1;
+
+   CREATE TEMPORARY TABLE IF NOT EXISTS GetExpensesIds1
+   AS
+      (SELECT *
+       FROM GetTravelExpenses
+       ORDER BY TicketDate, IdEmployeeExpense);
+
+   DROP TEMPORARY TABLE IF EXISTS GetEmployeeAttendees;
+
+   CREATE TEMPORARY TABLE IF NOT EXISTS GetEmployeeAttendees
+   AS
+      SELECT CONCAT(e.FirstName, ' ', e.LastName) AS Name,
+             eea.IdEmployeeExpenseAttendee,
+             "Other Attendees: " AS styleName,
+             " (Employees)" AS AttendeesType,
+             ee.IdEmployeeExpense
+      FROM employees e
+           INNER JOIN employee_expense_attendees eea
+              ON eea.IdEmployee = e.IdEmployee
+           INNER JOIN employee_expenses ee
+              ON ee.IdEmployeeExpense = eea.IdEmployeeExpense
+      WHERE     eea.IsDeleted = 0
+            AND e.IdEmployee IN
+                   (SELECT IdEmployee
+                    FROM employee_expense_attendees
+                    WHERE IdEmployeeExpense IN
+                             (SELECT IdEmployeeExpense FROM GetTravelExpenses))
+      UNION
+      SELECT CONCAT(p.Name, ' ', p.Surname) AS Name,
+             eea.IdEmployeeExpenseAttendee,
+             "Other Attendees: " AS styleName,
+             " (Customer)" AS AttendeesType,
+             ee.IdEmployeeExpense
+      FROM geos.people p
+           INNER JOIN employee_expense_attendees eea
+              ON eea.IdCustomer = p.IdPerson
+           INNER JOIN employee_expenses ee
+              ON ee.IdEmployeeExpense = eea.IdEmployeeExpense
+      WHERE     eea.IsDeleted = 0
+            AND p.IdPerson IN
+                   (SELECT IdCustomer
+                    FROM employee_expense_attendees
+                    WHERE IdEmployeeExpense IN
+                             (SELECT IdEmployeeExpense FROM GetExpensesIds))
+      UNION
+      SELECT CONCAT(c.FirstName, ' ', c.LastName) AS Name,
+             eea.IdEmployeeExpenseAttendee,
+             "Other Attendees: " AS styleName,
+             " (Supplier)" AS AttendeesType,
+             ee.IdEmployeeExpense
+      FROM geos.contacts c
+           INNER JOIN employee_expense_attendees eea
+              ON eea.IdSupplier = c.IdContact
+           INNER JOIN employee_expenses ee
+              ON ee.IdEmployeeExpense = eea.IdEmployeeExpense
+      WHERE     eea.IsDeleted = 0
+            AND c.IdContact IN
+                   (SELECT IdSupplier
+                    FROM employee_expense_attendees
+                    WHERE IdEmployeeExpense IN
+                             (SELECT IdEmployeeExpense FROM GetExpensesIds1))
+      UNION
+      SELECT 'Other' AS Name,
+             eea.IdEmployeeExpenseAttendee,
+             "Other Attendees: " AS styleName,
+             " (Unknown)" AS AttendeesType,
+             ee.IdEmployeeExpense
+      FROM employee_expense_attendees eea
+           INNER JOIN employee_expenses ee
+              ON ee.IdEmployeeExpense = eea.IdEmployeeExpense
+      WHERE     eea.IsDeleted = 0
+            AND eea.IdEmployee IS NULL
+            AND eea.IdCustomer IS NULL
+            AND eea.IdSupplier IS NULL;
+
+
+   DROP TEMPORARY TABLE IF EXISTS GetEmployeeRemarks1;
+
+   CREATE TEMPORARY TABLE IF NOT EXISTS GetEmployeeRemarks1
+   AS
+      (SELECT eer.IdEmployeeExpenseReport,
+              ee.IdEmployeeExpense,
+              ee.ExpenseDate AS TicketDate,
+              lv.Value AS Type,
+              ee.Remarks
+       FROM employee_expense_reports eer
+            INNER JOIN emdep_geos.employee_expenses ee
+               ON ee.IdEmployeeExpenseReport = eer.IdEmployeeExpenseReport
+            INNER JOIN emdep_geos.lookup_values lv
+               ON lv.IdLookupValue = ee.IdExpenseType
+       WHERE     ee.IdEmployeeExpense IN
+                    (SELECT IdEmployeeExpense FROM GetExpensesIds)
+             AND (   ee.Remarks IS NOT NULL
+                  OR COALESCE(TRIM(ee.Remarks), '') <> '')
+             AND eer.IdEmployeeExpenseReport IN
+                    (SELECT IdEmployeeExpenseReport
+                     FROM emdep_geos.employee_expense_reports
+                     WHERE IdLinkedTrip = _idEmployeeTrip)
+       ORDER BY IdEmployeeExpense);
+
+
+   DROP TEMPORARY TABLE IF EXISTS GetEmployeeRemarks2;
+
+   CREATE TEMPORARY TABLE IF NOT EXISTS GetEmployeeRemarks2
+   AS
+      (SELECT eer.IdEmployeeExpenseReport,
+              ee.IdEmployeeExpense,
+              ee.ExpenseDate
+                 AS TicketDate,
+              lv.Value
+                 AS Type,
+              CONCAT(ea.styleName,
+                     group_concat(CONCAT(ea.Name, ea.AttendeesType)))
+                 AS Remarks
+       FROM employee_expense_reports eer
+            INNER JOIN emdep_geos.employee_expenses ee
+               ON ee.IdEmployeeExpenseReport = eer.IdEmployeeExpenseReport
+            INNER JOIN emdep_geos.lookup_values lv
+               ON lv.IdLookupValue = ee.IdExpenseType
+            LEFT JOIN GetEmployeeAttendees ea
+               ON ea.IdEmployeeExpense = ee.IdEmployeeExpense
+       WHERE     ee.IdEmployeeExpense IN
+                    (SELECT IdEmployeeExpense FROM GetExpensesIds)
+             AND ea.IdEmployeeExpenseAttendee IS NOT NULL
+       GROUP BY ee.ExpenseDate
+       ORDER BY IdEmployeeExpense);
+
+   SELECT * FROM GetEmployeeRemarks1
+   UNION
+   SELECT * FROM GetEmployeeRemarks2;
+
+
+   SELECT eer.IdEmployeeExpenseReport,
+          ee.IdEmployeeExpense,
+          ee.ExpenseDate
+             AS TicketDate,
+          lv.Value
+             AS Type,
+          CONCAT('Expense paid by ',
+                 e.FirstName,
+                 ' ',
+                 e.LastName)
+             AS Remarks,
+          eea.IdEmployeeExpenseAttendee
+   FROM employee_expense_reports eer
+        INNER JOIN employees e ON eer.IdEmployee = e.IdEmployee
+        INNER JOIN employee_expenses ee
+           ON ee.IdEmployeeExpenseReport = eer.IdEmployeeExpenseReport
+        INNER JOIN employee_expense_attendees eea
+           ON eea.IdEmployeeExpense = ee.IdEmployeeExpense
+        LEFT JOIN emdep_geos.lookup_values lv
+           ON lv.IdLookupValue = ee.IdExpenseType
+   WHERE     eea.IsDeleted = 0
+         AND eer.IdEmployeeExpenseReport IN
+                (SELECT IdEmployeeExpenseReport
+                 FROM GetTravelExpenses
+                 WHERE PaymentMethod = 'Paid by Other')
+         AND ee.IdEmployeeExpense IN
+                (SELECT IdEmployeeExpense FROM GetExpensesIds)
+   GROUP BY ee.IdEmployeeExpense;
+END$$
+delimiter ;

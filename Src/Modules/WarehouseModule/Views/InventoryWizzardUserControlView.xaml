@@ -1,0 +1,644 @@
+﻿<UserControl x:Class="Emdep.Geos.Modules.Warehouse.Views.InventoryWizzardUserControlView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.Warehouse.Views"
+             mc:Ignorable="d"
+             HorizontalAlignment="Stretch"
+             VerticalAlignment="Stretch"
+             xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol" 
+             xmlns:system="clr-namespace:System;assembly=mscorlib"
+             xmlns:UIConverter="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters" 
+             xmlns:dxm="http://schemas.devexpress.com/winfx/2008/xaml/map"
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:dxgt="http://schemas.devexpress.com/winfx/2008/xaml/grid/themekeys"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm" 
+             xmlns:sysglb="clr-namespace:System.Globalization;assembly=mscorlib"
+             xmlns:dxet="http://schemas.devexpress.com/winfx/2008/xaml/editors/themekeys"
+             xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+             xmlns:UIValidation="clr-namespace:Emdep.Geos.UI.Validations;assembly=Emdep.Geos.UI.Validations" 
+             xmlns:dxeh="http://schemas.devexpress.com/winfx/2008/xaml/editors/internal"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity" 
+             xmlns:ei="http://schemas.microsoft.com/expression/2010/interactions" 
+             Focusable="True" IsTabStop="True"  
+             UIHelper:FocusExtension.IsFocused="{Binding FocusUserControl}">
+
+    <UserControl.Resources>
+        <UIConverter:InvertedVisibilityConverter x:Key="invertedVisibilityConverter"/>
+
+        <Style TargetType="dxlc:GroupBox" >
+            <Setter Property="FontSize" Value="24"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Padding" Value="0"/>
+        </Style>
+
+        <ControlTemplate x:Key="{dxet:TrackBarEditThemeKey ResourceKey=PanelLeftSideTemplate, IsThemeIndependent=True}">
+            <Border Background="{DynamicResource WarehouseInitialLocationBackground}" />
+        </ControlTemplate>
+
+        <ControlTemplate x:Key="{dxet:TrackBarEditThemeKey ResourceKey=PanelRightSideTemplate, IsThemeIndependent=True}">
+            <Border Background="Gray" />
+        </ControlTemplate>
+
+        <Style x:Key="{dxet:TrackBarEditThemeKey ResourceKey=PanelRightSideStyle}" TargetType="ContentControl">
+            <Setter Property="IsTabStop" Value="false" />
+            <Setter Property="Template" Value="{DynamicResource {dxet:TrackBarEditThemeKey ResourceKey=PanelRightSideTemplate}}" />
+            <Setter Property="Focusable" Value="false" />
+            <Setter Property="OverridesDefaultStyle" Value="True" />
+        </Style>
+
+        <Style x:Key="{dxet:TrackBarEditThemeKey ResourceKey=PanelLeftSideStyle}" TargetType="ContentControl">
+            <Setter Property="IsTabStop" Value="false" />
+            <Setter Property="Template" Value="{DynamicResource {dxet:TrackBarEditThemeKey ResourceKey=PanelLeftSideTemplate}}" />
+            <Setter Property="UseLayoutRounding" Value="{Binding Path=(dxe:BaseEdit.OwnerEdit).UseLayoutRounding}" />
+            <Setter Property="Focusable" Value="false" />
+            <Setter Property="OverridesDefaultStyle" Value="True" />
+        </Style>
+
+        <dxe:GridLengthConverter x:Key="GridLengthConverter" />
+
+        <ControlTemplate x:Key="{dxet:TrackBarEditThemeKey ResourceKey=PanelHorizontalTemplate,IsThemeIndependent=True}" TargetType="dxe:RangeEditBasePanel">
+            <Grid x:Name="root">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition x:Name="leftButton" Width="Auto" />
+                    <ColumnDefinition x:Name="leftColumn" Width="{Binding Path=(dxe:RangeEditBaseInfo.LayoutInfo).LeftSidePosition, Converter={StaticResource GridLengthConverter}}" />
+                    <ColumnDefinition x:Name="centerColumn" Width="Auto" />
+                    <ColumnDefinition x:Name="rightColumn" Width="{Binding Path=(dxe:RangeEditBaseInfo.LayoutInfo).RightSidePosition, Converter={StaticResource GridLengthConverter}}" />
+                    <ColumnDefinition x:Name="rightButton" Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <ContentControl x:Name="back" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Height="12"
+                                Style="{DynamicResource {dxet:TrackBarEditThemeKey ResourceKey=HorizontalBackgroundStyle}}" 
+                                dxeh:ControlHelper.ShowFocusedState="{Binding Path=(dxe:BaseEdit.OwnerEdit).IsKeyboardFocusWithin}">
+                </ContentControl>
+
+                <UIHelper:CustomTickBar x:Name="PART_BottomTick"
+                                        Grid.Row="0"
+                                        Grid.Column="1"
+                                        Grid.ColumnSpan="3"
+                                        Placement="Top"
+                                        Style="{DynamicResource {dxet:TrackBarEditThemeKey ResourceKey=TickBarStyle,IsThemeIndependent=True}}"/>
+
+                <RepeatButton x:Name="left" Grid.Column="1" Grid.Row="1" Height="5"
+                              Style="{DynamicResource {dxet:TrackBarEditThemeKey ResourceKey=PanelLeftSideStyle}}" 
+                              Command="{Binding Path=(dxe:BaseEdit.OwnerEdit).DecrementLargeCommand}" />
+
+                <Thumb x:Name="PART_Thumb" Grid.Column="2" Grid.Row="1" >
+                    <Thumb.Style>
+                        <Style TargetType="Thumb">
+                            <Setter Property="SnapsToDevicePixels" Value="True" />
+                            <Setter Property="OverridesDefaultStyle" Value="True" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Thumb">
+                                        <Ellipse Height="16" Width="16" Fill="{DynamicResource WarehouseInitialLocationBackground}"/>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </Thumb.Style>
+                </Thumb>
+
+                <RepeatButton x:Name="right" Grid.Column="3" Grid.Row="1" Height="5"
+                              Style="{DynamicResource {dxet:TrackBarEditThemeKey ResourceKey=PanelRightSideStyle}}" 
+                              Command="{Binding Path=(dxe:BaseEdit.OwnerEdit).IncrementLargeCommand}" />
+            </Grid>
+        </ControlTemplate>
+
+        <Style TargetType="dxg:HeaderContentControl" x:Key="MyHeaderStyle">
+            <Setter Property="TextBlock.FontSize" Value="28"/>
+        </Style>
+
+
+        <system:Double x:Key="FontSize15">15</system:Double>
+        <system:Double x:Key="FontSize18">18</system:Double>
+        <system:Double x:Key="FontSize19">19</system:Double>
+        <system:Double x:Key="FontSize24">24</system:Double>
+        <system:Double x:Key="FontSize33">33</system:Double>
+        <system:Double x:Key="FontSize35">35</system:Double>
+
+        <DataTemplate x:Key="ZeroTemplate">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="3"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Text="{Binding RowData.Row.RemainingQty,StringFormat={}{0}}" HorizontalAlignment="Right"></TextBlock>
+                <StackPanel Grid.Row="1" HorizontalAlignment="Right">
+                    <Line Name="Zero1" Stroke="Gray" X1="0" Y1="2" X2="25" Y2="2" SnapsToDevicePixels="True" RenderOptions.EdgeMode="Aliased"   StrokeThickness="5" />
+                    <Line Name="Zero2" Stroke="Gray" X1="0" Y1="4" X2="25" Y2="4" SnapsToDevicePixels="True" RenderOptions.EdgeMode="Aliased"   StrokeThickness="5" />
+                </StackPanel>
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="PlusTemplate">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="3"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Text="{Binding RowData.Row.RemainingQty, StringFormat='+{0}'}" HorizontalAlignment="Right">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="Green"></Setter>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Source={x:Reference DataContextElement}, Path=DataContext.EnabledGridFormatCondition}"  Value="True">
+                                    <Setter Property="Foreground" Value="White"></Setter>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+
+                <StackPanel Grid.Row="1" HorizontalAlignment="Right">
+                    <Polygon Points="8,0 16,16, 0,16"  HorizontalAlignment="Right">
+                        <Polygon.Style>
+                            <Style TargetType="Polygon">
+                                <Setter Property="Fill" Value="Green"></Setter>
+                                <Setter Property="Stroke" Value="Green"></Setter>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Source={x:Reference DataContextElement}, Path=DataContext.EnabledGridFormatCondition}"  Value="True">
+                                        <Setter Property="Fill" Value="White"></Setter>
+                                        <Setter Property="Stroke" Value="Green"></Setter>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Polygon.Style>
+                    </Polygon>
+                </StackPanel>
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="MinusTemplate">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="3"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Foreground="Red" Text="{Binding RowData.Row.RemainingQty,StringFormat='{}{0}'}" HorizontalAlignment="Right"/>
+                <StackPanel Grid.Row="1">
+                    <Polygon Points="0,0 8,16, 16,0" Stroke="Red" Fill="Red" HorizontalAlignment="Right" />
+                </StackPanel>
+            </Grid>
+        </DataTemplate>
+
+    </UserControl.Resources>
+
+    <Grid ShowGridLines="False">
+        <Grid.RowDefinitions>
+
+
+            <RowDefinition Height="0.75*"/>
+            <RowDefinition Height="2.5*"/>
+            <RowDefinition Height="7.5*"/>
+            <RowDefinition Height="2.5*"/>
+            <RowDefinition Height="1.7*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2.5*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <FrameworkElement Name="DataContextElement" />
+        <!--<TextBlock Text="{Binding Source={x:Reference DataContextElement}, Path=DataContext.EnabledGridFormatCondition}" FontSize="50" Visibility="Visible" Name="EnabledGridFormatCondition"></TextBlock>-->
+        <dxe:TrackBarEdit Grid.Row="0" Grid.ColumnSpan="2" Minimum="0" Maximum="2" TickFrequency="1" IsReadOnly="True" SmallStep="1" LargeStep="1" Cursor="Arrow" 
+                         Visibility="Visible"  EditValue="{Binding TrackBarEditvalue,UpdateSourceTrigger=PropertyChanged}"  HorizontalAlignment="Stretch" />
+
+        <dxlc:LayoutGroup Grid.Row="1" View="GroupBox"  Grid.Column="0"
+                              HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                              IsCollapsible="False" IsCollapsed="False">
+            <dxlc:LayoutGroup.HeaderTemplate>
+                <DataTemplate>
+                    <Grid >
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="3"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="{DynamicResource InventoryUserControlViewLocationPoint}" FontWeight="Bold" VerticalAlignment="Center"/>
+                        <Image Grid.Column="1" Visibility="{Binding DataContext.IsWrongLocationErrorVisible, RelativeSource={RelativeSource AncestorType=dxlc:LayoutGroup}}" x:Name="errorImage" Height="24" Width="24" 
+                                    Source="/Emdep.Geos.Modules.Warehouse;component/Assets/Images/error.png" 
+                                    DockPanel.Dock="Left"/>
+                        <TextBlock Grid.Column="3" Visibility="{Binding DataContext.IsWrongLocationErrorVisible, RelativeSource={RelativeSource AncestorType=dxlc:LayoutGroup}}" Name="errorText"
+                                   Text="{Binding DataContext.WrongLocation, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" 
+                                   HorizontalAlignment="Right" VerticalAlignment="Center" FontWeight="Bold" Foreground="#FF0000" DockPanel.Dock="Right" />
+                    </Grid>
+                </DataTemplate>
+            </dxlc:LayoutGroup.HeaderTemplate>
+
+            <Grid Name="Locationgrid" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"  >
+                <Viewbox>
+                    <TextBlock Text="{Binding LocationName,UpdateSourceTrigger=PropertyChanged}"
+                               FontWeight="Bold" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                               IsEnabled="False" TextAlignment="Center"
+                               Focusable="False">
+                        <TextBlock.Style>
+                            <Style TargetType="{x:Type TextBlock}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsWrongLocationErrorVisible}" Value="Visible">
+                                        <Setter Property="Foreground" Value="{DynamicResource WarehouseInValidLocationForeground}"></Setter>
+                                        <!--<Setter Property="Background" Value="{DynamicResource WarehouseInValidLocationBackground}"></Setter>-->
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IsWrongLocationErrorVisible}" Value="Collapsed">
+                                        <Setter Property="Foreground" Value="{DynamicResource WarehouseValidLocationForeground}"></Setter>
+                                        <!--<Setter Property="Background" Value="{DynamicResource WarehouseValidLocationBackground}"></Setter>-->
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IsWrongLocationErrorVisible}" Value="Hidden">
+                                        <Setter Property="Foreground" Value="{DynamicResource WarehouseInitialLocationForeground}"></Setter>
+                                        <!--<Setter Property="Background" Value="{DynamicResource WarehouseInitialLocationBackground}"></Setter>-->
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Viewbox>
+                <Grid.Style>
+                    <Style TargetType="{x:Type Grid}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsWrongLocationErrorVisible}" Value="Visible">
+                                <Setter Property="Background" Value="{DynamicResource WarehouseInValidLocationBackground}"></Setter>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsWrongLocationErrorVisible}" Value="Collapsed">
+                                <Setter Property="Background" Value="{DynamicResource WarehouseValidLocationBackground}"></Setter>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsWrongLocationErrorVisible}" Value="Hidden">
+                                <Setter Property="Background" Value="{DynamicResource WarehouseInitialLocationBackground}"></Setter>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Grid.Style>
+            </Grid>
+        </dxlc:LayoutGroup>
+
+        <dxlc:LayoutGroup Grid.Row="2" View="GroupBox" Grid.Column="0"
+                              HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+                              IsCollapsible="False" IsCollapsed="False">
+            <dxlc:LayoutGroup.HeaderTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="{DynamicResource InventoryUserControlViewItem}" FontWeight="Bold" VerticalAlignment="Center"/>
+                        <DockPanel Grid.Column="1" Visibility="{Binding DataContext.IsWrongItemErrorVisible,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}">
+                            <Image x:Name="errorImage" Height="24" Width="24" Source="/Emdep.Geos.Modules.Warehouse;component/Assets/Images/error.png"  DockPanel.Dock="Left"/>
+                            <TextBlock Name="errorText" Text="{Binding DataContext.WrongItem, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" HorizontalAlignment="Right" VerticalAlignment="Center" FontWeight="Bold"  Foreground="#FF0000" DockPanel.Dock="Right" />
+                        </DockPanel>
+                    </Grid>
+                </DataTemplate>
+            </dxlc:LayoutGroup.HeaderTemplate>
+
+            <UIHelper:GridControlWithoutClickExtended ItemsSource="{Binding InventoryMaterials, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                      CurrentItem="{Binding SelectedInventoryMaterial, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                                      HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+                                                      MaxHeight="800" 
+                                                      MinWidth="300"
+                                                      Width="Auto">
+                
+                 <!--checkbox-->
+                <!--[rani dhamankar][07-04-2025][GEOS2-6758]-->
+                <dxg:GridColumn Header="" FieldName="checked" Width="15"  ShowCheckBoxInHeader="True" AllowEditing="True" >
+                    <dxg:GridColumn.CellTemplate>
+                        <DataTemplate>
+                            <CheckBox Height="30" IsChecked="{Binding RowData.Row.IsChecked, Mode=TwoWay ,UpdateSourceTrigger=PropertyChanged}"  IsEnabled="{Binding RowData.Row.IsCheckboxEnabled}"     Margin="15 0 0 0"  Style="{DynamicResource CheckBoxStyle}">
+                                <dxmvvm:Interaction.Triggers>
+
+                                    <dxmvvm:EventToCommand 
+     EventName="Checked" Command="{Binding DataContext.IsCheckedChanged,RelativeSource={RelativeSource AncestorType=dxg:GridControl}}" PassEventArgsToCommand="True"/>
+                                    <dxmvvm:EventToCommand 
+EventName="Unchecked" Command="{Binding DataContext.IsCheckedChanged,RelativeSource={RelativeSource AncestorType=dxg:GridControl}}" PassEventArgsToCommand="True"/>
+                                </dxmvvm:Interaction.Triggers>
+                            </CheckBox>
+                        </DataTemplate>
+                    </dxg:GridColumn.CellTemplate>
+                </dxg:GridColumn>
+                <!--Reference-->
+                <dxg:GridColumn Header="{DynamicResource InventoryUserControlViewReference}" FieldName="Reference" Width="Auto" AllowColumnFiltering ="False" AllowSorting="False">
+                    <dxg:GridColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock VerticalAlignment="Center" Margin="10 0 0 0">
+                                        <Hyperlink x:Name="hyperlink"
+                                                   TargetName="_blank"
+                                                   Command="{Binding DataContext.HyperlinkClickCommand,RelativeSource={RelativeSource AncestorType=dxg:GridControl}}"
+                                                   CommandParameter="{Binding RowData.Row}" Style="{DynamicResource hyperlinkGridStyle}">
+                                            <InlineUIContainer>
+                                                <TextBlock Text="{Binding Data.Reference}" Style="{DynamicResource HyperlinkTextBlock}" TextDecorations="Underline" />
+                                            </InlineUIContainer>
+                                        </Hyperlink>
+                                     </TextBlock>
+                        </DataTemplate>
+                    </dxg:GridColumn.CellTemplate>
+                </dxg:GridColumn>
+
+                <!--Date/DN-->
+                <dxg:GridColumn Header="{DynamicResource InventoryUserControlViewDateDn}" 
+                                Width="55" 
+                                AllowColumnFiltering ="False" 
+                                AllowSorting="False">
+                    <dxg:GridColumn.CellTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <!--[GEOS2-4420][rdixit][15.06.2023]-->
+                                <TextBlock Grid.Row="0" 
+                                           Text="{Binding RowData.Row.WarehouseDeliveryNote.DeliveryDateNullable, StringFormat=d, ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}"
+                                           HorizontalAlignment="Left"/>
+                                <TextBlock Grid.Row="1" Text="{Binding RowData.Row.WarehouseDeliveryNote.Code}"
+                                           Margin="0 0 3 0"
+                                           HorizontalAlignment="Right" FontSize="{StaticResource FontSize18}"/>
+                            </Grid>
+                        </DataTemplate>
+                    </dxg:GridColumn.CellTemplate>
+                </dxg:GridColumn>
+
+                <!--Quantity-->
+                <dxg:GridColumn Header="{DynamicResource InventoryUserControlViewQuantity}" 
+                                Width="25" 
+                                AllowColumnFiltering ="False" AllowSorting="False">
+                    <dxg:GridColumn.CellTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="3"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0" Text="{Binding RowData.Row.ScannedQty}" HorizontalAlignment="Right"/>
+                                <TextBlock Grid.Row="1" Text="{Binding RowData.Row.AvailableQty}" HorizontalAlignment="Right" FontSize="{StaticResource FontSize18}"/>
+                            </Grid>
+                        </DataTemplate>
+                    </dxg:GridColumn.CellTemplate>
+                </dxg:GridColumn>
+
+                <!--Diff-->
+                <dxg:GridColumn Header="{DynamicResource InventoryUserControlViewDiff}"  
+                                Width="25" AllowColumnFiltering ="False" AllowSorting="False" 
+                                Visible="{Binding DataContext.IsLocationScanned, RelativeSource={RelativeSource AncestorType=dxlc:LayoutGroup}, UpdateSourceTrigger=PropertyChanged}">
+                    <dxg:GridColumn.CellTemplateSelector>
+                        <UIHelper:WarehouseInventoryDiffTemplateSelector />
+                    </dxg:GridColumn.CellTemplateSelector>
+                </dxg:GridColumn>
+
+                <!--Reasons-->
+                <dxg:GridColumn Header="REASON" FieldName="IdReason" Width="48">
+                    <dxg:GridColumn.EditSettings>
+                        <dxe:ComboBoxEditSettings ItemsSource="{Binding ReasonList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                                  DisplayMember="Value" ValueMember="IdLookupValue" />
+                    </dxg:GridColumn.EditSettings>
+                </dxg:GridColumn>
+
+                <dxg:GridControl.View>
+                    <dxg:TableView x:Name="ItemsTableView"
+                                   ItemsSourceErrorInfoShowMode="None"
+                                   NavigationStyle="Cell"
+                                   ShowGroupPanel="False"
+                                   ShowColumnHeaders="True"
+                                   ShowIndicator="False" 
+                                   AutoWidth="True" 
+                                   RowMinHeight="60" 
+                                   FontSize="{StaticResource FontSize33}" 
+                                   IsColumnMenuEnabled="False"
+                                   SearchColumns="False"
+                                   HorizontalScrollbarVisibility="Auto"
+                                   VerticalScrollbarVisibility="Auto"
+                                   IndicatorWidth="60"
+                                   IsEnabled="True">
+                        <dxmvvm:Interaction.Behaviors>
+                            <dxmvvm:EventToCommand EventName="CellValueChanging" 
+                                                   Command="{Binding ReasonCellValueChanged}"
+                                                   PassEventArgsToCommand="True" />
+                          
+                        </dxmvvm:Interaction.Behaviors>
+                        <dxg:TableView.FormatConditions>
+                            <dxg:FormatCondition  Expression="0 = 0" ApplyToRow="True" IsEnabled="{Binding Source={x:Reference DataContextElement}, Path=DataContext.EnabledGridFormatCondition}">
+                                <dxg:Format Background="#FF008000" Foreground="White"/>
+                            </dxg:FormatCondition>
+                        </dxg:TableView.FormatConditions>
+                    </dxg:TableView>
+                </dxg:GridControl.View>
+            </UIHelper:GridControlWithoutClickExtended>
+        </dxlc:LayoutGroup>
+
+        <!--Comments-->
+        <dxlc:LayoutGroup Grid.Row="3" View="GroupBox"  Grid.Column="0"
+                              HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                              IsCollapsible="False" IsCollapsed="False"
+                              IsEnabled="{Binding DataContext.IsCommentEnable,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=UserControl}}"
+                              >
+            <dxlc:LayoutGroup.HeaderTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Grid.Column="0" Text="{DynamicResource InternalUseComment}" FontWeight="Bold" VerticalAlignment="Center"/>
+                        <Image Grid.Column="0" x:Name="errorImage" Height="24" Width="24" HorizontalAlignment="Right" Margin="10 0 0 0"
+                                    Source="/Emdep.Geos.Modules.Warehouse;component/Assets/Images/error.png" 
+                                    Visibility="{Binding DataContext.IsWrongCommentErrorVisible, RelativeSource={RelativeSource AncestorType=dxlc:LayoutGroup}}"
+                                    ToolTip="{DynamicResource AddComment}"
+                               DockPanel.Dock="Left"/>
+                    </StackPanel>
+                </DataTemplate>
+            </dxlc:LayoutGroup.HeaderTemplate>
+
+            <Grid Name="Commentsgrid" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                <Viewbox VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                    <TextBox x:Name="CommentsTextBlock" Width="1350" MaxWidth="1400" BorderBrush="#FF2AB7FF" Height="85" Text="{Binding DataContext.Comments,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=UserControl}}"
+                               FontWeight="Bold" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" TextWrapping="Wrap" 
+                               TextAlignment="Left" Focusable="True" FontSize="{StaticResource FontSize33}"
+                               ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Disabled" AcceptsReturn="True">
+
+                        <dxmvvm:Interaction.Behaviors>
+                            <dxmvvm:EventToCommand EventName="PreviewTextInput"
+                                     Command="{Binding CommandInsertComment}"
+                                     CommandParameter="{Binding ElementName=CommentsTextBlock}" >
+                            </dxmvvm:EventToCommand>
+                        </dxmvvm:Interaction.Behaviors>
+                    </TextBox>
+                </Viewbox>
+            </Grid>
+        </dxlc:LayoutGroup>
+        
+        <!--Information-->
+        <Border Grid.Row="1" Grid.Column="2" Grid.RowSpan="3" Grid.ColumnSpan="3"
+                 HorizontalAlignment="Stretch"  
+                 VerticalAlignment="Stretch"
+                 BorderBrush="#FF2AB7FF" BorderThickness="0.4" >
+            <dxlc:LayoutGroup Grid.Row="1" Grid.Column="2" Grid.RowSpan="3" Grid.ColumnSpan="3"
+                            View="GroupBox"
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Stretch"  
+                            VerticalAlignment="Stretch" 
+                            Header="{DynamicResource InventoryUserControlViewInformation}" 
+                            IsCollapsible="False" IsCollapsed="False" >
+            <Grid ShowGridLines="False" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Visibility="{Binding IsInformationVisible}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" 
+                            Text="{Binding SelectedInventoryMaterial.Description}" TextWrapping="Wrap" TextAlignment="Center"
+                            HorizontalAlignment="Stretch" 
+                            FontSize="{StaticResource FontSize24}" FontWeight="Bold" />
+                <Image Grid.Row="1"
+                        Source="{Binding ArticleImage,UpdateSourceTrigger=PropertyChanged}" 
+                        VerticalAlignment="Center"/>
+                <Grid Grid.Row="2" VerticalAlignment="Center">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="3"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="3"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="3"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="175"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="175"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Row="1" Grid.Column="1" Background="{Binding TotalStockBgColor,UpdateSourceTrigger=PropertyChanged}" BorderThickness="1" BorderBrush="Gray">
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock Text="{DynamicResource InventoryMaterialTotalStock}" TextBlock.Foreground="{Binding TotalStockFgColor}" HorizontalAlignment="Center" FontSize="{StaticResource FontSize19}"/>
+                            <TextBlock Text="{Binding TotalCurrentItemStock,UpdateSourceTrigger=PropertyChanged}" TextBlock.Foreground="{Binding TotalStockFgColor}"  HorizontalAlignment="Center"  FontSize="{StaticResource FontSize35}" FontWeight="Bold" />
+                        </StackPanel>
+                    </Border>
+
+                    <dxe:ProgressBarEdit Grid.Row="3" Grid.Column="1" 
+                                             Minimum="0" Maximum="{Binding ProgressbarArticleStock.ArticleStockForAllLocation, Mode=OneWay}" Value="{Binding ProgressbarArticleStock.AvgStock, Mode=OneWay}" 
+                                             FontSize="{StaticResource FontSize15}" ShowBorder="False" 
+                                             FontWeight="SemiBold" IsPercent="True" 
+                                             DisplayFormatString="p0" 
+                                             ContentDisplayMode="Value"/>
+
+                    <Border Grid.Row="1" Grid.Column="3" Background="{Binding LocationStockBgColor, UpdateSourceTrigger=PropertyChanged}" BorderThickness="1" BorderBrush="Gray" >
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock Text="{DynamicResource InventoryMaterialLocationStock}" HorizontalAlignment="Center"  FontSize="{StaticResource FontSize19}" TextBlock.Foreground="{Binding LocationStockFgColor}"/>
+                            <TextBlock Text="{Binding ProgressbarLocationStock.LocationStock,UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center" FontSize="{StaticResource FontSize35}" FontWeight="Bold" 
+                                       TextBlock.Foreground="{Binding LocationStockFgColor}" />
+                        </StackPanel>
+                    </Border>
+
+                    <dxe:ProgressBarEdit Grid.Row="3" Grid.Column="3" ShowBorder="False"
+                                             Value="{Binding LocationStockValue,Mode=OneWay}"
+                                             Minimum="0" Maximum="{Binding ProgressbarLocationStock.MaximumStock, Mode=TwoWay}"
+                                             FontSize="{StaticResource FontSize15}" FontWeight="SemiBold" IsPercent="True" 
+                                             DisplayFormatString="p0" ContentDisplayMode="Value"/>
+                </Grid>
+            </Grid>
+
+            <!--Margin="-10"-->
+            <dxm:MapControl Name="mapControl" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                            Visibility="{Binding IsInformationVisible, Converter={StaticResource invertedVisibilityConverter}}">
+                <dxm:MapControl.ScalePanelOptions>
+                    <dxm:ScalePanelOptions Visible="False" />
+                </dxm:MapControl.ScalePanelOptions>
+                <dxm:MapControl.ZoomTrackbarOptions>
+                    <dxm:ZoomTrackbarOptions Visible="False" />
+                </dxm:MapControl.ZoomTrackbarOptions>
+                <dxm:MapControl.ScrollButtonsOptions>
+                    <dxm:ScrollButtonsOptions Visible="False" />
+                </dxm:MapControl.ScrollButtonsOptions>
+                <dxm:MapControl.CoordinatesPanelOptions>
+                    <dxm:CoordinatesPanelOptions Visible="False" />
+                </dxm:MapControl.CoordinatesPanelOptions>
+
+                <dxm:VectorLayer x:Name="DataLayer" EnableSelection="false">
+                    <dxm:SvgFileDataAdapter FileUri="{Binding SvgUri, Mode=OneWay , UpdateSourceTrigger=PropertyChanged}" 
+                                            BoundaryPoint1="3.0549583994941538,-176.15739521873573" 
+                                            BoundaryPoint2="84.893298751861167,4.9498408125624227"/>
+                    <dxmvvm:Interaction.Behaviors>
+                        <dxmvvm:EventToCommand EventName="DataLoaded" Command="{Binding VectorLayerDataLoadedCommand}"
+                                                   CommandParameter="{Binding ElementName=mapControl}" />
+                    </dxmvvm:Interaction.Behaviors>
+                </dxm:VectorLayer>
+                <dxm:VectorLayer x:Name="vectorLayer">
+                    <dxm:ListSourceDataAdapter DataSource="{Binding MapItems, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                        <dxmvvm:Interaction.Behaviors>
+                            <dxmvvm:EventToCommand EventName="CustomizeMapItem" Command="{Binding CustomizeMapItemCommand}" PassEventArgsToCommand="True" />
+                        </dxmvvm:Interaction.Behaviors>
+                        <dxm:ListSourceDataAdapter.Mappings>
+                            <dxm:MapItemMappingInfo Latitude="Latitude" Longitude="Longitude" />
+                        </dxm:ListSourceDataAdapter.Mappings>
+                        <dxm:ListSourceDataAdapter.ItemSettings>
+                            <dxm:MapRectangleSettings />
+                        </dxm:ListSourceDataAdapter.ItemSettings>
+                    </dxm:ListSourceDataAdapter>
+                </dxm:VectorLayer>
+
+            </dxm:MapControl>
+        </dxlc:LayoutGroup>
+        </Border>
+
+        <!--Accept Button-->
+
+        <Grid Grid.Row="4" Grid.ColumnSpan="2" Margin="0,10,0,0" ShowGridLines="False" >
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="40"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- //Shubham[skadam] GEOS2-4436 Ask for location inventory after do the picking of certain references (2/3)  23 10 2023 -->
+            <!--<Button Grid.Column="0" Grid.Row="0" Width="150" 
+                    HorizontalAlignment="Right" VerticalAlignment="Top"
+                    Command="{Binding CommandCancelButton}" 
+                    FontSize="{StaticResource FontSize24}" FontWeight="Bold" Focusable="False" 
+                    Content="{DynamicResource InventoryUserControlViewCancel}"
+                    Visibility="{Binding IsCancelButtonVisible}"
+                    IsEnabled="{Binding IsCancelButtonEnabled}"
+                    />-->
+
+            <Button Grid.Column="0" Grid.Row="0" Width="150" 
+          HorizontalAlignment="Right" VerticalAlignment="Top"
+          Command="{Binding CommandUndoButton}" 
+          FontSize="{StaticResource FontSize24}" FontWeight="Bold" Focusable="False" 
+          Content="{DynamicResource InventoryUserControlViewUndo}"
+          Visibility="Visible"
+          IsEnabled="{Binding IsUndoButtonEnabled}"
+          />
+
+            <Button Grid.Column="2" Width="150" 
+                    HorizontalAlignment="Left" VerticalAlignment="Top"
+                    Command="{Binding CommandAcceptButton}"
+                    CommandParameter="{Binding ElementName=ItemsTableView}"
+                    Visibility="Visible" IsEnabled="{Binding IsLocationScanned}"
+                    FontSize="{StaticResource FontSize24}" FontWeight="Bold" Focusable="False" 
+                    Content="{DynamicResource InventoryUserControlViewAccept}"/>
+        </Grid>
+
+    </Grid>
+</UserControl>

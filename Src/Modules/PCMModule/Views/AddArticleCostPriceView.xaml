@@ -1,0 +1,144 @@
+﻿<dxwui:WinUIDialogWindow    x:Class="Emdep.Geos.Modules.PCM.Views.AddArticleCostPriceView"
+                            xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                              xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+                              xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+                            xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                            xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                            xmlns:local="clr-namespace:Emdep.Geos.Modules.PCM.Views"
+                            xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+                            xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+                            xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+                            mc:Ignorable="d" 
+                            d:DesignHeight="900" d:DesignWidth="500"
+                            Style="{DynamicResource WinUIDialogWindowStyle}"
+                            Title="{Binding WindowHeader}"
+                            TitleStyle="{DynamicResource WinUIDialogWindowTitleStyle}">
+
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape" Command="{Binding EscapeButtonCommand}"/>
+    </dxwui:WinUIDialogWindow.InputBindings>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="5"/>
+            <RowDefinition Height="40"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+        <!--<TextBlock x:Name="Articles" Grid.Row="0" Grid.Column="0" Text="Articles" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="18"></TextBlock>-->
+        <!--Plant-->
+        <StackPanel Grid.Column="0" Orientation="Horizontal">
+            <TextBlock Grid.Column="0" Text="{DynamicResource CommonPlant}"  FontWeight="Bold" Margin="10,2,5,0" Grid.Row="0" HorizontalAlignment="Right" Height="25" IsEnabled="True"  />
+
+            <dxe:ComboBoxEdit  Grid.Column="0"  Width="150" Height="30"                        
+                                 ItemsSource="{Binding Path=AllPlantsList,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Margin="5,0,5,0"
+                                      DisplayMember="ShortName" 
+                                      EditValue="{Binding Path=AllSelectedPlantsList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      >
+                <dxe:ComboBoxEdit.StyleSettings>
+                    <dxe:CheckedComboBoxStyleSettings />
+                </dxe:ComboBoxEdit.StyleSettings>
+                <dxmvvm:Interaction.Triggers>
+                    <dxmvvm:EventToCommand EventName="PopupClosed"
+                                               Command="{Binding DataContext.PlantOwnerPopupClosedCommand, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" 
+                                               PassEventArgsToCommand="True"/>
+                </dxmvvm:Interaction.Triggers>
+            </dxe:ComboBoxEdit>
+        </StackPanel>
+      
+  
+  
+        <dxg:GridControl x:Name="AllArticleGrid" Width="955" Height="600" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Grid.Row="1" Grid.Column="0"   
+                                                 ItemsSource="{Binding Path=ArticlesListForMainGrid,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" SelectionMode="MultipleRow" 
+                                                 SelectedItems="{Binding Path=SelectedAllArticlesListForMainGrid,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                                                 ImplyNullLikeEmptyStringWhenFiltering="True" AllowLiveDataShaping="True" 
+                                                 Visibility="{Binding IsGridViewVisible,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" >
+
+            <dxg:GridColumn FieldName="IsChecked" Header=" " Width="50" FixedWidth="True" 
+                                AllowBestFit="true" 
+                                AllowCellMerge="False"
+                                AllowMoving="false"
+                                AllowAutoFilter="False"
+                                ShowInColumnChooser="False" 
+                                FilterPopupMode="Default"
+                                ShowCheckBoxInHeader="True">
+                <dxg:GridColumn.CellTemplate>
+                    <DataTemplate>
+                        <CheckBox x:Name="Part_Editor" IsChecked="{Binding RowData.Row.IsChecked,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center" />
+                        <!--IsChecked="{Binding RowData.Row.IsChecked,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"-->
+                    </DataTemplate>
+                </dxg:GridColumn.CellTemplate>
+            </dxg:GridColumn>
+           
+            <dxg:GridColumn Header="{DynamicResource ArticleGridColReference}" FieldName="Reference" FilterPopupMode="CheckedList" Width="300" FixedWidth="True" ReadOnly="True" />
+            <dxg:GridColumn Header="{DynamicResource Name}" FieldName="Description" FilterPopupMode="CheckedList" Width="600" FixedWidth="True" ReadOnly="True" />
+          
+            <dxg:GridControl.View>
+                <dxg:TableView x:Name="AllArticlesTableView"
+                                                       NavigationStyle="Row"
+                                                       RowDetailsVisibilityMode="Visible"
+                                                       ShowHorizontalLines="True"
+                                                       ShowSearchPanelMode="Always"
+                                                       ShowColumnHeaders="True"
+                                                       VerticalScrollbarVisibility="Auto" 
+                                                       HorizontalScrollbarVisibility="Auto"
+                                                       ImmediateUpdateRowPosition="True"
+                                                       AllowFixedColumnMenu="False"
+                                                       SearchPanelHorizontalAlignment="Stretch"
+                                                       ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly"
+                                                       AllowGrouping="True" 
+                                                       ShowGroupPanel="False"
+                                                       AllowPerPixelScrolling="True"
+                                                       FocusedRow="{Binding SelectedAllArticlesListForMainGrid, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
+                                                       ShowIndicator="False" AutoWidth="True"
+                                                       GroupSummaryDisplayMode="AlignByColumns"
+                                                       AllowColumnFiltering="True" 
+                                                       FilterEditorShowOperandTypeIcon="True"
+                                                       GroupRowCheckBoxFieldName="IsChecked" BestFitArea="All" >
+                    <!--ShowFixedTotalSummary="True" ShowTotalSummary="True"-->
+                    <!--<dxg:TableView.RowStyle>
+                                                <Style TargetType="{x:Type dxg:RowControl}" BasedOn="{StaticResource BaseUniversalStyle}">
+                                                    <Style.Triggers>
+                                                        <MultiDataTrigger>
+                                                            <MultiDataTrigger.Conditions>
+                                                                <Condition Binding="{Binding Row.InUse}" Value="false" />
+                                                            </MultiDataTrigger.Conditions>
+                                                            <Setter Property="Foreground" Value="Gray"/>
+                                                        </MultiDataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </dxg:TableView.RowStyle>-->
+                </dxg:TableView>
+            </dxg:GridControl.View>
+        </dxg:GridControl>
+
+        <!--Accept and Cancel Buttons-->
+        <Grid Grid.Row="3" ShowGridLines="False" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Button  HorizontalAlignment="Right"
+                     Style="{DynamicResource Button16Style}"
+                     VerticalAlignment="Top"
+                     Content="{DynamicResource AddEditSkillsAcceptButton}"
+                     Command="{Binding AddArticleCostPriceAcceptButtonCommand}" CommandParameter="{Binding ElementName=AllArticlesTableView}"
+                     Height="30"
+                     Width="100" />
+
+            <Button Grid.Row="3" Grid.Column="2"
+                    HorizontalAlignment="Left"
+                    Style="{DynamicResource Button16Style}"
+                    VerticalAlignment="Top"
+                    Content="{DynamicResource AddEditSkillsCancelButton}"
+                    Command="{Binding CancelButtonCommand }"
+                    Height="30"
+                    Width="100" />
+        </Grid>
+    </Grid>
+</dxwui:WinUIDialogWindow>

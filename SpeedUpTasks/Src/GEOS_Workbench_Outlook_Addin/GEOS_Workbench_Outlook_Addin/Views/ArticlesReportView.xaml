@@ -1,0 +1,212 @@
+﻿<dxwui:WinUIDialogWindow x:Class="Emdep.Geos.Modules.Crm.Views.ArticlesReportView"
+                         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                         xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                         xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors" 
+                         xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+                         xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"
+                         xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+                         xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+                         xmlns:localVM="clr-namespace:Emdep.Geos.Modules.Crm.ViewModels"
+                         xmlns:local="clr-namespace:Emdep.Geos.Modules.Crm.Views"
+                         xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+                         xmlns:behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+                         mc:Ignorable="d"
+                         Height="400" Width="600"
+                         x:Name="articlesReportView"
+                         Title="{DynamicResource ArticlesReportHeader}"
+                         TitleStyle="{DynamicResource WinUIDialogWindowTitleStyle}"
+                         Style="{DynamicResource WinUIDialogWindowStyle}">
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape" Command="{Binding ArticlesReportCancelButtonCommand}"/>
+    </dxwui:WinUIDialogWindow.InputBindings>
+
+    <dxmvvm:Interaction.Behaviors>
+        <dxmvvm:SaveFileDialogService Title="Save Excel Report"/>
+    </dxmvvm:Interaction.Behaviors>
+    <ScrollViewer ScrollViewer.VerticalScrollBarVisibility="Auto"
+      ScrollViewer.HorizontalScrollBarVisibility="Auto">
+        <Grid ShowGridLines="False"   VerticalAlignment="Stretch" Height="{Binding ScreenHeight,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="35"/>
+                <RowDefinition Height="35"/>
+                <RowDefinition Height="*" MinHeight="150"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="50"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="85" />
+                <ColumnDefinition Width="150" />
+                <ColumnDefinition Width="80" />
+                <ColumnDefinition Width="150" />
+            </Grid.ColumnDefinitions>
+
+            <!--From date-->
+            <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4" Orientation="Horizontal" >
+                <Label Content= "{DynamicResource CommonFrom}" Margin="0,0,10,0"  Style="{DynamicResource Label16Style}"  HorizontalAlignment="Left" />
+                <dxe:DateEdit  Style="{DynamicResource BaseUniversalStyle}" 
+                      ShowClearButton="False" Width="110"      Margin="0,0,10,0"               
+                      Mask="{Binding CultureInfo.CurrentCulture.DateTimeFormat.YearMonthPattern}" 
+                      MaskUseAsDisplayFormat="True"
+                      HorizontalAlignment="Left"  VerticalAlignment="Top" IsTextEditable="False" 
+                      HorizontalContentAlignment="Right" InvalidValueBehavior="AllowLeaveEditor">
+                    <dxe:DateEdit.EditValue>
+                        <Binding Path="FromDate" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                            <!--<Binding.ValidationRules>
+                        <Validation:ActivityValidation FieldName="FromDate"/>
+                    </Binding.ValidationRules>-->
+                        </Binding>
+                    </dxe:DateEdit.EditValue>
+                </dxe:DateEdit>
+
+                <!--To date-->
+                <Label Content= "{DynamicResource CommonTo}"  HorizontalAlignment="Left" Style="{DynamicResource Label16Style}" Margin="0,0,10,0"/>
+                <dxe:DateEdit  Style="{DynamicResource BaseUniversalStyle}" 
+                      ShowClearButton="False" Width="110" Margin="0,0,10,0"
+                      Mask="{Binding CultureInfo.CurrentCulture.DateTimeFormat.YearMonthPattern}" MaskUseAsDisplayFormat="True"
+                      HorizontalAlignment="Left" VerticalAlignment="Top" IsTextEditable="False" 
+                      HorizontalContentAlignment="Right" InvalidValueBehavior="AllowLeaveEditor"
+                      ValidateOnEnterKeyPressed="True" ValidateOnTextInput="True">
+                    <dxe:DateEdit.EditValue>
+                        <Binding Path="ToDate" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay"
+                         ValidatesOnDataErrors="True" >
+                            <!--<Binding.ValidationRules>
+                        <Validation:ActivityValidation FieldName="ToDate"/>
+                    </Binding.ValidationRules>-->
+                        </Binding>
+                    </dxe:DateEdit.EditValue>
+                </dxe:DateEdit>
+            </StackPanel>
+
+            <Label Content= "{DynamicResource CommonReference}" Grid.Row="1" Grid.Column="0" HorizontalAlignment="Left" Style="{DynamicResource Label16Style}"/>
+
+            <dxe:ListBoxEdit Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3"  HorizontalAlignment="Stretch"
+                         ItemsSource="{Binding ReferenceCategories, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                         SelectedIndex="{Binding SelectedIndexReference, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         ShowBorder="False">
+                <dxe:ListBoxEdit.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding}" TextWrapping="Wrap" Width="120" />
+                    </DataTemplate>
+                </dxe:ListBoxEdit.ItemTemplate>
+                <dxe:ListBoxEdit.StyleSettings>
+                    <dxe:RadioListBoxEditStyleSettings/>
+                </dxe:ListBoxEdit.StyleSettings>
+                <dxe:ListBoxEdit.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </dxe:ListBoxEdit.ItemsPanel>
+                <dxmvvm:Interaction.Behaviors>
+                    <dxmvvm:EventToCommand EventName="SelectedIndexChanged" Command="{Binding SelectedItemChangedCommand}" PassEventArgsToCommand="True"/>
+                </dxmvvm:Interaction.Behaviors>
+            </dxe:ListBoxEdit>
+
+            <!--Articles by Supplier-->
+            <dxg:TreeListControl Grid.Row="2" Grid.Column="0" Grid.RowSpan="2" Grid.ColumnSpan="4" Margin="0 0 0 0" MaxHeight="550" MinHeight="200"
+                             HorizontalAlignment="Stretch" VerticalAlignment="Stretch" AutoGenerateColumns="None" 
+                             Visibility="{Binding IsSupplierVisible, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             ItemsSource="{Binding ArticlesBySupplier, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                <dxg:TreeListControl.Columns>
+                    <dxg:TreeListColumn FieldName="Article.Reference" MinWidth="250" ReadOnly="True"/>
+                </dxg:TreeListControl.Columns>
+                <dxg:TreeListControl.View>
+                    <dxg:TreeListView Name="treeListViewSupplier" ShowTotalSummary="False" 
+                                  KeyFieldName="IdChild" ParentFieldName="IdArticleSupplier"
+                                  ShowCheckboxes="True" CheckBoxFieldName="IsChecked"
+                                  ShowIndicator="False" AutoWidth="True"  
+                                  ShowColumnHeaders="False"
+                                  BestFitMode="AllRows"
+                                  ShowSearchPanelMode ="Always" 
+                                  FilterMode="Extended"
+                                  SearchPanelAllowFilter="True"
+                                  SearchPanelFindFilter="Contains" 
+                                  ExpandNodesOnFiltering="True"
+                                  SearchPanelHorizontalAlignment="Stretch"   
+                                  AllowRecursiveNodeChecking="True" />
+                </dxg:TreeListControl.View>
+            </dxg:TreeListControl>
+
+            <!--Article Categories-->
+            <dxg:TreeListControl Grid.Row="2" Grid.Column="0" Grid.RowSpan="2" Grid.ColumnSpan="4" Margin="0 0 0 0" MaxHeight="550"  MinHeight="200"
+                             HorizontalAlignment="Stretch" VerticalAlignment="Stretch" AutoGenerateColumns="None" 
+                             Visibility="{Binding IsWarehouseCategoryVisible, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             ItemsSource="{Binding WarehouseCategories, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                <dxg:TreeListControl.Columns>
+                    <dxg:TreeListColumn FieldName="BaseName" MinWidth="250" ReadOnly="True"/>
+                </dxg:TreeListControl.Columns>
+                <dxg:TreeListControl.View>
+                    <dxg:TreeListView Name="treeListViewArticleCategories" ShowTotalSummary="False" 
+                                  KeyFieldName="IdKey" ParentFieldName="IdParent"
+                                  ShowCheckboxes="True" CheckBoxFieldName="IsChecked"
+                                  ShowIndicator="False" AutoWidth="True"
+                                  ShowColumnHeaders="False"
+                                  BestFitMode="AllRows"
+                                  ShowSearchPanelMode ="Always" 
+                                  FilterMode="Extended"
+                                  SearchPanelAllowFilter="True"
+                                  SearchPanelFindFilter="Contains"
+                                  ExpandNodesOnFiltering="True"   
+                                  SearchPanelHorizontalAlignment="Stretch"   
+                                  AllowRecursiveNodeChecking="True" />
+                </dxg:TreeListControl.View>
+            </dxg:TreeListControl>
+
+            <!--<dxg:TreeListControl Grid.Row="0" Grid.Column="2" Grid.RowSpan="3" Margin="10 0 0 0"
+                             HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                             Visibility="{Binding IsWarehouseCategoryVisible, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             ItemsSource="{Binding ArticleCategories, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+            <dxg:TreeListControl.Resources>
+                <localVM:CustomChildrenSelector x:Key="childrenSelector"/>
+            </dxg:TreeListControl.Resources>
+            
+            <dxg:TreeListColumn FieldName="BaseName" MinWidth="200" ReadOnly="True"/>
+            <dxg:TreeListControl.View>
+                <dxg:TreeListView Name="treeListViewArticleCategories" ShowTotalSummary="False"
+                                  TreeDerivationMode="ChildNodesSelector"
+                                  ChildNodesSelector="{StaticResource childrenSelector}"
+                                  
+                                  ShowCheckboxes="True" CheckBoxFieldName="IsChecked"
+                                  ShowIndicator="False"
+                                  ShowColumnHeaders="False"
+                                  BestFitMode="AllRows"
+                                  AllowRecursiveNodeChecking="True" />
+            </dxg:TreeListControl.View>
+        </dxg:TreeListControl>-->
+
+            <!--Buttons-->
+            <Grid Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="4"
+              HorizontalAlignment="Center" VerticalAlignment="Bottom">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Button  Grid.Column="0"
+                         Content="{DynamicResource CommonAccept}"
+                         Command="{Binding ArticlesReportAcceptButtonCommand}"
+                         CommandParameter="{Binding ElementName=articlesReportView}"
+                         Height="30"
+                         Width="100"
+                         Style="{DynamicResource Button16Style}"
+                         VerticalAlignment="Bottom" />
+
+                <Button Grid.Column="2" 
+                    Content="{DynamicResource CommonCancel}"
+                    Command="{Binding ArticlesReportCancelButtonCommand}" 
+                    Height="30"
+                    Width="100"
+                    Style="{DynamicResource Button16Style}"
+                    VerticalAlignment="Bottom" />
+            </Grid>
+
+        </Grid>
+    </ScrollViewer>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="KeyDown">
+            <behaviors:InvokeDelegateCommandAction Command="{Binding CommandTextInput}" CommandParameter="{Binding Path=InvokeParameter, RelativeSource={RelativeSource Self}}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+</dxwui:WinUIDialogWindow>

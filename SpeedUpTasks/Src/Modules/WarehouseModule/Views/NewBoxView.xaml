@@ -1,0 +1,248 @@
+﻿<dxwui:WinUIDialogWindow x:Class="Emdep.Geos.Modules.Warehouse.Views.NewBoxView"
+                         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                         xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                         xmlns:local="clr-namespace:Emdep.Geos.Modules.Warehouse.Views"
+                         xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors" 
+                         xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"
+                         xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+                         xmlns:Validation ="clr-namespace:Emdep.Geos.UI.Validations;assembly=Emdep.Geos.UI.Validations"
+                         mc:Ignorable="d" 
+                         >
+
+    <dxwui:WinUIDialogWindow.TitleStyle>
+        <Style TargetType="ContentControl">
+            <Setter Property="ContentTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <!--<ColumnDefinition Width="Auto"/>-->
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Text="{Binding DataContext.WindowHeader,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"
+                                       HorizontalAlignment="Left"
+                                       Style="{DynamicResource PickingWinUIDialogWindowTitleStyle}" >
+                            </TextBlock>
+
+                            <Button Content=" " Grid.Column="1" Height="40" Width="40" HorizontalAlignment="Right" Margin="5 0 0 5"
+                                    Command="{Binding DataContext.PrintLabelCommand,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}">
+                                <Button.ToolTip>
+                                    <TextBlock Text="{DynamicResource ButtonPrint}"/>
+                                </Button.ToolTip>
+                                <Button.ContentTemplate>
+                                    <DataTemplate>
+                                        <Image Style="{ DynamicResource PrinterButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                                    </DataTemplate>
+                                </Button.ContentTemplate>
+                            </Button>
+
+                            <!--<Button Content=" " Grid.Column="2" Height="40" Width="40" HorizontalAlignment="Right" Margin="5 0 0 5" Visibility="{Binding DataContext.IsOpenCloseButtonVisibile,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"
+                                    Command="{Binding DataContext.OpenCloseBoxButtonCommand,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}">
+                                <Button.ContentTemplate>
+                                    <DataTemplate>
+                                        <Image Height="24" Width="24" Margin="-10">
+                                            <Image.Style>
+                                                <Style TargetType="{x:Type Image}">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding DataContext.IsClosed,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" Value="0">
+                                                            <Setter Property="Source" Value="{DynamicResource OpenBoxImageSource}"></Setter>
+                                                            <Setter Property="ToolTip" Value="Open"/>
+                                                        </DataTrigger>
+
+                                                        <DataTrigger Binding="{Binding DataContext.IsClosed,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" Value="1">
+                                                            <Setter Property="Source" Value="{DynamicResource ClosedBoxImageSource}"></Setter>
+                                                            <Setter Property="ToolTip" Value="Closed"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Image.Style>
+                                        </Image> 
+                                    </DataTemplate>
+                                </Button.ContentTemplate>
+                            </Button>-->
+                        </Grid>
+                      
+                    </DataTemplate> 
+                </Setter.Value> 
+            </Setter> 
+        </Style> 
+    </dxwui:WinUIDialogWindow.TitleStyle> 
+    
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape"  Command="{Binding CancelButtonCommand}"/>
+    </dxwui:WinUIDialogWindow.InputBindings>
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="180"/>
+            <ColumnDefinition Width="250"/>
+        </Grid.ColumnDefinitions>
+
+
+        <!--Customer-->
+        <Label Grid.Row="0" Grid.Column="0" Content="{DynamicResource GridColCustomer}"  Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" />
+
+        <dxe:ComboBoxEdit Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" 
+                          Height="30" Width="250" VerticalAlignment="Center" 
+                          ItemsSource="{Binding CustomersList,Mode=TwoWay}"                         
+                          DisplayMember="ShortName" ValueMember="IdCompany"
+                          AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True">
+
+            <dxe:ComboBoxEdit.SelectedIndex>
+                <Binding Path="SelectedCustomerIndex" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                    <Binding.ValidationRules>
+                        <Validation:PackingBoxValidation FieldName="SelectedCustomerIndex" ValidationStep="UpdatedValue" />
+                    </Binding.ValidationRules>
+                </Binding>
+            </dxe:ComboBoxEdit.SelectedIndex>
+
+        </dxe:ComboBoxEdit>
+
+        
+        <!--BoxNumber-->
+        <Label Grid.Row="1" Grid.Column="0" Content="{DynamicResource BoxNumber}"  Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" />
+
+        <dxe:TextEdit Text="{Binding BoxNumber, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
+                      Grid.Row="1" Grid.Column="1"  VerticalAlignment="Center" HorizontalAlignment="Left" 
+                      AllowNullInput="True" Width="250" Height="30">
+            <dxe:TextEdit.EditValue>
+                <Binding Path="BoxNumber" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                    <Binding.ValidationRules>
+                        <Validation:PackingBoxValidation FieldName="BoxNumber" ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True"/>
+                    </Binding.ValidationRules>
+                </Binding>
+            </dxe:TextEdit.EditValue>
+        </dxe:TextEdit>
+
+        <!--Type-->
+        <Label Grid.Row="2" Grid.Column="0" Content="{DynamicResource GridColType}"  Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" />
+
+        <dxe:ComboBoxEdit Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left" 
+                          Grid.ColumnSpan="2" Height="30" Width="250" VerticalAlignment="Center"  
+                          ItemsSource="{Binding PackingBoxTypeList,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"                         
+                          DisplayMember="Code" ValueMember="IdPackingBoxType" 
+                          AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True">
+            
+
+            <dxe:ComboBoxEdit.SelectedIndex>
+                <Binding Path="SelectedPackingBoxTypeIndex" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                    <Binding.ValidationRules>
+                        <Validation:PackingBoxValidation FieldName="SelectedPackingBoxTypeIndex" ValidationStep="UpdatedValue" />
+                    </Binding.ValidationRules>
+                </Binding>
+            </dxe:ComboBoxEdit.SelectedIndex>
+
+            <dxmvvm:Interaction.Behaviors>
+                <dxmvvm:EventToCommand EventName="SelectedIndexChanged" Command="{Binding DataContext.SelectedIndexChangedCommand,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" PassEventArgsToCommand="True"/>
+            </dxmvvm:Interaction.Behaviors>
+        </dxe:ComboBoxEdit>
+        
+        <!--Size-->
+        <Label Grid.Row="3" Grid.Column="0" Content="{DynamicResource Size}"  Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" />
+        
+        <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal">
+
+            <!--<dxe:TextEdit Text="{Binding Length, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
+                          HorizontalAlignment="Left" 
+                          AllowNullInput="False" 
+                          Width="80" Height="30" 
+                          MaskType="Numeric">
+                <dxe:TextEdit.EditValue>
+                    <Binding Path="Length" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                        <Binding.ValidationRules>
+                            <Validation:PackingBoxValidation FieldName="Length" ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True"/>
+                        </Binding.ValidationRules>
+                    </Binding>
+                </dxe:TextEdit.EditValue>
+            </dxe:TextEdit>-->
+
+            <dxe:TextEdit Text="{Binding Length, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
+                          HorizontalAlignment="Left" 
+                          AllowNullInput="False" 
+                          Width="80" Height="30" 
+                          MaskType="Numeric"
+                          IsReadOnly="{Binding IsCustomBox,UpdateSourceTrigger=PropertyChanged ,Mode=TwoWay}"/>
+
+            <dxe:TextEdit Text="{Binding Width, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                          VerticalAlignment="Center" HorizontalAlignment="Left" 
+                          AllowNullInput="True" Width="80" Height="30" Margin="5 0 0 0"
+                          MaskType="Numeric"
+                          IsReadOnly="{Binding IsCustomBox,UpdateSourceTrigger=PropertyChanged ,Mode=TwoWay}">
+            </dxe:TextEdit>
+
+            <dxe:TextEdit Text="{Binding Height, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
+                          VerticalAlignment="Center" HorizontalAlignment="Left" 
+                          MaskType="Numeric"
+                          AllowNullInput="True" Width="80" Height="30" Margin="5 0 0 0"
+                          IsReadOnly="{Binding IsCustomBox,UpdateSourceTrigger=PropertyChanged ,Mode=TwoWay}">
+            </dxe:TextEdit>
+            
+        </StackPanel>
+
+        <!--NetWeight-->
+        <Label Grid.Row="4" Grid.Column="0" Content="{DynamicResource NetWeight}"  Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" />
+
+        <dxe:TextEdit Grid.Row="4" Grid.Column="1"
+                      Text="{Binding NetWeight, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                      VerticalAlignment="Center" HorizontalAlignment="Left" 
+                      AllowNullInput="True" Width="250" Height="30"
+                      MaskType="Numeric"
+                      IsReadOnly="{Binding IsCustomBox,UpdateSourceTrigger=PropertyChanged ,Mode=TwoWay}">
+        </dxe:TextEdit>
+
+        <!--GrossWeight-->
+        <Label Grid.Row="5" Grid.Column="0" Content="{DynamicResource GrossWeight}"  Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" />
+
+        <dxe:TextEdit Grid.Row="5" Grid.Column="1" 
+                      Text="{Binding GrossWeight, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                      VerticalAlignment="Center" HorizontalAlignment="Left" 
+                      AllowNullInput="True" Width="250" Height="30">
+        </dxe:TextEdit>
+           
+ 
+ 
+        <StackPanel Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2"
+                    HorizontalAlignment="Center" 
+                    Orientation="Horizontal"
+                    Margin="0,0,0,0"
+                    >
+
+            <Button Content="{DynamicResource Accept}"
+                    Command="{Binding AcceptButtonCommand}"
+                    Height="30"
+                    Width="100"
+                    Style="{DynamicResource Button16Style}"
+                    VerticalAlignment="Bottom" />
+
+            <Button Content="{DynamicResource Cancel}"
+                    Command="{Binding CancelButtonCommand}" 
+                    Height="30"
+                    Width="100"
+                    Margin="10,0,0,0"
+                    Style="{DynamicResource Button16Style}"
+                    VerticalAlignment="Bottom" />
+        </StackPanel>
+
+    </Grid>
+ 
+</dxwui:WinUIDialogWindow>

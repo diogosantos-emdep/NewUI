@@ -1,0 +1,374 @@
+﻿<UserControl x:Class="Emdep.Geos.Modules.SAM.Views.DashboardView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.SAM.Views"
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:dxwuin="http://schemas.devexpress.com/winfx/2008/xaml/windowsui/navigation" 
+             xmlns:dxb="http://schemas.devexpress.com/winfx/2008/xaml/bars"
+             xmlns:dxnav="http://schemas.devexpress.com/winfx/2008/xaml/navigation"
+             xmlns:Converters="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+             xmlns:UIConverter="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters" 
+             xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+             xmlns:ViewModels="clr-namespace:Emdep.Geos.Modules.SAM.ViewModels"
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:dxci="http://schemas.devexpress.com/winfx/2008/xaml/core/internal"
+             xmlns:SAMCommon ="clr-namespace:Emdep.Geos.Modules.SAM"
+             xmlns:dxgt="http://schemas.devexpress.com/winfx/2008/xaml/grid/themekeys"
+             xmlns:dxp="http://schemas.devexpress.com/winfx/2008/xaml/printing" 
+             xmlns:WmsApplication="clr-namespace:Emdep.Geos.Modules.SAM"
+             xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+             xmlns:Interactive="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:Behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+             xmlns:sysglb="clr-namespace:System.Globalization;assembly=mscorlib"
+             xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+             xmlns:gif="http://wpfanimatedgif.codeplex.com"
+             Style="{DynamicResource UserControlStyle}" 
+             mc:Ignorable="d" 
+             d:DesignHeight="500" d:DesignWidth="700">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <Style x:Key="{dxgt:GridCardThemeKey ResourceKey=ContentPresenterStyle, IsThemeIndependent=True}" TargetType="{x:Type dxg:GridCardContentPresenter}">
+            <Setter Property="Margin" Value="2" />
+        </Style>
+        
+        <Style TargetType="dxg:GridCardHeaderControl">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <Border Background="#FF515151" Height="1"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <DataTemplate x:Key="readonlyCardTemplate">
+            <StackPanel Orientation="Vertical" Background="{Binding DataContext.GridControlcardViewBackGroundColor, RelativeSource={RelativeSource AncestorType=UserControl}}" Margin="0">
+                    <StackPanel Orientation="Horizontal" Grid.Column="0" Background="{Binding DataContext.GridControlcardViewBackGroundColor, RelativeSource={RelativeSource AncestorType=UserControl}}">
+
+                    <StackPanel Orientation="Vertical" Background="{Binding DataContext.GridControlcardViewBackGroundColor, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                        <TextBlock Padding="5,5,5,0" Text="{DynamicResource WorkOrder}" 
+                               HorizontalAlignment="Left" FontSize="11" Foreground="White" FontWeight="Bold" />
+                        <TextBlock Padding="5,0,5,0" Text="{Binding Path= Row.Code}"
+                               HorizontalAlignment="Left" FontSize="16" Foreground="White" FontWeight="Bold" />
+                    
+                    <TextBlock Padding="5,5,5,0" Text="PROJECT" 
+                               HorizontalAlignment="Left" FontSize="11" Foreground="White" FontWeight="Bold" />
+                    <TextBlock Padding="5,0,5,0" Text="{Binding Path= Row.Project}" 
+                               HorizontalAlignment="Left" FontSize="16" Foreground="White" FontWeight="Bold" />
+                        </StackPanel>
+
+                    <StackPanel Orientation="Vertical" Background="{Binding DataContext.GridControlcardViewBackGroundColor, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                        <TextBlock Padding="5,5,5,0" Text="CUSTOMER" 
+                               HorizontalAlignment="Left" FontSize="11" Foreground="White" FontWeight="Bold" />
+                        <TextBlock Padding="5,0,5,0" Text="{Binding Path= Row.Plant}" 
+                               HorizontalAlignment="Left" FontSize="16" Foreground="White" FontWeight="Bold" />
+                        
+                        <ItemsControl Height="Auto"
+                                          HorizontalAlignment="Left" VerticalAlignment="Center" 
+                                          ItemsSource="{Binding Path=Row.allChildOtAssignedUser}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal"  Background="LightGray" Margin="2"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate >
+                                <DataTemplate>
+                                    <Border BorderThickness="{Binding Path=BorderThickness}" BorderBrush="{Binding Path=BorderColor}"  Margin="2" Visibility="Visible">
+                                        <!--
+                                            BorderBrush="{Binding Path=BorderColor}"
+                                            <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Path=UserShortDetail.IdUserGender}" 
+                                                    Value="2">
+                                                    <Setter Property="BorderBrush" Value="Red"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>-->
+
+                                        <!--Binding="{Binding Path=IsCurrentlyWorkingOnOT}" Value="1">-->
+                                        <!--BorderBrush="Pink" BorderThickness="10"-->
+                                        <!--Height="80" Width="67"-->
+                                        <!--Height="40" Width="34"-->
+                                        <dxe:ImageEdit VerticalAlignment="Top" HorizontalAlignment="Left" 
+                                                       IsReadOnly="True" ShowMenu="False" Height="40" Width="34"
+                                                       ShowBorder="False" 
+                                                       Margin="2,0,0,0"
+                                                       Stretch="Uniform">
+                                            <dxe:ImageEdit.Style>
+                                                <Style TargetType="{x:Type dxe:ImageEdit}">
+                                                    <Setter Property="Source" Value="{Binding Path=UserShortDetail.UserImage}" />
+                                                    <Setter Property="ToolTip" Value="{Binding Path=UserShortDetail.UserName}" />
+                                                    <Style.Triggers>
+                                                        <MultiDataTrigger>
+                                                            <MultiDataTrigger.Conditions>
+                                                                <Condition Binding="{Binding Path=UserShortDetail.UserImage}" Value="{x:Null}"/>
+                                                                <Condition Binding="{Binding Path=UserShortDetail.IdUserGender}" Value="2"/>
+                                                            </MultiDataTrigger.Conditions>
+                                                            <Setter Property="Source" Value="{DynamicResource MaleUserWhiteImageStyle}"/>
+                                                        </MultiDataTrigger>
+                                                        <MultiDataTrigger>
+                                                            <MultiDataTrigger.Conditions>
+                                                                <Condition Binding="{Binding Path=UserShortDetail.UserImage}" Value="{x:Null}"/>
+                                                                <Condition Binding="{Binding Path=UserShortDetail.IdUserGender}" Value="1"/>
+                                                            </MultiDataTrigger.Conditions>
+                                                            <Setter Property="Source" Value="{DynamicResource FemaleUserWhiteImageStyle}"/>
+                                                        </MultiDataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </dxe:ImageEdit.Style>
+                                        </dxe:ImageEdit>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        
+                    </StackPanel>
+                    <DockPanel Background="{Binding DataContext.GridControlcardViewBackGroundColor, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                        <TextBlock  DockPanel.Dock="Top" Padding="5,5,5,0" Text="DELIVERY DATE"
+                               HorizontalAlignment="Left" FontSize="11" Foreground="White" FontWeight="Bold" />
+                        <TextBlock  DockPanel.Dock="Top" Padding="5,0,5,0" Text="{Binding Path= Row.DeliveryDate,StringFormat='dd/MM/yyyy'}"
+                               HorizontalAlignment="Left" FontSize="16" Background="Transparent" 
+                               Foreground="{Binding Row.DeliveryDate, 
+                            Converter={Converters:CellColorConverter}}"
+                               FontWeight="Bold" />
+                        <TextBlock  DockPanel.Dock="Top" Padding="5,5,5,0" Text="WORKING TIME" 
+                            HorizontalAlignment="Left" FontSize="11" Foreground="White" FontWeight="Bold" />
+                        <TextBlock  DockPanel.Dock="Top" Padding="5,0,5,0" Text="{Binding Path= Row.RealDuration}" 
+                            HorizontalAlignment="Left" FontSize="16" Foreground="White" FontWeight="Bold" />
+
+                        <TextBlock  DockPanel.Dock="Bottom" Padding="0" Margin="5 0 5 0" Text="{Binding Path= Row.Progress,StringFormat='{}{0}%'}" 
+                               HorizontalAlignment="Right" FontSize="14" Foreground="White" FontWeight="Bold" />
+                        </DockPanel>
+                    </StackPanel>
+                    
+                    <StackPanel Orientation="Vertical" Background="{Binding DataContext.GridControlcardViewBackGroundColor, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                    
+                    <dxe:ProgressBarEdit Margin="5 0 5 5" Height="10"
+                                     Value="{Binding Row.Progress}"
+                                     HorizontalAlignment="Stretch" VerticalAlignment="Center">
+                        </dxe:ProgressBarEdit>
+                    </StackPanel>
+                    
+                </StackPanel>
+        </DataTemplate>
+
+        <!--<Converters:ImageConverter x:Key="ImageConverter"/>-->
+        <!--<Converters:CellColorConverterForPoDate x:Key="CellColorConverterForPoDate"/>
+        <Converters:CellBackroundColorOtTypeConvertorSAM x:Key="CellBackroundColorOtTypeConvertorSAM"/>
+        <Converters:CellBackroundColorProducedModuleConvertor x:Key="CellBackroundColorProducedModuleConvertor"/>-->
+        <!--<UIHelper:MultipleCellEditHelperSAMWorkOrder x:Key="multipleCellEditHelperSAMWorkOrder"/>-->
+        <!--<UIHelper:CellTemplateSelector x:Key="myTemplateSelector"/>
+        <UIHelper:ColumnTemplateSelectorSAM x:Key="ColumnTemplateSelectorSAM"/>-->
+        
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="5"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="5"/>
+                <ColumnDefinition Width="150"/>
+                <ColumnDefinition Width="5"/>
+                <!--<ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="5"/>-->
+                <ColumnDefinition Width="40"/>
+                <ColumnDefinition Width="5"/>
+                <!--<ColumnDefinition Width="40"/>
+                <ColumnDefinition Width="5"/>
+                <ColumnDefinition Width="40"/>
+                <ColumnDefinition Width="5"/>
+                <ColumnDefinition Width="40"/>
+                <ColumnDefinition Width="5"/>
+                <ColumnDefinition Width="45"/>-->
+            </Grid.ColumnDefinitions>
+
+            <DockPanel Grid.Column="0" Background="Transparent" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="0">
+                <StackPanel Orientation="Horizontal">
+                    <Label DockPanel.Dock="Left" Content="{DynamicResource SAMDashboard}" Style="{StaticResource LabelTitleStyle}" />
+                    <!--//Shubham[skadam] [V.2.6.9.0] GEOS2-8853 SAM module very slow when trying to load informations - Dashboard (6/6) 25 11 2025-->
+                    <Image gif:ImageBehavior.RepeatBehavior="Forever" gif:ImageBehavior.AnimatedSource="/Emdep.Geos.Modules.SAM;component/Assets/Images/animatedWarning.gif" 
+                   Visibility="{Binding IsShowFailedPlantWarning,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,Converter={StaticResource BoolToVis}}" 
+                   Grid.Column="1" Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,2,5,0" Height="30" Width="30">
+                        <Image.ToolTip>
+                            <TextBlock Text="{Binding WarningFailedPlants}"/>
+                        </Image.ToolTip>
+                    </Image>
+                </StackPanel>
+                <Label DockPanel.Dock="Right" 
+                       Content="{Binding Path=DataContext.AutoRefreshLabelContent, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                       Margin="0 0 50 0" Style="{StaticResource Label20Style}" FontWeight="Bold"
+                       HorizontalAlignment="Right" VerticalAlignment="Center"/>
+            </DockPanel>
+
+            <!-- Warehouse combobox section -->
+            <Grid Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" >
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="5"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Image Grid.Column="0" Style="{DynamicResource WarehouseImageStyle}"
+                       Width="24" Height="24"
+                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="2" 
+                           Text="{DynamicResource SAMPlant:}" FontWeight="Bold"
+                           VerticalAlignment="Center" HorizontalAlignment="Center" />
+            </Grid>
+
+            <dxe:ComboBoxEdit Grid.Column="4" Name="CbeWareHouse" 
+                              Style="{DynamicResource ComboBoxEditStyle}" 
+                              Height="35"
+                              HorizontalAlignment="Stretch"
+                              VerticalAlignment="Stretch"
+                              IsTextEditable="False"
+                              DisplayMember="ShortName"
+                              ItemsSource ="{Binding Source={x:Static SAMCommon:SAMCommon.Instance}, Path=PlantOwnerList ,UpdateSourceTrigger=PropertyChanged , Mode=TwoWay}"
+                              EditValue="{Binding Source={x:Static SAMCommon:SAMCommon.Instance}, Path=SelectedPlantOwnerList,UpdateSourceTrigger=PropertyChanged}">
+
+                <dxe:ComboBoxEdit.StyleSettings>
+                    <dxe:CheckedComboBoxStyleSettings />
+                </dxe:ComboBoxEdit.StyleSettings>
+
+                <dxmvvm:Interaction.Triggers>
+                    <dxmvvm:EventToCommand EventName="PopupClosed"
+                                           Command="{Binding DataContext.PlantOwnerPopupClosed, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                           PassEventArgsToCommand="True"/>
+                </dxmvvm:Interaction.Triggers>
+            </dxe:ComboBoxEdit>
+
+            <!--Scan validation--><!--
+            <Button Content=" " Grid.Column="6"
+                    Height="40" Width="40" HorizontalAlignment="Right"
+                    Command="{Binding ScanValidationCommand}"
+                    CommandParameter="{Binding ElementName=PendingWorkOrderTableView}" >
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource ScanValidation}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Image Style="{ DynamicResource ScanvalidationButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>-->
+
+            <!-- Refresh Button -->
+            <Button Content=" " Grid.Column="6"
+                    Height="40" Width="40" HorizontalAlignment="Right"
+                    Command="{Binding RefreshWorkOrderViewCommand}"
+                    CommandParameter="{Binding ElementName=PendingWorkOrderTableView}"                     
+                IsEnabled="{Binding Path=DataContext.RefreshButtonIsEnabled, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                <!--IsEnabled="{Binding Converter={UIConverter:OnOffStringToBoolConverter}}">-->
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource ButtonRefresh}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Image Style="{ DynamicResource WareHouseRefreshButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+
+        </Grid>
+        
+        <dxlc:LayoutControl Grid.Row="1" Grid.Column="0" Name="layoutControl1" 
+                            Padding="0" Orientation="Vertical" Margin="0"                             
+                            DragScrolling="False">
+
+            <dxlc:LayoutGroup Orientation="Vertical">
+                <dxlc:LayoutGroup Orientation="Horizontal">
+                    <dxlc:LayoutGroup dxlc:LayoutControl.AllowHorizontalSizing="False" Header="{DynamicResource DashboardWorkedToday}"
+                                View="GroupBox"  Margin="0" Padding="0" IsCollapsible="False" IsCollapsed="False" HorizontalOffset="0" VerticalOffset="0"
+                                     Background="{Binding Path=DataContext.TotalTimeRegisteredByALLOperators_TodayBackground, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                        <Label Foreground="White" Margin="0" Padding="0" Height="30" Width="Auto" FontSize="25" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                                    Content="{Binding Path=DataContext.TotalTimeRegisteredByALLOperators_Today, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                    </dxlc:LayoutGroup>
+                    <dxlc:LayoutGroup dxlc:LayoutControl.AllowHorizontalSizing="False" Header="{DynamicResource DashboardWorkedThisWeek}"
+                                View="GroupBox"  Margin="0" Padding="0" IsCollapsible="False" IsCollapsed="False" HorizontalOffset="0" VerticalOffset="0"
+                                      Background="{Binding Path=DataContext.TotalTimeRegisteredByALLOperators_CurrentWeekBackground, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                        <Label Foreground="White" Margin="0" Padding="0" Height="30" Width="Auto" FontSize="25"  HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                                    Content="{Binding Path=DataContext.TotalTimeRegisteredByALLOperators_CurrentWeek, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                    </dxlc:LayoutGroup>
+                    <dxlc:LayoutGroup dxlc:LayoutControl.AllowHorizontalSizing="False" Header="{DynamicResource DashboardWorkedLastWeek}"
+                                View="GroupBox"  Margin="0" Padding="0" IsCollapsible="False" IsCollapsed="False" HorizontalOffset="0" VerticalOffset="0"
+                                      Background="{Binding Path=DataContext.TotalTimeRegisteredByALLOperators_LastWeekBackground, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                        <Label Foreground="White" Margin="0" Padding="0" Height="30" Width="Auto" FontSize="25" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                                    Content="{Binding Path=DataContext.TotalTimeRegisteredByALLOperators_LastWeek, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                    </dxlc:LayoutGroup>
+                    <dxlc:LayoutGroup dxlc:LayoutControl.AllowHorizontalSizing="False" Header="{DynamicResource DashboardWorkedThisMonth}"
+                                View="GroupBox"  Margin="0" Padding="0" IsCollapsible="False" IsCollapsed="False" HorizontalOffset="0" VerticalOffset="0"
+                                      Background="{Binding Path=DataContext.TotalTimeRegisteredByALLOperators_ThisMonthBackground, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                        <Label Foreground="White" Margin="0" Padding="0" Height="30" Width="Auto" FontSize="25" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                                    Content="{Binding Path=DataContext.TotalTimeRegisteredByALLOperators_ThisMonth, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                    </dxlc:LayoutGroup>
+                </dxlc:LayoutGroup>
+
+                    <dxlc:LayoutGroup Name="layoutGroup12" View="GroupBox"  Margin="0" Padding="0"
+                                  dxlc:LayoutControl.AllowHorizontalSizing="True" MinHeight="350"
+                                  IsCollapsible="False" IsCollapsed="False" Header="{DynamicResource DashboardOrderStatus}">
+
+                    <dxg:GridControl ItemsSource="{Binding Dttable, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"                              
+                             AutoGenerateColumns="AddNew" ScrollViewer.HorizontalScrollBarVisibility="Visible"
+                             ShowBorder="True"
+                             HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                             ImplyNullLikeEmptyStringWhenFiltering="True">
+                   
+                        <dxg:GridControl.View>
+
+                            <dxg:CardView x:Name="PendingWorkOrderTableView" ShowSearchPanelMode="Never"
+                                  ShowColumnHeaders="False" ShowDragDropHint="False"
+                                  ShowFilterPanelMode="Never" 
+                                  ShowTargetInfoInDragDropHint="False"
+                                  CardTemplate="{StaticResource readonlyCardTemplate}"
+                                  ShowGroupPanel="False"
+                                  ShowCardExpandButton="False"
+                                  HorizontalAlignment="Stretch"
+                                  VerticalAlignment="Stretch"
+                                  CardLayout="Rows">
+                            </dxg:CardView>
+
+                            <!--<dxg:TableView x:Name="PendingWorkOrderTableView"
+                                           NavigationStyle="Cell"
+                                           RowDetailsVisibilityMode="Visible"
+                                           ShowHorizontalLines="True"
+                                           ShowSearchPanelMode="Always"
+                                           ShowColumnHeaders="True"                                          
+                                           VerticalScrollbarVisibility="Visible"
+                                           AllowFixedColumnMenu="False"
+                                           ShowFixedTotalSummary="True" 
+                                           SearchPanelHorizontalAlignment="Stretch"
+                                           ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly"                        
+                                           ShowIndicator="False"
+                                           AutoWidth="False"
+                                           FilterEditorShowOperandTypeIcon="True"
+                                           AllowColumnFiltering="True"
+                                           UseLegacyFilterEditor="True"
+                                           AllowEditing="True">                        
+                    </dxg:TableView>-->
+
+                        </dxg:GridControl.View>
+
+                    </dxg:GridControl>
+
+                </dxlc:LayoutGroup>
+            </dxlc:LayoutGroup>
+        </dxlc:LayoutControl>
+
+        <!--</DockPanel>-->
+    </Grid>
+</UserControl>

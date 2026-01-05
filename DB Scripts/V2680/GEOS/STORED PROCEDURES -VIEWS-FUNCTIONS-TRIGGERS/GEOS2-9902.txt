@@ -1,0 +1,261 @@
+DELIMITER $$
+drop procedure if exists WMM_GetArticleStockByWarehouseAsPerDate_V2670$$
+ 
+CREATE PROCEDURE `WMM_GetArticleStockByWarehouseAsPerDate_V2670`(
+    _IdWarehouse INT UNSIGNED,
+    _AsOnDate DATETIME
+)
+BEGIN
+    /*
+    [nsatpute][05.09.2025][GEOS2-9902]
+    */
+	DECLARE _IdCurrencyTo TINYINT UNSIGNED DEFAULT 1;
+
+			SELECT IFNULL(e.IdCurrency, 1) INTO _IdCurrencyTo
+			FROM geos.emdepsites e
+			INNER JOIN geos.currency c ON e.IdCurrency = c.IdCurrency
+			INNER JOIN geos.warehouses w ON e.idSite = w.IdSite
+			WHERE w.idWarehouse = _IdWarehouse 
+			LIMIT 1;
+
+SELECT     sql_buffer_result a.idarticle                                                                                                                          as idarticle,
+           a.reference                                                                                                                                            AS reference,
+           a.description                                                                                                                                          AS description,
+           w.idwarehouse                                                                                                                                          AS warehouse,
+           ifnull(sum(s.quantity), 0)                                                                                                                             AS stock,
+           (ifnull((p.baseprice - p.baseprice * (p.discount / 100) + p.baseprice * (p.iva / 100) + p.baseprice * (p.overcost / 100)), 0)*ifnull(cc.exchangerate,1))AS price,
+           p.idcurrency,
+           c.NAME currname,
+           a.isobsolete,
+           w.minimumstock,
+           w.maximumstock,
+           ((ifnull(sum(s.quantity), 0)*ifnull((p.baseprice - p.baseprice * (p.discount / 100) + p.baseprice * (p.iva / 100) + p.baseprice * (p.overcost / 100)), 0))*ifnull(cc.exchangerate,1))  AS value ,
+           tmp.regularizationpointid                                                                                                                                                           AS 'RegularizationPointId',
+           ifnull(w.location,'')                                                                                                                                                               AS location,
+           ifnull(
+           (
+                  SELECT lv.value
+                  FROM   emdep_geos.lookup_values lv
+                  WHERE  lv.idlookupvalue=a.materialtype),'---') AS typeofmaterial
+FROM       articles a
+INNER JOIN mywarehouse w
+ON         a.idarticle=w.idarticle
+LEFT JOIN  articlesstock s
+ON         s.idarticle=w.idarticle
+AND        s.idwarehouse = w.idwarehouse
+INNER JOIN
+           (
+                      SELECT     tmparticles.idarticle               AS idarticle,
+                                 max(tmparticlestock.idarticlestock) AS regularizationpointid
+                      FROM       articlesstock tmparticlestock
+                      INNER JOIN articles tmparticles
+                      ON         tmparticles.idarticle = tmparticlestock.idarticle
+                      WHERE      tmparticles.isobsolete = false
+                      AND        NOT tmparticlestock.isdamaged
+                      AND        tmparticlestock.regularizationpoint = true
+                      AND        tmparticlestock.uploadedin <= _AsOnDate
+                      GROUP BY   tmparticlestock.idarticle) AS tmp
+ON         tmp.idarticle = s.idarticle
+AND        s.idarticlestock >= tmp.regularizationpointid
+LEFT JOIN
+           (
+                      SELECT     a.*
+                      FROM       articlesbysupplier a
+                      INNER JOIN articlesuppliers b
+                      ON         a.idarticlesupplier = b.idarticlesupplier
+                      AND        a.idcurrency = b.idcurrency
+                      INNER JOIN favourite_suppliers_by_site_and_article favsupp
+                      ON         a.idarticle = favsupp.idarticle
+                      AND        a.idarticlesupplier = favsupp.idarticlesupplier
+                      AND        favsupp.idsite = 18) p
+ON         p.idarticle=a.idarticle
+LEFT JOIN  currency c
+ON         c.idcurrency = p.idcurrency
+LEFT JOIN  currencyconversions cc
+ON         (
+                      cc.idcurrencyfrom=p.idcurrency
+           AND        cc.idcurrencyto= _IdCurrencyTo)
+WHERE      NOT s.isdamaged
+AND        a.isobsolete = false
+AND        w.idwarehouse = _IdWarehouse
+AND        s.uploadedin <=_AsOnDate
+AND        s.idwarehouse = _IdWarehouse
+GROUP BY   a.idarticle
+UNION
+SELECT     aa.idarticle                                                                                                                                           AS idarticle,
+           aa.reference                                                                                                                                           AS reference,
+           aa.description                                                                                                                                         AS description,
+           w.idwarehouse                                                                                                                                          AS warehouse,
+           ifnull(sum(s.quantity), 0)                                                                                                                             AS stock,
+           (ifnull((p.baseprice - p.baseprice * (p.discount / 100) + p.baseprice * (p.iva / 100) + p.baseprice * (p.overcost / 100)), 0)*ifnull(cc.exchangerate,1))  AS price,
+           p.idcurrency,
+           c.NAME currname,
+           aa.isobsolete,
+           w.minimumstock,
+           w.maximumstock,
+           ((ifnull(sum(s.quantity), 0)*ifnull((p.baseprice - p.baseprice * (p.discount / 100) + p.baseprice * (p.iva / 100) + p.baseprice * (p.overcost / 100)), 0))*ifnull(cc.exchangerate,1)) AS value ,
+           tmp.regularizationpointid                                                                                                                                                           AS 'RegularizationPointId',
+           ifnull(w.location,'')                                                                                                                                                               AS location,
+           ifnull(
+           (
+                  SELECT lv.value
+                  FROM   emdep_geos.lookup_values lv
+                  WHERE  lv.idlookupvalue=aa.materialtype),'---') AS typeofmaterial
+FROM       articles aa
+INNER JOIN mywarehouse w
+ON         aa.idarticle=w.idarticle
+LEFT JOIN  articlesstock s
+ON         s.idarticle=w.idarticle
+AND        s.idwarehouse = w.idwarehouse
+INNER JOIN
+           (
+                      SELECT     tempas.idarticle                AS idarticle,
+                                 '0'                             AS regularizationpointid,
+                                 max(tempas.regularizationpoint) AS maxregularizationpoint
+                      FROM       articlesstock tempas
+                      INNER JOIN articles tmpa
+                      ON         tmpa.idarticle = tempas.idarticle
+                      WHERE      tmpa.isobsolete = false
+                      AND        NOT tempas.isdamaged
+                      AND        tempas.uploadedin <= _AsOnDate
+                      GROUP BY   tempas.idarticle) AS tmp
+ON         tmp.idarticle = s.idarticle
+AND        tmp.maxregularizationpoint=false
+LEFT JOIN
+           (
+                      SELECT     a.*
+                      FROM       articlesbysupplier a
+                      INNER JOIN articlesuppliers b
+                      ON         a.idarticlesupplier = b.idarticlesupplier
+                      AND        a.idcurrency = b.idcurrency
+                      INNER JOIN favourite_suppliers_by_site_and_article favsupp
+                      ON         a.idarticle = favsupp.idarticle
+                      AND        a.idarticlesupplier = favsupp.idarticlesupplier
+                      AND        favsupp.idsite = 18 ) p
+ON         p.idarticle=aa.idarticle
+LEFT JOIN  currency c
+ON         c.idcurrency = p.idcurrency
+LEFT JOIN  currencyconversions cc
+ON         (
+                      cc.idcurrencyfrom=p.idcurrency
+           AND        cc.idcurrencyto= _IdCurrencyTo)
+WHERE      NOT s.isdamaged
+AND        aa.isobsolete = false
+AND        w.idwarehouse = _IdWarehouse
+AND        s.uploadedin <=_AsOnDate
+AND        s.idwarehouse = _IdWarehouse
+GROUP BY   aa.idarticle
+ORDER BY   reference;
+    
+END$$
+DELIMITER ;
+
+
+
+DROP PROCEDURE IF EXISTS `WMM_CalculteArticleStockByWarehouseAsperDate_V2670`;
+DELIMITER $$
+CREATE PROCEDURE `WMM_CalculteArticleStockByWarehouseAsperDate_V2670`(
+_MonthDesc INT, _IdWarehouse int unsigned)
+BEGIN
+/*
+[nsatpute][21.09.2025][GEOS2-9210]
+[shubham.nikam][22.09.2025][GEOS2-8807]
+Call WMM_CalculteArticleStockByWarehouseAsperDate_V2670 (202502,18);
+*/
+-- Step 1: Get the raw string
+SELECT 
+    a.idarticle,
+    a.totalvalue,
+    a.monthnr,
+    a.monthdesc,
+    a.IdWarehouse
+FROM 
+    GEOS.monthlyarticlestockvalue a
+LEFT JOIN (
+    -- Step 2: Process the setting string without CTEs
+    SELECT 
+        SUBSTRING_INDEX(SUBSTRING_INDEX(val, ';', 1), ';', -1) AS WarehouseID,
+        SUBSTRING(val, LOCATE(';', val) + 1) AS IdArticles
+    FROM (
+        -- Step 3: Split the string into individual items
+        SELECT 
+            TRIM(BOTH '()' FROM SUBSTRING_INDEX(SUBSTRING_INDEX(REPLACE(REPLACE(DefaultValue, '), (', '||'), '(', ''), '||', n.n), '||', -1)) AS val
+        FROM 
+            EMDEP_GEOS.geos_app_settings,
+            (SELECT 1 AS n UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 
+             UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9 UNION SELECT 10) n
+        WHERE AppSettingName = 'WMS_Stock_Report_Ignored_References_per_Warehouse'
+          AND n.n <= (LENGTH(DefaultValue) - LENGTH(REPLACE(DefaultValue, '), (', ''))) + 1
+    ) AS split_vals
+    WHERE TRIM(val) != '' -- Added to handle empty values
+) AS b ON b.WarehouseID = a.IdWarehouse
+WHERE 
+    a.monthdesc = _MonthDesc 
+    AND a.IdWarehouse = _IdWarehouse 
+    AND (b.IdArticles IS NULL OR FIND_IN_SET(a.idarticle, b.IdArticles) = 0);
+ 
+-- Dummy select
+SELECT 0.875 AS TargetPrice1, 0.925 AS TargetPrice2;
+END$$
+DELIMITER ;
+
+
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS `WMM_CalculteArticleStockByWarehouseAsperDate_V2670`$$
+CREATE PROCEDURE `WMM_CalculteArticleStockByWarehouseAsperDate_V2670`(
+_MonthDesc INT, _IdWarehouse int unsigned)
+BEGIN
+/*
+[nsatpute][21.09.2025][GEOS2-9210]
+[shubham.nikam][22.09.2025][GEOS2-8807]
+[nsatpute][15.10.2025][GEOS2-9210]
+Call WMM_CalculteArticleStockByWarehouseAsperDate_V2670 (202502,18);
+*/
+	
+	DECLARE _IdCurrencyFrom TINYINT UNSIGNED DEFAULT 1;
+declare _ExchangeRate float default 1;
+	
+	SELECT IFNULL(w.IdCurrency, 1) INTO _IdCurrencyFrom
+			from geos.warehouses  w
+			WHERE w.idWarehouse = _IdWarehouse
+			LIMIT 1;
+	
+select IFNULL(ExchangeRate,1) into _ExchangeRate from currencyconversions where IdCurrencyFrom = _IdCurrencyFrom and IdCurrencyTo = 1 order by lastupdate desc limit 1;
+	
+-- Step 1: Get the raw string
+SELECT 
+    a.idarticle,
+    a.totalvalue * _ExchangeRate as totalvalue,
+    a.monthnr,
+    a.monthdesc,
+    a.IdWarehouse
+FROM 
+    GEOS.monthlyarticlestockvalue a
+LEFT JOIN (
+    -- Step 2: Process the setting string without CTEs
+    SELECT 
+        SUBSTRING_INDEX(SUBSTRING_INDEX(val, ';', 1), ';', -1) AS WarehouseID,
+        SUBSTRING(val, LOCATE(';', val) + 1) AS IdArticles
+    FROM (
+        -- Step 3: Split the string into individual items
+        SELECT 
+            TRIM(BOTH '()' FROM SUBSTRING_INDEX(SUBSTRING_INDEX(REPLACE(REPLACE(DefaultValue, '), (', '||'), '(', ''), '||', n.n), '||', -1)) AS val
+        FROM 
+            EMDEP_GEOS.geos_app_settings,
+            (SELECT 1 AS n UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 
+             UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9 UNION SELECT 10) n
+        WHERE AppSettingName = 'WMS_Stock_Report_Ignored_References_per_Warehouse'
+          AND n.n <= (LENGTH(DefaultValue) - LENGTH(REPLACE(DefaultValue, '), (', ''))) + 1
+    ) AS split_vals
+    WHERE TRIM(val) != '' -- Added to handle empty values
+) AS b ON b.WarehouseID = a.IdWarehouse
+WHERE 
+    a.monthdesc = _MonthDesc 
+    AND a.IdWarehouse = _IdWarehouse 
+    AND (b.IdArticles IS NULL OR FIND_IN_SET(a.idarticle, b.IdArticles) = 0);
+ 
+-- Dummy select
+SELECT 0.875 AS TargetPrice1, 0.925 AS TargetPrice2;
+END$$
+DELIMITER ;

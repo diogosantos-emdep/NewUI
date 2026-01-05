@@ -1,0 +1,50 @@
+﻿<UserControl x:Class="Emdep.Geos.Modules.Epc.Views.MainView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:dxnav="http://schemas.devexpress.com/winfx/2008/xaml/navigation"
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"
+             xmlns:dxwuin="http://schemas.devexpress.com/winfx/2008/xaml/windowsui/navigation"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:viewModel="clr-namespace:Emdep.Geos.Modules.Epc.ViewModels"
+             xmlns:view="clr-namespace:Emdep.Geos.Modules.Epc.Views"
+             mc:Ignorable="d" 
+             FontFamily="Calibri"
+             d:DesignHeight="300" d:DesignWidth="300" FontSize="13">
+
+    <UserControl.DataContext>
+        <viewModel:MainViewModel/>
+    </UserControl.DataContext>
+    <UserControl.Resources>
+        <Style TargetType="{x:Type dxnav:TileBar}">
+            <Setter Property="ItemContainerStyle" Value="{StaticResource TileBarItemStyleExtended}"/>
+        </Style>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.Resources>
+            <DataTemplate x:Key="waitIndicator">
+                <dx:WaitIndicator DeferedVisibility="True"/>
+            </DataTemplate>
+        </Grid.Resources>
+        <dxnav:TileBar VerticalAlignment="Top" ItemsSource="{Binding TileCollection}" FlyoutShowMode="Popup" Margin="-25,-20,0,-5"   >
+        </dxnav:TileBar>
+        <dxwui:NavigationFrame x:Name="Navigatedframe" Grid.Row="1" AnimationType="SlideHorizontal">
+            <dxmvvm:Interaction.Behaviors>
+                <dxwuin:FrameNavigationService/>
+                <dx:DXSplashScreenService SplashScreenStartupLocation="CenterOwner">
+                    <dx:DXSplashScreenService.ViewTemplate>
+                        <DataTemplate>
+                            <view:SplashScreenView/>
+                        </DataTemplate>
+                    </dx:DXSplashScreenService.ViewTemplate>
+                </dx:DXSplashScreenService>
+            </dxmvvm:Interaction.Behaviors>
+        </dxwui:NavigationFrame>
+    </Grid>
+</UserControl>

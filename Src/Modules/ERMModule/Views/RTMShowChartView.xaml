@@ -1,0 +1,332 @@
+﻿<Window x:Class="Emdep.Geos.Modules.ERM.Views.RTMShowChartView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"             
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:dxga="http://schemas.devexpress.com/winfx/2008/xaml/gauges"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors" 
+             xmlns:dxp="http://schemas.devexpress.com/winfx/2008/xaml/printing"
+             xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+             xmlns:ViewModels="clr-namespace:Emdep.Geos.Modules.ERM.ViewModels"
+             xmlns:dxc="http://schemas.devexpress.com/winfx/2008/xaml/charts" 
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:sysglb="clr-namespace:System.Globalization;assembly=mscorlib"
+             xmlns:dxsch="http://schemas.devexpress.com/winfx/2008/xaml/scheduler"
+             xmlns:Scheduler="clr-namespace:DevExpress.Xpf.Scheduler.UI;assembly=DevExpress.Xpf.Scheduler.v19.2"
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:dxschcore="clr-namespace:DevExpress.XtraScheduler;assembly=DevExpress.XtraScheduler.v19.2.Core"
+             xmlns:behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+             xmlns:Interactive="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:Behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:dxci="http://schemas.devexpress.com/winfx/2008/xaml/core/internal"
+             xmlns:UIConverter="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+             xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+             xmlns:dxschint="http://schemas.devexpress.com/winfx/2008/xaml/scheduler/internal"
+             xmlns:dxscht="http://schemas.devexpress.com/winfx/2008/xaml/scheduler/themekeys"
+             xmlns:ERMApplication="clr-namespace:Emdep.Geos.Modules.ERM.CommonClasses"
+             xmlns:Serialization="clr-namespace:DevExpress.Xpf.LayoutControl.Serialization;assembly=DevExpress.Xpf.LayoutControl.v19.2"
+             xmlns:dxb="http://schemas.devexpress.com/winfx/2008/xaml/bars"
+             xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:dxgt="http://schemas.devexpress.com/winfx/2008/xaml/grid/themekeys"
+             xmlns:gif="http://wpfanimatedgif.codeplex.com"
+            xmlns:local="clr-namespace:Emdep.Geos.Modules.ERM.Views"
+        
+             mc:Ignorable="d" WindowState="Maximized" >
+    
+    <Window.InputBindings>
+        <KeyBinding Key="Escape" Command="{Binding CloseButtonCommand}"/>
+    </Window.InputBindings>
+
+   
+        
+
+    <!--<dxwui:PageView Background="{DynamicResource AppointmentHeaderBackground}" AnimationType="SlideHorizontal" Header="{Binding LoadsxWorkstation}" ItemsSource="{Binding DataSource}" >-->
+        <!--<Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="240" />
+                <ColumnDefinition Width="900" />
+                <ColumnDefinition Width="150" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="450"/>
+            </Grid.RowDefinitions>
+
+
+            <dxc:ChartControl x:Name="ChartActions" Margin="-12"  Grid.Row="0" Grid.Column="0" Width="120"
+                                  DataSource="{Binding ActionGraphDataTable, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 VerticalAlignment="Stretch"  CrosshairEnabled="True" BorderThickness="0" ScrollViewer.VerticalScrollBarVisibility="Auto">
+
+               
+                <dxmvvm:Interaction.Triggers>
+                    <dxmvvm:EventToCommand EventName="Loaded" Command="{Binding ActionLoadCommand}" CommandParameter="{Binding ElementName=ChartActions}" />
+                    <dxmvvm:EventToCommand EventName="CustomDrawCrosshair" Command="{Binding ChartDashboardSaleCustomDrawCrosshairCommand}" PassEventArgsToCommand="True" />
+                    <dxmvvm:EventToCommand EventName="MouseDoubleClick"  Command="{Binding ShowDialogWindowCommand}" CommandParameter="{Binding ElementName=ChartActions}" />
+
+                </dxmvvm:Interaction.Triggers>
+
+
+            </dxc:ChartControl>
+
+            <dxc:ChartControl x:Name="ChartSalesStatusByMonths"  Grid.Row="0" Grid.Column="1"
+                                      VerticalAlignment="Stretch" 
+                                      
+                                       CrosshairEnabled="True" BorderThickness="0" 
+                                      ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                      DataSource="{Binding GraphDataTable, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+               
+                <dxc:ChartControl.Legend>
+                    <dxc:Legend HorizontalPosition="RightOutside" />
+                </dxc:ChartControl.Legend>
+
+                <dxmvvm:Interaction.Triggers>
+                    <dxmvvm:EventToCommand EventName="Loaded" Command="{Binding ActionLoadCommand}" CommandParameter="{Binding ElementName=ChartSalesStatusByMonths}" />
+                    <dxmvvm:EventToCommand EventName="CustomDrawCrosshair" Command="{Binding ChartDashboardSaleCustomDrawCrosshairCommand}" PassEventArgsToCommand="True" />
+                </dxmvvm:Interaction.Triggers>
+            </dxc:ChartControl>
+
+            <dxlc:LayoutGroup Orientation="Vertical" View="GroupBox" Grid.Row="0" Grid.Column="2" >
+
+                <StackPanel Grid.Row="0" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Stretch">
+
+
+                    <TextBlock  Width="100" TextWrapping="WrapWithOverflow"  VerticalAlignment="Center" Margin="5,5,5,0" FontWeight="Bold" HorizontalAlignment="Center" Text="{DynamicResource DeliveryVisualManagement}"></TextBlock>
+                  
+                    <Grid HorizontalAlignment="Center" Grid.Row="0" Grid.Column="2" VerticalAlignment="Stretch" Background="{DynamicResource AppointmentHeaderDashboardBackground}" >
+
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="50"></ColumnDefinition>
+
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="10"></RowDefinition>
+                            <RowDefinition Height="20"></RowDefinition>
+                            <RowDefinition Height="25"></RowDefinition>
+                            <RowDefinition Height="25"></RowDefinition>
+                            <RowDefinition Height="25"></RowDefinition>
+                            <RowDefinition Height="25"></RowDefinition>
+                            <RowDefinition Height="25"></RowDefinition>
+                            <RowDefinition Height="25"></RowDefinition>
+                            <RowDefinition Height="20"></RowDefinition>
+                            <RowDefinition Height="20"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <TextBlock Text ="{DynamicResource DeliveryVisualManagementQtyWithDot}" FontWeight="Bold"  HorizontalAlignment="Center"  Grid.Column="0" Grid.Row="1"/>
+                        <Rectangle  Fill="#3A9BDC" Stroke="Black"  Grid.Column="0" Grid.Row="2"/>
+                        <TextBlock Text ="{Binding ConditionGreaterThan7Days}" HorizontalAlignment="Center" FontWeight="Bold" Foreground="White"  Grid.Column="0" Grid.Row="2"/>
+                        <Rectangle  Fill="#72cc50" Stroke="Black" Grid.Column="0" Grid.Row="3"/>
+                        <TextBlock Text="{Binding ConditionLessThanEqual7Day}" HorizontalAlignment="Center" Foreground="Black" FontWeight="Bold"  Grid.Column="0" Grid.Row="3"/>
+                        <Rectangle  Fill="#FFFF00" Stroke="Black" Grid.Column="0" Grid.Row="4"/>
+                        <TextBlock Text="{Binding ConditionDelay}"  HorizontalAlignment="Center" Foreground="Black" FontWeight="Bold"  Grid.Column="0" Grid.Row="4"/>
+
+                        <Rectangle  Fill="#ff0000" Stroke="Black" Grid.Column="0" Grid.Row="5"/>
+                        <TextBlock Text ="{Binding ConditionQuality}"  HorizontalAlignment="Center" Foreground="White" FontWeight="Bold"  Grid.Column="0" Grid.Row="5"/>
+
+                        <Rectangle  Fill="#FFA500" Stroke="Black" Grid.Column="0" Grid.Row="6"/>
+                        <TextBlock Text="{Binding ConditionGoAhead}" HorizontalAlignment="Center" FontWeight="Bold" Foreground="White" Grid.Column="0" Grid.Row="6"/>
+                        <Rectangle  Fill="Transparent" Stroke="Black" Grid.Column="0" Grid.Row="7"/>
+                        <TextBlock Text="{Binding TotalQuantity}" HorizontalAlignment="Center" FontWeight="Bold" Grid.Column="0" Grid.Row="7">
+                            <TextBlock.Style>
+                                <Style TargetType="{x:Type TextBlock}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Path=(dx:ThemeManager.TreeWalker).ThemeName, RelativeSource={RelativeSource Self}}" Value="BlackAndBlue" >
+                                            <Setter Property="Foreground" Value="White"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Grid>
+                </StackPanel>
+
+            </dxlc:LayoutGroup>
+        </Grid>-->
+    <!--Header="{Binding LoadsxWorkstation}"-->
+    <Grid Background="{DynamicResource AppointmentHeaderBackground}" >
+        <dxlc:LayoutGroup Header="{Binding LoadsxWorkstation}" dxlc:LayoutControl.AllowHorizontalSizing="True"
+                                   View="GroupBox" Margin="5,0,5,5"
+                                  IsCollapsible="False" IsCollapsed="False" >
+            <dxlc:LayoutGroup.HeaderTemplate>
+
+                <DataTemplate>
+                    <Grid >
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+
+
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="{Binding}" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+                    </Grid>
+                </DataTemplate>
+            </dxlc:LayoutGroup.HeaderTemplate>
+            <dxlc:LayoutGroup.GroupBoxStyle>
+                <Style TargetType="dxlc:GroupBox">
+                    <Setter Property="BorderThickness" Value="2" />
+
+                </Style>
+            </dxlc:LayoutGroup.GroupBoxStyle>
+            <!--Width="200"-->
+
+            <Grid ShowGridLines="False">
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="82*" />
+                    <ColumnDefinition Width="18*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!--<ScrollViewer  VerticalScrollBarVisibility="Auto"  HorizontalScrollBarVisibility="Auto">-->
+                    <Grid ShowGridLines="False"    Grid.Row="0"  Grid.Column="0" >
+
+                    <Grid.ColumnDefinitions>
+
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="90*" />
+
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                       
+                    </Grid.RowDefinitions>
+                    
+                    <dxc:ChartControl x:Name="ChartActions"   Grid.Row="0" Grid.Column="0" Width="180" Margin="10,0,0,0" AutoLayout="False"
+                                  DataSource="{Binding ActionGraphDataTable, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 VerticalAlignment="Stretch"  MinHeight="280" CrosshairEnabled="True" BorderThickness="0" ScrollViewer.VerticalScrollBarVisibility="Auto">
+
+                <dxc:XYDiagram2D>
+                    <dxc:XYDiagram2D.AxisX>
+                        <dxc:AxisX2D LabelVisibilityMode="Default">
+                            <dxc:AxisX2D.NumericScaleOptions>
+                                <dxc:ContinuousNumericScaleOptions  AutoGrid="False" GridSpacing="1"></dxc:ContinuousNumericScaleOptions>
+                                <!--GridSpacing="1"-->
+                            </dxc:AxisX2D.NumericScaleOptions>
+                        </dxc:AxisX2D>
+
+                    </dxc:XYDiagram2D.AxisX>
+                    <dxc:XYDiagram2D.AxisY>
+                        <dxc:AxisY2D  LabelVisibilityMode="Default">
+                            <dxc:AxisY2D.NumericScaleOptions>
+                                <dxc:ContinuousNumericScaleOptions AutoGrid="False" GridSpacing="1"></dxc:ContinuousNumericScaleOptions>
+                            </dxc:AxisY2D.NumericScaleOptions>
+                        </dxc:AxisY2D>
+
+                    </dxc:XYDiagram2D.AxisY>
+                </dxc:XYDiagram2D>
+                <dxmvvm:Interaction.Triggers>
+                    <dxmvvm:EventToCommand EventName="Loaded" Command="{Binding ActionLoadCommand}" CommandParameter="{Binding ElementName=ChartActions}" />
+                    <dxmvvm:EventToCommand EventName="CustomDrawCrosshair" Command="{Binding ChartDashboardSaleCustomDrawCrosshairCommand}" PassEventArgsToCommand="True" />
+
+                </dxmvvm:Interaction.Triggers>
+
+
+            </dxc:ChartControl>
+
+                    <dxc:ChartControl x:Name="ChartSalesStatusByMonths"  Grid.Row="0" Grid.Column="1" Margin="15,0,0,0"
+                                      VerticalAlignment="Stretch" AutoLayout="False"
+                                      MinHeight="280"
+                                       CrosshairEnabled="True" BorderThickness="0" 
+                                      ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                      DataSource="{Binding GraphDataTable, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                <dxc:XYDiagram2D>
+                    <dxc:XYDiagram2D.AxisX>
+                        <dxc:AxisX2D LabelVisibilityMode="Default">
+                            <dxc:AxisX2D.NumericScaleOptions>
+                                <dxc:ContinuousNumericScaleOptions AutoGrid="False" GridSpacing="1"></dxc:ContinuousNumericScaleOptions>
+                            </dxc:AxisX2D.NumericScaleOptions>
+                        </dxc:AxisX2D>
+                    </dxc:XYDiagram2D.AxisX>
+                    <dxc:XYDiagram2D.AxisY>
+                        <dxc:AxisY2D  LabelVisibilityMode="Default">
+                            <dxc:AxisY2D.NumericScaleOptions>
+                                <dxc:ContinuousNumericScaleOptions AutoGrid="False" GridSpacing="1"></dxc:ContinuousNumericScaleOptions>
+                            </dxc:AxisY2D.NumericScaleOptions>
+                        </dxc:AxisY2D>
+
+                    </dxc:XYDiagram2D.AxisY>
+                </dxc:XYDiagram2D>
+                <dxc:ChartControl.Legend>
+                    <dxc:Legend HorizontalPosition="RightOutside" />
+                </dxc:ChartControl.Legend>
+
+                <dxmvvm:Interaction.Triggers>
+                    <dxmvvm:EventToCommand EventName="Loaded" Command="{Binding ActionLoadCommand}" CommandParameter="{Binding ElementName=ChartSalesStatusByMonths}" />
+                    <dxmvvm:EventToCommand EventName="CustomDrawCrosshair" Command="{Binding ChartDashboardSaleCustomDrawCrosshairCommand}" PassEventArgsToCommand="True" />
+                </dxmvvm:Interaction.Triggers>
+            </dxc:ChartControl>
+                    
+                </Grid>
+                <!--</ScrollViewer>-->
+                <dxlc:LayoutGroup Orientation="Vertical" View="GroupBox" Grid.Row="0" Grid.Column="1" >
+
+                <StackPanel Grid.Row="0" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Stretch">
+
+
+                    <TextBlock  Width="100" TextWrapping="WrapWithOverflow"  VerticalAlignment="Center" Margin="5,5,5,0" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource AppointmentHeaderForeground}" Text="{DynamicResource DeliveryVisualManagement}"></TextBlock>
+                    <!--  [GEOS2 4857] [Aishwarya Ingale][20-09-2023] -->
+                    <Grid HorizontalAlignment="Center" Grid.Row="0" Grid.Column="2" VerticalAlignment="Stretch" Background="{DynamicResource AppointmentHeaderDashboardBackground}" >
+
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="100"></ColumnDefinition>
+
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="10"></RowDefinition>
+                            <RowDefinition Height="20"></RowDefinition>
+                            <RowDefinition Height="25"></RowDefinition>
+                            <RowDefinition Height="25"></RowDefinition>
+                            <RowDefinition Height="25"></RowDefinition>
+                            <RowDefinition Height="25"></RowDefinition>
+                            <RowDefinition Height="25"></RowDefinition>
+                            <RowDefinition Height="25"></RowDefinition>
+                            <RowDefinition Height="20"></RowDefinition>
+                            <RowDefinition Height="20"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <TextBlock Text ="{DynamicResource DeliveryVisualManagementQtyWithDot}" Foreground="{DynamicResource AppointmentHeaderForeground}" FontWeight="Bold"  HorizontalAlignment="Center"  Grid.Column="0" Grid.Row="1"/>
+                        <Rectangle  Fill="#3A9BDC" Stroke="Black"  Grid.Column="0" Grid.Row="2"/>
+                        <TextBlock Text ="{Binding ConditionGreaterThan7Days}" HorizontalAlignment="Center" FontWeight="Bold" Foreground="White"  Grid.Column="0" Grid.Row="2"/>
+                        <Rectangle  Fill="#72cc50" Stroke="Black" Grid.Column="0" Grid.Row="3"/>
+                        <TextBlock Text="{Binding ConditionLessThanEqual7Day}" HorizontalAlignment="Center" Foreground="Black" FontWeight="Bold"  Grid.Column="0" Grid.Row="3"/>
+                        <Rectangle  Fill="#FFFF00" Stroke="Black" Grid.Column="0" Grid.Row="4"/>
+                        <TextBlock Text="{Binding ConditionDelay}"  HorizontalAlignment="Center" Foreground="Black" FontWeight="Bold"  Grid.Column="0" Grid.Row="4"/>
+
+                        <Rectangle  Fill="#ff0000" Stroke="Black" Grid.Column="0" Grid.Row="5"/>
+                        <TextBlock Text ="{Binding ConditionQuality}"  HorizontalAlignment="Center" Foreground="White" FontWeight="Bold"  Grid.Column="0" Grid.Row="5"/>
+
+                        <Rectangle  Fill="#FFA500" Stroke="Black" Grid.Column="0" Grid.Row="6"/>
+                        <TextBlock Text="{Binding ConditionGoAhead}" HorizontalAlignment="Center" FontWeight="Bold" Foreground="White" Grid.Column="0" Grid.Row="6"/>
+                        <Rectangle  Fill="Transparent" Stroke="Black" Grid.Column="0" Grid.Row="7"/>
+                        <TextBlock Text="{Binding TotalQuantity}" HorizontalAlignment="Center" FontWeight="Bold" Grid.Column="0" Grid.Row="7">
+                            <TextBlock.Style>
+                                <Style TargetType="{x:Type TextBlock}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Path=(dx:ThemeManager.TreeWalker).ThemeName, RelativeSource={RelativeSource Self}}" Value="BlackAndBlue" >
+                                            <Setter Property="Foreground" Value="White"/>
+                                        </DataTrigger>
+                                        <!--<DataTrigger Binding="{Binding Path=(dx:ThemeManager.TreeWalker).ThemeName, RelativeSource={RelativeSource Self}}" Value="WhiteAndBlue" >
+                                            <Setter Property="Background" Value="White"/>
+                                        </DataTrigger>-->
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Grid>
+                </StackPanel>
+
+            </dxlc:LayoutGroup>
+            </Grid>
+        </dxlc:LayoutGroup>
+    </Grid>
+    <!--</dxwui:PageView>-->
+
+
+</Window>

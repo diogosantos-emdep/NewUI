@@ -1,0 +1,196 @@
+﻿<dxwui:WinUIDialogWindow x:Class="Emdep.Geos.Modules.Hrm.Views.ReadImportedAttendanceView"
+                         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                         xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                         xmlns:local="clr-namespace:Emdep.Geos.Modules.Hrm.Views"
+                         xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"
+                         xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+                         xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+                         xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+                         xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+                         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+                         xmlns:behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+                         mc:Ignorable="d" 
+                         xmlns:Coverter="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+                         HorizontalAlignment="Stretch"
+                         Title="{DynamicResource ReadImportedAttendanceViewModelTitle}" 
+                         TitleStyle="{DynamicResource WinUIDialogWindowTitleStyle}"
+                         Style="{DynamicResource WinUIDialogWindowStyle}">
+
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape"  Command="{Binding CancelButtonCommand}"/>
+    </dxwui:WinUIDialogWindow.InputBindings>
+
+    <dxwui:WinUIDialogWindow.Resources>
+        <Coverter:ForegroundColorConverter x:Key="ForegroundColorConverter" />
+    </dxwui:WinUIDialogWindow.Resources>
+
+    <Grid HorizontalAlignment="Stretch" Height="600" Margin="20,0,20,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="40"/>
+        </Grid.RowDefinitions>
+
+            <dxg:GridControl Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"   SelectedItem="{Binding  SelectedAttendance}" ScrollViewer.HorizontalScrollBarVisibility="Auto" 
+                         ItemsSource="{Binding DataContext.AttendanceSheetData,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow,Mode=FindAncestor},Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+            <dxg:GridControl.Columns>
+                 <!--shubham[skadam] GEOS2-3537 HRM - Communication with PSD software -  Import attendance using the employee company e-mail [#IES20]-->
+                <!--<dxg:GridColumn  Header="{DynamicResource GridColClockID}" FieldName="EmployeeClockTimeID" MinWidth="50" FilterPopupMode="CheckedList" AllowEditing="False" />-->
+                <dxg:GridColumn Header="{Binding GridColHeader}" FieldName="EmployeeClockTimeID" AllowResizing="true" MinWidth="50" FilterPopupMode="CheckedList" AllowEditing="False" />
+                <dxg:GridColumn Header="{DynamicResource GridColEmployeeName}" FieldName="Employee" AllowResizing="true" MinWidth="200" FilterPopupMode="CheckedList" AllowEditing="False"/>
+
+                <dxg:GridColumn Header="{DynamicResource GridColDate}" FieldName="Date" AllowResizing="true"  MinWidth="100" FilterPopupMode="CheckedList" AllowEditing="False">
+                    <dxg:GridColumn.EditSettings>
+                        <dxe:TextEditSettings DisplayFormat="d" />
+                    </dxg:GridColumn.EditSettings>
+                </dxg:GridColumn>
+
+                <dxg:GridColumn Header="{DynamicResource GridColTime}" FieldName="Time" AllowResizing="true" MinWidth="100" FilterPopupMode="CheckedList" AllowEditing="False">
+                    <dxg:GridColumn.EditSettings>
+                        <dxe:TextEditSettings MaskType="DateTime"
+                                              MaskUseAsDisplayFormat="True"
+                                              Mask="{Binding TimeEditMask,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+                    </dxg:GridColumn.EditSettings>
+                </dxg:GridColumn>
+
+                <dxg:GridColumn Header="{DynamicResource GridColType}" FieldName="Type" AllowResizing="true" MinWidth="100" FilterPopupMode="CheckedList" >
+                    <dxg:GridColumn.CellTemplate>
+                        <DataTemplate>
+                            <dxe:ComboBoxEdit ItemsSource="{Binding DataContext.AttendanceTypeList,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"
+                                              SelectedItem="{Binding RowData.Row.Type,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" ApplyItemTemplateToSelectedItem="True"
+                                              IsTextEditable="False" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" VerticalAlignment="Center" VerticalContentAlignment="Center" DisplayMember="Value" ValueMember="IdLookupValue">
+                                <dxe:ComboBoxEdit.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Margin="2,0,0,0" 
+                                                Background="{Binding HtmlColor}"
+                                                Padding="2" HorizontalAlignment="Stretch" 
+                                                VerticalAlignment="Stretch">
+                                            <TextBlock Margin="2,0,0,0"
+                                                       HorizontalAlignment="Center"
+                                                       Padding="2"
+                                                       Text="{Binding Value}"
+                                                       Background="{Binding HtmlColor}"
+                                                       Foreground="{Binding HtmlColor,Converter={StaticResource ForegroundColorConverter}}"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </dxe:ComboBoxEdit.ItemTemplate>
+                            </dxe:ComboBoxEdit>
+                        </DataTemplate>
+                    </dxg:GridColumn.CellTemplate>
+                </dxg:GridColumn>
+
+                <dxg:GridColumn Header="{DynamicResource GridColShift}" FieldName="CompanyShift" AllowResizing="true"
+                                MinWidth="200" ShowValidationAttributeErrors="True" FilterPopupMode="CheckedList">
+                    <dxg:GridColumn.CellTemplate>
+                        <DataTemplate>
+                            <dxe:ComboBoxEdit Name="PART_Editor" ImmediatePopup="True" ValidateOnTextInput="True"                                             
+                                              ItemsSource="{Binding RowData.Row.CompanyShiftList,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"   
+                                              SelectedItem="{Binding CompanyShift,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"                                              
+                                              HorizontalAlignment="Stretch"
+                                              HorizontalContentAlignment="Left" VerticalAlignment="Center" 
+                                              VerticalContentAlignment="Center"
+                                              ApplyItemTemplateToSelectedItem="False" IsTextEditable="False"
+                                              DisplayMember="DisplayName" 
+                                              Margin="5,0,0,0"
+                                              NullText="Select Value..." ShowError="True" ShowErrorToolTip="True"> 
+                            </dxe:ComboBoxEdit>
+                        </DataTemplate>
+                    </dxg:GridColumn.CellTemplate>                    
+                </dxg:GridColumn>
+                <dxg:GridColumn Header="{DynamicResource GridColIn}" FieldName="In" AllowResizing="true" Width="40" MinWidth="40" MaxWidth="40"  AllowSorting="False" HorizontalHeaderContentAlignment="Center" AllowColumnFiltering="False" Fixed="Right" ShowInColumnChooser="False" Visible="True" AllowPrinting="False" FilterPopupMode="CheckedList" AllowMoving="False"  AllowEditing="true" >
+                    <dxg:GridColumn.EditSettings>
+                        <dxe:CheckEditSettings />
+                    </dxg:GridColumn.EditSettings>
+                </dxg:GridColumn>
+
+                <dxg:GridColumn Header="{DynamicResource GridColOut}" FieldName="Out" AllowResizing="true" Width="40" MinWidth="40" MaxWidth="40"  AllowSorting="False" HorizontalHeaderContentAlignment="Center" AllowColumnFiltering="False" Fixed="Right" ShowInColumnChooser="False" Visible="True" AllowPrinting="False" FilterPopupMode="CheckedList" AllowMoving="False"  AllowEditing="true" >
+                    <dxg:GridColumn.EditSettings>
+                        <dxe:CheckEditSettings />
+                    </dxg:GridColumn.EditSettings>
+                </dxg:GridColumn>
+
+                <dxg:GridColumn  Width="40" MinWidth="40" MaxWidth="40" FixedWidth="True" AllowResizing="true" AllowSorting="False" HorizontalHeaderContentAlignment="Center" AllowColumnFiltering="False" Fixed="Right" ShowInColumnChooser="False" Visible="True" AllowPrinting="False" FilterPopupMode="CheckedList" AllowMoving="False" >
+                    <dxg:GridColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Name="deleteAttendance" Command="{Binding DataContext.DeleteAttendanceRowCommand, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow},Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                     CommandParameter="{Binding RowData.Row}" >
+                                <Button.ContentTemplate>
+                                    <DataTemplate>
+                                        <Image Height="16" Width="16" Source="/Emdep.Geos.Modules.Hrm;component/Assets/Images/Delete.png"/>
+                                    </DataTemplate>
+                                </Button.ContentTemplate>
+                                <Button.ToolTip>
+                                    <TextBlock HorizontalAlignment="Stretch" Text="Delete Record" />
+                                </Button.ToolTip>
+                            </Button>
+                        </DataTemplate>
+                    </dxg:GridColumn.CellTemplate>
+                </dxg:GridColumn>
+            </dxg:GridControl.Columns>
+            
+            <dxg:GridControl.TotalSummary>
+                <dxg:GridSummaryItem x:Name="summary" FieldName="" SummaryType="Count" DisplayFormat="Total Count: {0}" Visible="True"   Alignment="Left"/>
+                
+            </dxg:GridControl.TotalSummary>
+            
+            <dxg:GridControl.View>
+                <dxg:TableView x:Name="tblAttendance" 
+                               AllowBestFit="True"
+                               AllowEditing="True"
+                               ShowGroupPanel="False" 
+                               ShowIndicator="False"
+                               AutoWidth="True"
+                               ShowSearchPanelMode="Always" 
+                               SearchPanelHorizontalAlignment="Stretch"
+                               HorizontalScrollbarVisibility="Auto"
+                               VerticalScrollbarVisibility="Auto"
+                               NavigationStyle="Cell"
+                               ShowFixedTotalSummary="True"
+                               AllowPerPixelScrolling="True"
+                               AllowConditionalFormattingMenu="True">
+                    <dxg:TableView.FormatConditions>
+                        <dxg:FormatCondition Expression="[IsRowError] = True" ApplyToRow="True">
+                            <dxg:Format Background="#FFFF0000"/>
+                        </dxg:FormatCondition>
+                    </dxg:TableView.FormatConditions>
+                    <dxmvvm:Interaction.Triggers>
+                        <dxmvvm:EventToCommand EventName="CellValueChanging" 
+                                               Command="{Binding InOutChangedCommand}" 
+                                               CommandParameter="{Binding RowData.Row}"
+                                               PassEventArgsToCommand="True"/>
+                    </dxmvvm:Interaction.Triggers>
+
+                </dxg:TableView>
+            </dxg:GridControl.View>
+                
+        </dxg:GridControl>
+
+        <StackPanel Grid.Row=" 1" 
+                    HorizontalAlignment="Center" 
+                    Orientation="Horizontal"
+                    Margin="20,0,0,0"
+                    Width="290">
+            <Button Content="{DynamicResource AcceptButton}"
+                    Command="{Binding AcceptButtonCommand}"  CommandParameter="{Binding ElementName=tblAttendance}"
+                    Height="30"
+                    Width="100"
+                    Margin="0,0,30,0"
+                    Style="{DynamicResource Button16Style}"
+                    VerticalAlignment="Bottom" />
+            <Button Content="{DynamicResource CancelButton}"
+                    Command="{Binding CancelButtonCommand}" 
+                    Height="30"
+                    Width="100"
+                    Margin="30,0,0,0"
+                    Style="{DynamicResource Button16Style}"
+                    VerticalAlignment="Bottom" />
+
+        </StackPanel>
+    </Grid>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="KeyDown">
+            <behaviors:InvokeDelegateCommandAction Command="{Binding CommandTextInput}" CommandParameter="{Binding Path=InvokeParameter, RelativeSource={RelativeSource Self}}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+</dxwui:WinUIDialogWindow> 

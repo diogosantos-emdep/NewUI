@@ -1,0 +1,92 @@
+﻿<dxwui:WinUIDialogWindow x:Class="Emdep.Geos.Modules.PCM.Views.SynchronizationView"
+                         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                         xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                         xmlns:local="clr-namespace:Emdep.Geos.Modules.PCM.Views"
+                         xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"
+                            xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+                         xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors" 
+                         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+                              xmlns:behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+                         mc:Ignorable="d" 
+                         d:DesignHeight="100" d:DesignWidth="100"
+                          Title="{DynamicResource PCMSystemSetting}"
+                         TitleStyle="{DynamicResource WinUIDialogWindowTitleStyle}"
+                        
+                         >
+
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape"  Command="{Binding CancelButtonCommand}"/>
+    </dxwui:WinUIDialogWindow.InputBindings>
+    <!--<Grid>-->
+    <!--<Border BorderBrush="Black" BorderThickness="2">-->
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30" />
+            <RowDefinition Height="10" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="10" />
+            <RowDefinition Height="50" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="5" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="250" />
+        </Grid.ColumnDefinitions>
+
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                   VerticalAlignment="Top" FontSize="18" >
+        </TextBlock>
+
+        <TextBlock x:Name="SynchronizationTextBlock" Grid.Row="0" Grid.Column="2" Text="Synchronization" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="18"></TextBlock>
+        <!--.-->
+        <dxe:TextEdit Grid.Row="2" VerticalContentAlignment="Top" Grid.Column="0" Height="100" Grid.ColumnSpan="4" Width="600" FontSize="14" ScrollViewer.VerticalScrollBarVisibility="Visible"
+                      TextWrapping="Wrap" HorizontalAlignment="Left" ScrollViewer.HorizontalScrollBarVisibility="Disabled" AcceptsReturn="True"  NullText="{Binding NullTextString,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                              Text="{Binding Details, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                              IsEnabled="{Binding IsTextEditVisible, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                              Visibility="{Binding IsVisible, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" EditValue="{Binding Details, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
+
+            <!--<dxmvvm:Interaction.Behaviors>
+                <dxmvvm:EventToCommand EventName="EditValueChanged" Command="{Binding FilterCommand}"
+            CommandParameter="{Binding ElementName=txtFilter, Path=Text}"/>
+            </dxmvvm:Interaction.Behaviors>-->
+        </dxe:TextEdit>
+
+        <StackPanel Grid.Row="4" 
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Bottom"
+                    Orientation="Horizontal" 
+                    Width="290" Grid.Column="2" Grid.ColumnSpan="1">
+
+            <Button Content="{DynamicResource Accept}"
+                            Command="{Binding AcceptButtonCommand}"
+                            CommandParameter="{Binding ElementName=SynchronizationTextBlock}"
+                            Height="30"
+                            Width="100"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Bottom"
+                            Margin="40 0 0 0"
+                            Style="{DynamicResource Button16Style}"/>
+
+           
+
+            <Button Content="{DynamicResource Cancel}"
+                            Command="{Binding CancelButtonCommand}" 
+                            Height="30"
+                            Width="100"
+                            Margin="50,0,0,0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Bottom"
+                            Style="{DynamicResource Button16Style}"/>
+        </StackPanel>
+    </Grid>
+    <!--<i:Interaction.Triggers>
+        <i:EventTrigger EventName="KeyDown">
+            <behaviors:InvokeDelegateCommandAction Command="{Binding FilterCommand}" CommandParameter="{Binding Path=InvokeParameter, RelativeSource={RelativeSource Self}}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>-->
+    <!--</Border>-->
+    <!--</Grid>-->
+</dxwui:WinUIDialogWindow>

@@ -1,0 +1,543 @@
+﻿<UserControl x:Class="Emdep.Geos.Modules.SRM.Views.CatalogueDashboardView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:dxdo="http://schemas.devexpress.com/winfx/2008/xaml/docking"
+             xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:sysglb="clr-namespace:System.Globalization;assembly=mscorlib"
+             xmlns:Converters="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+             xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.SRM.Views"
+             xmlns:SRMCommon ="clr-namespace:Emdep.Geos.Modules.SRM"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+    
+    <UserControl.InputBindings>
+        <KeyBinding Key="Enter" Command="{Binding DataContext.SearchCommand,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{ Binding ElementName=lgCustom}"/>
+    </UserControl.InputBindings>
+    <UserControl.Resources>
+        <Converters:WeightToWeightUnitConverter x:Key="WeightToWeightUnitConverter"/>
+        <Converters:ImageUrlToByteArrayConverter x:Key="ImageUrlToByteArrayConverter" />
+        <DataTemplate x:Key="Template1">
+            <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" x:Name="TableAndCardGrid" ScrollViewer.HorizontalScrollBarVisibility="Auto"  >
+                
+                <dxg:GridControl x:Name="ConnectorGridControl1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"                            
+                             ItemsSource="{Binding DataContext.CatalogueList,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay, RelativeSource={RelativeSource AncestorType=UserControl, Mode=FindAncestor}}" 
+                             Visibility="{Binding IsTableView,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"  
+                                 SelectedItem="{Binding SelectedConnector,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                             SelectionMode="Row" Width="Auto" Height="Auto" ImplyNullLikeEmptyStringWhenFiltering="True" AllowLiveDataShaping="True">
+                    <!--Loaded="WidthAdjust"-->
+                    <dxg:GridColumn Header="{DynamicResource CatalogueDashboard_Reference}" FieldName="Reference" FilterPopupMode="CheckedList"
+                                 
+                                    MinWidth="160" ReadOnly="True" CellStyle="{DynamicResource FocusedHyperlinkCellStyle}">
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock VerticalAlignment="Center" Margin="10 0 0 0">
+                                        <Hyperlink x:Name="hyperlink" 
+                                        TargetName="_blank"
+                                        Command="{Binding DataContext.ViewArticleHyperlinkClickCommand,RelativeSource={RelativeSource AncestorType= UserControl}}"
+                                        CommandParameter="{Binding ElementName=CatalogueTableView}" 
+                                        Style="{DynamicResource hyperlinkGridStyle}">
+                                        <InlineUIContainer>
+                                            <TextBlock Text="{Binding Data.Reference}" Style="{DynamicResource HyperlinkTextBlock}" TextDecorations="Underline" />
+                                        </InlineUIContainer>
+                                    </Hyperlink>
+                                        </TextBlock>
+                                <DataTemplate.Triggers>
+                                    <Trigger Property="dxg:DataViewBase.IsFocusedCell" Value="True">
+                                        <Setter TargetName="hyperlink" Property="Foreground" Value="OrangeRed"/>
+                                    </Trigger>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="hyperlink" Property="Foreground" Value="OrangeRed" />
+                                    </Trigger>
+                                </DataTemplate.Triggers>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+                    <dxg:GridColumn Header="{DynamicResource CatalogueDashboard_SupplierReference}" FieldName="SupplierReference" 
+                                   
+                                    MinWidth="250" ReadOnly="True" HorizontalHeaderContentAlignment="Left"/>
+                    <dxg:GridColumn Header="{DynamicResource CatalogueDashboard_SupplierName}" FieldName="SupplierName" MinWidth="350" ReadOnly="True"  />
+                    <dxg:GridColumn Header="{DynamicResource CatalogueDashboard_Image}" AllowPrinting="False" FieldName="ArticleImageInBytes" AllowAutoFilter="True" FilterPopupMode="CheckedList"  Width="82" MinWidth="60"  ReadOnly="True">
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <Image Source="{Binding RowData.Row.ImagePath,Converter={StaticResource ImageUrlToByteArrayConverter},UpdateSourceTrigger=PropertyChanged ,ConverterParameter='image/png'}"
+                                       VerticalAlignment="Stretch" HorizontalAlignment="Stretch" MaxHeight="60" MinHeight="60">
+                                    <Image.ToolTip>
+                                        <Image Source="{Binding RowData.Row.ImagePath,Converter={StaticResource ImageUrlToByteArrayConverter},UpdateSourceTrigger=PropertyChanged ,ConverterParameter='image/png'}"                             
+                                       VerticalAlignment="Center" Height="200" Width="300" Margin="2,0,0,0" />
+                                    </Image.ToolTip>
+                                </Image>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                        <!--<dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <Image Source="{Binding Data.ReferenceImage,UpdateSourceTrigger=PropertyChanged }"
+                                       VerticalAlignment="Stretch" HorizontalAlignment="Stretch" MaxHeight="60" MinHeight="60">
+                                    <Image.ToolTip>
+                                        <Image Source="{Binding Data.ReferenceImage,UpdateSourceTrigger=PropertyChanged }"                             
+                                       VerticalAlignment="Center" Height="200" Width="300" Margin="2,0,0,0" />
+                                    </Image.ToolTip>
+                                    <dxmvvm:Interaction.Behaviors>
+                                        <dxmvvm:EventToCommand EventName="MouseDown" CommandParameter="{Binding ElementName=ConnectorGridControl1}"
+                                       Command="{Binding DataContext.ImageClickCommand,RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                       PassEventArgsToCommand="True"/>
+                                    </dxmvvm:Interaction.Behaviors>
+                                </Image>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>-->
+                    </dxg:GridColumn>
+                    <dxg:GridColumn Header="{DynamicResource CatalogueDashboard_Description}" FieldName="Description" MinWidth="400" ReadOnly="True" />
+                    <dxg:GridColumn Header="{DynamicResource CatalogueDashboard_Category}" FieldName="Category" MinWidth="142" ReadOnly="True"  />
+                    <dxg:GridColumn Header="{DynamicResource CatalogueDashboard_Location}" FieldName="Location" MinWidth="142" ReadOnly="True"  />
+                    <dxg:GridColumn Header="{DynamicResource CatalogueDashboard_Weight}" FieldName="Weight"  UnboundType="Decimal" MinWidth="50" FilterPopupMode="CheckedList" ReadOnly="True" >
+                        <dxg:GridColumn.EditSettings>
+                            <dxe:TextEditSettings DisplayTextConverter="{StaticResource WeightToWeightUnitConverter}"/>
+                        </dxg:GridColumn.EditSettings>
+                    </dxg:GridColumn>
+                    <dxg:GridColumn Header="{DynamicResource CatalogueDashboard_Length}" FieldName="Length"  MinWidth="50" ReadOnly="True" />
+                    <dxg:GridColumn Header="{DynamicResource CatalogueDashboard_Width}" FieldName="Width" MinWidth="50" ReadOnly="True"  />
+                    <dxg:GridColumn Header="{DynamicResource CatalogueDashboard_Height}" FieldName="Height" MinWidth="50" ReadOnly="True"   />
+                    <dxg:GridColumn Header="{DynamicResource CatalogueDashboard_Stock}" FieldName="Stock"  MinWidth="50" ReadOnly="True"  >
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                                    <Label Width="Auto" Content="{Binding RowData.Row.Stock}" HorizontalAlignment="Stretch" 
+                                   VerticalAlignment="Stretch" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" Padding="0 0 5 0" >
+                                        <Label.Style>
+                                            <Style TargetType="Label">
+                                                <Style.Triggers>
+                                                    <MultiDataTrigger>
+                                                        <MultiDataTrigger.Conditions>
+                                                            <Condition Value="Red">
+                                                                <Condition.Binding>
+                                                                    <MultiBinding Converter="{Converters:CellBackgroundColorConverter}">
+                                                                        <Binding Path="RowData.Row.Stock" />
+                                                                        <Binding Path="RowData.Row.MinimumStock" />
+                                                                    </MultiBinding>
+                                                                </Condition.Binding>
+                                                            </Condition>
+                                                        </MultiDataTrigger.Conditions>
+                                                        <Setter Property="Background" Value="Red" />
+                                                    </MultiDataTrigger>
+                                                    <MultiDataTrigger>
+                                                        <MultiDataTrigger.Conditions>
+                                                            <Condition Value="Green">
+                                                                <Condition.Binding>
+                                                                    <MultiBinding Converter="{Converters:CellBackgroundColorConverter}">
+                                                                        <Binding Path="RowData.Row.Stock" />
+                                                                        <Binding Path="RowData.Row.MinimumStock" />
+                                                                    </MultiBinding>
+                                                                </Condition.Binding>
+                                                            </Condition>
+                                                        </MultiDataTrigger.Conditions>
+                                                        <Setter Property="Background" Value="Green" />
+                                                    </MultiDataTrigger>
+                                                    <MultiDataTrigger>
+                                                        <MultiDataTrigger.Conditions>
+                                                            <Condition Value="Yellow">
+                                                                <Condition.Binding>
+                                                                    <MultiBinding Converter="{Converters:CellBackgroundColorConverter}">
+                                                                        <Binding Path="RowData.Row.Stock" />
+                                                                        <Binding Path="RowData.Row.MinimumStock" />
+                                                                    </MultiBinding>
+                                                                </Condition.Binding>
+                                                            </Condition>
+                                                        </MultiDataTrigger.Conditions>
+                                                        <Setter Property="Background" Value="Yellow" />
+                                                        <Setter Property="Foreground" Value="Black" />
+                                                    </MultiDataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Label.Style>
+                                    </Label>
+                                </Border>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+                    <dxg:GridColumn Header="{DynamicResource CatalogueDashboard_Value}" FieldName="PriceWithSelectedCurrencySymbol" MinWidth="90" ReadOnly="True"  >
+                        <dxg:GridColumn.EditSettings>
+                            <dxe:TextEditSettings HorizontalContentAlignment="Right" />
+                        </dxg:GridColumn.EditSettings>
+                    </dxg:GridColumn>
+                    <dxg:GridColumn Header="{DynamicResource CatalogueDashboard_CostPrice}" FieldName="CostWithDecimal" MinWidth="90" ReadOnly="True" >
+                        <dxg:GridColumn.EditSettings>
+                            <dxe:TextEditSettings HorizontalContentAlignment="Right" />
+                        </dxg:GridColumn.EditSettings>
+                    </dxg:GridColumn>
+                    <dxg:GridColumn Header="{DynamicResource CatalogueDashboard_CostCurrency}" FieldName="CostCurrency" MinWidth="90" ReadOnly="True"  />
+                    <dxg:GridColumn Header="{DynamicResource CatalogueDashboard_LatestDeliveryDate}" FieldName="LatestDeliveryDate" MinWidth="150" FilterPopupMode="Default" ReadOnly="True" >
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                                    <TextBlock Text="{Binding Data.LatestDeliveryDate,StringFormat=d,ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}" HorizontalAlignment="Center" VerticalAlignment="Center"></TextBlock>
+                                </Border>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+                    <dxg:GridColumn Header="{DynamicResource CatalogueDashboard_MinimumStock}" FieldName="MinimumStock" MinWidth="90" ReadOnly="True"   />
+                    <dxg:GridColumn Header="{DynamicResource CatalogueDashboard_MaximumStock}" FieldName="MaximumStock"  MinWidth="90" ReadOnly="True"  />
+                    <dxg:GridColumn Header="{DynamicResource CatalogueDashboard_IsObsolete}" FieldName="IsObsolete"  MinWidth="70" ReadOnly="True"   >
+                        <!--<dxg:GridColumn.EditSettings>
+                            <dxe:TextEditSettings HorizontalContentAlignment="Center" />
+                        </dxg:GridColumn.EditSettings>-->
+                    </dxg:GridColumn>
+                    <dxg:GridColumn Header="{DynamicResource CatalogueDashboard_SerialNumber}" FieldName="RegisterSerialNumber"  MinWidth="70" ReadOnly="True"  >
+                        <!--<dxg:GridColumn.EditSettings>
+                            <dxe:TextEditSettings HorizontalContentAlignment="Center" />
+                        </dxg:GridColumn.EditSettings>-->
+                    </dxg:GridColumn>
+                    <dxg:GridControl.TotalSummary>
+                        <dxg:GridSummaryItem x:Name="summary" FieldName="Reference" SummaryType="Count" DisplayFormat="Total Count: {0}" Visible="True"   Alignment="Left"/>
+                    </dxg:GridControl.TotalSummary>
+                    <dxmvvm:Interaction.Behaviors>
+                        <UIHelper:GridSelectingBehavior />
+                    </dxmvvm:Interaction.Behaviors>
+                    <dxg:GridControl.View>
+                        <dxg:TableView x:Name="CatalogueTableView"
+                               NavigationStyle="Row"
+                               ShowColumnHeaders="True"
+                                       RowDetailsVisibilityMode="Visible"
+                               ShowIndicator="False" 
+                               AutoWidth="False" 
+                                         AllowGrouping="True"
+                               ShowGroupPanel="False" 
+                               ShowSearchPanelMode="Always" 
+                                         AllowHorizontalScrollingVirtualization="False"
+                                       HorizontalScrollbarVisibility="Auto"
+                               SearchPanelHorizontalAlignment="Stretch" BestFitMode="Default"  AllowBestFit="True"  BestFitArea="All"
+                               ShowFixedTotalSummary="True" 
+                               ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly"
+                                   ShowFilterPopup="{DXEvent Handler='@args.PopupBaseEdit.PopupWidth=200'}" 
+                                       AllowColumnFiltering="True"  
+                                 UseLegacyFilterEditor="True">
+                            <dxg:TableView.Resources></dxg:TableView.Resources>
+                            <!--<dxmvvm:Interaction.Behaviors>
+                                <dxmvvm:EventToCommand Command="{Binding FilterEditorCreatedCommand}"
+                                                   EventName="FilterEditorCreated"
+                                                   PassEventArgsToCommand="True" />
+                            </dxmvvm:Interaction.Behaviors>-->
+                        </dxg:TableView>
+                    </dxg:GridControl.View>
+                </dxg:GridControl>
+            </Grid>
+        </DataTemplate>
+    </UserControl.Resources>
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="55"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="400" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Label Content="{DynamicResource CatalogueDashboardCatalogue}" Style="{StaticResource LabelTitleStyle}" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left"/>
+            <Grid Grid.Row="0" Grid.Column="2" HorizontalAlignment="Right">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <!--Warehouse label-->
+                <DockPanel Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" Height="35" >
+                    <Image Style="{DynamicResource WarehouseImageStyle}" Width="24" Height="24" Margin="7,0,3,5" />
+                    <TextBlock Text="{DynamicResource Warehouse}"  FontWeight="Bold" Margin="5,2,5,5" Height="24" />
+                </DockPanel>
+                <!--Warehouse combo-->
+                <dxe:ComboBoxEdit Grid.Column="3" Name="CbeWareHouse" Style="{DynamicResource ComboBoxEditStyle}"  Width="150" Height="35" 
+                                       Margin="5,0,5,5" IsTextEditable="False"
+                                      ItemsSource ="{Binding Source={x:Static SRMCommon:SRMCommon.Instance}, Path=WarehouseList ,UpdateSourceTrigger=PropertyChanged , Mode=TwoWay}"
+                                      SelectedItem="{Binding Source={x:Static SRMCommon:SRMCommon.Instance}, Path=Selectedwarehouse ,UpdateSourceTrigger=PropertyChanged , Mode=TwoWay}"
+                                      DisplayMember="Name" ShowError="False" ShowErrorToolTip="False"  >
+                    <dxmvvm:Interaction.Triggers>
+                        <dxmvvm:EventToCommand EventName="EditValueChanged"
+                                               Command="{Binding CommandWarehouseEditValueChanged}" 
+                                                   PassEventArgsToCommand="True"
+                                              />
+                    </dxmvvm:Interaction.Triggers>
+                </dxe:ComboBoxEdit>
+                <!-- Print Button -->
+                <Button Content=" " Grid.Column="0" Height="35" Width="40" HorizontalAlignment="Right"  Command="{Binding PrintPurchaseOrderViewCommand}" CommandParameter="{Binding ElementName=PendingPurchaseOrderTableView}" Margin="0,0,5,5" Visibility="Hidden">
+                    <Button.ToolTip>
+                        <TextBlock Text="{DynamicResource ButtonPrint}"/>
+                    </Button.ToolTip>
+                    <Button.ContentTemplate>
+                        <DataTemplate>
+                            <Image Style="{ DynamicResource PrinterButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                        </DataTemplate>
+                    </Button.ContentTemplate>
+                </Button>
+                <!-- Export Button -->
+                <Button Content=" " Grid.Row="1" Grid.Column="3" Height="35" Width="40" HorizontalAlignment="Right"  Command="{Binding ExportPurchaseOrderViewCommand}" CommandParameter="{Binding ElementName=PendingPurchaseOrderTableView}" Margin="0,0,5,5" Visibility="Hidden">
+                    <Button.ToolTip>
+                        <TextBlock Text="{DynamicResource ButtonExportToExcel}"/>
+                    </Button.ToolTip>
+                    <Button.ContentTemplate>
+                        <DataTemplate>
+                            <Image Style="{ DynamicResource ExcelExportButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                        </DataTemplate>
+                    </Button.ContentTemplate>
+                </Button>
+            </Grid>
+        </Grid>
+        
+        <Grid Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="1">
+            <dxdo:DockLayoutManager x:Name="DemoDockContainer"
+                                FloatingMode="Desktop" 
+                                FloatingDocumentContainer="{Binding SelectedItem.Id, ElementName=floatingDocumentContainerListBox}"
+                                RedrawContentWhenResizing="{Binding IsChecked, ElementName=redrawContentWhenResizingCheck}"
+                                ShowContentWhenDragging="{Binding IsChecked, ElementName=showContentWhenDraggingCheck}"
+                                ViewStyle="{Binding SelectedItem.Id, ElementName=viewStyleListBox}">
+                <dxdo:LayoutGroup>
+                    <dxdo:LayoutGroup Orientation="Vertical" ItemWidth="3*">
+                        <dxdo:LayoutGroup Name="group1" ItemHeight="3*">
+                            <dxdo:LayoutPanel Name="SRMFilter" AutoHideExpandState="Visible" AllowMinimize="False" AllowMaximize="False" AllowClose="False" 
+                                              ShowHideButton="False" AutoHidden="{Binding DataContext.IsPinned,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=UserControl}}"  Caption="{DynamicResource SCMFilter}"  VerticalAlignment="Stretch" ItemWidth="350">
+                                <Grid HorizontalAlignment="Stretch">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="5" />
+                                        <RowDefinition Height="35" />
+                                        <RowDefinition Height="5" />
+                                        <RowDefinition Height="5" />
+                                        <RowDefinition Height="40" />
+                                    </Grid.RowDefinitions>
+                                    <!--<ScrollViewer Name="scroll"
+                                              ScrollViewer.VerticalScrollBarVisibility="Hidden"
+                                              Grid.Row="0" >-->
+                                    <Grid Name="mainGrid"
+                                          Grid.Row="0"
+                                          ShowGridLines="True" >
+                                        <dxlc:LayoutGroup Orientation="Vertical" >
+                                            <dxlc:LayoutGroup Header="{DynamicResource CatalogueDashboardPartnumber}"
+                                                              Name="lgPartnumber"
+                                                              View="GroupBox"
+                                                              Margin="5"
+                                                              dxlc:LayoutControl.AllowHorizontalSizing="True"
+                                                              IsCollapsible="True"
+                                                              IsCollapsed="False" MaxHeight="120" MinHeight="120">
+                                                <dxlc:LayoutGroup.HeaderTemplate>
+                                                    <DataTemplate>
+                                                        <Grid>
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="Auto" />
+                                                                <ColumnDefinition Width="*" />
+                                                            </Grid.ColumnDefinitions>
+                                                            <TextBlock  Grid.Column="0"
+                                                                        Text="{Binding}"
+                                                                        HorizontalAlignment="Left"
+                                                                        VerticalAlignment="Stretch" />
+                                                        </Grid>
+                                                    </DataTemplate>
+                                                </dxlc:LayoutGroup.HeaderTemplate>
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="75" />
+                                                        <ColumnDefinition Width="5" />
+                                                        <ColumnDefinition Width="25" />
+                                                        <ColumnDefinition Width="5" />
+                                                        <ColumnDefinition Width="*" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="30" />
+                                                        <RowDefinition Height="5" />
+                                                        <RowDefinition Height="*" />
+                                                    </Grid.RowDefinitions>
+                                                    <Label Grid.Row="0"
+                                                           Grid.Column="0"
+                                                           Margin="2,0,0,0"                                                          
+                                                           Content="{DynamicResource CatalogueDashboardReference}" />
+                                                    <!--Reference textbox-->
+                                                    <dxe:TextEdit Grid.Row="0" Grid.Column="4" HorizontalAlignment="Stretch" VerticalContentAlignment="Center"                                                                                                                                    
+                                                                  Text="{Binding DataContext.Reference,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                                                    <!--Supplier combo-->
+                                                    <Label Grid.Row="2" Grid.Column="0" Margin="2,0,0,0" Content="{DynamicResource CatalogueDashboardReferenceSupplier}" />
+                                                    <dxe:ComboBoxEdit Height="30" Grid.Row="2" Grid.Column="4" Name="Name"
+                                                                      HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ScrollViewer.VerticalScrollBarVisibility="Auto"                                                                      
+                                                                      Style="{DynamicResource ComboBoxEditStyle}" IsTextEditable="False" AutoComplete="True"
+                                                                      DisplayMember="Name"  AllowDefaultButton="False"                                                                      
+                                                                      ItemsSource="{Binding DataContext.SupplierList, RelativeSource={RelativeSource AncestorType=UserControl, Mode=FindAncestor},UpdateSourceTrigger=PropertyChanged , Mode=TwoWay}"
+                                                                      EditValue="{Binding DataContext.SelectedSupplierList, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                                                        <dxe:ComboBoxEdit.Buttons>
+                                                            <dxe:ButtonInfo GlyphKind="Custom"
+                                                                            x:Name="btnClearCompany">
+                                                                <dxe:ButtonInfo.Template>
+                                                                    <DataTemplate>
+                                                                        <dxe:ButtonClose HorizontalAlignment="Center"
+                                                                                         VerticalAlignment="Center"
+                                                                                         Margin="2,0"
+                                                                                         Visibility="{Binding DataContext.ClearSuppliers, UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                                         Command="{Binding (dxe:BaseEdit.OwnerEdit).SetNullValueCommand, RelativeSource={RelativeSource Self}}" />
+                                                                    </DataTemplate>
+                                                                </dxe:ButtonInfo.Template>
+                                                            </dxe:ButtonInfo>
+                                                            <dxe:ButtonInfo IsDefaultButton="True"
+                                                                            GlyphKind="DropDown" />
+                                                        </dxe:ComboBoxEdit.Buttons>
+                                                        <dxe:ComboBoxEdit.StyleSettings>
+                                                            <dxe:CheckedComboBoxStyleSettings />
+                                                        </dxe:ComboBoxEdit.StyleSettings>
+                                                    </dxe:ComboBoxEdit>
+                                                </Grid>
+                                            </dxlc:LayoutGroup>
+                                            
+                                                <!--Category-->
+                                                <dxlc:LayoutGroup  Header="{DynamicResource CatalogueDashboardCategory}"
+                                                              Name="lgProperties"
+                                                              View="GroupBox"
+                                                              Margin="5"
+                                                              dxlc:LayoutControl.AllowHorizontalSizing="True"
+                                                              IsCollapsible="True"
+                                                              IsCollapsed="False">
+                                                    <dxg:TreeListControl  Margin="-12" 
+                             HorizontalAlignment="Stretch" VerticalAlignment="Stretch" AutoGenerateColumns="None" SelectionMode="Cell"
+                             ItemsSource="{Binding WarehouseCategories, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                                        <dxg:TreeListControl.Columns>
+                                                            <dxg:TreeListColumn FieldName="BaseName" MinWidth="250" ReadOnly="True"/>
+                                                        </dxg:TreeListControl.Columns>
+                                                        <dxg:TreeListControl.View>
+                                                            <dxg:TreeListView Name="treeListWarehouseCategories" ShowTotalSummary="False" 
+                                  KeyFieldName="IdKey" ParentFieldName="IdParent"
+                                  ShowCheckboxes="True" CheckBoxFieldName="IsCategoryChecked"
+                                  ShowIndicator="False" AutoWidth="True"
+                                  ShowColumnHeaders="False"
+                                  BestFitMode="AllRows"
+                                  ShowSearchPanelMode ="Always" 
+                                  FilterMode="Extended"
+                                  SearchPanelAllowFilter="True"
+                                  SearchPanelFindFilter="Contains"
+                                  ExpandNodesOnFiltering="True"   
+                                  SearchPanelHorizontalAlignment="Stretch"  
+                                  AllowRecursiveNodeChecking="False"
+                                  EnableSelectedRowAppearance="True" >
+                                                                <dxmvvm:Interaction.Behaviors>
+                                                                    <dxmvvm:EventToCommand EventName="NodeCheckStateChanged"
+                                                   Command="{Binding ChildNodeSelectUnselectCommand}"
+                                                   PassEventArgsToCommand="True"/>
+                                                                </dxmvvm:Interaction.Behaviors>
+                                                            </dxg:TreeListView>
+                                                        </dxg:TreeListControl.View>
+                                                    </dxg:TreeListControl>
+                                                </dxlc:LayoutGroup>
+                                            
+                                        </dxlc:LayoutGroup>
+                                    </Grid>
+                                  
+                                    <!--</ScrollViewer>-->
+                                    <!--Stock label-->
+                                    <Grid Grid.Row="2" Grid.Column="0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="50" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Label Grid.Row="0"
+                                                           Grid.Column="0"
+                                                           Margin="10,0,0,0"                                                          
+                                                           Content="{DynamicResource CatalogueDashboardStock}" />
+                                        <!--Stock combobox-->
+                                        <dxe:ComboBoxEdit Height="30" Grid.Column="1" Name="cmbStock" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"  Margin="10,0,5,0"                                                          
+                                                                          ScrollViewer.VerticalScrollBarVisibility="Auto"  Style="{DynamicResource ComboBoxEditStyle}" AutoComplete="True"                                                                     
+                                                                          IsTextEditable="False"  AllowDefaultButton="False"                                                                           
+                                                                          ItemsSource="{Binding DataContext.ConditionalOperators, RelativeSource={RelativeSource AncestorType=UserControl, Mode=FindAncestor},   UpdateSourceTrigger=PropertyChanged , Mode=TwoWay}"                                                                           
+                                                                          SelectedItem ="{Binding DataContext.SelectedConditionalOperator, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                                            <dxe:ComboBoxEdit.Buttons>
+                                                <dxe:ButtonInfo GlyphKind="Custom"
+                                                                            x:Name="buttonClearSubfamily">
+                                                    <dxe:ButtonInfo.Template>
+                                                        <DataTemplate>
+                                                            <dxe:ButtonClose HorizontalAlignment="Center"
+                                                                                         VerticalAlignment="Center"
+                                                                                         Margin="2,0"
+                                                                                         Visibility="{Binding DataContext.ClearConditionalOperator, UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                                         Command="{Binding (dxe:BaseEdit.OwnerEdit).SetNullValueCommand, RelativeSource={RelativeSource Self}}" />
+                                                        </DataTemplate>
+                                                    </dxe:ButtonInfo.Template>
+                                                </dxe:ButtonInfo>
+                                                <dxe:ButtonInfo IsDefaultButton="True" GlyphKind="DropDown" />
+                                            </dxe:ComboBoxEdit.Buttons>
+                                            <!--<dxe:ComboBoxEdit.StyleSettings>
+                                                <dxe:CheckedComboBoxStyleSettings />
+                                            </dxe:ComboBoxEdit.StyleSettings>-->
+                                        </dxe:ComboBoxEdit>
+                                        <!--Numeric up/down-->
+                                        <dxe:SpinEdit Height="30" Grid.Column="2" Name="StockEditor" AllowDefaultButton="True" MaskType="Numeric" MaskShowPlaceHolders="False" ValidateOnTextInput="True" 
+                                              AllowRoundOutOfRangeValue="True" HorizontalAlignment="Stretch" MaxValue="100" MinValue="0" Margin="5,0,10,0" IsEnabled="{Binding IsStockChangesEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                              Mask="N0" MaskUseAsDisplayFormat="True" TabIndex="0" Value="0" EditValue ="{Binding DataContext.StockValue, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                                            <dxmvvm:Interaction.Behaviors>
+                                                                                <dxmvvm:EventToCommand EventName="EditValueChanged" 
+                                            Command="{Binding DataContext.ChangeValueCommand, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                            CommandParameter="{Binding ColumnFieldName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                            </dxmvvm:Interaction.Behaviors>
+                                        </dxe:SpinEdit>
+                                    </Grid>
+                                    <Separator Grid.Row="4" />
+                                    <Grid Grid.Row="5" Grid.Column="0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="100" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Button Grid.Column="0"
+                                            Content="{DynamicResource CatalogueDashboardClear}"
+                                            Margin="10,5,10,5" Name="clearbtn" >
+                                            <dxmvvm:Interaction.Behaviors>
+                                                <dxmvvm:EventToCommand Command="{Binding DataContext.ClearCommand,RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                                                       EventName="Click"
+                                                                                                       CommandParameter="{Binding Path=.}" />
+                                            </dxmvvm:Interaction.Behaviors>
+                                        </Button>
+                                        <Button Grid.Column="2"
+                                            Content="{DynamicResource CatalogueDashboardSearch}"
+                                            Margin="10,5,10,5" TabIndex="0">
+                                            <!--IsEnabled="{Binding DataContext.EnableSearech, RelativeSource={RelativeSource AncestorType=UserControl, Mode=FindAncestor},UpdateSourceTrigger=PropertyChanged , Mode=TwoWay}" >-->
+                                            
+                                            <dxmvvm:Interaction.Behaviors>
+                                                <dxmvvm:EventToCommand Command="{Binding DataContext.SearchCommand,RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                                                       EventName="Click"
+                                                                                                       CommandParameter="{Binding Path=.}"  />
+                                            </dxmvvm:Interaction.Behaviors>
+                                        </Button>
+                                    </Grid>
+                                </Grid>
+                            </dxdo:LayoutPanel>
+                            <dxdo:DocumentGroup  Name="documentContainer" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                                 DestroyOnClosingChildren="False" ItemTemplate="{DynamicResource Template1}"
+                                                 ItemsSource="{Binding DataContext.CatalogueSearchedList, RelativeSource={RelativeSource AncestorType=UserControl, Mode=FindAncestor},UpdateSourceTrigger=PropertyChanged , Mode=TwoWay}" 
+                                                 SelectedTabIndex="{Binding DataContext.SelectedSearchIndex, RelativeSource={RelativeSource AncestorType=UserControl, Mode=FindAncestor},UpdateSourceTrigger=PropertyChanged , Mode=TwoWay}" 
+                                                 ItemWidth="4.25*" CaptionLocation="{Binding CaptionLocation, RelativeSource={RelativeSource AncestorType=UserControl, Mode=FindAncestor},UpdateSourceTrigger=PropertyChanged , Mode=TwoWay}" 
+                                                 ShowDropDownButton="False" AllowContextMenu="True" ItemHeight="50">
+                                <dxdo:DocumentGroup.ItemStyle>
+                                    <Style TargetType="dxdo:DocumentPanel">
+                                        <Setter Property="CaptionTemplate">
+                                            <Setter.Value>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding Header}"/>
+                                                </DataTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Setter Property="CloseCommand" Value="{Binding DataContext.EditConnectorViewCancelButtonCommand, RelativeSource={RelativeSource AncestorType=UserControl, Mode=FindAncestor},UpdateSourceTrigger=PropertyChanged , Mode=TwoWay}"/>
+                                    </Style>
+                                </dxdo:DocumentGroup.ItemStyle>
+                            </dxdo:DocumentGroup>               
+                        </dxdo:LayoutGroup>
+                    </dxdo:LayoutGroup>
+                </dxdo:LayoutGroup>
+            </dxdo:DockLayoutManager>
+        
+        </Grid>
+        
+    </Grid>
+</UserControl>

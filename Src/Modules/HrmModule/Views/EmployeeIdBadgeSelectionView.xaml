@@ -1,0 +1,110 @@
+﻿<dxwui:WinUIDialogWindow x:Class="Emdep.Geos.Modules.Hrm.Views.EmployeeIdBadgeSelectionView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.Hrm.Views"
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"            
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors" 
+             xmlns:HrmApplication="clr-namespace:Emdep.Geos.Modules.Hrm"
+             xmlns:Validation ="clr-namespace:Emdep.Geos.UI.Validations;assembly=Emdep.Geos.UI.Validations"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+             xmlns:behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="400"
+             Title="{Binding WindowHeader,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+                         TitleStyle="{DynamicResource WinUIDialogWindowTitleStyle}"
+                          Style="{DynamicResource WinUIDialogWindowStyle}">
+
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape" Command="{Binding CancelButtonCommand}"/>
+        <KeyBinding Key="Enter" Command="{Binding AcceptButtonCommand}"/>
+    </dxwui:WinUIDialogWindow.InputBindings>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="120"/>
+            <ColumnDefinition Width="450"/>
+        </Grid.ColumnDefinitions>
+
+        <Label Grid.Row="0" Grid.Column="0" Content="{DynamicResource ProfessionalJobDescriptionJobTitle}" Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,10,0,10"/>
+
+        <dxe:ComboBoxEdit  Name="cmbJobDescription" 
+                           Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" 
+                           Width="450" Height="30" VerticalAlignment="Center"
+                           ApplyItemTemplateToSelectedItem="True" IsTextEditable="False"
+                           ValueMember="IdJobDescription" DisplayMember="JobDescriptionTitleAndCode" 
+                           ItemsSource="{Binding EmployeeJobDescriptionList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+
+            <dxe:ComboBoxEdit.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <Image Margin="5 0" Height="15" Width="15">
+                            <Image.Style>
+                                <Style>
+                                    <Style.Triggers>
+                                        <!-- Blank !-->
+                                        <DataTrigger Binding="{Binding EmployeeJobDescriptions[0].IsMainJobDescription}" Value="0">
+                                            <Setter Property="Image.Source" Value="{x:Null}" />
+                                        </DataTrigger>
+
+                                        <!-- Star !-->
+                                        <DataTrigger Binding="{Binding EmployeeJobDescriptions[0].IsMainJobDescription}" Value="1">
+                                            <Setter Property="Image.Source" Value="/Emdep.Geos.Modules.Hrm;component/Assets/Images/IsMain.png" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Image.Style>
+                        </Image>
+                        <TextBlock Text="{Binding JobDescriptionTitleAndCode}" Margin="5 0" />
+                    </StackPanel>
+                </DataTemplate>
+            </dxe:ComboBoxEdit.ItemTemplate>
+
+            <dxe:ComboBoxEdit.SelectedIndex>
+                <Binding Path="SelectedJobDescription" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                    <Binding.ValidationRules>
+                        <Validation:EmployeeProfileValidation FieldName="SelectedJobDescription" ValidationStep="UpdatedValue" />
+                    </Binding.ValidationRules>
+                </Binding>
+            </dxe:ComboBoxEdit.SelectedIndex>
+        </dxe:ComboBoxEdit>
+
+        <StackPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
+                    HorizontalAlignment="Center" 
+                    Orientation="Horizontal"
+                    Margin="0,0,0,0"
+                    Width="250">
+
+            <Button Content="Accept"
+                    Command="{Binding AcceptButtonCommand}"
+                    Height="30"
+                    Width="100"
+                    Margin="0,0,10,0"
+                    Style="{DynamicResource Button16Style}"
+                    VerticalAlignment="Bottom" 
+                    IsEnabled="{Binding Source={x:Static HrmApplication:HrmCommon.Instance}, Path=IsPermissionEnabled}"/>
+
+            <Button Content="Cancel"
+                    Command="{Binding CancelButtonCommand}" 
+                    Height="30"
+                    Width="100"
+                    Margin="10,0,0,0"
+                    Style="{DynamicResource Button16Style}"
+                    VerticalAlignment="Bottom" />
+        </StackPanel>
+
+    </Grid>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="KeyDown">
+            <behaviors:InvokeDelegateCommandAction Command="{Binding CommandTextInput}" CommandParameter="{Binding Path=InvokeParameter, RelativeSource={RelativeSource Self}}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+</dxwui:WinUIDialogWindow>

@@ -1,0 +1,147 @@
+﻿<dxwui:WinUIDialogWindow x:Class="Workbench.Views.EmdepSitesWindow"
+                         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                         xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+                         xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"
+                         xmlns:dxca="http://schemas.devexpress.com/winfx/2008/xaml/carousel" 
+                         xmlns:dxm="http://schemas.devexpress.com/winfx/2008/xaml/map"
+                         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+                         xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+                         xmlns:ViewModels="clr-namespace:Workbench.ViewModels"  
+                         xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+                         xmlns:gif="http://wpfanimatedgif.codeplex.com"
+                         Height="Auto" Width="525" 
+                         Title="{DynamicResource EmdepSitesWindowChooseSite}"
+                         TitleStyle="{DynamicResource WinUIDialogWindowCenterTitleStyle}"
+                         Style="{DynamicResource WinUIDialogWindowStyle}"
+                         xmlns:system="clr-namespace:System;assembly=mscorlib"
+                        xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper" >
+
+    <!--<dxwui:WinUIDialogWindow.DataContext>
+        <ViewModels:EmdepSitesMapWindowViewModel/>
+    </dxwui:WinUIDialogWindow.DataContext>-->
+    <dxwui:WinUIDialogWindow.Resources>
+        <UIHelper:MyScaleDistributionFunction x:Key="test"/>
+        <dxmvvm:ObjectToObjectConverter x:Key="objectToObject"/>
+        <system:Double x:Key="defaultValue">0</system:Double>
+    </dxwui:WinUIDialogWindow.Resources>
+    <Window.InputBindings>
+        <KeyBinding Key="Escape" Command="{Binding WorkbenchWindowCloseButtonCommand,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />
+    </Window.InputBindings>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <!--<RowDefinition Height="40"/>-->
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <!--<Label Grid.Row="0" Content="{DynamicResource EmdepSitesWindowChooseSite}" Style="{DynamicResource LabelTitleStyle}" VerticalAlignment="Top" HorizontalAlignment="Center" />-->
+
+        <dxca:CarouselItemsControl  Grid.Row="1" ItemsSource="{Binding CompanyObservableCollection}"       >
+            <ItemsControl.ItemsPanel  >
+                <ItemsPanelTemplate >
+                    <dxca:CarouselPanel AttractorPointIndex="2" ActivateItemOnClick="True" VisibleItemCount="5" Margin="10,30"                                     
+                                       Width ="Auto" Height="350" ItemSize="400,400"  PathSizingMode="Stretch" IsRepeat="True"   
+                                       IsInvertedDirection="True"   AnimationTime="300"                       
+                                      PathPadding="7, 7, 7, 20" ClipToBounds="False" PathVisible="False" 
+                                       ActiveItemIndex="{Binding ActiveItemIndexValue, Mode=TwoWay}">
+                        <dxca:CarouselPanel.ParameterSet>
+                            <dxca:ParameterCollection>
+                                <dxca:Parameter Name="ScaleX" DistributionFunction="{StaticResource test}" />
+                                <dxca:Parameter Name="ScaleY" DistributionFunction="{StaticResource test}" />
+                                <!--Standard-->
+                                <dxca:Parameter Name="Scale" DistributionFunction="{StaticResource {ComponentResourceKey TypeInTargetAssembly={x:Type dxca:CarouselPanel}, ResourceId=Linear3PConvexNr}}" />
+                                <dxca:Parameter Name="OriginXB" DistributionFunction="{StaticResource {ComponentResourceKey TypeInTargetAssembly={x:Type dxca:CarouselPanel}, ResourceId=Constant0}}" />
+                                <dxca:Parameter Name="OriginYB" DistributionFunction="{StaticResource {ComponentResourceKey TypeInTargetAssembly={x:Type dxca:CarouselPanel}, ResourceId=Constant0}}" />
+                                <dxca:Parameter Name="Angle" DistributionFunction="{StaticResource {ComponentResourceKey TypeInTargetAssembly={x:Type dxca:CarouselPanel}, ResourceId=Constant0}}" />
+                                <dxca:Parameter Name="OriginXE" DistributionFunction="{StaticResource {ComponentResourceKey TypeInTargetAssembly={x:Type dxca:CarouselPanel}, ResourceId=Constant0}}" />
+                                <dxca:Parameter Name="OriginYE" DistributionFunction="{StaticResource {ComponentResourceKey TypeInTargetAssembly={x:Type dxca:CarouselPanel}, ResourceId=Constant0}}" />
+                            </dxca:ParameterCollection>
+                        </dxca:CarouselPanel.ParameterSet>
+                    </dxca:CarouselPanel>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate  >
+                    <Grid  >
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="30"/>
+                            <RowDefinition Height="220"/>
+                            <RowDefinition Height="20"/>
+                        </Grid.RowDefinitions>
+                        <Label Content="{Binding Name}" Grid.Row="0" VerticalAlignment="Top" HorizontalAlignment="Center" Style="{DynamicResource Label20Style}"></Label>
+                        <Grid  Grid.Row="1" VerticalAlignment="Top" >
+
+                            <Border  Width="350" VerticalAlignment="Top" Style="{DynamicResource BorderBackground}">
+                                <ContentControl>
+                                    <dxmvvm:Interaction.Behaviors>
+                                        <dxmvvm:EventToCommand EventName="MouseDoubleClick"
+                                                               PassEventArgsToCommand="True" 
+                                                               Command="{Binding DataContext.EmdepSitesImageActionCommand, RelativeSource={RelativeSource AncestorType=Window}}" />
+                                    </dxmvvm:Interaction.Behaviors>
+                                    <!--<Image Grid.Row="1"    Height="400" Width="400" Stretch="Uniform"  VerticalAlignment="Top" Source="{Binding BitmapImage}">
+                                    </Image>-->
+
+                                    <Image Stretch="Fill" HorizontalAlignment="Center" VerticalAlignment="Center" Source="{Binding SiteImage }">
+                                        <Image.Style>
+                                            <Style TargetType="Image">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsPermission}" Value="False">
+                                                        <Setter Property="Opacity" Value=".5"></Setter>
+                                                        <Setter Property="OpacityMask" Value="Beige"></Setter>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Image.Style>
+                                    </Image>
+                                </ContentControl>
+                            </Border>
+                            <Image  Stretch="Fill" HorizontalAlignment="Left" VerticalAlignment="Top" Source="/GeosWorkbench;component/Assets/Images/Lock.png" Height="60" Width="60" Margin="-10,-20,10,10" >
+                                <Image.Style>
+                                    <Style TargetType="Image">
+                                        <Setter Property="Visibility" Value="Hidden"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsPermission}" Value="False">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Image.Style>
+                            </Image>
+                        </Grid>
+
+                        <TextBlock   Grid.Row="2" TextWrapping="Wrap" Style="{DynamicResource TextBlockStyle}" Cursor="Hand"  
+                                     VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="150,0,182,1">
+                               <Hyperlink Name="hyperlink" Command="{Binding DataContext.EmdepSitesMapWindowCommand,
+                                          RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"
+                                          Style="{DynamicResource hyperlinkGridStyle}">  
+                                    <InlineUIContainer>
+                                        <TextBlock  Text="{Binding Alias ,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"  />
+                                    </InlineUIContainer>
+                               </Hyperlink>
+                       </TextBlock>
+                        <!--<Button   Content="{Binding Alias ,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" 
+                                  Grid.Row="2"
+                                  Cursor="Hand"  
+                                  VerticalAlignment="Bottom" 
+                                  HorizontalAlignment="Center"                                 
+                                  Margin="150,0,182,1"
+                                  Style="{DynamicResource ButtonForeground}">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <TextBlock TextDecorations="Underline" Style="{DynamicResource TextBlockStyle}" HorizontalAlignment="Stretch">
+                                <ContentPresenter />
+                                    </TextBlock>
+                                </ControlTemplate>
+                            </Button.Template>
+
+                            <dxmvvm:Interaction.Behaviors>
+                                <dxmvvm:EventToCommand EventName="Click" PassEventArgsToCommand="True"
+                                                       Command="{Binding DataContext.EmdepSitesMapWindowCommand, RelativeSource={RelativeSource AncestorType=Window}}" />
+                            </dxmvvm:Interaction.Behaviors>
+                        </Button>-->
+                    </Grid>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </dxca:CarouselItemsControl>
+    </Grid>
+</dxwui:WinUIDialogWindow>

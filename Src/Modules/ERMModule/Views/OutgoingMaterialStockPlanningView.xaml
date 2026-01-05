@@ -1,0 +1,139 @@
+﻿<dxwui:WinUIDialogWindow x:Class="Emdep.Geos.Modules.ERM.Views.OutgoingMaterialStockPlanningView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+     xmlns:sysglb="clr-namespace:System.Globalization;assembly=mscorlib"
+     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+     xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+     xmlns:local="clr-namespace:Emdep.Geos.Modules.ERM.Views"
+     mc:Ignorable="d"
+     xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"
+     xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+     xmlns:Validation ="clr-namespace:Emdep.Geos.UI.Validations;assembly=Emdep.Geos.UI.Validations"
+     xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+     xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors" 
+      xmlns:dxeh="http://schemas.devexpress.com/winfx/2008/xaml/editors/internal"
+     xmlns:Converters="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+      xmlns:ve="http://schemas.devexpress.com/winfx/2008/xaml/docking/visualelements"
+      xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+      xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+     xmlns:ViewModel="clr-namespace:Emdep.Geos.Modules.ERM.ViewModels"
+     xmlns:dxet="http://schemas.devexpress.com/winfx/2008/xaml/editors/themekeys"
+     xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+     
+     Height="300" Width="300"
+     Style="{DynamicResource WinUIDialogWindowStyle}"
+     
+  
+    
+        >
+    
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape" Command="{Binding CancelButtonCommand}"/>
+
+    </dxwui:WinUIDialogWindow.InputBindings>
+    <dxwui:WinUIDialogWindow.TitleStyle>
+        <Style TargetType="ContentControl">
+            <Setter Property="ContentTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                        <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" >
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="5"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Text="{Binding DataContext.WindowHeader,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}" Grid.Column="0" Style="{DynamicResource CustomTitleStyle}" />
+
+                            <Button    Grid.Column="1" Height="24" Width="24" HorizontalAlignment="Stretch" 
+                                Command="{Binding DataContext.CloseButtonCommand,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}" >
+                                <Button.ContentTemplate>
+                                    <DataTemplate>
+                                        <Image Style="{ DynamicResource CloseButtonIcon}"  Height="24" Width="24"  Margin="-12"
+                                           />
+                                    </DataTemplate>
+                                </Button.ContentTemplate>
+                            </Button>
+                        </Grid>
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </dxwui:WinUIDialogWindow.TitleStyle>
+
+    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Focusable="False">
+        <Grid ShowGridLines="True">
+          
+
+
+            <dxg:GridControl ShowBorder="True" Background="Black"  Height="400" Width="1200"
+                      ItemsSource="{Binding DataContext.ERMOutgoingArticleStockPlanningList,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged , RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"
+                    
+                      VerticalAlignment="Center" 
+                      HorizontalAlignment="Center" 
+                      SelectionMode="Row" ImplyNullLikeEmptyStringWhenFiltering="True"  >
+            <dxg:GridColumn Header="{DynamicResource GridColOTCode}" Width="70"  FieldName="OTCode" />
+            <dxg:GridColumn Header="{DynamicResource GridColCustomer}" Width="60"  FieldName="Customer" />
+            <dxg:GridColumn Header="{DynamicResource GridColDescription}" Width="200"  FieldName="Description" />
+            <dxg:GridColumn Header="{DynamicResource GridColItemNumber}" Width="60"  FieldName="ItemNumber"/>
+            <dxg:GridColumn Header="{DynamicResource GridColStatus}" Width="60"  FieldName="Status" />
+                <dxg:GridColumn x:Name="id" Header="{DynamicResource GridColIDDrawing}" Width="60" FieldName="IDDrawing" >
+                    <dxg:GridColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock>
+                                <TextBlock.Style>
+                                    <Style>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IDDrawing}" Value="0">
+                                                <Setter Property="TextBlock.Text" Value="{x:Null}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+
+                        </DataTemplate>
+                    </dxg:GridColumn.CellTemplate>
+                </dxg:GridColumn>
+                
+                <dxg:GridColumn Header="{DynamicResource GridColQuantitytoDownload}" FieldName="Quantity"  Width="85"/>
+
+            <dxg:GridColumn Header="{DynamicResource GridColDeliveryDate}" FieldName="DeliveryDate"  Width="70" IsSmart="True" />
+            <dxg:GridControl.TotalSummary>
+                <dxg:GridSummaryItem x:Name="Summary" SummaryType="Sum" FieldName="Quantity" DisplayFormat="{DynamicResource GridSummary}" Visible="True"  Alignment="Left"/>
+            </dxg:GridControl.TotalSummary>
+
+
+            <dxmvvm:Interaction.Behaviors>
+                <UIHelper:GridSelectingBehavior />
+            </dxmvvm:Interaction.Behaviors>
+
+            <dxg:GridControl.View>
+                <dxg:TableView x:Name="ArticleStockPlanningTableView"
+                            NavigationStyle="Row"
+                            ShowColumnHeaders="True"
+                            ShowIndicator="False" 
+                            AutoWidth="True" 
+                            ShowGroupPanel="False" 
+                            ShowSearchPanelMode="Always" 
+                            SearchPanelHorizontalAlignment="Stretch" 
+                            ShowFixedTotalSummary="True" 
+                            VerticalScrollbarVisibility="Visible"
+                            HorizontalScrollbarVisibility="Visible"
+                            ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly">
+
+                </dxg:TableView>
+               
+            </dxg:GridControl.View>
+        </dxg:GridControl>
+    </Grid>
+        <!--<dxmvvm:Interaction.Triggers>
+            <dxmvvm:EventToCommand EventName="Closing" 
+                           Command="{Binding DXWindowCloseCommand}"
+                           PassEventArgsToCommand="True"/>
+        </dxmvvm:Interaction.Triggers>-->
+    </ScrollViewer>
+    </dxwui:WinUIDialogWindow>
+    
+    

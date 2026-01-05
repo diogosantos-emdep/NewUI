@@ -1,0 +1,89 @@
+﻿<dxwui:WinUIDialogWindow x:Class="Emdep.Geos.Modules.Warehouse.Views.NewLocationView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.Warehouse.Views"
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="500"
+             Style="{DynamicResource WinUIDialogWindowStyle}"
+             Title="{DynamicResource NewLocation}" 
+             TitleStyle="{DynamicResource WinUIDialogWindowTitleStyle}">
+
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape" Command="{Binding CloseWindowCommand}"/>
+    </dxwui:WinUIDialogWindow.InputBindings>
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="10"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="14"></RowDefinition>
+            <RowDefinition Height="50"></RowDefinition>
+        </Grid.RowDefinitions>
+
+        <!--<Grid.ColumnDefinitions>
+            <ColumnDefinition Width="100"></ColumnDefinition>
+            <ColumnDefinition Width="10"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="20"></ColumnDefinition>
+        </Grid.ColumnDefinitions>-->
+
+        <!--<Label Content="{DynamicResource WarehouseLocationPrintLabelSize}" Grid.Column="0"  Grid.Row="1" HorizontalAlignment="Left" VerticalContentAlignment="Center"/>-->
+
+        <dxe:ComboBoxEdit Grid.Column="2" Grid.Row="1" HorizontalAlignment="Center"  Width="210" 
+                          IsTextEditable="False" ItemsSource="{Binding AllPossibleLocationOfArticleList}"
+                          DisplayMember="FullName" ValueMember="IdWarehouseLocation" Height="35" 
+                          SelectedItem="{Binding SelectedAllPossibleLocationOfArticle}"/>
+
+
+
+        <!--<StackPanel Grid.Row="3" 
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="top"
+                    Orientation="Horizontal" 
+                    Width="290">-->
+        <Grid HorizontalAlignment="Center" Grid.Row="3">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"></RowDefinition>
+            </Grid.RowDefinitions>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="100"></ColumnDefinition>
+                <ColumnDefinition Width="10"></ColumnDefinition>
+                <ColumnDefinition Width="100"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+
+            <Button Content="{DynamicResource NewLocationBackButton}" Grid.Column="0"
+                            Command="{Binding CloseWindowCommand}"
+                            Height="30"
+                            Width="100"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Bottom" />
+
+            <Button Content="{DynamicResource Confirm}" Grid.Column="2"
+                            Command="{Binding ConfirmButtonCommand}" 
+                            Height="30"
+                            Width="100"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Bottom"/>
+        </Grid>
+        <!--<Button Content="{DynamicResource Back}" Grid.Row="3"
+                            Command="{Binding CloseWindowCommand}"
+                            Height="30"
+                            Width="100"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center" />
+
+        <Button Content="{DynamicResource Confirm}" Grid.Row="3"
+                            Command="{Binding ConfirmButtonCommand}" 
+                            Height="30"
+                            Width="100"
+                            Margin="10,0,0,0"
+                            HorizontalAlignment=""
+                            VerticalAlignment="Bottom"/>-->
+        <!--</StackPanel>-->
+    </Grid>
+</dxwui:WinUIDialogWindow>

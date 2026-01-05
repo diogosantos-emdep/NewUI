@@ -1,0 +1,20 @@
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS WMS_GetWarehouseScheduleEventsByIdWarehouse_V2670$$
+
+CREATE PROCEDURE WMS_GetWarehouseScheduleEventsByIdWarehouse_V2670(_IdWarehouse int unsigned, _Year int)
+BEGIN
+/*
+ [nsatpute][25.09.2025][GEOS2-8797]
+  */
+	select IdWarehouseSchedule, IdWarehouse, CreationDate, CreatedBy, 
+	concat(ifnull(p1.Name,''),' ', ifnull(p1.Surname,'')) as CreatedByPerson, ModifiedBy, 
+	concat(ifnull(p2.Name,''),' ', ifnull(p2.Surname,'')) as ModifiedByPerson, ModificationDate, IdTypeEvent, IdLogistic, StartDate, EndDate,IsDone, ws.Observations  from geos.warehouseschedule ws
+left join geos.people p1 on ws.CreatedBy = p1.idperson
+left join geos.people p2 on ws.ModifiedBy = p2.idperson 
+where idwarehouse = _IdWarehouse and year(StartDate) = _Year;
+END$$
+
+DELIMITER ;
+
+

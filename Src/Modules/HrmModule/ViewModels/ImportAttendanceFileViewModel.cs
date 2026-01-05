@@ -1,0 +1,2754 @@
+﻿using DevExpress.Mvvm;
+using DevExpress.Xpf.Core;
+using Emdep.Geos.Data.Common;
+using Emdep.Geos.Modules.Hrm.Views;
+using Emdep.Geos.UI.Commands;
+using Emdep.Geos.UI.Common;
+using Prism.Logging;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.IO;
+using System.Windows.Input;
+using Emdep.Geos.Data.Common.Hrm;
+using System.ServiceModel;
+using Emdep.Geos.Services.Contracts;
+using Emdep.Geos.UI.CustomControls;
+using System.Windows;
+using System.Data;
+using DevExpress.Spreadsheet;
+using DevExpress.XtraSpreadsheet.Model;
+using DevExpress.XtraSpreadsheet.API.Native.Implementation;
+using System.Dynamic;
+using DevExpress.Xpf.Editors;
+using Emdep.Geos.UI.Validations;
+using Emdep.Geos.Modules.Hrm.CommonClass;
+using DevExpress.Xpf.Grid;
+using DevExpress.Data.Filtering;
+using System.Linq;
+using System.Windows.Media;
+using DevExpress.Mvvm.UI;
+using ExcelDataReader.Core;
+using Emdep.Geos.Utility;
+using ExcelDataReader;
+using Emdep.Geos.UI.ServiceProcess;
+using Microsoft.Win32;
+using System.Data.Odbc;
+using System.Data.OleDb;
+using System.Text;
+using System.Reflection;
+using System.Globalization;
+using Emdep.Geos.Data.Common.Epc;
+
+namespace Emdep.Geos.Modules.Hrm.ViewModels
+{
+    public class ImportAttendanceFileViewModel : NavigationViewModelBase, IDataErrorInfo, INotifyPropertyChanged
+    {
+        #region TaskLog
+
+        /// <summary>
+        /// [001][adadibathina] [GEOS2-48] Add startdate and enddate filter in import attendance 
+        /// [002][skhade][2019-09-13][GEOS2-31] Change the time format in attendance import option.
+        /// </summary>
+
+        #endregion
+
+        #region Service
+
+        protected IOpenFileDialogService OpenFileDialogService { get { return this.GetService<IOpenFileDialogService>(); } }
+        IHrmService HrmService = new HrmServiceController(GeosApplication.Instance.ApplicationSettings["ServicePath"].ToString());
+        ICrmService CrmStartUp = new CrmServiceController(GeosApplication.Instance.ApplicationSettings["ServicePath"].ToString());
+
+        #endregion
+
+        #region Declaration
+
+        private DateTime filterStartDate;
+        private DateTime filterEndDate;
+        private bool isSave;
+        bool IsBusy;
+        private ObservableCollection<Attachment> attachmentFiles;
+        private byte[] fileInBytes;
+        private int sheetNameSelectedIndex;
+        private ObservableCollection<ImportAttendance> employeeAttendance = new ObservableCollection<ImportAttendance>();
+        private EmployeeAttendanceImportField selectedField;
+        private int attachedFileIndex;
+        private List<IDictionary<string, object>> reportData;
+        private DataTable filteredTable { get; set; }
+        int dataSourceSelectedIndex;
+        private Dictionary<string, int> matchedIndex { get; set; }
+        ObservableCollection<string> textSeparators;
+        ObservableCollection<string> exelSheetNames;
+        ObservableCollection<string> dsns;
+        private int dsnSelectedIndex;
+        ObservableCollection<string> dsnTableNames;
+        string sheetNameSelectedItem;
+
+        public enum SQL_INFO
+        {
+            DATA_SOURCE_NAME,
+            DRIVER_NAME,
+            DRIVER_VER,
+            ODBC_VER,
+            SERVER_NAME,
+            SEARCH_PATTERN_ESCAPE,
+            DBMS_NAME,
+            DBMS_VER,
+            IDENTIFIER_CASE,
+            IDENTIFIER_QUOTE_CHAR,
+            CATALOG_NAME_SEPARATOR,
+            DRIVER_ODBC_VER,
+            GROUP_BY,
+            KEYWORDS,
+            ORDER_BY_COLUMNS_IN_SELECT,
+            QUOTED_IDENTIFIER_CASE,
+            SQL_OJ_CAPABILITIES_30,
+            SQL_SQL92_RELATIONAL_JOIN_OPERATORS,
+            SQL_OJ_CAPABILITIES_20
+        }
+
+        private bool isReadOnlyField;
+        private bool isAcceptEnabled;
+        private ObservableCollection<LookupValue> attendanceTypeList;
+        private List<string> idsAttendanceType;
+
+        #endregion
+
+        #region Properties
+
+        // 002 geos_app_setting
+        string DateFormatGeosAppSetting { get; set; }
+        String[] DateFormatGeosAppSettingArray { get; set; }
+
+        string TimeFormatGeosAppSetting { get; set; }
+        String[] TimeFormatGeosAppSettingArray { get; set; }
+
+        private List<CompanySetting> DateFormatCompanySettings { get; set; }
+        private List<CompanySetting> TimeFormatCompanySettings { get; set; }
+
+        int StringSplit { get; set; }
+
+        public DateTime FilterStartDate
+        {
+            get { return filterStartDate; }
+            set { filterStartDate = value; OnPropertyChanged(new PropertyChangedEventArgs("FilterStartDate")); }
+        }
+
+        public DateTime FilterEndDate
+        {
+            get { return filterEndDate; }
+            set { filterEndDate = value; OnPropertyChanged(new PropertyChangedEventArgs("FilterEndDate")); }
+        }
+
+        public List<EmployeeAttendance> EmpAddedAttendanceList { get; set; }
+        public int SheetNameSelectedIndex
+        {
+            get { return sheetNameSelectedIndex; }
+            set
+            {
+                sheetNameSelectedIndex = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("SheetNameSelectedIndex"));
+            }
+        }
+
+        public int DataSourceSelectedIndex
+        {
+            get { return dataSourceSelectedIndex; }
+            set
+            {
+                dataSourceSelectedIndex = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("DataSourceSelectedIndex"));
+            }
+        }
+
+        public ObservableCollection<string> TextSeparators
+        {
+            get { return textSeparators; }
+            set
+            {
+                textSeparators = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("TextSeparators"));
+            }
+        }
+
+        public ObservableCollection<string> ExelSheetNames
+        {
+            get { return exelSheetNames; }
+            set
+            {
+                exelSheetNames = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("ExelSheetNames"));
+            }
+        }
+
+        public ObservableCollection<string> Dsns
+        {
+            get { return dsns; }
+            set
+            {
+                dsns = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("Dsns"));
+            }
+        }
+
+        public ObservableCollection<string> DsnTableNames
+        {
+            get { return dsnTableNames; }
+            set
+            {
+                dsnTableNames = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("DsnTableNames"));
+            }
+        }
+
+        public ObservableCollection<Attachment> AttachmentFiles
+        {
+            get { return attachmentFiles; }
+            set
+            {
+                attachmentFiles = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("AttachmentFiles"));
+            }
+        }
+
+        public List<IDictionary<string, object>> ReportData
+        {
+            get { return reportData; }
+            set
+            {
+                reportData = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("ReportData"));
+            }
+        }
+
+        public int AttachedFileIndex
+        {
+            get { return attachedFileIndex; }
+            set
+            {
+                attachedFileIndex = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("AttachedFileIndex"));
+            }
+        }
+
+        List<EmployeeAttendance> EmployeeAttendanceList { get; set; }
+        bool IsMatchTypeWithDataSourceField { get; set; }
+        public ObservableCollection<ImportAttendance> EmployeeAttendance
+        {
+            get { return employeeAttendance; }
+            set
+            {
+                employeeAttendance = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("EmployeeAttendance"));
+            }
+        }
+
+        public EmployeeAttendanceImportField SelectedField
+        {
+            get { return selectedField; }
+            set
+            {
+                selectedField = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("SelectedField"));
+            }
+        }
+
+        public byte[] FileInBytes
+        {
+            get { return fileInBytes; }
+            set
+            {
+                fileInBytes = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("FileInBytes"));
+            }
+        }
+
+        public bool IsSave
+        {
+            get { return isSave; }
+            set
+            {
+                isSave = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("IsSave"));
+            }
+        }
+
+        public int DsnSelectedIndex
+        {
+            get { return dsnSelectedIndex; }
+            set
+            {
+                dsnSelectedIndex = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("DsnSelectedIndex"));
+            }
+        }
+
+        public string SheetNameSelectedItem
+        {
+            get { return sheetNameSelectedItem; }
+            set
+            {
+                sheetNameSelectedItem = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("SheetNameSelectedItem"));
+            }
+        }
+
+        public bool IsReadOnlyField
+        {
+            get { return isReadOnlyField; }
+            set
+            {
+                isReadOnlyField = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("IsReadOnlyField"));
+            }
+        }
+
+        public bool IsAcceptEnabled
+        {
+            get { return isAcceptEnabled; }
+            set
+            {
+                isAcceptEnabled = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("IsAcceptEnabled"));
+            }
+        }
+
+        public ObservableCollection<LookupValue> AttendanceTypeList
+        {
+            get { return attendanceTypeList; }
+            set
+            {
+                attendanceTypeList = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("AttendanceTypeList"));
+            }
+        }
+
+        public List<string> IdsAttendanceType
+        {
+            get { return idsAttendanceType; }
+            set
+            {
+                idsAttendanceType = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("IdsAttendanceType"));
+            }
+        }
+
+        private List<PostgreSQLdb> PostgreSQLdbList { get; set; }
+
+        #endregion
+
+        #region Public Icommands
+        public ICommand CloseButtonCommand { get; set; }
+        public ICommand ChooseFileCommandForAttendance { get; set; }
+        public ICommand NextButtonCommand { get; set; }
+        public ICommand NextWindowCommand { get; set; }
+        public ICommand SelectedItemChangedCommand { get; set; }
+        public ICommand ShowSourceColumnCustomFilterPopupCommand { get; set; }
+        public ICommand DataSourceSelectedIndexChanged { get; set; }
+        public ICommand SheetNameSelectedIndexChanged { get; set; }
+        public ICommand FilterStartDateValueChangedCommand { get; set; }
+        public ICommand FilterEndDateValueChangedCommand { get; set; }
+
+        public ICommand CommandTextInput { get; set; }
+        #endregion
+
+        #region Events
+
+        public event EventHandler RequestClose;
+        public event PropertyChangedEventHandler PropertyChanged;
+        public void OnPropertyChanged(PropertyChangedEventArgs e)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, e);
+            }
+        }
+
+        #endregion
+
+        #region Validation
+
+        bool allowValidation = false;
+        string EnableValidationAndGetError()
+        {
+            allowValidation = true;
+            string error = ((IDataErrorInfo)this).Error;
+
+            if (!string.IsNullOrEmpty(error))
+            {
+                return error;
+            }
+            return null;
+        }
+
+        string IDataErrorInfo.Error
+        {
+            get
+            {
+                if (!allowValidation) return null;
+                IDataErrorInfo me = (IDataErrorInfo)this;
+                string error =
+                    me[BindableBase.GetPropertyName(() => AttachedFileIndex)] +
+                    me[BindableBase.GetPropertyName(() => EmployeeAttendance)] +
+                    me[BindableBase.GetPropertyName(() => FilterEndDate)] +
+                    me[BindableBase.GetPropertyName(() => FilterStartDate)] +
+                    me[BindableBase.GetPropertyName(() => SheetNameSelectedIndex)];
+
+                if (!string.IsNullOrEmpty(error))
+                    return "Please check inputted data.";
+
+                return null;
+            }
+        }
+
+        string IDataErrorInfo.this[string columnName]
+        {
+            get
+            {
+                if (!allowValidation) return null;
+                string AttachedFileIndexProp = BindableBase.GetPropertyName(() => AttachedFileIndex);
+                string sheetNameSelectedIndex = BindableBase.GetPropertyName(() => SheetNameSelectedIndex);
+                string employeeAttendance = BindableBase.GetPropertyName(() => EmployeeAttendance);
+                string filterEndDate = BindableBase.GetPropertyName(() => FilterEndDate);
+                string filterStartDate = BindableBase.GetPropertyName(() => FilterStartDate);
+
+                if (columnName == AttachedFileIndexProp && DataSourceSelectedIndex != 2)
+                    return RequiredValidationRule.GetErrorMessage(AttachedFileIndexProp, AttachedFileIndex);
+
+                if (DataSourceSelectedIndex.Equals(1))
+                {
+                    if (columnName == sheetNameSelectedIndex)
+                    {
+                        string error = RequiredValidationRule.GetErrorMessage(sheetNameSelectedIndex, StringSplit);
+
+                        return error;
+                    }
+                }
+
+                if (DataSourceSelectedIndex.Equals(2))
+                {
+                    if (columnName == sheetNameSelectedIndex)
+                    {
+                        if (DsnTableNames.Count == 0)
+                            return "Error";
+
+                    }
+                }
+
+                if (columnName == employeeAttendance)
+                {
+                    string error = RequiredValidationRule.GetErrorMessage(employeeAttendance, EmployeeAttendance.Count);
+
+                    return error;
+                }
+
+                if (columnName == filterStartDate || columnName == filterEndDate)
+                {
+                    if (FilterEndDate < FilterStartDate)
+                    {
+                        return System.Windows.Application.Current.FindResource("ImportAttendanceFilterDateError").ToString();
+                    }
+                }
+
+                return null;
+            }
+        }
+
+        #endregion
+
+        #region Constructor
+
+        public ImportAttendanceFileViewModel()
+        {
+            try
+            {
+                GeosApplication.Instance.Logger.Log("Constructor ImportAttendanceFileViewModel()...", category: Category.Info, priority: Priority.Low);
+
+                SetUserPermission();
+                CloseButtonCommand = new RelayCommand(new Action<object>(CloseWindow));
+                ChooseFileCommandForAttendance = new RelayCommand(new Action<object>(BrowseFileAction));
+                NextWindowCommand = new RelayCommand(new Action<object>(Next));
+                SelectedItemChangedCommand = new DelegateCommand<EditValueChangedEventArgs>(SelectedItemChangedCommandAction);
+                ShowSourceColumnCustomFilterPopupCommand = new DelegateCommand<FilterPopupEventArgs>(ShowSourceColumnCustomFilterPopupCommandAction);
+                DataSourceSelectedIndexChanged = new DelegateCommand<EditValueChangedEventArgs>(DataSourceIndexChanged);
+                SheetNameSelectedIndexChanged = new DelegateCommand<EditValueChangedEventArgs>(SheetNameIndexChanged);
+                FilterEndDateValueChangedCommand = new DelegateCommand<EditValueChangedEventArgs>(DateChangeValidation);
+                FilterStartDateValueChangedCommand = new DelegateCommand<EditValueChangedEventArgs>(DateChangeValidation);
+                CommandTextInput = new DelegateCommand<KeyEventArgs>(ShortcutAction);
+                //[001]Added Code
+                string TypeCompaniesids = CrmStartUp.GetGeosAppSettings(86).DefaultValue;
+                string[] idsTypeCompany = TypeCompaniesids.Split(',').ToArray();
+                if (HrmCommon.Instance.SelectedAuthorizedPlantsList != null && HrmCommon.Instance.SelectedAuthorizedPlantsList.Count > 0)
+                {
+                    HrmCommon.Instance.SelectedAuthorizedPlantsList.Cast<Company>().FirstOrDefault();
+                    if (idsTypeCompany.Any(i => i == HrmCommon.Instance.SelectedAuthorizedPlantsList.Cast<Company>().FirstOrDefault().IdCompany.ToString()))
+                    {
+                        IsMatchTypeWithDataSourceField = true;
+                        
+                    }
+                }
+                if (IsMatchTypeWithDataSourceField)
+                {
+                    string ImportAttendanceCodes = CrmStartUp.GetGeosAppSettings(87).DefaultValue;
+                    string[] ArrayImportAttendanceCodes = ImportAttendanceCodes.Split(',').ToArray();
+                    Dictionary<string, string> LstImportAttendanceCodes = new Dictionary<string, string>();
+                    if (LstImportAttendanceCodes == null)
+                    {
+                        LstImportAttendanceCodes = new Dictionary<string, string>();
+                    }
+                    foreach (string item in ArrayImportAttendanceCodes)
+                    {
+                        string[] tempCodes = null;
+                        if (item.Contains(';'))
+                            tempCodes = item.Split(';').ToArray();
+                        if (tempCodes.Count() == 2 && tempCodes[0] != null && tempCodes[1] != null)
+                            LstImportAttendanceCodes.Add(tempCodes[0].Replace('(', ' ').Trim(), tempCodes[1].Replace(')', ' ').Trim());
+                    }
+                    if (LstImportAttendanceCodes != null && LstImportAttendanceCodes.Count > 0)
+                    {
+                        idsAttendanceType = LstImportAttendanceCodes.Select(i => (string.IsNullOrEmpty(i.Value.TrimStart(new Char[] { '0' })) ? "0" : i.Value.TrimStart(new Char[] { '0' }))).ToList();
+                    }
+                }
+                GeosApplication.Instance.Logger.Log("Constructor ImportAttendanceFileViewModel()....executed successfully", category: Category.Info, priority: Priority.Low);
+            }
+            catch (Exception ex)
+            {
+                GeosApplication.Instance.Logger.Log("Get an error in Constructor ImportAttendanceFileViewModel()...." + ex.Message, category: Category.Exception, priority: Priority.Low);
+            }
+        }
+
+        #endregion
+
+        #region Methods
+
+        private void SetUserPermission()
+        {
+            switch (HrmCommon.Instance.UserPermission)
+            {
+                case PermissionManagement.SuperAdmin:
+                    IsAcceptEnabled = true;
+                    IsReadOnlyField = false;
+                    break;
+
+                case PermissionManagement.Admin:
+                    IsAcceptEnabled = true;
+                    IsReadOnlyField = false;
+                    break;
+
+                case PermissionManagement.PlantViewer:
+                    IsAcceptEnabled = false;
+                    IsReadOnlyField = true;
+                    break;
+
+                case PermissionManagement.GlobalViewer:
+                    IsAcceptEnabled = false;
+                    IsReadOnlyField = true;
+                    break;
+
+                default:
+                    IsAcceptEnabled = false;
+                    IsReadOnlyField = true;
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Init the viewmodel
+        /// </summary>
+        /// <param name="EmployeeAttendanceList">Tatoal Attendance to Coampare with imported recored</param>
+        public void Init(ObservableCollection<EmployeeAttendance> employeeAttendanceList)
+        {
+            GeosApplication.Instance.Logger.Log("Method Init() ...", category: Category.Info, priority: Priority.Low);
+            try
+            {
+                EmployeeAttendanceList = employeeAttendanceList.ToList();
+                AttachmentFiles = new ObservableCollection<Attachment>();
+                TextSeparators = new ObservableCollection<string>();
+                ExelSheetNames = new ObservableCollection<string>();
+                ReportData = new List<IDictionary<string, object>>();
+                matchedIndex = new Dictionary<string, int>();
+                Dsns = new ObservableCollection<string>();
+                DsnTableNames = new ObservableCollection<string>();
+                FilterStartDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+                FilterEndDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.DaysInMonth(DateTime.Now.Year, DateTime.Now.Month));
+                EmpAddedAttendanceList = new List<Data.Common.Hrm.EmployeeAttendance>();
+                LoadSavedSettings();
+                FillSeparators();
+                FillDsns();
+                }
+            catch (Exception ex)
+            {
+                GeosApplication.Instance.Logger.Log("Get an error in Method Init()...." + ex.Message, category: Category.Exception, priority: Priority.Low);
+            }
+
+            GeosApplication.Instance.Logger.Log("Method Init() executed successfully", category: Category.Info, priority: Priority.Low);
+        }
+
+        private void FillTableNameFromDsn()
+        {
+            try
+            {
+                string dbsmName = string.Empty;
+                GeosApplication.Instance.Logger.Log("Method FillTableNameFromDsn() ...", category: Category.Info, priority: Priority.Low);
+                string connectionString = "Dsn=" + Dsns[DsnSelectedIndex] + ";Trusted_Connection=Yes;";
+
+                using (OdbcConnection connection = new OdbcConnection(connectionString))
+                {
+                   
+                    connection.Open();
+                    dbsmName = GetInfoOfDBMS(connection, SQL_INFO.DBMS_NAME);
+                    DataSet ds = new DataSet();
+                    OdbcCommand oComm = new OdbcCommand();
+                    DataTable tables = connection.GetSchema("Tables");
+                    DataTable viewDatatable = connection.GetSchema("Views");
+                    if (dbsmName == "Microsoft SQL Server")
+                    {
+                        try
+                        {
+                            if (!viewDatatable.AsEnumerable().Any(X => X["TABLE_NAME"].ToString().Trim().ToUpper() == "GHRMCHECKINOUT_VIEW"))
+                            {
+
+                                oComm.CommandText = "create view GHRMCHECKINOUT_VIEW as (select inf.[Badgenumber] ,ch.[CHECKTIME]  as PunchDate,ch.[CHECKTIME]  as PunchTime  From [CHECKINOUT] as ch  inner join [USERINFO] as inf on ch.USERID=inf.USERID)";
+                                oComm.Connection = connection;
+                                OdbcDataAdapter oAdapter = new OdbcDataAdapter(oComm);
+                                oAdapter.Fill(ds);
+                                viewDatatable = connection.GetSchema("Views");
+                            }
+
+                            DataRow row = viewDatatable.AsEnumerable().Where(X => X["TABLE_NAME"].ToString().ToUpper() == "GHRMCHECKINOUT_VIEW").FirstOrDefault();
+                            if (row != null)
+                            {
+                                DsnTableNames.Add(row["TABLE_NAME"].ToString());
+                            }
+                        }
+                        catch(Exception ex)
+                        {
+                            GeosApplication.Instance.Logger.Log("Get an error in Sql Server while creating view GHRMCHECKINOUT_VIEW in Method FillTableNameFromDsn()...." + ex.Message, category: Category.Exception, priority: Priority.Low);
+                        }
+                    }
+                    else if (dbsmName == "MySQL")
+                    {
+                        try
+                        {
+                            if (viewDatatable.AsEnumerable().Any(X => X["TABLE_NAME"].ToString().ToUpper() == "GHRMCHECKINOUT_VIEW"))
+                            {
+                                DataRow row = viewDatatable.AsEnumerable().Where(X => X["TABLE_NAME"].ToString().ToUpper() == "GHRMCHECKINOUT_VIEW").FirstOrDefault();
+                                if (row != null)
+                                {
+                                    DsnTableNames.Add(row["TABLE_NAME"].ToString());
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            GeosApplication.Instance.Logger.Log("Get an error in MysQL server while Loading view in Method FillTableNameFromDsn()...." + ex.Message, category: Category.Exception, priority: Priority.Low);
+                        }
+                    }
+                    else if (dbsmName == "PostgreSQL")
+                    {
+                        try
+                        {
+                            if (viewDatatable.AsEnumerable().Any(X => X["TABLE_NAME"].ToString().ToUpper() == "GHRMCHECKINOUT_VIEW"))
+                            {
+                                DataRow row = viewDatatable.AsEnumerable().Where(X => X["TABLE_NAME"].ToString().ToUpper() == "GHRMCHECKINOUT_VIEW").FirstOrDefault();
+                                if (row != null)
+                                {
+                                    DsnTableNames.Add(row["TABLE_NAME"].ToString());
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            GeosApplication.Instance.Logger.Log("Get an error in MysQL server while Loading view in Method FillTableNameFromDsn()...." + ex.Message, category: Category.Exception, priority: Priority.Low);
+                        }
+                    }
+
+                }
+
+                using (OdbcConnection connection = new OdbcConnection(connectionString))
+                {
+
+                    connection.Open();
+                    dbsmName = GetInfoOfDBMS(connection, SQL_INFO.DBMS_NAME);
+                    DataTable tables = connection.GetSchema("Tables");
+                    DataTable viewDatatable = connection.GetSchema("Views");
+                    if (dbsmName == "EXCEL")
+                    {
+                        foreach (DataRow row in tables.Rows)
+                        {
+                            DsnTableNames.Add(row["TABLE_NAME"].ToString().Replace("$", "").Replace("'", ""));
+                        }
+                    }
+                    else if (dbsmName == "ACCESS")
+                    {
+                        foreach (DataRow row in tables.Rows)
+                        {
+                            if (row["TABLE_NAME"].ToString().Substring(0, 4) != "MSys")
+                                DsnTableNames.Add(row["TABLE_NAME"].ToString());
+                        }
+                    }
+                    else
+                    {
+                        foreach (DataRow row in viewDatatable.Rows)
+                        {
+                            try
+                            {
+                                if (row["TABLE_NAME"].ToString().Equals("attendance_view"))
+                                {
+                                    DsnTableNames.Add(row["TABLE_NAME"].ToString());
+                                }
+                                try
+                                {
+                                    if (PostgreSQLdbList == null)
+                                    {
+                                        PostgreSQLdbList = new List<PostgreSQLdb>();
+                                    }
+                                    PostgreSQLdb postgreSQLdb = new PostgreSQLdb();
+                                    if (!string.IsNullOrEmpty(row["TABLE_NAME"].ToString()))
+                                    {
+                                        postgreSQLdb.TABLE_NAME = row["TABLE_NAME"].ToString();
+                                    }
+                                    if (!string.IsNullOrEmpty(row["TABLE_SCHEM"].ToString()))
+                                    {
+                                        postgreSQLdb.TABLE_SCHEM = row["TABLE_SCHEM"].ToString();
+                                    }
+                                    if (!string.IsNullOrEmpty(row["TABLE_CAT"].ToString()))
+                                    {
+                                        postgreSQLdb.TABLE_CAT = row["TABLE_CAT"].ToString();
+                                    }
+                                    if (!string.IsNullOrEmpty(row["TABLE_TYPE"].ToString()))
+                                    {
+                                        postgreSQLdb.TABLE_TYPE = row["TABLE_TYPE"].ToString();
+                                    }
+                                    if (!string.IsNullOrEmpty(row["REMARKS"].ToString()))
+                                    {
+                                        postgreSQLdb.REMARKS = row["REMARKS"].ToString();
+                                    }
+                                    PostgreSQLdbList.Add(postgreSQLdb);
+                                }
+                                catch (Exception ex)
+                                {
+                                    GeosApplication.Instance.Logger.Log("Get an error in Method FillTableNameFromDsn()...." + ex.Message, category: Category.Exception, priority: Priority.Low);
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                GeosApplication.Instance.Logger.Log("Get an error in Method FillTableNameFromDsn()...." + ex.Message, category: Category.Exception, priority: Priority.Low);
+                            }
+
+                        }
+
+                        foreach (DataRow row in tables.Rows)
+                        {
+
+                            DsnTableNames.Add(row["TABLE_NAME"].ToString());
+                            //if (row["TABLE_NAME"].ToString().Equals("ep_eptransaction") || row["TABLE_NAME"].ToString().Equals("applicable_roles") || row["TABLE_NAME"].ToString().Equals("attendance_view"))
+                            //{
+
+                            //    DsnTableNames.Add(row["TABLE_NAME"].ToString());
+                            //}
+                            try
+                            {
+                                if (PostgreSQLdbList==null)
+                                {
+                                    PostgreSQLdbList = new List<PostgreSQLdb>();
+                                }
+                                PostgreSQLdb postgreSQLdb = new PostgreSQLdb();
+                                if (!string.IsNullOrEmpty(row["TABLE_NAME"].ToString()))
+                                {
+                                    postgreSQLdb.TABLE_NAME = row["TABLE_NAME"].ToString();
+                                }
+                                if (!string.IsNullOrEmpty(row["TABLE_SCHEM"].ToString()))
+                                {
+                                    postgreSQLdb.TABLE_SCHEM = row["TABLE_SCHEM"].ToString();
+                                }
+                                if (!string.IsNullOrEmpty(row["TABLE_CAT"].ToString()))
+                                {
+                                    postgreSQLdb.TABLE_CAT = row["TABLE_CAT"].ToString();
+                                }
+                                if (!string.IsNullOrEmpty(row["TABLE_TYPE"].ToString()))
+                                {
+                                    postgreSQLdb.TABLE_TYPE = row["TABLE_TYPE"].ToString();
+                                }
+                                if (!string.IsNullOrEmpty(row["REMARKS"].ToString()))
+                                {
+                                    postgreSQLdb.REMARKS = row["REMARKS"].ToString();
+                                }
+                                PostgreSQLdbList.Add(postgreSQLdb);
+                            }
+                            catch (Exception ex)
+                            {
+                                GeosApplication.Instance.Logger.Log("Get an error in Method FillTableNameFromDsn()...." + ex.Message, category: Category.Exception, priority: Priority.Low);
+                            }
+
+                        }
+                    }
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                GeosApplication.Instance.Logger.Log("Get an error in Method FillTableNameFromDsn()...." + ex.Message, category: Category.Exception, priority: Priority.Low);
+            }
+
+            GeosApplication.Instance.Logger.Log("Method FillTableNameFromDsn() executed successfully", category: Category.Info, priority: Priority.Low);
+        }
+
+        /// <summary>
+        /// Fill dsns
+        /// </summary>
+        private void FillDsns()
+        {
+            Dsns.AddRange(EnumDsn(Registry.CurrentUser));
+            Dsns.AddRange(EnumDsn(Registry.LocalMachine));
+        }
+
+        public string GetInfoOfDBMS(OdbcConnection ocn, SQL_INFO info)
+        {
+            try
+            {
+                GeosApplication.Instance.Logger.Log("Method GetInfoOfDBMS() ...", category: Category.Info, priority: Priority.Low);
+                MethodInfo GetInfoStringUnhandled = ocn.GetType().GetMethods(BindingFlags.NonPublic | BindingFlags.Instance).First(c => c.Name == "GetInfoStringUnhandled");
+                ParameterInfo SQL_INFO = GetInfoStringUnhandled.GetParameters().First(c => (c.ParameterType.ToString() == "System.Data.Odbc.ODBC32+SQL_INFO"));
+                Array EnumValues = SQL_INFO.ParameterType.GetEnumValues();
+                foreach (var enumval in EnumValues)
+                {
+                    if (enumval.ToString() == info.ToString())
+                    {
+                        return Convert.ToString(GetInfoStringUnhandled.Invoke(ocn, new object[] { enumval }));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                GeosApplication.Instance.Logger.Log("Get an error in Method GetInfoOfDBMS()...." + ex.Message, category: Category.Exception, priority: Priority.Low);
+            }
+            GeosApplication.Instance.Logger.Log("Method GetInfoOfDBMS() executed successfully", category: Category.Info, priority: Priority.Low);
+            return string.Empty;
+        }
+
+        private IEnumerable<string> EnumDsn(RegistryKey rootKey)
+        {
+            RegistryKey regKey = rootKey.OpenSubKey(@"Software\ODBC\ODBC.INI\ODBC Data Sources");
+            if (regKey != null)
+            {
+                foreach (string name in regKey.GetValueNames())
+                {
+                    string value = regKey.GetValue(name, "").ToString();
+                    yield return name;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Load settings which are saved before
+        /// </summary>
+        void LoadSavedSettings()
+        {
+            GeosApplication.Instance.Logger.Log("Method LoadSavedSettings() ...", category: Category.Info, priority: Priority.Low);
+            try
+            {
+                if (GeosApplication.Instance.UserSettings.ContainsKey("ImportAttendanceDataSourceSelectedIndex"))
+                {
+                    int SelectedIndex;
+                    int.TryParse(GeosApplication.Instance.UserSettings["ImportAttendanceDataSourceSelectedIndex"], out SelectedIndex);
+                    DataSourceSelectedIndex = SelectedIndex;
+                }
+                else
+                    DataSourceSelectedIndex = 0;
+
+                if (DataSourceSelectedIndex == 1)
+                {
+                    if (GeosApplication.Instance.UserSettings.ContainsKey("ImportAttendanceTextSeparator"))
+                    {
+                        int SelectedIndex;
+                        int.TryParse(GeosApplication.Instance.UserSettings["ImportAttendanceTextSeparator"], out SelectedIndex);
+                        SheetNameSelectedIndex = SelectedIndex;
+                    }
+                    else
+                        SheetNameSelectedIndex = 0;
+                }
+
+                if (DataSourceSelectedIndex == 2)
+                {
+                    if (GeosApplication.Instance.UserSettings.ContainsKey("ImportAttendanceOdbcDns"))
+                    {
+                        int SelectedIndex;
+                        int.TryParse(GeosApplication.Instance.UserSettings["ImportAttendanceOdbcDns"], out SelectedIndex);
+                        DsnSelectedIndex = SelectedIndex;
+
+                    }
+                    else
+                        DsnSelectedIndex = 0;
+
+                    if (GeosApplication.Instance.UserSettings.ContainsKey("ImportAttendanceOdbcTableName"))
+                    {
+                        int SelectedIndex;
+                        int.TryParse(GeosApplication.Instance.UserSettings["ImportAttendanceOdbcTableName"], out SelectedIndex);
+                        SheetNameSelectedIndex = SelectedIndex;
+                        string ImportAttendanceSourceFieldSelectedIndex = string.Empty;
+                    }
+                    else
+                        SheetNameSelectedIndex = 0;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                GeosApplication.Instance.Logger.Log("Get an error in Method LoadSavedSettings()...." + ex.Message, category: Category.Exception, priority: Priority.Low);
+            }
+            GeosApplication.Instance.Logger.Log("Method LoadSavedSettings() executed successfully", category: Category.Info, priority: Priority.Low);
+        }
+
+        /// <summary>
+        /// Method for Custome Filter on Source COlumn
+        /// </summary>
+        /// <param name="obj"></param>
+
+        public void ShowSourceColumnCustomFilterPopupCommandAction(FilterPopupEventArgs e)
+        {
+            GeosApplication.Instance.Logger.Log(" Method ShowSourceColumnCustomFilterPopupCommandAction ...", category: Category.Info, priority: Priority.Low);
+            if (e.Column.FieldName != "EmployeeAttendanceImportField")
+            {
+                return;
+            }
+
+            try
+            {
+                List<object> filterItems = new List<object>();
+                if (e.Column.FieldName == "EmployeeAttendanceImportField")
+                {
+                    foreach (ImportAttendance item in EmployeeAttendance)
+                    {
+                        foreach (var sourceCol in item.EmployeeAttendanceImportFieldList)
+                        {
+                            if (!filterItems.Any(x => Convert.ToString(((CustomComboBoxItem)x).DisplayValue) == sourceCol.Name.ToString()))
+                            {
+                                CustomComboBoxItem customComboBoxItem = new CustomComboBoxItem();
+                                customComboBoxItem.DisplayValue = sourceCol.Name.ToString();
+                                customComboBoxItem.EditValue = CriteriaOperator.Parse(string.Format("EmployeeAttendanceImportField Like '%{0}%'", sourceCol.Name.ToString()));
+                                filterItems.Add(customComboBoxItem);
+                            }
+                        }
+                    }
+                }
+
+                e.ComboBoxEdit.ItemsSource = filterItems.OrderBy(sort => Convert.ToString(((CustomComboBoxItem)sort).DisplayValue)).ToList();
+                GeosApplication.Instance.Logger.Log("Method ShowSourceColumnCustomFilterPopupCommandAction() executed successfully", category: Category.Info, priority: Priority.Low);
+            }
+            catch (Exception ex)
+            {
+                GeosApplication.Instance.Logger.Log("Get an error in ShowSourceColumnCustomFilterPopupCommandAction() method " + ex.Message, category: Category.Info, priority: Priority.Low);
+            }
+        }
+
+        /// <summary>
+        /// data source changed
+        /// </summary>
+        /// <param name="obj"></param>
+        public void DataSourceIndexChanged(EditValueChangedEventArgs obj)
+        {
+            GeosApplication.Instance.Logger.Log("Method DataSourceIndexChanged() ...", category: Category.Info, priority: Priority.Low);
+            try
+            {
+                if (obj.NewValue == null)
+                {
+                    AttachmentFiles = new ObservableCollection<Attachment>();
+                    EmployeeAttendance = new ObservableCollection<ImportAttendance>();
+                    ExelSheetNames = new ObservableCollection<string>();
+                }
+                else if (obj.NewValue != obj.OldValue && obj.OldValue != null)
+                {
+                    AttachmentFiles = new ObservableCollection<Attachment>();
+                    EmployeeAttendance = new ObservableCollection<ImportAttendance>();
+                    ExelSheetNames = new ObservableCollection<string>();
+                    ReportData = new List<IDictionary<string, object>>();
+                    DsnTableNames = new ObservableCollection<string>();
+                    SetUserSetting(obj);
+                }
+                if (DataSourceSelectedIndex.Equals(2))
+                {
+                    FillTableNameFromDsn();
+                    FillTableFromDsn(HowManyRecordsToBeFetched.Single);
+                }
+            }
+            catch (Exception ex)
+            {
+                GeosApplication.Instance.Logger.Log("Get an error in Method DataSourceIndexChanged()...." + ex.Message, category: Category.Exception, priority: Priority.Low);
+            }
+            GeosApplication.Instance.Logger.Log("Method DataSourceIndexChanged() executed successfully", category: Category.Info, priority: Priority.Low);
+        }
+
+        /// <summary>
+        /// Selected File SelectedItemChanged
+        /// </summary>
+        /// <param name="obj"></param>
+        public void SelectedItemChangedCommandAction(EditValueChangedEventArgs obj)
+        {
+            try
+            {
+                GeosApplication.Instance.Logger.Log("Method SelectedItemChangedCommandAction()...", category: Category.Info, priority: Priority.Low);
+                if (obj.NewValue == null)
+                {
+                    EmployeeAttendance = new ObservableCollection<ImportAttendance>();
+                    ExelSheetNames = new ObservableCollection<string>();
+                }
+                else if (obj.NewValue != obj.OldValue && obj.OldValue != null)
+                {
+                    ReportData = new List<IDictionary<string, object>>();
+                    EmployeeAttendance = new ObservableCollection<ImportAttendance>();
+                    DsnTableNames = new ObservableCollection<string>();
+                    SetUserSetting(obj);
+                }
+
+                if (DataSourceSelectedIndex.Equals(2))
+                {
+                    FillTableNameFromDsn();
+                    FillTableFromDsn(HowManyRecordsToBeFetched.Single);
+                }
+
+                GeosApplication.Instance.Logger.Log("Method SelectedItemChangedCommandAction()....executed successfully", category: Category.Info, priority: Priority.Low);
+            }
+            catch (Exception ex)
+            {
+                GeosApplication.Instance.Logger.Log("Get an error in Method SelectedItemChangedCommandAction()...." + ex.Message, category: Category.Exception, priority: Priority.Low);
+            }
+        }
+
+        /// <summary>
+        /// Sheet name SelectedItem chaged
+        /// </summary>
+        /// <param name="obj"></param>
+        public void SheetNameIndexChanged(EditValueChangedEventArgs obj)
+        {
+            GeosApplication.Instance.Logger.Log("Method SheetNameIndexChanged() ...", category: Category.Info, priority: Priority.Low);
+            try
+            {
+                ReportData = new List<IDictionary<string, object>>();
+
+                if (obj.NewValue == null)
+                {
+                    EmployeeAttendance = new ObservableCollection<ImportAttendance>();
+                }
+                else if (obj.NewValue != obj.OldValue && obj.OldValue != null)
+                {
+                    EmployeeAttendance = new ObservableCollection<ImportAttendance>();
+                }
+
+                if (DataSourceSelectedIndex.Equals(0))
+                {
+                    SheetNameSelectedIndex = ExelSheetNames.IndexOf(obj.NewValue.ToString());
+                    FetchColumnsFromExcel(AttachmentFiles[0]);
+                }
+
+                if (DataSourceSelectedIndex.Equals(1))
+                {
+                    if (AttachmentFiles.Count > 0)
+                        FetchColumnsFromText(AttachmentFiles[0]);
+                }
+
+                if (DataSourceSelectedIndex.Equals(2))
+                {
+                    FillTableFromDsn(HowManyRecordsToBeFetched.Single);
+                }
+            }
+            catch (Exception ex)
+            {
+                GeosApplication.Instance.Logger.Log("Get an error in Method SheetNameIndexChanged()...." + ex.Message, category: Category.Exception, priority: Priority.Low);
+            }
+
+            GeosApplication.Instance.Logger.Log("Method SheetNameIndexChanged() executed successfully", category: Category.Info, priority: Priority.Low);
+        }
+
+        private void FillTableFromDsn()
+        {
+            GeosApplication.Instance.Logger.Log("Method FillTableFromDsn() ...", category: Category.Info, priority: Priority.Low);
+            string dbsmName = string.Empty;
+            try
+            {
+                DataSet ds = new DataSet();
+                string cs = "Dsn=" + Dsns[DsnSelectedIndex] + ";Trusted_Connection=Yes;";
+                using (OdbcConnection cn = new OdbcConnection(cs))
+                {
+                    cn.Open();
+                    dbsmName = GetInfoOfDBMS(cn, SQL_INFO.DBMS_NAME);
+                    OdbcCommand oComm = new OdbcCommand();
+                    if (dbsmName == "EXCEL")
+                    {
+                        oComm.CommandText = "Select * From [" + DsnTableNames[SheetNameSelectedIndex] + "$]";
+                    }
+                    else if (dbsmName == "MySQL")
+                    {
+                        oComm.CommandText = "Select * From " + DsnTableNames[SheetNameSelectedIndex] + "";
+                    }
+                    else if (dbsmName == "PostgreSQL")
+                    {
+                        try
+                        {
+                            // PostgreSQL query: Use double quotes for case-sensitive table names.
+                            oComm.CommandText = "SELECT * FROM \"" + DsnTableNames[SheetNameSelectedIndex] + "\"";
+                            if (PostgreSQLdbList != null)
+                            {
+                                if (PostgreSQLdbList.Any(a => a.TABLE_NAME.Equals(DsnTableNames[SheetNameSelectedIndex])))
+                                {
+                                    PostgreSQLdb postgreSQLdb = PostgreSQLdbList.Where(a => a.TABLE_NAME.Equals(DsnTableNames[SheetNameSelectedIndex])).FirstOrDefault();
+                                    if (postgreSQLdb != null)
+                                    {
+                                        if (!string.IsNullOrEmpty(postgreSQLdb.TABLE_SCHEM))
+                                        {
+                                            oComm.CommandText = $"SELECT * FROM \"{postgreSQLdb.TABLE_SCHEM}\".\"{DsnTableNames[SheetNameSelectedIndex]}\"";
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            GeosApplication.Instance.Logger.Log("Get an error in Method FillTableFromDsn()...." + ex.Message, category: Category.Exception, priority: Priority.Low);
+                        }
+                    }
+                    else
+                    {
+                        oComm.CommandText = "Select * From [" + DsnTableNames[SheetNameSelectedIndex] + "]";
+                    }
+
+                    oComm.Connection = cn;
+                    OdbcDataAdapter oAdapter = new OdbcDataAdapter(oComm);
+                    oAdapter.Fill(ds);
+                  
+                }
+
+                FillSourceIngrid(ds.Tables[0]);
+                CalculateIndexForGridFromDsn();
+
+                filteredTable = ds.Tables[0];
+                
+                 SheetNameSelectedItem = DsnTableNames[SheetNameSelectedIndex];
+                OnPropertyChanged(new PropertyChangedEventArgs("SheetNameSelectedIndex"));
+                OnPropertyChanged(new PropertyChangedEventArgs("EmployeeAttendance"));
+            }
+            catch (Exception ex)
+            {
+                GeosApplication.Instance.Logger.Log("Get an error in Method FillTableFromDsn()...." + ex.Message, category: Category.Exception, priority: Priority.Low);
+            }
+
+            GeosApplication.Instance.Logger.Log("Method FillTableFromDsn() executed successfully", category: Category.Info, priority: Priority.Low);
+        }
+
+        enum HowManyRecordsToBeFetched
+        {
+            Single,
+            WithinSelectedDateRange,
+            All
+        }
+
+        private void FillTableFromDsn(HowManyRecordsToBeFetched howManyRecordsToBeFetched) // enum single record, date range, all
+        {
+            GeosApplication.Instance.Logger.Log("Method FillTableFromDsn() ...", category: Category.Info, priority: Priority.Low);
+            string dbsmName = string.Empty;
+            try
+            {
+                DataSet ds = new DataSet();
+                string cs = "Dsn=" + Dsns[DsnSelectedIndex] + ";Trusted_Connection=Yes;";
+                GeosApplication.Instance.Logger.Log($"Method FillTableFromDsn() OdbcConnection={cs}", category: Category.Info, priority: Priority.Low);
+                using (OdbcConnection cn = new OdbcConnection(cs))
+                {
+                    cn.Open();
+                    dbsmName = GetInfoOfDBMS(cn, SQL_INFO.DBMS_NAME); // Microsoft SQL Server
+                    GeosApplication.Instance.Logger.Log($"Method FillTableFromDsn() Server Name={dbsmName}", category: Category.Info, priority: Priority.Low);
+                    OdbcCommand oComm = new OdbcCommand();
+
+                    switch (howManyRecordsToBeFetched)
+                    {
+                        case HowManyRecordsToBeFetched.Single:
+
+                            switch (dbsmName)
+                            {
+                                case "EXCEL":
+                                    oComm.CommandText = "Select * From [" + DsnTableNames[SheetNameSelectedIndex] + "$]";
+                                    break;
+                                case "MySQL":
+                                    oComm.CommandText = "Select * From " + DsnTableNames[SheetNameSelectedIndex] + "  LIMIT 1 ";
+                                    break;
+                                case "Microsoft SQL Server":
+                                    oComm.CommandText = "Select TOP 1 * From [" + DsnTableNames[SheetNameSelectedIndex] + "]";
+                                    break;
+                                case "PostgreSQL":
+                                    try
+                                    {
+                                        oComm.CommandText = "SELECT * FROM \"" + DsnTableNames[SheetNameSelectedIndex] + "\" LIMIT 1";
+                                        if (PostgreSQLdbList != null)
+                                        {
+                                            if (PostgreSQLdbList.Any(a => a.TABLE_NAME.Equals(DsnTableNames[SheetNameSelectedIndex])))
+                                            {
+                                                PostgreSQLdb postgreSQLdb = PostgreSQLdbList.Where(a => a.TABLE_NAME.Equals(DsnTableNames[SheetNameSelectedIndex])).FirstOrDefault();
+                                                if (postgreSQLdb != null)
+                                                {
+                                                    if (!string.IsNullOrEmpty(postgreSQLdb.TABLE_SCHEM))
+                                                    {
+                                                        oComm.CommandText = $"SELECT * FROM \"{postgreSQLdb.TABLE_SCHEM}\".\"{DsnTableNames[SheetNameSelectedIndex]}\" LIMIT 1";
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    catch (Exception ex) 
+                                    {
+                                        GeosApplication.Instance.Logger.Log("Get an error in Method FillTableFromDsn()...." + ex.Message, category: Category.Exception, priority: Priority.Low);
+                                    }
+                                    break;
+                                default:
+                                    oComm.CommandText = "Select * From [" + DsnTableNames[SheetNameSelectedIndex] + "]";
+                                    break;
+                            }
+
+                            break;
+                        case HowManyRecordsToBeFetched.WithinSelectedDateRange:
+
+                            // Get date column index in datatable filteredTable
+                            var EmployeeAttendanceImportField = EmployeeAttendance[0].EmployeeAttendanceImportFieldList.FirstOrDefault(x=>x.Name== "Date");
+                            int? indexOfDateColumnInDatatableFilteredTable = null;
+                            indexOfDateColumnInDatatableFilteredTable = matchedIndex.FirstOrDefault(x => x.Key == "Date").Value;
+
+                            string NameOfDateColumnInDatatableFilteredTable = string.Empty;
+                            if(indexOfDateColumnInDatatableFilteredTable!=null)
+                            {
+                                NameOfDateColumnInDatatableFilteredTable = filteredTable.Columns[indexOfDateColumnInDatatableFilteredTable.Value].ColumnName;
+                            }
+                            
+                            switch (dbsmName)
+                            {
+                                case "EXCEL":
+                                    oComm.CommandText = "Select * From [" + DsnTableNames[SheetNameSelectedIndex] + "$]";
+                                    break;
+                                case "MySQL":
+                                    oComm.CommandText = "Select * From " + DsnTableNames[SheetNameSelectedIndex] + " WHERE " +
+                                        NameOfDateColumnInDatatableFilteredTable + " BETWEEN CAST('" + FilterStartDate.ToString("yyyy-MM-dd HH:mm:ss") +
+                                        "' AS DATE) AND CAST('" + FilterEndDate.ToString("yyyy-MM-dd HH:mm:ss") + "' AS DATE) ";
+                                    
+                                 // Example - oComm.CommandText = "Select * From fichajes3 WHERE Fecha BETWEEN CAST('2022-03-01' AS DATE) AND CAST('2022-03-31' AS DATE)";
+                                    break;
+                                case "Microsoft SQL Server":
+                                    oComm.CommandText = "Select * From [" + DsnTableNames[SheetNameSelectedIndex] + "] WHERE " + 
+                                        NameOfDateColumnInDatatableFilteredTable + " BETWEEN '" + FilterStartDate.ToString("yyyy-MM-dd HH:mm:ss") + 
+                                        "' AND '" + FilterEndDate.ToString("yyyy-MM-dd HH:mm:ss") + "' ";
+                                    break;
+                                case "PostgreSQL":
+                                    try
+                                    {
+                                        // PostgreSQL: Simple query with inline date values
+                                        oComm.CommandText = "SELECT * FROM \"" + DsnTableNames[SheetNameSelectedIndex] + "\" " + "WHERE \"" + NameOfDateColumnInDatatableFilteredTable
+                                        + "\" " + "BETWEEN '" + FilterStartDate.ToString("yyyy-MM-dd HH:mm:ss") + "' " + "AND '" + FilterEndDate.ToString("yyyy-MM-dd HH:mm:ss") + "'";
+                                        // Check if TABLE_SCHEM is available and adjust the query accordingly
+                                        if (PostgreSQLdbList != null)
+                                        {
+                                            var postgreSQLdb = PostgreSQLdbList.FirstOrDefault(a => a.TABLE_NAME.Equals(DsnTableNames[SheetNameSelectedIndex], StringComparison.OrdinalIgnoreCase));
+
+                                            if (postgreSQLdb != null && !string.IsNullOrEmpty(postgreSQLdb.TABLE_SCHEM))
+                                            {
+                                                oComm.CommandText = $"SELECT * FROM \"{postgreSQLdb.TABLE_SCHEM}\".\"{DsnTableNames[SheetNameSelectedIndex]}\" " +
+                                                $"WHERE \"{NameOfDateColumnInDatatableFilteredTable}\" " + $"BETWEEN '{FilterStartDate:yyyy-MM-dd HH:mm:ss}' " + $"AND '{FilterEndDate:yyyy-MM-dd HH:mm:ss}'";
+                                            }
+                                        }
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        GeosApplication.Instance.Logger.Log("Get an error in Method FillTableFromDsn()...." + ex.Message, category: Category.Exception, priority: Priority.Low);
+                                    }
+                                    break;
+                                default:
+                                    oComm.CommandText = "Select * From [" + DsnTableNames[SheetNameSelectedIndex] + "]";
+                                    break;
+                            }
+
+                            break;
+                        case HowManyRecordsToBeFetched.All:
+
+                            switch (dbsmName)
+                            {
+                                case "EXCEL":
+                                    oComm.CommandText = "Select * From [" + DsnTableNames[SheetNameSelectedIndex] + "$]";
+                                    break;
+                                case "MySQL":
+                                    oComm.CommandText = "Select * From " + DsnTableNames[SheetNameSelectedIndex] + "  ";
+                                    break;
+                                case "Microsoft SQL Server":
+                                    oComm.CommandText = "Select * From [" + DsnTableNames[SheetNameSelectedIndex] + "]";
+                                    break;
+                                case "PostgreSQL":
+                                    try
+                                    {
+                                        // PostgreSQL: Table names should be enclosed in double quotes (case-sensitive)
+                                        oComm.CommandText = "SELECT * FROM \"" + DsnTableNames[SheetNameSelectedIndex] + "\"";
+                                        if (PostgreSQLdbList != null)
+                                        {
+                                            if (PostgreSQLdbList.Any(a => a.TABLE_NAME.Equals(DsnTableNames[SheetNameSelectedIndex])))
+                                            {
+                                                PostgreSQLdb postgreSQLdb = PostgreSQLdbList.Where(a => a.TABLE_NAME.Equals(DsnTableNames[SheetNameSelectedIndex])).FirstOrDefault();
+                                                if (postgreSQLdb != null)
+                                                {
+                                                    if (!string.IsNullOrEmpty(postgreSQLdb.TABLE_SCHEM))
+                                                    {
+                                                        oComm.CommandText = $"SELECT * FROM \"{postgreSQLdb.TABLE_SCHEM}\".\"{DsnTableNames[SheetNameSelectedIndex]}\"";
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        GeosApplication.Instance.Logger.Log("Get an error in Method FillTableFromDsn()...." + ex.Message, category: Category.Exception, priority: Priority.Low);
+                                    }
+                                    break;
+                                default:
+                                    oComm.CommandText = "Select * From [" + DsnTableNames[SheetNameSelectedIndex] + "]";
+                                    break;
+                            }
+
+                            break;
+                        default:
+                            break;
+                    }
+
+                    GeosApplication.Instance.Logger.Log($"Method FillTableFromDsn() CommandText={oComm.CommandText}", category: Category.Info, priority: Priority.Low);
+
+
+                    oComm.Connection = cn;
+                    OdbcDataAdapter oAdapter = new OdbcDataAdapter(oComm);
+                    oAdapter.Fill(ds);
+                    //using (OdbcDataAdapter oAdapter = new OdbcDataAdapter(oComm))
+                    //{
+                    //    oAdapter.Fill(ds);
+                    //}
+                    
+                    // Check ds.Tables[0].Rows.Count, while debugging
+                    GeosApplication.Instance.Logger.Log($"Method FillTableFromDsn() Fetched Rows Count={ds.Tables[0].Rows.Count}", category: Category.Info, priority: Priority.Low);
+
+                }
+
+                FillSourceIngrid(ds.Tables[0]);
+                if (ds.Tables[0].Rows.Count > 0)
+                {
+                    CalculateIndexForGridFromDsn();
+                }
+                filteredTable = ds.Tables[0];
+
+                SheetNameSelectedItem = DsnTableNames[SheetNameSelectedIndex];
+                OnPropertyChanged(new PropertyChangedEventArgs("SheetNameSelectedIndex"));
+                OnPropertyChanged(new PropertyChangedEventArgs("EmployeeAttendance"));
+            }
+            catch (Exception ex)
+            {
+                GeosApplication.Instance.Logger.Log("Get an error in Method FillTableFromDsn()...." + ex.Message, category: Category.Exception, priority: Priority.Low);
+            }
+
+            GeosApplication.Instance.Logger.Log("Method FillTableFromDsn() executed successfully", category: Category.Info, priority: Priority.Low);
+        }
+
+        /// <summary>
+        /// Next button click
+        /// [001][skale][01-08-2019][GEOS2-1701]Attendance paremeters are not saved
+        /// </summary>
+        /// <param name="obj"></param>
+        private void Next(object obj)
+        {
+            try
+            {
+                GeosApplication.Instance.Logger.Log("Method NextWindow()...", category: Category.Info, priority: Priority.Low);
+                IsBusy = true;
+                matchedIndex = new Dictionary<string, int>();
+                string error = EnableValidationAndGetError();
+                OnPropertyChanged(new PropertyChangedEventArgs("AttachedFileIndex"));
+                OnPropertyChanged(new PropertyChangedEventArgs("SheetNameSelectedIndex"));
+                OnPropertyChanged(new PropertyChangedEventArgs("EmployeeAttendance"));
+                OnPropertyChanged(new PropertyChangedEventArgs("FilterEndDate"));
+                OnPropertyChanged(new PropertyChangedEventArgs("FilterStartDate"));
+
+                if (error != null)
+                {
+                    IsBusy = false;
+                    return;
+                }
+                else
+                {
+                    if (!DXSplashScreen.IsActive)
+                    {
+                        DXSplashScreen.Show(x =>
+                        {
+                            Window win = new Window()
+                            {
+                                ShowActivated = false,
+                                WindowStyle = WindowStyle.None,
+                                ResizeMode = ResizeMode.NoResize,
+                                AllowsTransparency = true,
+                                Background = new SolidColorBrush(Colors.Transparent),
+                                ShowInTaskbar = false,
+                                Topmost = true,
+                                SizeToContent = SizeToContent.WidthAndHeight,
+                                WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                            };
+                            WindowFadeAnimationBehavior.SetEnableAnimation(win, true);
+                            win.Topmost = false;
+                            return win;
+                        }, x =>
+                        {
+                            return new SplashScreenView() { DataContext = new SplashScreenViewModel() };
+                        }, null, null);
+                    }
+
+                    DevExpress.Xpf.Grid.GridControl GridImportAttendance = (DevExpress.Xpf.Grid.GridControl)obj;
+                    if (IsMatchTypeWithDataSourceField)
+                    {
+                        for (int item = 0; item < 4; item++)
+                        {
+                            var DataGridRow = (ImportAttendance)GridImportAttendance.GetRow(item);
+                            matchedIndex.Add(DataGridRow.Column, DataGridRow.EmployeeAttendanceImportFieldList.IndexOf(DataGridRow.EmployeeAttendanceImportField));
+                        }
+                    }
+                    else
+                    {
+                        for (int item = 0; item < 3; item++)
+                        {
+                            var DataGridRow = (ImportAttendance)GridImportAttendance.GetRow(item);
+                            matchedIndex.Add(DataGridRow.Column, DataGridRow.EmployeeAttendanceImportFieldList.IndexOf(DataGridRow.EmployeeAttendanceImportField));
+                        }
+                    }
+
+                    GeosApplication.Instance.UserSettings["ImportAttendanceDataSourceSelectedIndex"] = DataSourceSelectedIndex.ToString();
+
+                    //[001] added
+                    if (DataSourceSelectedIndex == 0)
+                    {
+                        if (SheetNameSelectedIndex != -1)
+                            GeosApplication.Instance.UserSettings["ImportAttendanceExcelSheetname"] = SheetNameSelectedIndex.ToString();
+
+                        string ImportAttendanceExcelSourceFieldSelectedIndex = string.Empty;
+
+                        for (int item = 0; item < EmployeeAttendance.Count; item++)
+                        {
+                            var DataGridRow = (ImportAttendance)GridImportAttendance.GetRow(item);
+                            int index = DataGridRow.EmployeeAttendanceImportFieldList.IndexOf(DataGridRow.EmployeeAttendanceImportField);
+                            ImportAttendanceExcelSourceFieldSelectedIndex += index.ToString() + ",";
+                        }
+                        ImportAttendanceExcelSourceFieldSelectedIndex = ImportAttendanceExcelSourceFieldSelectedIndex.Remove(ImportAttendanceExcelSourceFieldSelectedIndex.Length - 1, 1);
+                        GeosApplication.Instance.UserSettings["ImportAttendanceExcelSourceFieldSelectedIndex"] = ImportAttendanceExcelSourceFieldSelectedIndex;
+                    }
+                    if (DataSourceSelectedIndex == 1)
+                    {
+                        if (SheetNameSelectedIndex != -1)
+                            GeosApplication.Instance.UserSettings["ImportAttendanceTextSeparator"] = SheetNameSelectedIndex.ToString();
+
+                        string ImportAttendanceTextSourceFieldSelectedIndex = string.Empty;
+
+                        for (int item = 0; item < EmployeeAttendance.Count; item++)
+                        {
+                            var DataGridRow = (ImportAttendance)GridImportAttendance.GetRow(item);
+                            int index = DataGridRow.EmployeeAttendanceImportFieldList.IndexOf(DataGridRow.EmployeeAttendanceImportField);
+                            ImportAttendanceTextSourceFieldSelectedIndex += index.ToString() + ",";
+                        }
+                        ImportAttendanceTextSourceFieldSelectedIndex = ImportAttendanceTextSourceFieldSelectedIndex.Remove(ImportAttendanceTextSourceFieldSelectedIndex.Length - 1, 1);
+                        GeosApplication.Instance.UserSettings["ImportAttendanceTextSourceFieldSelectedIndex"] = ImportAttendanceTextSourceFieldSelectedIndex;
+                    }
+
+                    if (DataSourceSelectedIndex == 2)
+                    {
+                        if (DsnSelectedIndex != -1)
+                            GeosApplication.Instance.UserSettings["ImportAttendanceOdbcDns"] = DsnSelectedIndex.ToString();
+
+                        if (SheetNameSelectedIndex != -1)
+                            GeosApplication.Instance.UserSettings["ImportAttendanceOdbcTableName"] = SheetNameSelectedIndex.ToString();
+
+                        string ImportAttendanceSourceFieldSelectedIndex = string.Empty;
+
+                        for (int item = 0; item < EmployeeAttendance.Count; item++)
+                        {
+                            var DataGridRow = (ImportAttendance)GridImportAttendance.GetRow(item);
+                            int index = DataGridRow.EmployeeAttendanceImportFieldList.IndexOf(DataGridRow.EmployeeAttendanceImportField);
+                            ImportAttendanceSourceFieldSelectedIndex += index.ToString() + ",";
+                        }
+
+                        ImportAttendanceSourceFieldSelectedIndex = ImportAttendanceSourceFieldSelectedIndex.Remove(ImportAttendanceSourceFieldSelectedIndex.Length - 1, 1);
+                        GeosApplication.Instance.UserSettings["ImportAttendanceSourceFieldSelectedIndex"] = ImportAttendanceSourceFieldSelectedIndex;
+                    }
+
+                    ApplicationOperation.CreateNewSetting(GeosApplication.Instance.UserSettings, GeosApplication.Instance.UserSettingFilePath, "UserSettings");
+
+                    FilterEndDate = FilterEndDate.AddHours(23).AddMinutes(59);
+                    if (DataSourceSelectedIndex.Equals(2))
+                    {
+                        FillTableFromDsn(HowManyRecordsToBeFetched.WithinSelectedDateRange);
+                    }
+                    FillReports(filteredTable);
+                    
+                    ReadImportedAttendanceView readImportedAttendanceView = new ReadImportedAttendanceView();
+                    ReadImportedAttendanceViewModel readImportedAttendanceViewModel = new ReadImportedAttendanceViewModel();
+                    readImportedAttendanceViewModel.IsMatchTypeWithDataSourceField = IsMatchTypeWithDataSourceField;
+                    readImportedAttendanceViewModel.FilterStartDate = FilterStartDate;
+                    readImportedAttendanceViewModel.FilterEndDate = FilterEndDate;
+                    readImportedAttendanceViewModel.Init(EmployeeAttendance, ReportData, EmployeeAttendanceList);
+                    EventHandler handle = delegate { readImportedAttendanceView.Close(); };
+                    readImportedAttendanceViewModel.RequestClose += handle;
+                    readImportedAttendanceView.DataContext = readImportedAttendanceViewModel;
+
+                    if (readImportedAttendanceViewModel.MappingFailMessage != string.Empty)
+                        CustomMessageBox.Show(readImportedAttendanceViewModel.MappingFailMessage, Application.Current.Resources["PopUpWarningColor"].ToString(), CustomMessageBox.MessageImagePath.NotOk, MessageBoxButton.OK);
+                    else
+                        readImportedAttendanceView.ShowDialog();
+
+                    IsSave = readImportedAttendanceViewModel.IsSave;
+
+                    if (readImportedAttendanceViewModel.NewEmployeeAttendanceList != null)
+                        EmpAddedAttendanceList.AddRange(readImportedAttendanceViewModel.NewEmployeeAttendanceList);
+
+                    //saving settings to check adding ImportAttendanceFilePath check in hrmainveiwmodel
+                    // GeosApplication.Instance.UserSettings["ImportAttendanceFilePath"] = AttachmentFiles[0].FilePath;
+                    // GeosApplication.Instance.UserSettings["ImportAttendanceDataSourceSelectedIndex"] = DataSourceSelectedIndex.ToString();
+                    if (IsSave)
+                    {
+                        RequestClose(null, null);
+                    }
+                    else
+                    {
+                        if (DataSourceSelectedIndex.Equals(2))
+                        {
+                            FillTableFromDsn();
+                            LoadSavedSettings();
+                        }
+                    }
+                }
+
+                IsBusy = false;
+                if (DXSplashScreen.IsActive) { DXSplashScreen.Close(); }
+                GeosApplication.Instance.Logger.Log("Method NextWindow()....executed successfully", category: Category.Info, priority: Priority.Low);
+            }
+            catch (Exception ex)
+            {
+                IsBusy = false;
+                if (DXSplashScreen.IsActive) { DXSplashScreen.Close(); }
+                GeosApplication.Instance.Logger.Log("Get an error in Method NextWindow()...." + ex.Message, category: Category.Exception, priority: Priority.Low);
+            }
+        }
+
+        /// <summary>
+        /// To browse files
+        /// </summary>
+        /// <param name="obj"></param>
+        public void BrowseFileAction(object obj)
+        {
+            GeosApplication.Instance.Logger.Log("Method BrowseFile() ...", category: Category.Info, priority: Priority.Low);
+            IsBusy = true;
+            AttachmentFiles.Clear();
+            ExelSheetNames = new ObservableCollection<string>();
+
+            try
+            {
+                string ResultFileName;
+
+                if (DataSourceSelectedIndex.Equals(0))
+                    OpenFileDialogService.Filter = "Excel Files (.xlsx)|*.xlsx|Excel Files (.xls)|*.xls";
+
+                if (DataSourceSelectedIndex.Equals(1))
+                    OpenFileDialogService.Filter = "Text Files|*.txt";
+
+                OpenFileDialogService.FilterIndex = 1;
+                bool DialogResult = OpenFileDialogService.ShowDialog();
+
+                if (!DialogResult)
+                {
+                    ResultFileName = string.Empty;
+                    return;
+                }
+                else
+                {
+                    ResultFileName = (OpenFileDialogService.File).DirectoryName + "\\" + (OpenFileDialogService.File).Name;
+                    FileInBytes = System.IO.File.ReadAllBytes(ResultFileName);
+                    FileInfo file = new FileInfo(ResultFileName);
+                    Attachment Attachment = new Attachment();
+                    Attachment.FilePath = file.FullName;
+                    Attachment.OriginalFileName = file.Name;
+                    Attachment.IsDeleted = false;
+                    Attachment.FileByte = FileInBytes;
+                    AttachmentFiles.Insert(0, Attachment);
+                    FillSheetNames(Attachment);
+
+                    if (DataSourceSelectedIndex.Equals(0))
+                    {
+                        FetchColumnsFromExcel(Attachment);
+                        SheetNameSelectedIndex = 0;
+                    }
+
+                    if (DataSourceSelectedIndex.Equals(1))
+                    {
+                        FetchColumnsFromText(Attachment);
+                    }
+
+
+                }
+
+                IsBusy = false;
+            }
+            catch (Exception ex)
+            {
+                IsBusy = false;
+                CustomMessageBox.Show(ex.Message, Application.Current.Resources["PopUpWarningColor"].ToString(), CustomMessageBox.MessageImagePath.NotOk, MessageBoxButton.OK);
+            }
+
+            GeosApplication.Instance.Logger.Log("Method BrowseFile() executed successfully", category: Category.Info, priority: Priority.Low);
+        }
+
+        /// <summary>
+        /// To get all the sheets available in xls sheet
+        /// </summary>
+        /// <param name="attachedFile"></param>
+        public void FillSheetNames(Attachment attachedFile)
+        {
+            try
+            {
+                GeosApplication.Instance.Logger.Log("Method FillSheetNames() ...", category: Category.Info, priority: Priority.Low);
+                ExelSheetNames.Clear();
+                using (var stream = File.Open(attachedFile.FilePath, FileMode.Open, FileAccess.Read))
+                {
+                    using (var reader = ExcelReaderFactory.CreateReader(stream))
+                    {
+                        do
+                        {
+                            ExelSheetNames.Add(reader.Name);
+                        } while (reader.NextResult());
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                GeosApplication.Instance.Logger.Log("Get an error in Method FillSheetNames()...." + ex.Message, category: Category.Exception, priority: Priority.Low);
+            }
+
+            GeosApplication.Instance.Logger.Log("Method FillSheetNames() executed successfully", category: Category.Info, priority: Priority.Low);
+        }
+
+        /// <summary>
+        /// Separators For text files u can add new here if u want
+        /// </summary>
+        public void FillSeparators()
+        {
+            GeosApplication.Instance.Logger.Log("Method FillSeparators() ...", category: Category.Info, priority: Priority.Low);
+            try
+            {
+                TextSeparators.AddRange(new List<string> { "Tab", "Comma", "SemiColon", "Space" });
+            }
+            catch (Exception ex)
+            {
+                GeosApplication.Instance.Logger.Log("Get an error in Method FillSeparators()...." + ex.Message, category: Category.Exception, priority: Priority.Low);
+            }
+            GeosApplication.Instance.Logger.Log("Method FillSeparators() executed successfully", category: Category.Info, priority: Priority.Low);
+        }
+
+        /// <summary>
+        /// get the coloums from xls file from Attachment
+        /// </summary>
+        /// <param name="attachedFile"></param>
+        public void FetchColumnsFromExcel(Attachment attachedFile)
+        {
+            try
+            {
+                System.Data.DataTable SelectedSheet = new DataTable();
+
+                EmployeeAttendance = new ObservableCollection<ImportAttendance>();
+
+                if (SheetNameSelectedIndex == -1)
+                    SheetNameSelectedIndex = 0;
+
+                GeosApplication.Instance.Logger.Log("Method FetchColumnsFromExcel() ...", category: Category.Info, priority: Priority.Low);
+
+                if (!DXSplashScreen.IsActive)
+                {
+                    DXSplashScreen.Show(x =>
+                    {
+                        Window win = new Window()
+                        {
+                            ShowActivated = false,
+                            WindowStyle = WindowStyle.None,
+                            ResizeMode = ResizeMode.NoResize,
+                            AllowsTransparency = true,
+                            Background = new SolidColorBrush(Colors.Transparent),
+                            ShowInTaskbar = false,
+                            Topmost = true,
+                            SizeToContent = SizeToContent.WidthAndHeight,
+                            WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                        };
+                        WindowFadeAnimationBehavior.SetEnableAnimation(win, true);
+                        win.Topmost = false;
+                        return win;
+                    }, x =>
+                    {
+                        return new SplashScreenView() { DataContext = new SplashScreenViewModel() };
+                    }, null, null);
+                }
+
+                int LoopCount = 0;
+                using (var stream = File.Open(attachedFile.FilePath, FileMode.Open, FileAccess.Read))
+                {
+                    using (var reader = ExcelReaderFactory.CreateReader(stream))
+                        do
+                        {
+                            while (reader.Read())
+                            {
+                                //Getting Seleted Sheet
+                                if (reader.Name.Equals(ExelSheetNames[SheetNameSelectedIndex]))
+                                {
+                                    var result = reader.AsDataSet();
+                                    //Getting Seleted Sheet
+                                    SelectedSheet = result.Tables[ExelSheetNames[SheetNameSelectedIndex]];
+
+                                    if (SelectedSheet.Rows.Count > 0)
+                                    {
+                                        FillSourceIngrid(SelectedSheet);
+                                        //Deleteing First coloum as the first coloum is xls coloum names
+                                        SelectedSheet.Rows[0].Delete();
+                                        SelectedSheet.AcceptChanges();
+                                        //Removeing unwanted rows
+                                        //[rdixit][27.09.2023][GEOS2-4873]
+                                        filteredTable = SelectedSheet.Rows.Cast<DataRow>().Where(row => (row.ItemArray.Any(field => !(field is System.DBNull))) && (!string.IsNullOrWhiteSpace(row.ItemArray[2].ToString()))).CopyToDataTable();
+                                    }
+                                    else
+                                    {
+                                        CustomMessageBox.Show(string.Format(System.Windows.Application.Current.FindResource("AttendanceSheetBrowseFailed").ToString()), Application.Current.Resources["PopUpWarningColor"].ToString(), CustomMessageBox.MessageImagePath.NotOk, MessageBoxButton.OK);
+                                        EmployeeAttendance = new ObservableCollection<ImportAttendance>();
+                                    }
+
+                                    break;
+                                }
+                                break;
+                            }
+
+                            reader.NextResult();
+                            LoopCount++;
+                        } while (ExelSheetNames.Count != LoopCount);
+                }
+
+                AttachmentFiles.Clear();
+                AttachmentFiles.Add(attachedFile);
+                AttachedFileIndex = 0;
+                CalculateIndexForGridExcel();
+
+                OnPropertyChanged(new PropertyChangedEventArgs("EmployeeAttendance"));
+
+                if (DXSplashScreen.IsActive) { DXSplashScreen.Close(); }
+                GeosApplication.Instance.Logger.Log("Method FetchColumnsFromExcel() executed successfully", category: Category.Info, priority: Priority.Low);
+            }
+            catch (FaultException<ServiceException> ex)
+            {
+                if (DXSplashScreen.IsActive) { DXSplashScreen.Close(); }
+                GeosApplication.Instance.Logger.Log("Get an error in FetchColumnsFromExcel() Method " + ex.Detail.ErrorMessage, category: Category.Exception, priority: Priority.Low);
+                CustomMessageBox.Show(GeosApplication.Instance.ExceptionHandlingOperationString(ex.Detail, null), Application.Current.Resources["PopUpWarningColor"].ToString(), CustomMessageBox.MessageImagePath.NotOk, MessageBoxButton.OK);
+            }
+            catch (ServiceUnexceptedException ex)
+            {
+                if (DXSplashScreen.IsActive) { DXSplashScreen.Close(); }
+                GeosApplication.Instance.Logger.Log("Get an error in FetchColumnsFromExcel() Method - ServiceUnexceptedException " + ex.Message, category: Category.Exception, priority: Priority.Low);
+                GeosApplication.Instance.ExceptionHandlingOperation(ex.ExceptionType, GeosApplication.Instance.ApplicationSettings["ServiceProviderIP"].ToString(), null);
+            }
+        }
+
+        /// <summary>
+        /// To calculate the index for grid
+        /// </summary>
+        //private void CalculateIndexForGrid()
+        //{
+        //    int seletedIndexCount = 0;
+        //    GeosApplication.Instance.Logger.Log("Method CalculateIndexForGrid() ...", category: Category.Info, priority: Priority.Low);
+
+        //    try
+        //    {
+        //        for (int i = 0; i < EmployeeAttendance.Count; i++)
+        //        {
+        //            if (seletedIndexCount < EmployeeAttendance.Count)
+        //                if (EmployeeAttendance[i].EmployeeAttendanceImportFieldList.Count > seletedIndexCount)
+        //                    EmployeeAttendance[i].EmployeeAttendanceImportField = EmployeeAttendance[i].EmployeeAttendanceImportFieldList[seletedIndexCount];
+        //            seletedIndexCount++;
+        //        }
+        //        GeosApplication.Instance.Logger.Log("Method CalculateIndexForGrid() executed successfully", category: Category.Info, priority: Priority.Low);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        GeosApplication.Instance.Logger.Log("Get an error in CalculateIndexForGrid() Method  " + ex.Message, category: Category.Exception, priority: Priority.Low);
+        //    }
+        //}
+
+
+        //To calculate the index for grid Combobox items 
+        private void CalculateIndexForGridFromDsn()
+        {
+            int seletedIndexCount = 0;
+            GeosApplication.Instance.Logger.Log("Method CalculateIndexForGridFromDsn() ...", category: Category.Info, priority: Priority.Low);
+
+            try
+            {
+                int[] importAttendanceSourceField = new int[] { 0, 0, 0,0 };
+                if (GeosApplication.Instance.UserSettings.ContainsKey("ImportAttendanceSourceFieldSelectedIndex") && !string.IsNullOrEmpty(GeosApplication.Instance.UserSettings["ImportAttendanceSourceFieldSelectedIndex"]))
+                {
+                    string importAttendanceSourceFieldSelectedIndex = GeosApplication.Instance.UserSettings["ImportAttendanceSourceFieldSelectedIndex"];
+                    string[] importAttendanceSourceFieldSelectedIndexArray = importAttendanceSourceFieldSelectedIndex.Split(',');
+
+                    for (int item = 0; item < importAttendanceSourceFieldSelectedIndexArray.Length; item++)
+                        int.TryParse(importAttendanceSourceFieldSelectedIndexArray[item], out importAttendanceSourceField[item]);
+
+                    for (int i = 0; i < EmployeeAttendance.Count; i++)
+                    {
+                        if (seletedIndexCount < EmployeeAttendance.Count)
+                        {
+                            if (EmployeeAttendance[i].EmployeeAttendanceImportFieldList.Count > 0 && EmployeeAttendance[i].EmployeeAttendanceImportFieldList.Count > importAttendanceSourceField[i])
+                                EmployeeAttendance[i].EmployeeAttendanceImportField = EmployeeAttendance[i].EmployeeAttendanceImportFieldList[importAttendanceSourceField[i]];
+                            else
+                                EmployeeAttendance[i].EmployeeAttendanceImportField = EmployeeAttendance[i].EmployeeAttendanceImportFieldList[seletedIndexCount];
+                        }
+                        seletedIndexCount++;
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < EmployeeAttendance.Count; i++)
+                    {
+                        if (seletedIndexCount < EmployeeAttendance.Count)
+                        {
+                            if (EmployeeAttendance[i].EmployeeAttendanceImportFieldList.Count > 0)
+                                EmployeeAttendance[i].EmployeeAttendanceImportField = EmployeeAttendance[i].EmployeeAttendanceImportFieldList[seletedIndexCount];
+                        }
+
+                        seletedIndexCount++;
+                    }
+                }
+                
+                GeosApplication.Instance.Logger.Log("Method CalculateIndexForGridFromDsn() executed successfully", category: Category.Info, priority: Priority.Low);
+            }
+            catch (Exception ex)
+            {
+                GeosApplication.Instance.Logger.Log("Get an error in CalculateIndexForGridFromDsn() Method  " + ex.Message + GeosApplication.createExceptionDetailsMsg(ex), category: Category.Exception, priority: Priority.Low);
+            }
+        }
+        /// <summary>
+        /// [000][skale][01-08-2019][GEOS2-1701]Attendance paremeters are not saved
+        /// </summary>
+        private void CalculateIndexForGridText()
+        {
+            int seletedIndexCount = 0;
+            GeosApplication.Instance.Logger.Log("Method CalculateIndexForGridText() ...", category: Category.Info, priority: Priority.Low);
+
+            try
+            {
+                int[] importAttendanceSourceField = new int[] { 0, 0, 0 };
+
+                if (GeosApplication.Instance.UserSettings.ContainsKey("ImportAttendanceTextSourceFieldSelectedIndex") && !string.IsNullOrEmpty(GeosApplication.Instance.UserSettings["ImportAttendanceTextSourceFieldSelectedIndex"]))
+                {
+                    string ImportAttendanceTextSourceFieldSelectedIndex = GeosApplication.Instance.UserSettings["ImportAttendanceTextSourceFieldSelectedIndex"];
+                    string[] ImportAttendanceTextSourceFieldSelectedIndexArray = ImportAttendanceTextSourceFieldSelectedIndex.Split(',');
+
+                    for (int item = 0; item < ImportAttendanceTextSourceFieldSelectedIndexArray.Length; item++)
+                        int.TryParse(ImportAttendanceTextSourceFieldSelectedIndexArray[item], out importAttendanceSourceField[item]);
+
+                    for (int i = 0; i < EmployeeAttendance.Count; i++)
+                    {
+                        if (seletedIndexCount < EmployeeAttendance.Count)
+                        {
+                            if (EmployeeAttendance[i].EmployeeAttendanceImportFieldList.Count > 0 && EmployeeAttendance[i].EmployeeAttendanceImportFieldList.Count > importAttendanceSourceField[i])
+                                EmployeeAttendance[i].EmployeeAttendanceImportField = EmployeeAttendance[i].EmployeeAttendanceImportFieldList[importAttendanceSourceField[i]];
+                            else
+                                EmployeeAttendance[i].EmployeeAttendanceImportField = EmployeeAttendance[i].EmployeeAttendanceImportFieldList[seletedIndexCount];
+                        }
+                        seletedIndexCount++;
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < EmployeeAttendance.Count; i++)
+                    {
+                        if (seletedIndexCount < EmployeeAttendance.Count)
+                        {
+                            if (EmployeeAttendance[i].EmployeeAttendanceImportFieldList.Count > 0)
+                                EmployeeAttendance[i].EmployeeAttendanceImportField = EmployeeAttendance[i].EmployeeAttendanceImportFieldList[seletedIndexCount];
+                        }
+
+                        seletedIndexCount++;
+                    }
+                }
+
+                GeosApplication.Instance.Logger.Log("Method CalculateIndexForGridText() executed successfully", category: Category.Info, priority: Priority.Low);
+            }
+            catch (Exception ex)
+            {
+                GeosApplication.Instance.Logger.Log("Get an error in CalculateIndexForGridText() Method  " + ex.Message, category: Category.Exception, priority: Priority.Low);
+            }
+        }
+
+        /// <summary>
+        /// [000][skale][01-08-2019][GEOS2-1701]Attendance paremeters are not saved
+        /// </summary>
+        private void CalculateIndexForGridExcel()
+        {
+            int seletedIndexCount = 0;
+            GeosApplication.Instance.Logger.Log("Method CalculateIndexForGridExcel() ...", category: Category.Info, priority: Priority.Low);
+
+            try
+            {
+                if (DataSourceSelectedIndex == 0)
+                {
+                    if (GeosApplication.Instance.UserSettings.ContainsKey("ImportAttendanceExcelSheetname"))
+                    {
+                        int SelectedIndex;
+                        int.TryParse(GeosApplication.Instance.UserSettings["ImportAttendanceExcelSheetname"], out SelectedIndex);
+                        SheetNameSelectedIndex = SelectedIndex;
+                    }
+                    else
+                        SheetNameSelectedIndex = 0;
+                }
+
+                int[] importAttendanceSourceField = new int[] { 0, 0, 0 };
+
+                if (GeosApplication.Instance.UserSettings.ContainsKey("ImportAttendanceExcelSourceFieldSelectedIndex") && !string.IsNullOrEmpty(GeosApplication.Instance.UserSettings["ImportAttendanceExcelSourceFieldSelectedIndex"]))
+                {
+                    string ImportAttendanceExcelSourceFieldSelectedIndex = GeosApplication.Instance.UserSettings["ImportAttendanceExcelSourceFieldSelectedIndex"];
+                    string[] ImportAttendanceExcelSourceFieldSelectedIndexArray = ImportAttendanceExcelSourceFieldSelectedIndex.Split(',');
+
+                    for (int item = 0; item < ImportAttendanceExcelSourceFieldSelectedIndexArray.Length; item++)
+                        int.TryParse(ImportAttendanceExcelSourceFieldSelectedIndexArray[item], out importAttendanceSourceField[item]);
+
+                    for (int i = 0; i < EmployeeAttendance.Count; i++)
+                    {
+                        if (seletedIndexCount < EmployeeAttendance.Count)
+                        {
+                            if (EmployeeAttendance[i].EmployeeAttendanceImportFieldList.Count > 0 && EmployeeAttendance[i].EmployeeAttendanceImportFieldList.Count > importAttendanceSourceField[i])
+                                EmployeeAttendance[i].EmployeeAttendanceImportField = EmployeeAttendance[i].EmployeeAttendanceImportFieldList[importAttendanceSourceField[i]];
+                            else
+                                EmployeeAttendance[i].EmployeeAttendanceImportField = EmployeeAttendance[i].EmployeeAttendanceImportFieldList[seletedIndexCount];
+                        }
+                        seletedIndexCount++;
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < EmployeeAttendance.Count; i++)
+                    {
+                        if (seletedIndexCount < EmployeeAttendance.Count)
+                        {
+                            if (EmployeeAttendance[i].EmployeeAttendanceImportFieldList.Count > 0)
+                                EmployeeAttendance[i].EmployeeAttendanceImportField = EmployeeAttendance[i].EmployeeAttendanceImportFieldList[seletedIndexCount];
+                        }
+
+                        seletedIndexCount++;
+                    }
+                }
+
+                GeosApplication.Instance.Logger.Log("Method CalculateIndexForGridExcel() executed successfully", category: Category.Info, priority: Priority.Low);
+            }
+            catch (Exception ex)
+            {
+                GeosApplication.Instance.Logger.Log("Get an error in CalculateIndexForGridExcel() Method  " + ex.Message, category: Category.Exception, priority: Priority.Low);
+            }
+        }
+
+        /// <summary>
+        /// To fill the the data into ReportData
+        /// [001][skale][04/02/2020][GEOS2-1959]-GHRM - Leaves/Attendance inactive employees
+        /// [002][cpatil][2020-04-02][GEOS2-2151] Attendance not read
+        /// </summary>
+        /// <param name="dataTable"></param>
+        public void FillReports(DataTable dataTable)
+        {
+            
+            GeosApplication.Instance.Logger.Log("Method FillReports() ...", category: Category.Info, priority: Priority.Low);
+            List<string> empIds = new List<string>();
+            List<IDictionary<string, object>> LocalReportData = new List<IDictionary<string, object>>();
+            ReportData = new List<IDictionary<string, object>>();
+            string EmpDocumentNumbers = string.Empty;
+
+            try
+            {
+                foreach (System.Data.DataRow item2 in dataTable.Rows)
+                {
+                    try
+                    {
+                        IDictionary<string, object> row = new Dictionary<string, object>();
+
+                        foreach (var matchIndex in matchedIndex)
+                        {
+                            if (item2.IsNull(matchIndex.Value))
+                                continue;
+
+                            row.Add(matchIndex.Key, item2.ItemArray[matchIndex.Value]);
+                        }
+
+                        if (row.Count > 0)
+                        {
+
+                            if (IsMatchTypeWithDataSourceField && row.Keys.Contains("Type") && row.FirstOrDefault(x => x.Key.Equals("Type")).Value != null)
+                            {
+                                if (idsAttendanceType.Contains((string.IsNullOrEmpty(row.FirstOrDefault(x => x.Key.Equals("Type")).Value.ToString().TrimStart(new Char[] { '0' })) ? "0" : row.FirstOrDefault(x => x.Key.Equals("Type")).Value.ToString().TrimStart(new Char[] { '0' }))))
+                                {
+                                    if (row.FirstOrDefault(x => x.Key.Equals("EmployeeClockTimeID")).Value != null)
+                                        empIds.Add(row.FirstOrDefault(x => x.Key.Equals("EmployeeClockTimeID")).Value.ToString());
+                                    // shubham[skadam] GEOS2-3537 HRM - Communication with PSD software -  Import attendance using the employee company e-mail [#IES20]
+                                    if (row.FirstOrDefault(x => x.Key.Equals("EmployeeCompanyEmail")).Value != null)
+                                        empIds.Add(row.FirstOrDefault(x => x.Key.Equals("EmployeeCompanyEmail")).Value.ToString());
+                                }
+                                else
+                                {
+                                    continue;
+                                }
+                            }
+                            else
+                            {
+                                if (row.FirstOrDefault(x => x.Key.Equals("EmployeeClockTimeID")).Value != null)
+                                    empIds.Add(row.FirstOrDefault(x => x.Key.Equals("EmployeeClockTimeID")).Value.ToString());
+                                // shubham[skadam] GEOS2-3537 HRM - Communication with PSD software -  Import attendance using the employee company e-mail [#IES20]
+                                if (row.FirstOrDefault(x => x.Key.Equals("EmployeeCompanyEmail")).Value != null)
+                                    empIds.Add(row.FirstOrDefault(x => x.Key.Equals("EmployeeCompanyEmail")).Value.ToString());
+                            }
+                            LocalReportData.Add(row);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        GeosApplication.Instance.Logger.Log("Get an error in Method FillReports()...." + ex.Message, category: Category.Exception, priority: Priority.Low);
+                    }
+                }
+
+                empIds = empIds.Distinct().ToList();
+                empIds.ForEach(x => { EmpDocumentNumbers = x + "," + EmpDocumentNumbers; });
+                EmpDocumentNumbers = EmpDocumentNumbers.TrimEnd(',');
+
+                List<Company> plantOwners = HrmCommon.Instance.SelectedAuthorizedPlantsList.Cast<Company>().ToList();
+                var plantOwnersIds = string.Join(",", plantOwners.Select(i => i.IdCompany));
+                // [002] Changed service method GetEmpDtlByEmpDocNoAndPeriod_V2039 to GetEmpDtlByEmpDocNoAndPeriod_V2041
+                // List<Employee> Employees = HrmService.GetEmpDtlByEmpDocNoAndPeriod_V2036(EmpDocumentNumbers, plantOwnersIds, HrmCommon.Instance.SelectedPeriod);
+                // shubham[skadam] GEOS2-3537 HRM - Communication with PSD software -  Import attendance using the employee company e-mail [#IES20]
+                List<Employee> Employees = new List<Employee>();
+                if (matchedIndex.Any(a => a.Key.Equals("EmployeeClockTimeID")))
+                {
+                    Employees = HrmService.GetEmpDtlByEmpDocNoAndPeriod_V2370(EmpDocumentNumbers, plantOwnersIds, HrmCommon.Instance.SelectedPeriod);
+                }
+                else
+                {
+                    Employees = HrmService.GetEmpDtlByEmailNoAndPeriod_V2370(EmpDocumentNumbers, plantOwnersIds, HrmCommon.Instance.SelectedPeriod);
+                }
+
+
+                Employee employee;
+
+                //002
+                //geos_app_settings
+                DateFormatGeosAppSetting = CrmStartUp.GetGeosAppSettings(12).DefaultValue;
+                DateFormatGeosAppSettingArray = DateFormatGeosAppSetting.Split(';').ToArray();
+
+                TimeFormatGeosAppSetting = CrmStartUp.GetGeosAppSettings(13).DefaultValue;
+                TimeFormatGeosAppSettingArray = TimeFormatGeosAppSetting.Split(';').ToArray();
+
+                //company_settings
+                DateFormatCompanySettings = HrmService.GetCompanySettingByIdCompany(12, string.Join(",", HrmCommon.Instance.SelectedAuthorizedPlantsList.Cast<Company>().Select(Company => Company.IdCompany)), HrmCommon.Instance.SelectedPeriod);
+                TimeFormatCompanySettings = HrmService.GetCompanySettingByIdCompany(13, string.Join(",", HrmCommon.Instance.SelectedAuthorizedPlantsList.Cast<Company>().Select(Company => Company.IdCompany)), HrmCommon.Instance.SelectedPeriod);
+
+                //[001] Added
+                // get Employee Contract
+                List<IDictionary<string, object>> tempReportData = new List<IDictionary<string, object>>();
+
+                if (Employees != null && Employees.Count > 0)
+                {
+                    foreach (var item in Employees)
+                    {
+                        if (item.EmployeeContractSituations != null && item.EmployeeContractSituations.Count > 0)
+                        {
+                            foreach (var items in item.EmployeeContractSituations)
+                            {
+                                // shubham[skadam] GEOS2-3537 HRM - Communication with PSD software -  Import attendance using the employee company e-mail [#IES20]
+                                List<IDictionary<string, object>> ReportsData = new List<IDictionary<string, object>>();
+                                if (matchedIndex.Any(a => a.Key.Equals("EmployeeClockTimeID")))
+                                {
+                                    ReportsData = LocalReportData.Where(x => x.FirstOrDefault(l => l.Key == "EmployeeClockTimeID").Value.ToString() == item.EmployeeDocument.EmployeeDocumentNumber &&
+                                                                                 DateConversion(x.FirstOrDefault(l => l.Key == "Date").Value.ToString()) >= items.ContractSituationStartDate.Value.Date &&
+                                                                                 DateConversion(x.FirstOrDefault(l => l.Key == "Date").Value.ToString()) <= (items.ContractSituationEndDate == null ?
+                                                                                 GeosApplication.Instance.ServerDateTime.Date : ((items.ContractSituationEndDate) > GeosApplication.Instance.ServerDateTime.Date ?
+                                                                                 GeosApplication.Instance.ServerDateTime.Date : items.ContractSituationEndDate))).ToList();
+                                }
+                                else
+                                {
+                                    ReportsData = LocalReportData.Where(x => x.FirstOrDefault(l => l.Key == "EmployeeCompanyEmail").Value.ToString() == item.EmployeeDocument.EmployeeDocumentNumber &&
+                                                                                 DateConversion(x.FirstOrDefault(l => l.Key == "Date").Value.ToString()) >= items.ContractSituationStartDate.Value.Date &&
+                                                                                 DateConversion(x.FirstOrDefault(l => l.Key == "Date").Value.ToString()) <= (items.ContractSituationEndDate == null ?
+                                                                                 GeosApplication.Instance.ServerDateTime.Date : ((items.ContractSituationEndDate) > GeosApplication.Instance.ServerDateTime.Date ?
+                                                                                 GeosApplication.Instance.ServerDateTime.Date : items.ContractSituationEndDate))).ToList();
+                                }
+
+
+                                tempReportData.AddRange(ReportsData);
+                            }
+                        }
+                    }
+                }
+                //end
+
+                foreach (var row in tempReportData)
+                {
+                    #region  removing unwanted data
+
+                    object dateValue = row.FirstOrDefault(x => x.Key == "Date").Value;
+                    // shubham[skadam] GEOS2-3537 HRM - Communication with PSD software -  Import attendance using the employee company e-mail [#IES20]
+                    object employeeClockTimeID = row.FirstOrDefault(x => x.Key == "EmployeeClockTimeID" || x.Key == "EmployeeCompanyEmail").Value;
+                    object timeValue = row.FirstOrDefault(x => x.Key == "Time").Value;
+                    object type = null;
+
+                    if (IsMatchTypeWithDataSourceField)
+                        type = row.FirstOrDefault(x => x.Key == "Type").Value;
+
+                    if (dateValue == null || employeeClockTimeID == null || timeValue == null || (IsMatchTypeWithDataSourceField == true ? type == null : false))
+                    {
+                        continue;
+                    }
+
+                    string attendanceDate = row.FirstOrDefault(x => x.Key == "Date").Value.ToString();
+                    string attendanceTime = row.FirstOrDefault(x => x.Key == "Time").Value.ToString();
+
+                    employee = Employees.FirstOrDefault(x => x.EmployeeDocument.EmployeeDocumentNumber.Equals(row.ElementAt(0).Value.ToString()));
+
+                    if (employee != null)
+                    {
+                        DateTime? AttendanceDateTime = DateTimeConversion(attendanceDate, attendanceTime, employee);
+
+                        if (!AttendanceDateTime.HasValue)
+                        {
+                            continue;
+                        }
+
+                        //The “End Date” (date) are the final date (23:59:59) to find records in the Source.(we are considering all records on that date with = dont have to add hrs)
+                        if (!(AttendanceDateTime.Value >= FilterStartDate && AttendanceDateTime.Value <= FilterEndDate))
+                        {
+                            continue;
+                        }
+                        //[rdixit][GEOS2-4872][26.10.2023]
+                        if (!row.Any(i => i.Key == "Converted_Date_Time"))
+                            row.Add("Converted_Date_Time", AttendanceDateTime);
+                    }
+                    else
+                    {
+                        continue;
+                    }
+
+                    #endregion
+
+                    if (Employees.Any(x => x.EmployeeDocument.EmployeeDocumentNumber.Equals(row.ElementAt(0).Value.ToString())))
+                    {
+                        var employeeName = Employees.FirstOrDefault(x => x.EmployeeDocument.EmployeeDocumentNumber.Equals(row.ElementAt(0).Value.ToString())).FullName;
+                        //[rdixit][GEOS2-4872][26.10.2023]
+                        if (!row.Any(i => i.Key == "EmployeeName"))
+                            row.Add("EmployeeName", employeeName);
+                    }
+                    else
+                    {
+                        //[rdixit][GEOS2-4872][26.10.2023]
+                        if (!row.Any(i => i.Key == "EmployeeName"))
+                            row.Add("EmployeeName", string.Empty);
+                    }
+                    //[rdixit][GEOS2-4872][26.10.2023]
+                    if (!row.Any(i => i.Key == "Employee"))
+                        row.Add("Employee", Employees.FirstOrDefault(x => x.EmployeeDocument.EmployeeDocumentNumber.Equals(row.ElementAt(0).Value.ToString())));
+                    ReportData.Add(row);
+
+                }
+
+                GeosApplication.Instance.Logger.Log("Method FillReports() executed successfully", category: Category.Info, priority: Priority.Low);
+            }
+            catch (FaultException<ServiceException> ex)
+            {
+                if (DXSplashScreen.IsActive) { DXSplashScreen.Close(); }
+                GeosApplication.Instance.Logger.Log("Get an error in FillReports() Method " + ex.Detail.ErrorMessage, category: Category.Info, priority: Priority.Low);
+                CustomMessageBox.Show(GeosApplication.Instance.ExceptionHandlingOperationString(ex.Detail, null), Application.Current.Resources["PopUpWarningColor"].ToString(), CustomMessageBox.MessageImagePath.NotOk, MessageBoxButton.OK);
+            }
+            catch (ServiceUnexceptedException ex)
+            {
+                if (DXSplashScreen.IsActive) { DXSplashScreen.Close(); }
+                GeosApplication.Instance.Logger.Log("Get an error in FillReports() Method - ServiceUnexceptedException " + ex.Message, category: Category.Info, priority: Priority.Low);
+                GeosApplication.Instance.ExceptionHandlingOperation(ex.ExceptionType, GeosApplication.Instance.ApplicationSettings["ServiceProviderIP"].ToString(), null);
+            }
+            catch (Exception ex)
+            {
+                GeosApplication.Instance.Logger.Log("Get an error in Method FillReports()...." + ex.Message, category: Category.Exception, priority: Priority.Low);
+            }
+        }
+
+        /// <summary>
+        /// Converting DateTime from string
+        /// [001][GEOS2-248]
+        /// [002][skhade][2019-09-13][GEOS2-31] Change the time format in attendance import option.
+        /// </summary>
+        /// <param name="attendanceDate"></param>
+        /// <param name="attendanceTime"></param>
+        /// <param name="employee"></param>
+        /// <returns></returns>
+        private DateTime? DateTimeConversion(string attendanceDate, string attendanceTime, Employee employee)
+        {
+            DateTime? AttendanceDateTime = null;
+            DateTime resultDate;
+            TimeSpan resultTime;
+
+            try
+            {
+                #region Default Conversion
+                
+                if (DateTime.TryParse(attendanceDate, CultureInfo.CurrentCulture, DateTimeStyles.None, out resultDate))
+                {
+                    AttendanceDateTime = resultDate;
+
+                    if (TimeSpan.TryParse(attendanceTime, CultureInfo.CurrentCulture, out resultTime))
+                    {
+                        //sometimes through system it is converting wrong time like 061500 to 165 days so added this condition.
+                        if (resultTime.Hours != 0 && resultTime.Minutes != 0 && resultTime.Seconds != 0)
+                        {
+                            AttendanceDateTime = new DateTime(resultDate.Date.Year, resultDate.Date.Month, resultDate.Date.Day,
+                                                              resultTime.Hours, resultTime.Minutes, resultTime.Seconds);
+                            return AttendanceDateTime;
+                        }
+                    }
+
+                    //This is added only for excel because when i parse time formatted cell from excel is always like this e.g. "1899/12/31 12:30:00".
+                    DateTime excelResultDateTime;
+                    if (DateTime.TryParse(attendanceTime, CultureInfo.CurrentCulture, DateTimeStyles.None, out excelResultDateTime))
+                    {
+                        DateTime excelMinDate = new DateTime(1899, 12, 31);
+                        if (DateTime.Compare(excelResultDateTime.Date, excelMinDate) == 0)
+                        {
+                            AttendanceDateTime = new DateTime(resultDate.Date.Year, resultDate.Date.Month, resultDate.Date.Day,
+                                                              excelResultDateTime.Hour, excelResultDateTime.Minute, excelResultDateTime.Second);
+                            return AttendanceDateTime;
+                        }
+                    }
+                    else
+                    {
+                        GeosApplication.Instance.Logger.Log(string.Format("Unable to parse excel ResultDateTime {0} Method DateTimeConversion().", AttendanceDateTime), category: Category.Warn, priority: Priority.Low);
+                    }
+                }
+
+                #endregion
+
+                #region Custom geos_app_settings Conversion
+
+                try
+                {
+                    if (resultDate == DateTime.MinValue)
+                    {
+                        if (DateTime.TryParseExact(attendanceDate, DateFormatGeosAppSettingArray, CultureInfo.InvariantCulture, DateTimeStyles.None, out resultDate))
+                        {
+                            AttendanceDateTime = resultDate;
+                        }
+                        else
+                        {
+                            GeosApplication.Instance.Logger.Log(string.Format("Unable to parse date geos_app_settings {0} Method DateTimeConversion().", attendanceDate), category: Category.Warn, priority: Priority.Low);
+                        }
+                    }
+					//Shubham[skadam] GEOS2-4122 HRM EARO - Time attendance imported from ZK  27 02 2023
+                    bool isPM = false;
+                    if (attendanceTime.Contains(' '))
+                    {
+                        //attendanceTime = attendanceTime.Split(' ')[1];
+                        if (attendanceTime.Split(' ').Count()>2)
+                        {
+                            if(attendanceTime.Split(' ')[2]=="PM")
+                            {
+                                isPM = true;
+                            }
+                            else
+                            {
+                                isPM = false;
+                            }
+                            attendanceTime = attendanceTime.Split(' ')[1];
+                        }
+                        else
+                        {
+                            isPM = false;
+                            attendanceTime = attendanceTime.Split(' ')[1];
+                        }
+
+                    }
+
+                    if (TimeSpan.TryParseExact(attendanceTime, TimeFormatGeosAppSettingArray, CultureInfo.InvariantCulture, TimeSpanStyles.None, out resultTime))
+                    {
+                        AttendanceDateTime = new DateTime(resultDate.Date.Year, resultDate.Date.Month, resultDate.Date.Day,
+                                                          resultTime.Hours, resultTime.Minutes, resultTime.Seconds);
+						//Shubham[skadam] GEOS2-4122 HRM EARO - Time attendance imported from ZK  27 02 2023
+                        if(isPM)
+                        {
+                            AttendanceDateTime = Convert.ToDateTime(AttendanceDateTime.Value.ToString().Replace("AM", "PM"));
+                        }
+                        return AttendanceDateTime;
+                    }
+                    else
+                    {
+                        GeosApplication.Instance.Logger.Log(string.Format("Unable to parse time geos_app_settings {0} Method DateTimeConversion().", attendanceTime), category: Category.Warn, priority: Priority.Low);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    GeosApplication.Instance.Logger.Log(string.Format("Error in ReadImportedAttendanceViewModel Method DateTimeConversion() - geos_app_settings - {0}.", ex.Message), category: Category.Exception, priority: Priority.Low);
+                }
+
+                #endregion
+
+                #region Custom company_settings Conversion
+
+                try
+                {
+                    // company_settings
+                    int IdCompany = 0;
+                    if (!string.IsNullOrEmpty(employee.EmployeeCompanyIds))
+                    {
+                        List<Int32> IdCompanies = employee.EmployeeCompanyIds.Split(',').Select(Int32.Parse).ToList();
+                        IdCompany = IdCompanies.First();
+                    }
+
+                    //Formate.Split(';').ToArray();
+                    string Formate = string.Empty;
+
+                    if (resultDate == DateTime.MinValue)
+                    {
+                        if (DateFormatCompanySettings.Any(x => x.IdCompany == IdCompany))
+                            Formate = DateFormatCompanySettings.FirstOrDefault(x => x.IdCompany == IdCompany).Value;
+
+                        if (DateTime.TryParseExact(attendanceDate, Formate.Split(';').ToArray(), CultureInfo.InvariantCulture, DateTimeStyles.None, out resultDate))
+                        {
+                            AttendanceDateTime = resultDate;
+                        }
+                        else
+                        {
+                            GeosApplication.Instance.Logger.Log(string.Format("Unable to parse date company_settings {0} Method DateTimeConversion().", attendanceDate), category: Category.Warn, priority: Priority.Low);
+                        }
+                    }
+
+                    if (TimeFormatCompanySettings.Any(x => x.IdCompany == IdCompany))
+                        Formate = TimeFormatCompanySettings.FirstOrDefault(x => x.IdCompany == IdCompany).Value;
+					//Shubham[skadam] GEOS2-4122 HRM EARO - Time attendance imported from ZK  27 02 2023
+                    bool isPMCompSett = false;
+                    if (attendanceTime.Contains(' '))
+                    {
+                        //attendanceTime = attendanceTime.Split(' ')[1];
+                        if (attendanceTime.Split(' ').Count() > 2)
+                        {
+                            if (attendanceTime.Split(' ')[2] == "PM")
+                            {
+                                isPMCompSett = true;
+                            }
+                            else
+                            {
+                                isPMCompSett = false;
+                            }
+                            attendanceTime = attendanceTime.Split(' ')[1];
+                        }
+                        else
+                        {
+                            isPMCompSett = false;
+                            attendanceTime = attendanceTime.Split(' ')[1];
+                        }
+
+                    }
+
+                    if (TimeSpan.TryParseExact(attendanceTime, Formate.Split(';').ToArray(), CultureInfo.InvariantCulture, TimeSpanStyles.None, out resultTime))
+                    {
+                        AttendanceDateTime = new DateTime(resultDate.Date.Year, resultDate.Date.Month, resultDate.Date.Day,
+                                                          resultTime.Hours, resultTime.Minutes, resultTime.Seconds);
+                        //Shubham[skadam] GEOS2-4122 HRM EARO - Time attendance imported from ZK  27 02 2023
+						if (isPMCompSett)
+                        {
+                            AttendanceDateTime = Convert.ToDateTime(AttendanceDateTime.Value.ToString().Replace("AM", "PM"));
+                        }
+                        return AttendanceDateTime;
+                    }
+                    else
+                    {
+                        GeosApplication.Instance.Logger.Log(string.Format("Unable to parse time company_settings {0} Method DateTimeConversion().", attendanceTime), category: Category.Warn, priority: Priority.Low);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    GeosApplication.Instance.Logger.Log(string.Format("Error in ReadImportedAttendanceViewModel Method DateTimeConversion() - company_settings - {0}", ex.Message), category: Category.Exception, priority: Priority.Low);
+                }
+
+                #endregion
+            }
+            catch (Exception ex)
+            {
+                GeosApplication.Instance.Logger.Log("Error in ReadImportedAttendanceViewModel Method DateTimeConversion()...." + ex.Message, category: Category.Exception, priority: Priority.Low);
+            }
+
+            return AttendanceDateTime;
+        }
+
+        /// <summary>
+        /// This method is created for dateconversion when checking within contract dates.
+        /// [000][skhade][04-03-2020][GEOS2-2170]Import Attendance does not load any data
+        /// </summary>
+        /// <param name="attendanceDate">The date from odbc</param>
+        /// <returns>If successfully converted then datetime else null.</returns>
+        private DateTime? DateConversion(string attendanceDate)
+        {
+            DateTime? AttendanceDateTime = null;
+            DateTime resultDate;
+
+            try
+            {
+                // Default Conversion
+                if (DateTime.TryParse(attendanceDate, CultureInfo.CurrentCulture, DateTimeStyles.None, out resultDate))
+                {
+                    AttendanceDateTime = resultDate;
+                }
+
+                // Custom geos_app_settings Conversion
+                try
+                {
+                    if (resultDate == DateTime.MinValue)
+                    {
+                        if (DateTime.TryParseExact(attendanceDate, DateFormatGeosAppSettingArray, CultureInfo.InvariantCulture, DateTimeStyles.None, out resultDate))
+                        {
+                            AttendanceDateTime = resultDate;
+                        }
+                        else
+                        {
+                            GeosApplication.Instance.Logger.Log(string.Format("Unable to parse date geos_app_settings {0} Method DateConversion().", attendanceDate), category: Category.Warn, priority: Priority.Low);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    GeosApplication.Instance.Logger.Log(string.Format("Error in ImportAttendanceFileViewModel Method DateTimeConversion() - geos_app_settings - {0}.", ex.Message), category: Category.Exception, priority: Priority.Low);
+                }
+            }
+            catch (Exception ex)
+            {
+                GeosApplication.Instance.Logger.Log("Error in ImportAttendanceFileViewModel Method DateTimeConversion()...." + ex.Message, category: Category.Exception, priority: Priority.Low);
+            }
+
+            return AttendanceDateTime;
+        }
+
+        private void gridView1_CustomRowCellEditForEditing(object sender, DevExpress.XtraGrid.Views.Grid.CustomRowCellEditEventArgs e)
+        {
+            //if (e.Column.FieldName == "Quantity")
+            //    e.RepositoryItem = editorForEditing;
+        }
+
+        /// <summary>
+        /// First Row will be filled to all the tagerts as cmbx
+        //[001][cpatil][11-05-2022][GEOS2-61044]
+        /// </summary>
+        /// <param name="dataTable"></param>
+        public void FillSourceIngrid(DataTable dataTable)
+        {
+            GeosApplication.Instance.Logger.Log("Method FillSourceIngrid() ...", category: Category.Info, priority: Priority.Low);
+
+            try
+            {
+                List<string> TargetfieldNew  = new List<string>();
+                TargetfieldNew.Add("EmployeeClockTimeID");
+                TargetfieldNew.Add("EmployeeCompanyEmail");
+
+                List<string> Targetfield = new List<string>();
+                EmployeeAttendance = new ObservableCollection<ImportAttendance>();
+                Targetfield.Add("EmployeeClockTimeID"); Targetfield.Add("Date"); Targetfield.Add("Time"); 
+               
+                if(IsMatchTypeWithDataSourceField)
+                {
+                    Targetfield.Add("Type");
+                }
+                Targetfield.Add("EmployeeCompanyEmail");
+
+
+
+                for (int k = 0; k < Targetfield.Count - 1; k++)
+                //foreach (var item in Targetfield)
+                {
+                    ImportAttendance tmpEmpAttandance = new ImportAttendance();
+                   // tmpEmpAttandance.Column = item.ToString();
+                    tmpEmpAttandance.TargetFieldList = TargetfieldNew;
+                    tmpEmpAttandance.Column = Targetfield[k].ToString();
+
+                    tmpEmpAttandance.EmployeeAttendanceImportFieldList = new List<EmployeeAttendanceImportField>();
+                    tmpEmpAttandance.EmployeeAttendanceTargetFieldList = new List<EmployeeAttendanceImportField>();
+                    // shubham[skadam] GEOS2-3537 HRM - Communication with PSD software -  Import attendance using the employee company e-mail [#IES20]
+					foreach (System.Data.DataRow item2 in dataTable.Rows)
+                    {
+                        for (int i = 0; i < Targetfield.Count; i++)
+                        {
+                            tmpEmpAttandance.EmployeeAttendanceTargetFieldList.Add(new EmployeeAttendanceImportField { Name = Targetfield[i].ToString() });
+                        }
+                        break;
+                    }
+                    foreach (System.Data.DataRow item2 in dataTable.Rows)
+                    {
+                        for (int i = 0; i < dataTable.Columns.Count; i++)
+                        {
+                            tmpEmpAttandance.EmployeeAttendanceImportFieldList.Add(new EmployeeAttendanceImportField { Name = item2[i].ToString() });
+                        }
+
+                        break;
+                    }
+                    EmployeeAttendance.Add(tmpEmpAttandance);
+                }
+            }
+            catch (Exception ex)
+            {
+                GeosApplication.Instance.Logger.Log("Get an error in Method FillSourceIngrid()...." + ex.Message, category: Category.Exception, priority: Priority.Low);
+            }
+
+            GeosApplication.Instance.Logger.Log("Method FillSourceIngrid() executed successfully...", category: Category.Info, priority: Priority.Low);
+        }
+
+        /// <summary>
+        /// get colums from text file 
+        /// </summary>
+        /// <param name="attachedFile"></param>
+        public void FetchColumnsFromText(Attachment attachedFile)
+        {
+            try
+            {
+                System.Data.DataTable SelectedSheet = new DataTable();
+                EmployeeAttendance = new ObservableCollection<ImportAttendance>();
+
+                GeosApplication.Instance.Logger.Log("Method FetchColumnsFromText() ...", category: Category.Info, priority: Priority.Low);
+                if (!DXSplashScreen.IsActive)
+                {
+                    DXSplashScreen.Show(x =>
+                    {
+                        Window win = new Window()
+                        {
+                            ShowActivated = false,
+                            WindowStyle = WindowStyle.None,
+                            ResizeMode = ResizeMode.NoResize,
+                            AllowsTransparency = true,
+                            Background = new SolidColorBrush(Colors.Transparent),
+                            ShowInTaskbar = false,
+                            Topmost = true,
+                            SizeToContent = SizeToContent.WidthAndHeight,
+                            WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                        };
+                        WindowFadeAnimationBehavior.SetEnableAnimation(win, true);
+                        win.Topmost = false;
+                        return win;
+                    }, x =>
+                    {
+                        return new SplashScreenView() { DataContext = new SplashScreenViewModel() };
+                    }, null, null);
+                }
+
+                DataTable data = ConvertTextFileToDataTable(attachedFile.FilePath);
+                if (data == null)
+                {
+                    OnPropertyChanged(new PropertyChangedEventArgs("EmployeeAttendance"));
+                    OnPropertyChanged(new PropertyChangedEventArgs("SheetNameSelectedIndex"));
+                    return;
+                }
+
+                FillSourceIngrid(data);
+                filteredTable = data.Rows.Cast<DataRow>().Where(row => row.ItemArray.Any(field => !(field is System.DBNull))).CopyToDataTable();
+                AttachmentFiles.Clear();
+                AttachmentFiles.Add(attachedFile);
+                AttachedFileIndex = 0;
+                CalculateIndexForGridText();
+
+                OnPropertyChanged(new PropertyChangedEventArgs("SheetNameSelectedIndex"));
+                OnPropertyChanged(new PropertyChangedEventArgs("EmployeeAttendance"));
+
+                if (DXSplashScreen.IsActive) { DXSplashScreen.Close(); }
+                GeosApplication.Instance.Logger.Log("Method FetchColumnsFromExcel() executed successfully", category: Category.Info, priority: Priority.Low);
+            }
+            catch (FaultException<ServiceException> ex)
+            {
+                if (DXSplashScreen.IsActive) { DXSplashScreen.Close(); }
+                GeosApplication.Instance.Logger.Log("Get an error in FetchColumnsFromExcel() Method " + ex.Detail.ErrorMessage, category: Category.Exception, priority: Priority.Low);
+                CustomMessageBox.Show(GeosApplication.Instance.ExceptionHandlingOperationString(ex.Detail, null), Application.Current.Resources["PopUpWarningColor"].ToString(), CustomMessageBox.MessageImagePath.NotOk, MessageBoxButton.OK);
+            }
+            catch (ServiceUnexceptedException ex)
+            {
+                if (DXSplashScreen.IsActive) { DXSplashScreen.Close(); }
+                GeosApplication.Instance.Logger.Log("Get an error in FetchColumnsFromExcel() Method - ServiceUnexceptedException " + ex.Message, category: Category.Exception, priority: Priority.Low);
+                GeosApplication.Instance.ExceptionHandlingOperation(ex.ExceptionType, GeosApplication.Instance.ApplicationSettings["ServiceProviderIP"].ToString(), null);
+            }
+        }
+
+        /// <summary>
+        /// Converting Text file in to Datatable
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <returns></returns>
+        public DataTable ConvertTextFileToDataTable(string filePath)
+        {
+            GeosApplication.Instance.Logger.Log("Method ConvertTextFileToDataTable() ...", category: Category.Info, priority: Priority.Low);
+            DataTable dataTable = new DataTable();
+            string separator = SelectedSeparator();
+
+            try
+            {
+                string[] lines = System.IO.File.ReadAllLines(filePath);
+                var content = System.IO.File.ReadAllText(filePath).Replace(separator, ",");
+                int numberOfColumns = lines[0].Split(char.Parse(separator)).Count();
+                StringSplit = numberOfColumns;
+                // File is in wrong for mate
+
+                if (StringSplit.Equals(1))
+                {
+                    CustomMessageBox.Show("File is in wrong format", Application.Current.Resources["PopUpWarningColor"].ToString(), CustomMessageBox.MessageImagePath.NotOk, MessageBoxButton.OK);
+                    dataTable = null;
+                    return dataTable;
+                }
+
+                for (int colum = 0; colum < numberOfColumns; colum++)
+                {
+                    dataTable.Columns.Add(new DataColumn("Column" + (colum + 1).ToString()));
+                }
+
+                foreach (string line in lines)
+                {
+                    var cols = line.Split(char.Parse(separator)).ToList();
+                    if (StringSplit != cols.Count)
+                        continue;
+                    DataRow dr = dataTable.NewRow();
+                    for (int columIndex = 0; columIndex < numberOfColumns; columIndex++)
+                    {
+                        dr[columIndex] = cols[columIndex].Trim();
+                    }
+                    dataTable.Rows.Add(dr);
+                }
+
+                GeosApplication.Instance.Logger.Log("Method ConvertTextFileToDataTable() executed successfully ...", category: Category.Info, priority: Priority.Low);
+            }
+            catch (Exception ex)
+            {
+                if (DXSplashScreen.IsActive) { DXSplashScreen.Close(); }
+                if (ex.Message.Contains("Index was outside the bounds"))
+                {
+                    StringSplit = 1;
+                    CustomMessageBox.Show("File is in wrong format", Application.Current.Resources["PopUpWarningColor"].ToString(), CustomMessageBox.MessageImagePath.NotOk, MessageBoxButton.OK);
+                    dataTable = null;
+                }
+                GeosApplication.Instance.Logger.Log("Get an error in ConvertTextFileToDataTable() Method " + ex.Message, category: Category.Exception, priority: Priority.Low);
+            }
+
+            return dataTable;
+        }
+
+        /// <summary>
+        /// Call Validation GEOS2-48 Sprint 60
+        /// </summary>
+        /// <param name="obj"></param>
+        public void DateChangeValidation(EditValueChangedEventArgs obj)
+        {
+            GeosApplication.Instance.Logger.Log("Method DateChangeValidation() ...", category: Category.Info, priority: Priority.Low);
+
+            if (obj.OldValue != null)
+            {
+                string error = EnableValidationAndGetError();
+                OnPropertyChanged(new PropertyChangedEventArgs("FilterEndDate"));
+                OnPropertyChanged(new PropertyChangedEventArgs("FilterStartDate"));
+            }
+
+            GeosApplication.Instance.Logger.Log("Method DateChangeValidation() executed successfully ...", category: Category.Info, priority: Priority.Low);
+        }
+
+        /// <summary>
+        /// Get the selected seperatior for datasource text file
+        /// </summary>
+        /// <returns></returns>
+        private string SelectedSeparator()
+        {
+            try
+            {
+                if (TextSeparators[SheetNameSelectedIndex].Equals("Tab")) return "\t";
+                if (TextSeparators[SheetNameSelectedIndex].Equals("Comma")) return ",";
+                if (TextSeparators[SheetNameSelectedIndex].Equals("SemiColon")) return ";";
+                if (TextSeparators[SheetNameSelectedIndex].Equals("Space")) return " ";
+            }
+            catch (Exception ex)
+            {
+                GeosApplication.Instance.Logger.Log("Get an error in SelectedSeparator() Method " + ex.Message, category: Category.Exception, priority: Priority.Low);
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// To close window
+        /// </summary>
+        /// <param name="obj"></param>
+        private void CloseWindow(object obj)
+        {
+            RequestClose(null, null);
+        }
+        public void SetUserSetting(EditValueChangedEventArgs obj)
+        {
+            try
+            {
+                GeosApplication.Instance.Logger.Log("Method SetUserSetting() ...", category: Category.Info, priority: Priority.Low);
+
+                if (obj.NewValue.ToString() == "Text")
+                {
+                    if (GeosApplication.Instance.UserSettings.ContainsKey("ImportAttendanceTextSeparator"))
+                    {
+                        int SelectedIndex;
+                        int.TryParse(GeosApplication.Instance.UserSettings["ImportAttendanceTextSeparator"], out SelectedIndex);
+                        SheetNameSelectedIndex = SelectedIndex;
+                    }
+                    else
+                        SheetNameSelectedIndex = 0;
+                }
+                else if (obj.NewValue.ToString() == "ODBC")
+                {
+
+                    if (GeosApplication.Instance.UserSettings.ContainsKey("ImportAttendanceOdbcDns"))
+                    {
+                        int SelectedIndex;
+                        int.TryParse(GeosApplication.Instance.UserSettings["ImportAttendanceOdbcDns"], out SelectedIndex);
+                        DsnSelectedIndex = SelectedIndex;
+                    }
+                    else
+                        DsnSelectedIndex = 0;
+
+                    if (GeosApplication.Instance.UserSettings.ContainsKey("ImportAttendanceOdbcTableName"))
+                    {
+                        int SelectedIndex;
+                        int.TryParse(GeosApplication.Instance.UserSettings["ImportAttendanceOdbcTableName"], out SelectedIndex);
+                        SheetNameSelectedIndex = SelectedIndex;
+                    }
+                    else
+                        SheetNameSelectedIndex = 0;
+                }
+
+                GeosApplication.Instance.Logger.Log("Method SetUserSetting() executed successfully ...", category: Category.Info, priority: Priority.Low);
+            }
+            catch (Exception ex)
+            {
+                GeosApplication.Instance.Logger.Log("Get an error in SetUserSetting() Method " + ex.Message, category: Category.Exception, priority: Priority.Low);
+            }
+        }
+        private void ShortcutAction(KeyEventArgs obj)
+        {
+
+            GeosApplication.Instance.Logger.Log("Method ShortcutAction ...", category: Category.Info, priority: Priority.Low);
+            try
+            {
+              
+                HrmCommon.Instance.OpenWindowClickOnShortcutKey(obj);
+
+                GeosApplication.Instance.Logger.Log("Method ShortcutAction....executed successfully.", category: Category.Info, priority: Priority.Low);
+            }
+            catch (Exception ex)
+            {
+                if (DXSplashScreen.IsActive && !GeosApplication.Instance.IsLoadOneTime) { DXSplashScreen.Close(); }
+                GeosApplication.Instance.Logger.Log("Get an error in Method ShortcutAction...." + ex.Message, category: Category.Exception, priority: Priority.Low);
+            }
+        }
+        #endregion
+    }
+}
+public class PostgreSQLdb
+{
+    public string TABLE_CAT { get; set; }
+    public string TABLE_SCHEM { get; set; }
+    public  string TABLE_NAME { get; set; }
+    public  string TABLE_TYPE { get; set; }
+    public string REMARKS { get; set; }
+
+}
+

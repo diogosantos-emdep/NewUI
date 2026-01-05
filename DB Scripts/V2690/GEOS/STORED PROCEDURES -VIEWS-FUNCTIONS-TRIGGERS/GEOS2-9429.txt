@@ -1,0 +1,238 @@
+DROP PROCEDURE IF EXISTS `OTM_GetPORequestDetails_V2690`;
+DELIMITER $$
+CREATE PROCEDURE `OTM_GetPORequestDetails_V2690`(
+   IN _FromDate     datetime,
+   IN _ToDate       datetime,
+   IN _Idcurrency   TINYINT(4) UNSIGNED)
+BEGIN
+   DECLARE _latestDate   datetime;
+
+   /*
+         CALL OTM_GetPORequestDetails_V2640('2025-02-01', '2025-02-11', 18); [pramod.misal][GEOS2-7248][24.04.2025]
+         CALL OTM_GetPORequestDetails_V2660('2025-08-01', '2025-08-31', 18);  [pramod.misal][GEOS2-8772][24.04.2025] 
+          CALL OTM_GetPORequestDetails_V2670('2025-08-01', '2025-08-31', 18);  [Rahul.Gadhave][GEOS2-9041][02.09.2025] 
+          CALL OTM_GetPORequestDetails_V2690('2024-08-01', '2025-08-31', 18);  [pramod.misal][GEOS2-9426][24.04.2025]
+         
+   */
+   SELECT MAX(CurrencyConversionDate)
+   INTO _latestDate
+   FROM emdep_geos.currency_conversions;
+
+   --
+   -- Main Query
+   SELECT e.EmailSentAt
+             AS DateTime,
+             DATE(e.EmailSentAt) AS Date,
+			-- TIME(e.EmailSentAt) AS Time,
+             DATE_FORMAT(e.EmailSentAt, '%H:%i') AS Time,
+
+          e.CCName
+             AS CCName,
+          TRIM(SUBSTRING_INDEX(e.SenderName, '(', 1))
+             AS SenderName,
+          e.SenderEmail
+             AS Sender,
+          e.ToName
+             AS ToRecipientName,
+          e.ToEmail
+             AS Recipient,
+          e.Subject
+             AS Subject,
+          ''
+             AS EmailBody,
+          e.IdEmail,
+          -- CASE WHEN ea.IdEmail IS NOT NULL THEN 'Yes' ELSE 'No' END
+          -- AS `POfound`,
+
+          CASE
+             WHEN EXISTS
+                     (SELECT 1
+                      FROM emailattachment ea2
+                      WHERE     ea2.IdEmail = e.IdEmail
+                            AND ea2.IdDocumentType = 2259)
+             THEN
+                'Yes'
+             ELSE
+                'No'
+          END
+             AS `POfound`,
+          COUNT(DISTINCT ea.IdAttachment)
+             AS attachCount,
+          Group_concat(
+             DISTINCT IFNULL(ea.AttachmentName, '') ORDER BY
+                                                       Locate(
+                                                          pfrr.IdAttachment,
+                                                          ea.AttachmentName) SEPARATOR ';')
+             AS Attachments,
+          e.ToName
+             AS Requester,
+          lv.Value
+             AS Status,
+          lv.IdLookupValue
+             AS IdPORequestStatus,
+          lv.HtmlColor,
+          e.CCEmail
+             AS CCRecipients,
+          e.SourceInboxId
+             AS Inbox,
+          por.Idoffer,
+          ea.AttachmentPath
+             AS AttachmentPath,
+          GROUP_CONCAT(DISTINCT off.Code ORDER BY off.Code SEPARATOR ',')
+             AS Offers,
+          -- Po data
+          -- [nsatpute][10-03-2025][GEOS2-6722]
+          pfrr.customer,
+          pfrr.invoiceto,
+          pfrr.ponumber,
+          pfrr.offers
+             AS offer,
+          pfrr.podate,
+          pfrr.email,
+          pfrr.transferamount,
+          pfrr.currency,
+          pfrr.shipto,
+          pfrr.incoterm,
+          pfrr.paymentterms,
+          0
+             AS IDPOfinalresult,
+          pr.IdPORequest,
+          GROUP_CONCAT(DISTINCT off.IdOffer ORDER BY off.Code SEPARATOR ',')
+             AS LinkedIdOffer,
+          e.SenderIdPerson,
+          e.ToIdPerson,
+          -- ea.IdAttachmentType,
+          -- [pramod.misal][GEOS2-7248][22.04.2025]
+          -- e.Body,
+          -- ea.IdAttachmentType,
+          --           Group_concat(
+          --              DISTINCT IFNULL(ea.IdAttachmentType, '') ORDER BY
+          --                                                        Locate(
+          --                                                           pfrr.IdAttachment,
+          --                                                           ea.IdAttachmentType) SEPARATOR ';') As IdAttachmentType,
+
+          --           GROUP_CONCAT(
+          --              DISTINCT IFNULL(ea.IdAttachmentType, '0') ORDER BY
+          --                                                           LOCATE(
+          --                                                              pfrr.IdAttachment,
+          --                                                              ea.IdAttachmentType) SEPARATOR ';')
+          --              AS IdAttachmentType,
+          -- ea.IdAttachment,
+          --           Group_concat(
+          --              DISTINCT IFNULL(ea.IdAttachment, '') ORDER BY
+          --                                                      Locate(
+          --                                                         pfrr.IdAttachment,
+          --                                                         ea.IdAttachment) SEPARATOR ';')
+          --              AS IdAttachment,
+          e.CCIdPerson,
+          cust.Name
+             AS CustomerGroup,
+-- //[rahul.gadhave][GEOS2-9020][23.07.2025] 
+             cust.IdCustomer As IdCustomerGroup,
+          replace(st.name, concat('(', co.name, ')'), '')
+             AS CustomerPlant,
+             st.IdSite As IdCustomerPlant,
+			 co.idcountry
+   FROM email e
+        LEFT JOIN emailattachment ea ON e.IdEmail = ea.IdEmail
+        LEFT JOIN porequest pr ON e.IdEmail = pr.IdEmail
+        LEFT JOIN customers cust ON cust.IdCustomer = e.IdCustomer
+        LEFT JOIN sites st ON st.IdSite = e.IdPlant
+        LEFT JOIN countries co ON co.idcountry = st.idcountry
+        LEFT JOIN
+        (SELECT idemail,
+                pfr.IdAttachment,
+                Group_concat(
+                   Ifnull(pfr.customer, '') ORDER BY
+                                               Locate(pfr.customer,
+                                                      pfr.customer) SEPARATOR ';')
+                   AS `Customer`,
+                Group_concat(
+                   Ifnull(pfr.invoiceto, '') ORDER BY
+                                                Locate(pfr.invoiceto,
+                                                       pfr.customer) SEPARATOR ';')
+                   AS `InvoiceTo`,
+                Group_concat(
+                   Ifnull(pfr.ponumber, '') ORDER BY
+                                               Locate(pfr.ponumber,
+                                                      pfr.customer) SEPARATOR ';')
+                   AS `PONumber`,
+                Group_concat(
+                   Ifnull(pfr.podate, '') ORDER BY
+                                             Locate(pfr.podate, pfr.customer) SEPARATOR ';')
+                   AS `PODate`,
+                Group_concat(
+                   Ifnull(pfr.email, '') ORDER BY
+                                            Locate(pfr.email, pfr.customer) SEPARATOR ';')
+                   AS `Email`,
+                Group_concat(
+                   Ifnull(
+                      Cast(Round(pfr.transferamount, 4) AS DECIMAL(18, 4)),
+                      '') ORDER BY
+                             Locate(
+                                Ifnull(
+                                   Cast(
+                                      Round(pfr.transferamount, 4) AS DECIMAL(18, 4)),
+                                   ''),
+                                pfr.customer) SEPARATOR ';')
+                   AS `TransferAmount`,
+                Group_concat(
+                   Ifnull(pfr.currency, '') ORDER BY
+                                               Locate(pfr.currency,
+                                                      pfr.customer) SEPARATOR ';')
+                   AS `Currency`,
+                Group_concat(
+                   Ifnull(pfr.shipaddress, '') ORDER BY
+                                                  Locate(pfr.shipaddress,
+                                                         pfr.customer) SEPARATOR ';')
+                   AS `ShipTo`,
+                Group_concat(
+                   Ifnull(pfr.incoterm, '') ORDER BY
+                                               Locate(pfr.incoterm,
+                                                      pfr.customer) SEPARATOR ';')
+                   AS `Incoterm`,
+                Group_concat(
+                   Ifnull(pfr.paymentterms, '') ORDER BY
+                                                   Locate(pfr.paymentterms,
+                                                          pfr.customer) SEPARATOR ';')
+                   AS `PaymentTerms`,
+                GROUP_CONCAT(
+                   CASE WHEN pfr.offer != ':' THEN pfr.offer END ORDER BY
+                                                                    LOCATE(
+                                                                       pfr.offer,
+                                                                       pfr.customer) SEPARATOR ';')
+                   AS `Offers`
+         FROM pofinalresult pfr
+              INNER JOIN porequest pr ON pfr.idporequest = pr.idporequest
+         GROUP BY idemail) pfrr
+           ON pfrr.idemail = e.idemail
+        -- End
+
+        LEFT JOIN emdep_geos.lookup_values lv
+           ON lv.IdLookupValue = pr.PORequestStatus
+        LEFT JOIN emdep_geos.currency_conversions cc
+           ON     cc.IdCurrencyConversionFrom = _Idcurrency
+              AND cc.IdCurrencyConversionTo = _Idcurrency
+              AND DATE(cc.CurrencyConversionDate) = _latestDate
+        LEFT JOIN PoRequestLinkedOffers por
+           ON por.IdPORequest = pr.IdPORequest
+        LEFT JOIN offers off ON off.IdOffer = por.Idoffer
+   WHERE date(e.EmailSentAt) BETWEEN _FromDate AND _ToDate
+   GROUP BY e.IdEmail
+   ORDER BY EmailSentAt DESC;
+
+   SELECT POLNK.IDPOREQUEST,
+          O.CODE,
+          C.NAME AS GROUPNAME,
+          replace(s.name, concat('(', co.name, ')'), '') AS Plant,
+          C.IDCUSTOMER as offerIdcustomer,
+          s.IdSite as offerIdcustomerPlant
+   FROM POREQUESTLINKEDOFFERS POLNK
+        INNER JOIN OFFERS O ON POLNK.IDOFFER = O.IDOFFER
+        INNER JOIN sites s ON s.idsite = o.idcustomer
+        INNER JOIN CUSTOMERS C ON C.IDCUSTOMER = S.IDCUSTOMER
+        INNER JOIN countries co ON co.idcountry = s.idcountry
+   WHERE C.IDCUSTOMER != 10
+   GROUP BY POLNK.IDPOREQUEST;
+END $$
+DELIMITER ;

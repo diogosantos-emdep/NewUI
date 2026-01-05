@@ -1,0 +1,8 @@
+INSERT INTO geos.automatic_reports (Name, StartDate, `Interval`, IsEnabled)
+SELECT 'APM_OverdueTasks', '2025-08-06 00:00:00', 'weekly', 0
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM geos.automatic_reports 
+    WHERE Name = 'APM_OverdueTasks'
+);
+ 

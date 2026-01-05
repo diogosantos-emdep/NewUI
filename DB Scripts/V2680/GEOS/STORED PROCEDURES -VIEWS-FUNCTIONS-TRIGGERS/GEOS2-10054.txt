@@ -1,0 +1,75 @@
+
+DROP PROCEDURE IF EXISTS `EDS_GetWorkOrderItemsInStage_V2680`;
+DELIMITER $$
+CREATE PROCEDURE `EDS_GetWorkOrderItemsInStage_V2680`(
+   IN `_IdStage`   text)
+BEGIN
+   /*
+   //Shubham[skadam] GEOS2-8430 Make same ot code in both services 17 06 2025
+   call EDS_GetWorkOrderItemsInStage_V2570(7);
+   //Shubham[skadam] [V.2.6.7.0] GEOS2-9464 Add a new field “Workbook” in the existing service GetWorkOrderItemsInStageAsXmlString  12 09 2025
+   call EDS_GetWorkOrderItemsInStage_V2670(7);
+   //Shubham[skadam] [V.2.6.8.0] GEOS2-9458&GEOS2-9460&GEOS2-9462 GetWorkOrderItemsInStageAsXmlString 01 10 2025
+   call EDS_GetWorkOrderItemsInStage_V2680("7,1,2,3,4,17,40,42");
+   */
+   SELECT                                                           -- q.code,
+          ot.Code,
+          ot.NumOT,
+          concat(cust.Name, ' - ', si.Name)   AS customer,
+          IFNULL(ot.DeliveryDate, '1000-01-01')  AS DeliveryDate,
+          oti.IdOTItem,
+          ri.numitem,
+          ri.Quantity  AS Quantity,
+          a.ReworkNumber,
+          typ.Name  AS itemtype,
+          con.IdConnector,
+          prod.Reference   AS reference1,
+          prod.OtherReference AS reference2,
+          con.Ref  AS referenceEMDEP,
+          CONCAT(fam.Name, ' ', IFNULL(connectorsubfamilies.Name, ''))  AS family,
+          connectorcolor.Name  AS connectorcolor,
+          con.NumWays,
+          connectorterminals.Name  AS gender,
+          con.Sealed,
+          prod.IdDrawing,
+          solidworksprojects.Reference   AS solidworksprojectsReference,
+          solidworksprojects.Path  AS solidworksprojectsPath,
+          prod.IdWorkbookOfCpProducts   AS IdWorkbook,
+          cpw.`IsCopy`,
+          cpw.IdSampleCounterpart,
+          cps.`Code` as PrototypeSN,
+          q.`IdDetectionsTemplate` as IdTemplate,
+          t.`Name` as TemplateName
+     FROM counterparts cpart
+          INNER JOIN
+          (SELECT max(ReworkNumber) AS ReworkNumber,
+                    cpt.IdCounterpart,
+                    oti.IdOTItem
+               FROM counterparts cp
+                    INNER JOIN counterpartstracking cpt
+                       ON cp.IdCounterpart = cpt.IdCounterpart
+                    INNER JOIN otitems oti ON cp.IdOTItem = oti.IdOTItem
+              WHERE FIND_IN_SET(IdStage,_IdStage) AND EndDate IS NULL-- idstage = _IdStage 
+           GROUP BY cpt.IdCounterpart, oti.IdOTItem) a  ON cpart.IdCounterpart = a.IdCounterpart
+          INNER JOIN otitems oti ON a.IdOTItem = oti.IdOTItem
+          INNER JOIN revisionitems ri  ON oti.IdRevisionItem = ri.IdRevisionItem
+          INNER JOIN ots ot ON oti.IdOT = ot.IdOT
+          INNER JOIN quotations q ON ot.IdQuotation = q.IdQuotation
+          LEFT JOIN templates t ON t.`IdTemplate`=q.`IdDetectionsTemplate`
+          INNER JOIN sites si ON q.IdCustomer = si.IdSite
+          INNER JOIN customers cust ON si.idcustomer = cust.IdCustomer
+          LEFT JOIN cpproduct prod ON prod.IdCP = ri.IdProduct
+          LEFT JOIN cpproductworkbooks cpw ON cpw.`IdWorkbookOfCpProducts`=prod.IdWorkbookOfCpProducts
+          LEFT JOIN counterparts  cps ON cps.`IdCounterpart`=cpw.IdSampleCounterpart
+          LEFT JOIN cptypes typ ON typ.IdCPType = prod.IdCPType
+          LEFT JOIN refconclients rcc ON rcc.Ref = prod.Reference
+          LEFT JOIN connectors con ON con.IdConnector = rcc.IdConnector
+          LEFT JOIN connectorfamilies fam ON fam.IdFamily = con.Family
+          LEFT JOIN connectorsubfamilies ON connectorsubfamilies.idConnectorSubfamily = con.Subfamily
+          LEFT JOIN colours AS connectorcolor  ON con.Color = connectorcolor.IdColor
+          LEFT JOIN connectorterminals  ON connectorterminals.IdTerminal = con.Terminal
+          LEFT JOIN drawings ON prod.IdDrawing = drawings.IdDrawing
+          LEFT JOIN solidworksprojects  ON solidworksprojects.IdSolidWorksProject = drawings.IdSolidWorksProject
+    WHERE ri.Quantity != 0;
+END$$
+DELIMITER ;

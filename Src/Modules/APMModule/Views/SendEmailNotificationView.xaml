@@ -1,0 +1,148 @@
+﻿<dxwui:WinUIDialogWindow x:Class="Emdep.Geos.Modules.APM.Views.SendEmailNotificationView"
+           xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.APM.Views"
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm" 
+             xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+             xmlns:dxci="http://schemas.devexpress.com/winfx/2008/xaml/core/internal"  
+             xmlns:APMCommon ="clr-namespace:Emdep.Geos.Modules.APM.CommonClasses"
+             xmlns:ViewModels="clr-namespace:Emdep.Geos.Modules.APM.ViewModels"
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:UIConverter="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+             xmlns:system="clr-namespace:System;assembly=mscorlib"
+             xmlns:APMApplication="clr-namespace:Emdep.Geos.Modules.APM.CommonClasses"
+             xmlns:Validation ="clr-namespace:Emdep.Geos.UI.Validations;assembly=Emdep.Geos.UI.Validations" 
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             mc:Ignorable="d"  
+             xmlns:sysglb="clr-namespace:System.Globalization;assembly=mscorlib"
+             Title="{DynamicResource SendNotificationHeader}"     
+      TitleStyle="{DynamicResource WinUIDialogWindowTitleStyle}" >
+    <!--[shweta.thube][GEOS2-8063][27/05/2025]-->
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape" Command="{Binding CancelButtonCommand}"/>
+    </dxwui:WinUIDialogWindow.InputBindings>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+
+        </Grid.RowDefinitions>
+
+        <dxlc:LayoutGroup Grid.Row="0" Width="800" Height="280" VerticalAlignment="Stretch" HorizontalAlignment="Center"
+			  Name="lgPartnumber" Header=" "
+			  View="GroupBox"
+   
+			  dxlc:LayoutControl.AllowVerticalSizing="True"
+                         
+>
+            <dxg:GridControl x:Name="AddParticipantsGrid" Margin="-10" FontSize="14"
+     									  ItemsSource="{Binding ResponsibleListForEmailNotification,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" 
+				   Width="796"
+				  MinWidth="130" Height="254"
+				  ImplyNullLikeEmptyStringWhenFiltering="True">
+                <dxg:GridControl.Columns>
+                    <dxg:GridColumn FieldName="ResponsibleWithTaskCount"  Header="{DynamicResource Employee}" CellToolTipBinding="{Binding Employee}" ReadOnly="True" FilterPopupMode="CheckedList" MinWidth="299" />
+                    <dxg:GridColumn FieldName="CompanyEmail"  Header="{DynamicResource EmployeeEmail}" CellToolTipBinding="{Binding EmployeeEmail}" ReadOnly="True" FilterPopupMode="CheckedList" MinWidth="250" />
+                    <dxg:GridColumn Header="{DynamicResource EmailSent}" FieldName="SentDateTime" ReadOnly="True"   MinWidth="145"  MaxWidth="145" FilterPopupMode="CheckedList">
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Height="24">
+                                    <TextBlock Text ="{Binding RowData.Row.SentDateTime,UpdateSourceTrigger=PropertyChanged,StringFormat={}{0:g}
+,ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}" VerticalAlignment="Center" Margin="5,0,0,0" >
+                                        <TextBlock.ToolTip>
+                                            <ToolTip>
+                                                <StackPanel>
+                                                    <TextBlock Text ="{Binding RowData.Row.SentDateTime,UpdateSourceTrigger=PropertyChanged,StringFormat={}{0:g}
+,ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}" />
+                                                </StackPanel>
+                                            </ToolTip>
+                                        </TextBlock.ToolTip>
+                      </TextBlock>
+                                </StackPanel>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+                    <dxg:GridColumn MinWidth="40" MaxWidth="40"  Fixed="Right"  FieldName="" FixedWidth="True" AllowMoving="False" AllowColumnFiltering="false" >
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Name="Email" ToolTip="Preview Email"  
+    Command="{Binding DataContext.SendMailtoPersonCommand, RelativeSource={RelativeSource AncestorType={x:Type dxg:GridControl}}}"
+    CommandParameter="{Binding RowData.Row}" IsEnabled="{Binding RowData.Row.IsPreviewEmail}">
+                                    <Button.ContentTemplate>
+                                        <DataTemplate>
+                                            <Image Height="16" Width="16" Source="/Emdep.Geos.Modules.APM;component/Assets/Images/wEmail.png" />
+                                        </DataTemplate>
+                                    </Button.ContentTemplate>
+                                </Button>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+                    <dxg:GridColumn MinWidth="40" MaxWidth="40" Fixed="Right"  FieldName="" FixedWidth="True" AllowMoving="False" AllowColumnFiltering="false" >
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Name="SendEmail" ToolTip="Send email to inform employee of his tasks"  
+     Command="{Binding DataContext.SendAutomaticEmailCommand, RelativeSource={RelativeSource AncestorType={x:Type dxg:GridControl}}}"
+     CommandParameter="{Binding RowData.Row}" IsEnabled="{Binding RowData.Row.SentEmail}">
+                                    <Button.ContentTemplate>
+                                        <DataTemplate>
+                                            <Image Height="16" Width="16" Source="/Emdep.Geos.Modules.APM;component/Assets/Images/wSend.png" />
+                                        </DataTemplate>
+                                    </Button.ContentTemplate>
+                                </Button>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+                </dxg:GridControl.Columns>
+                <dxg:GridControl.TotalSummary>
+                    <dxg:GridSummaryItem x:Name="summary" FieldName="ResponsibleWithTaskCount" SummaryType="Count" DisplayFormat="Total Count: {0}" Visible="True"  Alignment="Left"/>
+                </dxg:GridControl.TotalSummary>
+                <dxg:GridControl.View>
+                    <dxg:TableView Name="sendNotification"  NavigationStyle="Row"
+						  VerticalScrollbarVisibility="Visible"
+						 HorizontalScrollbarVisibility="Visible"
+						 AutoWidth="False"
+                         ShowFixedTotalSummary="True"
+                         SearchPanelHorizontalAlignment="Stretch"
+						 ShowGroupPanel="False"
+						 ShowIndicator="False"
+						 AllowEditing="True" AllowLeaveInvalidEditor="True"
+                         ShowSearchPanelMode="Always"
+						 ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly" EnableImmediatePosting="True"
+						 ItemsSourceErrorInfoShowMode="RowAndCell">
+
+                    </dxg:TableView>
+                </dxg:GridControl.View>
+            </dxg:GridControl>
+
+        </dxlc:LayoutGroup>
+
+        <Button Content="{DynamicResource AddActionPlanDetailsExitButton}"  Grid.Row="2" HorizontalAlignment="Left" 
+        Command="{Binding CancelButtonCommand}"   Margin="290,5,0,5"
+        FontSize="16"  Height="30" Width="100" Style="{DynamicResource Button16Style}"/>
+        <!--[Shweta.Thube][07-11-2024][GEOS2-9129]-->
+        <Button Command="{Binding SendAllButtonCommand}" Grid.Row="2"
+        IsEnabled="{Binding IsSendAllEnabled}"
+        HorizontalAlignment="Right" Margin="0,5,290,5"
+        FontSize="16" Height="30" Width="100"
+        Style="{DynamicResource Button16Style}"
+        ToolTip="Send email to all employees of the list">
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <!-- Text -->
+                <TextBlock Text="{DynamicResource SendAllButton}" 
+                   VerticalAlignment="Center" 
+                   Margin="0,0,5,0"/>
+
+                <!-- Image -->
+                <Image Source="/Emdep.Geos.Modules.APM;component/Assets/Images/wSend.png"
+               Width="16" Height="16"
+               VerticalAlignment="Center"/>
+            </StackPanel>
+        </Button>
+
+    </Grid>
+</dxwui:WinUIDialogWindow>

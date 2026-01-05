@@ -1,0 +1,77 @@
+﻿<dxwui:WinUIDialogWindow x:Class="Emdep.Geos.Modules.Crm.Views.SearchUserView"
+                         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                          xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                         xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                         xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+                         xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"
+                         xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+                         xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+                         xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+                         xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+                         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+                         xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+                         xmlns:UIConverter ="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+                         xmlns:Validation ="clr-namespace:Emdep.Geos.UI.Validations;assembly=Emdep.Geos.UI.Validations"
+                         xmlns:behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+                         mc:Ignorable="d" 
+                         d:DesignHeight="250" Width="500"
+                         Title="{DynamicResource SearchUser}"
+                         TitleStyle="{DynamicResource WinUIDialogWindowTitleStyle}"
+                         Style="{DynamicResource WinUIDialogWindowStyle}">
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape" Command="{Binding SelectUserCancelButtonCommand}"/>
+    </dxwui:WinUIDialogWindow.InputBindings>
+
+    <Grid Margin="2">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="40"/>
+        </Grid.RowDefinitions>
+        <Grid DataContext="{Binding Contact,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow},Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+            <dxlc:LayoutGroup Margin="20">
+                <dxlc:LayoutItem Label="{DynamicResource LeadsEditViewCommentUserLabel}">
+                    <dxe:ComboBoxEdit AutoComplete="True" 
+				IsTextEditable="True"
+				ImmediatePopup="True"
+				IncrementalFiltering="True" 
+                                              HorizontalAlignment="Stretch" VerticalAlignment="Top" ItemsSource="{Binding DataContext.ListUser,Mode=TwoWay, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow},UpdateSourceTrigger=PropertyChanged}" 
+                                              DisplayMember="Login">
+                        <dxe:ComboBoxEdit.SelectedIndex>
+                            <Binding Path="DataContext.SelectedUser" RelativeSource="{RelativeSource AncestorType=dxwui:WinUIDialogWindow}" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                                <Binding.ValidationRules>
+                                    <Validation:ContactValidation FieldName="SelectedUser" ValidationStep="UpdatedValue" />
+                                </Binding.ValidationRules>
+                            </Binding>
+                        </dxe:ComboBoxEdit.SelectedIndex>
+                    </dxe:ComboBoxEdit>
+                </dxlc:LayoutItem>
+            </dxlc:LayoutGroup>
+        </Grid>
+        <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                    HorizontalAlignment="Center" 
+                    Orientation="Horizontal"
+                    Margin="20,5,0,0"
+                    Width="290">
+
+            <Button Content="{DynamicResource AddContactViewAccept}"
+                    Command="{Binding SelectUserAcceptButtonCommand}"
+                    Height="30"
+                    Width="100"
+                    Margin="0,0,30,0"
+                    VerticalAlignment="Bottom" />
+
+            <Button Content="{DynamicResource AddContactViewCancel}"
+                    Command="{Binding SelectUserCancelButtonCommand}" 
+                    Height="30"
+                    Width="100"
+                    Margin="30,0,0,0"
+                    VerticalAlignment="Bottom"  />
+        </StackPanel>
+    </Grid>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="KeyDown">
+            <behaviors:InvokeDelegateCommandAction Command="{Binding CommandTextInput}" CommandParameter="{Binding Path=InvokeParameter, RelativeSource={RelativeSource Self}}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+</dxwui:WinUIDialogWindow>

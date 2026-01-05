@@ -1,0 +1,24 @@
+delimiter $$
+drop procedure if exists geos.WMS_GetSiteTransportFrequencies_V2690$$
+create procedure geos.WMS_GetSiteTransportFrequencies_V2690()
+/*
+ [nsatpute][18.11.2025][GEOS2-9364]
+ CALL geos.WMS_GetSiteTransportFrequencies_V2690();
+  */
+SELECT 
+    s.IdSite,
+    s.ShortName,
+    c.name as CountryName,
+    IFNULL(MAX(CASE WHEN ft.TransportMethod IS NULL THEN ft.Frequency END), 0) as LocalFrequency,
+    IFNULL(MAX(CASE WHEN ft.TransportMethod = 1632 THEN ft.Frequency END), 0) as AirFrequency,
+    IFNULL(MAX(CASE WHEN ft.TransportMethod = 1633 THEN ft.Frequency END), 0) as SeaFrequency,
+    IFNULL(MAX(CASE WHEN ft.TransportMethod = 1634 THEN ft.Frequency END), 0) as GroundFrequency,
+	c.iso as CountryIso
+FROM geos.emdepsites es
+INNER JOIN geos.sites s ON es.idSite = s.IdSite
+INNER JOIN geos.countries c ON s.IdCountry = c.IdCountry
+LEFT JOIN geos.frequencytransport ft ON es.idSite = ft.IdSite
+AND COALESCE(ft.TransportMethod, 0) IN (0, 1632, 1633, 1634)
+GROUP BY s.IdSite;
+
+delimiter ;

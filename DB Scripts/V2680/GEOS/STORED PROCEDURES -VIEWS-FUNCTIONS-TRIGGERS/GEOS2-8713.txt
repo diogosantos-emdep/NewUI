@@ -1,0 +1,31 @@
+DROP PROCEDURE IF EXISTS SAM_GetAllPlantsDetails_V2680;
+DELIMITER $$
+CREATE PROCEDURE SAM_GetAllPlantsDetails_V2680(
+   IN _idUser   smallint(5) UNSIGNED)
+BEGIN
+-- [Rahul.Gadhave][GEOS2-8713[Date:03/11/2025]
+-- call SAM_GetAllPlantsDetails_V2680(1);
+   SELECT emsi.idSite,
+          emsi.IP,
+          emsi.Code,
+          emsi.DatabaseIP,
+          si.ShortName,
+          si.Name,
+          co.idCountry,
+          co.name,
+          gp.ServiceProviderUrl
+     FROM emdepsites emsi
+		INNER JOIN sites si ON emsi.idSite = si.IdSite
+		INNER JOIN countries co ON co.idCountry = si.IdCountry
+		INNER JOIN emdep_geos.geos_providers gp  ON gp.IdCompany = emsi.idSite
+		INNER JOIN emdep_geos.site_user_permission usrpermission ON usrpermission.IdCompany = si.IdSite
+		INNER JOIN emdep_geos.site_user_module_geos_permission sump   ON sump.IdSiteUserPermission = usrpermission.Id
+		INNER JOIN emdep_geos.geos_modules gm    ON gm.IdGeosModule = sump.IdGeosModule  
+       /*   INNER JOIN countries co ON co.idCountry = si.IdCountry
+          INNER JOIN emdep_geos.geos_providers gp
+             ON gp.IdCompany = emsi.idSite*/
+    WHERE usrpermission.IdUser = _IdUser And gm.IdGeosModule=9
+   GROUP BY emsi.idSite;
+   END$$
+DELIMITER ;
+

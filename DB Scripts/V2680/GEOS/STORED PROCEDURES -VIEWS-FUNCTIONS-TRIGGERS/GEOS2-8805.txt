@@ -1,0 +1,131 @@
+delimiter $$
+drop procedure if exists WMS_GetWarehouseScheduleForPreOrders_V2680$$
+create procedure WMS_GetWarehouseScheduleForPreOrders_V2680	(_IdWarehouse int unsigned,  _StartDate datetime)
+begin
+/*
+ [nsatpute][04-11-2025][GEOS2-8805]
+ call WMS_GetWarehouseScheduleForPreOrders_V2680(2,'2025-11-03');
+  */
+select wsc.IdWarehouseSchedule,  wsc.IdWarehouse , w.IdSite , wsc.IdLogistic , wsc.StartDate , w.IdCurrency, wsc.Observations 
+from warehouseschedule wsc
+inner join warehouses w on wsc.idwarehouse = w.idWarehouse 
+where date(StartDate) = date(_StartDate) and not wsc.IsDone and IdTypeEvent = 2287 and wsc.IdWarehouse = _IdWarehouse;
+end$$
+delimiter ;
+
+
+delimiter $$
+drop procedure if exists WMS_UpdateWarehouseScheduleEventToDone_V2680$$
+create procedure WMS_UpdateWarehouseScheduleEventToDone_V2680(_IdWarehouseSchedule int unsigned)
+begin
+/*
+ [nsatpute][04-11-2025][GEOS2-8805]
+ call WMS_UpdateWarehouseScheduleEventToDone_V2680(2);
+  */
+Update warehouseschedule
+set IsDone = true
+where  IdWarehouseSchedule = _IdWarehouseSchedule;
+end$$
+delimiter ;
+
+delimiter $$
+drop procedure if exists WMS_GetAllWarehouseForScheduleEvents_V2680$$
+create procedure WMS_GetAllWarehouseForScheduleEvents_V2680()
+begin
+/*
+ [nsatpute][04-11-2025][GEOS2-8805]
+ call WMS_GetAllWarehouseForScheduleEvents_V2680();
+  */
+select ws.IdWarehouse, ws.Name , ws.IdSite, pro.ServiceProviderUrl, ws.IsRegional, s.LanguageForDocumentation  from geos.warehouses ws
+   inner join geos.sites s on ws.IdSite  = s.IdSite
+   inner join emdep_geos.geos_providers pro on ws.IdSite  = pro.IdCompany where InUse;
+end$$
+delimiter ;
+
+
+delimiter $$
+drop procedure if exists WMS_InsertWarehousePreOrders_V2680$$
+create procedure WMS_InsertWarehousePreOrders_V2680	(_Code varchar(45), _Observations varchar(100),_IdWarehouse int unsigned, 
+_CreationDate datetime, _IdCurrency tinyint unsigned, _IdLogistic smallint unsigned )
+begin
+/*
+ [nsatpute][04-11-2025][GEOS2-8805]
+ call WMS_InsertWarehousePreOrders_V2680('EAES20250521','test',18,'2025-11-03',1,2287);
+  */
+insert into warehousepreorders(Code, Observations,IdWarehouse,CreationDate,IdCurrency,IdLogistic)
+values (_Code, _Observations, _IdWarehouse,_CreationDate, _IdCurrency, _IdLogistic);
+
+end$$
+delimiter ;
+
+
+DELIMITER $$
+DROP PROCEDURE IF EXISTS geos.WMS_GetJobFailureNotificationEmails_V2680$$ 
+
+CREATE PROCEDURE geos.WMS_GetJobFailureNotificationEmails_V2680(
+    IN p_key VARCHAR(50)
+)
+begin
+	
+	/*
+	 [nsatpute][11-11-2025][GEOS2-8805]
+	 CALL  geos.WMS_GetJobFailureNotificationEmails_V2680('WMM');
+	 */
+    DECLARE _IdEmployees VARCHAR(500);	
+
+    -- Get the employee IDs into variable
+    SELECT TRIM(BOTH ',' FROM 
+            SUBSTRING_INDEX(
+                SUBSTRING_INDEX(
+                    SUBSTRING_INDEX(DefaultValue, CONCAT('(', p_key, ';'), -1),
+                    ')',
+                    1
+                ),
+                ';',
+                -1
+            )
+        ) INTO _IdEmployees
+    FROM emdep_geos.geos_app_settings
+    WHERE IdAppSetting = 166
+      AND DefaultValue LIKE CONCAT('%(', p_key, ';%');
+
+    -- If no employees found, set empty string
+    IF _IdEmployees IS NULL THEN
+        SET _IdEmployees = '';
+    END IF;
+
+    -- Return emails for found employees
+    select distinct empcont.CompanyEmail
+    FROM emdep_geos.employees emp
+    INNER JOIN (
+        -- Subquery to get the preferred job description per employee
+        SELECT ejd1.*
+        FROM emdep_geos.employee_job_descriptions ejd1
+        LEFT JOIN emdep_geos.employee_job_descriptions ejd2 
+            ON ejd1.IdEmployee = ejd2.IdEmployee 
+            AND (
+                -- Priority 1: IsMainJobDescription = 1
+                (ejd1.IsMainJobDescription = 0 AND ejd2.IsMainJobDescription = 1)
+                OR
+                -- Priority 2: If no main job, pick max JobDescriptionUsage
+                (ejd1.IsMainJobDescription = ejd2.IsMainJobDescription AND ejd1.JobDescriptionUsage < ejd2.JobDescriptionUsage)
+            )
+        WHERE ejd2.IdEmployee IS NULL -- Ensures only the best record remains
+    ) ejd ON emp.IdEmployee = ejd.IdEmployee
+    INNER JOIN emdep_geos.companies compOrg ON ejd.IdCompany = compOrg.IdCompany
+    INNER JOIN (
+        SELECT ec.IdEmployee,
+               GROUP_CONCAT(ec.EmployeeContactValue SEPARATOR ';') AS CompanyEmail
+        FROM emdep_geos.employee_contacts ec
+        WHERE ec.EmployeeContactIdType = 88 
+          AND ec.IsCompanyUse = 1
+        GROUP BY ec.IdEmployee
+    ) empcont ON empcont.IdEmployee = emp.IdEmployee
+    WHERE CURDATE() BETWEEN ejd.JobDescriptionStartDate AND COALESCE(ejd.JobDescriptionEndDate, CURDATE())
+      AND emp.IsEnabled  
+      AND emp.IdEmployeeStatus = 136 
+      AND FIND_IN_SET(emp.IdEmployee, _IdEmployees);
+
+END$$
+
+DELIMITER ;

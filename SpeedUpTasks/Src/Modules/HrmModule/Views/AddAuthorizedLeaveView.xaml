@@ -1,0 +1,107 @@
+﻿<dxwui:WinUIDialogWindow x:Class="Emdep.Geos.Modules.Hrm.Views.AddAuthorizedLeaveView"
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.Hrm.Views"
+             xmlns:HrmApplication="clr-namespace:Emdep.Geos.Modules.Hrm" 
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+             xmlns:behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300"
+             Title="{Binding WindowHeader,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" TitleStyle="{DynamicResource WinUIDialogWindowTitleStyle}"
+             Style="{DynamicResource WinUIDialogWindowStyle}">
+
+
+    <Grid Margin="0,-50,0,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="120"/>
+            <ColumnDefinition Width="250"/>
+        </Grid.ColumnDefinitions>
+
+
+        <!--Authorized Leave-->
+        <Label Grid.Row="1" Grid.Column="0" Content="{DynamicResource AddAuthorizedLeaveViewLeave}"  Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,10,0,10"/>
+
+        <dxe:ComboBoxEdit Style="{DynamicResource ComboBoxEditStyle}" Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="2"  Height="30"  Margin="5,5,5,5" HorizontalAlignment="Stretch"  
+            ItemsSource="{Binding AnnualLeaveList,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                          DisplayMember="Value" ValueMember="IdLookupValue" 
+                          IsTextEditable="False" ValidateOnTextInput="False"
+                          AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True"
+                          IsReadOnly="{Binding IsReadOnlyField,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
+            <dxe:ComboBoxEdit.SelectedIndex>
+                <Binding Path="SelectedLeaveType" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+
+                </Binding>
+            </dxe:ComboBoxEdit.SelectedIndex>
+        </dxe:ComboBoxEdit>
+
+        <!--Regular-->
+        <Label Grid.Row="2" Grid.Column="0" Content="{DynamicResource AddAuthorizedLeaveViewRegular}"  Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,10,0,10"/>
+        <StackPanel Grid.Row="2" Grid.Column="1"
+                    HorizontalAlignment="Left" 
+                    Orientation="Horizontal"
+                    Margin="0,0,0,0"
+                    Width="300">
+            <dxe:SpinEdit IsFloatValue="False"  Width="70" Height="30"  Margin="5,5,5,5" MinValue="0" Increment="1" Value="{Binding RegularDays,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged }"></dxe:SpinEdit>
+            <Label Content="{DynamicResource AddAuthorizedLeaveViewDays}" VerticalAlignment="Center"  ></Label>
+            <dxe:SpinEdit IsFloatValue="False"  Width="70" Height="30"  Margin="15,5,5,5" MinValue="0" Increment="1" Value="{Binding RegularHours,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged }"></dxe:SpinEdit>
+            <Label Content="{DynamicResource AddAuthorizedLeaveViewHours}" VerticalAlignment="Center"  ></Label>
+       </StackPanel>
+
+        <!--Additional-->
+        <Label Grid.Row="3" Grid.Column="0" Content="{DynamicResource AddAuthorizedLeaveViewAdditional}"  Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,10,0,10"/>
+        <StackPanel Grid.Row="3" Grid.Column="1"
+                    HorizontalAlignment="Left" 
+                    Orientation="Horizontal"
+                    Margin="0,0,0,0"
+                    Width="250">
+            <dxe:SpinEdit IsFloatValue="False"  Width="70" Height="30"  Margin="5,5,5,5" MinValue="0" Increment="1" Value="{Binding AdditionalDays,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></dxe:SpinEdit>
+            <Label Content="{DynamicResource AddAuthorizedLeaveViewDays}" VerticalAlignment="Center"  ></Label>
+            <dxe:SpinEdit IsFloatValue="False"  Width="70" Height="30"  Margin="15,5,5,5" MinValue="0" Increment="1" Value="{Binding AdditionalHours,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" ></dxe:SpinEdit>
+            <Label Content="{DynamicResource AddAuthorizedLeaveViewHours}" VerticalAlignment="Center"  ></Label>
+        </StackPanel>
+
+        <StackPanel Grid.Row="4" Grid.Column="1"
+                    HorizontalAlignment="Left" 
+                    Orientation="Horizontal"
+                    Margin="0,0,0,0"
+                    Width="250">
+
+            <Button Content="{DynamicResource AddAuthorizedLeaveViewAcceptButton}"
+                    Command="{Binding AddAuthorizedLeaveViewAcceptButtonCommand}"
+                    Height="30"
+                    Width="100"
+                    Margin="5,0,10,0"
+                    Style="{DynamicResource Button16Style}"
+                    VerticalAlignment="Bottom" 
+                   IsEnabled="{Binding IsAcceptEnabled}"/>
+
+            <Button Content="{DynamicResource AddAuthorizedLeaveViewCancelButton}"
+                    Command="{Binding AddAuthorizedLeaveViewCancelButtonCommand}" 
+                    Height="30"
+                    Width="100"
+                    Margin="10,0,0,0"
+                    Style="{DynamicResource Button16Style}"
+                    VerticalAlignment="Bottom" />
+        </StackPanel>
+    </Grid>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="KeyDown">
+            <behaviors:InvokeDelegateCommandAction Command="{Binding CommandTextInput}" CommandParameter="{Binding Path=InvokeParameter, RelativeSource={RelativeSource Self}}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+</dxwui:WinUIDialogWindow> 

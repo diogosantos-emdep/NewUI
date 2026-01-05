@@ -1,0 +1,73 @@
+delimiter $$
+drop procedure if exists geos.CRM_InsertImportedAccounts_V2690$$
+CREATE  PROCEDURE geos.`CRM_InsertImportedAccounts_V2690`(
+    _CustomerName varchar(50), 
+    _RegisteredNumber varchar(50),
+    _Name varchar(100), 
+    _IdCountry int(10) UNSIGNED,
+    _City varchar(50), 
+    _Address varchar(500),
+    _RegisteredName varchar(100), 
+    _PostCode varchar(100),
+    _CreatedBy smallint(5) UNSIGNED, 
+    _IdBusinessField tinyint(3),
+    _IdBusinessCenter tinyint(3), 
+    _IdSalesResponsible smallint(5) UNSIGNED,
+    _Website varchar(255), 
+    _IdSource smallint(3) UNSIGNED,
+    _Region varchar(100), 
+    _IdEmdepSite smallint(5) UNSIGNED)
+BEGIN
+    /*
+	 [nsatpute][23-06-2024][GEOS2-5701]
+	 [nsatpute][03.12.2025][GEOS2-10361]
+	 */
+    DECLARE _IdCustomer smallint(5) UNSIGNED DEFAULT 0;
+    DECLARE _IdCustomerSite smallint(5) UNSIGNED DEFAULT 0;
+    
+    -- Get customer ID if exists
+    SELECT IdCustomer INTO _IdCustomer 
+    FROM customers 
+    WHERE Name LIKE _CustomerName 
+    LIMIT 1;
+    
+    -- If customer doesn't exist, create new one
+    IF (_IdCustomer IS NULL OR _IdCustomer = 0) THEN
+        INSERT INTO CUSTOMERS(Name, IdCustomerType, IsStillActive)
+        VALUES (_CustomerName, 1, 1);
+        
+        SET _IdCustomer = LAST_INSERT_ID();
+    END IF;
+    
+    -- Insert site
+    INSERT IGNORE INTO sites(
+        IdCustomer, Name, IdCountry, City, Address, 
+        RegisteredName, PostCode, CreatedBy, IdBusinessField,
+        IdBusinessCenter, IdSalesResponsible, Website, IdSource, 
+        CreatedIn, Region, CIF)
+    VALUES (
+        _IdCustomer, _Name, _IdCountry, _City, _Address, 
+        _RegisteredName, _PostCode, _CreatedBy, _IdBusinessField,
+        _IdBusinessCenter, _IdSalesResponsible, _Website, _IdSource, 
+        NOW(), _Region, _RegisteredNumber);
+    
+    SET _IdCustomerSite = LAST_INSERT_ID();
+    
+    -- Link to emdep site if insert was successful
+    IF (_IdCustomerSite != 0) THEN
+        INSERT IGNORE INTO customersitesbyemdepsite(IdCustomerSite, IdEmdepSite, AccountingCode)
+        VALUES (_IdCustomerSite, _IdEmdepSite, NULL);
+    END IF;
+    
+    -- Add sales owner if not exists
+    IF NOT EXISTS (
+        SELECT IdSalesOwner 
+        FROM site_sales_owners 
+        WHERE IdSalesOwner = _IdSalesResponsible 
+        AND IdSite = _IdCustomerSite
+    ) THEN
+        INSERT IGNORE INTO site_sales_owners(IdSalesOwner, IdSite, IsMainSalesOwner)
+        VALUES (_IdSalesResponsible, _IdCustomerSite, 0);
+    END IF;
+END$$
+delimiter ;

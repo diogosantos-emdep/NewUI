@@ -1,0 +1,306 @@
+﻿<UserControl x:Class="Emdep.Geos.Modules.Warehouse.Views.WarehouseLocationsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.Warehouse.Views"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:WarehouseCommon ="clr-namespace:Emdep.Geos.Modules.Warehouse"
+             xmlns:dxp="http://schemas.devexpress.com/winfx/2008/xaml/printing" 
+             xmlns:dxgt="http://schemas.devexpress.com/winfx/2008/xaml/grid/themekeys"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+             mc:Ignorable="d"   xmlns:WmsApplication="clr-namespace:Emdep.Geos.Modules.Warehouse"
+            >
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="100*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Label Content="{DynamicResource WarehouseViewModelConfigurationLocations}" Style="{StaticResource LabelTitleStyle}" Grid.Row="0" Grid.Column="0"/>
+            <Grid HorizontalAlignment="Right" Width="Auto" Height="45" >
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="45"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                   
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Waresouse combobox section -->
+                <DockPanel Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Height="30" >
+                    <Image Style="{DynamicResource WarehouseImageStyle}" Width="24" Height="24" Margin="7,0,3,0" />
+                    <TextBlock Text="{DynamicResource Warehouse}"  FontWeight="Bold" Margin="5,2,5,0" VerticalAlignment="Bottom" />
+                </DockPanel>
+
+                <dxe:ComboBoxEdit Name="CbeWareHouse" Style="{DynamicResource ComboBoxEditStyle}" Grid.Column="1" Width="150" Height="30"
+                                        Margin="5,0,5,5" VerticalAlignment="Bottom" HorizontalAlignment="Right" IsTextEditable="False"
+                                      ItemsSource ="{Binding Source={x:Static WarehouseCommon:WarehouseCommon.Instance}, Path=WarehouseList ,UpdateSourceTrigger=PropertyChanged , Mode=TwoWay}"
+                                    SelectedItem="{Binding Source={x:Static WarehouseCommon:WarehouseCommon.Instance}, Path=Selectedwarehouse,UpdateSourceTrigger=PropertyChanged}"
+                                      DisplayMember="Name" ShowError="False" ShowErrorToolTip="False" >
+
+                    <dxmvvm:Interaction.Triggers>
+                        <dxmvvm:EventToCommand EventName="EditValueChanged"
+                                               Command="{Binding CommandWarehouseEditValueChanged}" CommandParameter="{Binding ElementName=CbeWareHouse,Path=SelectedItem}"
+                                              />
+                    </dxmvvm:Interaction.Triggers>
+                </dxe:ComboBoxEdit>
+
+                <!-- Add location Button -->
+                <Button Visibility="Visible"  Grid.Row="0" Grid.Column="2" Height="40" Width="40" HorizontalAlignment="Right"   IsEnabled="{Binding Source={x:Static WmsApplication:WarehouseCommon.Instance}, Path=IsPermissionEnabled}"
+                    Margin="0,0,5,5" Command="{Binding AddLocationCommand}" CommandParameter="{Binding ElementName=treeListView1}" >
+                    <Button.ToolTip>
+                        <TextBlock Text="{DynamicResource WarehouseAddLocation}"/>
+                    </Button.ToolTip>
+                    <Button.ContentTemplate>
+                        <DataTemplate>
+                            <Image Style="{DynamicResource AddNewButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                        </DataTemplate>
+                    </Button.ContentTemplate>
+                </Button>
+                <!-- Refresh Button -->
+
+                <Button Content=" " Grid.Row="0" Grid.Column="3" Height="40" Width="40" HorizontalAlignment="Right" Command="{Binding RefreshWarehouseLocationViewCommand}" CommandParameter="{Binding ElementName=WarehouseLocationsTableView}" Margin="0,0,5,5">
+                    <Button.ToolTip>
+                        <TextBlock Text="{DynamicResource ButtonRefresh}"/>
+                    </Button.ToolTip>
+                    <Button.ContentTemplate>
+                        <DataTemplate>
+                            <Image Style="{ DynamicResource WareHouseRefreshButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                        </DataTemplate>
+                    </Button.ContentTemplate>
+                </Button>
+
+
+               
+                <!-- Print Button -->
+
+                <Button Content=" " Grid.Row="0" Grid.Column="4" Height="40" Width="40" HorizontalAlignment="Right" Margin="0,0,5,5"
+                        Command="{Binding PrintWarehouseLocationViewCommand}" CommandParameter="{Binding ElementName=treeListView1}">
+                    <Button.ToolTip>
+                        <TextBlock Text="{DynamicResource ButtonPrint}"/>
+                    </Button.ToolTip>
+                    <Button.ContentTemplate>
+                        <DataTemplate>
+                            <Image Style="{ DynamicResource PrinterButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                        </DataTemplate>
+                    </Button.ContentTemplate>
+                </Button>
+
+                <!-- Export Button -->
+
+                <Button Content=" " Grid.Row="0" Grid.Column="5" Height="40" Width="40" HorizontalAlignment="Right" Margin="0,0,5,5"
+                        Command="{Binding ExportWarehouseLocationViewCommand}" CommandParameter="{Binding ElementName=treeListView1}">
+                    <Button.ToolTip>
+                        <TextBlock Text="{DynamicResource ButtonExportToExcel}"/>
+                    </Button.ToolTip>
+                    <Button.ContentTemplate>
+                        <DataTemplate>
+                            <Image Style="{ DynamicResource ExcelExportButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                        </DataTemplate>
+                    </Button.ContentTemplate>
+                </Button>
+            </Grid>
+
+        </Grid>
+
+        <dxg:TreeListControl  Grid.Row="1" Grid.Column="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" SelectedItem="{Binding SelectedWarehouseLocation}" 
+                         ItemsSource="{Binding WarehouseLocationList,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
+            <dxg:TreeListControl.Resources>
+                <DataTemplate x:Key="WarehouseLocationListReportPrintHeaderTemplate">
+                    <Grid Width="{Binding UsablePageWidth}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="50" />
+                            <ColumnDefinition Width="130" />
+                        </Grid.ColumnDefinitions>
+                        <dxe:TextEdit Text=" " Width="{Binding UsablePageWidth}" Grid.ColumnSpan="3" IsPrintingMode="True" Background="#333E5E" HorizontalAlignment="Stretch" 
+                                                      VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" Height="50" />
+                        <dxe:TextEdit Text="Location Report" IsPrintingMode="True" HorizontalAlignment="Stretch" 
+                                                      VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" />
+                        <Image Source="/Emdep.Geos.Modules.Warehouse;component/Assets/Images/GeosReportLogo.png" Height="50" Width="80"  dxp:ExportSettings.TargetType="Image" Grid.Column="2" />
+                    </Grid>
+                </DataTemplate>
+                <DataTemplate x:Key="WarehouseLocationListReportPrintFooterTemplate">
+                    <dxe:TextEdit HorizontalContentAlignment="Center" 
+                                                  Width="{Binding Path=UsablePageWidth, Mode=OneWay}" 
+                                                  dxp:ExportSettings.TargetType="PageNumber" 
+                                                  dxp:PageNumberExportSettings.Kind="NumberOfTotal" 
+                                                  dxp:PageNumberExportSettings.Format="Page {0} of {1}"/>
+                </DataTemplate>
+            </dxg:TreeListControl.Resources>
+            <dxmvvm:Interaction.Behaviors>
+                <dxmvvm:EventToCommand EventName="Row"/>
+            </dxmvvm:Interaction.Behaviors>
+            <dxg:TreeListControl.Columns>
+                <dxg:TreeListColumn Header="{DynamicResource LocationGridColFullName}" FieldName="FullName" Width="150" ReadOnly="True" />
+                <dxg:TreeListColumn Header="{DynamicResource LocationGridColManufacturer}" FieldName="ManufacturerName" Width="150" ReadOnly="True"   Visible="{Binding ManufacturerVisibility, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
+                  
+                    
+                </dxg:TreeListColumn> 
+                <dxg:TreeListColumn Header="{DynamicResource LocationGridColHtmlColor}" FieldName="HtmlColor" FilterPopupMode="CheckedList" MinWidth="80" Width="150" ReadOnly="True" FixedWidth="True">
+                    <dxg:TreeListColumn.CellTemplate>
+                        <DataTemplate>
+                            <DockPanel>
+                                <Rectangle Width="15"
+                                                        Height="15"
+                                                        Margin="3,3,6,3"
+                                                        Fill="{Binding RowData.Row.HtmlColor}" />
+                                <TextBlock Text="{Binding RowData.Row.HtmlColor}" 
+                                       HorizontalAlignment="Left" VerticalAlignment="Center" Margin="2,0,5,0">
+
+                                </TextBlock>
+                            </DockPanel>
+                        </DataTemplate>
+                    </dxg:TreeListColumn.CellTemplate>
+                </dxg:TreeListColumn>
+                <!--WMS	M051-13	Add new column Direction in locations configuration-->
+                <dxg:TreeListColumn Header="{DynamicResource LocationGridColDirection}" FieldName="Direction.Value" Width="90" ReadOnly="True" >
+                    <dxg:TreeListColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <Image Margin="5" Height="16" Width="16">
+                                    <Image.Style>
+                                        <Style>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding RowData.Row.Direction.IdImage}" Value="1">
+                                                    <Setter Property="Image.Source" Value="{DynamicResource UpDirectionImageStyle}" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding RowData.Row.Direction.IdImage}" Value="2">
+                                                    <Setter Property="Image.Source" Value="{DynamicResource DownDirectionImageStyle}" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Image.Style>
+                                </Image>
+                                <TextBlock Text="{Binding RowData.Row.Direction.Value}" Margin="5 0" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </dxg:TreeListColumn.CellTemplate>
+                </dxg:TreeListColumn>
+                <dxg:TreeListColumn Header="{DynamicResource LocationGridColInUse}" FieldName="InUse" Width="70" ReadOnly="True" >
+                    <dxg:TreeListColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,0,5,0">
+                                <TextBlock.Style>
+                                    <Style TargetType="{x:Type TextBlock}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Path=RowData.Row.InUse}" Value="true">
+                                                <Setter Property="TextBlock.Text" Value="Yes"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Path=RowData.Row.InUse}" Value="false">
+                                                <Setter Property="TextBlock.Text" Value="No"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </DataTemplate>
+                    </dxg:TreeListColumn.CellTemplate>
+                    <dxg:TreeListColumn.PrintCellStyle>
+                        <Style TargetType="dxe:TextEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                            <Setter Property="dxp:ExportSettings.TargetType" Value="Text"  />
+                            <Setter Property="dxp:TextExportSettings.Text" Value="{Binding Path=RowData.Row.InUse}" >
+                            </Setter>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Path=RowData.Row.InUse}" Value="true">
+                                    <Setter Property="dxp:TextExportSettings.Text" Value="Yes"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Path=RowData.Row.InUse}" Value="false">
+                                    <Setter Property="dxp:TextExportSettings.Text" Value="No"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </dxg:TreeListColumn.PrintCellStyle>
+                    <dxg:TreeListColumn.EditSettings>
+                        <dxe:TextEditSettings>
+                            <dxe:TextEditSettings.DisplayTextConverter>
+                                <dxmvvm:ObjectToObjectConverter>
+                                    <dxmvvm:MapItem Source="true" Target="Yes"/>
+                                    <dxmvvm:MapItem Source="false" Target="No"/>
+                                </dxmvvm:ObjectToObjectConverter>
+                            </dxe:TextEditSettings.DisplayTextConverter>
+                        </dxe:TextEditSettings>
+                    </dxg:TreeListColumn.EditSettings>
+                </dxg:TreeListColumn>
+                <dxg:TreeListColumn Header="{DynamicResource LocationGridColIsLeaf}" FieldName="IsLead" Width="70" ReadOnly="True" >
+                    <dxg:TreeListColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,0,5,0">
+                                <TextBlock.Style>
+                                    <Style TargetType="{x:Type TextBlock}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Path=RowData.Row.IsLead}" Value="1">
+                                                <Setter Property="TextBlock.Text" Value="Yes"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Path=RowData.Row.IsLead}" Value="0">
+                                                <Setter Property="TextBlock.Text" Value="No"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </DataTemplate>
+                    </dxg:TreeListColumn.CellTemplate>
+                    <dxg:TreeListColumn.PrintCellStyle>
+                        <Style TargetType="dxe:TextEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                            <Setter Property="dxp:ExportSettings.TargetType" Value="Text"  />
+                            <Setter Property="dxp:TextExportSettings.Text" Value="{Binding Path=RowData.Row.IsLead}" >
+                            </Setter>
+                            <Setter Property="dxp:TextExportSettings.HorizontalAlignment" Value="Left"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Path=RowData.Row.IsLead}" Value="1">
+                                    <Setter Property="dxp:TextExportSettings.Text" Value="Yes"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Path=RowData.Row.IsLead}" Value="0">
+                                    <Setter Property="dxp:TextExportSettings.Text" Value="No"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </dxg:TreeListColumn.PrintCellStyle>
+                    <dxg:TreeListColumn.EditSettings>
+                        <dxe:TextEditSettings>
+                            <dxe:TextEditSettings.DisplayTextConverter>
+                                <dxmvvm:ObjectToObjectConverter>
+                                    <dxmvvm:MapItem Source="1" Target="Yes"/>
+                                    <dxmvvm:MapItem Source="0" Target="No"/>
+                                </dxmvvm:ObjectToObjectConverter>
+                            </dxe:TextEditSettings.DisplayTextConverter>
+                        </dxe:TextEditSettings>
+                    </dxg:TreeListColumn.EditSettings>
+                </dxg:TreeListColumn>
+            </dxg:TreeListControl.Columns>
+            <dxg:TreeListControl.TotalSummary>
+                <dxg:TreeListSummaryItem SummaryType="Count" ShowInColumn="FullName" DisplayFormat="Total Count: {0}" />
+            </dxg:TreeListControl.TotalSummary>
+            <dxg:TreeListControl.View>
+                <dxg:TreeListView Name="treeListView1" 
+                                  ShowTotalSummary="True"
+                                  AllowRecursiveNodeChecking="False"
+                                  ParentFieldName="Parent" KeyFieldName="IdWarehouseLocation" >
+                    <dxmvvm:Interaction.Behaviors>
+                        <dxmvvm:EventToCommand EventName="RowDoubleClick" Command="{Binding EditLocationDoubleCommand}" CommandParameter="{Binding ElementName=treeListView1}"/>
+                    </dxmvvm:Interaction.Behaviors>
+
+                </dxg:TreeListView>
+            </dxg:TreeListControl.View>
+
+
+
+        </dxg:TreeListControl>
+
+
+
+    </Grid>
+</UserControl>

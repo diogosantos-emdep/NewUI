@@ -1,0 +1,125 @@
+﻿<dxwui:WinUIDialogWindow x:Class="Emdep.Geos.Modules.SAM.Views.AddEditReferenceView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.SAM.Views"
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors" 
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:Validation="clr-namespace:Emdep.Geos.UI.Validations;assembly=Emdep.Geos.UI.Validations"  
+             xmlns:Converters="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+             mc:Ignorable="d" 
+             Style="{DynamicResource WinUIDialogWindowStyle}"
+             Title="{Binding WindowHeader}"
+             TitleStyle="{DynamicResource WinUIDialogWindowTitleStyle}">
+
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape"  Command="{Binding EscapeButtonCommand}"/>
+    </dxwui:WinUIDialogWindow.InputBindings>
+
+    <dxwui:WinUIDialogWindow.Resources>
+        <Converters:ImageUrlToByteArrayConverter x:Key="ImageUrlToByteArrayConverter"/>
+    </dxwui:WinUIDialogWindow.Resources>
+   
+    
+    <Grid ShowGridLines="False">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="5"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="5"/>
+            <RowDefinition Height="160"/>
+            <RowDefinition Height="5"/>
+            <RowDefinition Height="45"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="80"/>
+            <ColumnDefinition Width="2"/>
+            <ColumnDefinition Width="220"/>
+        </Grid.ColumnDefinitions>
+
+        <!--Reference -->
+        <TextBlock Grid.Row="0" Grid.Column="0"  Text="{DynamicResource ReferenceTitle}" Style="{StaticResource TextBlock14Style}" VerticalAlignment="Center"  />
+
+        <dxe:ComboBoxEdit Grid.Row="0" Grid.Column="2" VerticalContentAlignment="Center"
+                          IsTextEditable="False"  AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True"  IsSynchronizedWithCurrentItem="True"
+                          ItemsSource="{Binding DataContext.ReferenceList, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"
+                          SelectedItem="{Binding DataContext.SelectedReference, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"
+                          Style="{DynamicResource ComboBoxEditStyle}"
+                          HorizontalAlignment="Stretch" VerticalAlignment="Stretch"                  
+                          DisplayMember="Reference" ValueMember="IdArticle" >
+
+            <dxmvvm:Interaction.Triggers>
+                <dxmvvm:EventToCommand EventName="PopupClosed" Command="{Binding DataContext.ChangeReferenceCommand , Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" PassEventArgsToCommand="True"/>
+            </dxmvvm:Interaction.Triggers>
+        </dxe:ComboBoxEdit>
+      
+
+        <!--Quantity-->
+        <TextBlock Grid.Row="2" Grid.Column="0"  Text="{DynamicResource QuantityTitle}" Style="{StaticResource TextBlock14Style}" VerticalAlignment="Center" />
+        
+        <dxe:TextEdit Grid.Row="2" Grid.Column="2"  Text="{Binding Quantity, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
+                      ShowNullText="True" Mask="###,###,###,###,###,###,###,##0;" MaskType="Numeric" MaskUseAsDisplayFormat="True" 
+                      VerticalContentAlignment="Top" DisplayFormatString=""
+                      ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Disabled" AcceptsReturn="False" InvalidValueBehavior="AllowLeaveEditor" AllowNullInput="True">
+            <dxe:TextEdit.EditValue>
+                <Binding Path="Quantity" ValidatesOnDataErrors="True" ValidatesOnNotifyDataErrors="True"  UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                
+                <Binding.ValidationRules>
+                    <Validation:AddEditQuantityValidation FieldName="Quantity" ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True" />
+                </Binding.ValidationRules>
+                    
+            </Binding>
+            </dxe:TextEdit.EditValue>
+        </dxe:TextEdit>
+
+        <!--Image-->
+        <Border Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" Height="Auto" Width="Auto" BorderThickness="1" BorderBrush="Gray"
+        VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+            <Image VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Height="160" Width="170">
+                <Image.Style>
+                    <Style TargetType="Image">
+                        <Setter Property="Source" Value="{Binding SelectedImgPath, Converter={StaticResource ImageUrlToByteArrayConverter}, ConverterParameter='image/png'}" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding SelectedImgPath}" Value="{x:Null}">
+                                <Setter Property="Source" Value="/Emdep.Geos.Modules.SAM;component/Assets/Images/EmptyImage.png" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Image.Style>
+            </Image>
+        </Border>
+
+
+
+
+
+        <Grid Grid.Row="6" ShowGridLines="False" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Center"  VerticalAlignment="Center">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="5"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Button  HorizontalAlignment="Right"
+                     Style="{DynamicResource Button16Style}"
+                     VerticalAlignment="Top"
+                     Content="{DynamicResource AddCatalogueAcceptButton}"
+                     Command="{Binding AcceptAddreferenceActionCommand}"
+                     Height="30"
+                     Width="100" />
+
+            <Button Grid.Row="10" Grid.Column="2"
+                                                HorizontalAlignment="Left"
+                                                Style="{DynamicResource Button16Style}"
+                                                VerticalAlignment="Top"
+                                                Content="{DynamicResource AddCatalogueCancelButton}"
+                                                Command="{Binding CancelButtonCommand }"
+                                                Height="30"
+                                                Width="100" />
+        </Grid>
+
+    </Grid>
+
+</dxwui:WinUIDialogWindow>

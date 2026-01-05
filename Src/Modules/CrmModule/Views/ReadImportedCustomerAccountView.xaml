@@ -1,0 +1,251 @@
+﻿<dxwui:WinUIDialogWindow x:Class="Emdep.Geos.Modules.Crm.Views.ReadImportedCustomerAccountView"
+                         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                         xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                         xmlns:local="clr-namespace:Emdep.Geos.Modules.Crm.Views"
+                         xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"
+                         xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+                         xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+                         xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+                         xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+                         xmlns:Validation="clr-namespace:Emdep.Geos.UI.Validations;assembly=Emdep.Geos.UI.Validations"
+                         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+                         xmlns:behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+                         mc:Ignorable="d" 
+                         xmlns:Coverter="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+                         HorizontalAlignment="Stretch" Margin="20,0,0,0"
+                         Title="{DynamicResource ImportAccountView_ViewCustomerAccounts}" 
+                         TitleStyle="{DynamicResource WinUIDialogWindowTitleStyle}"
+                         Style="{DynamicResource WinUIDialogWindowStyle}">
+
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape"  Command="{Binding CancelButtonCommand}"/>
+    </dxwui:WinUIDialogWindow.InputBindings>
+
+    <dxwui:WinUIDialogWindow.Resources>
+        <Coverter:ForegroundColorConverter x:Key="ForegroundColorConverter" />
+    </dxwui:WinUIDialogWindow.Resources>
+
+    <Grid HorizontalAlignment="Stretch" Height="600" Margin="20,0,20,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="40"/>
+        </Grid.RowDefinitions>
+        <dxg:GridControl x:Name="Accountgrid" ItemsSource="{Binding ImportedAccounts,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Width="Auto" Height="Auto" 
+                 FilterString="{Binding MyFilterString ,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" SelectionMode="Row" AllowLiveDataShaping="True"
+                 SelectedItem="{Binding SelectedObject, Mode=TwoWay}" ImplyNullLikeEmptyStringWhenFiltering="True">
+            <dxg:GridColumn Header=" " ShowCheckBoxInHeader="True" FieldName="IsSelected" Width="50" FixedWidth="True" 
+                                AllowBestFit="true" 
+                                AllowCellMerge="False"
+                                AllowMoving="false"
+                                AllowAutoFilter="False"
+                                ShowInColumnChooser="False" 
+                                FilterPopupMode="Default">
+                <dxg:GridColumn.CellTemplate>
+                    <DataTemplate>
+                        <CheckBox x:Name="Part_Editor" IsChecked="{Binding RowData.Row.IsSelected,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                  HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </DataTemplate>
+                </dxg:GridColumn.CellTemplate>
+            </dxg:GridColumn>
+            <dxg:GridColumn FieldName="Customer.CustomerName" Header="{DynamicResource ReadImportedAccountView_Group}" MinWidth="100" Width="150" FilterPopupMode="Default" >
+                <dxg:GridColumn.CellTemplate>
+                    <DataTemplate>
+                        <dxe:TextEdit Name="GroupFieldEditorEditor" Text="{Binding RowData.Row.Customer.CustomerName,UpdateSourceTrigger=PropertyChanged , Mode=TwoWay}"
+                                                  HorizontalAlignment="Stretch" InvalidValueBehavior="AllowLeaveEditor" >
+                            <dxmvvm:Interaction.Behaviors>
+                                <dxmvvm:EventToCommand EventName="Validate"
+                                       Command="{Binding DataContext.GroupNameValidateCommand, RelativeSource={RelativeSource AncestorType=dxg:GridControl}}"
+                                       PassEventArgsToCommand="True"/>
+                            </dxmvvm:Interaction.Behaviors>
+                        </dxe:TextEdit>
+                    </DataTemplate>
+                </dxg:GridColumn.CellTemplate>
+            </dxg:GridColumn>
+            <dxg:GridColumn FieldName="Name" Header="{DynamicResource ReadImportedAccountView_Plant}" MinWidth="150" Width="200" FilterPopupMode="Default">
+                <dxg:GridColumn.CellTemplate>
+                    <DataTemplate>
+                        <dxe:TextEdit Name="PlantFieldEditorEditor" Text="{Binding RowData.Row.Name,UpdateSourceTrigger=PropertyChanged , Mode=TwoWay}"
+                                                  HorizontalAlignment="Stretch" InvalidValueBehavior="AllowLeaveEditor" >
+                            <dxmvvm:Interaction.Behaviors>
+                                <dxmvvm:EventToCommand EventName="Validate"
+                                       Command="{Binding DataContext.PlantFieldValidateCommand, RelativeSource={RelativeSource AncestorType=dxg:GridControl}}"
+                                       PassEventArgsToCommand="True"/>
+                            </dxmvvm:Interaction.Behaviors>
+                        </dxe:TextEdit>
+                    </DataTemplate>
+                </dxg:GridColumn.CellTemplate>
+            </dxg:GridColumn>
+            <dxg:GridColumn FieldName="GroupCountry.Name" Header="{DynamicResource ReadImportedAccountView_Country}" MinWidth="150" Width="200" FilterPopupMode="Default">
+                <dxg:GridColumn.CellTemplate>
+                    <DataTemplate>
+                        <dxe:ComboBoxEdit Name="CountryEditor" ItemsSource="{Binding DataContext.CountryList, RelativeSource={RelativeSource AncestorType=dxg:GridControl},UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                  HorizontalAlignment="Stretch" IsTextEditable="False"
+                                                  DisplayMember="Name" ValueMember="IdCountry"
+                                                  AutoComplete="False" ImmediatePopup="True" IncrementalFiltering="True" 
+                                          SelectedItem="{Binding RowData.Row.GroupCountry,UpdateSourceTrigger=PropertyChanged , Mode=TwoWay}"></dxe:ComboBoxEdit>
+                    </DataTemplate>
+                </dxg:GridColumn.CellTemplate>
+            </dxg:GridColumn>
+            <dxg:GridColumn FieldName="City" Header="{DynamicResource ReadImportedAccountView_City}" MinWidth="150" Width="200" FilterPopupMode="Default">
+                <dxg:GridColumn.CellTemplate>
+                    <DataTemplate>
+                        <dxe:TextEdit Name="CityFieldEditorEditor" Text="{Binding RowData.Row.City,UpdateSourceTrigger=PropertyChanged , Mode=TwoWay}"
+                                                  HorizontalAlignment="Stretch" InvalidValueBehavior="AllowLeaveEditor" >
+                            <dxmvvm:Interaction.Behaviors>
+                                <dxmvvm:EventToCommand EventName="Validate"
+                                       Command="{Binding DataContext.CityFieldValidateCommand, RelativeSource={RelativeSource AncestorType=dxg:GridControl}}"
+                                       PassEventArgsToCommand="True" CommandParameter="{Binding RowData.Row}"/>
+                            </dxmvvm:Interaction.Behaviors>
+                        </dxe:TextEdit>
+                    </DataTemplate>
+                </dxg:GridColumn.CellTemplate>
+            </dxg:GridColumn>
+            <dxg:GridColumn FieldName="BusinessField.Value" Header="{DynamicResource ReadImportedAccountView_BusinessField}" MinWidth="200" Width="250" FilterPopupMode="Default">
+                <dxg:GridColumn.CellTemplate>
+                    <DataTemplate>
+                        <dxe:ComboBoxEdit Name="BusinessFieldEditorEditor" ItemsSource="{Binding DataContext.BusinessFields, RelativeSource={RelativeSource AncestorType=dxg:GridControl},UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                  HorizontalAlignment="Stretch" IsTextEditable="False" InvalidValueBehavior="AllowLeaveEditor" 
+                                                  DisplayMember="Value" ValueMember="IdLookupValue"
+                                                  SelectedItem="{Binding RowData.Row.BusinessField,UpdateSourceTrigger=PropertyChanged , Mode=TwoWay}" AutoComplete="False" ImmediatePopup="True" IncrementalFiltering="True">
+                        <dxmvvm:Interaction.Behaviors>
+                                <dxmvvm:EventToCommand EventName="Validate"
+                                       Command="{Binding DataContext.BusinessCenterEditorValidateCommand, RelativeSource={RelativeSource AncestorType=dxg:GridControl}}"
+                                       PassEventArgsToCommand="True"/>
+                            </dxmvvm:Interaction.Behaviors>
+                        </dxe:ComboBoxEdit>
+                    </DataTemplate>
+                </dxg:GridColumn.CellTemplate>
+            </dxg:GridColumn>
+            <dxg:GridColumn FieldName="BusinessCenter.Value" Header="{DynamicResource ReadImportedAccountView_BusinessCenter}" MinWidth="200" Width="250" FilterPopupMode="Default">
+                <dxg:GridColumn.CellTemplate>
+                    <DataTemplate>
+                        <dxe:ComboBoxEdit Name="BusinessCenterEditor" ItemsSource="{Binding DataContext.BusinessCenters, RelativeSource={RelativeSource AncestorType=dxg:GridControl},UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                  HorizontalAlignment="Stretch" IsTextEditable="False" InvalidValueBehavior="AllowLeaveEditor"
+                                                  DisplayMember="Value" ValueMember="IdLookupValue"
+                                                  SelectedItem="{Binding RowData.Row.BusinessCenter,UpdateSourceTrigger=PropertyChanged , Mode=TwoWay}" AutoComplete="False" ImmediatePopup="True" IncrementalFiltering="True">
+                            <dxmvvm:Interaction.Behaviors>
+                                <dxmvvm:EventToCommand EventName="Validate"
+                                       Command="{Binding DataContext.BusinessCenterEditorValidateCommand, RelativeSource={RelativeSource AncestorType=dxg:GridControl}}"
+                                       PassEventArgsToCommand="True"/>
+                            </dxmvvm:Interaction.Behaviors>
+                        </dxe:ComboBoxEdit>
+                    </DataTemplate>
+                </dxg:GridColumn.CellTemplate>
+            </dxg:GridColumn>
+            <dxg:GridColumn FieldName="ZipCode" Header="{DynamicResource ReadImportedAccountView_Zipcode}" MinWidth="100" Width="150" FilterPopupMode="Default" />
+            <dxg:GridColumn FieldName="Address" Header="{DynamicResource ReadImportedAccountView_Address}" MinWidth="300" Width="350" FilterPopupMode="Default">
+                <dxg:GridColumn.CellTemplate>
+                    <DataTemplate>
+                        <dxe:TextEdit Name="AddressFieldEditorEditor" Text="{Binding RowData.Row.Address,UpdateSourceTrigger=PropertyChanged , Mode=TwoWay}"
+                                                  HorizontalAlignment="Stretch" InvalidValueBehavior="AllowLeaveEditor" >
+                            <dxmvvm:Interaction.Behaviors>
+                                <dxmvvm:EventToCommand EventName="Validate"
+                                       Command="{Binding DataContext.AddressFieldValidateCommand, RelativeSource={RelativeSource AncestorType=dxg:GridControl}}"
+                                       PassEventArgsToCommand="True"/>
+                            </dxmvvm:Interaction.Behaviors>
+                        </dxe:TextEdit>
+                    </DataTemplate>
+                </dxg:GridColumn.CellTemplate>
+            </dxg:GridColumn>
+            <dxg:GridColumn FieldName="Region" Header="{DynamicResource ReadImportedAccountView_StateProvince}" MinWidth="200" Width="250" FilterPopupMode="Default" />
+            <dxg:GridColumn FieldName="RegisteredName" Header="{DynamicResource ReadImportedAccountView_RegisteredName}" MinWidth="200" Width="250" FilterPopupMode="Default" />
+            <dxg:GridColumn FieldName="RegisteredNumber" Header="{DynamicResource ReadImportedAccountView_RegistrationNumber}" MinWidth="200" Width="250" FilterPopupMode="Default" />
+            <dxg:GridColumn FieldName="Website" Header="{DynamicResource ReadImportedAccountView_Website}" MinWidth="150" Width="200" FilterPopupMode="Default" />
+            <dxg:GridColumn FieldName="PeopleSalesResponsibleAssemblyBU.FullName" Header="{DynamicResource ReadImportedAccountView_SalesOwner}" MinWidth="150" Width="200" FilterPopupMode="Default">
+                <dxg:GridColumn.CellTemplate>
+                    <DataTemplate>
+                        <dxe:ComboBoxEdit Name="SalesOwnerEditor" ItemsSource="{Binding DataContext.SalesOwnerList, RelativeSource={RelativeSource AncestorType=dxg:GridControl},UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                  HorizontalAlignment="Stretch" IsTextEditable="False" InvalidValueBehavior="AllowLeaveEditor"
+                                                  DisplayMember="FullName" ValueMember="IdPerson"
+                                                  SelectedItem="{Binding RowData.Row.PeopleSalesResponsibleAssemblyBU,UpdateSourceTrigger=PropertyChanged , Mode=TwoWay}" AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True">
+                            <dxmvvm:Interaction.Behaviors>
+                                <dxmvvm:EventToCommand EventName="Validate"
+                                       Command="{Binding DataContext.SalesOwnerValidateCommand, RelativeSource={RelativeSource AncestorType=dxg:GridControl}}"
+                                       PassEventArgsToCommand="True"/>
+                            </dxmvvm:Interaction.Behaviors>
+                        </dxe:ComboBoxEdit>
+                    </DataTemplate>
+                </dxg:GridColumn.CellTemplate>
+            </dxg:GridColumn>
+            <dxg:GridColumn FieldName="Source.Value" Header="{DynamicResource ReadImportedAccountView_Source}" MinWidth="150" Width="200" FilterPopupMode="Default">
+                <dxg:GridColumn.CellTemplate>
+                    <DataTemplate>
+                        <dxe:ComboBoxEdit Name="SourceEditor" ItemsSource="{Binding DataContext.SourceList, RelativeSource={RelativeSource AncestorType=dxg:GridControl},UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                  HorizontalAlignment="Stretch" IsTextEditable="False" InvalidValueBehavior="AllowLeaveEditor"
+                                                  DisplayMember="Value" ValueMember="IdLookupValue"
+                                                  SelectedItem="{Binding RowData.Row.Source,UpdateSourceTrigger=PropertyChanged , Mode=TwoWay}" AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True">
+                            <dxmvvm:Interaction.Behaviors>
+                                <dxmvvm:EventToCommand EventName="Validate"
+                                       Command="{Binding DataContext.SourceNameValidateCommand, RelativeSource={RelativeSource AncestorType=dxg:GridControl}}"
+                                       PassEventArgsToCommand="True"/>
+                            </dxmvvm:Interaction.Behaviors>
+                        </dxe:ComboBoxEdit>
+                    </DataTemplate>
+                </dxg:GridColumn.CellTemplate>
+            </dxg:GridColumn>
+            <dxg:GridControl.TotalSummary>
+                <dxg:GridSummaryItem x:Name="summary" FieldName="Name" SummaryType="Count" DisplayFormat="Total Count: {0}" Alignment="Left"/>
+            </dxg:GridControl.TotalSummary>
+            <dxg:GridControl.View>
+                <dxg:TableView x:Name="tblCustomerAccount" 
+                       AllowBestFit="True"
+                       AllowEditing="True"
+                       ShowGroupPanel="False" 
+                       ShowIndicator="False"
+                       AutoWidth="True"
+                               
+                       ShowSearchPanelMode="Always" 
+                       SearchPanelHorizontalAlignment="Stretch"
+                       HorizontalScrollbarVisibility="Auto"
+                       VerticalScrollbarVisibility="Auto"
+                       NavigationStyle="Cell"
+                       ShowFixedTotalSummary="True"
+                       AllowPerPixelScrolling="True"
+                       AllowConditionalFormattingMenu="True" GroupRowCheckBoxFieldName="IsChecked">
+                    <dxg:TableView.FormatConditions>
+                        <dxg:FormatCondition Expression="[IsRowError] = True" ApplyToRow="True">
+                            <dxg:Format Background="#FFFF0000"/>
+                        </dxg:FormatCondition>
+                    </dxg:TableView.FormatConditions>
+                    <!--<dxmvvm:Interaction.Triggers>
+                        <dxmvvm:EventToCommand EventName="CellValueChanging" 
+                                       Command="{Binding InOutChangedCommand}" 
+                                       CommandParameter="{Binding RowData.Row}"
+                                       PassEventArgsToCommand="True"/>
+                    </dxmvvm:Interaction.Triggers>-->
+                    <dxmvvm:Interaction.Behaviors>
+                        <dxmvvm:EventToCommand Event="PreviewKeyDown" Command="{Binding UpdateSelectedFieldsCommand}" PassEventArgsToCommand="True" CommandParameter="{Binding DataContext.RowData.FieldName}"/>
+                    </dxmvvm:Interaction.Behaviors>
+                </dxg:TableView>
+            </dxg:GridControl.View>
+        </dxg:GridControl>
+        <StackPanel Grid.Row=" 1" 
+                    HorizontalAlignment="Center" 
+                    Orientation="Horizontal"
+                    Margin="20,0,0,0"
+                    Width="290">
+            <Button Content="{DynamicResource AcceptButton}"
+                    Command="{Binding AcceptButtonCommand}"  CommandParameter="{Binding ElementName=tblAttendance}"
+                    Height="30"
+                    Width="100" IsEnabled="{Binding IsAcceptEnable, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    Margin="0,0,30,0"
+                    Style="{DynamicResource Button16Style}"
+                    VerticalAlignment="Bottom" />
+            <Button Content="{DynamicResource CancelButton}"
+                    Command="{Binding CancelButtonCommand}" 
+                    Height="30"
+                    Width="100"
+                    Margin="30,0,0,0"
+                    Style="{DynamicResource Button16Style}"
+                    VerticalAlignment="Bottom" />
+
+        </StackPanel>
+    </Grid>
+    <!--<i:Interaction.Triggers>
+        <i:EventTrigger EventName="KeyDown">
+            <behaviors:InvokeDelegateCommandAction Command="{Binding CommandTextInput}" CommandParameter="{Binding Path=InvokeParameter, RelativeSource={RelativeSource Self}}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>-->
+</dxwui:WinUIDialogWindow> 

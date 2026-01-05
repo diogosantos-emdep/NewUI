@@ -1,0 +1,161 @@
+﻿<dxwui:WinUIDialogWindow x:Class="Emdep.Geos.Modules.Warehouse.Views.ChangeDeliveryDateOfOTsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.Warehouse.Views"                       
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:WarehouseCommon ="clr-namespace:Emdep.Geos.Modules.Warehouse"
+             xmlns:Validation ="clr-namespace:Emdep.Geos.UI.Validations;assembly=Emdep.Geos.UI.Validations"
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300"
+             Title="{Binding WindowHeader,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" Margin="50"
+             TitleStyle="{DynamicResource WinUIDialogWindowTitleStyle}"
+             Style="{DynamicResource WinUIDialogWindowStyle}"
+             HorizontalContentAlignment="Center"
+                         >
+
+    <!--Added new View for GEOS2-5094 -->
+    <!--[pramod.misal][GEOS2-5094][20-12-2023]-->
+    <!--|Display a new popup informing the user to change the delivery dates of the OTS with “Todo” Status in the list|-->
+    
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape"  Command="{Binding ChangeDeliveryDateOfOTsViewCancelCommand}"/>
+    </dxwui:WinUIDialogWindow.InputBindings>
+
+    <Grid ShowGridLines="False" HorizontalAlignment="Center">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="0"/>
+            <RowDefinition Height="200"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <!--<RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>-->
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+
+        
+        <!--SelectedItem="{Binding Path=SelectedTodoOt,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"-->
+        <!--Grid for code,Customer,Status,DeliveryDate lable-->
+        <dxg:GridControl VerticalAlignment="Stretch" HorizontalAlignment="Center" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="5" Grid.RowSpan="2" 
+                        ItemsSource="{Binding TodoOtList,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" SelectionMode="Row" Width="520" Height="200"  
+                             ImplyNullLikeEmptyStringWhenFiltering="False">
+
+            <dxg:GridColumn Header="{DynamicResource ChangeDeliveryDateOfOTsViewCodeTitle}" FieldName="MergeCode" FilterPopupMode="CheckedList"  Width="180" ReadOnly="True" FixedWidth="True"  HorizontalHeaderContentAlignment="Left"/>
+            <dxg:GridColumn Header="{DynamicResource ChangeDeliveryDateOfOTsViewCustomerTitle}" FieldName="Quotation.Site.Name" FilterPopupMode="CheckedList"  Width="100" ReadOnly="True" FixedWidth="True"  HorizontalHeaderContentAlignment="Left"/>
+            <dxg:GridColumn Header="{DynamicResource GridColforStatus}" FilterPopupMode="CheckedList" FieldName="WorkflowStatus.Name" IsSmart="True" Width="100" MinWidth="100">
+                <dxg:GridColumn.CellTemplate>
+                    <DataTemplate>
+                        <Border Background="{Binding RowData.Row.WorkflowStatus.HtmlColor}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <TextBlock Text="{Binding RowData.Row.WorkflowStatus.Name}" Foreground="Black" VerticalAlignment="Center" />
+                        </Border>
+                    </DataTemplate>
+                </dxg:GridColumn.CellTemplate>
+            </dxg:GridColumn>
+            <dxg:GridColumn Header="{DynamicResource ChangeDeliveryDateOfOTsViewDeliveryDateTitle}" FieldName="DeliveryDate" FilterPopupMode="CheckedList"  Width="100" ReadOnly="True" FixedWidth="False"  HorizontalHeaderContentAlignment="Left"/>
+
+
+            <dxg:GridControl.View>
+                <dxg:TableView x:Name="tblWorkOrder" 
+                               AllowBestFit="True"
+                               AllowEditing="True"
+                               ShowGroupPanel="False" 
+                               ShowIndicator="False"
+                               AutoWidth="True"
+                               ShowSearchPanelMode="Never" 
+                               SearchPanelHorizontalAlignment="Stretch"
+                               HorizontalScrollbarVisibility="Hidden"
+                               VerticalScrollbarVisibility="Auto"
+                               ShowFixedTotalSummary="False" 
+                               AllowPerPixelScrolling="True"
+                               RowDetailsVisibilityMode="Visible"
+                               ShowHorizontalLines="True"
+                               ShowColumnHeaders="True"
+                               AllowFixedColumnMenu="False"
+                               GroupRowCheckBoxFieldName="IsSendReadyExpeditionEmail"
+                               NavigationStyle="Cell"
+                               EnableImmediatePosting="True"
+                               ImmediateUpdateRowPosition="True"
+                               ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly"
+                               >
+                </dxg:TableView>
+            </dxg:GridControl.View>
+
+        </dxg:GridControl>
+
+        <!--DeliveryDate lable-->
+        <Label Grid.Row="3" Grid.Column="0" Content="{DynamicResource ChangeDeliveryDateOfOTsViewDeliveryDateTitleDD}" Height="Auto" FontSize="16" Grid.ColumnSpan="2" FontWeight="Bold"
+               HorizontalAlignment="Left" VerticalAlignment="Center"/>
+
+
+        <!--DeliveryDate  MaxWidth="200" dropdown-->
+        <dxe:DateEdit Grid.Row="3" Grid.Column="2" TabIndex="5"  Grid.ColumnSpan="3"
+                      HorizontalAlignment="Stretch" Mask="dd/MM/yyyy" MaskType="DateTimeAdvancingCaret" MaskUseAsDisplayFormat="True"
+                      IsReadOnly="{Binding DataContext.IsReadOnly,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}"
+                      IsEnabled="True" 
+                      >
+            
+            
+            <dxe:DateEdit.EditValue>
+                <Binding Path="DataContext.DeliveryDate" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay" RelativeSource="{RelativeSource AncestorType=dxwui:WinUIDialogWindow}">
+                    <Binding.ValidationRules>
+                        <Validation:DeliveryDateOfOTsValidation FieldName="DataContext.DeliveryDate" ValidationStep="UpdatedValue"/>
+                    </Binding.ValidationRules>
+                </Binding>
+            </dxe:DateEdit.EditValue>
+            
+            
+            <dxmvvm:Interaction.Behaviors>
+                <dxmvvm:EventToCommand EventName="EditValueChanging" Command="{Binding DataContext.OnDateEditValueChangingCommand,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" PassEventArgsToCommand="True"/>
+            </dxmvvm:Interaction.Behaviors>
+        </dxe:DateEdit>
+
+         <!--Accept and cancel button-->
+        <StackPanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="6"
+                    HorizontalAlignment="Center" VerticalAlignment="Stretch"
+                    Orientation="Horizontal"
+                    Margin="0,0,0,0"
+                    Width="Auto">
+
+            <Button Content="Accept"
+                    Command="{Binding ChangeDeliveryDateOfOTsViewAcceptButtonCommand}"
+                    Height="30"
+                    Width="100"
+                    Margin="0,0,10,0"
+                    Style="{DynamicResource Button16Style}"
+                    VerticalAlignment="Center" 
+                    />
+
+            <Button Content="Cancel"
+                    Command="{Binding ChangeDeliveryDateOfOTsViewCancelCommand}" 
+                    Height="30"
+                    Width="100"
+                    Margin="10,0,0,0"
+                    Style="{DynamicResource Button16Style}"
+                    VerticalAlignment="Center"  />
+        </StackPanel>
+
+    </Grid>
+
+
+</dxwui:WinUIDialogWindow>

@@ -1,0 +1,198 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
+using System.Runtime.Serialization;
+
+namespace Emdep.Geos.Data.Common
+{
+    [Table("car_projects")]
+    [DataContract]
+    public class CarProject : ModelBase, IDisposable
+    {
+        #region Fields
+        Int64 idCarProject;
+        string name;
+        Int32 idCustomer;
+        Int32 idCarOem;
+        DateTime creationDate;
+        CarOEM caroem;
+        List<Offer> offers;
+        double? projectOfferAmount;
+        Int32 createdBy;
+        #endregion
+
+        #region Constructor
+        public CarProject()
+        {
+
+        }
+        #endregion
+
+        #region Properties
+        [Key]
+        [Column("IdCarProject")]
+        [DataMember]
+        public Int64 IdCarProject
+        {
+            get
+            {
+                return idCarProject;
+            }
+
+            set
+            {
+                idCarProject = value;
+                OnPropertyChanged("IdCarProject");
+            }
+        }
+
+        [Column("Name")]
+        [DataMember]
+        public string Name
+        {
+            get
+            {
+                return name;
+            }
+
+            set
+            {
+                name = value;
+                OnPropertyChanged("Name");
+            }
+        }
+
+        [NotMapped]
+        [DataMember]
+        public Int32 IdCustomer
+        {
+            get
+            {
+                return idCustomer;
+            }
+
+            set
+            {
+                idCustomer = value;
+                OnPropertyChanged("IdCustomer");
+            }
+        }
+
+        [Column("IdCarOem")]
+        [DataMember]
+        public Int32 IdCarOem
+        {
+            get
+            {
+                return idCarOem;
+            }
+
+            set
+            {
+                idCarOem = value;
+                OnPropertyChanged("IdCarOem");
+            }
+        }
+
+        [Column("CreationDate")]
+        [DataMember]
+        public DateTime CreationDate
+        {
+            get
+            {
+                return creationDate;
+            }
+
+            set
+            {
+                creationDate = value;
+                OnPropertyChanged("CreationDate");
+            }
+        }
+
+        [NotMapped]
+        [DataMember]
+        public Int32 CreatedBy
+        {
+            get
+            {
+                return createdBy;
+            }
+
+            set
+            {
+                createdBy = value;
+                OnPropertyChanged("CreatedBy");
+            }
+        }
+
+        [NotMapped]
+        [DataMember]
+        public CarOEM CarOEM
+        {
+            get
+            {
+                return caroem;
+            }
+
+            set
+            {
+                caroem = value;
+                OnPropertyChanged("CarOEM");
+            }
+        }
+
+
+        [NotMapped]
+        [DataMember]
+        public List<Offer> Offers
+        {
+            get
+            {
+                return offers;
+            }
+
+            set
+            {
+                offers = value;
+                OnPropertyChanged("Offers");
+            }
+        }
+
+
+        [NotMapped]
+        [DataMember]
+        public double? ProjectOfferAmount
+        {
+            get
+            {
+                return projectOfferAmount;
+            }
+
+            set
+            {
+                projectOfferAmount = value;
+                OnPropertyChanged("ProjectOfferAmount");
+            }
+        }
+        #endregion
+
+        #region Methods
+        public void Dispose()
+        {
+            GC.SuppressFinalize(this);
+        }
+
+        public override object Clone()
+        {
+            return this.MemberwiseClone();
+        }
+
+
+        #endregion
+    }
+}

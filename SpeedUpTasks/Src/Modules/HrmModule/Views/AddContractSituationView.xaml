@@ -1,0 +1,211 @@
+﻿<dxwui:WinUIDialogWindow x:Class="Emdep.Geos.Modules.Hrm.Views.AddContractSituationView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.Hrm.Views"
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"  
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:HrmApplication="clr-namespace:Emdep.Geos.Modules.Hrm" 
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors" 
+             xmlns:Validation ="clr-namespace:Emdep.Geos.UI.Validations;assembly=Emdep.Geos.UI.Validations" 
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+             xmlns:behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300"
+                 Title="{Binding WindowHeader,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+                         TitleStyle="{DynamicResource WinUIDialogWindowTitleStyle}"
+                          Style="{DynamicResource WinUIDialogWindowStyle}">
+
+    <!-- This View Created By Amit -->
+    <!--[HRM-M040-05] New configuration section Departments-->
+    
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape"  Command="{Binding AddContractSituationViewCancelButtonCommand}"/>
+    </dxwui:WinUIDialogWindow.InputBindings>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="100"/>
+            <RowDefinition Height="40"/>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="155"/>
+            <ColumnDefinition Width="220"/>
+        </Grid.ColumnDefinitions>
+
+        <Label Grid.Row="0" Grid.Column="0" Content="{DynamicResource Company}" Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,10,0,10"/>
+        <dxe:ComboBoxEdit Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" 
+                         Width="200" Height="30" VerticalAlignment="Center" ItemsSource="{Binding CompanyList,Mode=TwoWay}"                          
+                         DisplayMember="Alias" ValueMember="IdCompany"
+                         IsReadOnly="{Binding DataContext.IsReadOnlyField,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+                         AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True" Name="cmbCompany">
+            <dxe:ComboBoxEdit.SelectedIndex>
+                <Binding Path="SelectedIndexCompany" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                    <Binding.ValidationRules>
+                        <Validation:EmployeeProfileValidation FieldName="SelectedIndexCompany" ValidationStep="UpdatedValue" />
+                    </Binding.ValidationRules>
+                </Binding>
+            </dxe:ComboBoxEdit.SelectedIndex>
+        </dxe:ComboBoxEdit>
+        <!---->
+        <Label Grid.Row="1" Grid.Column="0" Content="{DynamicResource EmpcontractSit}" Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,10,0,10"/>
+
+        <dxe:ComboBoxEdit Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left" 
+                         Width="200" Height="30" VerticalAlignment="Center"  ItemsSource="{Binding ContractSituationList,Mode=TwoWay}"                         
+                          DisplayMember="Name" ValueMember="IdContractSituation" 
+                          AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True">
+
+            <dxe:ComboBoxEdit.SelectedIndex>
+                <Binding Path="SelectedIndexContractSituation" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                    <Binding.ValidationRules>
+                        <Validation:EmployeeProfileValidation FieldName="SelectedIndexContractSituation" ValidationStep="UpdatedValue" />
+                    </Binding.ValidationRules>
+                </Binding>
+            </dxe:ComboBoxEdit.SelectedIndex>
+        </dxe:ComboBoxEdit>
+
+        <Label Grid.Row="2" Grid.Column="0" Content="{DynamicResource EmpProfCategory}" Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,10,0,10"/>
+
+
+        <dxe:ComboBoxEdit Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left" 
+                         Width="200" Height="30" VerticalAlignment="Center"  ItemsSource="{Binding ProfessionalCategoryList,Mode=TwoWay}"                         
+                          DisplayMember="Name" ValueMember="IdProfessionalCategory" AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True">
+
+            <dxe:ComboBoxEdit.SelectedIndex>
+                <Binding Path="SelectedIndexProfessionalCategory" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                    <Binding.ValidationRules>
+                        <Validation:EmployeeProfileValidation FieldName="SelectedIndexProfessionalCategory" ValidationStep="UpdatedValue" />
+                    </Binding.ValidationRules>
+                </Binding>
+            </dxe:ComboBoxEdit.SelectedIndex>
+        </dxe:ComboBoxEdit>
+
+        <Label Grid.Row="3" Grid.Column="0" Content="{DynamicResource EmpEducationStartDate}" Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,10,0,10"/>
+
+        <dxe:DateEdit Margin="0,0,0,5" Grid.Row="3" Grid.Column="1" Width="200" Height="30" HorizontalAlignment="Left" VerticalAlignment="Center" InvalidValueBehavior="AllowLeaveEditor"
+                      MinValue="{Binding MinStartDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                      MaxValue="{Binding MaxStartDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                      IsReadOnly="{Binding IsReadOnlyField,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
+            <dxe:DateEdit.EditValue>
+                <Binding Path="StartDate" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay"
+                                                 ValidatesOnDataErrors="True">
+                    <Binding.ValidationRules>
+                        <Validation:EmployeeProfileValidation FieldName="StartDate" ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True"/>
+                    </Binding.ValidationRules>
+                </Binding>
+            </dxe:DateEdit.EditValue>
+            <dxmvvm:Interaction.Behaviors>
+                <dxmvvm:EventToCommand EventName="EditValueChanging" Command="{Binding DataContext.OnDateEditValueChangingCommand,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" PassEventArgsToCommand="True"/>
+            </dxmvvm:Interaction.Behaviors>
+        </dxe:DateEdit>
+
+        <Label Grid.Row="4" Grid.Column="0" Content="{DynamicResource EmpEducationEndDate}" Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,10,0,10"/>
+
+        <dxe:DateEdit Margin="0,0,0,5" Grid.Row="4" Grid.Column="1" Width="200" Height="30" HorizontalAlignment="Left" VerticalAlignment="Center" InvalidValueBehavior="AllowLeaveEditor"
+                      MinValue="{Binding MinEndDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                      MaxValue="{Binding MaxEndDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                       IsReadOnly="{Binding IsReadOnlyField,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
+            <dxe:DateEdit.EditValue>
+                <Binding Path="EndDate" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay"
+                                                 ValidatesOnDataErrors="True">
+                    <Binding.ValidationRules>
+                        <Validation:EmployeeProfileValidation FieldName="EndDate" ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True"/>
+                    </Binding.ValidationRules>
+                </Binding>
+            </dxe:DateEdit.EditValue>
+            <dxmvvm:Interaction.Behaviors>
+                <dxmvvm:EventToCommand EventName="EditValueChanging" Command="{Binding DataContext.OnDateEditValueChangingCommand,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" PassEventArgsToCommand="True"/>
+            </dxmvvm:Interaction.Behaviors>
+        </dxe:DateEdit>
+
+        <Label Grid.Row="5" Grid.Column="0" Content="{DynamicResource EmpEducationFile}" Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,10,0,10"/>
+
+        <dxe:ComboBoxEdit x:Name="editor" Grid.Row="5" Grid.Column="1" Height="30" Width="200"
+                          EditValue="{Binding AttachmentList, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                          ItemsSource="{Binding AttachmentList,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                          ScrollViewer.VerticalScrollBarVisibility="Auto"
+                          DisplayMember="OriginalFileName"
+                          HorizontalAlignment="Left"
+                          VerticalAlignment="Center"
+                          AllowDefaultButton="False"
+                          AutoComplete="True"
+                          ImmediatePopup="True" Margin="0 0 0 0"
+                          ValidateOnEnterKeyPressed="True" 
+                          ValidateOnTextInput="True"
+                          IsTextEditable="False" Style="{DynamicResource ComboBoxEditStyle}"
+                          IsReadOnly="{Binding IsReadOnlyField,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
+
+            <dxe:ComboBoxEdit.StyleSettings>
+                <dxe:TokenComboBoxStyleSettings  NewTokenPosition="Far" EnableTokenWrapping="True"  />
+            </dxe:ComboBoxEdit.StyleSettings>
+        </dxe:ComboBoxEdit>
+
+
+
+        <Button Content= "{DynamicResource EmpEducationChooseFile}"
+                    Height="30"  
+                    Grid.Row="6" Grid.Column="1"
+                    Width="100"
+                Margin="0,0,20,0"
+                    HorizontalAlignment="Right"
+                VerticalAlignment="Center"
+                    Command="{Binding ChooseFileCommand}" Style="{DynamicResource ButtonStyle}" 
+                    IsEnabled="{Binding IsAcceptEnabled}"/>
+
+        
+        <Label Grid.Row="7" Grid.Column="0" Content="{DynamicResource EmployeeRemarks}" Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,0,10"/>
+   
+
+        <TextBox Margin="0,0,0,0" Grid.Row="7" Grid.Column="1" Width="200" Height="90" TextWrapping="Wrap" 
+                 VerticalAlignment="Center" HorizontalAlignment="Left" ScrollViewer.VerticalScrollBarVisibility="Auto" 
+                 Text="{Binding Remarks,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" AcceptsReturn="True"
+                  IsReadOnly="{Binding IsReadOnlyField,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
+        </TextBox>
+        
+        <StackPanel Grid.Row="8" Grid.Column="1" Grid.ColumnSpan="2"
+                    HorizontalAlignment="Left" 
+                    Orientation="Horizontal"
+                    Margin="0,0,0,0"
+                    Width="250">
+
+            <Button Content="Accept"
+                    Command="{Binding AddContractSituationViewAcceptButtonCommand}"
+                    Height="30"
+                    Width="100"
+                    Margin="0,0,10,0"
+                    Style="{DynamicResource Button16Style}"
+                    VerticalAlignment="Bottom" 
+                    IsEnabled="{Binding IsAcceptEnabled}"/>
+
+            <Button Content="Cancel"
+                    Command="{Binding AddContractSituationViewCancelButtonCommand}" 
+                    Height="30"
+                    Width="100"
+                    Margin="10,0,0,0"
+                    Style="{DynamicResource Button16Style}"
+                    VerticalAlignment="Bottom" />
+        </StackPanel>
+
+    </Grid>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="KeyDown">
+            <behaviors:InvokeDelegateCommandAction Command="{Binding CommandTextInput}" CommandParameter="{Binding Path=InvokeParameter, RelativeSource={RelativeSource Self}}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+</dxwui:WinUIDialogWindow>

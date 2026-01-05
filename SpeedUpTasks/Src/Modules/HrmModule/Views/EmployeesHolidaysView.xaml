@@ -1,0 +1,285 @@
+﻿<UserControl x:Class="Emdep.Geos.Modules.Hrm.Views.EmployeesHolidaysView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.Hrm.Views"
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"  
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+             xmlns:dxp="http://schemas.devexpress.com/winfx/2008/xaml/printing" 
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+               xmlns:HrmApplication="clr-namespace:Emdep.Geos.Modules.Hrm" 
+             xmlns:Converters="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:dxgt="http://schemas.devexpress.com/winfx/2008/xaml/grid/themekeys"
+             xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+
+    <Grid Background="{DynamicResource EmpDetailBackColor}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="55"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="250"/>
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Label Content="{DynamicResource Holidays}" HorizontalAlignment="Left" Style="{StaticResource LabelTitleStyle}" Grid.Row="0" Grid.Column="0" />
+        <Grid HorizontalAlignment="Right" Grid.Row="0" Grid.Column="1" Margin="0,5,0,0" >
+            <Grid.RowDefinitions>
+                <RowDefinition Height="AUTO"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="AUTO"/>
+                <ColumnDefinition Width="AUTO" />
+                <ColumnDefinition Width="AUTO" />
+                <ColumnDefinition Width="AUTO" />
+                <ColumnDefinition Width="AUTO" />
+                <ColumnDefinition Width="AUTO" />
+                <ColumnDefinition Width="AUTO" />
+                <ColumnDefinition Width="AUTO" />
+            </Grid.ColumnDefinitions>
+
+            <!--Plant-->
+            <TextBlock Grid.Column="0" Grid.Row="0" Text="{DynamicResource CommonPlant}"  FontWeight="Bold" Margin="10,2,5,0"  HorizontalAlignment="Right" Height="25" IsEnabled="True"  />
+
+            <dxe:ComboBoxEdit Style="{DynamicResource ComboBoxEditStyle}" Grid.Column="1" Grid.Row="0" Width="150" Height="30"                        
+                              ItemsSource="{Binding Source={x:Static HrmApplication:HrmCommon.Instance}, Path=UserAuthorizedPlantsList}"
+                              EditValue="{Binding Source={x:Static HrmApplication:HrmCommon.Instance}, Path=SelectedAuthorizedPlantsList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="5,0,5,0"
+                              DisplayMember="ShortName"  >
+                <dxe:ComboBoxEdit.StyleSettings>
+                    <dxe:CheckedComboBoxStyleSettings />
+                </dxe:ComboBoxEdit.StyleSettings>
+
+                <dxmvvm:Interaction.Triggers>
+                    <dxmvvm:EventToCommand EventName="PopupClosed"
+                                               Command="{Binding DataContext.PlantOwnerPopupClosedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                               PassEventArgsToCommand="True"/>
+                </dxmvvm:Interaction.Triggers>
+            </dxe:ComboBoxEdit>
+
+            <!--Period-->
+            <DockPanel Grid.Column="2" Grid.Row="0" HorizontalAlignment="Right"   VerticalAlignment="Center" Margin="5,0,0,0" >
+                <Image Style="{DynamicResource CalendarImageStyle}" Width="30" Height="20" Margin="2,0,3,0" />
+                <TextBlock Text="{DynamicResource AnnualSalesPerformanceViewPeriod}"  FontWeight="Bold" Margin="0,0,0,0" IsEnabled="True" />
+            </DockPanel>
+
+            <dxe:ComboBoxEdit Grid.Row="0" Grid.Column="3" 
+                                  Name="cmbPeriod"
+                          IsTextEditable="False" Margin="5,0,0,0"
+                          HorizontalAlignment="Left"
+                          IsEnabled="True"
+                          Height="30"
+                          Width="80"
+                          MaxLength="4" 
+                          VerticalAlignment="Center" 
+                         ItemsSource="{Binding Source={x:Static HrmApplication:HrmCommon.Instance}, Path=FinancialYearList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 SelectedItem="{Binding Source={x:Static HrmApplication:HrmCommon.Instance}, Path=SelectedPeriod,UpdateSourceTrigger=PropertyChanged}">
+                <dxe:ComboBoxEdit.StyleSettings>
+                    <dxe:ComboBoxStyleSettings />
+                </dxe:ComboBoxEdit.StyleSettings>
+                <dxmvvm:Interaction.Triggers>
+                    <dxmvvm:EventToCommand EventName="EditValueChanged"
+                                            Command="{Binding DataContext.SelectedYearChangedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                            PassEventArgsToCommand="True"/>
+                </dxmvvm:Interaction.Triggers>
+            </dxe:ComboBoxEdit>
+
+            <!-- Add New Holiday -->
+            <Button Visibility="Visible" Grid.Row="0" Grid.Column="4" Height="40" Width="40" HorizontalAlignment="Right" 
+                                Command="{Binding AddNewHolidayCommand}"
+                    CommandParameter="{Binding ElementName=HolidaysTableView}" Margin="5,0,5,5"
+                     IsEnabled="{Binding IsAcceptEnabled}">
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource AddHolidaysInformation}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Image Style="{DynamicResource AddNewButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+
+            <!-- Refresh Holidays Grid-->
+            <Button Visibility="Visible" Grid.Row="0" Grid.Column="5" Height="40" Width="40" HorizontalAlignment="Right" 
+                                Command="{Binding RefreshButtonCommand}"
+                                CommandParameter="{Binding ElementName=HolidaysTableView}"
+                                Margin="0,0,5,5">
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource ButtonRefresh}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Image Style="{DynamicResource RefreshButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+
+            <!-- Print Holidays List-->
+            <Button Visibility="Visible" Grid.Row="0" Grid.Column="6" Height="40" Width="40" HorizontalAlignment="Right" 
+                        Command="{Binding PrintButtonCommand}"
+                        CommandParameter="{Binding ElementName=HolidaysTableView}" Margin="0,0,5,5">
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource ButtonPrint}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Image Style="{DynamicResource PrinterButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+
+            <!-- Export Holidays List-->
+            <Button Visibility="Visible" Grid.Row="0" Grid.Column="7" Height="40" Width="40" HorizontalAlignment="Right" 
+                                Command="{Binding ExportButtonCommand}"
+                    CommandParameter="{Binding ElementName=HolidaysTableView}" Margin="0,0,5,5">
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource ButtonExportToExcel}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Image Style="{DynamicResource ExcelExportButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+        </Grid>
+
+        <dxg:GridControl VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                        ItemsSource="{Binding Path=CompanyHolidays,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" SelectionMode="Row"
+                             SelectedItem="{Binding Path=SelectedHoliday,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                             ImplyNullLikeEmptyStringWhenFiltering="True">
+
+            <dxg:GridColumn Header="{DynamicResource HolidayCompany}" FieldName="Company.Alias"  FilterPopupMode="CheckedList" MinWidth="100" Width="150" ReadOnly="True" FixedWidth="True"/>
+            <dxg:GridColumn Header="{DynamicResource HolidayName}" FieldName="Name" FilterPopupMode="CheckedList" MinWidth="100" Width="200" ReadOnly="True" FixedWidth="True"/>
+            <dxg:GridColumn Header="{DynamicResource HolidayType}" FieldName="Holiday.Value"  MinWidth="100" Width="150" FilterPopupMode="CheckedList" ReadOnly="True" FixedWidth="True"/>
+            <dxg:GridColumn Header="{DynamicResource HolidayStartDate}" FieldName="StartDate" FilterPopupMode="CheckedList" MinWidth="150" Width="150" ReadOnly="True" FixedWidth="True"/>
+            <dxg:GridColumn Header="{DynamicResource HolidayStartTime}" FieldName="StartTime" FilterPopupMode="CheckedList" MinWidth="150" Width="150" ReadOnly="True" FixedWidth="True">
+                <dxg:GridColumn.EditSettings>
+                    <dxe:TextEditSettings  MaskType="DateTime" MaskUseAsDisplayFormat="True"
+                                           Mask="{Binding TimeEditMask,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                                    />
+                </dxg:GridColumn.EditSettings>
+            </dxg:GridColumn>
+            <dxg:GridColumn Header="{DynamicResource HolidayEndDate}" FieldName="EndDate"  Width="150" FilterPopupMode="CheckedList" ReadOnly="True" FixedWidth="True"/>
+            <dxg:GridColumn Header="{DynamicResource HolidayEndTime}" FieldName="EndTime"  Width="150" FilterPopupMode="CheckedList" ReadOnly="True" FixedWidth="True">
+                <dxg:GridColumn.EditSettings>
+                    <dxe:TextEditSettings  MaskType="DateTime" MaskUseAsDisplayFormat="True"
+                                           Mask="{Binding TimeEditMask,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                                    />
+                </dxg:GridColumn.EditSettings>
+            </dxg:GridColumn>
+
+            <dxg:GridColumn Header="{DynamicResource HolidayIsRecursive}" FieldName="IsRecursive" FilterPopupMode="CheckedList" MinWidth="100" Width="150" ReadOnly="True" FixedWidth="True">
+                <dxg:GridColumn.CellTemplate>
+                    <DataTemplate>
+                        <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,0,5,0">
+                            <TextBlock.Style>
+                                <Style TargetType="{x:Type TextBlock}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Path=RowData.Row.IsRecursive}" Value="1">
+                                            <Setter Property="TextBlock.Text" Value="Yes"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Path=RowData.Row.IsRecursive}" Value="0">
+                                            <Setter Property="TextBlock.Text" Value="No"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </DataTemplate>
+                </dxg:GridColumn.CellTemplate>
+                <dxg:GridColumn.PrintCellStyle>
+                    <Style TargetType="dxe:TextEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                        <Setter Property="dxp:ExportSettings.TargetType" Value="Text"  />
+                        <Setter Property="dxp:TextExportSettings.Text" Value="{Binding Path=RowData.Row.IsRecursive}" >
+                        </Setter>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Path=RowData.Row.IsRecursive}" Value="1">
+                                <Setter Property="dxp:TextExportSettings.Text" Value="Yes"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Path=RowData.Row.IsRecursive}" Value="0">
+                                <Setter Property="dxp:TextExportSettings.Text" Value="No"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </dxg:GridColumn.PrintCellStyle>
+                <dxg:GridColumn.EditSettings>
+                    <dxe:TextEditSettings>
+                        <dxe:TextEditSettings.DisplayTextConverter>
+                            <dxmvvm:ObjectToObjectConverter>
+                                <dxmvvm:MapItem Source="1" Target="Yes"/>
+                                <dxmvvm:MapItem Source="0" Target="No"/>
+                            </dxmvvm:ObjectToObjectConverter>
+                        </dxe:TextEditSettings.DisplayTextConverter>
+                    </dxe:TextEditSettings>
+                </dxg:GridColumn.EditSettings>
+            </dxg:GridColumn>
+
+            <dxmvvm:Interaction.Behaviors>
+                <UIHelper:GridSelectingBehavior />
+            </dxmvvm:Interaction.Behaviors>
+
+            <dxg:GridControl.TotalSummary>
+                <dxg:GridSummaryItem x:Name="summary" FieldName="Name" SummaryType="Count" DisplayFormat="Total Count: {0}" Visible="True" Alignment="Left"/>
+            </dxg:GridControl.TotalSummary>
+
+            <dxg:GridControl.View>
+                <dxg:TableView x:Name="HolidaysTableView"
+                                   NavigationStyle="Row"
+                                   RowDetailsVisibilityMode="Visible"
+                                   ShowHorizontalLines="True"
+                                   ShowSearchPanelMode="Always"
+                                   ShowColumnHeaders="True"
+                                   VerticalScrollbarVisibility="Auto" 
+                                   HorizontalScrollbarVisibility="Auto"
+                                   AllowFixedColumnMenu="False"
+                                   ShowFixedTotalSummary="True" 
+                                   SearchPanelHorizontalAlignment="Stretch"
+                                   ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly"
+                                   AllowGrouping="True"
+                                   ShowGroupPanel="False"     
+                                   FocusedRow="{Binding Path=SelectedHoliday,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                   ShowIndicator="False" AutoWidth="True">
+
+                    <dxg:TableView.Resources>
+                        <DataTemplate x:Key="HolidaysReportPrintHeaderTemplate">
+                            <Grid Width="{Binding UsablePageWidth}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="50" />
+                                    <ColumnDefinition Width="130" />
+                                </Grid.ColumnDefinitions>
+                                <dxe:TextEdit Text=" " Width="{Binding UsablePageWidth}" Grid.ColumnSpan="3" IsPrintingMode="True" Background="#333E5E" HorizontalAlignment="Stretch" 
+                                                      VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" Height="50" />
+                                <dxe:TextEdit Text="Holidays Report" IsPrintingMode="True" HorizontalAlignment="Stretch" 
+                                                      VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" />
+                                <Image Source="/Emdep.Geos.Modules.Hrm;component/Assets/Images/GeosReportLogo.png" Height="50" Width="80"  dxp:ExportSettings.TargetType="Image" Grid.Column="2" />
+                            </Grid>
+                        </DataTemplate>
+
+                        <DataTemplate x:Key="HolidaysReportPrintFooterTemplate">
+                            <dxe:TextEdit HorizontalContentAlignment="Center" 
+                                                  Width="{Binding Path=UsablePageWidth, Mode=OneWay}" 
+                                                  dxp:ExportSettings.TargetType="PageNumber" 
+                                                  dxp:PageNumberExportSettings.Kind="NumberOfTotal" 
+                                                  dxp:PageNumberExportSettings.Format="Page {0} of {1}"/>
+                        </DataTemplate>
+
+                    </dxg:TableView.Resources>
+
+                    <dxmvvm:Interaction.Behaviors>
+                        <dxmvvm:EventToCommand Command="{Binding EditHolidaysDoubleClickCommand}" EventName="MouseDoubleClick" CommandParameter="{Binding ElementName=HolidaysTableView}" >
+                            <dxmvvm:EventToCommand.EventArgsConverter>
+                                <dx:EventArgsToDataRowConverter/>
+                            </dxmvvm:EventToCommand.EventArgsConverter>
+                        </dxmvvm:EventToCommand>
+                    </dxmvvm:Interaction.Behaviors>
+
+                </dxg:TableView>
+            </dxg:GridControl.View>
+        </dxg:GridControl>
+    </Grid>
+</UserControl>

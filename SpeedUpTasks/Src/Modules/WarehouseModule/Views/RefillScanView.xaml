@@ -1,0 +1,71 @@
+﻿<dxwui:WinUIDialogWindow x:Class="Emdep.Geos.Modules.Warehouse.Views.RefillScanView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.Warehouse.Views"
+             Style="{DynamicResource WinUIDialogWindowStyle}"
+             TitleStyle="{DynamicResource WinUIDialogWindowWorkOrderTitleStyle}" 
+             mc:Ignorable="d" Title="{DynamicResource RefillScanHeader}"
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm" Height="250"  >
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape" Command="{Binding CommandCancelButton}" />
+    </dxwui:WinUIDialogWindow.InputBindings>
+    <Grid Width="800">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="360"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Label Grid.Row="0" Grid.Column="1"
+               Content="{DynamicResource RefilllViewLocation}" FontWeight="SemiBold" FontSize="20"
+               HorizontalAlignment="Left" />
+
+        <Label Grid.Row="1" Grid.Column="0" Width="60" Style="{DynamicResource LabelBackgroundImageBrush}" HorizontalAlignment="Right" />
+
+        <dxe:TextEdit  Width="350"  Margin="5" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3"  ShowBorder="True"  Height="60" FontSize="40" VerticalContentAlignment="Center" HorizontalAlignment="Left" AcceptsReturn="False" AcceptsTab="False" TextWrapping="NoWrap"
+                       FocusManager.FocusedElement="{Binding ElementName=TextEditBarcode}" AllowUpdateTwoWayBoundPropertiesOnSynchronization="False" 
+                       InvalidValueBehavior="AllowLeaveEditor"  TextTrimming="CharacterEllipsis" VerticalScrollBarVisibility="Disabled" x:Name="TextEditBarcode" >
+            <!--Background="{Binding WorkOrderBarcodeBackground}" BorderBrush="{Binding WorkOrderBarcodeBackground}"-->
+            <dxmvvm:Interaction.Behaviors>
+                <dxmvvm:EventToCommand EventName="KeyDown" Command="{Binding CommandScanBarcode}" PassEventArgsToCommand="True"/>
+            </dxmvvm:Interaction.Behaviors>
+            <dxe:TextEdit.EditValue>
+                <Binding Path="LocationBarcode" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay"/>
+            </dxe:TextEdit.EditValue>
+            <!--<dxe:TextEdit.BorderTemplate>
+                <ControlTemplate TargetType="{x:Type ContentControl}">
+                    <Border x:Name="border" Background="{TemplateBinding Background}" BorderThickness="1" BorderBrush="#FFA2A2A2">
+                        <ContentPresenter/>
+                    </Border>
+                </ControlTemplate>
+            </dxe:TextEdit.BorderTemplate>-->
+        </dxe:TextEdit>
+
+        <StackPanel Orientation="Horizontal"  Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left" Visibility="{Binding RefillErrorVisibility}" Height="25"  Grid.ColumnSpan="3" Margin="5,0,0,0">
+            <Image Height="24" Width="24" Source="/Emdep.Geos.Modules.Warehouse;component/Assets/Images/error.png" />
+            <TextBlock Text="{Binding RefillBarcodeError}" Foreground="{Binding RefillErrorColour}" FontWeight="SemiBold"  FontSize="20" VerticalAlignment="Center" HorizontalAlignment="Right" />
+        </StackPanel>
+        <StackPanel Grid.Column="1" Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center">
+        <Button Content="{DynamicResource RefillViewCancel}" 
+                Command="{Binding CommandCancelButton}" VerticalAlignment="Center"  Margin="5"
+                FontSize="16" Height="30" Width="100" Style="{DynamicResource Button16Style}"/>
+        <Button Content="{DynamicResource RefillViewSkip}" Grid.Column="1" Grid.Row="3"
+                Command="{Binding CommandSkipButton}" VerticalAlignment="Center"  Margin="15,5,5,5"
+                CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Grid}}"
+                FontSize="16" Height="30" Width="100" Style="{DynamicResource Button16Style}"/>
+        </StackPanel>
+
+    </Grid>
+</dxwui:WinUIDialogWindow>
+

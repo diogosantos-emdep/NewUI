@@ -1,0 +1,111 @@
+﻿<dxwui:WinUIDialogWindow
+             x:Class="Emdep.Geos.Modules.Warehouse.Views.AddManufacturerView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.Warehouse.Views"
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:Validation ="clr-namespace:Emdep.Geos.UI.Validations;assembly=Emdep.Geos.UI.Validations"
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300"
+            Height="400" Width="400"
+            Title ="{DynamicResource AddManufacturerViewTitle}"
+            TitleStyle="{DynamicResource WinUIDialogWindowTitleStyle}"
+            Style="{DynamicResource WinUIDialogWindowStyle}">
+    
+    
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape" Command="{Binding AddManufacturerViewCancelButtonCommand}"/>
+    </dxwui:WinUIDialogWindow.InputBindings>
+
+    <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Height="Auto " Width="350" Background="Transparent">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="100" />
+            <RowDefinition Height="100" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <StackPanel  Orientation="Vertical" Grid.Row="0" >
+            <Label Content="{DynamicResource AddManufacturerViewManufacturer}"/>
+
+            <!--<dxe:ComboBoxEdit 
+                                HorizontalAlignment="Left" VerticalAlignment="Top" Width="170" Margin="0,0,0,0"
+                                AllowDefaultButton="False"                               
+                                ItemsSource="{Binding ManufacturerNameStrList, UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"                            
+                                AutoComplete="False" 
+                                IsTextEditable="True"
+                                ImmediatePopup="True"
+                                Style="{DynamicResource ComboBoxEditStyle}"
+                                EditValue="{Binding ManufacturerName,ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+                <dxe:ComboBoxEdit.PopupContentTemplate>
+                    <ControlTemplate>
+                        <dxg:GridControl Name="PART_GridControl" Height="Auto" ItemsSource="{Binding ManufacturerNameStrList, UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" >
+                            <dxg:GridControl.Columns>
+                                <dxg:GridColumn FieldName="ManufacturerName" Width="160" ReadOnly="True"/>
+                            </dxg:GridControl.Columns>
+                            <dxg:GridControl.View>
+                                <dxg:TableView AutoWidth="True" ShowColumnHeaders="False" ShowIndicator="False" ShowGroupPanel="False"
+                                           ShowSearchPanelMode="Never" ShowHorizontalLines="False" ShowVerticalLines="False" 
+                                           ScrollViewer.HorizontalScrollBarVisibility="Auto" ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly"
+                                           ScrollViewer.VerticalScrollBarVisibility="Visible" SearchPanelHorizontalAlignment="Stretch"/>
+                            </dxg:GridControl.View>
+                        </dxg:GridControl>
+                    </ControlTemplate>
+                </dxe:ComboBoxEdit.PopupContentTemplate>
+            </dxe:ComboBoxEdit>-->
+           
+            <dxe:TextEdit 
+                              Text="{Binding ManufacturerName,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" 
+                              Height="30"  Width="350"
+                              VerticalAlignment="Center" 
+                              HorizontalAlignment="Left"  
+                              TextWrapping="WrapWithOverflow"  
+                              AcceptsReturn="True" MaxLength="999"
+                              VerticalScrollBarVisibility="Hidden"
+                              VerticalContentAlignment="Stretch"
+                              HorizontalContentAlignment="Left">
+                <dxe:TextEdit.EditValue>
+                    <Binding Path="ManufacturerName" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                        <Binding.ValidationRules>
+                            <Validation:WarehouseValidation FieldName="ManufacturerName"/>
+                        </Binding.ValidationRules>
+                    </Binding>
+                </dxe:TextEdit.EditValue>
+            </dxe:TextEdit>
+        </StackPanel>
+
+
+        <StackPanel Orientation="Vertical" Grid.Row="1" >
+            <Label Content="{DynamicResource AddManufacturerViewMadeIn}"/>
+            <dxe:ComboBoxEdit HorizontalAlignment="Stretch"
+                              VerticalAlignment="Top" ValidateOnTextInput="True"
+                              ItemsSource="{Binding ListCountry }" AutoComplete="True" IsTextEditable="False" ImmediatePopup="True" IncrementalFiltering="True"
+                              SelectedItem="{Binding SelectedCountry,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                              DisplayMember="Name" Height="30">
+            </dxe:ComboBoxEdit>
+        </StackPanel>
+
+
+        <DockPanel Grid.Row="2" 
+                    HorizontalAlignment="Center" 
+                    Margin="0,5,0,0" Width="300">
+            <Button Content="{DynamicResource Accept}"
+        		Command="{Binding AddManufacturerViewAcceptButtonCommand}"
+        		Height="30"
+        		Width="100"
+        		Margin="0,0,30,0"
+                HorizontalAlignment="Left"
+        		VerticalAlignment="Bottom" />
+            <Button Content="{DynamicResource Cancel}"
+            	Command="{Binding AddManufacturerViewCancelButtonCommand}" 
+            	Height="30"
+            	Width="100"
+            	Margin="30,0,0,0"
+                HorizontalAlignment="Right"
+            	VerticalAlignment="Bottom"  />
+        </DockPanel>
+    </Grid>
+</dxwui:WinUIDialogWindow>

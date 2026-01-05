@@ -1,0 +1,197 @@
+DROP PROCEDURE IF EXISTS `CRM_GetOfrsEngAnlysisDateWiseAndpermission_IgnoreCloseDate_V2680`;
+DELIMITER $$
+CREATE PROCEDURE `CRM_GetOfrsEngAnlysisDateWiseAndpermission_IgnoreCloseDate_V2680`(
+   IN _idUser               smallint(5) UNSIGNED,
+   IN _idcurrency           TINYINT(4) UNSIGNED,
+   IN _idZone               smallint(5) UNSIGNED,
+   IN _accountingYearFrom   DATETIME,
+   IN _accountingYearTo     DATETIME,
+   IN _idPermission         smallint(5) UNSIGNED)
+BEGIN
+      -- Call CRM_GetOfrsEngAnlysisDateWiseAndpermission_IgnoreCloseDate_V2680(1,3,1,'2025-01-01','2025-12-31',22);
+      
+      DROP TEMPORARY TABLE IF EXISTS table2;CREATE TEMPORARY TABLE IF NOT EXISTS table2
+   AS
+      (SELECT q.IdQuotation,
+              q.Code,
+              q.`Year`,
+              `of`.IdOffer,
+              `of`.IdSalesOwner,
+              `of`.idOfferType,
+              `of`.Code AS OfferCode,
+              `of`.Description AS OfferTitle,
+              `of`.IdBusinessUnit,
+              lvbusinessunit.Value AS BusinessUnit,
+              `of`.IdStatus,
+              oft.IdOfferStatusType AS OfferStatusid,
+              oft.name AS OfferStatus,
+              oft.HtmlColor AS OfferStatusColor,
+              ss.IdSalesStatusType,
+              ss.Name AS SalesStatusType,
+              ss.HtmlColor AS SalesStatusTypeColor,
+              DATE(IFNULL(`of`.DeliveryDate, _accountingYearFrom))
+                 AS OfferExpectedPODate,
+              mxr.IdRevision,
+              mxr.NumRevision,
+              DATE(IFNULL(mxr.ExpiryDate, _accountingYearFrom))
+                 AS DeliveryDate,
+              DATE(IFNULL(mxr.DeliveryDate, _accountingYearFrom))
+                 AS OtDeliveryDate,
+              ri.NumItem,
+              ri.IdRevisionItem,
+              pn.idPartNumber,
+              pn.code AS PartNumberCode,
+              pnt.IdOperator,
+              p.Name,
+              p.Surname,
+              pnt.StartDate,
+              pnt.EndDate,
+              UPPER(zo.name) AS CustomerZone,
+              UPPER(co.name) AS CustomerCountry,
+              UPPER(cu.name) AS CustomerGroup,
+              replace(si.name, concat('(', co.name, ')'), '') AS SiteName,
+              lvsource.Value AS Source,
+              cao.Name AS CarOEM,
+              carproject.Name AS CarProject,`of`.IdProductCategory
+       FROM quotations q
+            INNER JOIN offers `of` ON `of`.IdOffer = q.IdOffer AND q.IdDetectionsTemplate = 23
+            INNER JOIN sites si ON si.idsite = `of`.idcustomer
+            INNER JOIN customers cu ON cu.idcustomer = si.idcustomer
+            INNER JOIN countries co ON co.idcountry = si.idcountry
+            INNER JOIN zones zo ON zo.idzone = co.idzone
+            INNER JOIN optionsbyoffer optbyof ON `of`.IdOffer = optbyof.IdOffer AND optbyof.IdOption = 25
+            INNER JOIN
+            (SELECT r.IdQuotation,
+                    MAX(r.IdRevision) AS IdRevision,
+                    MAX(r.NumRevision) AS NumRevision,
+                    r.ExpiryDate,
+                    ot.DeliveryDate
+               FROM Revisions r
+                INNER JOIN ots ot ON r.IdQuotation = ot.IdQuotation
+				GROUP BY r.IdQuotation
+             ) AS mxr ON mxr.IdQuotation = q.IdQuotation
+            INNER JOIN revisionitems ri ON mxr.IdRevision = ri.IdRevision
+            INNER JOIN otitems oi ON oi.IdRevisionItem = ri.IdRevisionItem and ri.Quantity>0 and ri.IdRevisionItemStatus!=15
+            INNER JOIN partnumbers pn ON oi.IdOTItem = pn.idOtItem
+            INNER JOIN partnumberstracking pnt ON pn.idPartNumber = pnt.idPartNumber AND pnt.idStage = 23
+            LEFT JOIN people p ON p.IdPerson = pnt.IdOperator
+            INNER JOIN offerstatustypes oft ON oft.idofferstatustype = `of`.idstatus
+            INNER JOIN sales_status_types ss
+          ON if((`of`.IdStatus = 12
+                 && (SELECT idOffer
+                       FROM (SELECT idOffer,
+                                    Date(min(ReceivedIn)) AS ReceivedIn,
+                                    Code,
+                                    IdPOType,
+                                    POType,
+                                    IdSite
+                               FROM (SELECT po.idOffer,
+                                            Date(min(p.ReceivedIn))
+                                               AS ReceivedIn,
+                                            p.Code,
+                                            p.IdPOType,
+                                            cpot.POType,
+                                            p.IdSite
+                                       FROM customerpurchaseordersbyoffer po
+                                            INNER JOIN
+                                            customerpurchaseorders p
+                                               ON p.idcustomerpurchaseorders =
+                                                     po.idcustomerpurchaseorder
+                                            INNER JOIN
+                                            customerpurchaseordertypes cpot
+                                               ON cpot.IdPOType = p.IdPOType
+                                            INNER JOIN offers `of`
+                                               ON `of`.IdOffer = po.idOffer
+                                      WHERE -- `of`.idOfferType IN (1, 10) AND -- [shubham.nikam][GEOS2-8440][08 Aug 2025]
+                                      `of`.IdStatus = 12
+                                     GROUP BY idoffer, p.IdPOType
+                                     HAVING MIN(p.receivedin)) test
+                             GROUP BY idoffer
+                             HAVING (    MIN(receivedin)
+                                     AND Group_concat(IdPOType) NOT LIKE
+                                            ("3"))) AS POResult
+                      WHERE idOffer = `of`.idoffer) > 0),
+                ss.IdSalesStatusType = 4,
+                oft.IdSalesStatusType = ss.IdSalesStatusType)
+            LEFT JOIN emdep_geos.lookup_values lvbusinessunit
+               ON lvbusinessunit.IdLookupValue = `of`.IdBusinessUnit
+            LEFT JOIN emdep_geos.lookup_values lvsource
+               ON lvsource.IdLookupValue = `of`.IdSource
+            LEFT JOIN car_projects carproject
+               ON carproject.IdCarProject = `of`.IdCarProject
+            LEFT JOIN caroems cao ON cao.IdCarOEM = `of`.IdCarOEM
+       WHERE     CASE
+                    WHEN (SELECT Count(*)
+                          FROM sales_user_restricted_bu
+                          WHERE     IdUser IN (_idUser)
+                                AND (   IdPermission = _idPermission
+                                     || IdPermission IS NULL)) > 0
+                    THEN
+                          `of`.IdBusinessUnit NOT IN
+                             (SELECT sbu.IdBusinessUnit
+                                FROM sales_user_restricted_bu sbu
+                               WHERE     sbu.IdUser IN (_idUser)
+                                     AND (   sbu.IdPermission = _idPermission
+                                          || sbu.IdPermission IS NULL))
+                       || (`of`.IdBusinessUnit IS NULL || `of`.IdBusinessUnit = 0)
+                    ELSE
+                       TRUE
+                 END
+             AND CASE
+                    WHEN _idPermission = 20
+                    THEN
+                      (     (   SELECT s.IdSiteSalesOwner
+                           FROM site_sales_owners s
+                              INNER JOIN sales_users su
+                      ON s.IdSalesOwner = su.IdSalesUser
+                   LEFT JOIN people p ON s.IdSalesOwner = p.IdPerson
+             WHERE su.IsEnabled = 1 AND s.IdSite=si.IdSite
+                   AND p.IsStillActive = 1 AND FIND_IN_SET(s.IdSalesOwner,
+                                                _idUser) group by s.IdSite
+                                 )
+
+                            AND (   FIND_IN_SET(`of`.IdSalesOwner, _idUser)
+                                 OR `of`.IdSalesOwner IS NULL))
+                    WHEN _idPermission = 22
+                    THEN
+                       TRUE
+                    ELSE
+                       FALSE
+                 END
+             AND CASE
+                  WHEN (ss.IdSalesStatusType=4)
+                  THEN mxr.ExpiryDate BETWEEN DATE_FORMAT(_accountingYearFrom,
+                                                    '%Y-%m-%d 00:00:00')
+                                    AND DATE_FORMAT(_accountingYearTo,
+                                                    '%Y-%m-%d 23:59:59')
+                  WHEN ss.IdSalesStatusType != 4
+                  THEN mxr.ExpiryDate BETWEEN DATE_FORMAT(_accountingYearFrom,
+                                                    '%Y-%m-%d 00:00:00')
+                                    AND DATE_FORMAT('9999-12-31',
+                                                    '%Y-%m-%d 23:59:59')
+                END
+            -- AND `of`.idoffertype IN (1, 10) -- [shubham.nikam][GEOS2-8440][08 Aug 2025]
+             AND `of`.IdCustomerToDelivery NOT IN (SELECT IdSite
+                                                   FROM sites
+                                                  WHERE IdCustomer = 10)
+       GROUP BY `of`.idoffer);
+       
+SELECT * FROM table2;
+
+SELECT pcoo.IdProductCategory AS IdProductSubCategory,
+             pc.Name AS ProductSubCategory,
+             pc.IdParent AS IdCategory,
+             pcmaincat.Name AS Category
+        FROM product_category_offer_options pcoo
+             INNER JOIN product_categories pc ON pc.IdProductCategory = pcoo.IdProductCategory
+             LEFT JOIN product_categories pcmaincat ON pc.IdParent = pcmaincat.IdProductCategory
+       WHERE pcoo.IdProductCategory IN (SELECT IdProductCategory FROM table2)
+      GROUP BY pcoo.IdProductCategory;
+      
+      SELECT p.IdPerson AS IdPerson,
+             concat(p.Name, ' ', p.Surname) AS SalesOwner
+        FROM people p
+       WHERE p.IdPerson IN (SELECT IdSalesOwner FROM table2)
+      GROUP BY p.IdPerson;
+END$$
+DELIMITER ;

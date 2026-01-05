@@ -1,0 +1,81 @@
+DROP PROCEDURE IF EXISTS `emdep_geos`.`Hrm_GetEmployeeContractExpirations_V2680`;
+DELIMITER $$
+
+CREATE PROCEDURE `emdep_geos`.`Hrm_GetEmployeeContractExpirations_V2680`(
+    IN _CurrentDate   datetime,
+    IN _IdCompany     smallint(5) UNSIGNED)
+ BEGIN
+	-- [rdixit][30.09.2025][GEOS2-9059]
+    -- call Hrm_GetEmployeeContractExpirations_V2680('2025-09-30', 11558)
+    CALL emdep_geos.Hrm_GetAllEmployeesCurrentJobDescription_V2039(Year(_CurrentDate));
+            
+	SELECT ecs.IdEmployeeContractSituation,
+           ecs.IdEmployee,
+           emp.EmployeeCode,
+           emp.FirstName,
+           emp.LastName,
+           ecs.ContractSituationStartDate,
+           ecs.ContractSituationEndDate,
+           ecs.ContractExpirationWarningDate
+      FROM employees emp
+           INNER JOIN emp_job_descs ejd ON ejd.IdEmployee = emp.IdEmployee
+           INNER JOIN
+           (SELECT *
+              FROM employee_contract_situations
+             WHERE (    date(ContractSituationStartDate) <= date(_CurrentDate)
+                    AND date(_CurrentDate) <=
+                           ifnull(date(ContractSituationEndDate),
+                                  date(_CurrentDate)))
+            GROUP BY IdEmployee) ecs
+              ON ecs.IdEmployee = emp.IdEmployee
+     WHERE     emp.IsEnabled
+           AND ejd.IdCompany = _IdCompany
+           AND emp.IdEmployeeStatus != 137
+           AND date(_CurrentDate) <= date(ecs.ContractSituationEndDate)
+           AND date(ecs.ContractSituationEndDate) <=
+                  date((  _CurrentDate
+                        + INTERVAL +(SELECT DefaultValue
+                                       FROM geos_app_settings
+                                      WHERE IdAppSetting = 39) DAY))
+           AND (   ecs.ContractExpirationWarningDate IS NULL
+                OR date(ecs.ContractExpirationWarningDate) <
+                      date(ecs.ContractSituationStartDate))
+    GROUP BY emp.IdEmployee
+    ORDER BY date(ecs.ContractSituationEndDate);
+    
+SELECT 
+            ec.IdEmployee,
+            ejd.IdJobDescription,
+            ec.EmployeeContactValue AS Emails,
+            regCmp.IdCompany AS RegionIdCompany,
+            regCmp.Alias AS RegionCompany,
+            empCmp.IdCompany AS empIdCompany,
+            empCmp.Alias AS empCompany,
+            lv.Value,
+            lv.IdLookupValue,
+            ejd.IdRegion    
+        FROM employee_job_descriptions ejd
+        LEFT JOIN companies empCmp 
+            ON ejd.IdCompany = empCmp.IdCompany
+        INNER JOIN employee_contacts ec 
+            ON ejd.IdEmployee = ec.IdEmployee
+        INNER JOIN employees emp 
+            ON emp.IdEmployee = ejd.IdEmployee
+        LEFT JOIN geos.countries countr 
+            ON countr.IdRegion = ejd.IdRegion
+        LEFT JOIN lookup_values lv 
+            ON lv.IdLookupValue = ejd.IdRegion
+        LEFT JOIN companies regCmp 
+            ON countr.IdCountry = regCmp.IdCountry
+        WHERE CURDATE() >= DATE(ejd.JobDescriptionStartDate)
+          AND CURDATE() <= IFNULL(DATE(ejd.JobDescriptionEndDate), CURDATE())
+          AND FIND_IN_SET(ejd.IdJobDescription, (SELECT DefaultValue
+                                      FROM geos_app_settings
+                                     WHERE IdAppSetting = 40))
+          AND emp.IsEnabled
+          AND emp.IdEmployeeStatus != 137
+          AND ec.IsCompanyUse
+          AND ec.EmployeeContactIdType = 88
+   AND (regCmp.IdCompany = _IdCompany OR empCmp.IdCompany = _IdCompany) group by emp.IdEmployee;
+END$$
+DELIMITER ;

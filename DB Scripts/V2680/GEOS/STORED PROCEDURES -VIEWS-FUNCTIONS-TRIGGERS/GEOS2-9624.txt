@@ -1,0 +1,12 @@
+DROP PROCEDURE IF EXISTS `geos`.`OTM_GetEmailCreatedIn_V2670`;
+DELIMITER $$
+
+CREATE PROCEDURE `geos`.`OTM_GetEmailCreatedIn_V2670`(
+    IN _poAnalyzerEmailToCheck   text)
+ BEGIN
+       -- [rdixit][GEOS2-9624][03.10.2025]
+       SELECT IdEmail, CreatedIn, SourceInboxId,EmailSentAt,Subject
+         FROM email 
+        WHERE FIND_IN_SET(SourceInboxId, _poAnalyzerEmailToCheck);
+END$$
+DELIMITER ;

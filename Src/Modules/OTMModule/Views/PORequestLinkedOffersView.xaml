@@ -1,0 +1,289 @@
+﻿<dxwui:WinUIDialogWindow x:Class="Emdep.Geos.Modules.OTM.Views.PORequestLinkedOffersView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Emdep.Geos.Modules.OTM.Views"
+        xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+        xmlns:Coverter="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+        xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+        xmlns:sysglb="clr-namespace:System.Globalization;assembly=mscorlib"
+        xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm" 
+        xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+         xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+        xmlns:dxp="http://schemas.devexpress.com/winfx/2008/xaml/printing" 
+        mc:Ignorable="d"
+        Title="" Height="450" Width="800">
+
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape" Command="{Binding LinkedOfferViewCancelButtonCommand}" />
+    </dxwui:WinUIDialogWindow.InputBindings>
+
+    <dxwui:WinUIDialogWindow.Resources>
+        <Coverter:ForegroundColorConverter x:Key="ForegroundColorConverter" />
+    </dxwui:WinUIDialogWindow.Resources>
+
+
+    <Grid HorizontalAlignment="Stretch" ShowGridLines="False">
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="800"/>
+            <RowDefinition Height="*"  />
+        </Grid.RowDefinitions>
+
+       
+        <TextBlock Margin="10,0,0,0" Grid.Row="0"  VerticalAlignment="Center" FontSize="30" FontWeight="Bold" Text="{DynamicResource PORequestLinkedOffersViewHeader}" />
+
+
+        <!--ItemsSource="{Binding DataContext.Linkedofferlist,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox},UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"-->
+        <!--SelectedItems="{Binding SelectedIndexPOLinkedOffer,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"-->
+        <dxg:GridControl x:Name="LinkedofferGrid" DockPanel.Dock="Right" Grid.Column="0"  Grid.Row="1" ScrollViewer.VerticalScrollBarVisibility="Auto"
+          Margin="10" HorizontalAlignment="Stretch" Width="Auto" 
+         FilterString="{Binding MyFilterString,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+         ShowBorder="True"  SelectedItem="{x:Null}" SelectionMode="MultipleRow"  AllowLiveDataShaping="True" 
+         ItemsSource="{Binding  Linkedofferlist,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" 
+         ImplyNullLikeEmptyStringWhenFiltering="True">
+
+            <dxmvvm:Interaction.Behaviors>
+                <UIHelper:GridSelectingBehavior />
+            </dxmvvm:Interaction.Behaviors>
+            <!--Code-->
+            <dxg:GridColumn Header="{DynamicResource OTMCode}" FieldName="Code" MinWidth="100" MaxWidth="100"   FilterPopupMode="CheckedList" ReadOnly="True"/>
+
+            <!--Group-->
+      
+
+            <dxg:GridColumn Header="{DynamicResource OTMGroup}" FieldName="CustomerGroup" MinWidth="80" MaxWidth="90"   FilterPopupMode="CheckedList" ReadOnly="True"/>
+
+
+
+
+            <dxg:GridColumn Header="{DynamicResource OTMPlant}" FieldName="Plant"  MinWidth="80" MaxWidth="110"  FilterPopupMode="CheckedList" ReadOnly="True"/>
+
+
+            <!--Description-->
+
+
+            <dxg:GridColumn Header="{DynamicResource OTMDescription}" FieldName="Description" MinWidth="470"  FilterPopupMode="CheckedList" ReadOnly="True"/>
+
+
+            <!--RFQ-->
+
+
+            <dxg:GridColumn Header="{DynamicResource OTMRFQ}" FieldName="RFQ" Width="*" MaxWidth="120" MinWidth="100"  FilterPopupMode="CheckedList" ReadOnly="True"/>
+
+
+            <!--Contact-->
+
+
+            <dxg:GridColumn Header="{DynamicResource POContact}" FieldName="Contact" Width="200" MaxWidth="200"  FilterPopupMode="CheckedList" ReadOnly="True"/>
+
+
+            <!--Status-->
+
+
+
+            <dxg:GridColumn Header="{DynamicResource POStatus}" FieldName="Status" FilterPopupMode="CheckedList" MinWidth="120" MaxWidth="150"   ReadOnly="True">
+                <!--<dxg:GridColumn.CellToolTipBinding>
+                    <Binding Path="Status" />
+                </dxg:GridColumn.CellToolTipBinding>-->
+                <dxg:GridColumn.CellTemplate>
+                    <DataTemplate>
+                        <Border Background="{Binding RowData.Row.HtmlColor, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
+                                VerticalAlignment="Stretch" 
+                                 HorizontalAlignment="Stretch">
+                            <TextBlock Text="{Binding RowData.Row.Status, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                HorizontalAlignment="Center" 
+                                VerticalAlignment="Center"
+                                TextAlignment="Center"
+                                Foreground="Black" 
+                                Padding="4"/>
+                        </Border>
+                    </DataTemplate>
+                </dxg:GridColumn.CellTemplate>
+            </dxg:GridColumn>
+
+            <!--Discount-->
+
+
+
+            <!--<dxg:GridColumn Header="{DynamicResource OTMDiscount}" FieldName="Discount" MinWidth="60"  FilterPopupMode="CheckedList" ReadOnly="True"/>-->
+
+            
+            <!--Discount-->
+            <dxg:GridColumn Header="{DynamicResource OTMDiscount}" FieldName="Discount" MinWidth="60" MaxWidth="60" ReadOnly="True">
+                <dxg:GridColumn.CellTemplate>
+                    <DataTemplate>
+                        <TextBlock Margin="0,0,5,0" VerticalAlignment="Center" HorizontalAlignment="Right">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Text" Value="{Binding RowData.Row.Discount, StringFormat={}{0:0.0}%,ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}"/>
+                                    <Style.Triggers>
+                                        <!-- Hide if discount is zero -->
+                                        <DataTrigger Binding="{Binding RowData.Row.Discount}" Value="0">
+                                            <Setter Property="Text" Value="0.0%" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </DataTemplate>
+                </dxg:GridColumn.CellTemplate>
+            </dxg:GridColumn>
+
+
+
+            <!--Amount-->
+
+
+
+            <!--<dxg:GridColumn Header="{DynamicResource POAmount}" FieldName="Amount" MinWidth="90"  FilterPopupMode="CheckedList" ReadOnly="True"/>-->
+
+            <!--[pramod.misal][GEOS2-9445][29-09-2025]https://helpdesk.emdep.com/browse/GEOS2-9445-->
+            <dxg:GridColumn Header="{DynamicResource POAmount}" FieldName="Amount" MinWidth="90" FilterPopupMode="CheckedList"   ReadOnly="True">
+                <dxg:GridColumn.CellTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" >
+                            <TextBlock  Margin="0,0,5,0" Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Text" Value="{Binding RowData.Row.Amount, StringFormat={}{0:N2}, ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}"/>
+                                        <Style.Triggers>
+
+                                            <DataTrigger Binding="{Binding RowData.Row.Amount}" Value="0.00">
+                                                <Setter Property="Text" Value="{x:Null}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </StackPanel>
+                    </DataTemplate>
+                </dxg:GridColumn.CellTemplate>
+
+            </dxg:GridColumn>
+
+
+            <!--Currency-->
+
+            <dxg:GridColumn Header="{DynamicResource OTMCurrency}" AllowBestFit="true" FieldName="OfferCurrency" FilterPopupMode="CheckedList" MinWidth="60" MaxWidth="60"  ReadOnly="True">
+                <dxg:GridColumn.CellTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal" Height="24">
+                            <Image Source="{Binding RowData.Row.CurrencyIconBytes,UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" Height="24" Width="24" Margin="2,0,0,0" />
+                            <TextBlock Text ="{Binding RowData.Row.OfferCurrency,UpdateSourceTrigger=PropertyChanged}"  VerticalAlignment="Center" Margin="5,0,0,0" ></TextBlock>
+                        </StackPanel>
+                    </DataTemplate>
+                </dxg:GridColumn.CellTemplate>
+            </dxg:GridColumn>
+
+            <!--Linked PO-->
+
+
+            <dxg:GridColumn Header="{DynamicResource OTMLinkedPO}" FieldName="LinkedPO"  MinWidth="300"  Width="*" FilterPopupMode="CheckedList" ReadOnly="True"/>
+
+
+
+            <!--Folder-->
+
+            <dxg:GridColumn Header=" "  MinWidth="40" Width="50" MaxWidth="50" FixedWidth="True" Fixed="Right" ReadOnly="True" AllowColumnFiltering="false" AllowPrinting="False" ShowInColumnChooser="False" AllowMoving="false">
+                <dxg:GridColumn.CellTemplate>
+                    <DataTemplate>
+                        <Button x:Name="btnViewFile" ToolTip="{DynamicResource LinkedOfferDocuments}" Command="{Binding DataContext.LinkedOfferOpenCommand,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" CommandParameter="{Binding RowData.Row}">
+                            <Button.ContentTemplate>
+                                <DataTemplate>
+                                    <Image Height="22" Width="22" Source="/Emdep.Geos.Modules.OTM;component/Assets/Images/FileExpo.png" />
+                                </DataTemplate>
+                            </Button.ContentTemplate>
+                            <Button.Style>
+                                <Style TargetType="{x:Type Button}">
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Cursor" Value="Hand"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                    </DataTemplate>
+                </dxg:GridColumn.CellTemplate>
+                
+            </dxg:GridColumn>
+
+            <dxg:GridControl.View>
+                <dxg:TableView x:Name="LinkedOffersTableView"
+                        NavigationStyle="Row"
+                         RowDetailsVisibilityMode="Visible"
+                         ShowHorizontalLines="True"
+                              
+                         ShowSearchPanelMode="Always"
+                         ShowColumnHeaders="True"
+                         VerticalScrollbarVisibility="Auto" 
+                         HorizontalScrollbarVisibility="Auto"
+                         ImmediateUpdateRowPosition="True"
+                         AllowFixedColumnMenu="False"
+                         SearchPanelHorizontalAlignment="Stretch"
+                         ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly"
+                         AllowGrouping="True" 
+                         ShowCheckBoxSelectorColumn="False"
+                         ShowCheckBoxSelectorInGroupRow="False"
+                         PreviewMouseLeftButtonDown="LinkedofferGrid_PreviewMouseLeftButtonDown"
+                         ShowGroupPanel="False"
+                         AllowPerPixelScrolling="True"
+                         IsColumnChooserVisible="{Binding DataContext.IsLinkedOffersViewColumnChooserVisible,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"
+                         Width="Auto"
+                         ShowIndicator="False" 
+                         GroupSummaryDisplayMode="AlignByColumns"
+                         AllowColumnFiltering="True" 
+                         FilterEditorShowOperandTypeIcon="True"
+                         GroupRowCheckBoxFieldName="IsChecked" 
+                                                >
+                    <!--FocusedRow="{Binding SelectedIndexPOLinkedOffer,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"-->
+                    <!--RowDetailsTemplate="{Binding SelectedItems.DetailTemplate,ElementName=rowTemplateComboBox}"
+RowStyle="{Binding SelectedItems.RowStyle,ElementName=rowTemplateComboBox}"-->
+                    <dxmvvm:Interaction.Behaviors>
+                        <dxmvvm:EventToCommand 
+                    Command="{Binding DataContext.TableViewLoadedCommand,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" EventName="Loaded" PassEventArgsToCommand="True" />
+
+                        <dxmvvm:EventToCommand EventName="ShowFilterPopup"
+                         Command="{Binding DataContext.CustomShowFilterPopupCommand,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                         PassEventArgsToCommand="True"/>
+                    </dxmvvm:Interaction.Behaviors>
+                </dxg:TableView>
+            </dxg:GridControl.View>
+
+
+
+        </dxg:GridControl>
+
+
+        <StackPanel Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"
+     HorizontalAlignment="Center" 
+     Orientation="Horizontal"
+     Margin="25,30,75,0"
+     Width="290">
+
+            <Button Content="{DynamicResource EditRegisteredPOsViewAccept}"
+     Command="{Binding LinkedOfferViewAcceptButtonCommand}"
+       CommandParameter="{Binding ElementName=LinkedOffersTableView}"
+                    
+     Height="30"
+     Width="100"
+     Margin="0,0,30,0"
+     VerticalAlignment="Bottom"/>
+            <Button Content="{DynamicResource EditRegisteredPOsViewCancel}"
+     Command="{Binding LinkedOfferViewCancelButtonCommand}"
+     Height="30"
+     Width="100"
+     Margin="30,0,0,0"
+     VerticalAlignment="Bottom"/>
+        </StackPanel>
+
+
+    </Grid>
+</dxwui:WinUIDialogWindow>

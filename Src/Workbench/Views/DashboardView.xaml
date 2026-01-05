@@ -1,0 +1,328 @@
+﻿<UserControl
+            xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"
+             xmlns:dxwuin="http://schemas.devexpress.com/winfx/2008/xaml/windowsui/navigation"
+             xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+             xmlns:dxwuii="http://schemas.devexpress.com/winfx/2008/xaml/windowsui/internal" 
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"               
+             xmlns:dxc="http://schemas.devexpress.com/winfx/2008/xaml/core" 
+             xmlns:Converts="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters" 
+             xmlns:ViewModels="clr-namespace:Workbench.ViewModels" 
+             x:Class="Workbench.Views.DashboardView" 
+             FontFamily="Montserrat"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             mc:Ignorable="d" Margin="0">
+    
+    
+    <!--<dxmvvm:Interaction.Triggers>
+        <dxmvvm:EventToCommand EventName="Loaded" PassEventArgsToCommand="True" Command="{Binding WorkbenchWindowCloseCommand,Mode=TwoWay}" >
+        </dxmvvm:EventToCommand>
+    </dxmvvm:Interaction.Triggers>-->
+    
+    <UserControl.Resources>    
+        <Converts:ImageToConverter x:Key="Conv"></Converts:ImageToConverter>
+        <Style x:Key="VerticalTile" TargetType="{x:Type dxlc:Tile}">
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="Size" Value="Large" />
+            <Setter Property="HeaderTemplate">
+                <Setter.Value>
+                    <DataTemplate />
+                </Setter.Value>
+            </Setter>
+            
+            <Setter Property="ContentTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                        <StackPanel>
+                            <Image Source="{Binding}" Stretch="Uniform" Height="100" />
+                            <TextBlock Text="{Binding Header, RelativeSource={RelativeSource AncestorType={x:Type dxlc:Tile}}}" Style="{DynamicResource TextBlockStyle}" Margin="20,0,0,0" VerticalAlignment="Center" TextWrapping="Wrap" />
+                        </StackPanel>
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Background">
+                <Setter.Value>
+                    <LinearGradientBrush >
+                        
+                    </LinearGradientBrush>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="BorderBrush"  Value="Gray"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="BorderBrush" Value="#2AB7FF" />
+                    <Setter Property="BorderThickness" Value="3"/>
+                </Trigger>
+                <Trigger Property="IsMouseOver" Value="False">
+                    <Setter Property="BorderBrush" Value="Gray" />
+                    <Setter Property="BorderThickness" Value="3"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="VerticalTilenew" TargetType="{x:Type dxlc:Tile}">
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="Size" Value="Large" />
+            <Setter Property="HeaderTemplate">
+                <Setter.Value>
+                    <DataTemplate />
+                </Setter.Value>
+            </Setter>
+            <Setter Property="ContentTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                        <StackPanel>   
+                            
+                            <Image Source="{Binding SiteImageSource,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" Stretch="None" Height="100" />
+
+                            <TextBlock Text="{Binding Header, RelativeSource={RelativeSource AncestorType={x:Type dxlc:Tile}}}"  Margin="0,5,0,0" HorizontalAlignment="Center" Foreground="White" FontWeight="Bold" TextWrapping="Wrap" Style="{DynamicResource TextBlockStyle}" />
+                            
+                        </StackPanel>
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Background">
+                <Setter.Value>
+                    <LinearGradientBrush >                     
+                        <GradientStop   />
+                    </LinearGradientBrush>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="BorderBrush"  Value="Gray"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="BorderBrush" Value="#2AB7FF" />
+                    <Setter Property="BorderThickness" Value="3"/>
+                </Trigger>
+                <Trigger Property="IsMouseOver" Value="False">
+                    <Setter Property="BorderBrush" Value="Gray" />
+                    <Setter Property="BorderThickness" Value="3"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="VerticalTileExtraSmall" TargetType="{x:Type dxlc:Tile}">
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="Size" Value="ExtraSmall" />
+            <Setter Property="HeaderTemplate">
+                <Setter.Value>
+                    <DataTemplate />
+                </Setter.Value>
+            </Setter>
+            <Setter Property="ContentTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                        <StackPanel>
+                            <Image Source="{Binding}" Stretch="Uniform" Height="100" />
+                            <TextBlock Text="{Binding Header, RelativeSource={RelativeSource AncestorType={x:Type dxlc:Tile}}}"  Margin="20,0,0,0" VerticalAlignment="Center" TextWrapping="Wrap" Style="{DynamicResource TextBlockStyle}"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Background" Value="#2AB7FF"/>
+            <Setter Property="BorderBrush" Value="#2AB7FF "/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="BorderBrush" Value="White" />
+                    <Setter Property="BorderThickness" Value="3"/>
+                </Trigger>
+                <Trigger Property="IsMouseOver" Value="False">
+                    <Setter Property="BorderBrush" Value="#2AB7FF " />
+                    <Setter Property="BorderThickness" Value="3"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="HorizontalTile" TargetType="{x:Type dxlc:Tile}">
+            <Setter Property="VerticalContentAlignment" Value="Top" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="Size" Value="Small" />
+            <Setter Property="HeaderTemplate">
+                <Setter.Value>
+                    <DataTemplate />
+                </Setter.Value>
+            </Setter>
+            <Setter Property="ContentTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <Image Source="{Binding}" Stretch="None" />
+                            <TextBlock Text="{Binding Header, RelativeSource={RelativeSource AncestorType={x:Type dxlc:Tile}}}" Style="{DynamicResource TextBlockStyle}" Margin="20,0,0,0" VerticalAlignment="Center" TextWrapping="Wrap"  Foreground="Black"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Background" >
+                <Setter.Value>
+                    <LinearGradientBrush EndPoint="0.504,1.5" StartPoint="0.504,0.03">
+                        <GradientStop Color="Gray" Offset="0"/>
+                        <GradientStop Color="#FFFFFFFF" Offset="0.8"/>
+                    </LinearGradientBrush>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="BorderBrush" Value="Gray "/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="BorderBrush" Value="#2AB7FF" />
+                    <Setter Property="BorderThickness" Value="3"/>
+                </Trigger>
+                <Trigger Property="IsMouseOver" Value="False">
+                    <Setter Property="BorderBrush" Value="Gray" />
+                    <Setter Property="BorderThickness" Value="3"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="backDemoButtonStyle" TargetType="{x:Type Button}">
+            <Setter Property="Width" Value="50" />
+            <Setter Property="Height" Value="20" />
+        </Style>
+        <ControlTemplate x:Key="DefaultHeaderControlTemplate" TargetType="{x:Type dxwuii:NavigationHeaderControl}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <Border  Style="{DynamicResource BorderBorderBrushColor}" BorderThickness="0 0 0 1"  Grid.Column="1" >
+                    <ContentPresenter x:Name="PART_Content" VerticalAlignment="Center" Grid.Column="1" HorizontalAlignment="Stretch" />
+                </Border>
+            </Grid>
+        </ControlTemplate>
+        <Style TargetType="{x:Type dxwuii:NavigationHeaderControl}">
+            <Setter Property="Template" Value="{StaticResource DefaultHeaderControlTemplate}" />
+            <Setter Property="FontSize" Value="40" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Background" Value="Red"/>
+            <Setter Property="Padding" Value="0"/>
+
+        </Style>
+
+        
+    </UserControl.Resources>
+    <Grid>
+        <dxwui:PageAdornerControl   Padding="0,-30,0,0" Header="MODULES" Foreground="#004FA3" VerticalAlignment="Top" HorizontalAlignment="Stretch" FontFamily="Montserrat" FontSize="32" Margin="0"  ShowBackButton="True" Style="{DynamicResource PageAdornerControlStyle}" >
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="80*"/>
+                    <ColumnDefinition Width="20*"/>
+                </Grid.ColumnDefinitions>
+                <dxlc:FlowLayoutControl  ScrollBars="Auto" Grid.Column="0" Grid.ColumnSpan="2" StretchContent="True">
+                    
+                     <dxlc:TileLayoutControl Background="{x:Null}"   Grid.Column="0"  ItemsSource="{Binding GeosModuleTiles}"
+                                                Padding="0" 
+                                                Margin="0,-20,0,0"
+                                                Orientation="Horizontal"
+                                                HorizontalAlignment="Stretch" 
+                                                VerticalAlignment="Top"                                          
+                                                BreakFlowToFit="True" 
+                                               
+                                                AllowAddFlowBreaksDuringItemMoving="False" 
+                                                LayerSpace="8" 
+                                                ScrollViewer.VerticalScrollBarVisibility="Visible"
+                                                ScrollViewer.HorizontalScrollBarVisibility="Hidden">
+                        <dxlc:TileLayoutControl.Resources>
+                            <Style TargetType="{x:Type dxlc:Tile}">
+                                <Setter Property="dxlc:FlowLayoutControl.IsFlowBreak" Value="{Binding Break}"/>
+                            </Style>
+                        </dxlc:TileLayoutControl.Resources>
+                        <dxlc:TileLayoutControl.ItemTemplate>
+                            <DataTemplate >
+
+                                <dxlc:Tile  
+                                     Margin="20,20,0,0"  
+                                     Size="Large"  
+                                     Height="116"  
+                                     Width="345"  
+                                     BorderThickness="0"  
+                                    
+                                     Background="Transparent"  
+                                     dxwuin:Navigation.NavigateTo="{Binding NavigateTo}">
+                                     <!-- Card Style -->
+                                    <Border Background="{Binding BackColor}"  BorderThickness="1.5"   RenderTransformOrigin="0.5,0.5" dxc:FrameworkElementHelper.IsClipped="True" CornerRadius="12">
+
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <!-- Reapply the binding to ForeColor -->
+                                                        <Setter Property="BorderBrush" Value="{Binding ForeColor}"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <Grid Margin="20,10,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- Left Icon -->
+                                            <Image Source="{Binding SiteImageSource}"   
+                                                    Width="80"  
+                                                    Height="65"  
+                                                    RenderOptions.BitmapScalingMode="HighQuality"
+                                                    VerticalAlignment="Center"  
+                                                    Stretch="Uniform"  
+                                                    Margin="0,0,16,0"/>
+
+                                            <!-- Right Text -->
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Orientation="Vertical">
+                                                <TextBlock Text="{Binding Acronym}"  
+                                                        FontFamily="Leelawadee UI"
+                                                        FontSize="24"  
+                                                        FontWeight="SemiBold"  
+                                                        Foreground="#061C3D"/>
+                                                
+                                                <TextBlock Text="{Binding Name}"  
+                                                        FontFamily="Segoe UI"  
+                                                        FontSize="17"  
+                                                        FontWeight="Regular"  
+                                                        Foreground="#4B5563"  
+                                                        TextWrapping="Wrap"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </dxlc:Tile>
+
+
+                            </DataTemplate>
+                        </dxlc:TileLayoutControl.ItemTemplate>
+                    </dxlc:TileLayoutControl>
+                </dxlc:FlowLayoutControl>
+            </Grid>
+        </dxwui:PageAdornerControl>
+        <StackPanel VerticalAlignment="Bottom" HorizontalAlignment="Stretch"  Height="150" >
+            <Grid  VerticalAlignment="Bottom" HorizontalAlignment="Stretch"  Height="150" Margin="0,0,30,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="150" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="35"/>
+                </Grid.RowDefinitions>
+
+                <Button   Style="{DynamicResource ButtonForeground}"  Cursor="Hand"  Grid.Column="1"   Grid.Row="1" HorizontalAlignment="Right" VerticalAlignment="Center" Command="{Binding WorkbenchWindowOpenEmdepWebSiteCommand}" >
+                    <Button.Template>
+                        <ControlTemplate TargetType="{x:Type Button}">
+                            <TextBlock  HorizontalAlignment="Stretch" VerticalAlignment="Bottom" FontSize="28"  Text="www.emdep.com" Margin="0,0,0,-30" Style="{DynamicResource TextBlock25Style}">
+                                <InlineUIContainer>
+                                <ContentPresenter />
+                                </InlineUIContainer>    
+                            </TextBlock>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+                <StackPanel Grid.Column="1"  Grid.Row="2" HorizontalAlignment="Right"  Orientation="Horizontal">
+                    <!--<Image  Style="{DynamicResource ResourceKey=ImageStyle}" Stretch="UniformToFill" Height="30"  Width="30"  VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="0,0,0,-2" Grid.Column="1"  Grid.Row="2"/>-->
+                    <TextBlock Grid.Column="1" VerticalAlignment="Bottom" HorizontalAlignment="Right"  x:Name="txtip" Margin="10,0,0,0"  Grid.Row="2" Text="{Binding MachineName}" Style="{DynamicResource TextBlock25Style}"/>
+                </StackPanel>
+
+
+            </Grid>
+        </StackPanel>
+    </Grid>
+</UserControl>

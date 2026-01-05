@@ -1,0 +1,182 @@
+﻿<dxwui:WinUIDialogWindow x:Class="Emdep.Geos.Modules.PCM.Views.AddFreePluginsView"
+            xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.PCM.Views"
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors" 
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:Validation ="clr-namespace:Emdep.Geos.UI.Validations;assembly=Emdep.Geos.UI.Validations"
+             mc:Ignorable="d"
+             Style="{DynamicResource WinUIDialogWindowStyle}"
+             Title="{Binding WindowHeader}"
+             TitleStyle="{DynamicResource WinUIDialogWindowTitleStyle}">
+
+    <!--[pramod.misal][GEOS2-4443][13-09-2023]-->
+    
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape"  Command="{Binding EscapeButtonCommand}"/>
+    </dxwui:WinUIDialogWindow.InputBindings>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <!--<RowDefinition Height="30"/>
+            <RowDefinition Height="5"/>-->
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="5"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="5"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="5"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="5"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="5"/>
+            <RowDefinition Height="45"/>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="5"/>
+            <ColumnDefinition Width="270"/>
+        </Grid.ColumnDefinitions>
+
+
+      
+        <!--Name-->
+        <TextBlock Grid.Row="0" Grid.Column="0"  Text="{DynamicResource AddGridColName}" Style="{StaticResource TextBlock14Style}" VerticalAlignment="Center"  />
+        <dxe:ComboBoxEdit Grid.Row="0" Grid.Column="2" 
+                VerticalAlignment="Stretch"
+                HorizontalAlignment="Stretch"
+                ItemsSource="{Binding FreePluginNamesList,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                
+                DisplayMember="Name" ValueMember="Name"
+                AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True" 
+                >
+
+            <!--SelectedItem="{Binding SelectedFreePluginName,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"-->
+            <dxe:ComboBoxEdit.SelectedItem>
+                <Binding Path="SelectedFreePluginName" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                    <Binding.ValidationRules>
+                        <Validation:AddFreePluginsValidation FieldName="SelectedFreePluginName" ValidationStep="UpdatedValue" />
+                    </Binding.ValidationRules>
+                </Binding>
+            </dxe:ComboBoxEdit.SelectedItem>
+
+          
+        </dxe:ComboBoxEdit>
+        <!--Group-->
+        <TextBlock Grid.Row="2" Grid.Column="0"  Text="{DynamicResource GridColGroup}" Style="{StaticResource TextBlock14Style}" VerticalAlignment="Center"  />
+        <dxe:ComboBoxEdit Grid.Row="2" Grid.Column="2" 
+                VerticalAlignment="Stretch"
+                HorizontalAlignment="Stretch"
+                ItemsSource="{Binding GroupList,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                SelectedItem="{Binding SelectedGroup,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                DisplayMember="GroupName" ValueMember="IdGroup"
+                AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True" 
+                >
+            
+            <!--<dxe:ComboBoxEdit.SelectedItem>
+                <Binding Path="SelectedGroup" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                    <Binding.ValidationRules>
+                        <Validation:AddEditCPLCustomerValidation FieldName="SelectedGroup" ValidationStep="UpdatedValue" />
+                    </Binding.ValidationRules>
+                </Binding>
+            </dxe:ComboBoxEdit.SelectedItem>-->
+
+            <dxmvvm:Interaction.Triggers>
+                <dxmvvm:EventToCommand EventName="SelectedIndexChanged" Command="{Binding SelectedGroupIndexChangedCommand}" PassEventArgsToCommand="True"/>
+            </dxmvvm:Interaction.Triggers>
+
+        </dxe:ComboBoxEdit>
+
+        <!--Region-->
+        <TextBlock Grid.Row="4" Grid.Column="0"  Text="{DynamicResource GridColRegion}" Style="{StaticResource TextBlock14Style}" VerticalAlignment="Center"  />
+        <dxe:ComboBoxEdit Grid.Row="4" Grid.Column="2" 
+                    Name="CbeRegion"
+                    Style="{DynamicResource ComboBoxEditStyle}" 
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    IsTextEditable="False"
+                    DisplayMember="RegionName" 
+                    ItemsSource="{Binding RegionList,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                    EditValue="{Binding SelectedRegion,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+            
+            <dxe:ComboBoxEdit.StyleSettings>
+                    <dxe:CheckedComboBoxStyleSettings />
+                </dxe:ComboBoxEdit.StyleSettings>
+            
+                <dxmvvm:Interaction.Triggers>
+                    <dxmvvm:EventToCommand EventName="PopupClosed" Command="{Binding ChangeRegionCommand}" PassEventArgsToCommand="True"/>
+                </dxmvvm:Interaction.Triggers>
+            </dxe:ComboBoxEdit>
+
+        <!--Country-->
+        <TextBlock Grid.Row="6" Grid.Column="0"  Text="{DynamicResource GridColCountry}" Style="{StaticResource TextBlock14Style}" VerticalAlignment="Center"  />
+        <dxe:ComboBoxEdit Grid.Row="6" Grid.Column="2" 
+                    Name="CbeCountry"
+                    Style="{DynamicResource ComboBoxEditStyle}" 
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    IsTextEditable="False"
+                    DisplayMember="Name" 
+                    ItemsSource="{Binding CountryList,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                    EditValue="{Binding SelectedCountry, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                                                    >
+
+            <dxe:ComboBoxEdit.StyleSettings>
+                <dxe:CheckedComboBoxStyleSettings />
+            </dxe:ComboBoxEdit.StyleSettings>
+            <dxmvvm:Interaction.Triggers>
+                <dxmvvm:EventToCommand EventName="PopupClosed" Command="{Binding ChangeCountryCommand}" PassEventArgsToCommand="True"/>
+            </dxmvvm:Interaction.Triggers>
+        </dxe:ComboBoxEdit>
+
+        <!--Plant-->
+        <TextBlock Grid.Row="8" Grid.Column="0"  Text="{DynamicResource GridColPlant}" Style="{StaticResource TextBlock14Style}" VerticalAlignment="Center"  />
+        <dxe:ComboBoxEdit Grid.Row="8" Grid.Column="2" 
+                    Name="CbePlant"
+                    Style="{DynamicResource ComboBoxEditStyle}" 
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    IsTextEditable="False"
+                    DisplayMember="Name" 
+                    ItemsSource="{Binding PlantList,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                    EditValue="{Binding SelectedPlant, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+
+            <dxe:ComboBoxEdit.StyleSettings>
+                <dxe:CheckedComboBoxStyleSettings />
+            </dxe:ComboBoxEdit.StyleSettings>
+            <dxmvvm:Interaction.Triggers>
+                <dxmvvm:EventToCommand EventName="PopupClosed" Command="{Binding ChangePlantCommand}" PassEventArgsToCommand="True"/>
+            </dxmvvm:Interaction.Triggers>
+        </dxe:ComboBoxEdit>
+
+        <Grid Grid.Row="10" ShowGridLines="False" Grid.Column="2" VerticalAlignment="Center">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Button  HorizontalAlignment="Right"
+                     Style="{DynamicResource Button16Style}"
+                     VerticalAlignment="Top"
+                     Content="{DynamicResource AddCatalogueAcceptButton}"
+                     Command="{Binding AcceptAddFreePluginsActionCommand}"
+                     Height="30"
+                     Width="100" />
+
+            <Button Grid.Row="8" Grid.Column="2"
+                    Style="{DynamicResource Button16Style}"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    Content="{DynamicResource AddCatalogueCancelButton}"
+                    Command="{Binding CancelButtonCommand }"
+                    Height="30"
+                    Width="100" />
+        </Grid>
+
+    </Grid>
+</dxwui:WinUIDialogWindow>

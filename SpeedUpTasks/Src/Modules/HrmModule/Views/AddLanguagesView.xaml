@@ -1,0 +1,181 @@
+﻿<dxwui:WinUIDialogWindow x:Class="Emdep.Geos.Modules.Hrm.Views.AddLanguagesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.Hrm.Views"
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"  
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors" 
+             xmlns:HrmApplication="clr-namespace:Emdep.Geos.Modules.Hrm" 
+             xmlns:Validation ="clr-namespace:Emdep.Geos.UI.Validations;assembly=Emdep.Geos.UI.Validations"
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+             xmlns:behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300" 
+                         Title="{Binding WindowHeader,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+                         TitleStyle="{DynamicResource WinUIDialogWindowTitleStyle}"
+                          Style="{DynamicResource WinUIDialogWindowStyle}">
+
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape"  Command="{Binding AddLanguagesViewCancelButtonCommand}"/>
+    </dxwui:WinUIDialogWindow.InputBindings>
+    
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="100"/>
+            <RowDefinition Height="40"/>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="130"/>
+            <ColumnDefinition Width="220"/>
+        </Grid.ColumnDefinitions>
+
+        <Label Grid.Row="0" Grid.Column="0" Content="{DynamicResource EmpLanguageName}" Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,10,0,10"/>
+
+        
+        <dxe:ComboBoxEdit Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" 
+                         Width="200" Height="30" VerticalAlignment="Center"  ItemsSource="{Binding LanguageList,Mode=TwoWay}"                         
+                          DisplayMember="Value" ValueMember="IdLookupValue"
+                          AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True">
+
+            <dxe:ComboBoxEdit.SelectedIndex>
+                <Binding Path="SelectedIndexLanguage" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                    <Binding.ValidationRules>
+                        <Validation:EmployeeProfileValidation FieldName="SelectedIndexLanguage" ValidationStep="UpdatedValue" />
+                    </Binding.ValidationRules>
+                </Binding>
+            </dxe:ComboBoxEdit.SelectedIndex>
+
+            <dxe:ComboBoxEdit.ItemContainerStyle>
+                <Style TargetType="dxe:ComboBoxEditItem">
+                    <Setter Property="IsEnabled" Value="{Binding InUse}" />
+                </Style>
+            </dxe:ComboBoxEdit.ItemContainerStyle>
+            
+        </dxe:ComboBoxEdit>
+
+        <Label Grid.Row="1" Grid.Column="0" Content="{DynamicResource EmpLanguageUnderstand}" Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,10,0,10"/>
+
+
+        <dxe:ComboBoxEdit Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left" 
+                         Width="200" Height="30" VerticalAlignment="Center"  ItemsSource="{Binding UnderstandingLevelList,Mode=TwoWay}"                         
+                          DisplayMember="Value" ValueMember="IdLookupValue"
+                          AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True">
+
+            <dxe:ComboBoxEdit.SelectedIndex>
+                <Binding Path="SelectedIndexUnderstandingLevel" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                    <Binding.ValidationRules>
+                        <Validation:EmployeeProfileValidation FieldName="SelectedIndexUnderstandingLevel" ValidationStep="UpdatedValue" />
+                    </Binding.ValidationRules>
+                </Binding>
+            </dxe:ComboBoxEdit.SelectedIndex>
+
+            <dxe:ComboBoxEdit.ItemContainerStyle>
+                <Style TargetType="dxe:ComboBoxEditItem">
+                    <Setter Property="IsEnabled" Value="{Binding InUse}" />
+                </Style>
+            </dxe:ComboBoxEdit.ItemContainerStyle>
+            
+        </dxe:ComboBoxEdit>
+
+        <Label Grid.Row="2" Grid.Column="0" Content="{DynamicResource EmpLanguageSpeak}" Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,10,0,10"/>
+
+
+        <dxe:ComboBoxEdit Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left" 
+                         Width="200" Height="30" VerticalAlignment="Center"  ItemsSource="{Binding SpeakingLevelList,Mode=TwoWay}"                         
+                          DisplayMember="Value" ValueMember="IdLookupValue"
+                          AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True">
+
+            <dxe:ComboBoxEdit.SelectedIndex>
+                <Binding Path="SelectedIndexSpeakingLevel" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                    <Binding.ValidationRules>
+                        <Validation:EmployeeProfileValidation FieldName="SelectedIndexSpeakingLevel" ValidationStep="UpdatedValue" />
+                    </Binding.ValidationRules>
+                </Binding>
+            </dxe:ComboBoxEdit.SelectedIndex>
+
+            <dxe:ComboBoxEdit.ItemContainerStyle>
+                <Style TargetType="dxe:ComboBoxEditItem">
+                    <Setter Property="IsEnabled" Value="{Binding InUse}" />
+                </Style>
+            </dxe:ComboBoxEdit.ItemContainerStyle>
+            
+        </dxe:ComboBoxEdit>
+
+        <Label Grid.Row="3" Grid.Column="0" Content="{DynamicResource EmpLanguageWrite}" Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,10,0,10"/>
+
+        
+        <dxe:ComboBoxEdit Grid.Row="3" Grid.Column="1" HorizontalAlignment="Left" 
+                         Width="200" Height="30" VerticalAlignment="Center"  ItemsSource="{Binding WritingLevelList,Mode=TwoWay}"                         
+                          DisplayMember="Value" ValueMember="IdLookupValue"
+                          AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True">
+
+            <dxe:ComboBoxEdit.SelectedIndex>
+                <Binding Path="SelectedIndexWritingLevel" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                    <Binding.ValidationRules>
+                        <Validation:EmployeeProfileValidation FieldName="SelectedIndexWritingLevel" ValidationStep="UpdatedValue" />
+                    </Binding.ValidationRules>
+                </Binding>
+            </dxe:ComboBoxEdit.SelectedIndex>
+
+            <dxe:ComboBoxEdit.ItemContainerStyle>
+                <Style TargetType="dxe:ComboBoxEditItem">
+                    <Setter Property="IsEnabled" Value="{Binding InUse}" />
+                </Style>
+            </dxe:ComboBoxEdit.ItemContainerStyle>
+            
+        </dxe:ComboBoxEdit>
+
+        <Label Grid.Row="4" Grid.Column="0" Content="{DynamicResource EmployeeRemarks}" Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,0,10"/>
+  
+        <TextBox Margin="0,0,0,0" Grid.Row="4" Grid.Column="1" Width="200" Height="90" TextWrapping="Wrap" 
+                 VerticalAlignment="Center" HorizontalAlignment="Left" ScrollViewer.VerticalScrollBarVisibility="Auto" 
+                 Text="{Binding Remarks,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" AcceptsReturn="True"
+                 IsReadOnly="{Binding IsReadOnlyField,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
+        </TextBox>
+
+
+        <StackPanel Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2"
+                    HorizontalAlignment="Left" 
+                    Orientation="Horizontal"
+                    Margin="0,0,0,0"
+                    Width="250">
+
+            <Button Content="Accept"
+                    Command="{Binding AddLanguagesViewAcceptButtonCommand}"
+                    Height="30"
+                    Width="100"
+                    Margin="0,0,10,0"
+                    Style="{DynamicResource Button16Style}"
+                    VerticalAlignment="Bottom"  
+                    IsEnabled="{Binding IsAcceptEnabled}"/>
+
+
+
+            <Button Content="Cancel"
+                    Command="{Binding AddLanguagesViewCancelButtonCommand}" 
+                    Height="30"
+                    Width="100"
+                    Margin="10,0,0,0"
+                    Style="{DynamicResource Button16Style}"
+                    VerticalAlignment="Bottom" />
+        </StackPanel>
+        
+    </Grid>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="KeyDown">
+            <behaviors:InvokeDelegateCommandAction Command="{Binding CommandTextInput}" CommandParameter="{Binding Path=InvokeParameter, RelativeSource={RelativeSource Self}}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+</dxwui:WinUIDialogWindow>

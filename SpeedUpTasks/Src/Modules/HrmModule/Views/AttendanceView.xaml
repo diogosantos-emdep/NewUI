@@ -1,0 +1,120 @@
+﻿<dxwui:WinUIDialogWindow x:Class="Emdep.Geos.Modules.Hrm.Views.AttendanceView"
+                         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                         xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                         xmlns:local="clr-namespace:Emdep.Geos.Modules.Hrm.Views"
+                         xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+                         xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+                         xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+                         xmlns:DataCommon="clr-namespace:Emdep.Geos.Data.Common.Hrm;assembly=Emdep.Geos.Data.Common"
+                         xmlns:HrmApplication="clr-namespace:Emdep.Geos.Modules.Hrm" 
+                         xmlns:UIConverter="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+                         xmlns:Validation="clr-namespace:Emdep.Geos.UI.Validations;assembly=Emdep.Geos.UI.Validations"
+                         xmlns:Views="clr-namespace:Emdep.Geos.Modules.Hrm.Views"
+                         xmlns:sys="clr-namespace:System;assembly=mscorlib"
+                         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+                         xmlns:behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+                         mc:Ignorable="d" 
+                         Title="{Binding WindowHeader,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                         TitleStyle="{DynamicResource WinUIDialogWindowTitleStyle}"
+                         Style="{DynamicResource WinUIDialogWindowStyle}">
+
+    <!-- Sprint HRM M058-14 Add split option in Attendance entries -->
+
+    <dxwui:WinUIDialogWindow.Resources>
+        <UIConverter:DateFormatConverter x:Key="DateFormatConverter" />
+        <sys:String x:Key="ShortDateTimeFormat">dd/MM/yyyy hh:mm tt</sys:String>
+        <sys:String x:Key="ShortTimeFormat">hh:mm tt</sys:String>
+        <sys:String x:Key="ShortDateFormat">dd/MM/yyyy</sys:String>
+    </dxwui:WinUIDialogWindow.Resources>
+
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape" Command="{Binding AddAttendanceViewCancelButtonCommand}"/>
+    </dxwui:WinUIDialogWindow.InputBindings>
+
+    <Grid Margin="0 -50 0 0">
+        <Grid.Resources>
+            <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        </Grid.Resources>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Button Grid.Row="0"
+                Grid.Column="1"
+                Height="40"
+                Width="40"
+                HorizontalAlignment="Right"
+                CommandParameter="{Binding ElementName=pageViewAttendanceSplit}"
+                Command="{Binding SplitButtonCommand}"
+                Content=" " 
+                IsEnabled="{Binding Source={x:Static HrmApplication:HrmCommon.Instance}, Path=IsPermissionEnabled}"
+                Visibility="{Binding IsSplitVisible,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,Converter={StaticResource BoolToVis},FallbackValue=Hidden}">
+            <Button.ToolTip>
+                <TextBlock Text="{DynamicResource ButtonSplit}" />
+            </Button.ToolTip>
+            <Button.ContentTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Image Grid.Column="0"
+                            Height="24"
+                            Width="24"
+                            Margin="-10"
+                            Source="{DynamicResource SplitImageSource}"  />
+                    </Grid>
+                    <!--<Image Height="40"
+                           Width="40"
+                           Source="{DynamicResource SplitImageSource}" 
+                           Stretch="UniformToFill"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center" />-->
+                </DataTemplate>
+            </Button.ContentTemplate>
+        </Button>
+
+        <dxwui:PageView x:Name="pageViewAttendanceSplit"
+                        Grid.Row="1"
+                        Margin="0,5,0,0"
+                        AnimationType="SlideHorizontal"
+                        Background="Transparent"
+                        BorderThickness="0,0,0,0"
+                        SelectedIndex="{Binding SelectedViewIndex}"
+                        ShowBackButton="True">
+            <dxwui:PageViewItem Margin="0,0,0,0"
+                                Height="0"
+                                DataContext="{Binding}"
+                                ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                UseLayoutRounding="True">
+                <Views:AddEditAttendanceView x:Name="attendanceView"
+                                      MinHeight="300"
+                                      Height="Auto"
+                                      MaxHeight="500"
+                                      DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
+            </dxwui:PageViewItem>
+
+            <dxwui:PageViewItem Margin="0,0,0,0"
+                                Height="0"
+                                DataContext="{Binding}"
+                                ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                UseLayoutRounding="True">
+                <Views:AttendanceSplitView x:Name="attendanceSplitView"
+                                            Height="Auto"
+                                            MinHeight="300"
+                                            MaxHeight="500"
+                                            DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
+            </dxwui:PageViewItem>
+        </dxwui:PageView>
+    </Grid>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="KeyDown">
+            <behaviors:InvokeDelegateCommandAction Command="{Binding CommandTextInput}" CommandParameter="{Binding Path=InvokeParameter, RelativeSource={RelativeSource Self}}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+
+</dxwui:WinUIDialogWindow> 

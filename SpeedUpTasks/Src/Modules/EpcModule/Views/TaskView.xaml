@@ -1,0 +1,493 @@
+﻿<UserControl x:Class="Emdep.Geos.Modules.Epc.Views.TaskView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:viewModel="clr-namespace:Emdep.Geos.Modules.Epc.ViewModels"
+             xmlns:UIConverter="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:dxc="http://schemas.devexpress.com/winfx/2008/xaml/charts"
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.Epc.Views"             
+             xmlns:dxn="http://schemas.devexpress.com/winfx/2008/xaml/navbar"
+             xmlns:dxga="http://schemas.devexpress.com/winfx/2008/xaml/gauges"
+             xmlns:ei="http://schemas.microsoft.com/expression/2010/interactions"
+             xmlns:behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+             xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+             xmlns:dxp="http://schemas.devexpress.com/winfx/2008/xaml/printing"
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:dxgt="clr-namespace:DevExpress.Xpf.Grid.Themes;assembly=DevExpress.Xpf.Grid.v19.2"
+             xmlns:dxgext="clr-namespace:DevExpress.Xpf.Grid;assembly=DevExpress.Xpf.Grid.v19.2.Extensions"
+             xmlns:dxdo="http://schemas.devexpress.com/winfx/2008/xaml/docking"
+             mc:Ignorable="d" 
+             d:DesignHeight="500" d:DesignWidth="800">
+
+    <UserControl.DataContext>
+        <viewModel:TaskViewModel />
+    </UserControl.DataContext>
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Emdep.Geos.Modules.Epc;component/Resources/EpcCommonResource.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <DataTemplate x:Key="BarLabelTemplate">
+                <TextBlock Text="{Binding Path=Text,Converter={StaticResource TimeConverter}}" />
+            </DataTemplate>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="14*" />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        <Label Style="{StaticResource LabelStyle}" Content="My Assigned Task" Margin="0" Padding="5" Grid.Row="0" Grid.Column="0" />
+        <dxe:ComboBoxEdit x:Name="cmbUser" 
+						IsTextEditable="False" 
+						Margin="0" Padding="5" Grid.Row="0" Grid.Column="1" 
+                        Width="200" Height="30" HorizontalAlignment="Right" 
+						VerticalAlignment="Center"
+						ItemsSource="{Binding TeamUserList}"
+						DisplayMember="FullName"                    
+                       EditValue="{Binding SelectedItems,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+            <dxe:ComboBoxEdit.StyleSettings>
+                <dxe:CheckedComboBoxStyleSettings />
+            </dxe:ComboBoxEdit.StyleSettings>
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="EditValueChanging">
+                    <behaviors:InvokeDelegateCommandAction Command="{Binding SelectedUserIndexChangedCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=InvokeParameter}" />
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+        </dxe:ComboBoxEdit>
+
+        <Button HorizontalAlignment="Right" Grid.Column="2" Height="40" Width="40" Command="{Binding PrintButtonCommand}" CommandParameter="{Binding ElementName=taskTable}">
+            <Button.ContentTemplate>
+                <DataTemplate>
+                    <Image Style="{DynamicResource PrinterButtonImageStyle}" Grid.Column="0" Height="24" Width="24" Margin="-10" />
+                </DataTemplate>
+            </Button.ContentTemplate>
+        </Button>
+        <dxlc:LayoutControl VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Style="{DynamicResource LayoutControlStyle}" Margin="2" Padding="0" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3">
+            <dxlc:LayoutGroup Orientation="Vertical">
+                <dxlc:LayoutGroup>
+                    <dxg:GridControl x:Name="taskGrid" ItemsSource="{Binding OpenTaskList}" SelectionMode="Row" EnableSmartColumnsGeneration="true" ScrollViewer.HorizontalScrollBarVisibility="Visible" ScrollViewer.VerticalScrollBarVisibility="Visible">
+                        <dxg:GridControl.Columns>
+                            <dxg:GridColumn FieldName="TaskAssistances" VisibleIndex="0" FixedWidth="True" Width="30" AllowSorting="False" AllowColumnFiltering="False"
+                                            HorizontalHeaderContentAlignment="Center">
+                                <dxg:GridColumn.HeaderTemplate>
+                                    <DataTemplate>
+                                        <Border>
+                                            <ContentControl>
+                                                <Image Source="/Emdep.Geos.Modules.Epc;component/Images/Menu/rNeedAssistance.png" Width="20" Height="20" HorizontalAlignment="right" ToolTip="Need Assitance"></Image>
+                                            </ContentControl>
+                                        </Border>
+                                    </DataTemplate>
+                                </dxg:GridColumn.HeaderTemplate>
+
+                                <dxg:GridColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Image Height="20" Width="20" Name="image" Source="/Emdep.Geos.Modules.Epc;component/Images/Menu/rNeedAssistance.png">
+                                            <Image.ToolTip>
+                                                <dxe:ListBoxEdit ShowBorder="False" ItemsSource="{Binding RowData.Row.TaskAssistances}" DisplayMember="RequestTo.FullName" />
+                                            </Image.ToolTip>
+                                        </Image>
+                                        <DataTemplate.Triggers>
+                                            <DataTrigger Binding="{Binding RowData.Row.TaskAssistances.Count}" Value="0">
+                                                <Setter TargetName="image" Property="Source" Value="{x:Null}" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding RowData.Row.TaskAssistances}" Value="{x:Null}">
+                                                <Setter TargetName="image" Property="Source" Value="{x:Null}" />
+                                            </DataTrigger>
+                                        </DataTemplate.Triggers>
+                                    </DataTemplate>
+                                </dxg:GridColumn.CellTemplate>
+
+                                <!--<dxg:GridColumn.PrintCellStyle>
+                                    <Style  TargetType="dxe:BaseEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                                        <Setter Property="dxp:ExportSettings.TargetType" Value="Image" />
+                                        <Setter Property="DisplayTemplate">
+                                            <Setter.Value>
+                                                <ControlTemplate >
+                                                    <Image Name="Image" Source="/Emdep.Geos.Modules.Epc;component/Images/Menu/rNeedAssistance.png" Stretch="Fill" Height="16" Width="16" Visibility="{Binding Value, Converter={dx:BooleanToVisibilityConverter}}"/>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </dxg:GridColumn.PrintCellStyle>-->
+
+
+                                <dxg:GridColumn.PrintCellStyle>
+                                    <Style TargetType="dxe:BaseEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                                        <Setter Property="dxp:ExportSettings.TargetType" Value="Image" />
+                                        <Setter Property="dxp:ImageExportSettings.ForceCenterImageMode" Value="True" />
+                                        <Setter Property="dxp:ImageExportSettings.ImageRenderMode" Value="UseImageSource" />
+                                        <Setter Property="dxp:ImageExportSettings.ImageSource">
+                                            <Setter.Value>
+                                                <Image x:Name="AssistImage" Source="/Emdep.Geos.Modules.Epc;component/Images/Menu/rNeedAssistance.png" Stretch="None" />
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding RowData.Row.TaskAssistances.Count}" Value="0">
+                                                <Setter Property="dxp:ImageExportSettings.ImageSource">
+                                                    <Setter.Value>
+                                                        <Image Source="{x:Null}" Stretch="None" />
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding RowData.Row.TaskAssistances}" Value="{x:Null}">
+                                                <Setter Property="dxp:ImageExportSettings.ImageSource">
+                                                    <Setter.Value>
+                                                        <Image Source="{x:Null}" Stretch="None" />
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </DataTrigger>
+
+                                        </Style.Triggers>
+                                    </Style>
+                                </dxg:GridColumn.PrintCellStyle>
+                            </dxg:GridColumn>
+                            <!--<dxg:GridColumn FieldName="Project.Product.ProductName" Header="Product Name" />-->
+                            <dxg:GridColumn FieldName="Project.ProjectCode" Header="Project Code" VisibleIndex="1" FixedWidth="True" Width="90">
+                                <dxg:GridColumn.DisplayTemplate>
+                                    <ControlTemplate>
+                                        <TextBlock Margin="5,0,0,0" VerticalAlignment="Center">
+                                            <Hyperlink TargetName="_blank" Style="{DynamicResource hyperlinkGridStyle}"
+                                                       Command="{Binding View.DataContext.HyperlinkToProjectCodeCommand}" CommandParameter="{Binding Data.Project}">
+                                                <TextBlock x:Name="PART_Editor" Text="{Binding DataContext.Project.ProjectCode}" />
+                                             </Hyperlink>
+                                         </TextBlock>
+                                    </ControlTemplate>
+                                </dxg:GridColumn.DisplayTemplate>
+                            </dxg:GridColumn>
+                            <dxg:GridColumn FieldName="Project.ProjectName" Header="Project Name" VisibleIndex="2" FixedWidth="False" Width="*" />
+                            <!--<dxg:GridColumn FieldName="Owner.FullName"     Header="Project Owner" VisibleIndex="3" FixedWidth="True" Width="120" />-->
+                            <dxg:GridColumn FieldName="Project.Customer.CustomerName" Header="Customer" VisibleIndex="3" FixedWidth="True" Width="150" />
+                            <dxg:GridColumn FieldName="ProductRoadmap.LinkedTo" Header="Source" VisibleIndex="4" FixedWidth="True" Width="100">
+
+                            </dxg:GridColumn>
+                            <dxg:GridColumn FieldName="TaskTitle" Header="Task Name" FixedWidth="False" VisibleIndex="5" Width="*" />
+                            <!--<dxg:GridColumn FieldName="TaskType.Name"  Header="Task Type" />-->
+                            <dxg:GridColumn FieldName="TaskPriority.Value" Header="Priority" DisplayTemplate="{StaticResource TaskPriorityColumnDisplayTemplate}" VisibleIndex="6" FixedWidth="True" Width="40" PrintCellStyle="{StaticResource ImageColumnPrintingStyle}" />
+
+                            <dxg:GridColumn FieldName="PlannedHours" Header="Expected Time" VisibleIndex="7" FixedWidth="True" Width="60">
+                                <dxg:GridColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Margin="2" Padding="0" Text="{Binding Path=Data.PlannedHours ,Converter={StaticResource TimeConverter}}" />
+                                    </DataTemplate>
+                                </dxg:GridColumn.CellTemplate>
+                                <dxg:GridColumn.PrintCellStyle>
+                                    <Style TargetType="dxe:TextEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                                        <Style.Setters>
+                                            <Setter Property="dxp:ExportSettings.TargetType" Value="Panel" />
+                                            <Setter Property="DisplayTemplate">
+                                                <Setter.Value>
+                                                    <ControlTemplate>
+                                                        <dxe:TextEdit Text="{Binding Path=RowData.Row.PlannedHours,Converter={ StaticResource TimeConverter}}" HorizontalAlignment="Center" Margin="4" IsPrintingMode="True" />
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style.Setters>
+                                    </Style>
+                                </dxg:GridColumn.PrintCellStyle>
+                                <!--<dxg:GridColumn.EditSettings>
+                                    <dxe:TextEditSettings Mask="HH:mm" MaskType="DateTime" MaskUseAsDisplayFormat="True"/>
+                                </dxg:GridColumn.EditSettings>-->
+                            </dxg:GridColumn>
+                            <dxg:GridColumn FieldName="WorkedHours" Header="Current Time" VisibleIndex="8" FixedWidth="True" Width="60">
+                                <dxg:GridColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Margin="2" Padding="0" Text="{Binding Path=Data.WorkedHours ,Converter={StaticResource TimeConverter}}" />
+                                    </DataTemplate>
+                                </dxg:GridColumn.CellTemplate>
+                                <dxg:GridColumn.PrintCellStyle>
+                                    <Style TargetType="dxe:TextEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                                        <Style.Setters>
+                                            <Setter Property="dxp:ExportSettings.TargetType" Value="Panel" />
+                                            <Setter Property="DisplayTemplate">
+                                                <Setter.Value>
+                                                    <ControlTemplate>
+                                                        <dxe:TextEdit Text="{Binding Path=RowData.Row.WorkedHours,Converter={ StaticResource TimeConverter}}" HorizontalAlignment="Center" Margin="4" IsPrintingMode="True" />
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style.Setters>
+                                    </Style>
+                                </dxg:GridColumn.PrintCellStyle>
+                            </dxg:GridColumn>
+                            <dxg:GridColumn FieldName="DueDate" VisibleIndex="9" FixedWidth="True" Width="80" />
+                            <dxg:GridColumn FieldName="Progress" BestFitMode="Smart" VisibleIndex="10" FixedWidth="True" Width="70">
+                                <dxg:GridColumn.EditSettings>
+                                    <dxe:ProgressBarEditSettings Maximum="100" Minimum="0" ContentDisplayMode="Value" DisplayFormat="{}{0}%" />
+                                </dxg:GridColumn.EditSettings>
+                            </dxg:GridColumn>
+                        </dxg:GridControl.Columns>
+                        <dxg:GridControl.View>
+                            <dxg:TableView x:Name="taskTable" ShowSearchPanelMode="Always" 
+                                           ShowIndicator="False" ShowGroupPanel="False" 
+                                           AllowEditing="False" AllowColumnFiltering="True"
+                                           AllowSorting="True" HorizontalScrollbarVisibility="Visible"
+                                           VerticalScrollbarVisibility="Visible" AutoWidth="True" NavigationStyle="Row">
+
+                                <dxg:TableView.Resources>
+                                    <DataTemplate x:Key="TaskViewCustomPrintHeaderTemplate">
+                                        <Grid Width="{Binding UsablePageWidth}">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="50" />
+                                                <ColumnDefinition Width="130" />
+                                            </Grid.ColumnDefinitions>
+                                            <dxe:TextEdit Text=" " Width="{Binding UsablePageWidth}" Grid.ColumnSpan="3" IsPrintingMode="True" Background="#333E5E" HorizontalAlignment="Stretch" 
+                                              VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" FontWeight="Bold" FontSize="20" Height="50" />
+                                            <dxe:TextEdit Text="My Assigned Task Report" IsPrintingMode="True" HorizontalAlignment="Stretch" 
+                                              VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" FontWeight="Bold" FontSize="20" />
+                                            <Image Source="/Emdep.Geos.Modules.Epc;component/Images/GeosReportLogo.png" Height="50" Width="80" dxp:ExportSettings.TargetType="Image" Grid.Column="2" />
+                                        </Grid>
+                                    </DataTemplate>
+                                    <DataTemplate x:Key="TaskViewCustomPrintFooterTemplate">
+                                        <dxe:TextEdit HorizontalContentAlignment="Center" 
+                                           Width="{Binding Path=UsablePageWidth, Mode=OneWay}" 
+                                           dxp:ExportSettings.TargetType="PageNumber" 
+                                           dxp:PageNumberExportSettings.Kind="NumberOfTotal" 
+                                           dxp:PageNumberExportSettings.Format="Page {0} of {1}">
+                                        </dxe:TextEdit>
+                                    </DataTemplate>
+                                </dxg:TableView.Resources>
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="RowDoubleClick">
+                                        <behaviors:InvokeDelegateCommandAction Command="{Binding CommandGridDoubleClick}" CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=InvokeParameter}" />
+                                    </i:EventTrigger>
+
+                                    <!--<i:EventTrigger EventName="CellValueChanged">
+                                        <behaviors:InvokeDelegateCommandAction Command="{Binding SetAssistanceCommand}"   CommandParameter="{Binding InvokeParameter, RelativeSource={RelativeSource Self}}" />
+                                    </i:EventTrigger>-->
+                                </i:Interaction.Triggers>
+
+                            </dxg:TableView>
+                        </dxg:GridControl.View>
+                        <dxmvvm:Interaction.Behaviors>
+                            <dxg:GridDragDropManager AllowDrop="False" AllowDrag="True" />
+                        </dxmvvm:Interaction.Behaviors>
+                    </dxg:GridControl>
+                </dxlc:LayoutGroup>
+                <dxlc:LayoutGroup Header="{Binding WeekTitle}" View="GroupBox" IsCollapsed="True" IsCollapsible="True" Margin="0,0,0,0" Padding="0,0,0,0" VerticalAlignment="Bottom">
+                    <dxc:ChartControl x:Name="chartControlWorkedHours" ToolTipEnabled="True" DataSource="{Binding WeeklyHoursList}" AnimationMode="OnLoad" Margin="-12" Padding="0,0,0,0" Height="180" CrosshairEnabled="False">
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="Loaded">
+                                <i:InvokeCommandAction Command="{Binding DateEditLoadCommand}" CommandParameter="{Binding ElementName=chartControlWorkedHours}" />
+                            </i:EventTrigger>
+
+                            <i:EventTrigger EventName="CustomDrawSeriesPoint">
+                                <i:InvokeCommandAction Command="{Binding CustomDrawSeriesPointCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=InvokeParameter}" />
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+
+
+                        <dxc:ChartControl.ToolTipOptions>
+                            <dxc:ToolTipOptions ShowForPoints="False" ShowForSeries="True" />
+                        </dxc:ChartControl.ToolTipOptions>
+
+
+                        <dxc:ChartControl.Titles>
+                            <dxc:Title Content="Week Days" Dock="Bottom" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="11" FontWeight="Bold" Visible="true" />
+                        </dxc:ChartControl.Titles>
+                        <dxc:ChartControl.Legend>
+                            <dxc:Legend Visible="False" />
+                        </dxc:ChartControl.Legend>
+                        <dxc:XYDiagram2D Rotated="False" SeriesDataMember="Series" PaneOrientation="Horizontal" EnableAxisXNavigation="False" EnableAxisYNavigation="False">
+                            <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="MouseLeftButtonDown">
+                                    <behaviors:InvokeDelegateCommandAction Command="{Binding SelectWorkedHoursChartSeriesPointCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=InvokeParameter}" />
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
+
+                            <dxc:XYDiagram2D.DefaultPane>
+                                <dxc:Pane EnableAxisXNavigation="{x:Null}" />
+                            </dxc:XYDiagram2D.DefaultPane>
+                            <dxc:XYDiagram2D.AxisX>
+                                <dxc:AxisX2D Reverse="False">
+                                    <dxc:AxisX2D.Label>
+                                        <dxc:AxisLabel />
+                                    </dxc:AxisX2D.Label>
+                                </dxc:AxisX2D>
+                            </dxc:XYDiagram2D.AxisX>
+                            <dxc:BarSideBySideSeries2D Name="SeriesWorkingHours" ArgumentDataMember="Argument" ValueDataMember="Time" Tag="{Binding}" BarWidth="0.3" ShowInLegend="True">
+                                <dxc:BarSideBySideSeries2D.Model>
+                                    <dxc:Quasi3DBar2DModel />
+                                </dxc:BarSideBySideSeries2D.Model>
+                                <dxc:BarSideBySideSeries2D.Label>
+                                    <dxc:SeriesLabel ConnectorVisible="False"
+                                                     ElementTemplate="{StaticResource BarLabelTemplate}"
+                                                     ResolveOverlappingMode="HideOverlapped"
+                                                     Style="{DynamicResource ChartBarLabelStyle}"
+                                                     Visible="True" dxc:BarSideBySideSeries2D.LabelPosition="Outside" />
+
+                                </dxc:BarSideBySideSeries2D.Label>
+
+                                <!--<dxc:BarSideBySideSeries2D.CrosshairLabelTemplate>
+                                    <DataTemplate >
+                                        <Grid>
+                                            <Border BorderThickness="2" CornerRadius="9" >
+                                                <Border.Background>
+                                                    <SolidColorBrush Color="AliceBlue" />
+                                                </Border.Background>
+                                                <Label BorderThickness="2" BorderBrush="Brown" FontStyle="Italic" 
+                                           Content="{Binding Path=Text}" Padding="5,1,5,1.5" 
+                                           Foreground="Red" FontSize="14"/>
+                                            </Border>
+                                        </Grid>
+                                    </DataTemplate>
+                                </dxc:BarSideBySideSeries2D.CrosshairLabelTemplate>-->
+                            </dxc:BarSideBySideSeries2D>
+                        </dxc:XYDiagram2D>
+                    </dxc:ChartControl>
+                </dxlc:LayoutGroup>
+            </dxlc:LayoutGroup>
+            <dxn:NavBarControl x:Name="navBarControlTaskTracker" dxlc:LayoutControl.AllowHorizontalSizing="True">
+                <dxn:NavBarControl.View>
+                    <dxn:NavigationPaneView x:Name="navigationPaneView" IsOverflowPanelVisible="False" IsExpanded="{Binding IsExpandedNavBarControl ,Mode=TwoWay}" MaxVisibleGroupCount="0" GroupButtonControlTemplate="{x:Null}" ShowBorder="True" ScrollViewer.VerticalScrollBarVisibility="Auto" IsSplitterVisible="False" />
+                </dxn:NavBarControl.View>
+                <dxn:NavBarGroup DisplaySource="Content">
+                    <dxn:NavBarGroup.Style>
+                        <Style TargetType="dxn:NavBarGroup">
+                            <Setter Property="Header" Value="{Binding NavGroupHeader ,Mode=OneWay}" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsExpanded, ElementName=navigationPaneView}" Value="True">
+                                    <Setter Property="Header" Value="{Binding NavGroupHeader ,Mode=OneWay}" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </dxn:NavBarGroup.Style>
+                    <dxn:NavBarGroup.Content>
+                        <dxlc:LayoutControl Orientation="Vertical" Margin="0,0,0,0" Padding="0,0,0,0">
+                            <DockPanel LastChildFill="True">
+                                <Grid DockPanel.Dock="Top">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition />
+                                        <ColumnDefinition />
+                                        <ColumnDefinition />
+                                        <ColumnDefinition />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="10" />
+                                        <RowDefinition Height="65" />
+                                        <RowDefinition Height="20" />
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+
+                                    <dxga:DigitalGaugeControl x:Name="DigitalTaskTrackerTimer" SymbolCount="8" Text="{Binding DigitalTaskTracker, Mode=TwoWay ,StringFormat={}{0:hh}:{0:mm}:{0:ss}}"
+									Grid.Row="1" Margin="10,0,10,0" FlowDirection="LeftToRight"
+									HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalContentAlignment="Center" Grid.ColumnSpan="5">
+                                        <dxmvvm:Interaction.Behaviors>
+                                            <UIHelper:GaugeDragDropManager x:Name="gaugeDragDropManager" />
+                                            <dxmvvm:EventToCommand SourceName="gaugeDragDropManager" EventName="Drop" PassEventArgsToCommand="True" Command="{Binding DropOnGauageCommand}" />
+                                        </dxmvvm:Interaction.Behaviors>
+
+                                        <dxga:DigitalGaugeControl.Layers>
+                                            <dxga:DigitalGaugeLayer />
+                                        </dxga:DigitalGaugeControl.Layers>
+                                        <dxga:DigitalGaugeControl.Model>
+                                            <dxga:DigitalIStyleModel />
+                                        </dxga:DigitalGaugeControl.Model>
+                                        <dxga:DigitalGaugeControl.SymbolView>
+                                            <dxga:SevenSegmentsView>
+                                                <dxga:SevenSegmentsView.Animation>
+                                                    <dxga:BlinkingAnimation RefreshTime="00:000:00.5" SymbolsStates="0 0 1 0 0 1 0 0" />
+                                                </dxga:SevenSegmentsView.Animation>
+                                            </dxga:SevenSegmentsView>
+                                        </dxga:DigitalGaugeControl.SymbolView>
+                                    </dxga:DigitalGaugeControl>
+                                    <TextBlock Margin="2" Text="{Binding  ActiveTask.TaskTitle}" TextWrapping="Wrap" Grid.Column="0" Grid.ColumnSpan="4" Grid.RowSpan="2" Grid.Row="2" FontWeight="Bold" />
+
+                                    <Image Style="{DynamicResource StartButtonImageStyle}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Visibility="{Binding PlayButtonVisibility}" Grid.Column="4" Grid.Row="3" Margin="5" Height="24" Width="24" Stretch="UniformToFill">
+                                        <i:Interaction.Triggers>
+                                            <i:EventTrigger EventName="MouseLeftButtonDown">
+                                                <i:InvokeCommandAction Command="{Binding PlayTaskWorkTimeCommand }" x:Name="interactivityFix" />
+                                            </i:EventTrigger>
+                                        </i:Interaction.Triggers>
+                                    </Image>
+
+                                    <Image Style="{DynamicResource StopButtonImageStyle}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Visibility="{Binding StopButtonVisibility}" Grid.Column="4" Grid.Row="3" Margin="5" Height="24" Width="24" Stretch="UniformToFill">
+                                        <i:Interaction.Triggers>
+                                            <i:EventTrigger EventName="MouseLeftButtonDown">
+                                                <i:InvokeCommandAction Command="{Binding  PauseTaskWorkTimeCommand}" />
+                                            </i:EventTrigger>
+                                        </i:Interaction.Triggers>
+                                    </Image>
+                                </Grid>
+                                <dxlc:LayoutControl Grid.Row="2" Grid.ColumnSpan="4" Margin="0,0,0,0" Padding="0,0,0,0">
+                                    <dxlc:LayoutGroup Header="Recent Tasks" View="GroupBox" Orientation="Vertical" Margin="0,0,0,0" Padding="0,0,0,0">
+                                        <dxlc:LayoutItem Margin="-8,-8,-8,-2">
+                                            <DockPanel LastChildFill="True">
+                                                <dxe:DateEdit Mask="dd/MM/yyyy" IsTextEditable="False" EditValue="{Binding CurrentDate, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" ShowWeekNumbers="True" 
+                                                          ShowClearButton="False" StaysPopupOpen="False" IsPopupOpen="False" MaskUseAsDisplayFormat="True" 
+                                                          MaskType="DateTime" AllowDefaultButton="True" AllowRoundOutOfRangeValue="true" DateTime="{Binding DateEditor, Mode=TwoWay}">
+                                                    <dxe:ButtonEdit.Buttons>
+                                                        <dxe:SpinButtonInfo IsDefaultButton="true" SpinStyle="Horizontal" />
+                                                    </dxe:ButtonEdit.Buttons>
+                                                    <i:Interaction.Triggers>
+                                                        <i:EventTrigger EventName="Spin">
+                                                            <behaviors:InvokeDelegateCommandAction Command="{Binding TodaySpinNavigationCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=InvokeParameter}" />
+                                                        </i:EventTrigger>
+
+                                                        <i:EventTrigger EventName="EditValueChanged">
+                                                            <behaviors:InvokeDelegateCommandAction Command="{Binding TodayEditValueChangedCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=InvokeParameter}" />
+                                                        </i:EventTrigger>
+                                                    </i:Interaction.Triggers>
+                                                </dxe:DateEdit>
+                                            </DockPanel>
+                                        </dxlc:LayoutItem>
+
+                                        <dxlc:LayoutItem Margin="0,0,0,0" Padding="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+                                                             x:Name="lstWorkedHours">
+                                            <dxe:ListBoxEdit HorizontalContentAlignment="Stretch" ItemsSource="{Binding WorkedProjectTaskList,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"                                    
+                                                                  FocusManager.IsFocusScope="True" 
+                                                                  EditValue="{Binding SelectedTaskWorkingTime,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                                                 Padding="0,0,0,0" Margin="-10,0,-10,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                                                <dxmvvm:Interaction.Behaviors>
+                                                    <dxmvvm:EventToCommand Command="{Binding SelectedTaskDeatilsWorkedProjectTaskListCommand}" EventName="MouseDoubleClick">
+                                                        <dxmvvm:EventToCommand.EventArgsConverter>
+                                                            <dx:EventArgsToDataRowConverter />
+                                                        </dxmvvm:EventToCommand.EventArgsConverter>
+                                                    </dxmvvm:EventToCommand>
+                                                    <dxg:ListBoxDragDropManager>
+                                                        <dxmvvm:Interaction.Behaviors>
+                                                            <dxmvvm:EventToCommand EventName="Drop" Command="{Binding TaskMoveCommand}" PassEventArgsToCommand="True" />
+                                                        </dxmvvm:Interaction.Behaviors>
+                                                    </dxg:ListBoxDragDropManager>
+                                                </dxmvvm:Interaction.Behaviors>
+                                                <dxe:ListBoxEdit.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <DockPanel LastChildFill="True">
+                                                            <TextBlock Grid.Column="1" Margin="5,0,0,0" DockPanel.Dock="Right" Text="{Binding WorkingTimeInHours,Converter={StaticResource TimeConverter}}" FontWeight="Bold" />
+                                                            <TextBlock Grid.Column="0" TextWrapping="Wrap" Text="{Binding TaskTitle}" FontWeight="Bold" />
+                                                        </DockPanel>
+                                                    </DataTemplate>
+                                                </dxe:ListBoxEdit.ItemTemplate>
+                                            </dxe:ListBoxEdit>
+                                        </dxlc:LayoutItem>
+
+                                        <dxlc:LayoutItem Label="Total Work" Margin="-10,0,-10,0" Padding="0,0,0,0">
+                                            <TextBlock TextAlignment="Right" Text="{Binding DayTotalTime, Converter={StaticResource TimeConverter}}">
+                                            </TextBlock>
+                                        </dxlc:LayoutItem>
+                                    </dxlc:LayoutGroup>
+                                </dxlc:LayoutControl>
+                            </DockPanel>
+
+                        </dxlc:LayoutControl>
+                    </dxn:NavBarGroup.Content>
+                </dxn:NavBarGroup>
+            </dxn:NavBarControl>
+        </dxlc:LayoutControl>
+    </Grid>
+</UserControl>

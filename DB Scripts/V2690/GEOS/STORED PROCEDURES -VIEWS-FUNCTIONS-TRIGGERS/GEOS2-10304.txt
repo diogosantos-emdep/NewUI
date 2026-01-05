@@ -1,0 +1,95 @@
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS geos.SAM_GetTestboardElectrificationOtArticles_V2550 $$
+CREATE PROCEDURE geos.SAM_GetTestboardElectrificationOtArticles_V2550(
+    IN _IdOT   INT(10) UNSIGNED
+)
+BEGIN
+/*
+[nsatpute][01.12.2025][GEOS2-10304]
+call geos.SAM_GetTestboardElectrificationOtArticles_V2550(1295)
+*/
+    SELECT 
+        pac.Name AS PCMCategory,
+        pacParentSecond.Name AS ParentSecond,
+        pacParentFirst.Name AS ParentFirst,
+        art.Reference,
+        art.Description,
+        ri.Quantity,
+        IFNULL(art.ImagePath, '') AS OriginalFileName
+    FROM ots ot
+        INNER JOIN quotations qu ON qu.IdQuotation = ot.IdQuotation
+        INNER JOIN offers `of` ON qu.IdOffer = `of`.IdOffer
+        INNER JOIN otitems oi ON ot.IdOT = oi.IdOT
+        INNER JOIN revisionitems ri ON oi.IdRevisionItem = ri.IdRevisionItem
+        INNER JOIN warehouseproduct wp ON ri.IdProduct = wp.IdWarehouseProduct
+        INNER JOIN articles art ON wp.IdArticle = art.IdArticle
+        INNER JOIN pcm_articles pa ON art.IdArticle = pa.IdArticle
+        INNER JOIN pcm_article_categories pac ON pa.IdPCMArticleCategory = pac.IdPCMArticleCategory
+        LEFT JOIN pcm_article_categories pacParentSecond 
+            ON pacParentSecond.IdPCMArticleCategory = pac.Parent
+        LEFT JOIN pcm_article_categories pacParentFirst
+            ON pacParentFirst.IdPCMArticleCategory = pacParentSecond.Parent
+    WHERE 
+        `of`.IdOffer IN (
+            SELECT IdOffer
+            FROM ots o
+                INNER JOIN quotations qt ON qt.IdQuotation = o.IdQuotation
+            WHERE o.IdOT = _IdOT
+        )
+        AND (ot.Code LIKE '%x' OR ot.Code LIKE '%B')
+        AND ri.Quantity > 0
+        AND oi.IdItemOtStatus != 15;
+END $$
+
+DELIMITER ;
+ 
+
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS geos.SAM_GetTestboardElectrificationOtArticles_V2550 $$
+CREATE PROCEDURE geos.SAM_GetTestboardElectrificationOtArticles_V2550(
+    IN _IdOT   INT(10) UNSIGNED
+)
+BEGIN
+
+/*
+[nsatpute][01.12.2025][GEOS2-10304]
+call geos.SAM_GetTestboardElectrificationOtArticles_V2550(1295)
+*/
+    SELECT 
+        pac.Name AS PCMCategory,
+        pacParentSecond.Name AS ParentSecond,
+        pacParentFirst.Name AS ParentFirst,
+        art.Reference,
+        art.Description,
+        ri.Quantity,
+        IFNULL(art.ImagePath, '') AS OriginalFileName
+    FROM ots ot
+        INNER JOIN quotations qu ON qu.IdQuotation = ot.IdQuotation
+        INNER JOIN offers `of` ON qu.IdOffer = `of`.IdOffer
+        INNER JOIN otitems oi ON ot.IdOT = oi.IdOT
+        INNER JOIN revisionitems ri ON oi.IdRevisionItem = ri.IdRevisionItem
+        INNER JOIN warehouseproduct wp ON ri.IdProduct = wp.IdWarehouseProduct
+        INNER JOIN articles art ON wp.IdArticle = art.IdArticle
+        INNER JOIN pcm_articles pa ON art.IdArticle = pa.IdArticle
+        INNER JOIN pcm_article_categories pac ON pa.IdPCMArticleCategory = pac.IdPCMArticleCategory
+        LEFT JOIN pcm_article_categories pacParentSecond 
+            ON pacParentSecond.IdPCMArticleCategory = pac.Parent
+        LEFT JOIN pcm_article_categories pacParentFirst
+            ON pacParentFirst.IdPCMArticleCategory = pacParentSecond.Parent
+    WHERE 
+        `of`.IdOffer IN (
+            SELECT IdOffer
+            FROM ots o
+                INNER JOIN quotations qt ON qt.IdQuotation = o.IdQuotation
+            WHERE o.IdOT = _IdOT
+        )
+        AND (ot.Code LIKE '%x' OR ot.Code LIKE '%B')
+        AND ri.Quantity > 0
+        AND oi.IdItemOtStatus != 15;
+END $$
+
+DELIMITER ;
+

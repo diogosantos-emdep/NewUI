@@ -1,0 +1,42 @@
+DROP PROCEDURE IF EXISTS GetPODetailsbyEmail_V2690;
+DELIMITER $$
+CREATE PROCEDURE GetPODetailsbyEmail_V2690(
+    IN _Email varchar(50) 
+)
+begin
+-- [Rahul.gadhave][GEOS2-9878][Date:19-11-2025]
+-- call GetPODetailsbyEmail_V2690("skadam@emdep.com");
+SELECT 
+    Email, IdPerson, CONCAT(Name, ' ', Surname) AS Sender
+FROM
+    people
+WHERE
+    Email = _Email;
+END $$
+DELIMITER ;
+
+
+DROP PROCEDURE IF EXISTS GetPODetailsbyIdEmail_V2690;
+DELIMITER $$
+CREATE PROCEDURE GetPODetailsbyIdEmail_V2690(
+    IN _IdEmail INT(10) UNSIGNED
+)
+begin
+-- [Rahul.gadhave][GEOS2-9878][Date:19-11-2025]
+-- call GetPODetailsbyIdEmail_V2690(6379);
+SELECT 
+    p.IdPerson,
+    CONCAT(p.Name, ' ', p.Surname) AS Sender,
+    e.IdUser,
+    el.EmailSentAt AS PODate
+FROM
+    email el
+        LEFT JOIN
+    emdep_geos.employees e ON e.IdEmployee = el.SenderIdPerson
+        LEFT JOIN
+    people p ON p.IdPerson = e.IdUser
+WHERE
+    el.IdEmail = _IdEmail;
+END $$
+DELIMITER ;
+

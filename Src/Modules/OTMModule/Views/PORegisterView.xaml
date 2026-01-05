@@ -1,0 +1,1393 @@
+﻿<UserControl x:Class="Emdep.Geos.Modules.OTM.Views.PORegisterView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.OTM.Views"
+             xmlns:dxwuin="http://schemas.devexpress.com/winfx/2008/xaml/windowsui/navigation"
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+             xmlns:dxp="http://schemas.devexpress.com/winfx/2008/xaml/printing" 
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:Converters="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:dxnav="http://schemas.devexpress.com/winfx/2008/xaml/navigation"
+             xmlns:dxgt="http://schemas.devexpress.com/winfx/2008/xaml/grid/themekeys"
+             xmlns:sysglb="clr-namespace:System.Globalization;assembly=mscorlib"
+             xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+             xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol" 
+             xmlns:OTMCommon ="clr-namespace:Emdep.Geos.Modules.OTM.CommonClass"
+             xmlns:dxdo="http://schemas.devexpress.com/winfx/2008/xaml/docking"
+             xmlns:dxb="http://schemas.devexpress.com/winfx/2008/xaml/bars"
+             xmlns:dxcn="http://schemas.devexpress.com/winfx/2008/xaml/core/internal"
+             xmlns:Validation ="clr-namespace:Emdep.Geos.UI.Validations;assembly=Emdep.Geos.UI.Validations"
+             xmlns:UIConverter="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="2000">
+    <UserControl.Resources>
+        <Converters:ForegroundColorConverter x:Key="ForegroundColorConverter"/>
+        <Converters:ImageConverterByModule x:Key="ImageConverterByModule"/>
+        <Converters:ImageUrlToByteArrayConverter x:Key="ImageUrlToByteArrayConverter" />
+        <Converters:EmployeeCodeInitialToImageConverter x:Key="EmployeeCodeInitialToImageConverter" />
+        <Converters:EditGridCellDataToStringConverter  x:Key="EditGridCellDataToStringConverter" />
+        <Converters:CurrencyToImageConverter  x:Key="CurrencyToImageConverter" />
+        <Style x:Key="LeftPanelTileItemStyle" TargetType="{x:Type dxnav:TileBarItem}">
+            <Setter Property="Foreground" Value="{Binding BackColor,Converter={Converters:ForegroundColorConverter}}"/>
+            <Setter Property="BorderBrush" Value="#FFD6D6D6"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Background" Value="{Binding BackColor}"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+            <Setter Property="Height" Value="{Binding Height}"/>
+            <Setter Property="Width" Value="{Binding Width}"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="SelectionPadding" Value="0" />
+            <Setter Property="ContentTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                        <StackPanel Orientation="Vertical" HorizontalAlignment="Left" Width="195" Height="75"  >
+                            <Label Content="{Binding EntitiesCount,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" HorizontalContentAlignment="Right"   Margin="0,-5,8,0" VerticalContentAlignment="Top" FontSize="36" Visibility="{Binding EntitiesCountVisibility}"></Label>
+                            <Label Content="{Binding Caption, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalContentAlignment="Left" Margin="6,0,0,3" VerticalAlignment="Bottom" FontSize="15" ></Label>
+                        </StackPanel>
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="BorderThickness" Value="5"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource TileBarItemColorStyle}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="LeftPanelTypeTileItemStyle" TargetType="{x:Type dxnav:TileBarItem}">
+            <Setter Property="Foreground" Value="{Binding ForeColor,Converter={Converters:ForegroundColorConverter}}"/>
+            <Setter Property="BorderBrush" Value="#FFD6D6D6"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Background" Value="{Binding BackColor}"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+            <Setter Property="Height" Value="{Binding Height}"/>
+            <Setter Property="Width" Value="{Binding Width}"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="SelectionPadding" Value="0" />
+            <Setter Property="ContentTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                        <Grid>
+                            <StackPanel Orientation="Vertical" HorizontalAlignment="Left" Width="195" Height="75"  >
+                                <TextBlock Text="{Binding EntitiesCount,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" FontSize="36" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-5,8,0" Opacity="0.6" Visibility="{Binding EntitiesCountVisibility}"/>
+                                <TextBlock HorizontalAlignment="Left" VerticalAlignment="Bottom" Text="{Binding Caption}" FontSize="13" Margin="6,0,0,3"/>
+                                <Image HorizontalAlignment="Left" VerticalAlignment="Top" Source="{Binding ImageUri, Converter={StaticResource ImageConverterByModule}, ConverterParameter='OTM'}" dxb:ImageColorizer.IsEnabled="False"
+                        Stretch="None" Margin="8,-60,8,0"/>
+                            </StackPanel>
+                        </Grid>
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="BorderThickness" Value="5"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource TileBarItemColorStyle}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="HideButtonStyle" TargetType="{x:Type ToggleButton}">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ToggleButton}">
+                        <Border BorderThickness="0" Background="{TemplateBinding Background}">
+                            <Grid>
+                                <Image Stretch="None" VerticalAlignment="Center" HorizontalAlignment="Center"
+                            Source="/Emdep.Geos.Modules.OTM;component/Assets/Images/ArrowRight.png"
+                            Visibility="{TemplateBinding IsChecked, Converter={dxmvvm:BooleanToVisibilityConverter Inverse=True}}"/>
+                                <Image Stretch="None" VerticalAlignment="Center" HorizontalAlignment="Center"
+                            Source="/Emdep.Geos.Modules.OTM;component/Assets/Images/ArrowLeft.png"
+                            Visibility="{TemplateBinding IsChecked, Converter={dxmvvm:BooleanToVisibilityConverter}}"/>
+                            </Grid>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <DataTemplate x:Key="SummaryTemplate">
+            <ContentControl>
+                <dxg:GridSummaryItem FieldName="{Binding Path=(dxcn:DependencyObjectExtensions.DataContext).FieldName, RelativeSource={RelativeSource Self}}"
+                              SummaryType="{Binding Path=(dxcn:DependencyObjectExtensions.DataContext).Type, RelativeSource={RelativeSource Self}}"
+                              DisplayFormat= "{Binding Path=(dxcn:DependencyObjectExtensions.DataContext).DisplayFormat, RelativeSource={RelativeSource Self}}" />
+            </ContentControl>
+        </DataTemplate>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="35"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="auto" />
+        </Grid.ColumnDefinitions>
+        <!--[ashish.malkhede][07.11.2024][GEOS2-6460]-->
+        <!-- Tab Registered View-->
+        <Grid HorizontalAlignment="Right" Grid.Row="0" Grid.Column="1" Height="Auto" Width="Auto" ShowGridLines="False"  Margin="0,-25,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="AUTO"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="AUTO"/>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="60" />
+                <ColumnDefinition Width="AUTO" />
+                <ColumnDefinition Width="AUTO" />
+                <ColumnDefinition Width="35" />
+                <ColumnDefinition Width="AUTO" />
+                <ColumnDefinition Width="AUTO" />
+                <ColumnDefinition Width="AUTO" />
+                <ColumnDefinition Width="AUTO" />
+            </Grid.ColumnDefinitions>
+            <!--Plant-->
+            <DockPanel Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Height="30" Margin="25,0,0,0" >
+                <Image Style="{DynamicResource OTMPlantImageStyle}" Width="24" Height="24" Margin="7,0,3,0" VerticalAlignment="Center" />
+                <TextBlock Text="{DynamicResource CommonPlant}"  FontWeight="Bold" Margin="5,2,5,0" VerticalAlignment="Center" />
+            </DockPanel>
+            <dxe:ComboBoxEdit   Grid.Column="1"  Width="150"  Height="30"  IncrementalFiltering="True"
+                                          VerticalContentAlignment="Center"  AutoComplete="True" VerticalAlignment="Center" HorizontalAlignment="Left" 
+                                          ApplyItemTemplateToSelectedItem="True" IsSynchronizedWithCurrentItem="True" IncrementalSearch="False" IsTextEditable="False" 
+                                          ItemsSource="{Binding Source={x:Static OTMCommon:OTMCommon.Instance}, Path=UserAuthorizedPlantsList,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                          SelectedItem="{Binding Source={x:Static OTMCommon:OTMCommon.Instance}, Path=SelectedPlantForRegisteredPO,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                          DisplayMember="Alias" Margin="5,0,5,0" >
+                <dxe:ComboBoxEdit.ItemTemplate>
+                    <DataTemplate>
+                        <DockPanel>
+                            <Image Source="{Binding CountryIconUrl, Converter={StaticResource ImageUrlToByteArrayConverter}, UpdateSourceTrigger=PropertyChanged ,ConverterParameter='image/png'}"  
+                                   VerticalAlignment="Center" Height="24" Width="24" Margin="2,0,0,0" />
+                            <TextBlock Text="{Binding Alias}" Margin="5,0,0,0" Padding="3" >
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Style.Triggers>
+                                            <Trigger Property="IsEnabled" Value="False">
+                                                <Setter Property="Foreground" Value="Gray" />
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </DockPanel>
+                    </DataTemplate>
+                </dxe:ComboBoxEdit.ItemTemplate>
+                <dxmvvm:Interaction.Triggers>
+                    <dxmvvm:EventToCommand EventName="EditValueChanged" 
+                                  Command="{Binding DataContext.CommandPlantEditValueChanged,RelativeSource={RelativeSource AncestorType=UserControl}}"      
+                                  CommandParameter="{Binding ElementName=PORegisteredTableView}" />
+                </dxmvvm:Interaction.Triggers>
+            </dxe:ComboBoxEdit>
+            <TextBlock Text="{DynamicResource OTMPeriod}"  FontWeight="Bold" Grid.Column="3"  VerticalAlignment="Center" />
+            <!-- Period -->
+            <DockPanel Grid.Column="4"  HorizontalAlignment="Right"   VerticalAlignment="Center" Margin="15,0,0,0" >
+                <!--<TextBlock Text="{Binding FromDate,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,StringFormat=d,ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,-10,5,0"/>-->
+                <TextBlock Text="{Binding Source={x:Static OTMCommon:OTMCommon.Instance}, Path=FromDatePOreg,Mode=TwoWay,StringFormat=d,ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture},UpdateSourceTrigger=PropertyChanged}"
+                                   HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                <TextBlock Text=" - " HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold" Margin="0,0,5,0"/>
+                <TextBlock Text="{Binding Source={x:Static OTMCommon:OTMCommon.Instance}, Path=ToDatePOreg,Mode=TwoWay,StringFormat=d,ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture},UpdateSourceTrigger=PropertyChanged}"
+                                    HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,5,0"/>
+            </DockPanel>
+            <!--Calender Icon  VerticalAlignment="Stretch"-->
+            <dxwui:AppBar x:Name="AppbarPOReg" HideMode="AlwaysVisible" Background="Transparent" Grid.Column="2" Grid.Row="0"
+                          IsSticky="True" HorizontalAlignment="Stretch" 
+                          IsOpen="True" IsExitButtonEnabled="False">
+                <!--Margin="70,0,-30,0"-->
+                <dxwui:AppBarButton x:Name="appbarbuttonPOReg" ToolTip="{DynamicResource PeriodSelect}" HorizontalAlignment="Right" 
+                                GlyphHeight="24" GlyphWidth="24" AllowGlyphTheming="False" Margin="2,0,-30,0"
+                                Style="{DynamicResource CalendarImageGlyphStyle}"
+                                GlyphStretch="Fill" IsEllipseEnabled="False" >
+                    <dxwui:AppBarButton.Flyout>
+                        <dxwui:MenuFlyout ShowIndicator="True" x:Name="MenuLayoutPOReg">
+                            <dxwui:MenuFlyoutItem StaysOpenOnClick="True">
+                                <Grid Width="Auto" Height="Auto">
+                                    <DockPanel>
+                                        <StackPanel Orientation="Vertical" x:Name="PeriodCategoriesPOReg">
+                                            <!--This Year-->
+                                            <Button x:Name="ThisYearPOReg" Content="{DynamicResource OTMThisYear}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                    Height="30" Width="110"
+                                                    Command="{Binding DataContext.PeriodRegCommand,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding ElementName=ThisYearPOReg}">
+                                            </Button>
+                                            <!--Last Year-->
+                                            <Button x:Name="LastYearPOReg" Content="{DynamicResource OTMLastYear}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                    Height="30" Width="110"
+                                                    Command="{Binding DataContext.PeriodRegCommand,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding ElementName=LastYearPOReg}">
+                                            </Button>
+                                            <!--This Month-->
+                                            <Button x:Name="ThisMonthPOReg" Content="{DynamicResource OTMThisMonth}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                    Height="30" Width="110"
+                                                    Command="{Binding DataContext.PeriodRegCommand,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding ElementName=ThisMonthPOReg}">
+                                            </Button>
+                                            <!--Last month-->
+                                            <Button x:Name="LastMonthPOReg" Content="{DynamicResource OTMLastMonth}" HorizontalAlignment="Center" VerticalAlignment="Center" 
+                                                    Height="30" Width="110"
+                                                    Command="{Binding DataContext.PeriodRegCommand,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding ElementName=LastMonthPOReg}">
+                                            </Button>
+                                            <!--This week-->
+                                            <Button x:Name="ThisWeekPOReg" Content="{DynamicResource OTMThisWeek}" HorizontalAlignment="Center" VerticalAlignment="Center" 
+                                                    Height="30" Width="110"
+                                                    Command="{Binding DataContext.PeriodRegCommand,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding ElementName=ThisWeekPOReg}">
+                                            </Button>
+                                            <!--Last week-->
+                                            <Button x:Name="LastWeekPOReg" Content="{DynamicResource OTMLastWeek}" HorizontalAlignment="Center" VerticalAlignment="Center" 
+                                                    Height="30" Width="110"
+                                                    Command="{Binding DataContext.PeriodRegCommand,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding ElementName=LastWeekPOReg}">
+                                            </Button>
+                                            <!--Last 12 month-->
+                                            <Button x:Name="Last12MonthsPOReg" Content="{DynamicResource OTMLast12Months}" HorizontalAlignment="Center" VerticalAlignment="Center" 
+                                                    Height="30" Width="110"
+                                                    Command="{Binding DataContext.PeriodRegCommand,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding ElementName=Last12MonthsPOReg}">
+                                            </Button>
+                                            <!--Custom Range-->
+                                            <Button x:Name="CustomRangePOReg" Content="{DynamicResource PeriodCustomRange}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                    Height="30" Width="110"
+                                                    Command="{Binding DataContext.PeriodCustomRangeCommand,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding ElementName=CustomRangePOReg}">
+                                            </Button>
+                                            <StackPanel Orientation="Horizontal" Margin="0,50,0,0">
+                                                <!--<Button Content="{DynamicResource OTMApply}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                    Height="30" Width="60" Background="Yellow" 
+                                                    Command="{Binding DataContext.ApplyPORegisteredCommand,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding ElementName=MenuLayoutPOReg}">
+                                                </Button>-->
+                                                <Button Content="{DynamicResource OTMApply}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                        Height="30" Width="60" Background="Yellow" 
+                                                      Command="{Binding DataContext.ApplyPORegisteredCommand,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=UserControl}}" >
+                                                    <Button.CommandParameter>
+                                                        <MultiBinding Converter="{Converters:ConverterForRefresh}">
+                                                            <Binding ElementName="MenuLayoutPOReg" />
+                                                            <Binding ElementName="PORegisteredGrid" />
+                                                        </MultiBinding>
+                                                    </Button.CommandParameter>
+                                                </Button>
+                                                <Button Content="{DynamicResource OTMCancel}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                    Height="30" Width="60" 
+                                                    Command="{Binding DataContext.CancelPORegisteredCommand ,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding ElementName=MenuLayoutPOReg}">
+                                                </Button>
+                                            </StackPanel>
+                                        </StackPanel>
+                                        <StackPanel Visibility="{Binding DataContext.IsCalendarVisible, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" Orientation="Horizontal">
+                                            <StackPanel Orientation="Vertical">
+                                                <dxe:TextEdit Text="{Binding DataContext.StartDate, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"                                           
+                                                                          Height="30" TextWrapping="Wrap" Mask="dd/MM/yyyy"                                            
+                                                                          MaskType="DateTimeAdvancingCaret"                                            
+                                                                          MaskUseAsDisplayFormat="True"                                          
+                                                                          HorizontalAlignment="Stretch" IsReadOnly="True"  Margin="2,2,2,2">
+                                                </dxe:TextEdit>
+                                                <!--Calendar-->
+                                                <dxe:DateEditCalendar DateTime="{Binding DataContext.StartDate, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                              VerticalAlignment="Center"
+                                                              ShowToday="False"
+                                                              ShowClearButton="False"/>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Vertical">
+                                                <dxe:TextEdit Text="{Binding DataContext.EndDate, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"                                           
+                                                                          Height="30" TextWrapping="Wrap" Mask="dd/MM/yyyy" MaskType="DateTimeAdvancingCaret"                                            
+                                                                          MaskUseAsDisplayFormat="True" HorizontalAlignment="Stretch" IsReadOnly="True"  Margin="2,2,2,2">
+                                                </dxe:TextEdit>
+                                                <!--Calendar-->
+                                                <dxe:DateEditCalendar DateTime="{Binding DataContext.EndDate, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                              VerticalAlignment="Center"
+                                                              ShowToday="False"
+                                                              ShowClearButton="False"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </DockPanel>
+                                </Grid>
+                            </dxwui:MenuFlyoutItem>
+                        </dxwui:MenuFlyout>
+                    </dxwui:AppBarButton.Flyout>
+                </dxwui:AppBarButton>
+            </dxwui:AppBar>
+            <!-- Refresh Button -->
+            <Button Content=" " Grid.Row="0" Grid.Column="6" Height="40" Width="40" HorizontalAlignment="Right"  
+                    Command="{Binding DataContext.RefreshPORegisteredViewCommand,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                    CommandParameter="{Binding ElementName=PORegisteredTableView}" Margin="0,0,5,5">
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource ButtonRefresh}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Image Style="{ DynamicResource PORequestsRefreshButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+            <!-- Export Button -->
+            <Button Content=" " Grid.Row="0" Grid.Column="7" Height="40" Width="40" HorizontalAlignment="Right"  
+                    Command="{Binding DataContext.ExportPORegisteredViewCommand,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                    CommandParameter="{Binding ElementName=PORegisteredTableView}" Margin="0,0,5,5">
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource ButtonExportToExcel}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Image Style="{ DynamicResource ExcelExportButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+            <!--[ashish.malkhede][08.11.2024][GEOS2-6460]-->
+            <!--Filter-->
+            <dx:DropDownButton x:Name="dropdownButton1" Content="Dropdown button" ScrollViewer.VerticalScrollBarVisibility="Auto"
+                     HorizontalAlignment="Right" Height="40" Width="45" Grid.Column="8"  Margin="0,0,5,5" VerticalAlignment="Center">
+                <dx:DropDownButton.Style>
+                    <Style>
+                        <Setter Property="dx:DropDownButtonBase.ArrowAlignment" Value="Right" />
+                        <Setter Property="dx:DropDownButtonBase.ArrowPadding" Value="0" />
+                    </Style>
+                </dx:DropDownButton.Style>
+                <Button.ToolTip>
+                    <TextBlock Text="Filter"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Image Style="{ DynamicResource AppointmentFilterImageForDashboardStyle}" Height="24" Width="24" Margin="-10" HorizontalAlignment="Right"/>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+                <dx:DropDownButton.PopupContent >
+                    <ScrollViewer>
+                        <Grid ShowGridLines="False">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="35"/>
+                                <RowDefinition Height="35"/>
+                                <RowDefinition Height="35"/>
+                                <RowDefinition Height="35"/>
+                                <RowDefinition Height="35"/>
+                                <RowDefinition Height="35"/>
+                                <RowDefinition Height="35"/>
+                                <RowDefinition Height="35"/>
+                                <RowDefinition Height="35"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="35"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="90"/>
+                                <ColumnDefinition Width="90"/>
+                                <ColumnDefinition Width="90"/>
+                                <ColumnDefinition Width="90"/>
+                                <ColumnDefinition Width="90"/>
+                            </Grid.ColumnDefinitions>
+                            <!--Plant-->
+                            <Label Content="{DynamicResource OTMPlant}" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" Margin="10,5,0,0" />
+                            <dxe:ComboBoxEdit Height="30" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="4" Margin="0,0,8,0"
+                                      ItemsSource="{Binding DataContext.CompanyList,RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                      DisplayMember="ShortName"
+                                      EditValue="{Binding DataContext.SelectedCompanies, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=UserControl}}">
+                                <dxe:ComboBoxEdit.StyleSettings>
+                                    <dxe:CheckedComboBoxStyleSettings />
+                                </dxe:ComboBoxEdit.StyleSettings>
+                            </dxe:ComboBoxEdit>
+                            <!--Number-->
+                            <Label Content="{DynamicResource OTMNumber}" Grid.Row="1" Grid.Column="0" HorizontalAlignment="Left" Margin="10,5,0,0" />
+                            <dxe:TextEdit Height="30" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="4" Margin="0,0,8,0" AllowNullInput="True"
+                                              EditValue="{Binding DataContext.Number, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType=UserControl}}" ></dxe:TextEdit>
+                            <!--Type-->
+                            <!--[pramod.misal][GEOS2-6460][28-11-2024]-->
+                            <Label Content= "{DynamicResource OTMType}" Grid.Row="2" Grid.Column="0" HorizontalAlignment="Left" Style="{DynamicResource Label16Style}" Margin="10,5,0,0"/>
+                            <dxe:ComboBoxEdit Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="4" Height="30" Margin="0,0,8,0" 
+                                                  ItemsSource="{Binding DataContext.TypeOfPos,RelativeSource={RelativeSource AncestorType=UserControl}}"                       
+                                                  DisplayMember="Type" ShowSizeGrip="True" ValueMember="IdPoType"
+                                                  AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True">
+                                <dxe:ComboBoxEdit.ItemTemplate>
+                                    <DataTemplate>
+                                        <DockPanel>
+                                            <Image VerticalAlignment="Center" Height="24" Width="24" Margin="0,0,0,0">
+                                                <Image.Style>
+                                                    <Style TargetType="Image">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IdPoType}" Value="1">
+                                                                <Setter Property="Image.Source" Value="/Emdep.Geos.Modules.OTM;component/Assets/Images/Star.png" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding IdPoType}" Value="2">
+                                                                <Setter Property="Image.Source" Value="/Emdep.Geos.Modules.OTM;component/Assets/Images/Green Flag.png" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding IdPoType}" Value="3">
+                                                                <Setter Property="Image.Source" Value="/Emdep.Geos.Modules.OTM;component/Assets/Images/BlueFlag.png" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Image.Style>
+                                            </Image>
+                                            <TextBlock Margin="5,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Center" Text="{Binding Type}" />
+                                        </DockPanel>
+                                    </DataTemplate>
+                                </dxe:ComboBoxEdit.ItemTemplate>
+                                <dxe:ComboBoxEdit.SelectedIndex>
+                                    <Binding Path="DataContext.SelectedPoType" RelativeSource="{RelativeSource AncestorType=UserControl}" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                                    </Binding>
+                                </dxe:ComboBoxEdit.SelectedIndex>
+                                <dxmvvm:Interaction.Behaviors>
+                                    <dxmvvm:EventToCommand EventName="SelectedIndexChanged" Command="{Binding SelectedItemChangedCommand}" PassEventArgsToCommand="True"/>
+                                </dxmvvm:Interaction.Behaviors>
+                            </dxe:ComboBoxEdit>
+                            <!--Group-->
+                            <Label Content= "{DynamicResource OTMGroup}" Grid.Row="3" Grid.Column="0" HorizontalAlignment="Left" Style="{DynamicResource Label16Style}" Margin="10,5,0,0"/>
+                            <dxe:ComboBoxEdit Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="4" Height="30" Margin="0,0,8,0"
+                          ItemsSource="{Binding DataContext.Customers,RelativeSource={RelativeSource AncestorType=UserControl}}"        
+                          DisplayMember="CustomerName" ShowSizeGrip="True"
+                          AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True">
+                                <dxe:ComboBoxEdit.SelectedIndex>
+                                    <Binding Path="DataContext.SelectedGroup" RelativeSource="{RelativeSource AncestorType=UserControl}" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                                    </Binding>
+                                </dxe:ComboBoxEdit.SelectedIndex>
+                                <dxmvvm:Interaction.Behaviors>
+                                    <dxmvvm:EventToCommand EventName="SelectedIndexChanged" Command="{Binding SelectedItemChangedCommand}" PassEventArgsToCommand="True"/>
+                                </dxmvvm:Interaction.Behaviors>
+                            </dxe:ComboBoxEdit>
+                            <!--Plant-->
+                            <Label Content= "{DynamicResource OTMPlant}" Grid.Row="4" Grid.Column="0" HorizontalAlignment="Left" Style="{DynamicResource Label16Style}" Margin="10,5,0,0"/>
+                            <dxe:ComboBoxEdit Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="4" Height="30" DisplayMember="CustomerPlantName" Margin="0,0,8,0"
+                          ItemsSource="{Binding DataContext.CustomerPlants,RelativeSource={RelativeSource AncestorType=UserControl}}"  
+                          ShowSizeGrip="True"  AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True">
+                                <dxe:ComboBoxEdit.SelectedIndex>
+                                    <Binding Path="DataContext.SelectedCustomerPlant" RelativeSource="{RelativeSource AncestorType=UserControl}" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                                    </Binding>
+                                </dxe:ComboBoxEdit.SelectedIndex>
+                            </dxe:ComboBoxEdit>
+                            <!--Sender-->
+                            <Label Content= "{DynamicResource OTMSender}" Grid.Row="5" Grid.Column="0" HorizontalAlignment="Left" Style="{DynamicResource Label16Style}" Margin="10,5,0,0"/>
+                            <dxe:TextEdit Height="30" Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="4"  Margin="0,0,8,0" AllowNullInput="True" EditValue="{Binding DataContext.Sender, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType=UserControl}}"></dxe:TextEdit>
+                            <Label Content= "{DynamicResource OTMCurrency}" Grid.Row="6" Grid.Column="0" HorizontalAlignment="Left" Style="{DynamicResource Label16Style}" Margin="10,5,0,0"/>
+                            <dxe:ComboBoxEdit Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="4" Height="30" DisplayMember="Name" Margin="0,0,8,0"
+                                          ItemsSource="{Binding DataContext.Currencies,RelativeSource={RelativeSource AncestorType=UserControl}}"        
+                                          ShowSizeGrip="True"  AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True">
+                                <dxe:ComboBoxEdit.ItemTemplate>
+                                    <DataTemplate>
+                                        <DockPanel>
+                                            <Image Source="{Binding CurrencyIconImage}" VerticalAlignment="Center" Height="24" Width="24" Margin="0,0,5,0" />
+                                            <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
+                                        </DockPanel>
+                                    </DataTemplate>
+                                </dxe:ComboBoxEdit.ItemTemplate>
+                                <dxe:ComboBoxEdit.SelectedIndex>
+                                    <Binding Path="DataContext.SelectedCurrency" RelativeSource="{RelativeSource AncestorType=UserControl}" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                                    </Binding>
+                                </dxe:ComboBoxEdit.SelectedIndex>
+                            </dxe:ComboBoxEdit>
+                            <!--Value-->
+                            <Label Content= "{DynamicResource OTMValue}" Grid.Row="7" Grid.Column="0" HorizontalAlignment="Left" Style="{DynamicResource Label16Style}" Margin="10,5,0,0"/>
+                            <Label Content= "{DynamicResource OTMBetween}" Grid.Row="7" Grid.Column="1" HorizontalAlignment="Left" Style="{DynamicResource Label16Style}" Margin="0,5,0,0"/>
+                            <!--<dxe:TextEdit Height="30" Width="70" Grid.Row="7" Grid.Column="2" HorizontalAlignment="Left"  Margin="0,0,10,0" AllowNullInput="True" EditValue="{Binding DataContext.PoValueRangeFrom, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType=UserControl}}" Mask="###,###,###,###,###,###,###,##0.00;"  MaskUseAsDisplayFormat="True" MaskType="Numeric"></dxe:TextEdit>-->
+                            <!--<dxe:TextEdit Height="30" Width="70"  Grid.Row="7" Grid.Column="2" 
+                                                  HorizontalAlignment="Left" 
+                                                  Mask="###,###,###,###,###,###,###,##0.00;" 
+                                                  MaskUseAsDisplayFormat="True" MaskType="Numeric" Visibility="Visible"  ValidateOnTextInput="False" ValidateOnEnterKeyPressed="False"
+                                                  EditValue="{Binding DataContext.PoValueRangeFrom,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=UserControl}}" />-->
+                            <dxe:TextEdit Height="30" Width="70" Grid.Row="7" Grid.Column="2"
+                                          HorizontalAlignment="Left"
+                                          Mask="###,###,###,###,###,###,###,##0.00;"
+                                          MaskUseAsDisplayFormat="True"
+                                          MaskType="Numeric"
+                                          Visibility="Visible"
+                                          ValidateOnTextInput="False"
+                                          ValidateOnEnterKeyPressed="False">
+                                <dxe:TextEdit.EditValue>
+                                    <Binding Path="DataContext.PoValueRangeFrom" 
+                                             Mode="TwoWay" 
+                                             UpdateSourceTrigger="PropertyChanged" 
+                                             RelativeSource="{RelativeSource AncestorType=UserControl}"
+                                             ValidatesOnDataErrors="True">
+                                        <Binding.ValidationRules>
+                                            <Validation:PORequestsValidation FieldName="PoValueRangeFrom" ValidationStep="UpdatedValue" />
+                                        </Binding.ValidationRules>
+                                    </Binding>
+                                </dxe:TextEdit.EditValue>
+                            </dxe:TextEdit>
+                            <Label Content= "{DynamicResource OTMAnd}" Grid.Row="7" Grid.Column="3" HorizontalAlignment="Center" Style="{DynamicResource Label16Style}" Margin="10,5,0,0"/>
+                            <!--<dxe:TextEdit Height="30" Width="68" Grid.Row="7" Grid.Column="4" HorizontalAlignment="Right" Margin="0,0,10,0" AllowNullInput="True" EditValue="{Binding DataContext.PoValueRangeTo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType=UserControl}}" Mask="###,###,###,###,###,###,###,##0.00;" MaskUseAsDisplayFormat="True" MaskType="Numeric"></dxe:TextEdit>-->
+                            <!--<dxe:TextEdit Height="30" Width="68"  Grid.Row="7" Grid.Column="4" 
+                                                  HorizontalAlignment="Right" 
+                                                  Mask="###,###,###,###,###,###,###,##0.00;" 
+                                                  MaskUseAsDisplayFormat="True" MaskType="Numeric" Visibility="Visible" ValidateOnTextInput="False" ValidateOnEnterKeyPressed="False"
+                                                  EditValue="{Binding DataContext.PoValueRangeTo,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=UserControl}}" />-->
+                            <dxe:TextEdit Height="30" Width="68" Grid.Row="7" Grid.Column="4"
+                                        HorizontalAlignment="Left"
+                                        Mask="###,###,###,###,###,###,###,##0.00;"
+                                        MaskUseAsDisplayFormat="True"
+                                        MaskType="Numeric"
+                                        Visibility="Visible"
+                                        ValidateOnTextInput="False"
+                                        ValidateOnEnterKeyPressed="False">
+                                <dxe:TextEdit.EditValue>
+                                    <Binding Path="DataContext.PoValueRangeTo" 
+                                           Mode="TwoWay" 
+                                           UpdateSourceTrigger="PropertyChanged" 
+                                           RelativeSource="{RelativeSource AncestorType=UserControl}"
+                                           ValidatesOnDataErrors="True">
+                                        <Binding.ValidationRules>
+                                            <Validation:PORequestsValidation FieldName="PoValueRangeTo" ValidationStep="UpdatedValue" />
+                                        </Binding.ValidationRules>
+                                    </Binding>
+                                </dxe:TextEdit.EditValue>
+                            </dxe:TextEdit>
+                            <!--Offer-->
+                            <Label Content= "{DynamicResource OTMOffer}" Grid.Row="8" Grid.Column="0" HorizontalAlignment="Left" Style="{DynamicResource Label16Style}" Margin="10,5,0,0"/>
+                            <dxe:TextEdit Height="30" Grid.Row="8" Grid.Column="1" Grid.ColumnSpan="4"  Margin="0,0,8,0" AllowNullInput="True" EditValue="{Binding DataContext.Offer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType=UserControl}}"></dxe:TextEdit>
+                            <!--[pooja.jadhav][11-11-2024][GEOS2-6460]-->
+                            <Grid ShowGridLines="False" Grid.Row="9" Grid.ColumnSpan="5">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="35"/>
+                                    <RowDefinition Height="35"/>
+                                    <RowDefinition Height="35"/>
+                                    <RowDefinition Height="35"/>
+                                    <RowDefinition Height="35"/>
+                                    <RowDefinition Height="35"/>
+                                    <RowDefinition Height="35"/>
+                                    <RowDefinition Height="35"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="90"/>
+                                    <ColumnDefinition Width="135"/>
+                                    <ColumnDefinition Width="90"/>
+                                    <ColumnDefinition Width="135"/>
+                                </Grid.ColumnDefinitions>
+                                <!-- Reception Date-->
+                                <CheckBox Content="{DynamicResource OTMReceptionDate}" Grid.Row="0" Grid.Column="0"  Grid.ColumnSpan="2" Margin="10,5,0,0" Style="{DynamicResource CheckBoxStyle}"
+                                              IsChecked="{Binding DataContext.IsReceptionDate,RelativeSource={RelativeSource AncestorType=UserControl},UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"></CheckBox>
+                                <!--From Date-->
+                                <Label Content="{DynamicResource OTMFrom}" Grid.Row="1" Grid.Column="0"  Margin="10,5,0,0" Style="{DynamicResource Label16Style}" HorizontalAlignment="Center"></Label>
+                                <dxe:DateEdit Grid.Row="1" Grid.Column="1" Style="{DynamicResource BaseUniversalStyle}" Height="30"
+                                              ShowClearButton="False" 
+                                              Mask="{Binding CultureInfo.CurrentCulture.DateTimeFormat.YearMonthPattern}" 
+                                              MaskUseAsDisplayFormat="True"
+                                              HorizontalAlignment="Stretch"  VerticalAlignment="Top" IsTextEditable="False" 
+                                              HorizontalContentAlignment="Right" InvalidValueBehavior="AllowLeaveEditor" AllowNullInput="True">
+                                    <dxe:DateEdit.EditValue>
+                                        <Binding Path="DataContext.ReceptionDateFrom" RelativeSource="{RelativeSource AncestorType=UserControl}" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                                            <Binding.ValidationRules>
+                                                <Validation:PORequestsValidation FieldName="ReceptionDateFrom" ValidationStep="UpdatedValue"  />
+                                            </Binding.ValidationRules>
+                                        </Binding>
+                                    </dxe:DateEdit.EditValue>
+                                </dxe:DateEdit>
+                                <!--To Date-->
+                                <Label Content="{DynamicResource OTMTo}" Grid.Row="1" Grid.Column="2"  Margin="10,5,0,0" Style="{DynamicResource Label16Style}" HorizontalAlignment="Center"></Label>
+                                <dxe:DateEdit Grid.Row="1" Grid.Column="3" Style="{DynamicResource BaseUniversalStyle}" Height="30" Margin="0,0,8,0"
+                                              ShowClearButton="False"
+                                              Mask="{Binding CultureInfo.CurrentCulture.DateTimeFormat.YearMonthPattern}" 
+                                              MaskUseAsDisplayFormat="True"
+                                              HorizontalAlignment="Stretch"  VerticalAlignment="Top" IsTextEditable="False" 
+                                              HorizontalContentAlignment="Right" InvalidValueBehavior="AllowLeaveEditor" AllowNullInput="True">
+                                    <dxe:DateEdit.EditValue>
+                                        <Binding Path="DataContext.ReceptionDateTo" RelativeSource="{RelativeSource AncestorType=UserControl}" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                                            <Binding.ValidationRules>
+                                                <Validation:PORequestsValidation FieldName="ReceptionDateTo" ValidationStep="UpdatedValue"  />
+                                            </Binding.ValidationRules>
+                                        </Binding>
+                                    </dxe:DateEdit.EditValue>
+                                </dxe:DateEdit>
+                                <!-- Creation Date-->
+                                <CheckBox Content="{DynamicResource OTMCreationDate}" Grid.Row="2" Grid.Column="0"  Grid.ColumnSpan="2" Margin="10,5,0,0" Style="{DynamicResource CheckBoxStyle}"
+                                              IsChecked="{Binding DataContext.IscreationDate,RelativeSource={RelativeSource AncestorType=UserControl},UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" ></CheckBox>
+                                <!--From Date-->
+                                <Label Content="{DynamicResource OTMFrom}" Grid.Row="3" Grid.Column="0"  Margin="10,5,0,0" Style="{DynamicResource Label16Style}" HorizontalAlignment="Center"></Label>
+                                <dxe:DateEdit Grid.Row="3" Grid.Column="1" Style="{DynamicResource BaseUniversalStyle}" Height="30"
+                                              ShowClearButton="False"
+                                              Mask="{Binding CultureInfo.CurrentCulture.DateTimeFormat.YearMonthPattern}" 
+                                              MaskUseAsDisplayFormat="True"
+                                              HorizontalAlignment="Stretch"  VerticalAlignment="Top" IsTextEditable="False" 
+                                              HorizontalContentAlignment="Right" InvalidValueBehavior="AllowLeaveEditor" AllowNullInput="True">
+                                    <dxe:DateEdit.EditValue>
+                                        <Binding Path="DataContext.CreationDateFrom" RelativeSource="{RelativeSource AncestorType=UserControl}" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                                            <Binding.ValidationRules>
+                                                <Validation:PORequestsValidation FieldName="CreationDateFrom" ValidationStep="UpdatedValue"  />
+                                            </Binding.ValidationRules>
+                                        </Binding>
+                                    </dxe:DateEdit.EditValue>
+                                </dxe:DateEdit>
+                                <!--To Date-->
+                                <Label Content="{DynamicResource OTMTo}" Grid.Row="3" Grid.Column="2"  Margin="10,5,0,0" Style="{DynamicResource Label16Style}" HorizontalAlignment="Center"></Label>
+                                <dxe:DateEdit Grid.Row="3" Grid.Column="3" Style="{DynamicResource BaseUniversalStyle}" Height="30" Margin="0,0,8,0"
+                                              ShowClearButton="False"
+                                              Mask="{Binding CultureInfo.CurrentCulture.DateTimeFormat.YearMonthPattern}" 
+                                              MaskUseAsDisplayFormat="True"
+                                              HorizontalAlignment="Stretch"  VerticalAlignment="Top" IsTextEditable="False" 
+                                              HorizontalContentAlignment="Right" InvalidValueBehavior="AllowLeaveEditor" AllowNullInput="True">
+                                    <dxe:DateEdit.EditValue>
+                                        <Binding Path="DataContext.CreationDateTo" RelativeSource="{RelativeSource AncestorType=UserControl}" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                                            <Binding.ValidationRules>
+                                                <Validation:PORequestsValidation FieldName="CreationDateTo" ValidationStep="UpdatedValue"  />
+                                            </Binding.ValidationRules>
+                                        </Binding>
+                                    </dxe:DateEdit.EditValue>
+                                </dxe:DateEdit>
+                                <!-- Update Date-->
+                                <CheckBox Content="{DynamicResource OTMUpdateDate}" Grid.Row="4" Grid.Column="0"  Grid.ColumnSpan="2" Margin="10,5,0,0" Style="{DynamicResource CheckBoxStyle}"
+                                              IsChecked="{Binding DataContext.IsupdateDate,RelativeSource={RelativeSource AncestorType=UserControl},UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"></CheckBox>
+                                <!--From Date-->
+                                <Label Content="{DynamicResource OTMFrom}" Grid.Row="5" Grid.Column="0"  Margin="10,5,0,0" Style="{DynamicResource Label16Style}" HorizontalAlignment="Center"></Label>
+                                <dxe:DateEdit Grid.Row="5" Grid.Column="1" Style="{DynamicResource BaseUniversalStyle}" Height="30"
+                                              ShowClearButton="False"
+                                              Mask="{Binding CultureInfo.CurrentCulture.DateTimeFormat.YearMonthPattern}" 
+                                              MaskUseAsDisplayFormat="True"
+                                              HorizontalAlignment="Stretch"  VerticalAlignment="Top" IsTextEditable="False" 
+                                              HorizontalContentAlignment="Right" InvalidValueBehavior="AllowLeaveEditor" AllowNullInput="True">
+                                    <dxe:DateEdit.EditValue>
+                                        <Binding Path="DataContext.UpdateDateFrom" RelativeSource="{RelativeSource AncestorType=UserControl}" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                                            <Binding.ValidationRules>
+                                                <Validation:PORequestsValidation FieldName="UpdateDateFrom" ValidationStep="UpdatedValue"  />
+                                            </Binding.ValidationRules>
+                                        </Binding>
+                                    </dxe:DateEdit.EditValue>
+                                </dxe:DateEdit>
+                                <!--To Date-->
+                                <Label Content="{DynamicResource OTMTo}" Grid.Row="5" Grid.Column="2"  Margin="10,5,0,0" Style="{DynamicResource Label16Style}" HorizontalAlignment="Center"></Label>
+                                <dxe:DateEdit Grid.Row="5" Grid.Column="3" Style="{DynamicResource BaseUniversalStyle}" Height="30" Margin="0,0,8,0"
+                                              ShowClearButton="False"
+                                              Mask="{Binding CultureInfo.CurrentCulture.DateTimeFormat.YearMonthPattern}" 
+                                              MaskUseAsDisplayFormat="True"
+                                              HorizontalAlignment="Stretch"  VerticalAlignment="Top" IsTextEditable="False" 
+                                              HorizontalContentAlignment="Right" InvalidValueBehavior="AllowLeaveEditor" AllowNullInput="True">
+                                    <dxe:DateEdit.EditValue>
+                                        <Binding Path="DataContext.UpdateDateTo" RelativeSource="{RelativeSource AncestorType=UserControl}" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                                            <Binding.ValidationRules>
+                                                <Validation:PORequestsValidation FieldName="UpdateDateTo" ValidationStep="UpdatedValue"  />
+                                            </Binding.ValidationRules>
+                                        </Binding>
+                                    </dxe:DateEdit.EditValue>
+                                </dxe:DateEdit>
+                                <!-- Cancelation Date-->
+                                <CheckBox Content="{DynamicResource OTMCancellationDate}" Grid.Row="6" Grid.Column="0"  Grid.ColumnSpan="2" Margin="10,5,0,0" Style="{DynamicResource CheckBoxStyle}"
+                                              IsChecked="{Binding DataContext.IscancellationDate,RelativeSource={RelativeSource AncestorType=UserControl},UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"></CheckBox>
+                                <!--From Date-->
+                                <Label Content="{DynamicResource OTMFrom}" Grid.Row="7" Grid.Column="0"  Margin="10,5,0,0" Style="{DynamicResource Label16Style}" HorizontalAlignment="Center"></Label>
+                                <dxe:DateEdit Grid.Row="7" Grid.Column="1" Style="{DynamicResource BaseUniversalStyle}" Height="30"
+                                              ShowClearButton="False"
+                                              Mask="{Binding CultureInfo.CurrentCulture.DateTimeFormat.YearMonthPattern}" 
+                                              MaskUseAsDisplayFormat="True"
+                                              HorizontalAlignment="Stretch"  VerticalAlignment="Top" IsTextEditable="False" 
+                                              HorizontalContentAlignment="Right" InvalidValueBehavior="AllowLeaveEditor" AllowNullInput="True">
+                                    <dxe:DateEdit.EditValue>
+                                        <Binding Path="DataContext.CancellationDateFrom" RelativeSource="{RelativeSource AncestorType=UserControl}" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                                            <Binding.ValidationRules>
+                                                <Validation:PORequestsValidation FieldName="CancellationDateFrom" ValidationStep="UpdatedValue"  />
+                                            </Binding.ValidationRules>
+                                        </Binding>
+                                    </dxe:DateEdit.EditValue>
+                                </dxe:DateEdit>
+                                <!--To Date-->
+                                <Label Content="{DynamicResource OTMTo}" Grid.Row="7" Grid.Column="2"  Margin="10,5,0,0" Style="{DynamicResource Label16Style}" HorizontalAlignment="Center"></Label>
+                                <dxe:DateEdit Grid.Row="7" Grid.Column="3" Style="{DynamicResource BaseUniversalStyle}" Height="30" Margin="0,0,8,0"
+                                              ShowClearButton="False"
+                                              Mask="{Binding CultureInfo.CurrentCulture.DateTimeFormat.YearMonthPattern}" 
+                                              MaskUseAsDisplayFormat="True"
+                                              HorizontalAlignment="Stretch"  VerticalAlignment="Top" IsTextEditable="False" 
+                                              HorizontalContentAlignment="Right" InvalidValueBehavior="AllowLeaveEditor" AllowNullInput="True">
+                                    <dxe:DateEdit.EditValue>
+                                        <Binding Path="DataContext.CancellationDateTo" RelativeSource="{RelativeSource AncestorType=UserControl}" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                                            <Binding.ValidationRules>
+                                                <Validation:PORequestsValidation FieldName="CancellationDateTo" ValidationStep="UpdatedValue"  />
+                                            </Binding.ValidationRules>
+                                        </Binding>
+                                    </dxe:DateEdit.EditValue>
+                                </dxe:DateEdit>
+                            </Grid>
+                            <DockPanel Height="40" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="1" Grid.Row="10" Grid.ColumnSpan="4">
+                                <Button Content="Ok" Width="100" Height="30" Margin="0,0,5,0"
+                          Command="{Binding DataContext.FilterActionAcceptCommand,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=UserControl}}"
+                          CommandParameter="{Binding ElementName=dropdownButton1}" />
+                                <Button Content="{DynamicResource Cancel}" Width="100" Height="30" Margin="0,0,5,0" 
+                          Command="{Binding DataContext.FilterActionCancelCommand,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=UserControl}}"
+                          CommandParameter="{Binding ElementName=dropdownButton1}" />
+                            </DockPanel>
+                        </Grid>
+                    </ScrollViewer>
+                </dx:DropDownButton.PopupContent>
+            </dx:DropDownButton>
+        </Grid>
+        <DockPanel Grid.Row="1" Grid.ColumnSpan="2" >
+            <Grid ShowGridLines="False" Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="1875*"/>
+                    <ColumnDefinition Width="68*"/>
+                </Grid.ColumnDefinitions>
+                <dxwui:NavigationFrame x:Name="Navigatedframe1" AnimationType="None">
+                    <dxmvvm:Interaction.Behaviors>
+                        <dxwuin:FrameNavigationService/>
+                    </dxmvvm:Interaction.Behaviors>
+                </dxwui:NavigationFrame>
+                <!--Visibility="{Binding ElementName=expandButton, Path=IsChecked, Converter={dxmvvm:BooleanToVisibilityConverter}}"-->
+                <UIHelper:DpiResizingPanel Grid.Column="0" DockPanel.Dock="Left" Visibility="{Binding IsTileBarVisibleType}">
+                    <dxnav:TileBar x:Name="tileBar1" DockPanel.Dock="Left" 
+                               Visibility="{Binding ElementName=expandButton1, Path=IsChecked, Converter={dxmvvm:BooleanToVisibilityConverter}}"
+                               Margin="-20,-20,-23,0"
+                               SelectedItem="{Binding SelectedTypeTileBarItems,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+                               Orientation="Vertical"
+                               ItemSpacing="5"
+                               ItemsSource="{Binding FilterTypeListOfTiles ,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                               ItemContainerStyle="{StaticResource LeftPanelTypeTileItemStyle}"  
+                               Focusable="True">
+                        <dxmvvm:Interaction.Behaviors>
+                            <dxmvvm:EventToCommand Command="{Binding DataContext.CommandFilterPOTypeTileClick,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=UserControl}}" EventName="SelectionChanged" PassEventArgsToCommand="True"/>
+                            <dxmvvm:EventToCommand Command="{Binding DataContext.CommandTileBarPOTypeClickDoubleClick,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=UserControl}}" EventName="MouseDoubleClick" CommandParameter="{Binding ElementName=PORegisteredTableView}"/>
+                        </dxmvvm:Interaction.Behaviors>
+                    </dxnav:TileBar>
+                </UIHelper:DpiResizingPanel>
+                <!-- Margin="0,108,1875.252,108" Visibility="{Binding IsTileBarVisibleType}"-->
+                <ToggleButton x:Name="expandButton1"  Grid.Column="1" DockPanel.Dock="Left" Visibility="{Binding IsTileBarVisibleType}" Style="{StaticResource HideButtonStyle}" IsChecked="True" VerticalAlignment="Center"/>
+                <dxg:GridControl x:Name="PORegisteredGrid" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"  Grid.Column="2"  AllowLiveDataShaping="True" 
+                                 ItemsSource="{Binding DataContext.PoRegisteredList,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=UserControl}}" SelectionMode="Cell"
+                                 SelectedItem="{Binding SelectedPoRegistered,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" Width="Auto"
+                                 ImplyNullLikeEmptyStringWhenFiltering="True" FilterString="{Binding DataContext.MyFilterString,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=UserControl}}" Grid.ColumnSpan="2" Margin="0.2,0,0,0">
+                    <dxg:GridControl.Bands>
+                        <dxg:GridControlBand Name="BandPORegistered">
+                            <!--Code-->
+                            <dxg:GridColumn FieldName="Code" Header="{DynamicResource OTMCode}" MinWidth="100"  Width="100"  ReadOnly="True" AllowBestFit="true"  FilterPopupMode="CheckedList">
+                                <dxg:GridColumn.CellToolTipBinding>
+                                    <Binding Path="Code" />
+                                </dxg:GridColumn.CellToolTipBinding>
+                                <dxg:GridColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Height="24">
+                                            <TextBlock Text ="{Binding RowData.Row.Code,UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center"  Margin="5,0,0,0" ></TextBlock>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </dxg:GridColumn.CellTemplate>
+                            </dxg:GridColumn>
+                            <!--Type-->
+                            <dxg:GridColumn FieldName="Type" Header="{DynamicResource OTMType}" Width="100" MinWidth="100" ReadOnly="True" AllowBestFit="true"  FilterPopupMode="CheckedList">
+                                <dxg:GridColumn.CellToolTipBinding>
+                                    <Binding Path="Type" />
+                                </dxg:GridColumn.CellToolTipBinding>
+                                <dxg:GridColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Height="24">
+                                            <Image VerticalAlignment="Center" Height="24" Width="24" Margin="5,0,0,0">
+                                                <Image.Style>
+                                                    <Style>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Path=RowData.Row.IdPOType}" Value="1">
+                                                                <Setter Property="Image.Source" Value="/Emdep.Geos.Modules.OTM;component/Assets/Images/Star.png" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Path=RowData.Row.IdPOType}" Value="2">
+                                                                <Setter Property="Image.Source" Value="/Emdep.Geos.Modules.OTM;component/Assets/Images/Green Flag.png" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Path=RowData.Row.IdPOType}" Value="3">
+                                                                <Setter Property="Image.Source" Value="/Emdep.Geos.Modules.OTM;component/Assets/Images/BlueFlag.png" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Image.Style>
+                                            </Image>
+                                            <TextBlock Text ="{Binding RowData.Row.Type,UpdateSourceTrigger=PropertyChanged}"  HorizontalAlignment="Center" Margin="5,0,0,0" ></TextBlock>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </dxg:GridColumn.CellTemplate>
+                            </dxg:GridColumn>
+                            <!--Group-->
+                            <dxg:GridColumn FieldName="Group" Header="{DynamicResource OTMGroup}" MinWidth="100" Width="100" AllowBestFit="true" ReadOnly="True"  FilterPopupMode="CheckedList">
+                                <dxg:GridColumn.CellToolTipBinding>
+                                    <Binding Path="Group" />
+                                </dxg:GridColumn.CellToolTipBinding>
+                                <dxg:GridColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Height="24">
+                                            <TextBlock Text ="{Binding RowData.Row.Group,UpdateSourceTrigger=PropertyChanged}"   HorizontalAlignment="Center" Margin="5,0,0,0" ></TextBlock>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </dxg:GridColumn.CellTemplate>
+                            </dxg:GridColumn>
+                            <!--Plant-->
+                            <dxg:GridColumn FieldName="Plant" Header="{DynamicResource OTMPlant}" MinWidth="100" Width="120" AllowBestFit="true" ReadOnly="True"  FilterPopupMode="CheckedList">
+                                <dxg:GridColumn.CellToolTipBinding>
+                                    <Binding Path="Plant" />
+                                </dxg:GridColumn.CellToolTipBinding>
+                                <dxg:GridColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Height="24">
+                                            <TextBlock Text ="{Binding RowData.Row.Plant,UpdateSourceTrigger=PropertyChanged}"   HorizontalAlignment="Center" Margin="5,0,0,0" ></TextBlock>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </dxg:GridColumn.CellTemplate>
+                            </dxg:GridColumn>
+                            <!--Country-->
+                            <dxg:GridColumn Header="{DynamicResource OTMCountry}" MinWidth="100" Width="120" AllowBestFit="true"  FieldName="Country" FilterPopupMode="CheckedList" ReadOnly="True">
+                                <dxg:GridColumn.CellToolTipBinding>
+                                    <Binding Path="Country" />
+                                </dxg:GridColumn.CellToolTipBinding>
+                                <dxg:GridColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Height="24">
+                                            <!--<Image  
+                            Source="{Binding RowData.Row.CountryIconBytes,UpdateSourceTrigger=PropertyChanged}"  
+                            VerticalAlignment="Center" Height="24" Width="24" Margin="2,0,0,0" />-->
+                                            <Image Source="{Binding RowData.Row.CountryIconUrl,Converter={StaticResource ImageUrlToByteArrayConverter},UpdateSourceTrigger=PropertyChanged ,ConverterParameter='image/png'}"
+                                                VerticalAlignment="Stretch" HorizontalAlignment="Stretch" MaxHeight="142" Margin="2" >
+                                               
+                                            </Image>
+
+                                            <TextBlock Text ="{Binding RowData.Row.Country,UpdateSourceTrigger=PropertyChanged}"  VerticalAlignment="Center" Margin="5,0,0,0" ></TextBlock>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </dxg:GridColumn.CellTemplate>
+                                <dxg:GridColumn.PrintCellStyle>
+                                    <Style TargetType="dxe:TextEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                                        <Setter Property="dxp:ExportSettings.TargetType" Value="Panel" />
+                                        <Setter Property="DisplayTemplate">
+                                            <Setter.Value>
+                                                <ControlTemplate>
+                                                    <dxe:TextEdit Name="PART_Editor" Text="{Binding Row.Country}" HorizontalAlignment="Left"
+                                                        IsPrintingMode="True">
+                                                    </dxe:TextEdit>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </dxg:GridColumn.PrintCellStyle>
+                            </dxg:GridColumn>
+                            <!--Region-->
+                            <dxg:GridColumn FieldName="Region" Header="{DynamicResource OTMRegion}" AllowBestFit="true" MinWidth="70" Width="70"  ReadOnly="True"  FilterPopupMode="CheckedList">
+                                <dxg:GridColumn.CellToolTipBinding>
+                                    <Binding Path="Region" />
+                                </dxg:GridColumn.CellToolTipBinding>
+                                <dxg:GridColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Height="24">
+                                            <TextBlock Text ="{Binding RowData.Row.Region,UpdateSourceTrigger=PropertyChanged}"  HorizontalAlignment="Center" Margin="5,0,0,0" ></TextBlock>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </dxg:GridColumn.CellTemplate>
+                            </dxg:GridColumn>
+                            <!--Reception Date-->
+                            <dxg:GridColumn FieldName="ReceptionDate" 
+                                                    CellToolTipBinding="{DXBinding Expr='ReceptionDate.ToString(`dd/MM/yyyy`)'}"      
+                                                    Header="{DynamicResource OTMReceptionDate}" AllowBestFit="true"   MinWidth="120" Width="120" Visible="True"  ReadOnly="True"  FilterPopupMode="CheckedList">
+                                <dxg:GridColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Height="24">
+                                            <TextBlock Text ="{Binding RowData.Row.ReceptionDate,UpdateSourceTrigger=PropertyChanged,StringFormat={}{0:dd/MM/yyyy},ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}"  HorizontalAlignment="Center" Margin="5,0,0,0" ></TextBlock>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </dxg:GridColumn.CellTemplate>
+                                <dxg:GridColumn.PrintCellStyle>
+                                    <Style TargetType="dxe:TextEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                                        <Setter Property="dxp:ExportSettings.TargetType" Value="Panel" />
+                                        <Setter Property="DisplayTemplate">
+                                            <Setter.Value>
+                                                <ControlTemplate>
+                                                    <dxe:TextEdit Name="PART_Editor" Text="{Binding RowData.Row.ReceptionDate,StringFormat={}{0:dd/MM/yyyy},ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}" HorizontalAlignment="Left"
+                                                               IsPrintingMode="True">
+                                                    </dxe:TextEdit>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </dxg:GridColumn.PrintCellStyle>
+                            </dxg:GridColumn>
+                            <!--Sender-->
+                            <dxg:GridColumn FieldName="Sender" Header="{DynamicResource OTMSender}" MinWidth="100" Width="120" AllowBestFit="true" ReadOnly="True"  FilterPopupMode="CheckedList">
+                                <dxg:GridColumn.CellToolTipBinding>
+                                    <Binding Path="Sender" />
+                                </dxg:GridColumn.CellToolTipBinding>
+                                <dxg:GridColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Height="24">
+                                            <TextBlock Text ="{Binding RowData.Row.Sender,UpdateSourceTrigger=PropertyChanged}"  HorizontalAlignment="Center" Margin="5,0,0,0" ></TextBlock>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </dxg:GridColumn.CellTemplate>
+                            </dxg:GridColumn>
+                            <!--Value-->
+                            <dxg:GridColumn Header="{DynamicResource OTMValue}" MinWidth="100" Width="100" AllowBestFit="true" FieldName="POValue" FilterPopupMode="CheckedList" ReadOnly="True">
+                                <dxg:GridColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel VerticalAlignment="Center" Orientation="Horizontal" HorizontalAlignment="Right">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="1"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="4"/>
+                                                    <ColumnDefinition Width="auto"/>
+                                                    <ColumnDefinition Width="1"/>
+                                                </Grid.ColumnDefinitions>
+                                                <!-- Define the TextBlock with a Style and DataTrigger -->
+                                                <TextBlock Grid.Column="1" VerticalAlignment="Center">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Text" Value="{Binding RowData.Row.POValue, StringFormat={}{0:N2}, ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}"/>
+                                                            <Style.Triggers>
+                                                                <!-- Trigger to set Text to null if TransferAmount is 0.00 -->
+                                                                <DataTrigger Binding="{Binding RowData.Row.POValue}" Value="{x:Null}">
+                                                                    <Setter Property="Text"  Value="0.00" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                                <!--<TextBlock Grid.Column="3" Text="{Binding RowData.Row.CurSymbol}" VerticalAlignment="Center" />-->
+                                            </Grid>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </dxg:GridColumn.CellTemplate>
+                                <dxg:GridColumn.PrintCellStyle>
+                                    <Style TargetType="dxe:TextEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                                        <Setter Property="dxp:ExportSettings.TargetType" Value="Panel" />
+                                        <Setter Property="DisplayTemplate">
+                                            <Setter.Value>
+                                                <ControlTemplate>
+                                                    <!-- Apply the same logic in PrintCellStyle if needed -->
+                                                    <dxe:TextEdit Name="PART_Editor" HorizontalAlignment="Right" IsPrintingMode="True">
+                                                        <dxe:TextEdit.Style>
+                                                            <Style TargetType="dxe:TextEdit">
+                                                                <Setter Property="Text" Value="{Binding RowData.Row.POValue, StringFormat={}{0:N2}, ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}" />
+                                                                <Style.Triggers>
+                                                                    <!-- Trigger to set Text to null if TransferAmount is 0.00 -->
+                                                                    <DataTrigger Binding="{Binding RowData.Row.Value}" Value="0.00">
+                                                                        <Setter Property="Text" Value="{x:Null}" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </dxe:TextEdit.Style>
+                                                    </dxe:TextEdit>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </dxg:GridColumn.PrintCellStyle>
+                            </dxg:GridColumn>
+                            <!--Currency-->
+                            <dxg:GridColumn Header="{DynamicResource OTMCurrency}" AllowBestFit="true" FieldName="Currency" FilterPopupMode="CheckedList" MinWidth="70" Width="70" ReadOnly="True">
+                                <dxg:GridColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Height="24">
+                                            <Image  
+                            Source="{Binding RowData.Row.CurrencyIconBytes,UpdateSourceTrigger=PropertyChanged}"  
+                            VerticalAlignment="Center" Height="24" Width="24" Margin="2,0,0,0" />
+                                            <TextBlock Text ="{Binding RowData.Row.Currency,UpdateSourceTrigger=PropertyChanged}"  VerticalAlignment="Center" Margin="5,0,0,0" ></TextBlock>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </dxg:GridColumn.CellTemplate>
+                                <dxg:GridColumn.PrintCellStyle>
+                                    <Style TargetType="dxe:TextEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                                        <Setter Property="dxp:ExportSettings.TargetType" Value="Panel" />
+                                        <Setter Property="DisplayTemplate">
+                                            <Setter.Value>
+                                                <ControlTemplate>
+                                                    <dxe:TextEdit Name="PART_Editor" Text="{Binding Row.Currency}" HorizontalAlignment="Left"
+                                                        IsPrintingMode="True">
+                                                    </dxe:TextEdit>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </dxg:GridColumn.PrintCellStyle>
+                            </dxg:GridColumn>
+                            <!--Amount-->
+                            <dxg:GridColumn AllowBestFit="true" MinWidth="100" Width="100"  FieldName="Amount" FilterPopupMode="CheckedList" ReadOnly="True">
+                                <dxg:GridColumn.EditSettings>
+                                    <dxe:TextEditSettings DisplayFormat="c"/>
+                                </dxg:GridColumn.EditSettings>
+                                <dxg:GridColumn.HeaderTemplate>
+                                    <DataTemplate>
+                                        <DockPanel>
+                                            <TextBlock Text="{DynamicResource POAmount}"></TextBlock>
+                                            <TextBlock Text=" (" />
+                                            <TextBlock Text="{ Binding DataContext.CurrencyInSetting,RelativeSource={RelativeSource AncestorType=UserControl}}"></TextBlock>
+                                            <TextBlock Text=")" />
+                                        </DockPanel>
+                                    </DataTemplate>
+                                </dxg:GridColumn.HeaderTemplate>
+                                <dxg:GridColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Margin="0,0,5,0" VerticalAlignment="Center" Orientation="Horizontal" HorizontalAlignment="Right">
+                                            <!-- Define the TextBlock with a Style and DataTrigger -->
+                                            <!--<TextBlock Text ="{Binding DataContext.AmountCurrencySymbol,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=UserControl}}"  VerticalAlignment="Center" Margin="5,0,0,0" ></TextBlock>-->
+                                            <TextBlock VerticalAlignment="Center">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Text" Value="{Binding RowData.Row.Amount, StringFormat={}{0:N2}, ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}"/>
+                                                        <Style.Triggers>
+                                                            <!-- Trigger to set Text to null if TransferAmount is 0.00 -->
+                                                            <DataTrigger Binding="{Binding RowData.Row.Amount}" Value="{x:Null}">
+                                                                <Setter Property="Text" Value="0.00" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                            <TextBlock Text=" " />
+                                            <TextBlock VerticalAlignment="Center">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Text" 
+                                                                        Value="{Binding DataContext.AmountCurrencySymbol, UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                                                        <Style.Triggers>
+                                                            <!-- Trigger to set Text to '0.00' if Amount is null or 0.00 -->
+                                                            <DataTrigger Binding="{Binding RowData.Row.Amount}" Value="{x:Null}">
+                                                                <Setter Property="Text" Value="0.00" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </dxg:GridColumn.CellTemplate>
+                                <dxg:GridColumn.PrintCellStyle>
+                                    <Style TargetType="dxe:TextEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                                        <Setter Property="dxp:ExportSettings.TargetType" Value="Panel" />
+                                        <Setter Property="DisplayTemplate">
+                                            <Setter.Value>
+                                                <ControlTemplate>
+                                                    <!-- Apply the same logic in PrintCellStyle if needed -->
+                                                    <dxe:TextEdit Name="PART_Editor" HorizontalAlignment="Right" IsPrintingMode="True">
+                                                        <dxe:TextEdit.Style>
+                                                            <Style TargetType="dxe:TextEdit">
+                                                                <Setter Property="Text" Value="{Binding RowData.Row.POValue, StringFormat={}{0:N2}, ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}" />
+                                                                <Style.Triggers>
+                                                                    <!-- Trigger to set Text to null if TransferAmount is 0.00 -->
+                                                                    <DataTrigger Binding="{Binding RowData.Row.Value}" Value="0.00">
+                                                                        <Setter Property="Text" Value="{x:Null}" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </dxe:TextEdit.Style>
+                                                    </dxe:TextEdit>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </dxg:GridColumn.PrintCellStyle>
+                            </dxg:GridColumn>
+                            <!--Remarks-->
+                            <dxg:GridColumn FieldName="Remarks" MinWidth="100" Width="150" AllowBestFit="true"  Header="{DynamicResource OTMRemarks}" ReadOnly="True"  FilterPopupMode="CheckedList">
+                                <dxg:GridColumn.CellToolTipBinding>
+                                    <Binding Path="Remarks" />
+                                </dxg:GridColumn.CellToolTipBinding>
+                                <dxg:GridColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Height="24">
+                                            <TextBlock Text ="{Binding RowData.Row.Remarks,UpdateSourceTrigger=PropertyChanged}"  HorizontalAlignment="Center" Margin="5,0,0,0" ></TextBlock>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </dxg:GridColumn.CellTemplate>
+                            </dxg:GridColumn>
+                            <!--LinkedOffer-->
+                            <dxg:GridColumn FieldName="LinkedOffer" AllowBestFit="true"  Header="{DynamicResource OTMLinkedOffers}" MinWidth="100"  Width="100"  ReadOnly="True"  FilterPopupMode="CheckedList">
+                                <dxg:GridColumn.CellToolTipBinding>
+                                    <Binding Path="LinkedOffer" />
+                                </dxg:GridColumn.CellToolTipBinding>
+                                <dxg:GridColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Height="24">
+                                            <TextBlock Text ="{Binding RowData.Row.LinkedOffer,UpdateSourceTrigger=PropertyChanged}"  HorizontalAlignment="Center" Margin="5,0,0,0" ></TextBlock>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </dxg:GridColumn.CellTemplate>
+                            </dxg:GridColumn>
+                            <!--Shipping Address-->
+                            <dxg:GridColumn FieldName="ShippingAddress" MinWidth="100" Width="250" AllowBestFit="true"  Header="{DynamicResource OTMShippingAddress}" ReadOnly="True"  FilterPopupMode="CheckedList">
+                                <dxg:GridColumn.CellToolTipBinding>
+                                    <Binding Path="ShippingAddress" />
+                                </dxg:GridColumn.CellToolTipBinding>
+                                <dxg:GridColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Height="24">
+                                            <TextBlock Text ="{Binding RowData.Row.ShippingAddress,UpdateSourceTrigger=PropertyChanged}"  HorizontalAlignment="Center" Margin="5,0,0,0" ></TextBlock>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </dxg:GridColumn.CellTemplate>
+                            </dxg:GridColumn>
+                            <!--Is OK-->
+                            <dxg:GridColumn FieldName="IsOK" MinWidth="60" AllowBestFit="true"  Header="{DynamicResource OTMIsOK}" Width="60"  ReadOnly="True"  FilterPopupMode="CheckedList">
+                                <dxg:GridColumn.CellToolTipBinding>
+                                    <Binding Path="IsOK" />
+                                </dxg:GridColumn.CellToolTipBinding>
+                                <dxg:GridColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Orientation="Horizontal">
+                                            <!--<TextBlock Text ="{Binding RowData.Row.IsOK,UpdateSourceTrigger=PropertyChanged}"  HorizontalAlignment="Center" Margin="5,0,0,0" ></TextBlock>-->
+                                            <!--<Image Source="{Binding RowData.Row.IsOKIconBytes, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" Height="24" Width="24" Margin="2,0,0,0" />-->
+                                            <Image VerticalAlignment="Center" Height="24" Width="24" Margin="5,0,0,0">
+                                                <Image.Style>
+                                                    <Style>
+                                                        <Style.Triggers>
+                                                            <!-- When IsOK equals 0, show Image1 -->
+                                                            <DataTrigger Binding="{Binding Path=RowData.Row.IsOK}" Value="PO OK">
+                                                                <Setter Property="Image.Source" Value="/Emdep.Geos.Modules.OTM;component/Assets/Images/IsOK.png" />
+                                                            </DataTrigger>
+                                                            <!-- When IsOK equals 1, show Image2 -->
+                                                            <DataTrigger Binding="{Binding Path=RowData.Row.IsOK}" Value="PO Not OK">
+                                                                <Setter Property="Image.Source" Value="/Emdep.Geos.Modules.OTM;component/Assets/Images/IsNotOK.png" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Image.Style>
+                                            </Image>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </dxg:GridColumn.CellTemplate>
+                            </dxg:GridColumn>
+                            <!--Confirmation-->
+                            <dxg:GridColumn FieldName="Confirmation" MinWidth="100" AllowBestFit="true"  Header="{DynamicResource OTMConfirmation}" Width="100"  ReadOnly="True"  FilterPopupMode="CheckedList">
+                                <dxg:GridColumn.CellToolTipBinding>
+                                    <Binding Path="Confirmation" />
+                                </dxg:GridColumn.CellToolTipBinding>
+                                <dxg:GridColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Height="24">
+                                            <!--<TextBlock Text ="{Binding RowData.Row.Confirmation,UpdateSourceTrigger=PropertyChanged}"  HorizontalAlignment="Center" Margin="5,0,0,0" ></TextBlock>-->
+                                            <Image VerticalAlignment="Center" Height="24" Width="24" Margin="40,0,0,0">
+                                                <Image.Style>
+                                                    <Style>
+                                                        <Style.Triggers>
+                                                            <!-- When Confirmation mail send to all linked offer is equals 2, show this image -->
+                                                            <DataTrigger Binding="{Binding Path=RowData.Row.Confirmation}" Value="Email Send to All Offer">
+                                                                <Setter Property="Image.Source" Value="/Emdep.Geos.Modules.OTM;component/Assets/Images/EmailWIthGreenArrow.png" />
+                                                            </DataTrigger>
+                                                            <!-- When Confirmation mail send to some linked offer is equals 1, show this image -->
+                                                            <DataTrigger Binding="{Binding Path=RowData.Row.Confirmation}" Value="Email Send Some Offer">
+                                                                <Setter Property="Image.Source" Value="/Emdep.Geos.Modules.OTM;component/Assets/Images/EmailWIthGrayArrow.png" />
+                                                            </DataTrigger>
+                                                            <!-- When Confirmation mail not send to all linked offer is equals 0, show this image -->
+                                                            <DataTrigger Binding="{Binding Path=RowData.Row.Confirmation}" Value="Email Not Send">
+                                                                <Setter Property="Image.Source" Value="/Emdep.Geos.Modules.OTM;component/Assets/Images/MailIcon.png" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Image.Style>
+                                            </Image>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </dxg:GridColumn.CellTemplate>
+                            </dxg:GridColumn>
+                            <!--Creation Date-->
+                            <dxg:GridColumn FieldName="CreationDate" AllowBestFit="true" 
+                                                    CellToolTipBinding="{DXBinding Expr='CreationDate.ToString(`dd/MM/yyyy`)'}" 
+                                                    Header="{DynamicResource OTMCreationDate}" Width="120"  MinWidth="120" AllowResizing="true"  Visible="True"  ReadOnly="True"  FilterPopupMode="CheckedList">
+                                <dxg:GridColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Height="24">
+                                            <TextBlock Text ="{Binding RowData.Row.CreationDate,UpdateSourceTrigger=PropertyChanged,StringFormat={}{0:dd/MM/yyyy},ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}"  HorizontalAlignment="Center" Margin="5,0,0,0" ></TextBlock>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </dxg:GridColumn.CellTemplate>
+                                <dxg:GridColumn.PrintCellStyle>
+                                    <Style TargetType="dxe:TextEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                                        <Setter Property="dxp:ExportSettings.TargetType" Value="Panel" />
+                                        <Setter Property="DisplayTemplate">
+                                            <Setter.Value>
+                                                <ControlTemplate>
+                                                    <dxe:TextEdit Name="PART_Editor" Text="{Binding RowData.Row.CreationDate,StringFormat={}{0:dd/MM/yyyy},ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}" HorizontalAlignment="Left"
+                                                               IsPrintingMode="True">
+                                                    </dxe:TextEdit>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </dxg:GridColumn.PrintCellStyle>
+                            </dxg:GridColumn>
+                            <!--Creator-->
+                            <dxg:GridColumn FieldName="Creator" AllowBestFit="true"  Header="{DynamicResource OTMCreator}" MinWidth="100" Width="100"  ReadOnly="True"  FilterPopupMode="CheckedList">
+                                <dxg:GridColumn.CellToolTipBinding>
+                                    <Binding Path="Creator" />
+                                </dxg:GridColumn.CellToolTipBinding>
+                                <dxg:GridColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Height="24">
+                                            <TextBlock Text ="{Binding RowData.Row.Creator,UpdateSourceTrigger=PropertyChanged}"  HorizontalAlignment="Center" Margin="5,0,0,0" ></TextBlock>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </dxg:GridColumn.CellTemplate>
+                            </dxg:GridColumn>
+                            <!--Update Date-->
+                            <dxg:GridColumn FieldName="UpdaterDate" AllowBestFit="true"
+                                                    CellToolTipBinding="{DXBinding Expr='UpdaterDate.ToString(`dd/MM/yyyy`)'}"                                                    
+                                                    Header="{DynamicResource OTMUpdateDate}" Width="120"  MinWidth="120" AllowResizing="true" Visible="True"  ReadOnly="True"  FilterPopupMode="CheckedList">
+                                <dxg:GridColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Height="24">
+                                            <TextBlock Text ="{Binding RowData.Row.UpdaterDate,UpdateSourceTrigger=PropertyChanged,StringFormat={}{0:dd/MM/yyyy},ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}"  HorizontalAlignment="Center" Margin="5,0,0,0" ></TextBlock>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </dxg:GridColumn.CellTemplate>
+                                <dxg:GridColumn.PrintCellStyle>
+                                    <Style TargetType="dxe:TextEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                                        <Setter Property="dxp:ExportSettings.TargetType" Value="Panel" />
+                                        <Setter Property="DisplayTemplate">
+                                            <Setter.Value>
+                                                <ControlTemplate>
+                                                    <dxe:TextEdit Name="PART_Editor" Text="{Binding RowData.Row.UpdateDate,StringFormat={}{0:dd/MM/yyyy},ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}" HorizontalAlignment="Left" IsPrintingMode="True">
+                                                    </dxe:TextEdit>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </dxg:GridColumn.PrintCellStyle>
+                            </dxg:GridColumn>
+                            <!--Updater-->
+                            <dxg:GridColumn FieldName="Updater" AllowBestFit="true"  Header="{DynamicResource OTMUpdater}" MinWidth="100" Width="100" AllowResizing="true"  ReadOnly="True"  FilterPopupMode="CheckedList">
+                                <dxg:GridColumn.CellToolTipBinding>
+                                    <Binding Path="Updater" />
+                                </dxg:GridColumn.CellToolTipBinding>
+                                <dxg:GridColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Height="24">
+                                            <TextBlock Text ="{Binding RowData.Row.Updater,UpdateSourceTrigger=PropertyChanged}"  HorizontalAlignment="Center" Margin="5,0,0,0" ></TextBlock>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </dxg:GridColumn.CellTemplate>
+                            </dxg:GridColumn>
+                            <!--Is Canceled-->
+                            <dxg:GridColumn FieldName="IsCancelled" Width="100" MinWidth="100" AllowResizing="true" AllowBestFit="true"  Header="{DynamicResource OTMIsCanceled}" ReadOnly="True"  FilterPopupMode="CheckedList">
+                                <dxg:GridColumn.CellToolTipBinding>
+                                    <Binding Path="IsCancelled" />
+                                </dxg:GridColumn.CellToolTipBinding>
+                                <dxg:GridColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Height="24">
+                                            <!--<TextBlock Text ="{Binding RowData.Row.IsCancelled,UpdateSourceTrigger=PropertyChanged}"  HorizontalAlignment="Center" Margin="5,0,0,0" ></TextBlock>-->
+                                            <Image VerticalAlignment="Center" Height="24" Width="24" Margin="40,0,0,0">
+                                                <Image.Style>
+                                                    <Style>
+                                                        <Style.Triggers>
+                                                            <!-- When Is Canceled equals 1, show cancel image -->
+                                                            <DataTrigger Binding="{Binding Path=RowData.Row.IsCancelled}" Value="PO Cancelled">
+                                                                <Setter Property="Image.Source" Value="/Emdep.Geos.Modules.OTM;component/Assets/Images/cancel.png" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Image.Style>
+                                            </Image>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </dxg:GridColumn.CellTemplate>
+                            </dxg:GridColumn>
+                            <!--Canceller-->
+                            <dxg:GridColumn FieldName="Canceler"  AllowBestFit="true"  Header="{DynamicResource OTMCanceler}" MinWidth="100" Width="100" AllowResizing="true"  ReadOnly="True"  FilterPopupMode="CheckedList">
+                                <dxg:GridColumn.CellToolTipBinding>
+                                    <Binding Path="Canceler" />
+                                </dxg:GridColumn.CellToolTipBinding>
+                                <dxg:GridColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Height="24">
+                                            <TextBlock Text ="{Binding RowData.Row.Canceler,UpdateSourceTrigger=PropertyChanged}"  HorizontalAlignment="Center" Margin="5,0,0,0" ></TextBlock>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </dxg:GridColumn.CellTemplate>
+                            </dxg:GridColumn>
+                            <!--Cancellation Date-->
+                            <dxg:GridColumn FieldName="CancellationDate" AllowBestFit="true" AllowResizing="true"
+                                                     CellToolTipBinding="{DXBinding Expr='CancellationDate.ToString(`dd/MM/yyyy`)'}" 
+                                                    Header="{DynamicResource OTMCancellationDate}"  MinWidth="120" Width="120" Visible="True"  ReadOnly="True"  FilterPopupMode="CheckedList">
+                                <dxg:GridColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Height="24">
+                                            <TextBlock Text ="{Binding RowData.Row.CancellationDate,UpdateSourceTrigger=PropertyChanged,StringFormat={}{0:dd/MM/yyyy},ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}"  HorizontalAlignment="Center" Margin="5,0,0,0" ></TextBlock>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </dxg:GridColumn.CellTemplate>
+                                <dxg:GridColumn.PrintCellStyle>
+                                    <Style TargetType="dxe:TextEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                                        <Setter Property="dxp:ExportSettings.TargetType" Value="Panel" />
+                                        <Setter Property="DisplayTemplate">
+                                            <Setter.Value>
+                                                <ControlTemplate>
+                                                    <dxe:TextEdit Name="PART_Editor" Text="{Binding RowData.Row.CancellationDate,StringFormat={}{0:dd/MM/yyyy},ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}" HorizontalAlignment="Left" IsPrintingMode="True">
+                                                    </dxe:TextEdit>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </dxg:GridColumn.PrintCellStyle>
+                            </dxg:GridColumn>
+                        </dxg:GridControlBand>
+                    </dxg:GridControl.Bands>
+                    <dxmvvm:Interaction.Behaviors>
+                        <UIHelper:GridSelectingBehavior />
+                        <dxmvvm:EventToCommand Command="{Binding DataContext.UpdatedCommand ,RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                          EventName="LayoutUpdated" CommandParameter="{Binding ElementName=PORegisteredTableView}"/>
+                    </dxmvvm:Interaction.Behaviors>
+                    <dxg:GridControl.TotalSummary>
+                        <dxg:GridSummaryItem FieldName="Amount" SummaryType="Sum"  DisplayFormat=" {0:C}"  />
+                        <dxg:GridSummaryItem FieldName="Code" SummaryType="Count" DisplayFormat="Total Count: {0}" />
+                    </dxg:GridControl.TotalSummary>
+                    <dxg:GridControl.View>
+                        <dxg:TableView x:Name="PORegisteredTableView"
+                                   NavigationStyle="Row"
+                                   RowDetailsVisibilityMode="Visible"
+                                   ShowHorizontalLines="True"
+                                   ShowSearchPanelMode="Always"
+                                   ShowColumnHeaders="True"
+                                   VerticalScrollbarVisibility="Auto" 
+                                   HorizontalScrollbarVisibility="Auto"
+                                   AllowFixedColumnMenu="True"
+                                   ShowFixedTotalSummary="True" 
+                                   SearchPanelHorizontalAlignment="Stretch"
+                                   ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly"
+                                   AllowGrouping="True"
+                                   ShowGroupPanel="False"     
+                                   FocusedRow="{Binding Path=SelectedPoRegistered,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                   AllowBestFit="True"
+                                   ShowIndicator="False"
+                                   AutoWidth="False"                                       
+                                   EnableImmediatePosting="True"
+                                   ImmediateUpdateRowPosition="True"
+                                   AllowEditing="True"
+                                   ShowTotalSummary="True"
+                                   IsColumnChooserVisible="{Binding DataContext.IsPOrequestsColumnChooserVisible,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                   UseLegacyFilterEditor="True"
+                                   RowDetailsTemplate="{Binding SelectedItem.DetailTemplate, ElementName=rowTemplateComboBox}"
+                                   RowStyle="{Binding SelectedItem.RowStyle, ElementName=rowTemplateComboBox}"
+                                   ShowFilterPopup="{DXEvent Handler='@args.PopupBaseEdit.PopupWidth=200'}" >
+                            <dxg:TableView.Resources>
+                                <DataTemplate x:Key="PORegisteredPrintHeaderTemplate">
+                                    <Grid Width="{Binding UsablePageWidth}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="50" />
+                                            <ColumnDefinition Width="130" />
+                                        </Grid.ColumnDefinitions>
+                                        <dxe:TextEdit Text=" " Width="{Binding UsablePageWidth}" Grid.ColumnSpan="3" IsPrintingMode="True" Background="#333E5E" HorizontalAlignment="Stretch" 
+                                                      VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" Height="50" />
+                                        <dxe:TextEdit Text="PO Requests Report" IsPrintingMode="True" HorizontalAlignment="Stretch" 
+                                                      VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" />
+                                        <Image Source="/Emdep.Geos.Modules.OTM;component/Assets/Images/GeosReportLogo.png" Height="50" Width="80"  dxp:ExportSettings.TargetType="Image" Grid.Column="2" />
+                                    </Grid>
+                                </DataTemplate>
+                                <DataTemplate x:Key="PORegisteredPrintFooterTemplate">
+                                    <dxe:TextEdit HorizontalContentAlignment="Center" 
+                                                  Width="{Binding Path=UsablePageWidth, Mode=OneWay}" 
+                                                  dxp:ExportSettings.TargetType="PageNumber" 
+                                                  dxp:PageNumberExportSettings.Kind="NumberOfTotal" 
+                                                  dxp:PageNumberExportSettings.Format="Page {0} of {1}"/>
+                                </DataTemplate>
+                            </dxg:TableView.Resources>
+                            <dxmvvm:Interaction.Behaviors>
+                                <dxmvvm:EventToCommand Command="{Binding DataContext.FilterEditorPORegisteredCreatedCommand, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                   EventName="FilterEditorCreated"
+                                                   PassEventArgsToCommand="True"/>
+                                <dxmvvm:EventToCommand Command="{Binding DataContext.TableViewLoadedPORegisteredCommand,RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                   EventName="Loaded"
+                                                   PassEventArgsToCommand="True" />
+
+                                <dxmvvm:EventToCommand Command="{Binding DataContext.TableViewUnloadedLoadedCommand,RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                       EventName="Unloaded"
+                                                       PassEventArgsToCommand="True" />
+
+                                <!--[pramod.nisal][GEOS2-6463][25-11-2024]-->
+                                <dxmvvm:EventToCommand  Command="{Binding DataContext.CommandRegisteredPOGridDoubleClick,RelativeSource={RelativeSource AncestorType=UserControl}}" EventName="MouseDoubleClick" CommandParameter="{Binding ElementName=PORegisteredTableView}">
+                                    <dxmvvm:EventToCommand.EventArgsConverter>
+                                        <dx:EventArgsToDataRowConverter   />
+                                    </dxmvvm:EventToCommand.EventArgsConverter>
+                                </dxmvvm:EventToCommand>
+                            </dxmvvm:Interaction.Behaviors>
+                        </dxg:TableView>
+                    </dxg:GridControl.View>
+                </dxg:GridControl>
+            </Grid>
+        </DockPanel>
+    </Grid>
+</UserControl>

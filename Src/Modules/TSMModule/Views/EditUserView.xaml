@@ -1,0 +1,138 @@
+﻿<dxwui:WinUIDialogWindow x:Class="Emdep.Geos.Modules.TSM.Views.EditUserView"
+                         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                         xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                         xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+                         xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"
+                         xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+                         xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+                         xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+                         xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+                         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+                         xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+                         xmlns:UIConverter ="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+                         xmlns:Validation ="clr-namespace:Emdep.Geos.UI.Validations;assembly=Emdep.Geos.UI.Validations"
+                         xmlns:behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+                         mc:Ignorable="d" 
+                         d:DesignHeight="500" Width="800"
+                         Title="Edit User"
+                         TitleStyle="{DynamicResource WinUIDialogWindowTitleStyle}"
+                         Style="{DynamicResource WinUIDialogWindowStyle}">
+    <dxwui:WinUIDialogWindow.Resources>
+        <UIConverter:EmployeeCodeToImageConverter x:Key="EmployeeCodeToImageConverter" />
+    </dxwui:WinUIDialogWindow.Resources>
+
+    <Grid Margin="2">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="40"/>
+        </Grid.RowDefinitions>
+        <Grid DataContext="{Binding Contact,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow},Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+            <ScrollViewer ScrollViewer.VerticalScrollBarVisibility="Auto">
+                <dxlc:LayoutControl Orientation="Vertical" Background="Transparent" Margin="-10" Width="500">
+                    <dxlc:LayoutGroup View="GroupBox" Header="{DynamicResource EditUserViewInformation}" Orientation="Vertical">
+                      
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="5"/>
+
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="5"/>
+
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="5"/>
+                                
+
+                            </Grid.RowDefinitions>
+                            <dxe:ImageEdit Grid.Column="0"  ShowMenu="False" Grid.RowSpan="6" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Stretch="UniformToFill"
+                                           Source="{Binding DataContext.EmployeeCodeWithIdGender,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow},Converter={StaticResource EmployeeCodeToImageConverter}, ConverterParameter='image/png'}"                                    
+                                   IsReadOnly="True">
+
+                                <dxe:ImageEdit.Style>
+                                    <Style>
+                                        <Style.Triggers >
+                                            <DataTrigger Binding="{Binding DataContext.EmployeeCodeWithIdGender,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow},UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" Value="false">
+                                                <Setter Property="dxe:ImageEdit.Stretch" Value="None" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </dxe:ImageEdit.Style>
+                            </dxe:ImageEdit>
+
+                            <TextBlock Grid.Row="0" Grid.Column="2" Text="{DynamicResource EditUserViewFullName}"/>
+                            <TextBlock Grid.Row="0" Grid.Column="3" Margin="5,0,0,0"  Text="{Binding DataContext.EditUser.FullName,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow},Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+
+
+                            <TextBlock Grid.Row="2" Grid.Column="2" Text="{DynamicResource EditUserViewUsername}"/>
+                            <TextBlock Grid.Row="2" Grid.Column="3" Margin="5,0,0,0"  Text="{Binding DataContext.EditUser.UserName,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow},Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+
+                            <TextBlock Grid.Row="4" Grid.Column="2" Text="{DynamicResource EditUserViewOrganization}"/>
+                            <TextBlock Grid.Row="4" Grid.Column="3" Margin="5,0,0,0"  Text="{Binding DataContext.EditUser.Organization,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow},Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+                           
+                        </Grid>
+
+
+                    </dxlc:LayoutGroup>
+
+                    <dxlc:LayoutGroup Header="{DynamicResource DashboardAuthorizedCustomerApplications}" View="GroupBox" Orientation="Vertical">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                              
+                               
+                            </Grid.RowDefinitions>
+                           
+                         
+                            <dxlc:LayoutItem Grid.Row="1" Grid.Column="0" Grid.RowSpan="5" VerticalAlignment="Bottom" >
+                                <dxe:ListBoxEdit                            
+                                                 HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                                 Padding="10,10,10,10"
+                                                 ItemsSource="{Binding DataContext.UsersLookUpValuesList,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow},Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                                 EditValue="{Binding DataContext.SelectedPermissions,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}">
+                                    <dxe:ListBoxEdit.StyleSettings>
+                                        <dxe:CheckedListBoxEditStyleSettings/>
+                                    </dxe:ListBoxEdit.StyleSettings>
+                                </dxe:ListBoxEdit>
+                            </dxlc:LayoutItem>
+                          
+                            
+                        </Grid>
+                    </dxlc:LayoutGroup>
+
+                </dxlc:LayoutControl>
+            </ScrollViewer>
+        </Grid>
+        <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                    HorizontalAlignment="Center" 
+                    Orientation="Horizontal"
+                    Margin="20,5,0,0"
+                    Width="290">
+
+            <Button Content="{DynamicResource EditUserViewAccept}"
+                    Command="{Binding AddUserAcceptButtonCommand}"
+                    Height="30"
+                    Width="100"
+                    Margin="0,0,30,0"
+                    VerticalAlignment="Bottom" />
+
+            <Button Content="{DynamicResource EditUserViewCancel}"
+                    Command="{Binding AddUserCancelButtonCommand}" 
+                    Height="30"
+                    Width="100"
+                    Margin="30,0,0,0"
+                    VerticalAlignment="Bottom"  />
+        </StackPanel>
+    </Grid>
+ 
+</dxwui:WinUIDialogWindow>

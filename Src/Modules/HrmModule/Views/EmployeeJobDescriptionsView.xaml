@@ -1,0 +1,467 @@
+﻿<UserControl x:Class="Emdep.Geos.Modules.Hrm.Views.EmployeeJobDescriptionsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.Hrm.Views"
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"  
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:dxp="http://schemas.devexpress.com/winfx/2008/xaml/printing" 
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+             xmlns:dxgt="http://schemas.devexpress.com/winfx/2008/xaml/grid/themekeys"
+             xmlns:HrmApplication="clr-namespace:Emdep.Geos.Modules.Hrm" 
+             xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             mc:Ignorable="d" 
+             xmlns:sys="clr-namespace:System;assembly=mscorlib">
+    <UserControl.Resources>
+
+        <DataTemplate x:Key="TemplateDiamondWithCircle">
+            <dxe:RatingEdit x:Name="PART_Editor" IsReadOnly="True" ItemsCount="{Binding RowData.Row.JDLevel.IdImage}">
+                <dxe:RatingEdit.ItemStyle>
+                    <Style TargetType="dxe:RatingItem">
+                        <Setter Property="Background" Value="Gold" />
+                        <Setter Property="VerticalAlignment" Value="Stretch" />
+                        <Setter Property="BorderBrush" Value="Gold" />
+                        <Setter Property="Geometry">
+                            <Setter.Value>
+                                <GeometryGroup FillRule="EvenOdd">
+                                    <EllipseGeometry Center="0,0" RadiusX="40" RadiusY="40" />
+                                    <EllipseGeometry Center="0,0" RadiusX="40" RadiusY="40" />
+                                    <RectangleGeometry Rect="-20,-20,40,40">
+                                        <RectangleGeometry.Transform>
+                                            <RotateTransform CenterX="0" CenterY="0" Angle="45" />
+                                        </RectangleGeometry.Transform>
+                                    </RectangleGeometry>
+                                </GeometryGroup>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </dxe:RatingEdit.ItemStyle>
+            </dxe:RatingEdit>
+        </DataTemplate>
+
+        <DataTemplate x:Key="TemplateDiamond">
+            <dxe:RatingEdit x:Name="PART_Editor" IsReadOnly="True" ItemsCount="{Binding RowData.Row.JDLevel.IdImage}">
+                <dxe:RatingEdit.ItemStyle>
+                    <Style TargetType="dxe:RatingItem">
+                        <Setter Property="Background" Value="Gold" />
+                        <Setter Property="VerticalAlignment" Value="Stretch" />
+                        <Setter Property="BorderBrush" Value="Gold" />
+                        <Setter Property="Geometry">
+                            <Setter.Value>
+                                <RectangleGeometry Rect="0,0,40,40">
+                                    <RectangleGeometry.Transform>
+                                        <RotateTransform CenterX="0" CenterY="0" Angle="45" />
+                                    </RectangleGeometry.Transform>
+                                </RectangleGeometry>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </dxe:RatingEdit.ItemStyle>
+            </dxe:RatingEdit>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <!--Sprint 41-HRM	M041-08	New configuration section Job Descriptions-sdesai-->
+    <Grid Background="{DynamicResource EmpDetailBackColor}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="55"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="350"/>
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Label Content="{DynamicResource JobDescriptions}" HorizontalAlignment="Left" Style="{StaticResource LabelTitleStyle}" Grid.Row="0" Grid.Column="0" />
+        <Grid HorizontalAlignment="Right" Grid.Row="0" Grid.Column="1" Margin="0,5,0,0" >
+            <Grid.RowDefinitions>
+                <RowDefinition Height="AUTO"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="AUTO"/>
+                <ColumnDefinition Width="AUTO" />
+                <ColumnDefinition Width="AUTO" />
+                <ColumnDefinition Width="AUTO" />
+                <ColumnDefinition Width="AUTO" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Add New JobDescriptions -->
+            <Button Visibility="Visible" Grid.Row="0" Grid.Column="1" Height="40" Width="40" HorizontalAlignment="Right" 
+                    Command="{Binding AddNewJobDescriptionCommand}"
+                    CommandParameter="{Binding ElementName=JobDescriptionTableView}" Margin="5,0,5,5"
+                    IsEnabled="{Binding IsAcceptEnabled}">
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource AddJobDescriptionInformation}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Image Style="{DynamicResource AddNewButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+
+            <!-- Refresh JobDescriptions Grid-->
+            <Button Visibility="Visible" Grid.Row="0" Grid.Column="2" Height="40" Width="40" HorizontalAlignment="Right" 
+                                Command="{Binding RefreshButtonCommand}"
+                                CommandParameter="{Binding ElementName=JobDescriptionTableView}"
+                                Margin="0,0,5,5">
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource ButtonRefresh}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Image Style="{DynamicResource RefreshButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+
+            <!-- Print JobDescriptions List-->
+            <Button Visibility="Visible" Grid.Row="0" Grid.Column="3" Height="40" Width="40" HorizontalAlignment="Right" 
+                        Command="{Binding PrintButtonCommand}"
+                        CommandParameter="{Binding ElementName=JobDescriptionTableView}" Margin="0,0,5,5">
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource ButtonPrint}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Image Style="{DynamicResource PrinterButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+
+            <!-- Export JobDescriptions List-->
+            <Button Visibility="Visible" Grid.Row="0" Grid.Column="4" Height="40" Width="40" HorizontalAlignment="Right" 
+                    Command="{Binding ExportButtonCommand}"
+                    CommandParameter="{Binding ElementName=JobDescriptionTableView}" Margin="0,0,5,5">
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource ButtonExportToExcel}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Image Style="{DynamicResource ExcelExportButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+        </Grid>
+        <!--[rdixit][GEOS2-4515][09.06.2023]-->
+        <dxg:GridControl VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" FilterString="[JobDescriptionInUse] In ('1')"
+                         ItemsSource="{Binding Path=JobDescriptionList,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" SelectionMode="Row"
+                         SelectedItem="{Binding Path=SelectedJobDescription,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"   ImplyNullLikeEmptyStringWhenFiltering="True">
+            <dxg:GridColumn Header="{DynamicResource JobDescriptionJDCode}" FieldName="JobDescriptionCode" FilterPopupMode="CheckedList" MinWidth="100" Width="180" ReadOnly="True" FixedWidth="True"/>
+            <dxg:GridColumn Header="{DynamicResource JobDescriptionTitle}" FieldName="JobDescriptionTitle"  MinWidth="100" Width="250" FilterPopupMode="CheckedList" ReadOnly="True" FixedWidth="True"/>
+            <dxg:GridColumn Header="{DynamicResource JobDescriptionJobCode}" FieldName="Abbreviation"  MinWidth="100" Width="180" FilterPopupMode="CheckedList" ReadOnly="True" FixedWidth="True"/>
+            <dxg:GridColumn Header="{DynamicResource JobDescriptionParent}" FieldName="ParentJobDescription.JobDescriptionTitle"  MinWidth="100" Width="250" FilterPopupMode="CheckedList" ReadOnly="True" FixedWidth="True"/>
+            <dxg:GridColumn Header="{DynamicResource JobDescriptionsDepartment}" FieldName="Department.DepartmentName" FilterPopupMode="CheckedList" MinWidth="200" Width="150" ReadOnly="True" FixedWidth="True"/>
+
+            <dxg:GridColumn Header="{DynamicResource JobDescriptionsLevel}" FieldName="JDLevel.Value"  FilterPopupMode="CheckedList" MinWidth="100" Width="150" ReadOnly="True" FixedWidth="True" 
+                            Binding="{Binding JDLevel.Value}">
+                <dxg:GridColumn.CellTemplateSelector>
+                    <UIHelper:JDLevelTemplateSelector/>
+                </dxg:GridColumn.CellTemplateSelector>
+
+                <dxg:GridColumn.PrintCellStyle>
+                    <Style TargetType="dxe:TextEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                        <Style.Setters>
+                            <Setter Property="dxp:ExportSettings.TargetType" Value="Text"/>
+                            <Setter Property="dxp:TextExportSettings.Text" Value="{Binding Path=RowData.Row.JDLevel.Value}"/>
+                        </Style.Setters>
+                    </Style>
+                </dxg:GridColumn.PrintCellStyle>
+                <dxg:GridColumn.EditSettings>
+                    <dxe:TextEditSettings>
+                        <dxe:TextEditSettings.DisplayTextConverter>
+                            <dxmvvm:ObjectToObjectConverter>
+                                <dxmvvm:MapItem Source="1" Target="Yes"/>
+                                <dxmvvm:MapItem Source="0" Target="No"/>
+                            </dxmvvm:ObjectToObjectConverter>
+                        </dxe:TextEditSettings.DisplayTextConverter>
+                    </dxe:TextEditSettings>
+                </dxg:GridColumn.EditSettings>
+            </dxg:GridColumn>
+            <!--sjadhav-->
+            <dxg:GridColumn Header="{DynamicResource JobDescriptionsScope}" FieldName="JDScope.Value" FilterPopupMode="CheckedList" MinWidth="100" Width="120" ReadOnly="True" FixedWidth="True"/>
+            <dxg:GridColumn Header="{DynamicResource JobDescriptionFileName}" FieldName="JobDescriptionFileName"  Width="80" FilterPopupMode="CheckedList" ReadOnly="True" FixedWidth="True">
+                <dxg:GridColumn.CellTemplate>
+                    <DataTemplate>
+                        <Button Name="btnViewJobDescriptionFile" ToolTip="View Document" 
+                                Command="{Binding DataContext.DocumentViewCommand,RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                CommandParameter="{Binding RowData.Row}">
+                            <Button.ContentTemplate>
+                                <DataTemplate>
+                                    <Image Height="16" Width="16" Source="/Emdep.Geos.Modules.Hrm;component/Assets/Images/pdf-icon.png" />
+                                </DataTemplate>
+                            </Button.ContentTemplate>
+                            <Button.Style>
+                                <Style TargetType="{x:Type Button}">
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Cursor" Value="Hand"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+
+                        <DataTemplate.Triggers>
+                            <DataTrigger Binding="{Binding RowData.Row.JobDescriptionFileName}" Value="{x:Null}">
+                                <Setter TargetName="btnViewJobDescriptionFile" Property="Visibility" Value="Hidden" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding RowData.Row.JobDescriptionFileName}" Value="{x:Static sys:String.Empty}">
+                                <Setter TargetName="btnViewJobDescriptionFile" Property="Visibility" Value="Hidden" />
+                            </DataTrigger>
+                        </DataTemplate.Triggers>
+                    </DataTemplate>
+                </dxg:GridColumn.CellTemplate>
+
+                <dxg:GridColumn.PrintCellStyle>
+                    <Style TargetType="dxe:TextEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                        <Setter Property="dxp:TextExportSettings.Text" Value="{Binding Path=RowData.Row.JobDescriptionCode}" >
+                        </Setter>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Path=RowData.Row.JobDescriptionFileName}" Value="{x:Null}" >
+                                <Setter Property="dxp:TextExportSettings.Text" Value=""/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </dxg:GridColumn.PrintCellStyle>
+
+                <dxg:GridColumn.EditSettings>
+                    <dxe:TextEditSettings>
+                        <dxe:TextEditSettings.DisplayTextConverter>
+                            <dxmvvm:ObjectToObjectConverter>
+                                <dxmvvm:MapItem Source="JobDescriptionFileName" Target="JobDescriptionCode"/>
+                            </dxmvvm:ObjectToObjectConverter>
+                        </dxe:TextEditSettings.DisplayTextConverter>
+                    </dxe:TextEditSettings>
+                </dxg:GridColumn.EditSettings>
+            </dxg:GridColumn>
+
+            <dxg:GridColumn Header="{DynamicResource JobDescriptionInUse}" FieldName="JobDescriptionInUse" FilterPopupMode="CheckedList" Width="90" ReadOnly="True" FixedWidth="True">
+                <dxg:GridColumn.CellTemplate>
+                    <DataTemplate>
+                        <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,0,5,0">
+                            <TextBlock.Style>
+                                <Style TargetType="{x:Type TextBlock}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Path=RowData.Row.JobDescriptionInUse}" Value="1">
+                                            <Setter Property="TextBlock.Text" Value="Yes"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Path=RowData.Row.JobDescriptionInUse}" Value="0">
+                                            <Setter Property="TextBlock.Text" Value="No"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </DataTemplate>
+                </dxg:GridColumn.CellTemplate>
+                <dxg:GridColumn.PrintCellStyle>
+                    <Style TargetType="dxe:TextEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                        <Setter Property="dxp:ExportSettings.TargetType" Value="Text"  />
+                        <Setter Property="dxp:TextExportSettings.Text" Value="{Binding Path=RowData.Row.JobDescriptionInUse}" >
+                        </Setter>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Path=RowData.Row.JobDescriptionInUse}" Value="1">
+                                <Setter Property="dxp:TextExportSettings.Text" Value="Yes"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Path=RowData.Row.JobDescriptionInUse}" Value="0">
+                                <Setter Property="dxp:TextExportSettings.Text" Value="No"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </dxg:GridColumn.PrintCellStyle>
+                <dxg:GridColumn.EditSettings>
+                    <dxe:TextEditSettings>
+                        <dxe:TextEditSettings.DisplayTextConverter>
+                            <dxmvvm:ObjectToObjectConverter>
+                                <dxmvvm:MapItem Source="1" Target="Yes"/>
+                                <dxmvvm:MapItem Source="0" Target="No"/>
+                            </dxmvvm:ObjectToObjectConverter>
+                        </dxe:TextEditSettings.DisplayTextConverter>
+                    </dxe:TextEditSettings>
+                </dxg:GridColumn.EditSettings>
+            </dxg:GridColumn>
+
+            <dxg:GridColumn Header="{DynamicResource JobDescriptionIsMandatory}" FieldName="JobDescriptionIsMandatory" FilterPopupMode="CheckedList" Width="90" ReadOnly="True" FixedWidth="True">
+                <dxg:GridColumn.CellTemplate>
+                    <DataTemplate>
+                        <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,0,5,0">
+                            <TextBlock.Style>
+                                <Style TargetType="{x:Type TextBlock}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Path=RowData.Row.JobDescriptionIsMandatory}" Value="1">
+                                            <Setter Property="TextBlock.Text" Value="Yes"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Path=RowData.Row.JobDescriptionIsMandatory}" Value="0">
+                                            <Setter Property="TextBlock.Text" Value="No"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </DataTemplate>
+                </dxg:GridColumn.CellTemplate>
+                <dxg:GridColumn.PrintCellStyle>
+                    <Style TargetType="dxe:TextEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                        <Setter Property="dxp:ExportSettings.TargetType" Value="Text"  />
+                        <Setter Property="dxp:TextExportSettings.Text" Value="{Binding Path=RowData.Row.JobDescriptionIsMandatory}" >
+                        </Setter>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Path=RowData.Row.JobDescriptionIsMandatory}" Value="1">
+                                <Setter Property="dxp:TextExportSettings.Text" Value="Yes"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Path=RowData.Row.JobDescriptionIsMandatory}" Value="0">
+                                <Setter Property="dxp:TextExportSettings.Text" Value="No"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </dxg:GridColumn.PrintCellStyle>
+                <dxg:GridColumn.EditSettings>
+                    <dxe:TextEditSettings>
+                        <dxe:TextEditSettings.DisplayTextConverter>
+                            <dxmvvm:ObjectToObjectConverter>
+                                <dxmvvm:MapItem Source="1" Target="Yes"/>
+                                <dxmvvm:MapItem Source="0" Target="No"/>
+                            </dxmvvm:ObjectToObjectConverter>
+                        </dxe:TextEditSettings.DisplayTextConverter>
+                    </dxe:TextEditSettings>
+                </dxg:GridColumn.EditSettings>
+            </dxg:GridColumn>
+
+            <dxg:GridColumn Header="{DynamicResource JobDescriptionIsRemote}" FieldName="JobDescriptionIsRemote" FilterPopupMode="CheckedList" MinWidth="100" Width="120" ReadOnly="True" FixedWidth="True">
+                <dxg:GridColumn.CellTemplate>
+                    <DataTemplate>
+                        <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,0,5,0">
+                            <TextBlock.Style>
+                                <Style TargetType="{x:Type TextBlock}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Path=RowData.Row.JobDescriptionIsRemote}" Value="1">
+                                            <Setter Property="TextBlock.Text" Value="Yes"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Path=RowData.Row.JobDescriptionIsRemote}" Value="0">
+                                            <Setter Property="TextBlock.Text" Value="No"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </DataTemplate>
+                </dxg:GridColumn.CellTemplate>
+                <dxg:GridColumn.PrintCellStyle>
+                    <Style TargetType="dxe:TextEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                        <Setter Property="dxp:ExportSettings.TargetType" Value="Text"  />
+                        <Setter Property="dxp:TextExportSettings.Text" Value="{Binding Path=RowData.Row.JobDescriptionIsRemote}" >
+                        </Setter>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Path=RowData.Row.JobDescriptionIsRemote}" Value="1">
+                                <Setter Property="dxp:TextExportSettings.Text" Value="Yes"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Path=RowData.Row.JobDescriptionIsRemote}" Value="0">
+                                <Setter Property="dxp:TextExportSettings.Text" Value="No"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </dxg:GridColumn.PrintCellStyle>
+                <dxg:GridColumn.EditSettings>
+                    <dxe:TextEditSettings>
+                        <dxe:TextEditSettings.DisplayTextConverter>
+                            <dxmvvm:ObjectToObjectConverter>
+                                <dxmvvm:MapItem Source="1" Target="Yes"/>
+                                <dxmvvm:MapItem Source="0" Target="No"/>
+                            </dxmvvm:ObjectToObjectConverter>
+                        </dxe:TextEditSettings.DisplayTextConverter>
+                    </dxe:TextEditSettings>
+                </dxg:GridColumn.EditSettings>
+            </dxg:GridColumn>
+
+            <dxmvvm:Interaction.Behaviors>
+                <UIHelper:GridSelectingBehavior />
+            </dxmvvm:Interaction.Behaviors>
+
+            <dxg:GridControl.TotalSummary>
+                <dxg:GridSummaryItem x:Name="summary" FieldName="JobDescriptionCode" SummaryType="Count" DisplayFormat="Total Count: {0}" Visible="True" Alignment="Left"/>
+            </dxg:GridControl.TotalSummary>
+
+            <dxg:GridControl.View>
+                <dxg:TableView x:Name="JobDescriptionTableView"
+                               NavigationStyle="Row"
+                               AllowHorizontalScrollingVirtualization="True" 
+                               RowDetailsVisibilityMode="Visible"
+                               ShowHorizontalLines="True"
+                               ShowSearchPanelMode="Always"
+                               ShowColumnHeaders="True"
+                               VerticalScrollbarVisibility="Auto" 
+                               HorizontalScrollbarVisibility="Auto"
+                               AllowFixedColumnMenu="False"
+                               AutoWidth="False"
+                               ShowFixedTotalSummary="True"
+                               ShowSearchPanelCloseButton="True"
+                               SearchPanelHorizontalAlignment="Stretch"
+                               ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly"
+                               AllowGrouping="True"
+                               ShowGroupPanel="False"
+                               ImmediateUpdateRowPosition="True"
+                               AllowColumnFiltering="True"
+                               UseLegacyFilterEditor="True"
+                               EnableImmediatePosting="True"
+                               ShowIndicator="False"                                                                         
+                               ShowAutoFilterRow="True"
+                               AllowEditing="True"            
+                               FilterRowDelay="0"
+                               AllowColumnMoving="True"                                
+                               FilterEditorShowOperandTypeIcon="True"                              
+                               FocusedRow="{Binding Path=SelectedJobDescription,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+
+                    <dxg:TableView.Resources>
+                        <DataTemplate x:Key="JobDescriptionReportPrintHeaderTemplate">
+                            <Grid Width="{Binding UsablePageWidth}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="50" />
+                                    <ColumnDefinition Width="130" />
+                                </Grid.ColumnDefinitions>
+                                <dxe:TextEdit Text=" " Width="{Binding UsablePageWidth}" Grid.ColumnSpan="3" IsPrintingMode="True" Background="#333E5E" HorizontalAlignment="Stretch" 
+                                              VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" Height="50" />
+                                <dxe:TextEdit Text="Job Descriptions Report" IsPrintingMode="True" HorizontalAlignment="Stretch" 
+                                              VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" />
+                                <Image Source="/Emdep.Geos.Modules.Hrm;component/Assets/Images/GeosReportLogo.png" Height="50" Width="80"  dxp:ExportSettings.TargetType="Image" Grid.Column="2" />
+                            </Grid>
+                        </DataTemplate>
+
+                        <DataTemplate x:Key="JobDescriptionReportPrintFooterTemplate">
+                            <dxe:TextEdit HorizontalContentAlignment="Center" 
+                                            Width="{Binding Path=UsablePageWidth, Mode=OneWay}" 
+                                            dxp:ExportSettings.TargetType="PageNumber" 
+                                            dxp:PageNumberExportSettings.Kind="NumberOfTotal" 
+                                            dxp:PageNumberExportSettings.Format="Page {0} of {1}"/>
+                        </DataTemplate>
+                    </dxg:TableView.Resources>
+                    <dxmvvm:Interaction.Behaviors>
+
+                        <dxmvvm:EventToCommand Command="{Binding EditJobDescriptionDoubleClickCommand}" 
+                                               EventName="MouseDoubleClick" 
+                                               CommandParameter="{Binding ElementName=JobDescriptionTableView}" >
+                            <dxmvvm:EventToCommand.EventArgsConverter>
+                                <dx:EventArgsToDataRowConverter/>
+                            </dxmvvm:EventToCommand.EventArgsConverter>
+                        </dxmvvm:EventToCommand>
+                        <!--<dxmvvm:EventToCommand EventName="ShowFilterPopup"
+                                               Command="{Binding CustomShowFilterPopupCommand}"
+                                               PassEventArgsToCommand="True">
+                        </dxmvvm:EventToCommand>-->
+
+                        <!--<dxmvvm:EventToCommand EventName="CustomRowFilter"
+                                       Command="{Binding CustomRowFilterRowCommand}"
+                                       PassEventArgsToCommand="True">
+                        </dxmvvm:EventToCommand>-->
+
+                    </dxmvvm:Interaction.Behaviors>
+                </dxg:TableView>
+            </dxg:GridControl.View>
+        </dxg:GridControl>
+
+    </Grid>
+</UserControl>

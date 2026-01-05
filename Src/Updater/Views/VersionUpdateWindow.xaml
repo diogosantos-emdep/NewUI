@@ -1,0 +1,57 @@
+﻿<Window
+    x:Class="Emdep.Geos.Workbench.Updater.VersionUpdateWindow"
+	xmlns:Views="clr-namespace:Emdep.Geos.Workbench.Updater.Views"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"     
+	xmlns:dxr="http://schemas.devexpress.com/winfx/2008/xaml/ribbon"
+	xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"	
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:dxc="http://schemas.devexpress.com/winfx/2008/xaml/core"	
+	xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	mc:Ignorable="d"
+	d:DesignWidth="1100"
+	d:DesignHeight="950"
+	Background="Transparent" 
+	WindowStartupLocation="CenterScreen"
+	Topmost="True"
+	ResizeMode="NoResize"
+	ShowInTaskbar="True"
+	Title="{DynamicResource VersionUpdateWindowTitle}"
+	WindowStyle="None"
+	WindowState="Maximized" Margin="0,0,0,0" BorderThickness="0,0,0,0" AllowsTransparency="True" 
+    xmlns:local="clr-namespace:Emdep.Geos.Workbench.Downloader.ViewModels"
+    >
+    <!--Title="Geos Workbench Installer"-->
+
+    <!--<Window.Resources>
+        <ResourceDictionary  Source="/Updater;component/Resources/Language.xaml"/>
+    </Window.Resources>-->
+    <!-- Your window content -->
+
+    <Grid >    
+        <dxwui:PageView  AnimationType="SlideHorizontal" Background="Transparent" SelectedIndex="{Binding SelectedViewIndex}" 
+			BorderThickness="0,0,0,0" ShowBackButton="True">
+           
+            <dxwui:PageViewItem Margin="0,0,0,0" UseLayoutRounding="True" Height="0"    DataContext="{Binding}" >
+                <Views:SoftwareUpdateView Height="400"  x:Name="ucsoftwareUpdate" DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
+            </dxwui:PageViewItem>
+            <dxwui:PageViewItem Margin="0,0,0,0" UseLayoutRounding="True" Height="0" DataContext="{Binding}" >
+                <Views:VersionReleaseNoteView Height="400"   DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" >
+                </Views:VersionReleaseNoteView>
+            </dxwui:PageViewItem>
+
+            <dxwui:PageViewItem Margin="0,0,0,0" UseLayoutRounding="True" Height="0" DataContext="{Binding}" >
+                <Views:InstallationInformationView Height="400"   DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" >
+                </Views:InstallationInformationView>
+            </dxwui:PageViewItem>
+
+            <dxwui:PageViewItem Margin="0,0,0,0" UseLayoutRounding="True" Height="0" DataContext="{Binding}" >
+                <Views:UserConfigurationWindow Height="230"   DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" >
+                </Views:UserConfigurationWindow>
+            </dxwui:PageViewItem>
+        </dxwui:PageView>
+
+    </Grid>
+</Window>

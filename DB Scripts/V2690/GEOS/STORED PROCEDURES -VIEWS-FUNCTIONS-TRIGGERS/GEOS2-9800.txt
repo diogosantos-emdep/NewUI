@@ -1,0 +1,23 @@
+drop procedure if exists GetCountryIso_V2690 ;
+ 
+DELIMITER $$
+CREATE  PROCEDURE `GetCountryIso_V2690`(IN _SiteIdList VARCHAR(500) )
+BEGIN 
+-- call GetCountryIso_V2690('18,21');
+--[rohit.rathod][27-11-2025][GEOS2-9800]
+     SELECT 
+         s.IdSite,
+         s.Name,
+         s.IdCountry,
+         s.ShortName,
+         cou.Name AS countryName,
+         cou.IdZone,
+         zones.Name AS zoneName,
+         cou.Iso AS CountryIso
+     FROM sites s
+     INNER JOIN countries cou ON s.IdCountry = cou.IdCountry
+     INNER JOIN zones zones ON zones.IdZone = cou.IdZone
+     WHERE FIND_IN_SET(s.IdSite, _SiteIdList) > 0;  
+END $$
+DELIMITER ;
+

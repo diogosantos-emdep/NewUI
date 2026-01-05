@@ -1,0 +1,576 @@
+﻿<dxwui:WinUIDialogWindow x:Class="Emdep.Geos.Modules.ERM.Views.AddEditModuleEquivalencyWeightView"
+                         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                         xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                         xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+                         xmlns:local="clr-namespace:Emdep.Geos.Modules.ERM.Views"
+                         xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+                         xmlns:dxeh="http://schemas.devexpress.com/winfx/2008/xaml/editors/internal"
+                         xmlns:dxdo="http://schemas.devexpress.com/winfx/2008/xaml/docking"
+                         xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+                         xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+                         xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+                         xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+                         xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+                         xmlns:ViewModel="clr-namespace:Emdep.Geos.Modules.ERM.ViewModels"
+                         xmlns:dxet="http://schemas.devexpress.com/winfx/2008/xaml/editors/themekeys"
+                         xmlns:sysglb="clr-namespace:System.Globalization;assembly=mscorlib"
+                         xmlns:Converter="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+                         xmlns:ve="http://schemas.devexpress.com/winfx/2008/xaml/docking/visualelements"
+                         xmlns:Interactive="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+                         xmlns:Validation ="clr-namespace:Emdep.Geos.UI.Validations;assembly=Emdep.Geos.UI.Validations"
+                         xmlns:sys="clr-namespace:System;assembly=mscorlib"
+                         xmlns:Behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+                         xmlns:behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+                         xmlns:ERMCommon ="clr-namespace:Emdep.Geos.Modules.ERM.CommonClasses"
+                         xmlns:dxb="http://schemas.devexpress.com/winfx/2008/xaml/bars"
+                         xmlns:dxci="http://schemas.devexpress.com/winfx/2008/xaml/core/internal"    
+                         xmlns:dxp="http://schemas.devexpress.com/winfx/2008/xaml/printing"
+                         xmlns:dxgt="http://schemas.devexpress.com/winfx/2008/xaml/grid/themekeys"
+                         xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+                         xmlns:dxwuii="clr-namespace:DevExpress.Xpf.WindowsUI.Internal;assembly=DevExpress.Xpf.Controls.v19.2"
+                         xmlns:dxwuin="http://schemas.devexpress.com/winfx/2008/xaml/windowsui/navigation"
+                         xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+                         mc:Ignorable="d" 
+                         d:DesignHeight="300" d:DesignWidth="300"
+                         Style="{DynamicResource WinUIDialogWindowStyle}"
+                         Title="{Binding WindowHeader}" >
+
+
+    <dxwui:WinUIDialogWindow.Resources>
+
+        <Style x:Key="img" TargetType="Image">
+            <Setter Property="Width" Value="24" />
+            <Setter Property="Height" Value="24" />
+            <Setter Property="Margin" Value="15,0,0,0"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+
+        </Style>
+        <Converter:MaximizedElementConverter x:Key="con"/>
+        <Converter:ForegroundColorConverter x:Key="ForegroundColorConverter"/>
+        <Style x:Key="myGroupBoxStyle" TargetType="{x:Type dxlc:GroupBox}">
+            <Setter Property="MaximizeElementVisibility" Value="Visible" />
+            <Setter Property="Width" Value="280" />
+            <Setter Property="Height" Value="145" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding MaximizedElementPosition}" Value="Bottom">
+                    <Setter Property="Width" Value="280" />
+                    <Setter Property="Height" Value="27" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding MaximizedElementPosition}" Value="Top">
+                    <Setter Property="Width" Value="280" />
+                    <Setter Property="Height" Value="27" />
+                </DataTrigger>
+            </Style.Triggers>
+
+        </Style>
+    </dxwui:WinUIDialogWindow.Resources>
+
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape" Command="{Binding DataContext.EscapeButtonCommand,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"/>
+    </dxwui:WinUIDialogWindow.InputBindings>
+    <dxwui:WinUIDialogWindow.TitleStyle>
+        <Style TargetType="ContentControl">
+            <Setter Property="ContentTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                        <Grid ShowGridLines="False" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="5"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="5"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock  Grid.Row="0" Grid.Column="0" Text="{Binding DataContext.WindowHeader,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" Style="{DynamicResource CustomTitleStyle}"
+                                        Grid.RowSpan="2"/>
+
+                        </Grid>
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </dxwui:WinUIDialogWindow.TitleStyle>
+    <ScrollViewer  VerticalScrollBarVisibility="Auto">
+        <Grid x:Name="LayoutRoot" Height="{Binding WindowHeight,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
+        <!--HorizontalAlignment="Stretch" VerticalAlignment="Stretch"-->
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="5"/>
+            <RowDefinition Height="45"/>
+        </Grid.RowDefinitions>
+        <dxlc:FlowLayoutControl x:Name="flowLayoutControl"
+                               ItemSpace="12" 
+                                LayerSpace="12" 
+                                Background="Transparent" 
+                                Orientation="Vertical" 
+                                Padding="0,0,0,0" 
+                                StretchContent="True"
+                                AllowMaximizedElementMoving="False" 
+                                Grid.Row="0" 
+                                Grid.Column="0" 
+                                Grid.ColumnSpan="2"
+                                BreakFlowToFit="True" 
+                                 MaximizedElementPosition="{Binding MaximizedElementPosition}">
+
+            <dxmvvm:Interaction.Behaviors>
+                <UIHelper:FlowLayoutControlForMinimiseMaximise/>
+            </dxmvvm:Interaction.Behaviors>
+
+
+
+            <!--INFORMATION-->
+            <!--Width="270" Height="140"-->
+            <dxlc:GroupBox  Background="Transparent" x:Name="GeneralInformation"  MaximizeElementVisibility="Visible" Style="{StaticResource myGroupBoxStyle}" >
+                <!--Style="{StaticResource myGroupBoxStyle}"-->
+                <dxlc:GroupBox.HeaderTemplate>
+                    <DataTemplate>
+                        <DockPanel Margin="-5,0,0,0">
+                            <TextBlock VerticalAlignment="Center"
+                                                   FontWeight="Bold"
+                                                   Text="{DynamicResource GeneralInfo}" />
+
+                            <dxe:TextEdit  Text="{DynamicResource GeneralInfo}" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center"  ShowBorder="False" IsReadOnly="True"                                                 >
+                                <Binding Path="DataContext.InformationError" RelativeSource="{RelativeSource AncestorType=dxlc:GroupBox}" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay" ValidatesOnDataErrors="True">
+                                    <Binding.ValidationRules>
+                                        <Validation:AddEditSODValidation FieldName="InformationError" ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True" />
+                                    </Binding.ValidationRules>
+                                </Binding>
+                            </dxe:TextEdit>
+                        </DockPanel>
+                    </DataTemplate>
+                </dxlc:GroupBox.HeaderTemplate>
+                <dxlc:GroupBox.ContentTemplate>
+                    <DataTemplate>
+                        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                            <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="auto"/>
+                                <RowDefinition Height="auto"/>
+                                <RowDefinition Height="auto"/>
+                                <RowDefinition Height="auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <!--start [gulab lakade][GEOS2-4333][12 04 2023]-->
+                            <Label Content="{DynamicResource EquivalentWeightWithColon}" Grid.Row="0" Grid.Column="0" Margin="2" Padding="2"  FontWeight="Bold" />
+                            <TextBlock Grid.Row="0" Grid.Column="1" Margin="2" Padding="2"
+                                      
+                                                   Text="{Binding DataContext.EquivalentWeight, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox},StringFormat=N2, ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}"
+                                                   />
+                            <!--ToolTip="{Binding DataContext.EquivalentWeight, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox},StringFormat=N2, ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}"-->
+                            <Label Content="{DynamicResource EquivalentWeightStartDateWithColon}" Grid.Row="1" Grid.Column="0" Margin="2" Padding="2"  FontWeight="Bold" />
+                            <TextBlock Grid.Row="1" Grid.Column="1" Margin="2" Padding="2"  
+                                                   Text="{Binding DataContext.StartDate, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox},StringFormat=d, ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}"
+                                       
+                                                   />
+                            <!--ToolTip="{Binding DataContext.StartDate, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox},StringFormat=d, ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}"-->
+                            <Label Content="{DynamicResource EquivalentWeightEndDateWithColon}" Grid.Row="2" Grid.Column="0" Margin="2" Padding="2"  FontWeight="Bold"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" Margin="2" Padding="2"  
+                                       Text="{Binding DataContext.EndDate, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox},StringFormat=d, ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}"
+                                       />
+                            <!--ToolTip="{Binding DataContext.EndDate, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox},StringFormat=d, ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}"-->
+                            <!--end [gulab lakade][GEOS2-4333][12 04 2023]-->
+                        </Grid>
+                        </ScrollViewer>
+                    </DataTemplate>
+                </dxlc:GroupBox.ContentTemplate>
+                <dxlc:GroupBox.MaximizedContentTemplate>
+                    <DataTemplate>
+                        <!--<Grid  Width="600" Height="410" >-->
+                        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                            <Grid  Width="800" Height="700" >
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="50"/>
+                                <!--<RowDefinition Height="10"/>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="20"/>
+                                <RowDefinition Height="25"/>
+                                <RowDefinition Height="10"/>
+                                <RowDefinition Height="15"/>
+                                <RowDefinition Height="25"/>
+                                <RowDefinition Height="15"/>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="10"/>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="10"/>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="10"/>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="5"/>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="5"/>-->
+                            </Grid.RowDefinitions>
+
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="auto"/>
+                                <!--<ColumnDefinition Width="120"/>
+                                <ColumnDefinition Width="5"/>
+                                <ColumnDefinition Width="300"/>
+                                <ColumnDefinition Width="5"/>
+                                <ColumnDefinition Width="45"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="auto"/>-->
+                            </Grid.ColumnDefinitions>
+
+                            <!--FilterString="{Binding MyFilterString,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"-->
+                            <!--ImplyNullLikeEmptyStringWhenFiltering="True"-->
+                            <dxg:GridControl x:Name="ModuleEquivalencyWeight" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Grid.Row="1" Grid.Column="0" 
+                                  AllowLiveDataShaping="True" ItemsSource="{Binding DataContext.ModulesEquivalentWeightList,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}"
+                                  SelectionMode="Row" Width="800" Height="Auto">
+                                <dxg:GridColumn FieldName="IDCPTypeEquivalent" Width="50" ReadOnly="True" FixedWidth="True" Visible="False" >
+
+                                </dxg:GridColumn>
+                                <dxg:GridColumn Header="{DynamicResource EquivalentWeight}" FieldName="EquivalentWeight" Width="250" ReadOnly="True" FixedWidth="True" FilterPopupMode="Default">
+
+                                </dxg:GridColumn>
+                                <dxg:GridColumn Header="{DynamicResource StartDate}" FieldName="StartDate" Width="250" FixedWidth="True" ReadOnly="True" FilterPopupMode="Default"   ShowInColumnChooser="True" >
+
+                                    <dxg:GridColumn.EditSettings>
+                                        <dxe:DateEditSettings  MaskType="DateTime" Mask="d" MaskUseAsDisplayFormat="True" ></dxe:DateEditSettings>
+                                    </dxg:GridColumn.EditSettings>
+
+
+                                </dxg:GridColumn>
+                                <dxg:GridColumn Header="{DynamicResource EndDate}" FieldName="EndDate" Width="250" ReadOnly="True" FixedWidth="True" FilterPopupMode="Default"  ShowInColumnChooser="True" >
+
+                                    <dxg:GridColumn.EditSettings>
+                                        <dxe:DateEditSettings  MaskType="DateTime" Mask="d" MaskUseAsDisplayFormat="True" ></dxe:DateEditSettings>
+                                    </dxg:GridColumn.EditSettings>
+                                </dxg:GridColumn>
+
+                                <dxg:GridColumn Header=" "  MinWidth="30" Width="47" ReadOnly="True" FixedWidth="True" FilterPopupMode="Default" Visible="True" AllowPrinting="False" ShowInColumnChooser="False" AllowMoving="false">
+                                    <dxg:GridColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <!--IsEnabled="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsEditSODPermissionERM}"-->
+                                            <Button Name="deleteRowItem" ToolTip="{DynamicResource Delete}" 
+                                    Command="{Binding DataContext.DeleteModuleEquivalencyWeightCommand,RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}" CommandParameter="{Binding RowData.Row}"
+                                                     IsEnabled="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsAdminPermissionERM}">
+                                                <Button.ContentTemplate>
+                                                    <DataTemplate>
+                                                        <Image Height="16" Width="16"  Style="{ DynamicResource DeleteStyle}" />
+                                                    </DataTemplate>
+                                                </Button.ContentTemplate>
+                                                <Button.Style>
+                                                    <Style TargetType="{x:Type Button}">
+                                                        <Style.Triggers>
+                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                <Setter Property="Cursor" Value="Hand"/>
+                                                            </Trigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                            </Button>
+                                        </DataTemplate>
+                                    </dxg:GridColumn.CellTemplate>
+                                </dxg:GridColumn>
+
+                                <dxmvvm:Interaction.Behaviors>
+                                    <UIHelper:GridSelectingBehavior />
+                                </dxmvvm:Interaction.Behaviors>
+
+                                <dxg:GridControl.View>
+                                    <!--IsEnabled="{Binding DataContext.IsEditWorkLog, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                                FocusedRow="{Binding DataContext.SelectedWorklogRow,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox},UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"-->
+                                    <!--ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly"-->
+                                    <dxg:TableView x:Name="ModuleEquivalencyWeightTableView" 
+                                                NavigationStyle="Row" 
+                                                AutoWidth="True" 
+                                                ShowGroupPanel="False" 
+                                                AllowEditing="True"                                                     
+                                                HorizontalScrollbarVisibility="Auto" 
+                                                VerticalScrollbarVisibility="Auto" 
+                                                ShowIndicator="False"
+                                                SearchPanelHorizontalAlignment="Stretch"
+                                                ShowFilterPopup="{DXEvent Handler='@args.PopupBaseEdit.PopupWidth=200'}" 
+                                                UseLegacyFilterEditor="True">
+
+                                        <dxmvvm:Interaction.Behaviors>
+                                            <!--<dxmvvm:EventToCommand Command="{Binding DataContext.EditWorkLogDoubleClickCommand,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" EventName="MouseDoubleClick" CommandParameter="{Binding ElementName=tblWorkLog}" >
+                                                <dxmvvm:EventToCommand.EventArgsConverter>
+                                                    <dx:EventArgsToDataRowConverter/>
+                                                </dxmvvm:EventToCommand.EventArgsConverter>
+                                            </dxmvvm:EventToCommand>-->
+                                            <dxmvvm:EventToCommand Command="{Binding DataContext.EditModulesEquivalencyWeightCommand, RelativeSource={RelativeSource AncestorType={x:Type dxlc:LayoutGroup}}}"
+                                                                               EventName="MouseDoubleClick"
+                                                                               CommandParameter="{Binding ElementName=ModuleEquivalencyWeightTableView}">
+                                                <dxmvvm:EventToCommand.EventArgsConverter>
+                                                    <dx:EventArgsToDataRowConverter />
+                                                </dxmvvm:EventToCommand.EventArgsConverter>
+                                            </dxmvvm:EventToCommand>
+
+                                            <dxmvvm:EventToCommand Command="{Binding ModulesEquivalencyWeightTableViewLoadedCommand}"
+                                                   EventName="Loaded"
+                                                   PassEventArgsToCommand="True" />
+                                            
+                                        </dxmvvm:Interaction.Behaviors>
+                                    </dxg:TableView>
+                                </dxg:GridControl.View>
+
+                            </dxg:GridControl>
+
+
+                            <Button Content=" " Grid.Row="2" Height="40" Width="40" HorizontalAlignment="Right"
+            Command="{Binding DataContext.AddButtonCommand, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay,RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}" CommandParameter="{Binding ElementName=ModuleEquivalencyWeightTableView}"
+                                    IsEnabled="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsAdminPermissionERM}">
+                                <Button.ToolTip>
+                                    <TextBlock Text="{DynamicResource ButtonAdd}"/>
+                                </Button.ToolTip>
+                                <Button.ContentTemplate>
+                                    <DataTemplate>
+                                        <Image Style="{ DynamicResource AddButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                                    </DataTemplate>
+                                </Button.ContentTemplate>
+                            </Button>
+                        </Grid>
+                        </ScrollViewer>
+                    </DataTemplate>
+                </dxlc:GroupBox.MaximizedContentTemplate>
+            </dxlc:GroupBox>
+
+            <!--Change Logs-->
+            <dxlc:GroupBox x:Name="ChangLog" MaximizeElementVisibility="Visible"  Style="{StaticResource myGroupBoxStyle}">
+                <dxlc:GroupBox.HeaderTemplate>
+                    <DataTemplate>
+                        <DockPanel Margin="-5,0,0,0">
+                            <TextBlock VerticalAlignment="Center"
+                                                   FontWeight="Bold"
+                                                   Text="{DynamicResource ChangeLog}" />
+                            <!--start GEOS2-3855 gulab lakade 24 08 2022-->
+                            <TextBlock Width="50"
+                                    Margin="5,1,0,0"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    FontWeight="Bold"
+                                    Name="LogCount"
+                                    Text="{Binding DataContext.ModuleEquivalenceWeightAllChangeLogList.Count, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" />
+                            <!--AncestorType=dxlc:GroupBox-->
+                            <!--end GEOS2-3855 gulab lakade 24 08 2022-->
+                        </DockPanel>
+                    </DataTemplate>
+                </dxlc:GroupBox.HeaderTemplate>
+
+                <dxlc:GroupBox.ContentTemplate>
+                    <DataTemplate>
+                      
+                            <!--Width="700" Height="800"-->
+                        <Grid Width="800" Height="410">
+                            <Grid.Style>
+                                <Style>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding DataContext.IsAccordionControlVisibleLogs,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" Value="0">
+                                            <Setter Property="Grid.Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Grid.Style>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                
+                                <!--Start GEOS2-4334 shiv kumar 24 04 2023-->
+                            </Grid.RowDefinitions>
+                            <Label Content="{DynamicResource LogDate}" Grid.Row="0" Grid.Column="0" Margin="2" Padding="2"  FontWeight="Bold" />
+                            <TextBlock Grid.Row="0" Grid.Column="1" Margin="2" Padding="2" Text="{Binding DataContext.ModuleEquivalenceWeightAllChangeLogList[0].Datetime, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox},StringFormat=d, ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}"/>
+
+                            <Label Content="{DynamicResource LogUser}" Grid.Row="1" Grid.Column="0" Margin="2" Padding="2"  FontWeight="Bold"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" Margin="2" Padding="2" Text="{Binding DataContext.ModuleEquivalenceWeightAllChangeLogList[0].ChangeLogUser.FullName, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" TextWrapping="Wrap" />
+                            <Label Content="{DynamicResource LogAction}" Grid.Row="2" Grid.Column="0" Margin="2" Padding="2"  FontWeight="Bold"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" Margin="2" Padding="2"  Text="{Binding DataContext.ModuleEquivalenceWeightAllChangeLogList[0].Comments, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}"  Width="Auto" TextTrimming="CharacterEllipsis" ToolTip="{Binding DataContext.ModuleEquivalenceWeightAllChangeLogList[0].Comments, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" />
+
+                        </Grid>
+                      
+                    </DataTemplate>
+
+                </dxlc:GroupBox.ContentTemplate>
+                <!--Start GEOS2-3855 gulab lakade 24 08 2022-->
+                <dxlc:GroupBox.MaximizedContentTemplate>
+                    <DataTemplate>
+                        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                            <DockPanel LastChildFill="False" Width="900" Height="700" >
+                         
+                                <!--MinHeight="550"-->
+                                <dxg:GridControl VerticalAlignment="Stretch" HorizontalAlignment="Stretch"  
+                                             ItemsSource="{Binding DataContext.ModuleEquivalenceWeightAllChangeLogList, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}, UpdateSourceTrigger=PropertyChanged}"
+                                             ImplyNullLikeEmptyStringWhenFiltering="True">
+                                    <!--Search option start-->
+                                    <dxg:GridControl.Resources>
+                                        <dx:ListOfObjectToIEnumerableOfStringConverter x:Key="listConverter"/>
+                                        <dx:EditorStringIdConverter x:Key="EditorStringIdConverter" />
+                                        <dx:BoolInverseConverter x:Key="boolInverseConverter"/>
+                                        <dx:VisibilityToBoolInverseConverter x:Key="visibilityToBoolInverseConverter"/>
+                                        <dx:StringToVisibilityConverter x:Key="stringToVisibilityConverter"/>
+                                        <Style x:Key="{dxet:SearchControlThemeKey ResourceKey=FindButtonStyle}" TargetType="{x:Type Button}">
+                                            <Setter Property="Margin" Value="0,0,6,0"/>
+                                            <Setter Property="dx:FocusHelper2.Focusable" Value="False" />
+                                            <Setter Property="Content" Value="{Binding Path=IsTabStop, RelativeSource={RelativeSource Self}, ConverterParameter=LookUpFind, Converter={StaticResource EditorStringIdConverter}}" />
+                                        </Style>
+                                        <Style x:Key="{dxet:SearchControlThemeKey ResourceKey=CloseButtonStyle}" TargetType="{x:Type Button}">
+                                            <Setter Property="dx:FocusHelper2.Focusable" Value="False" />
+                                            <Setter Property="Content" Value="{Binding Path=IsTabStop, RelativeSource={RelativeSource Self}, ConverterParameter=LookUpClose, Converter={StaticResource EditorStringIdConverter}}" />
+                                        </Style>
+                                        <dx:BoolToObjectConverter x:Key="NullValueButtonPlacementConverter">
+                                            <dx:BoolToObjectConverter.TrueValue>EditBox</dx:BoolToObjectConverter.TrueValue>
+                                            <dx:BoolToObjectConverter.FalseValue>None</dx:BoolToObjectConverter.FalseValue>
+                                        </dx:BoolToObjectConverter>
+                                        <dx:BooleanToVisibilityConverter x:Key="boolToVisibilityConverter" />
+
+                                        <ControlTemplate x:Key="{dxet:SearchControlThemeKey ResourceKey=Template, IsThemeIndependent=true}">
+                                            <ContentControl dx:FocusHelper2.Focusable="False" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*" />
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <dxe:ComboBoxEdit MinHeight="22" Grid.Column="0" HorizontalAlignment="Stretch" 
+                                                            ImmediatePopup="{Binding Path= SearchControlPropertyProvider.ActualImmediateMRUPopup, RelativeSource={RelativeSource TemplatedParent}}"
+                                                            x:Name="editor" AllowDefaultButton="False"
+                                                            ShowNullText="{Binding Path=SearchControlPropertyProvider.ActualShowFindButton, RelativeSource={RelativeSource TemplatedParent}, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource boolInverseConverter}}"
+                                                            dxeh:MVVMFocusBehavior.IsFocused="{Binding Path=IsKeyboardFocusWithin, RelativeSource={RelativeSource TemplatedParent}, UpdateSourceTrigger=PropertyChanged}"
+                                                            ItemsSource="{Binding Path=MRU, RelativeSource={RelativeSource TemplatedParent}}"
+                                                            Margin="0"
+                                                            ValidateOnEnterKeyPressed="True"
+                                                            IncrementalFiltering="False"
+                                                            IsCaseSensitiveSearch="True"
+                                                            EditValuePostDelay="{Binding Path=SearchTextPostDelay, RelativeSource={RelativeSource TemplatedParent}}"
+                                                            EditValuePostMode="{Binding Path=SearchControlPropertyProvider.ActualPostMode, RelativeSource={RelativeSource TemplatedParent}}"
+                                                            EditValue="{Binding Path=SearchText, RelativeSource={RelativeSource TemplatedParent}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                            IsTabStop="{Binding IsEditorTabStop, RelativeSource={RelativeSource TemplatedParent}, UpdateSourceTrigger=PropertyChanged}">
+                                                        <dxe:ComboBoxEdit.NullText>
+                                                            <MultiBinding>
+                                                                <Binding Path="NullText" RelativeSource="{RelativeSource TemplatedParent}" />
+                                                                <Binding Path="IsTabStop" RelativeSource="{RelativeSource Self}" Converter="{StaticResource EditorStringIdConverter}" ConverterParameter="LookUpSearch" />
+                                                                <MultiBinding.Converter>
+                                                                    <dx:SearchControlNullTextConverter />
+                                                                </MultiBinding.Converter>
+                                                            </MultiBinding>
+                                                        </dxe:ComboBoxEdit.NullText>
+
+                                                        <dxe:ComboBoxEdit.StyleSettings>
+                                                            <dxe:SearchControlStyleSettings/>
+                                                        </dxe:ComboBoxEdit.StyleSettings>
+
+                                                        <dxe:ComboBoxEdit.Buttons>
+                                                            <dxe:ButtonInfo GlyphKind="Custom" x:Name="buttonClear"
+                                                                                Command="{Binding Path=SearchControlPropertyProvider.ClearSearchTextCommand, RelativeSource={RelativeSource TemplatedParent}}"
+                                                                                Visibility="{Binding Path=SearchControlPropertyProvider.ActualShowClearButton, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource boolToVisibilityConverter}}">
+                                                                <dxe:ButtonInfo.Template>
+                                                                    <DataTemplate>
+                                                                        <dxe:ButtonClose Command="{Binding Command}" Visibility="{Binding Visibility}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="2,0" />
+                                                                    </DataTemplate>
+                                                                </dxe:ButtonInfo.Template>
+                                                            </dxe:ButtonInfo>
+                                                            <dxe:ButtonInfo GlyphKind="DropDown"
+                                                                                Command="{Binding Path=OpenPopupCommand, ElementName=editor}"
+                                                                                Visibility="{Binding Path=ShowMRUButton, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource boolToVisibilityConverter}}" />
+                                                        </dxe:ComboBoxEdit.Buttons>
+                                                    </dxe:ComboBoxEdit>
+
+
+                                                </Grid>
+                                            </ContentControl>
+                                        </ControlTemplate>
+                                    </dxg:GridControl.Resources>
+                                    <!--End Search-->
+
+                                    <dxg:GridControl.Columns>
+
+                                        <dxg:GridColumn FieldName="ChangeLogUser.FullName" Header="{DynamicResource ChangeLogUser}" ReadOnly="True" FixedWidth="True" Width="150" FilterPopupMode="CheckedList"/>
+                                        <dxg:GridColumn FieldName="Datetime" Header="{DynamicResource ChangeLogDate}" ReadOnly="True" FixedWidth="True" Width="140" FilterPopupMode="CheckedList">
+                                            <dxg:GridColumn.EditSettings>
+                                                <dxe:DateEditSettings DisplayFormat="g" Name="changeLogTime" />
+                                            </dxg:GridColumn.EditSettings>
+                                        </dxg:GridColumn>
+                                        <dxg:GridColumn FieldName="Comments" Header="{DynamicResource ChangeLogAction}" ReadOnly="True" FixedWidth="False" Width="*" FilterPopupMode="CheckedList">
+                                            <dxg:GridColumn.EditSettings>
+                                                <dxe:TextEditSettings TextWrapping="Wrap" />
+                                            </dxg:GridColumn.EditSettings>
+                                        </dxg:GridColumn>
+
+                                    </dxg:GridControl.Columns>
+                                    <dxg:GridControl.View>
+                                        <dxg:TableView Name="ChangeLogTableView" 
+                                                            NavigationStyle="Row"
+                                                        AllowHorizontalScrollingVirtualization="True"
+                                                           RowDetailsVisibilityMode="Visible"
+                                                           ShowHorizontalLines="True"
+                                                           ShowSearchPanelMode="Always"
+                                                           ShowColumnHeaders="True"
+                                                           VerticalScrollbarVisibility="Auto" 
+                                                           HorizontalScrollbarVisibility="Auto"
+                                                           AllowFixedColumnMenu="False"
+                                                           AutoWidth="False"
+                                                           ShowFixedTotalSummary="True"
+                                                           ShowSearchPanelCloseButton="True"
+                                                           SearchPanelHorizontalAlignment="Stretch"
+                                                           ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly"
+                                                           AllowGrouping="True"
+                                                           ShowGroupPanel="False"
+                                                           ShowIndicator="False"
+                                                          >
+
+                                        </dxg:TableView>
+                                    </dxg:GridControl.View>
+                                </dxg:GridControl>
+                           
+                        </DockPanel>
+                        <!--</ScrollViewer>       -->
+                        </ScrollViewer>
+                        <!--end GEOS2-3855 gulab lakade 24 08 2022-->
+                        
+                    </DataTemplate>
+                </dxlc:GroupBox.MaximizedContentTemplate>
+            </dxlc:GroupBox>
+        </dxlc:FlowLayoutControl>
+
+        <!--Accept and Cancel Button-->
+        <Grid Background="Transparent" ShowGridLines="False" Grid.Row="2"  VerticalAlignment="Center" Margin="5,0,0,0" HorizontalAlignment="Center" >
+            <Grid.ColumnDefinitions>
+                <!--<ColumnDefinition Width="100"/>-->
+                <ColumnDefinition Width="10*"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="10"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="*"/>
+                <!--<ColumnDefinition Width="250"/>
+                <ColumnDefinition Width="*"/>-->
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Column="1"
+                    Style="{DynamicResource Button16Style}"
+                    HorizontalAlignment="Center"
+                    Content="{DynamicResource AddCatalogueAcceptButton}"
+                    Command="{Binding DataContext.AcceptButtonCommand,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"
+                     IsEnabled="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsAdminPermissionERM}"
+                    Height="30"
+                    Width="100"/>
+            <Button Grid.Column="3"
+                    Style="{DynamicResource Button16Style}"
+                    HorizontalAlignment="Center"
+                    Content="{DynamicResource AddCatalogueCancelButton}"
+                    Command="{Binding DataContext.CancelButtonCommand,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"
+                    Height="30"
+                    Width="100" />
+        </Grid>
+    </Grid>
+    </ScrollViewer>
+</dxwui:WinUIDialogWindow>

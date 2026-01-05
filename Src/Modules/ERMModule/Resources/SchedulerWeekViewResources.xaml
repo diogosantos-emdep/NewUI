@@ -1,0 +1,161 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                    xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+                    xmlns:dxschv="http://schemas.devexpress.com/winfx/2008/xaml/scheduling/visual" 
+                    xmlns:dxsch="http://schemas.devexpress.com/winfx/2008/xaml/scheduling" 
+                    xmlns:dxr="http://schemas.devexpress.com/winfx/2008/xaml/ribbon" 
+                    xmlns:dxscht="http://schemas.devexpress.com/winfx/2008/xaml/scheduling/themekeys" 
+                    xmlns:dxb="http://schemas.devexpress.com/winfx/2008/xaml/bars" 
+                    xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+                    xmlns:dxet="http://schemas.devexpress.com/winfx/2008/xaml/editors/themekeys"
+                    xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+                    xmlns:dxschp="clr-namespace:DevExpress.Xpf.Scheduling.Panels;assembly=DevExpress.Xpf.Scheduling.v19.2" 
+                    xmlns:sysglb="clr-namespace:System.Globalization;assembly=mscorlib"
+                    xmlns:UIConverter="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters" 
+                    xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+                    mc:Ignorable="d">
+
+    <!-- Add weeks in monthly calendar in [shiv kumar] [24/04/2023] -->
+    <!-- DevExpress 19.2 DLL version update -->
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="{dx:SchedulingResource Independent/Views/MonthViewControl.xaml}" />
+    </ResourceDictionary.MergedDictionaries>
+
+    <ControlTemplate x:Key="{dxscht:SchedulerCommonThemeKey ResourceKey=MonthViewGroupByResourceTemplate}" TargetType="dxschv:MonthViewGroupByResourceControl">
+        <Grid>
+            <DockPanel>
+                <DockPanel x:Name="headersContainer" DockPanel.Dock="Top" ClipToBounds="True" Margin="0,0,1,0">
+                    <DockPanel x:Name="resourceHeadersContainer" DockPanel.Dock="Top"
+                               dxschv:HeaderControl.ShowTopBorder="False" dxschv:HeaderControl.ShowBottomBorder="True">
+                        <ContentPresenter x:Name="resourceHeadersOffset" ContentTemplate="{TemplateBinding ResourceHeadersCornerTemplate}"
+                                          DockPanel.Dock="Right" Width="{DXBinding '@e(scrollContainer).Tag'}" IsHitTestVisible="False" Visibility="Collapsed"
+                                          dxschv:HeaderControl.ShowLeftBorder="False" dxschv:HeaderControl.ShowRightBorder="False"/>
+                        <dxschp:ResourceHeadersContainerPanel x:Name="resourceHeadersPanel" Style="{StaticResource ResourceHeadersContainerPanel.GroupByResource.Style}" ScrollOffset="{DXBinding '@e(scrollPresenter).HAnimatedOffset'}"
+                                                              dxschv:HeaderControl.ShowLeftBorder="True" dxschv:HeaderControl.ShowRightBorder="True" FirstItemShowLeftBorder="False"/>
+                    </DockPanel>
+                    <DockPanel x:Name="dateHeadersContainer" DockPanel.Dock="Top"
+                               dxschv:HeaderControl.ShowTopBorder="False" dxschv:HeaderControl.ShowBottomBorder="True">
+                        <ContentPresenter x:Name="dateHeadersOffset" ContentTemplate="{TemplateBinding DateHeadersCornerTemplate}"
+                                          DockPanel.Dock="Right" Width="{DXBinding '@e(scrollContainer).Tag'}" IsHitTestVisible="False" Visibility="Collapsed"
+                                          dxschv:HeaderControl.ShowLeftBorder="False" dxschv:HeaderControl.ShowRightBorder="False"/>
+                        <dxschp:DateHeadersContainersPanel x:Name="dateHeadersPanel" Style="{StaticResource DateHeadersContainersPanel.GroupByResource.Style}" ScrollOffset="{DXBinding '@e(scrollPresenter).HAnimatedOffset'}"
+                                                           dxschv:HeaderControl.ShowLeftBorder="False" dxschv:HeaderControl.ShowRightBorder="True" 
+                                                           ItemContainerFirstItemShowLeftBorder="True" FirstItemContainerFirstItemShowLeftBorder="False"/>
+                    </DockPanel>
+                    <DockPanel x:Name="headerAreaSeparatorContainer" DockPanel.Dock="Top">
+                        <Decorator x:Name="headerAreaSeparatorOffset" DockPanel.Dock="Right" Width="{DXBinding '@e(scrollContainer).Tag'}" IsHitTestVisible="False" Visibility="Collapsed"/>
+                        <dxschp:ItemsContainerPanel x:Name="headerAreaSeparator" Style="{StaticResource HeaderAreaSeparator.GroupByResource.Style}" ScrollOffset="{DXBinding '@e(scrollPresenter).HAnimatedOffset'}" />
+                    </DockPanel>
+                </DockPanel>
+
+                <DockPanel x:Name="leftHeadersContainer" DockPanel.Dock="Left"
+                           dxschv:HeaderControl.ShowTopBorder="False"
+                           dxschv:HeaderControl.ShowBottomBorder="True"
+                           dxschv:HeaderControl.ShowLeftBorder="True"
+                           dxschv:HeaderControl.ShowRightBorder="False"
+                           dxschv:HeaderControl.Orientation="Vertical">
+                    <dxschp:DateHeadersContainerPanel x:Name="leftHeadersPanel"
+                                                      ItemsSource="{Binding VisualData.DayGroups[0].CellContainers, RelativeSource={RelativeSource TemplatedParent}}"
+                                                      Orientation="Vertical"
+                                                      AutoSize="True"
+                                                      AutoSizeMaxViewport="{Binding View.WeekCount, RelativeSource={RelativeSource TemplatedParent}}"
+                                                      ScrollOffset="{DXBinding '@e(scrollPresenter).VAnimatedOffset'}">
+                        <dxschp:DateHeadersContainerPanel.ItemContentTemplate>
+                            <DataTemplate>
+                                <!--Calc Week Count here-->
+                                <TextBlock Text="{Binding Interval.Start, Converter={UIConverter:DisplayWeekInDayMonthSchedulerConverterStartFromFirstFourDayWeek}, StringFormat='{}CW{0:D2}'}" HorizontalAlignment="Center" />
+                            </DataTemplate>
+                        </dxschp:DateHeadersContainerPanel.ItemContentTemplate>
+
+                    </dxschp:DateHeadersContainerPanel>
+                </DockPanel>
+
+                <Grid>
+                    <DockPanel x:Name="scrollContainer" Tag="{DXBinding '@e(scrollViewer).VerticalScrollBarActualWidth', FallbackValue=0.0}">
+                        <dxschv:SchedulerScrollViewer x:Name="scrollViewer"
+                                                      IsDeferredVerticalScrollingEnabled="{DXBinding '@p.View.IsDeferredVerticalScrollingEnabled'}" ShowScrollTip="True"
+                                                      HScrollSnapping="{DXBinding '@p.View.IsHorizontalScrollSnappingEnabled'}"
+                                                      VScrollSnapping="{DXBinding '@p.View.IsVerticalScrollSnappingEnabled'}" SetHorizontalOffset="{TemplateBinding HorizontalScrollOffset}"
+                                                      SetVerticalOffset="{TemplateBinding VerticalScrollOffset}"
+                                                      VerticalScrollBarVisibility="{Binding Path=View.ActualVerticalScrollBarVisibility, RelativeSource={RelativeSource Mode=TemplatedParent}}"
+                                                      HorizontalScrollBarVisibility="{Binding Path=View.ActualHorizontalScrollBarVisibility, RelativeSource={RelativeSource Mode=TemplatedParent}}"
+                                                      HorizontalScrollBarControlBoxVisibility="{Binding Path=View.ActualResourceNavigatorVisibility, RelativeSource={RelativeSource Mode=TemplatedParent}}">
+                            <dxmvvm:Interaction.Behaviors>
+                                <dxmvvm:EventToCommand EventName="ReportExtendBoundary" Command="{Binding VisualData.OnReportExtendBoundaryCommand}"/>
+                                <dxmvvm:EventToCommand EventName="ReportManipulationExtendBoundary" Command="{Binding VisualData.OnReportExtendBoundaryCommand}"/>
+                                <dxmvvm:EventToCommand EventName="ZoomGesture" Command="{Binding VisualData.OnZoomGestureCommand}" PassEventArgsToCommand="True"/>
+                            </dxmvvm:Interaction.Behaviors>
+                            <dxschp:ScrollPanelPresenter x:Name="scrollPresenter"
+                                                         HPixelScrolling="{Binding Path=View.IsHorizontalPerPixelScrollingEnabled, RelativeSource={RelativeSource Mode=TemplatedParent}}"
+                                                         VPixelScrolling="{Binding Path=View.IsVerticalPerPixelScrollingEnabled, RelativeSource={RelativeSource Mode=TemplatedParent}}"
+                                                         Margin="0,0,1,1">
+                                <dxschp:ScrollPanelAggregator>
+                                    <dxschp:MonthGroupsPanel x:Name="PART_MonthGroupsPanel" Style="{StaticResource MonthGroupsPanel.GroupByResource.Style}" dxschp:ScrollPanelAggregator.IsScrollPanel="True"/>
+                                    <dxschp:MonthNavigationPanel x:Name="navigationPanel" Style="{StaticResource MonthNavigationPanel.GroupByResource.Style}"/>
+                                </dxschp:ScrollPanelAggregator>
+                            </dxschp:ScrollPanelPresenter>
+                            <dxschv:SchedulerScrollViewer.HorizontalScrollBarControlBox>
+                                <dxschv:ResourceNavigator FirstCommand="{DXBinding '@e(scrollViewer).Commands.LeftmostCommand'}" PrevPageCommand="{DXBinding '@e(scrollViewer).Commands.PageLeftCommand'}" PrevCommand="{DXBinding '@e(scrollViewer).Commands.LeftCommand'}" NextCommand="{DXBinding '@e(scrollViewer).Commands.RightCommand'}" NextPageCommand="{DXBinding '@e(scrollViewer).Commands.PageRightCommand'}" LastCommand="{DXBinding '@e(scrollViewer).Commands.RightmostCommand'}" PlusCommand="{DXBinding '@p.Commands.MoreResourcesPerPageCommand'}" MinusCommand="{DXBinding '@p.Commands.LessResourcesPerPageCommand'}"/>
+                            </dxschv:SchedulerScrollViewer.HorizontalScrollBarControlBox>
+                        </dxschv:SchedulerScrollViewer>
+                    </DockPanel>
+                    <ContentPresenter ContentTemplate="{TemplateBinding BorderTemplate}"/>
+                </Grid>
+            </DockPanel>
+        </Grid>
+
+        <ControlTemplate.Triggers>
+            <Trigger SourceName="scrollViewer" Property="ComputedVerticalScrollBarVisibility" Value="Visible">
+                <Setter TargetName="resourceHeadersOffset" Property="Visibility" Value="Visible"/>
+                <Setter TargetName="dateHeadersOffset" Property="Visibility" Value="Visible"/>
+                <Setter TargetName="headerAreaSeparatorOffset" Property="Visibility" Value="Visible"/>
+            </Trigger>
+
+            <DataTrigger Binding="{Binding View.ShowResourceHeaders, RelativeSource={RelativeSource Self}}" Value="False">
+                <Setter TargetName="resourceHeadersContainer" Property="Visibility" Value="Collapsed"/>
+            </DataTrigger>
+
+            <DataTrigger Binding="{Binding View.ShowDayHeaders, RelativeSource={RelativeSource Self}}" Value="False">
+                <Setter TargetName="dateHeadersContainer" Property="Visibility" Value="Collapsed"/>
+            </DataTrigger>
+
+            <DataTrigger Binding="{Binding View.Scheduler.ActualGroupType, RelativeSource={RelativeSource Self}}" Value="None">
+                <Setter TargetName="resourceHeadersContainer" Property="Visibility" Value="Collapsed"/>
+            </DataTrigger>
+
+            <DataTrigger Binding="{Binding View.Scheduler.ShowDateNavigationPanel, RelativeSource={RelativeSource Self}}" Value="True">
+                <Setter TargetName="resourceHeadersContainer" Property="dxschv:HeaderControl.ShowTopBorder" Value="True"/>
+            </DataTrigger>
+
+            <MultiDataTrigger>
+                <MultiDataTrigger.Conditions>
+                    <Condition Binding="{Binding View.Scheduler.ShowDateNavigationPanel, RelativeSource={RelativeSource Self}}" Value="True"/>
+                    <Condition Binding="{Binding ElementName=resourceHeadersContainer, Path=Visibility}" Value="Collapsed"/>
+                </MultiDataTrigger.Conditions>
+                <Setter TargetName="dateHeadersContainer" Property="dxschv:HeaderControl.ShowTopBorder" Value="True"/>
+            </MultiDataTrigger>
+
+            <DataTrigger Binding="{Binding Source={x:Static dxsch:SchedulerControl.UseClassicStyle}, Mode=OneTime}" Value="False">
+                <Setter TargetName="resourceHeadersContainer" Property="dxschv:HeaderControl.ShowTopBorder" Value="True"/>
+                <Setter TargetName="resourceHeadersPanel" Property="FirstItemShowLeftBorder" Value="True"/>
+                <Setter TargetName="dateHeadersPanel" Property="FirstItemContainerFirstItemShowLeftBorder" Value="True"/>
+            </DataTrigger>
+
+            <MultiDataTrigger>
+                <MultiDataTrigger.Conditions>
+                    <Condition Binding="{Binding Source={x:Static dxsch:SchedulerControl.UseClassicStyle}, Mode=OneTime}" Value="False"/>
+                    <Condition Binding="{Binding ElementName=resourceHeadersContainer, Path=Visibility}" Value="Collapsed"/>
+                </MultiDataTrigger.Conditions>
+                <Setter TargetName="dateHeadersContainer" Property="dxschv:HeaderControl.ShowTopBorder" Value="True"/>
+            </MultiDataTrigger>
+
+            <DataTrigger Binding="{Binding Source={x:Static dxsch:SchedulerControl.UseClassicStyle}, Mode=OneTime}" Value="True">
+                <Setter TargetName="headersContainer" Property="Margin" Value="0"/>
+                <Setter TargetName="scrollPresenter" Property="Margin" Value="0"/>
+            </DataTrigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+
+</ResourceDictionary>

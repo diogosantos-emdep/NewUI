@@ -1,0 +1,68 @@
+﻿<dxwui:WinUIDialogWindow x:Class="Emdep.Geos.Modules.Warehouse.Views.PendingStorageScanView"
+                         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                         xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                         xmlns:local="clr-namespace:Emdep.Geos.Modules.Warehouse.Views"
+                         xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+                         xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+                         xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+                         mc:Ignorable="d"
+                         d:DesignHeight="300" d:DesignWidth="300"
+                         Title="{DynamicResource PendingStorageScanHeader}"
+                         Style="{DynamicResource WinUIDialogWindowStyle}" 
+                         TitleStyle="{DynamicResource WinUIDialogWindowTitleStyle}">
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape" Command="{Binding CancelButtonCommand}" />
+    </dxwui:WinUIDialogWindow.InputBindings>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="5*"/>
+            <RowDefinition Height="25"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!--Location-->
+        <Label Grid.Row="0" Grid.Column="1" Margin="5 0 0 0"
+               Content="{DynamicResource PendingStorageScanViewLocation}" FontWeight="SemiBold" FontSize="20"
+               HorizontalAlignment="Left"/>
+
+        <Label Grid.Row="1" Grid.Column="0" Width="60" Style="{DynamicResource LabelBackgroundImageBrush}" ToolTip="Scan"/>
+
+        <dxe:TextEdit Margin="5" Width="350" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3"  ShowBorder="True"  Height="60" FontSize="40" VerticalContentAlignment="Center" HorizontalAlignment="Left" AcceptsReturn="False" AcceptsTab="False" TextWrapping="NoWrap"
+                      FocusManager.FocusedElement="{Binding ElementName=TextEditBarcode}" AllowUpdateTwoWayBoundPropertiesOnSynchronization="False"
+                      InvalidValueBehavior="AllowLeaveEditor"  TextTrimming="CharacterEllipsis" VerticalScrollBarVisibility="Disabled" x:Name="TextEditBarcode" >
+            <dxmvvm:Interaction.Behaviors>
+                <dxmvvm:EventToCommand EventName="KeyDown" Command="{Binding CommandScanBarcode}" PassEventArgsToCommand="True"/>
+            </dxmvvm:Interaction.Behaviors>
+            <dxe:TextEdit.EditValue>
+                <Binding Path="PendingStorageBarcode" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                </Binding>
+            </dxe:TextEdit.EditValue>
+        </dxe:TextEdit>
+
+        <StackPanel Orientation="Horizontal" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left" Visibility="{Binding PendingStorageBarcodeErrorVisibility}" 
+                    Grid.ColumnSpan="3" Margin="5 0 0 0">
+            <Image Height="24" Width="24" Source="/Emdep.Geos.Modules.Warehouse;component/Assets/Images/error.png"  />
+            <TextBlock Text="{Binding PendingStorageBarcodeError}" Foreground="#FF0000" FontWeight="SemiBold" FontSize="20" HorizontalAlignment="Left" VerticalAlignment="Center"
+                   />
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal" Grid.Column="1" Grid.Row="3" Grid.ColumnSpan="2" HorizontalAlignment="Center">
+            <Button Content="{DynamicResource PendingStorageScanViewCancel}" 
+                    Command="{Binding CancelButtonCommand}" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="5"
+                    FontSize="16" Height="30" Width="100" Style="{DynamicResource Button16Style}"/>
+
+            <Button Content="{DynamicResource PendingStorageScanViewSkip}" 
+                    Command="{Binding SkipButtonCommand}" VerticalAlignment="Center" HorizontalAlignment="Center"  Margin="15 0 0 0"
+                    FontSize="16" Height="30" Width="100" Style="{DynamicResource Button16Style}"/>
+        </StackPanel>
+
+    </Grid>
+</dxwui:WinUIDialogWindow>

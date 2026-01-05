@@ -1,0 +1,1583 @@
+﻿<dxwui:WinUIDialogWindow  x:Class="Emdep.Geos.Modules.SRM.Views.ViewPurchaseOrderView"
+                            xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                            xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                            xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                            xmlns:local="clr-namespace:Emdep.Geos.Modules.SRM.Views"
+                            xmlns:ViewModels="clr-namespace:Emdep.Geos.Modules.SRM.ViewModels"
+                            xmlns:dxnav="http://schemas.devexpress.com/winfx/2008/xaml/navigation"
+                            xmlns:dxn="http://schemas.devexpress.com/winfx/2008/xaml/navbar"
+                            xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+                            xmlns:dxwuin="http://schemas.devexpress.com/winfx/2008/xaml/windowsui/navigation"
+                            xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"  
+                            xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+                            xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol" 
+                            xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+                            xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+                            xmlns:Converters="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+                            xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+                            xmlns:behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"     
+                            xmlns:dxgt="http://schemas.devexpress.com/winfx/2008/xaml/grid/themekeys"
+                            xmlns:sysglb="clr-namespace:System.Globalization;assembly=mscorlib"
+                            xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+                            xmlns:core="http://schemas.devexpress.com/winfx/2008/xaml/core"
+                            xmlns:UIConverter="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+                                                
+                          
+                            d:DesignHeight="300" d:DesignWidth="300"
+                            Height="{Binding SystemParameters.PrimaryScreenHeight}" 
+                            Width="{Binding SystemParameters.PrimaryScreenWidth}"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            HorizontalContentAlignment="Stretch"
+                            VerticalContentAlignment="Stretch"
+                            Template="{StaticResource Maximized_DXDialogWindow}"
+                            Style="{DynamicResource WinUIDialogWindowStyle}"
+                            mc:Ignorable="d">
+
+
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape" Command="{Binding CancelButtonCommand}" />
+    </dxwui:WinUIDialogWindow.InputBindings>
+
+    <dxwui:WinUIDialogWindow.Resources>
+        <UIConverter:ImageUrlToByteArrayConverter x:Key="ImageUrlToByteArrayConverter" />
+        <Converters:ForegroundColorConverter x:Key="ForegroundColorConverter"/>
+
+        <Style x:Key="myGroupBoxStyle" TargetType="{x:Type dxlc:GroupBox}">
+            <Setter Property="MaximizeElementVisibility" Value="Visible" />
+            <Setter Property="Width" Value="300" />
+            <Setter Property="Height" Value="140" />
+        </Style>
+
+        <SolidColorBrush x:Key="ColorMain" Color="White" />
+        <Converters:GridMasterDetailButtonVisibilityConverter x:Key="GridMasterDetailButtonVisibilityConverter"/>
+
+        <DataTemplate x:Key="ColumnHeaderTemplate">
+            <ContentControl>
+                <dxg:GridColumnHeader>
+                    <dxg:GridColumnHeader.Template>
+                        <ControlTemplate>
+                            <Border BorderBrush="Black" BorderThickness="1" Height="45" Margin="0">
+                                <Label Content="{Binding}" 
+                                     FontWeight="Bold" />
+                            </Border>
+                        </ControlTemplate>
+                    </dxg:GridColumnHeader.Template>
+                </dxg:GridColumnHeader>
+            </ContentControl>
+        </DataTemplate>
+
+    </dxwui:WinUIDialogWindow.Resources>
+
+    <dxwui:WinUIDialogWindow.TitleStyle>
+        <Style TargetType="ContentControl">
+            <Setter Property="ContentTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                        <Grid ShowGridLines="False" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="40"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="50"/>
+                                <ColumnDefinition Width="5"/>
+                                <ColumnDefinition Width="50"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Text="{DynamicResource ViewPurchaseOrder}" Style="{DynamicResource CustomTitleStyle}"/>
+                            <dxe:ListBoxEdit x:Name="WorkflowStatusBtns" Grid.Column="2"
+                                 ItemsSource="{Binding DataContext.WorkflowStatusButtons,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}"
+                                 SelectedItem="{Binding DataContext.SelectedWorkflowStatusButton, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}"
+                                 AllowItemHighlighting="False" SelectionMode="Single" Focusable="False" Margin="0,0,0,0" ShowBorder="False" >
+                                <dxe:ListBoxEdit.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" >
+                                        </StackPanel>
+                                    </ItemsPanelTemplate>
+                                </dxe:ListBoxEdit.ItemsPanel>
+                                <dxe:ListBoxEdit.ItemTemplate>
+                                    <DataTemplate>
+                                        <Button x:Name="WorkflowStatusBtn" Style="{DynamicResource Button16Style}"
+                                                     Content="{Binding Name}"
+                                                     IsEnabled="True"
+                                                     Height="30"
+                                                     Width="200"
+                                                Command="{Binding DataContext.WorkflowButtonClickCommand, RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}"
+                                                CommandParameter="{Binding IdWorkflowStatus}"
+                                                Background="{Binding HtmlColor}" core:ThemeManager.ThemeName="None"/>
+                                    </DataTemplate>
+                                </dxe:ListBoxEdit.ItemTemplate>
+                            </dxe:ListBoxEdit>
+
+                            <!--Send Mail Button-->
+
+                            <Button Content=" " Grid.Column="6" Height="40" Width="40" HorizontalAlignment="Right"
+                                                Command="{Binding DataContext.SendEmailCommand, RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}">
+                                <Button.ToolTip>
+                                    <TextBlock Text="{DynamicResource SRMSendPOrequestMail}"/>
+                                </Button.ToolTip>
+                                <Button.ContentTemplate>
+                                    <DataTemplate>
+                                        <Image Style="{DynamicResource SendEmailButtonImageStyle}"  Height="35" Width="30" Margin="-10"/>
+                                    </DataTemplate>
+                                </Button.ContentTemplate>
+                            </Button>
+
+                            <!--Edit Button-->
+                            <Button Content=" " Grid.Column="4" Height="40" Width="40" HorizontalAlignment="Right"
+                            Margin="0,0,5,5" Visibility="Hidden">
+                                <Button.ToolTip>
+                                    <TextBlock Text="Signature"/>
+                                </Button.ToolTip>
+                                <Button.ContentTemplate>
+                                    <DataTemplate>
+                                        <Image Style="{ DynamicResource EditButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                                    </DataTemplate>
+                                </Button.ContentTemplate>
+                            </Button>
+                        </Grid>
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </dxwui:WinUIDialogWindow.TitleStyle>
+    <!--[GEOS2-4653][rdixit][12.07.2023] Made design compatible with diff resolution-->
+    <!--<ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" >-->
+    <!--Commented to avoid unnecessary vertical scroll bar-->
+
+    <!--[pramod.misal][GEOS2-5082][28-12-2023]-->
+    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10,10,10,10" Width="{Binding DialogWidth}" >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="80*" />
+            <RowDefinition Height="10*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="100*"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+
+        <dxlc:FlowLayoutControl Grid.Row="0"
+			Grid.Column="0"
+			Grid.ColumnSpan="2"
+			AllowLayerSizing="False"
+            Orientation="Horizontal"
+            ItemSpace="5" 
+            ScrollBars="Auto"
+            LayerSpace="5" 
+            Background="Transparent" 
+            AllowMaximizedElementMoving="False" 
+            VerticalAlignment="Stretch"
+            HorizontalAlignment="Stretch"					
+			BreakFlowToFit="False"                
+			DragScrolling="True"
+			MaximizedElementPosition="Right"
+			Padding="5"                   
+			StretchContent="False">
+            <dxmvvm:Interaction.Behaviors>
+                <UIHelper:FlowLayoutControlForMinimiseMaximise />
+            </dxmvvm:Interaction.Behaviors>
+
+            <!--PO Information-->
+            <dxlc:GroupBox x:Name="Information" MaximizeElementVisibility="Visible"
+				    Selector.IsSelected="True"
+				    Style="{StaticResource myGroupBoxStyle}">
+
+                <dxlc:GroupBox.HeaderTemplate>
+                    <DataTemplate>
+                        <DockPanel Margin="-5,0,0,0">
+                            <TextBlock Margin="5,0,0,0"
+								VerticalAlignment="Center"
+								FontWeight="Bold"
+								Text="{DynamicResource POInformation}"/>
+                        </DockPanel>
+                    </DataTemplate>
+                </dxlc:GroupBox.HeaderTemplate>
+
+                <dxlc:GroupBox.ContentTemplate>
+
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="30" />
+                                <RowDefinition Height="30" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <Label Grid.Row="0"
+								Grid.Column="0"
+								Margin="2"
+								Content="{DynamicResource WMSCode}"
+								FontWeight="Bold"
+								Padding="2" />
+                            <TextBlock Text="{Binding DataContext.WarehousePurchaseOrder.Code, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}" VerticalAlignment="Center"  Grid.Row="0" Grid.Column="1" Margin="3,0,0,0" Padding="2"/>
+                            <Label Grid.Row="1"
+								Grid.Column="0"
+								Margin="2"
+								Content="{DynamicResource Supplier}"
+								FontWeight="Bold"
+								Padding="2" />
+                            <TextBlock Text="{Binding DataContext.WarehousePurchaseOrder.ArticleSupplier.Name, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}" VerticalAlignment="Center"  Grid.Row="1" Grid.Column="1" Margin="3,0,0,0" Padding="2"
+                                ToolTip="{Binding DataContext.WarehousePurchaseOrder.ArticleSupplier.Name, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}"  TextWrapping="WrapWithOverflow" Width="Auto" TextTrimming="CharacterEllipsis"/>
+                            <Label Grid.Row="2"
+								Grid.Column="0"
+								Margin="2"
+								Content="{DynamicResource ExpectedDate}"
+								FontWeight="Bold"
+								Padding="2" />
+
+                            <TextBlock Text="{Binding DataContext.WarehousePurchaseOrder.DeliveryDate, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}},StringFormat=d,ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}" 
+                             VerticalAlignment="Center"  Grid.Row="2" Grid.Column="1" Margin="3,0,0,0" Padding="2">
+                                <TextBlock.Style>
+                                    <Style>
+                                        <Style.Triggers>
+                                            <DataTrigger Value="True" Binding="{Binding DataContext.WarehousePurchaseOrder.DeliveryDate,Converter={Converters:DateCellColorConvertor},RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}">
+                                                <Setter Property="TextBlock.Foreground" Value="{DynamicResource SleepDaysRedColor}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Grid>
+                    </DataTemplate>
+                </dxlc:GroupBox.ContentTemplate>
+
+                <dxlc:GroupBox.MaximizedContentTemplate>
+                    <DataTemplate>
+                        <!--Informatiom-->
+
+                        <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.HorizontalScrollBarVisibility="Auto">
+                            <Grid.RowDefinitions >
+                                <RowDefinition Height="auto"/>
+                                <RowDefinition Height="20"/>
+                                <RowDefinition Height="auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="10"/>
+                                <RowDefinition Height="auto" MaxHeight="90"/>
+                            </Grid.RowDefinitions>
+
+                            <dxlc:LayoutGroup View="GroupBox" Header="{DynamicResource Information}" IsCollapsible="True" Grid.Row="0" ScrollViewer.VerticalScrollBarVisibility="Auto">
+
+                                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" >
+                                    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ShowGridLines="False" >
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="30"/>
+                                            <RowDefinition Height="5"/>
+                                            <RowDefinition Height="30"/>
+                                            <RowDefinition Height="5"/>
+                                            <RowDefinition Height="30"/>
+                                            <RowDefinition Height="5"/>
+                                            <RowDefinition Height="30"/>
+                                        </Grid.RowDefinitions>
+
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="5"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="10"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="5"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="10"/>
+                                            <ColumnDefinition Width="50*"/>
+                                            <ColumnDefinition Width="5"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="10"/>
+                                            <ColumnDefinition Width="30*"/>
+                                            <ColumnDefinition Width="5"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="10"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="5"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="10"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <!--Code-->
+                                        <TextBlock Text="{DynamicResource WMSCode}" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center"  HorizontalAlignment="Left"/>
+                                        <TextBlock Text="{Binding DataContext.WarehousePurchaseOrder.Code, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}" VerticalAlignment="Center"  Grid.Row="0" Grid.Column="2"/>
+
+                                        <!--Supplier-->
+                                        <TextBlock Text="{DynamicResource Supplier}" VerticalAlignment="Center"  HorizontalAlignment="Left" Grid.Row="2" Grid.Column="0"/>
+                                        <DockPanel Grid.Row="2" Grid.Column="2" LastChildFill="True" Grid.ColumnSpan="6">
+                                            <TextBlock Text="{Binding DataContext.WarehousePurchaseOrder.ArticleSupplier.Name, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}" VerticalAlignment="Center" HorizontalAlignment="Stretch" TextWrapping="WrapWithOverflow"  />
+                                        </DockPanel>
+                                        <!--View Supplier-->
+                                        <!--[pramod.misal][GEOS2-4408][20.06.2023]-->
+                                        <dxe:HyperlinkEdit AllowAutoNavigate="True" Text="[View Supplier]"
+                                                           ToolTip="[View Supplier]"
+                                                           ShowNavigationUrlToolTip="False"
+                                                           VerticalAlignment="Center"  Grid.Row="2" Grid.Column="8" Command="{Binding DataContext.OpenViewSupplierCommand,RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}"/>
+
+                                        <!--Country-->
+                                        <TextBlock Text="{DynamicResource SRM_POCountry}" VerticalAlignment="Center"  HorizontalAlignment="Left" Grid.Row="4" Grid.Column="0" />
+
+                                        <StackPanel Orientation="Horizontal" Height="24" Grid.Row="4" Grid.Column="2" Grid.ColumnSpan="6">
+                                            <Image Source="{Binding DataContext.WarehousePurchaseOrder.ArticleSupplier.Country.CountryIconImage,RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}"  
+                                                    VerticalAlignment="Center" Height="24" Width="24" Margin="0,0,5,0" />
+                                            <TextBlock Text="{Binding DataContext.WarehousePurchaseOrder.ArticleSupplier.Country.Name, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}"  VerticalAlignment="Center"/>
+                                        </StackPanel>
+
+                                        <!--Expected date-->
+                                        <TextBlock Text="{DynamicResource ExpectedDate}" VerticalAlignment="Center"  HorizontalAlignment="Left" Grid.Row="6" Grid.Column="0"/>
+                                        <TextBlock Text="{Binding DataContext.WarehousePurchaseOrder.DeliveryDate, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}},StringFormat=d,ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}"                                                   
+                                         VerticalAlignment="Center" HorizontalAlignment="Stretch" Grid.Row="6" Grid.Column="2">
+                                            <TextBlock.Style>
+                                                <Style>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Value="True" Binding="{Binding DataContext.WarehousePurchaseOrder.DeliveryDate,Converter={Converters:DateCellColorConvertor},RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}">
+                                                            <Setter Property="TextBlock.Foreground" Value="{DynamicResource SleepDaysRedColor}"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+
+                                        <!--Status-->
+                                        <TextBlock Text="{DynamicResource Status}" Grid.Row="6" Grid.Column="4" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                                        <dxe:TextEdit x:Name="txtStatus" 
+                                                      Text="{Binding DataContext.WarehousePurchaseOrder.WorkflowStatus.Name, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}},UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" 
+                                                      Background="{Binding DataContext.WarehousePurchaseOrder.WorkflowStatus.HtmlColor, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}},UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+                                                      Foreground="{Binding ElementName=txtStatus, Path=Background, Converter={Converters:ForegroundColorConverter}}"
+                                                      Grid.Column="6" Grid.Row="6" VerticalAlignment="Center" 
+                                                      IsReadOnly="True" ShowBorder="False" TextWrapping="WrapWithOverflow"/>
+
+                                        <!--<TextBlock Text="[View  Workflow]" VerticalAlignment="Center"  Grid.Row="6" Grid.Column="8"/>-->
+                                        <dxe:HyperlinkEdit AllowAutoNavigate="True" Text="[View Workflow]"
+                                                           ToolTip="[View Workflow]"
+                                                           ShowNavigationUrlToolTip="False"
+                                                           VerticalAlignment="Center"  Grid.Row="6" Grid.Column="8" Command="{Binding DataContext.OpenWorkflowDiagramCommand,RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}"/>
+
+
+
+
+                                        <!--Assignee-->
+                                        <TextBlock Grid.Row="0" Grid.Column="10"  Text="{DynamicResource SRM_POAssignee}" Style="{StaticResource TextBlock14Style}" VerticalAlignment="Center"  />
+                                        <dxe:ComboBoxEdit Grid.Row="0" Grid.Column="12" 
+                                            VerticalAlignment="Stretch"
+                                            HorizontalAlignment="Stretch"
+                                            ItemsSource="{Binding DataContext.AssigneeList,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}"
+                                                          SelectedItem="{Binding DataContext.SelectedAssignee,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}"
+                                            DisplayMember="FullName" ValueMember="IdUser"
+                                            AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True" 
+                                            >
+                                        </dxe:ComboBoxEdit>
+
+
+                                        <!--Approver-->
+                                        <TextBlock Grid.Row="2" Grid.Column="10"  Text="{DynamicResource SRM_POApprover}" Style="{StaticResource TextBlock14Style}" VerticalAlignment="Center"  />
+                                        <dxe:ComboBoxEdit Grid.Row="2" Grid.Column="12" 
+                                            VerticalAlignment="Stretch"
+                                            HorizontalAlignment="Stretch"
+                                            ItemsSource="{Binding DataContext.ApproverList,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}"
+                                                          SelectedItem="{Binding DataContext.SelectedApprover,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}"
+                                            DisplayMember="FullName" ValueMember="IdUser"
+                                            AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True" 
+                                            >
+                                        </dxe:ComboBoxEdit>
+                                        
+                                        <!--Currency-->
+                                        <!--[pallavi.kale][04-03-2025][GEOS2-7013]-->
+                                        <TextBlock Text="{DynamicResource Currency}" VerticalAlignment="Center"  HorizontalAlignment="Right" Grid.Row="4" Grid.Column="10" />
+
+                                        <StackPanel Orientation="Horizontal" Height="24" Grid.Row="4" Grid.Column="12" Grid.ColumnSpan="6">
+                                            <Image Source="{Binding DataContext.WarehousePurchaseOrder.Currency.CurrencyIconImage,RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}"  
+                                              VerticalAlignment="Center" Height="24" Width="24" Margin="0,0,5,0" />
+
+                                            <TextBlock Text="{Binding DataContext.WarehousePurchaseOrder.Currency.Name, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}"  VerticalAlignment="Center"/>
+                                        </StackPanel>
+
+
+                                        <!--CreatedBy-->
+                                        <TextBlock Text="{DynamicResource CreatedBy}" VerticalAlignment="Center"  HorizontalAlignment="Left" Grid.Row="0" Grid.Column="14"/>
+                                        <TextBlock Text="{Binding DataContext.WarehousePurchaseOrder.Creator.FullName, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}" Grid.Row="0" Grid.Column="16" VerticalAlignment="Center"/>
+
+                                        <!--CreatedIn-->
+                                        <TextBlock Text="{DynamicResource CreatedIn}" VerticalAlignment="Center"  HorizontalAlignment="Left" Grid.Row="2" Grid.Column="14"/>
+                                        <TextBlock Text="{Binding DataContext.WarehousePurchaseOrder.CreatedIn, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}},StringFormat=d,ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}"  Grid.Row="2" Grid.Column="16" VerticalAlignment="Center"/>
+
+                                        <!--ModifiedBy-->
+                                        <TextBlock Text="{DynamicResource ModifiedBy}" VerticalAlignment="Center"  HorizontalAlignment="Left" Grid.Row="4" Grid.Column="14"/>
+                                        <TextBlock Text="{Binding DataContext.WarehousePurchaseOrder.Modifier.FullName, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}" Grid.Row="4" Grid.Column="16" VerticalAlignment="Center"/>
+
+                                        <!--ModifiedIn-->
+                                        <TextBlock Text="{DynamicResource ModifiedIn}" VerticalAlignment="Center"  HorizontalAlignment="Left" Grid.Row="6" Grid.Column="14"/>
+                                        <TextBlock Text="{Binding DataContext.WarehousePurchaseOrder.ModifiedIn, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}},StringFormat=d,ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}"  Grid.Row="6" Grid.Column="16" VerticalAlignment="Center" />
+
+                                        <!--ArticleSupplierType-->
+                                        <!--<TextBlock Grid.Row="1" Grid.RowSpan="4" Grid.Column="16" Margin="5,0,0,0" VerticalAlignment="Stretch" HorizontalAlignment="Right"  Text="{Binding DataContext.WarehousePurchaseOrder.ArticleSupplier.ArticleSupplierType.Name,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" 
+                                               Background="{Binding DataContext.WarehousePurchaseOrder.ArticleSupplier.ArticleSupplierType.HtmlColor,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" 
+                                               Width="64" Height="64" TextAlignment="Center" FontWeight="Bold" FontSize="40"/>-->
+
+                                        <TextBlock Grid.Row="1" Grid.Column="18" Grid.RowSpan="4" VerticalAlignment="Stretch" HorizontalAlignment="Right"  Text="{Binding DataContext.WarehousePurchaseOrder.ArticleSupplier.ArticleSupplierType.Name,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" 
+                                               Background="{Binding DataContext.WarehousePurchaseOrder.ArticleSupplier.ArticleSupplierType.HtmlColor,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" 
+                                               Width="64" Height="64" TextAlignment="Center" FontWeight="Bold" FontSize="40"/>
+
+                                    </Grid>
+                                </ScrollViewer>
+                            </dxlc:LayoutGroup>
+
+
+
+
+                            <!--Items Grid-->
+                            <dxlc:LayoutGroup Orientation="Vertical" Width="auto" Height="auto"
+									            Grid.Row="2" Grid.RowSpan="2"
+                                                ScrollBars="Auto"
+									            Header="{DynamicResource Items}" 
+									            MaxHeight="1000"
+									            View="GroupBox" 
+									            IsCollapsible="False"
+									            IsCollapsed="False" ScrollViewer.VerticalScrollBarVisibility="Auto">
+
+                                <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Visible"
+                                      ScrollViewer.VerticalScrollBarVisibility="Visible">
+                                    <dxg:GridControl x:Name="gridControl"
+										            Margin="-10"
+                                                    HorizontalContentAlignment="Stretch"
+                                                    VerticalContentAlignment="Stretch"
+                                                    ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                                    ScrollViewer.HorizontalScrollBarVisibility="Hidden"
+										            HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+										            ShowBorder="True" SelectionMode="Cell" MinHeight="100"
+                                                    
+										            ItemsSource="{Binding DataContext.WarehousePurchaseOrder.WarehousePurchaseOrderItemWithComments, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}, UpdateSourceTrigger=PropertyChanged}" ImplyNullLikeEmptyStringWhenFiltering="True" >
+                                        <dxg:GridControl.Resources>
+
+                                            <Style TargetType="{x:Type dxg:DetailColumnHeadersControl}">
+                                                <Setter Property="FontWeight" Value="Bold"/>
+                                            </Style>
+                                        </dxg:GridControl.Resources>
+
+                                        <dxmvvm:Interaction.Behaviors>
+                                            <UIHelper:BestFitBehavior/>
+                                            <!--<dxmvvm:EventToCommand EventName="CustomSummary"
+                                                     Command="{Binding DataContext.CustomSummaryCommand,RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}"
+                                                     PassEventArgsToCommand="True">
+                                            </dxmvvm:EventToCommand>-->
+                                            <!--<dxmvvm:EventToCommand EventName="CustomSummary"
+                                                     Command="{Binding DataContext.CustomSummaryCommand,RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}"
+                                                     PassEventArgsToCommand="True" CommandParameter="{Binding Path=RowData.Row}">
+                                            </dxmvvm:EventToCommand>-->
+                                        </dxmvvm:Interaction.Behaviors>
+
+                                        <dxg:GridControl.TotalSummary>
+                                            <!--<dxg:GridSummaryItem x:Name="summary" FieldName="Article.Reference" SummaryType="Count" DisplayFormat="Total Count: {0}"/>-->
+                                            <!--<dxg:GridSummaryItem x:Name="summary1" FieldName="Article.Reference" SummaryType="Count" DisplayFormat="Total Count: {0}"/>-->
+                                            <!--<dxg:GridSummaryItem x:Name="summary" FieldName="Summary" SummaryType="Average" DisplayFormat="Total Count: {0}"/>-->
+                                            <!--<dxg:GridSummaryItem x:Name="IdArticle" FieldName="IdArticle" SummaryType="Custom" Visible="True"/>-->
+                                            <!--<dxg:GridSummaryItem x:Name="Summary" FieldName="Summary" SummaryType="Sum" DisplayFormat="Total Count: {0}"/>-->
+
+                                            <!--<dxg:GridSummaryItem x:Name="Min" FieldName="Article_New.IdArticle" SummaryType="Min" Visible="True"/>-->
+                                            <!--<dxg:GridSummaryItem x:Name="ArticleReference" FieldName="Article_New.Reference" SummaryType="Count" Visible="True" DisplayFormat="Total Count: {0}"/>
+                                            <dxg:GridSummaryItem FieldName="Summary"  SummaryType="Sum" DisplayFormat="Total Count: {0}"></dxg:GridSummaryItem>-->
+                                            <!--<dxg:GridSummaryItem x:Name="IdArticle" FieldName="IdArticle" SummaryType="Custom" Visible="True"/>-->
+                                            <!--// shubham[skadam] GEOS2-3833 Add comment rows in PO details view  12 Aug 2022-->
+                                            <dxg:GridSummaryItem x:Name="summary" FieldName="Summary" SummaryType="Max" DisplayFormat="Total Count: {0}" Visible="True"   Alignment="Left"/>
+                                            <!--//Shubham[skadam] GEOS2-5084 Apply same format always for amounts or quantities 26 12 2023-->
+                                            <dxg:GridSummaryItem FieldName="Quantity" SummaryType="Sum" DisplayFormat="{}{0:N2}"></dxg:GridSummaryItem>
+                                            <dxg:GridSummaryItem FieldName="TotalAmount_New" SummaryType="Sum" DisplayFormat="{}{0:N2}"></dxg:GridSummaryItem>
+                                            <dxg:GridSummaryItem FieldName="ReceivedQuantity" SummaryType="Sum" DisplayFormat="{}{0:N2}"></dxg:GridSummaryItem>
+                                        </dxg:GridControl.TotalSummary>
+                                        <!--<dxg:GridColumn Header="{DynamicResource GridColReference}" FieldName="Article.Reference" FilterPopupMode="CheckedList" ReadOnly="True"/>-->
+                                        <dxg:GridColumn Header="{DynamicResource GridColReference}" FieldName="Article.Reference"  FilterPopupMode="CheckedList" ReadOnly="True" MinWidth="150" Width="170">
+                                            <!--<dxg:GridColumn.DisplayTemplate>
+                                                <ControlTemplate>
+                                                        <TextBlock VerticalAlignment="Center" Margin="5 0 0 0">
+                                            <Hyperlink x:Name="hyperlink" 
+                                                       TargetName="_blank"
+                                                       Command="{Binding DataContext.POItemDetailsViewHyperlinkClickCommand,RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}"
+                                                       CommandParameter="{Binding ElementName=POItemDetTableView}" Style="{DynamicResource hyperlinkGridStyle}">
+                                                <InlineUIContainer>
+                                                    <TextBlock Text="{Binding RowData.Row.Article.Reference}"  Style="{DynamicResource HyperlinkTextBlock}" TextDecorations="Underline" />
+                                                </InlineUIContainer>
+                                            </Hyperlink>
+                                                </TextBlock>
+                                                </ControlTemplate>
+                                            </dxg:GridColumn.DisplayTemplate>-->
+                                            <dxg:GridColumn.CellTemplate>
+
+                                                <DataTemplate>
+                                                    <TextBlock Margin="4 0 0 0">
+                                                        <Hyperlink x:Name="hyperlink"
+                                                                    TargetName="_blank"
+                                                                    Command="{Binding DataContext.POItemDetailsViewHyperlinkClickCommand, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}"
+                                                                    CommandParameter="{Binding ElementName=POItemDetTableView}">
+                                                                <InlineUIContainer>
+                                                                    <TextBlock Text="{Binding RowData.Row.Article.Reference}" VerticalAlignment="Center" />
+                                                                </InlineUIContainer>
+                                                        </Hyperlink>
+                                                    </TextBlock>
+                                                    <DataTemplate.Triggers>
+                                                        <Trigger Property="dxg:DataViewBase.IsFocusedRow" Value="True">
+                                                            <Setter TargetName="hyperlink" Property="Foreground" Value="{DynamicResource ColorMain}"/>
+                                                        </Trigger>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter TargetName="hyperlink" Property="Foreground" Value="OrangeRed" />
+                                                        </Trigger>
+                                                    </DataTemplate.Triggers>
+                                                </DataTemplate>
+                                            </dxg:GridColumn.CellTemplate>
+                                        </dxg:GridColumn>
+                                        <dxg:GridColumn Header="{DynamicResource GridColDescription}" FieldName="Description" MinWidth="250" Width="380"
+                                                        FilterPopupMode="CheckedList" ReadOnly="True" FixedWidth="False" >
+                                            <dxg:GridColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    
+                                                        <TextBlock MaxHeight="40" Margin="2,0,2,0" Text ="{Binding RowData.Row.Description,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" TextWrapping="Wrap" VerticalAlignment="Stretch"  >
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Value="3252" Binding="{Binding RowData.Row.IdArticle,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+                                                                            <Setter Property="FontWeight" Value="Bold"/>
+                                                                            <Setter Property="FontStyle" Value="Italic"/>
+                                                                            
+                                                                            
+                                                                        </DataTrigger>
+                                                                        <!--//Shubham[skadam] GEOS2-4965 General discount row is not added in the PO 28 11 2023 -->
+                                                                        <DataTrigger Value="13339" Binding="{Binding RowData.Row.IdArticle,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+                                                                            <Setter Property="FontWeight" Value="Bold"/>
+                                                                            <!--<Setter Property="FontStyle" Value="Italic"/>-->
+                                                                       
+                                                                           
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                            <TextBlock.ToolTip>
+                                                                <ToolTip Content="{Binding RowData.Row.Description}"/>
+                                                            </TextBlock.ToolTip>
+                                                        </TextBlock>
+                                                   
+                                                </DataTemplate>
+                                            </dxg:GridColumn.CellTemplate>
+
+                                        </dxg:GridColumn>
+                                        <dxg:GridColumn Header="{DynamicResource GridColExpectedDate}" FieldName="ExpectedDate" FilterPopupMode="CheckedList" MinWidth="100" Width="120">
+                                            <!--ReadOnly="{Binding Source={x:Static WarehouseCommon:WarehouseCommon.Instance}, Path=IsPermissionReadOnly}"-->
+                                            <dxg:GridColumn.DisplayTemplate>
+                                                <ControlTemplate>
+                                                    <TextBlock Text="{Binding Data.ExpectedDate,ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture},StringFormat=d }"></TextBlock>
+                                                </ControlTemplate>
+                                            </dxg:GridColumn.DisplayTemplate>
+                                            <dxg:GridColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <dxg:LookUpEdit Name="PART_Editor" ItemsSource="{Binding DataContext.WarehousePurchaseOrder.WarehousePurchaseOrderItems,RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}},Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                                         DisplayMember="{Binding Data.Date}" ValueMember="{Binding Data.Date}"  IsTextEditable="False"
+                                                         PopupMinWidth="300" 
+                                                         AutoPopulateColumns="False" DisplayFormatString="d">
+                                                        <dxg:LookUpEdit.PopupContentTemplate>
+                                                            <ControlTemplate>
+                                                                <dxg:GridControl x:Name="PART_GridControl" AutoExpandAllGroups="True" ItemsSource="{Binding RowData.Row.WarehousePurchaseOrderExpectedItems}" ImplyNullLikeEmptyStringWhenFiltering="True">
+                                                                    <dxg:GridControl.Columns>
+                                                                        <dxg:GridColumn FieldName="Date" Header="Date" FilterPopupMode="CheckedList" ReadOnly="True"/>
+                                                                        <dxg:GridColumn FieldName="Quantity" Header="Quantity"/>
+                                                                    </dxg:GridControl.Columns>
+                                                                    <dxg:GridControl.View>
+                                                                        <!--[pramod.misal][GEOS2-5082][28-12-2023]-->
+                                                                        <dxg:TableView Name="View" 
+                                                                                    ShowGroupedColumns="True"
+                                                                                    
+                                                                                    AutoWidth="True" 
+                                                                                    ShowIndicator="False"
+                                                                                    AllowPerPixelScrolling="True"
+                                                                                    ScrollAnimationDuration="0" 
+                                                                                    ShowAutoFilterRow="False"
+                                                                                    ShowTotalSummary="False"
+                                                                                    IsSynchronizedWithCurrentItem="False"
+                                                                                    ShowSearchPanelMode="Never"
+                                                                                    
+                                                                                    ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly">
+                                                                        </dxg:TableView>
+                                                                    </dxg:GridControl.View>
+                                                                </dxg:GridControl>
+                                                            </ControlTemplate>
+                                                        </dxg:LookUpEdit.PopupContentTemplate>
+                                                    </dxg:LookUpEdit>
+                                                </DataTemplate>
+                                            </dxg:GridColumn.CellTemplate>
+                                        </dxg:GridColumn>
+                                        <dxg:GridColumn Header="{DynamicResource GridColTotalQty}" FieldName="Quantity"  FilterPopupMode="CheckedList" ReadOnly="True" MinWidth="100" Width="120">
+										<!--//Shubham[skadam] GEOS2-5084 Apply same format always for amounts or quantities 26 12 2023-->                                            
+											<dxg:GridColumn.EditSettings>
+                                                <dxe:TextEditSettings HorizontalContentAlignment="Right" MaskType="Numeric" Mask="N2" MaskUseAsDisplayFormat="True"/>
+                                            </dxg:GridColumn.EditSettings>
+                                        </dxg:GridColumn>
+                                        <dxg:GridColumn Header="{DynamicResource GridColUnitPrice}" FieldName="UnitPrice" FilterPopupMode="CheckedList" ReadOnly="True" MinWidth="100" Width="120">
+                                            <dxg:GridColumn.EditSettings>
+                                                <dxe:TextEditSettings HorizontalContentAlignment="Right" MaskType="Numeric" Mask="N2" MaskUseAsDisplayFormat="True"/>
+                                            </dxg:GridColumn.EditSettings>
+                                        </dxg:GridColumn>
+                                        <dxg:GridColumn Header="{DynamicResource GridColUnitDiscountWithPercentage}" FieldName="Discount" FilterPopupMode="CheckedList" ReadOnly="True" MinWidth="100" Width="120">
+                                            <!--//Shubham[skadam] GEOS2-5084 Apply same format always for amounts or quantities 26 12 2023-->
+                                            <dxg:GridColumn.EditSettings>
+                                                <dxe:TextEditSettings HorizontalContentAlignment="Right" MaskType="Numeric" Mask="N2" MaskUseAsDisplayFormat="True"/>
+                                            </dxg:GridColumn.EditSettings>
+                                        </dxg:GridColumn>
+                                        <dxg:GridColumn Header="{DynamicResource GridColTotalPrice}" FieldName="TotalAmount_New" FilterPopupMode="CheckedList" ReadOnly="True" MinWidth="100" Width="120">
+                                            <dxg:GridColumn.EditSettings>
+                                                <dxe:TextEditSettings HorizontalContentAlignment="Right" MaskType="Numeric" Mask="N2" MaskUseAsDisplayFormat="True"/>
+                                            </dxg:GridColumn.EditSettings>
+                                        </dxg:GridColumn>
+
+                                        <dxg:GridColumn Header="{DynamicResource GridColReceivedQty}" FieldName="ReceivedQuantity"  FilterPopupMode="CheckedList" ReadOnly="True" MinWidth="130" Width="170">
+                                            <dxg:GridColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <!--//Shubham[skadam] GEOS2-5084 Apply same format always for amounts or quantities 26 12 2023-->
+                                                    <TextBlock Text="{Binding Data.ReceivedQuantity,StringFormat={}{0:N2}, ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0 0 5 0">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="{x:Type TextBlock}">
+                                                                <Style.Triggers>
+                                                                    <MultiDataTrigger>
+                                                                        <MultiDataTrigger.Conditions>
+                                                                            <Condition Value="False">
+                                                                                <Condition.Binding>
+                                                                                    <MultiBinding Converter="{Converters:CheckValueGreaterThenOrEqualToConverter}">
+                                                                                        <Binding Path="RowData.Row.Quantity" />
+                                                                                        <Binding Path="RowData.Row.ReceivedQuantity" />
+                                                                                    </MultiBinding>
+                                                                                </Condition.Binding>
+                                                                            </Condition>
+                                                                        </MultiDataTrigger.Conditions>
+                                                                        <Setter Property="Foreground" Value="Red" />
+                                                                    </MultiDataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                </DataTemplate>
+                                            </dxg:GridColumn.CellTemplate>
+                                        </dxg:GridColumn>
+
+                                        <dxg:GridColumn Header="{DynamicResource GridColStatus}" FieldName="Status" FilterPopupMode="CheckedList" MinWidth="100" Width="120">
+                                            <dxg:GridColumn.EditSettings>
+                                                <dxe:ProgressBarEditSettings Maximum="100" Minimum="0" ContentDisplayMode="Value" DisplayFormat="{}{0}%" />
+                                            </dxg:GridColumn.EditSettings>
+                                        </dxg:GridColumn>
+                                        <dxg:GridControl.View>
+                                            <dxg:TableView x:Name="POItemDetTableView"
+                                                          NavigationStyle="Cell"
+                                                                  RowDetailsVisibilityMode="Visible"
+                                                                  ShowHorizontalLines="True"
+                                                                  ShowSearchPanelMode="Always"
+                                                                  ShowColumnHeaders="True"
+                                                                  VerticalScrollbarVisibility="Visible"
+                                                                  AllowFixedColumnMenu="False"
+                                                                  ShowTotalSummary="True"
+                                                                  ShowFixedTotalSummary="True" 
+                                                                  SearchPanelHorizontalAlignment="Stretch"
+                                                                  AllowGrouping="True"
+                                                                  ShowGroupPanel="False"
+                                                                  ShowIndicator="False" 
+                                                                  ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly"
+                                                                  UIHelper:MultipleCellEditHelper.IsEnabled="False"
+                                                                  FocusedRow="{Binding SelectedObject, Mode=TwoWay}"
+                                                          AutoWidth="True" >
+                                                <dxg:TableView.IsDetailButtonVisibleBinding>
+                                                    <Binding Path="Row.ReceivedDeliveryNotes.Count">
+                                                        <Binding.Converter>
+                                                            <dxmvvm:ObjectToObjectConverter DefaultTarget="True">
+                                                                <dxmvvm:MapItem Source="0" Target="False"/>
+                                                            </dxmvvm:ObjectToObjectConverter>
+                                                        </Binding.Converter>
+                                                    </Binding>
+                                                </dxg:TableView.IsDetailButtonVisibleBinding>
+
+
+                                                <dxg:TableView.TotalSummaryItemTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding Column.TotalSummaryText}" Padding="2" 
+                                                        Foreground="{Binding Column.TotalSummaries, Converter={Converters:SummaryValueToColorConverter}}"/>
+                                                    </DataTemplate>
+                                                </dxg:TableView.TotalSummaryItemTemplate>
+                                            </dxg:TableView>
+                                            <!--IsDetailButtonVisibleBinding="{Binding Row.ReceivedDeliveryNotes, Converter={StaticResource GridMasterDetailButtonVisibilityConverter}}"/>-->
+                                        </dxg:GridControl.View>
+                                        <dxg:GridControl.DetailDescriptor>
+                                            <dxg:DataControlDetailDescriptor ItemsSourceBinding="{Binding ReceivedDeliveryNotes}">
+
+                                                <dxg:GridControl ShowBorder="True" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                                                    <dxg:GridColumn Header="{DynamicResource GridColReference}" FieldName="Code" FilterPopupMode="CheckedList"/>
+                                                    <dxg:GridColumn Header="{DynamicResource GridColSupplierCode}" FieldName="SupplierCode"  FilterPopupMode="CheckedList"/>
+                                                    <dxg:GridColumn Header="{DynamicResource GridColDeliveryDate}" FieldName="DeliveryDate" FilterPopupMode="CheckedList"/>
+                                                    <dxg:GridColumn Header="{DynamicResource GridColQuantity}" FieldName="Quantity" FilterPopupMode="CheckedList">
+                                                        <!--//Shubham[skadam] GEOS2-5084 Apply same format always for amounts or quantities 26 12 2023-->
+                                                        <dxg:GridColumn.EditSettings>
+                                                            <dxe:TextEditSettings HorizontalContentAlignment="Right" MaskType="Numeric" Mask="N2" MaskUseAsDisplayFormat="True"/>
+                                                        </dxg:GridColumn.EditSettings>
+                                                    </dxg:GridColumn>
+                                                    <dxg:GridColumn Header="{DynamicResource GridColTotalPrice}" FieldName="TotalAmount_New" FilterPopupMode="CheckedList">
+                                                        <dxg:GridColumn.EditSettings>
+                                                            <dxe:TextEditSettings HorizontalContentAlignment="Right" MaskType="Numeric" Mask="N2" MaskUseAsDisplayFormat="True"/>
+                                                        </dxg:GridColumn.EditSettings>
+                                                    </dxg:GridColumn>
+
+                                                    <dxg:GridControl.View>
+                                                        <dxg:TableView Name="DetailView" 
+                                                                       VerticalScrollbarVisibility="Visible"
+                                                                       HorizontalScrollbarVisibility="Visible"
+                                                                       NavigationStyle="Row"
+                                                                       AutoWidth="True"
+                                                                       ShowGroupPanel="False" 
+                                                                       AllowEditing="False"
+                                                                       ShowTotalSummary="True"
+                                                                       ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly">
+                                                        </dxg:TableView>
+                                                    </dxg:GridControl.View>
+                                                </dxg:GridControl>
+                                            </dxg:DataControlDetailDescriptor>
+                                        </dxg:GridControl.DetailDescriptor>
+                                    </dxg:GridControl>
+                                </Grid>
+
+                            </dxlc:LayoutGroup>
+                            <!--<TextBlock Text="{DynamicResource Comments}" Grid.Row="4" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                            <dxe:TextEdit Text="{Binding DataContext.WarehousePurchaseOrder.Comments, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}},UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" 
+                                                Grid.Row="6" HorizontalAlignment="Left" VerticalAlignment="Stretch" 
+                                                VerticalContentAlignment="Top" TextWrapping="WrapWithOverflow"
+                                                IsReadOnly="True"/>-->
+                            <!--[pramod.misal][GEOS2-4449][30-06-2023]-->
+                            <!--Comments-->
+                            <!--<TextBlock Text="{DynamicResource Comments}" Grid.Row="4" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                                <dxe:TextEdit Text="{Binding DataContext.WarehousePurchaseOrder.Comments, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}},UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" 
+                                                Grid.Row="6" HorizontalAlignment="left" VerticalAlignment="Stretch"
+                                                VerticalContentAlignment="Top" TextWrapping="WrapWithOverflow"
+                                                IsReadOnly="True"/>-->
+
+                            <!--[pramod.misal][GEOS2-4449][30-06-2023]-->
+                            <!--<TextBlock Text="{DynamicResource SupplierComments}" Grid.Row="4" Grid.Column="4" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,640,0"/>
+                                 <dxe:TextEdit Text="{Binding DataContext.WarehousePurchaseOrder.SupplierComments, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
+                                          Grid.Row="7" HorizontalAlignment="Right" VerticalAlignment="Stretch" 
+                                          VerticalContentAlignment="Top" TextWrapping="WrapWithOverflow"
+                                          IsReadOnly="True"/>-->
+
+
+                            <Grid Grid.Row="5">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+                                <TextBlock Text="{DynamicResource Comments}" Grid.Row="4" Grid.Column="0"
+               VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                                <!--[pramod.misal][GEOS2-4449][30-06-2023]-->
+                                <dxe:TextEdit Text="{Binding DataContext.WarehousePurchaseOrder.Comments, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}},
+                    UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
+                  Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2"  MinHeight="40" Margin="0,10,0,0"
+                  HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                  VerticalContentAlignment="Top" TextWrapping="WrapWithOverflow"
+                  IsReadOnly="True"/>
+
+                                <TextBlock Text="{DynamicResource SupplierComments}" Grid.Row="4" Grid.Column="2"
+               VerticalAlignment="Center" HorizontalAlignment="Left"/>
+
+                                <dxe:TextEdit Text="{Binding DataContext.WarehousePurchaseOrder.SupplierComments, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}},
+                    UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
+                  Grid.Row="6" Grid.Column="2" Grid.ColumnSpan="2" MinHeight="40" Margin="0,10,0,0"
+                  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+                  VerticalContentAlignment="Top" TextWrapping="WrapWithOverflow"
+                  IsReadOnly="True"/>
+                            </Grid>
+                        </Grid>
+                    </DataTemplate>
+                </dxlc:GroupBox.MaximizedContentTemplate>
+            </dxlc:GroupBox>
+
+
+            <!--Shipping Address -->
+            <!--<[pramod.misal][GEOS2-4451][26-07-2023]-->
+
+
+            <dxlc:GroupBox x:Name="Contacts" Style="{StaticResource myGroupBoxStyle}">
+
+                <!--HeaderTemplate-->
+                <dxlc:GroupBox.HeaderTemplate>
+                    <DataTemplate>
+                        <DockPanel Margin="-5,0,0,0">
+                            <TextBlock Text="{DynamicResource ShippingAddress}" Margin="5,0,0,0" VerticalAlignment="Center" FontWeight="Bold"
+                                    />
+                            <TextBlock Name="ContactsCount" Text="{Binding DataContext.WarehousePurchaseOrder.WarehouseShippingAddress.Count,RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}"
+                                       FontWeight="Bold"
+                                    Width="50"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    Margin="5,1,0,0"
+                                    />
+                        </DockPanel>
+                    </DataTemplate>
+                </dxlc:GroupBox.HeaderTemplate>
+
+                <!--ContentTemplate-->
+
+                <dxlc:GroupBox.ContentTemplate>
+                    <DataTemplate>
+                        <Grid ShowGridLines="False" Margin="0,0,0,0">
+                            <Grid.Style>
+                                <Style>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding DataContext.WarehousePurchaseOrder.WarehouseShippingAddress[0],RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}" Value="0">
+                                            <Setter Property="Grid.Visibility" Value="Hidden" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Grid.Style>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="20" />
+                                <RowDefinition Height="20" />
+                                <RowDefinition Height="20" />
+                                <RowDefinition Height="20" />
+                                <RowDefinition Height="20" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="50" />
+                                <ColumnDefinition Width="10" />
+                                <ColumnDefinition Width="35" />
+                                <ColumnDefinition Width="10" />
+                                <ColumnDefinition Width="50" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Text="{Binding DataContext.WarehousePurchaseOrder.WarehouseShippingAddress[0].Name,RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}"
+                                       HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ToolTip="{Binding DataContext.WarehousePurchaseOrder.WarehouseShippingAddress[0].Name}"
+                                       Grid.Row="0" Grid.Column="0" Style="{DynamicResource TextBlock12Style}" FontWeight="Bold" TextWrapping="WrapWithOverflow" Grid.ColumnSpan="6" FontSize="15" />
+
+
+                            <!--Address-->
+
+                            <TextBlock Text="{Binding DataContext.WarehousePurchaseOrder.WarehouseShippingAddress[0].Address,RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}"
+                                       HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ToolTip="{Binding DataContext.WarehousePurchaseOrder.WarehouseShippingAddress[0].Address}"
+                                       Grid.Row="1" Grid.Column="0" Style="{DynamicResource TextBlock12Style}" TextWrapping="WrapWithOverflow" Grid.ColumnSpan="6"/>
+
+                            <!--ZipCode City Region [rdixit][GEOS2-4451][21.08.2023]-->
+                            <TextBlock Text="{Binding DataContext.WarehousePurchaseOrder.WarehouseShippingAddress[0].Zipcityregion,RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}"
+                                       HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+                                       Grid.Row="2" Grid.Column="0" Style="{DynamicResource TextBlock12Style}" TextWrapping="WrapWithOverflow" Grid.ColumnSpan="6" />
+
+
+                            <!--ZipCode-->
+                            <!--
+                            
+                            <TextBlock Text="{Binding DataContext.WarehousePurchaseOrder.WarehouseShippingAddress[0].ZipCode,RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}"
+                                       HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+                                       Grid.Row="2" Grid.Column="0" Style="{DynamicResource TextBlock12Style}" TextWrapping="WrapWithOverflow" Grid.ColumnSpan="5" />
+
+                            <TextBlock Text="-" HorizontalAlignment="Stretch" Grid.Row="2" Grid.Column="1" Margin="0,0,0,0" Grid.ColumnSpan="4" Visibility="{Binding DataContext.Addressvisibility,RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}},UpdateSourceTrigger=PropertyChanged}"/>
+
+                            -->
+                            <!--City-->
+                            <!--
+                            
+                            <TextBlock Text="{Binding DataContext.WarehousePurchaseOrder.WarehouseShippingAddress[0].City,RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}"
+                                       HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+                                       Grid.Row="2" Grid.Column="2" Style="{DynamicResource TextBlock12Style}" TextWrapping="WrapWithOverflow" Grid.ColumnSpan="3" />
+
+                            <TextBlock Text="-" HorizontalAlignment="Stretch" Grid.Row="2" Grid.Column="3" Margin="0,0,0,0" Grid.ColumnSpan="2" Visibility="{Binding DataContext.Addressvisibility,RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}},UpdateSourceTrigger=PropertyChanged}"/>
+
+                            -->
+                            <!--Region-->
+                            <!--
+                            
+                            <TextBlock Text="{Binding DataContext.WarehousePurchaseOrder.WarehouseShippingAddress[0].Region,RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}"
+                                       HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+                                       Grid.Row="2" Grid.Column="4" Style="{DynamicResource TextBlock12Style}" TextWrapping="WrapWithOverflow" Grid.ColumnSpan="3"/>-->
+
+
+
+                            <!--Country-->
+
+                            <StackPanel Orientation="Horizontal" Height="24" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="6">
+                                <Image Source="{Binding DataContext.Contentcountryimgurl,Converter={StaticResource ImageUrlToByteArrayConverter},ConverterParameter='image/png',RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}"  
+                                                    VerticalAlignment="Center" Height="24" Width="24" Margin="0,0,5,0" />
+                                <TextBlock Text="{Binding DataContext.Contentcountryname, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}"  VerticalAlignment="Center"/>
+                            </StackPanel>
+
+
+
+
+                        </Grid>
+
+                    </DataTemplate>
+                </dxlc:GroupBox.ContentTemplate>
+
+                <!--MaximizedContentTemplate-->
+
+                <dxlc:GroupBox.MaximizedContentTemplate>
+                    <DataTemplate>
+                        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+
+                            <Grid Width="1530" VerticalAlignment="Stretch"  Margin="1" ShowGridLines="False">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <dxe:ListBoxEdit  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ItemsSource="{Binding DataContext.WarehousePurchaseOrder.WarehouseShippingAddress,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow},Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                             ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Visible" 
+                                             DisplayMember="Firstname" ItemContainerStyle="{DynamicResource EditorListBoxThemeKey_DefaultItemStyle}">
+                                    IsReadOnly="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsPermissionReadOnly}"
+                                    <dxe:ListBoxEdit.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Style="{DynamicResource BorderStyle}">
+                                                <Grid Width="400" ScrollViewer.HorizontalScrollBarVisibility="Auto" ShowGridLines="False">
+                                                    <Grid Grid.Row="0" Margin="12" MaxWidth="400" ScrollViewer.HorizontalScrollBarVisibility="Auto" ShowGridLines="False">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="80" />
+                                                            <ColumnDefinition Width="220" />
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <Grid.RowDefinitions>
+                                                            <RowDefinition Height="25" />
+                                                            <RowDefinition Height="20" />
+                                                            <RowDefinition Height="20" />
+                                                            <RowDefinition Height="20" />
+                                                        </Grid.RowDefinitions>
+                                                        <!--For star image-->
+
+                                                        <StackPanel Grid.Column="2" 
+                                                                                    Grid.Row="0" HorizontalAlignment="Right" Margin="0 3 4 0">
+                                                            <Button ToolTip="{DynamicResource MainContact}" HorizontalContentAlignment="Right"                 
+                                                                    Command="{Binding DataContext.SetMainContactCommand,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" CommandParameter="{Binding Path=.}"
+                                                                >
+                                                                <Image Grid.Column="2" 
+                                                                                    Grid.Row="0"
+                                                                                    Width="16"
+                                                                                    Height="16"                                                                                  
+                                                                            HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+                                                                                    >
+                                                                    <Image.Style>
+                                                                        <Style TargetType="{x:Type Image}">
+                                                                            <Style.Triggers>
+                                                                                <DataTrigger Binding="{Binding IsMainContact,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" Value="True">
+                                                                                    <Setter Property="Image.Source" Value="/Emdep.Geos.Modules.Crm;component/Assets/Images/PrimaryContact.png" />
+                                                                                </DataTrigger>
+                                                                                <DataTrigger Binding="{Binding IsMainContact,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" Value="False">
+                                                                                    <Setter Property="Image.Source" Value="/Emdep.Geos.Modules.Crm;component/Assets/Images/PrimaryContactSales.png" />
+                                                                                </DataTrigger>
+                                                                            </Style.Triggers>
+                                                                        </Style>
+                                                                    </Image.Style>
+
+                                                                </Image>
+
+                                                            </Button>
+                                                        </StackPanel>
+
+                                                        <!--For star image-->
+
+                                                        <!--Name-->
+                                                        <TextBlock Grid.Row="0" Grid.Column="0" ToolTip="{Binding Path=Name}" TextWrapping="WrapWithOverflow" Style="{DynamicResource TextBlock16Style}" Margin="2,0,0,0" Grid.ColumnSpan="2" FontWeight="Bold" >
+                                                            <TextBlock.Text>
+                                                                <MultiBinding StringFormat="{}{0}">
+                                                                    <Binding Path="Name"/>
+                                                                </MultiBinding>
+                                                            </TextBlock.Text>
+                                                        </TextBlock>
+
+                                                        <!--Address-->
+                                                        <TextBlock Grid.Row="1" Grid.Column="0" ToolTip="{Binding Path=Address}" TextWrapping="WrapWithOverflow" Style="{DynamicResource TextBlock16Style}" Margin="4,0,0,0" Grid.ColumnSpan="2" >
+                                                            <TextBlock.Text>
+                                                                <MultiBinding StringFormat="{}{0}">
+                                                                    <Binding Path="Address"/>
+                                                                </MultiBinding>
+                                                            </TextBlock.Text>
+                                                        </TextBlock>
+
+                                                        <!--ZipCode,City,Region-->
+                                                        <TextBlock Grid.Row="2" Grid.Column="0" Text="{Binding Path=Zipcityregion}"  ToolTip="{Binding Path=Zipcityregion}" TextWrapping="WrapWithOverflow" Style="{DynamicResource TextBlock16Style}" Margin="5,0,0,0" Grid.ColumnSpan="2" >
+                                                        <!--<TextBlock.Text>
+                                                            <MultiBinding StringFormat="{}{0}-{1}-{2}">
+                                                                <Binding Path="ZipCode"/>
+                                                                <Binding Path="City"/>
+                                                                <Binding Path="Region"/>
+                                                            </MultiBinding>
+                                                        </TextBlock.Text>-->
+                                                        </TextBlock>
+
+                                                        <StackPanel Orientation="Horizontal" Height="24" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="6">
+                                                            <Image Source="{Binding Path=Country.CountryIconUrl,Converter={StaticResource ImageUrlToByteArrayConverter},ConverterParameter='image/png'}"  
+                                                    VerticalAlignment="Center" Height="24" Width="24" Margin="0,0,5,0" />
+                                                            <TextBlock Text="{Binding Path=CountryName}"  VerticalAlignment="Center"/>
+                                                        </StackPanel>
+                                                    </Grid>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </dxe:ListBoxEdit.ItemTemplate>
+
+                                    <dxe:ListBoxEdit.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel />
+                                        </ItemsPanelTemplate>
+                                    </dxe:ListBoxEdit.ItemsPanel>
+
+                                    <dxmvvm:Interaction.Behaviors>
+                                        <dxmvvm:EventToCommand Command="{Binding DataContext.LinkedContactDoubleClickCommand,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"
+                                                           EventName="MouseDoubleClick" CommandParameter="{Binding Path=.}">
+                                            <dxmvvm:EventToCommand.EventArgsConverter>
+                                                <dx:EventArgsToDataRowConverter />
+                                            </dxmvvm:EventToCommand.EventArgsConverter>
+                                        </dxmvvm:EventToCommand>
+                                    </dxmvvm:Interaction.Behaviors>
+                                </dxe:ListBoxEdit>
+                            </Grid>
+                        </ScrollViewer>
+                    </DataTemplate>
+                </dxlc:GroupBox.MaximizedContentTemplate>
+
+            </dxlc:GroupBox>
+
+            <!--Shipping Address end  Ref Contacts take this-->
+
+
+
+
+
+            <!--Delivery Notes-->
+
+            <dxlc:GroupBox x:Name="DeliveryNote" Style="{StaticResource myGroupBoxStyle}">
+
+                <dxlc:GroupBox.HeaderTemplate>
+                    <DataTemplate>
+                        <DockPanel Margin="-5,0,0,0">
+                            <TextBlock Margin="5,0,0,0"
+								    VerticalAlignment="Center"
+								    FontWeight="Bold"
+								    Text="{DynamicResource DeliveryNotes}" />
+                            <TextBlock Width="50"
+								    Margin="5,1,0,0"
+								    HorizontalAlignment="Left"
+								    VerticalAlignment="Center"
+								    FontWeight="Bold"
+								    x:Name="ContactCount"
+								    Text="{Binding DataContext.WarehousePurchaseOrder.WarehouseDeliveryNotes.Count, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}" />
+                        </DockPanel>
+                    </DataTemplate>
+                </dxlc:GroupBox.HeaderTemplate>
+
+                <dxlc:GroupBox.ContentTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="30" />
+                                <RowDefinition Height="30" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <Label Content="{DynamicResource ReferenceWithColon}"
+                                            Grid.Row="0"
+                                            Grid.Column="0" Margin="3,0,0,0" Padding="2"
+                                            FontWeight="Bold" VerticalContentAlignment="Center"/>
+                            <TextBlock Text="{Binding DataContext.WarehousePurchaseOrder.WarehouseDeliveryNotes[0].Code, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}" VerticalAlignment="Center"  Grid.Row="0" Grid.Column="1" Margin="3,0,0,0" Padding="2"/>
+
+                            <Label Content="{DynamicResource SupplierCodeWithColon}"
+                                        Grid.Row="1"
+                                        Grid.Column="0" Margin="3,0,0,0" Padding="2"
+                                        FontWeight="Bold" VerticalContentAlignment="Center"/>
+                            <TextBlock Text="{Binding DataContext.WarehousePurchaseOrder.WarehouseDeliveryNotes[0].SupplierCode, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}" VerticalAlignment="Center"  Grid.Row="1" Grid.Column="1" Margin="3,0,0,0" Padding="2"/>
+
+                            <Label Content="{DynamicResource DeliveryDateWithColon}"
+                                        Grid.Row="2"
+                                        Grid.Column="0" Margin="3,0,0,0" Padding="2"
+                                        FontWeight="Bold" VerticalContentAlignment="Center"/>
+                            <TextBlock Text="{Binding DataContext.WarehousePurchaseOrder.WarehouseDeliveryNotes[0].DeliveryDate, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}},StringFormat=d,ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}" VerticalAlignment="Center"  Grid.Row="2" Grid.Column="1" Margin="3,0,0,0" Padding="2"/>
+                        </Grid>
+
+                    </DataTemplate>
+                </dxlc:GroupBox.ContentTemplate>
+
+                <dxlc:GroupBox.MaximizedContentTemplate>
+                    <DataTemplate>
+                        <Grid Margin="2">
+                            <dxg:GridControl x:Name="deliveryNoteGrid"
+								Margin="-10" SelectionMode="Row"
+								HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+								ShowBorder="True"
+								ItemsSource="{Binding DataContext.WarehousePurchaseOrder.WarehouseDeliveryNotes, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}, UpdateSourceTrigger=PropertyChanged}"  ImplyNullLikeEmptyStringWhenFiltering="True" >
+
+                                <dxg:GridControl.TotalSummary>
+                                    <dxg:GridSummaryItem FieldName="Code" SummaryType="Count" DisplayFormat="Total Count: {0}"/>
+                                </dxg:GridControl.TotalSummary>
+
+                                <dxmvvm:Interaction.Behaviors>
+                                    <UIHelper:GridSelectingBehavior />
+                                </dxmvvm:Interaction.Behaviors>
+
+                                <dxg:GridColumn Header="{DynamicResource GridColReference}" FieldName="Code" FilterPopupMode="CheckedList"/>
+                                <dxg:GridColumn Header="{DynamicResource GridColSupplierCode}" FieldName="SupplierCode" FilterPopupMode="CheckedList"/>
+                                <dxg:GridColumn Header="{DynamicResource GridColExpectedDelivery}" FieldName="DeliveryDate" FilterPopupMode="CheckedList"/>
+                                <dxg:GridColumn MinWidth="30" Width="30" FixedWidth="True" AllowColumnFiltering="False">
+                                    <dxg:GridColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button x:Name="btnPdf" BorderThickness="0" Command="{Binding DataContext.OpenPdfFileCommand, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}" Padding="0,0,0,0"
+												CommandParameter="{Binding ElementName=deliveryNoteGrid}">
+                                                <Image Source="/Emdep.Geos.Modules.SRM;component/Assets/Images/pdf-icon.png" 
+													Stretch="Fill" Height="25" Width="30"/>
+                                            </Button>
+                                            <DataTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="btnPdf" Property="Cursor" Value="Hand" />
+                                                </Trigger>
+                                            </DataTemplate.Triggers>
+                                        </DataTemplate>
+                                    </dxg:GridColumn.CellTemplate>
+                                </dxg:GridColumn>
+
+                                <dxg:GridControl.View>
+                                    <dxg:TableView x:Name="DeliveryNoteTableView"
+										NavigationStyle="Row"
+										RowDetailsVisibilityMode="Visible"
+										ShowHorizontalLines="True"
+										ShowSearchPanelMode="Always"
+										ShowColumnHeaders="True"
+										VerticalScrollbarVisibility="Visible"
+										AllowFixedColumnMenu="False"
+										ShowTotalSummary="True"
+										SearchPanelHorizontalAlignment="Stretch"
+										AllowGrouping="True"
+										ShowGroupPanel="False"
+										ShowIndicator="False" AutoWidth="True"
+										ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly" >
+                                        <dxmvvm:Interaction.Behaviors>
+                                            <dxmvvm:EventToCommand  Command="{Binding DataContext.CommandDeliveryNoteGridDoubleClick, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}" EventName="MouseDoubleClick" CommandParameter="{Binding ElementName=deliveryNoteGrid}" >
+                                                <dxmvvm:EventToCommand.EventArgsConverter>
+                                                    <dx:EventArgsToDataRowConverter/>
+                                                </dxmvvm:EventToCommand.EventArgsConverter>
+                                            </dxmvvm:EventToCommand>
+                                        </dxmvvm:Interaction.Behaviors>
+                                    </dxg:TableView>
+                                </dxg:GridControl.View>
+
+                            </dxg:GridControl>
+                        </Grid>
+                    </DataTemplate>
+                </dxlc:GroupBox.MaximizedContentTemplate>
+            </dxlc:GroupBox>
+
+            <!--Comments-->
+            <dxlc:GroupBox x:Name="Comments" Style="{StaticResource myGroupBoxStyle}">
+
+                <!--HeaderTemplate-->
+                <dxlc:GroupBox.HeaderTemplate>
+                    <DataTemplate>
+                        <DockPanel Margin="-5,0,0,0">
+                            <TextBlock Margin="5,0,0,0"
+								    VerticalAlignment="Center"
+								    FontWeight="Bold"
+								    Text="{DynamicResource CommentHeader}" />
+                            <TextBlock Width="50"
+								    Margin="5,1,0,0"
+								    HorizontalAlignment="Left"
+								    VerticalAlignment="Center"
+								    FontWeight="Bold"
+								    x:Name="ContactCount"
+								    Text="{Binding DataContext.CommentsList.Count , RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}" />
+                        </DockPanel>
+                    </DataTemplate>
+                </dxlc:GroupBox.HeaderTemplate>
+
+                <!--ContentTemplate-->
+                <dxlc:GroupBox.ContentTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="30" />
+                                <RowDefinition Height="30" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <!--[GEOS2-4949][rdixit][23.11.2023]-->
+                            <Label Content="{DynamicResource DateWithColon}"
+                                            Grid.Row="0"
+                                            Grid.Column="0" Margin="3,0,0,0" Padding="2"
+                                            FontWeight="Bold" VerticalContentAlignment="Stretch"/>
+                            <TextBlock Text="{Binding DataContext.CommentsList[0].Datetime, UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,StringFormat=g, ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}" VerticalAlignment="Stretch"  Grid.Row="0" Grid.Column="1" Margin="3,0,0,0" Padding="2"/>
+
+                            <Label Content="{DynamicResource UserWithColon}"
+                                        Grid.Row="1"
+                                        Grid.Column="0" Margin="3,0,0,0" Padding="2"
+                                        FontWeight="Bold" VerticalContentAlignment="Stretch"/>
+                            <TextBlock Text="{Binding DataContext.CommentsList[0].People.FullName, UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}" VerticalAlignment="Stretch"  Grid.Row="1" Grid.Column="1" Margin="3,0,0,0" Padding="2"
+                                           ToolTip="{Binding DataContext.CommentsList[0].People.FullName,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}"  TextWrapping="WrapWithOverflow" Width="Auto" TextTrimming="CharacterEllipsis"/>
+
+                            <Label Content="{DynamicResource CommentWithColon}"
+                                        Grid.Row="2"
+                                        Grid.Column="0" Margin="3,0,0,0" Padding="2"
+                                        FontWeight="Bold" VerticalContentAlignment="Stretch"/>
+                            <TextBlock Text="{Binding DataContext.CommentsList[0].Comments,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}" VerticalAlignment="Stretch"  Grid.Row="2" Grid.Column="1" Margin="3,0,0,0" Padding="2"
+                                           ToolTip="{Binding DataContext.CommentsList[0].Comments,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}"  TextWrapping="WrapWithOverflow" Width="Auto" TextTrimming="CharacterEllipsis"/>
+                        </Grid>
+
+                    </DataTemplate>
+                </dxlc:GroupBox.ContentTemplate>
+
+                <!--MaximizedContentTemplate-->
+
+
+                <!--<dxlc:GroupBox.MaximizedContentTemplate>
+                        <DataTemplate>
+                            <Grid Margin="2">
+                                <dxg:GridControl x:Name="WarehousePOCommentsGrid"
+								Margin="-10" SelectionMode="Row"
+								HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+								ShowBorder="True"
+								ItemsSource="{Binding DataContext.WarehousePurchaseOrder.WarehousePOComments, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}, UpdateSourceTrigger=PropertyChanged}"  ImplyNullLikeEmptyStringWhenFiltering="True" >
+
+                                    <dxg:GridControl.TotalSummary>
+                                        <dxg:GridSummaryItem FieldName="People.FullName" SummaryType="Count" DisplayFormat="Total Count: {0}"/>
+                                    </dxg:GridControl.TotalSummary>
+
+                                    <dxmvvm:Interaction.Behaviors>
+                                        <UIHelper:GridSelectingBehavior />
+                                    </dxmvvm:Interaction.Behaviors>
+
+                                    <dxg:GridColumn Header="{DynamicResource User}" FieldName="People.FullName" MinWidth="170"  Width="220" FixedWidth="True" FilterPopupMode="CheckedList"/>
+                                    <dxg:GridColumn Header="{DynamicResource Date}" FieldName="Datetime" MinWidth="80"  Width="100" FixedWidth="True" FilterPopupMode="CheckedList"/>
+                                    <dxg:GridColumn Header="{DynamicResource Comment}" FieldName="Comments" Width="*" FilterPopupMode="CheckedList"/>
+
+                                    <dxg:GridControl.View>
+                                        <dxg:TableView x:Name="WarehousePOCommentsTableView"
+										NavigationStyle="Row"
+										RowDetailsVisibilityMode="Visible"
+										ShowHorizontalLines="True"
+										ShowSearchPanelMode="Always"
+										ShowColumnHeaders="True"
+										VerticalScrollbarVisibility="Visible"
+										AllowFixedColumnMenu="False"
+										ShowTotalSummary="True"
+										SearchPanelHorizontalAlignment="Stretch"
+										AllowGrouping="True"
+										ShowGroupPanel="False"
+										ShowIndicator="False" AutoWidth="True"
+										ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly" >
+                                        </dxg:TableView>
+                                    </dxg:GridControl.View>
+
+                                </dxg:GridControl>
+                            </Grid>
+                        </DataTemplate>
+                    </dxlc:GroupBox.MaximizedContentTemplate>-->
+
+                <!--<[pramod.misal][GEOS2-4450][27-07-2023]-->
+                <dxlc:GroupBox.MaximizedContentTemplate>
+                    <DataTemplate >
+
+                        
+                            <Grid Width="Auto">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="40" />
+                            </Grid.RowDefinitions>
+                            <dxg:GridControl x:Name="gcComments" Grid.Row="0" Width="1530"
+                                                 HorizontalAlignment="Stretch" VerticalAlignment="Stretch"  ScrollViewer.HorizontalScrollBarVisibility="Visible" ScrollViewer.VerticalScrollBarVisibility="Visible"
+                                                 SelectionMode="Row"
+                                                 Margin="-10,-10,-10,-10" Padding="0"
+                                                 DockPanel.Dock="Top" MaxHeight="1000"                                             
+                                                 ItemsSource="{Binding DataContext.CommentsList,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                                 ImplyNullLikeEmptyStringWhenFiltering="True"
+                                                 SelectedItem="{Binding DataContext.SelectedComment, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                         >
+                                <!--SelectedItem="{Binding DataContext.SelectedComment, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"-->
+
+                                <dxg:GridControl.Columns>
+
+
+                                    <dxg:GridColumn Width="170" FieldName="People.FullName"
+                                               Binding="{Binding RowData.Row.People.FullName, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged, ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}"
+                                            FixedWidth="True"
+                                            Header="{DynamicResource CommonUser}" FilterPopupMode="CheckedList">
+                                        <dxg:GridColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <dxe:TextEdit DisplayFormatString="g" Name="PART_Editor" FontWeight="Bold" />
+                                            </DataTemplate>
+                                        </dxg:GridColumn.CellTemplate>
+                                    </dxg:GridColumn>
+
+
+                                    <dxg:GridColumn Width="170"
+                                               Binding="{Binding Datetime,StringFormat=g, ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}"
+                                            FixedWidth="True"
+                                            Header="{DynamicResource LeadsEditViewCommentDate}" FilterPopupMode="CheckedList">
+                                        <dxg:GridColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <dxe:TextEdit DisplayFormatString="g" Name="PART_Editor" FontWeight="Bold" />
+                                            </DataTemplate>
+                                        </dxg:GridColumn.CellTemplate>
+                                    </dxg:GridColumn>
+                                    <!--<dxg:GridColumn FieldName="Comment" Visible="False" ShowInColumnChooser="False" />-->
+                                    <dxg:GridColumn FieldName="Comments" Visible="False"  Width="*" IsEnabled="False" AllowColumnFiltering="False" ShowInColumnChooser="False"/>
+
+                                    <dxg:GridColumn Fixed="Right" Width="40" FieldName="" FixedWidth="True" FilterPopupMode="CheckedList" AllowMoving="False" AllowColumnFiltering="false" >
+                                        <dxg:GridColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Button Name="deleteRowComment"
+                                                            Command="{Binding DataContext.DeleteCommentRowCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type dxlc:GroupBox}}}"
+                                                            CommandParameter="{Binding RowData.Row}"
+                                                            Content="">
+                                                    <Button.ContentTemplate>
+                                                        <DataTemplate>
+                                                            <Image Height="16" Width="16"
+                                                                       Source="/Emdep.Geos.Modules.Crm;component/Assets/Images/Delete.png" />
+                                                        </DataTemplate>
+                                                    </Button.ContentTemplate>
+                                                </Button>
+                                            </DataTemplate>
+                                        </dxg:GridColumn.CellTemplate>
+                                    </dxg:GridColumn>
+
+                                </dxg:GridControl.Columns>
+
+
+                                <dxmvvm:Interaction.Behaviors>
+                                    <UIHelper:GridSelectingBehavior />
+                                </dxmvvm:Interaction.Behaviors>
+                                <dxg:GridControl.View>
+                                    <dxg:TableView x:Name="commentTable"
+                                                       NavigationStyle="Row"
+                                                           AllowHorizontalScrollingVirtualization="True" 
+                                                           RowDetailsVisibilityMode="Visible"
+                                                           ShowHorizontalLines="True"
+                                                           ShowColumnHeaders="True"
+                                                           VerticalScrollbarVisibility="Auto" 
+                                                           HorizontalScrollbarVisibility="Auto"
+                                                           AllowFixedColumnMenu="False"
+                                                           AutoWidth="False"
+                                                           ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly"
+                                                           AllowGrouping="True"
+                                                           ShowGroupPanel="False"
+                                                           ShowIndicator="False" 
+                                                           AllowColumnMoving="False"
+                                                           ShowSearchPanelMode="Always"
+                                                           SearchPanelHorizontalAlignment="Stretch"
+                                                           FocusedRow="{Binding DataContext.SelectedComment, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                           SearchColumns="People.FullName;Comments"
+                                                   >
+                                        <!-- ShowSearchPanelMode="Always" SearchColumns="People.FullName;Comments"-->
+                                        <dxg:TableView.RowDetailsTemplate>
+                                            <DataTemplate>
+                                                <dx:DXExpander IsExpanded="{Binding Path=RowState.(UIHelper:ShowDetailBehavior.ShowDetail)}" HorizontalExpand="None" VerticalExpand="FromTopToBottom" >
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="50" />
+                                                            <ColumnDefinition Width="*" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <dxe:ImageEdit ShowLoadDialogOnClickMode="Never" ShowMenu="False" Source="{Binding Row.People.OwnerImage}" Stretch="UniformToFill" Width="50" Height="45" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+                                                        <UIHelper:BindableRichTextBox x:Name="BindableRichTextBox_Editor1" HorizontalScrollBarVisibility="Auto" 
+                                                                           Document="{Binding Row.Comments,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={UIConverter:RtfToFlowDocumentConverter}}" IsReadOnly="True" Grid.Column="1" Grid.Row="0" ScrollViewer.VerticalScrollBarVisibility="Auto" Style="{DynamicResource RichTextBoxStyle}"
+                                                                        >
+                                                        </UIHelper:BindableRichTextBox>
+
+
+                                                    </Grid>
+                                                </dx:DXExpander>
+                                            </DataTemplate>
+                                        </dxg:TableView.RowDetailsTemplate>
+                                        <dxmvvm:Interaction.Behaviors>
+                                            <dxmvvm:EventToCommand Command="{Binding DataContext.CommentsGridDoubleClickCommand,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}"
+                                                                       EventName="MouseDoubleClick"
+                                                                       PassEventArgsToCommand="True">
+                                                <dxmvvm:EventToCommand.EventArgsConverter>
+                                                    <dx:EventArgsToDataRowConverter />
+                                                </dxmvvm:EventToCommand.EventArgsConverter>
+                                            </dxmvvm:EventToCommand>
+                                            <UIHelper:ShowDetailBehavior />
+                                        </dxmvvm:Interaction.Behaviors>
+                                        <dxg:TableView.RowStyle>
+                                            <Style TargetType="dxg:RowControl">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding RowData.Row.IsEnabled}" Value="False">
+                                                        <Setter Property="IsEnabled" Value="False"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </dxg:TableView.RowStyle>
+                                    </dxg:TableView>
+                                </dxg:GridControl.View>
+                            </dxg:GridControl>
+
+                            <!--Open Add or Edit comment window-->
+                            <Button Grid.Row="1"
+                                    Height="32" Width="32"
+                                    Margin="0,5,-5,-5"
+                                    VerticalAlignment="Bottom" HorizontalAlignment="Right"
+                                    Command="{Binding AddCommentsCommand}"
+                                    ToolTip="Add Comment"
+                                    DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}"
+                                    >
+                                <Button.ContentTemplate>
+                                    <DataTemplate>
+                                        <Image Style="{DynamicResource AddButtonImageStyle}" Grid.Column="1" Height="24" Width="24" HorizontalAlignment="Right" Margin="-10" />
+                                    </DataTemplate>
+                                </Button.ContentTemplate>
+                            </Button>
+
+
+
+                        </Grid>
+                        
+                        
+                    </DataTemplate>
+                </dxlc:GroupBox.MaximizedContentTemplate>
+
+            </dxlc:GroupBox>
+
+            <!--Logs-->
+            <dxlc:GroupBox x:Name="Logs" Style="{StaticResource myGroupBoxStyle}">
+
+                <dxlc:GroupBox.HeaderTemplate>
+                    <DataTemplate>
+                        <DockPanel Margin="-5,0,0,0">
+                            <TextBlock Margin="5,0,0,0"
+								    VerticalAlignment="Center"
+								    FontWeight="Bold"
+								    Text="{DynamicResource ChangeLogHeader}" />
+                            <TextBlock Width="50"
+								    Margin="5,1,0,0"
+								    HorizontalAlignment="Left"
+								    VerticalAlignment="Center"
+								    FontWeight="Bold"
+								    x:Name="ContactCount"
+								    Text="{Binding DataContext.WarehousePurchaseOrder.WarehousePOLogEntries.Count, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}" />
+                        </DockPanel>
+                    </DataTemplate>
+                </dxlc:GroupBox.HeaderTemplate>
+
+                <dxlc:GroupBox.ContentTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="30" />
+                                <RowDefinition Height="30" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <Label Content="{DynamicResource DateWithColon}"
+                                            Grid.Row="0"
+                                            Grid.Column="0" Margin="3,0,0,0" Padding="2"
+                                            FontWeight="Bold" VerticalContentAlignment="Stretch"/>
+                            <!--[pramod.misal][15.06.2023][geos2-4431]-->
+                            <TextBlock Text="{Binding DataContext.WarehousePurchaseOrder.WarehousePOLogEntries[0].LogDatetime, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}" VerticalAlignment="Stretch"  Grid.Row="0" Grid.Column="1" Margin="3,0,0,0" Padding="2"/>
+
+                            <Label Content="{DynamicResource UserWithColon}"
+                                        Grid.Row="1"
+                                        Grid.Column="0" Margin="3,0,0,0" Padding="2"
+                                        FontWeight="Bold" VerticalContentAlignment="Stretch"/>
+                            <TextBlock Text="{Binding DataContext.WarehousePurchaseOrder.WarehousePOLogEntries[0].People.FullName, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}" VerticalAlignment="Stretch"  Grid.Row="1" Grid.Column="1" Margin="3,0,0,0" Padding="2"
+                                           ToolTip="{Binding DataContext.WarehousePurchaseOrder.WarehousePOLogEntries[0].People.FullName, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}"  TextWrapping="WrapWithOverflow" Width="Auto" TextTrimming="CharacterEllipsis"/>
+
+                            <Label Content="{DynamicResource ActionWithColon}"
+                                        Grid.Row="2"
+                                        Grid.Column="0" Margin="3,0,0,0" Padding="2"
+                                        FontWeight="Bold" VerticalContentAlignment="Stretch"/>
+                            <TextBlock Text="{Binding DataContext.WarehousePurchaseOrder.WarehousePOLogEntries[0].Comments, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}" VerticalAlignment="Stretch"  Grid.Row="2" Grid.Column="1" Margin="3,0,0,0" Padding="2"
+                                           ToolTip="{Binding DataContext.WarehousePurchaseOrder.WarehousePOLogEntries[0].Comments, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}"  TextWrapping="WrapWithOverflow" Width="Auto" TextTrimming="CharacterEllipsis"/>
+                        </Grid>
+
+                    </DataTemplate>
+                </dxlc:GroupBox.ContentTemplate>
+
+                <dxlc:GroupBox.MaximizedContentTemplate>
+                    <DataTemplate>
+                        <Grid Margin="2">
+                            <dxg:GridControl x:Name="warehousePOLogEntriesGrid"
+								Margin="-10" SelectionMode="Row"
+								HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+								ShowBorder="True"
+								ItemsSource="{Binding DataContext.WarehousePurchaseOrder.WarehousePOLogEntries, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}, UpdateSourceTrigger=PropertyChanged}"  ImplyNullLikeEmptyStringWhenFiltering="True" >
+
+                                <dxg:GridControl.TotalSummary>
+                                    <dxg:GridSummaryItem FieldName="People.FullName" SummaryType="Count" DisplayFormat="Total Count: {0}"/>
+                                </dxg:GridControl.TotalSummary>
+
+                                <dxmvvm:Interaction.Behaviors>
+                                    <UIHelper:GridSelectingBehavior />
+                                </dxmvvm:Interaction.Behaviors>
+
+                                <!--[pramod.misal]-->
+                                <dxg:GridColumn Header="{DynamicResource User}" FieldName="People.FullName" MinWidth="170"  Width="220" FixedWidth="True" FilterPopupMode="CheckedList"/>
+                                <dxg:GridColumn Header="{DynamicResource Date}" FieldName="LogDatetime" Width="150" FixedWidth="True" FilterPopupMode="CheckedList" >
+                                    <!--<dxg:GridColumn.EditSettings>
+                                        <dxe:DateEditSettings DisplayFormat="g" Name="changeLogTime" />
+                                    </dxg:GridColumn.EditSettings>-->
+                                </dxg:GridColumn>
+                                <dxg:GridColumn Header="{DynamicResource Action}" FieldName="Comments" Width="*" FilterPopupMode="CheckedList"/>
+
+                                <dxg:GridControl.View>
+                                    <dxg:TableView x:Name="warehousePOLogEntriesTableView"
+										NavigationStyle="Row"
+										RowDetailsVisibilityMode="Visible"
+										ShowHorizontalLines="True"
+										ShowSearchPanelMode="Always"
+										ShowColumnHeaders="True"
+										VerticalScrollbarVisibility="Visible"
+										AllowFixedColumnMenu="False"
+										ShowTotalSummary="True"
+										SearchPanelHorizontalAlignment="Stretch"
+										AllowGrouping="True"
+										ShowGroupPanel="False"
+										ShowIndicator="False" AutoWidth="True"
+										ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly" >
+                                    </dxg:TableView>
+                                </dxg:GridControl.View>
+
+                            </dxg:GridControl>
+                        </Grid>
+                    </DataTemplate>
+                </dxlc:GroupBox.MaximizedContentTemplate>
+            </dxlc:GroupBox>
+
+        </dxlc:FlowLayoutControl>
+        <Grid Grid.Row="2"   Grid.ColumnSpan="3" Margin="0,10,0,0"
+                  HorizontalAlignment="Center">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="40"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Button Height="30" Width="100"
+                    Grid.Column="0" Margin="0,0,30,0"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                            Command="{Binding AcceptButtonCommand}"
+                            Content="{DynamicResource Accept}"
+                            IsEnabled="{Binding IsAcceptEnable, Mode=OneTime}" />
+
+            <Button Grid.Column="2" Height="30"
+                            Width="100"
+                            Margin="30,0,0,0"
+                    HorizontalAlignment="Left" VerticalAlignment="Center"
+                    Command="{Binding CancelButtonCommand}"
+                            Content="{DynamicResource Cancel}" />
+        </Grid>
+
+    </Grid>
+    <!--</ScrollViewer>-->
+
+</dxwui:WinUIDialogWindow>

@@ -1,0 +1,404 @@
+﻿<dxwui:WinUIDialogWindow x:Class="Emdep.Geos.Modules.Hrm.Views.AddAuthorizedLeaveView"
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.Hrm.Views"
+             xmlns:HrmApplication="clr-namespace:Emdep.Geos.Modules.Hrm" 
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+             xmlns:behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+             xmlns:Validation ="clr-namespace:Emdep.Geos.UI.Validations;assembly=Emdep.Geos.UI.Validations"     
+              xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300"
+             Title="{Binding WindowHeader,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" TitleStyle="{DynamicResource WinUIDialogWindowTitleStyle}"
+             Style="{DynamicResource WinUIDialogWindowStyle}">
+
+    
+    <dxwui:WinUIDialogWindow.Resources>
+        <DataTemplate x:Key="RuleValueColumnTemplate">
+            <ContentControl>
+                <dxg:GridColumn FieldName="{Binding ColumnFieldName}" 
+                                Header="{Binding HeaderText}"
+                                Width="{Binding  Width}"
+                                Visible="{Binding Visible}"
+                                AllowBestFit="true" 
+                                AllowCellMerge="False"
+                                AllowMoving="False"
+                                AllowAutoFilter="False"
+                                ShowInColumnChooser="False" 
+                                HorizontalHeaderContentAlignment="Left" 
+                                FilterPopupMode="CheckedList">
+                    <dxg:GridColumn.CellTemplate>
+                        <DataTemplate>
+                            <dxe:SpinEdit Name="PART_Editor" AllowDefaultButton="True" MaskType="Numeric" MaskShowPlaceHolders="False" ValidateOnTextInput="True" AllowRoundOutOfRangeValue="True" Width="100" HorizontalAlignment="Stretch"
+                                                                                          Mask="N2" MaskUseAsDisplayFormat="True" TabIndex="0"/>
+                        </DataTemplate>
+                    </dxg:GridColumn.CellTemplate>
+                    <dxg:GridColumn.EditSettings>
+                        <dxe:TextEditSettings HorizontalContentAlignment="Right"/>
+                    </dxg:GridColumn.EditSettings>
+                </dxg:GridColumn>
+            </ContentControl>
+        </DataTemplate>
+        
+        <!--<UIHelper:EmployeeAdditionalLeaveMultipleCellEditHelper x:Key="employeeAdditionalLeaveMultipleCellEditHelper"/>-->
+    </dxwui:WinUIDialogWindow.Resources>
+
+    <Grid Margin="0,-50,0,0" >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="60"/>
+            <!--<RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="60"/>-->
+
+            <!--<RowDefinition Height="50"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="70"/>-->
+
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="120"/>
+            <ColumnDefinition Width="350"/>
+        </Grid.ColumnDefinitions>
+
+
+        <!--Authorized Leave-->
+        <Label Grid.Row="1" Grid.Column="0" Content="{DynamicResource AddAuthorizedLeaveViewLeave}"  Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,10,0,10"/>
+
+        <dxe:ComboBoxEdit Style="{DynamicResource ComboBoxEditStyle}" Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="2"  Height="30"  Margin="5,5,5,5" HorizontalAlignment="Stretch"  
+            ItemsSource="{Binding AnnualLeaveList,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                          DisplayMember="Value" ValueMember="IdLookupValue" 
+                          IsTextEditable="False" ValidateOnTextInput="False"
+                          AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True"
+                          IsReadOnly="{Binding IsReadOnlyField,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
+            <!--[GEOS2-2456][rdixit][12.06.2023]-->
+            <dxe:ComboBoxEdit.ItemContainerStyle>
+                <Style TargetType="dxe:ComboBoxEditItem">
+                    <Setter Property="IsEnabled" Value="{Binding InUse}" />
+                </Style>
+            </dxe:ComboBoxEdit.ItemContainerStyle>
+            <dxe:ComboBoxEdit.SelectedIndex>
+                <Binding Path="SelectedLeaveType" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+
+                </Binding>
+            </dxe:ComboBoxEdit.SelectedIndex>
+            <dxmvvm:Interaction.Triggers>
+              
+
+                <dxmvvm:EventToCommand EventName="EditValueChanged" 
+                                           Command="{Binding LeaveValueChangedCommand}">
+                    
+                </dxmvvm:EventToCommand>
+            </dxmvvm:Interaction.Triggers>
+        </dxe:ComboBoxEdit>
+
+        <!--Backlog-->
+        <Label Grid.Row="3" Grid.Column="0" Content="{DynamicResource AddAuthorizedLeaveViewBacklog}" Height="30" FontSize="17"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,10,0,10"/>
+        <StackPanel Grid.Row="3" Grid.Column="1"
+                    HorizontalAlignment="Left" 
+                    Orientation="Horizontal"
+                    Margin="0,0,0,0"
+                    Width="300">
+            <dxe:SpinEdit SelectAllOnGotFocus="True" SelectAllOnMouseUp="True" IsFloatValue="False"  Width="70" Height="30"  Margin="5,5,5,5"  Increment="1" Value="{Binding BacklogDays,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged }"></dxe:SpinEdit>
+            <Label Content="{DynamicResource AddAuthorizedLeaveViewDays}" VerticalAlignment="Center"  ></Label>
+            <dxe:SpinEdit SelectAllOnGotFocus="True" SelectAllOnMouseUp="True" IsFloatValue="False"  Width="70" Height="30"  Margin="15,5,5,5" Increment="1" Value="{Binding BacklogHours,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged }"></dxe:SpinEdit>
+            <Label Content="{DynamicResource AddAuthorizedLeaveViewHours}" VerticalAlignment="Center"  ></Label>
+        </StackPanel>
+
+        <!--Regular-->
+        <Label Grid.Row="4" Grid.Column="0" Content="{DynamicResource AddAuthorizedLeaveViewRegular}"  Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,10,0,10"/>
+        <StackPanel Grid.Row="4" Grid.Column="1"
+                    HorizontalAlignment="Left" 
+                    Orientation="Horizontal"
+                    Margin="0,0,0,0"
+                    Width="300">
+            <dxe:SpinEdit SelectAllOnGotFocus="True" SelectAllOnMouseUp="True" IsFloatValue="False"  Width="70" Height="30"  Margin="5,5,5,5" MinValue="0" Increment="1" Value="{Binding RegularDays,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged }"></dxe:SpinEdit>
+            <Label Content="{DynamicResource AddAuthorizedLeaveViewDays}" VerticalAlignment="Center"  ></Label>
+            <dxe:SpinEdit SelectAllOnGotFocus="True" SelectAllOnMouseUp="True" IsFloatValue="False"  Width="70" Height="30"  Margin="15,5,5,5" MinValue="0" Increment="1" Value="{Binding RegularHours,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged }"></dxe:SpinEdit>
+            <Label Content="{DynamicResource AddAuthorizedLeaveViewHours}" VerticalAlignment="Center"  ></Label>
+       </StackPanel>
+
+        <!--Additional-->
+        <Label Grid.Row="5" Grid.Column="0" Content="{DynamicResource AddAuthorizedLeaveViewAdditional}"  Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,10,0,10"/>
+
+        <dxg:GridControl x:Name="grid"  Grid.Row="6" Height="150" Grid.Column="0" Grid.ColumnSpan="2" 
+                        ItemsSource="{Binding AdditionalLeaveListForGrid,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"  
+                         SelectedItem="None"
+                        AutoGenerateColumns="None" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto" 
+                        ImplyNullLikeEmptyStringWhenFiltering="True">
+            <dxg:GridControl.Columns>
+                <dxg:GridColumn FieldName="AdditionalLeaveReasonName" Header="{DynamicResource EmpExitReason}" 
+                                    ReadOnly="True" FilterPopupMode="CheckedList" Width="*" AllowEditing="False"/>
+
+                <dxg:GridColumn FieldName="ConvertedDays" Header="{DynamicResource AddAuthorizedLeaveViewDays}" 
+                                FilterPopupMode="CheckedList" Width="70" >
+                    <dxg:GridColumn.CellTemplate>
+                        <DataTemplate>
+                            <dxe:SpinEdit  Name="PART_Editor" MaskType="Numeric" Mask="d"  Increment="1"/>
+                        </DataTemplate>
+                    </dxg:GridColumn.CellTemplate>
+                    <dxg:GridColumn.EditSettings>
+                        <dxe:SpinEditSettings MaskType="Numeric" Mask="d" Increment="1"  />
+                    </dxg:GridColumn.EditSettings>
+
+                    <!--<dxg:GridColumn.CellTemplate>
+                        <DataTemplate>
+                            <dxe:SpinEdit Name="PART_Editor" AllowDefaultButton="True" MaskType="Numeric"  Width="70" HorizontalAlignment="Stretch"
+                                          Mask="P1" MaskUseAsDisplayFormat="True" MinValue="0" MaxValue="100" Increment="1">
+                            </dxe:SpinEdit>
+                        </DataTemplate>
+                    </dxg:GridColumn.CellTemplate>-->
+
+                    <!--<dxg:GridColumn.EditSettings>
+                        <dxe:SpinEditSettings MaskType="Numeric" MinValue="0" MaxValue="500" Mask="d" IsEnabled="True" />
+                    </dxg:GridColumn.EditSettings>-->
+
+                    <!--<dxg:GridColumn.EditSettings>
+                        <dxe:TextEditSettings HorizontalContentAlignment="Right"/>
+                    </dxg:GridColumn.EditSettings>-->
+
+                    <!--<dxg:GridColumn.CellTemplate>
+                        <DataTemplate>
+                            <dxe:SpinEdit Name="PART_Editor" AllowDefaultButton="True" MaskType="Numeric" MaskShowPlaceHolders="False" 
+                                          ValidateOnTextInput="False" IsEnabled="True" 
+                                          AllowRoundOutOfRangeValue="True" Width="100" HorizontalAlignment="Stretch"
+                                          Mask="N2" MaskUseAsDisplayFormat="True" />
+                        </DataTemplate>
+                    </dxg:GridColumn.CellTemplate>-->
+                    
+                    <!--<dxg:GridColumn.CellTemplate>
+                        <DataTemplate>
+                            <ContentControl>
+                                <dxg:GridColumn FieldName="{Binding ColumnFieldName}" 
+                                Header="{Binding HeaderText}"
+                                Width="{Binding  Width}"
+                                Visible="{Binding Visible}"
+                                AllowBestFit="true" 
+                                AllowCellMerge="False"
+                                AllowMoving="False"
+                                AllowAutoFilter="False"
+                                ShowInColumnChooser="False" 
+                                HorizontalHeaderContentAlignment="Left" 
+                                FilterPopupMode="CheckedList">
+                                    <dxg:GridColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <dxe:SpinEdit Name="PART_Editor" AllowDefaultButton="True" MaskType="Numeric" MaskShowPlaceHolders="False" ValidateOnTextInput="True" AllowRoundOutOfRangeValue="True" Width="100" HorizontalAlignment="Stretch"
+                                                                                          Mask="N2" MaskUseAsDisplayFormat="True" TabIndex="0"/>
+                                        </DataTemplate>
+                                    </dxg:GridColumn.CellTemplate>
+                                    <dxg:GridColumn.EditSettings>
+                                        <dxe:TextEditSettings HorizontalContentAlignment="Right"/>
+                                    </dxg:GridColumn.EditSettings>
+                                </dxg:GridColumn>
+                            </ContentControl>
+                        </DataTemplate>
+                    </dxg:GridColumn.CellTemplate>--> 
+                </dxg:GridColumn>
+
+                <dxg:GridColumn FieldName="ConvertedHours" Header="{DynamicResource AddAuthorizedLeaveViewHours}" 
+                                    ReadOnly="False" FilterPopupMode="CheckedList" Width="70" >
+                    <dxg:GridColumn.CellTemplate>
+                        <DataTemplate>
+                            <dxe:SpinEdit  Name="PART_Editor" MaskType="Numeric" Mask="d"  Increment="1"/>
+                        </DataTemplate>
+                    </dxg:GridColumn.CellTemplate>
+                    <dxg:GridColumn.EditSettings>
+                        <dxe:SpinEditSettings MaskType="Numeric" Mask="d" Increment="1"  />
+                    </dxg:GridColumn.EditSettings>
+                </dxg:GridColumn>
+
+                <!--shubham[skadam] GEOS2-3655 HRM - Add holiday type  08 Sep 2022-->
+                <!--<dxg:GridColumn FieldName="{Binding DataContext.Comments,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Header="{DynamicResource AddAuthorizedLeaveViewComments}"  ReadOnly="False" FilterPopupMode="CheckedList" Width="190" >-->
+                <dxg:GridColumn FieldName="Comments" Header="{DynamicResource AddAuthorizedLeaveViewComments}" ReadOnly="False" FilterPopupMode="CheckedList" Width="190">
+                    <dxg:GridColumn.CellTemplate>
+                        <DataTemplate>
+                            <dxe:TextEdit ToolTip="{Binding RowData.Row.Comments,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"  Text="{Binding RowData.Row.Comments,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+                                
+                            </dxe:TextEdit>
+                        </DataTemplate>
+                    </dxg:GridColumn.CellTemplate>
+                    <UIHelper:GridColumnValidationHelper.ValidationRules>
+                        <UIHelper:ValidationRulesCollection>
+                            <Validation:GridValidationRuleComments/>
+                        </UIHelper:ValidationRulesCollection>
+                    </UIHelper:GridColumnValidationHelper.ValidationRules>
+                </dxg:GridColumn>
+                <!--shubham[skadam] GEOS2-3655 HRM - Add holiday type  08 Sep 2022-->
+
+
+            </dxg:GridControl.Columns>
+            <dxg:GridControl.View>
+                <local:TableViewEx ValidateRow="TableView_ValidateRow" InvalidRowException="TableView_InvalidRowException"
+                                   x:Name="AdditionalReasonTableView"
+                                   AllowEditing="True" 
+                                   EditorShowMode="MouseUp" 
+                                   ShowGroupPanel="False" 
+                                   EditorButtonShowMode="ShowOnlyInEditor"/>
+                <!--<dxg:TableView x:Name="AdditionalReasonTableView" AllowEditing="True" EditorShowMode="MouseUp"
+                               ShowGroupPanel="False" EditorButtonShowMode="ShowOnlyInEditor"
+                               >
+                    <dxmvvm:Interaction.Behaviors>
+                        <dxmvvm:EventToCommand EventName="ValidateCell" Command="{Binding DataContext.ValidateCellCommand, 
+                            RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}" PassEventArgsToCommand="True"  >
+                        </dxmvvm:EventToCommand>
+                    </dxmvvm:Interaction.Behaviors>
+                </dxg:TableView>-->
+            </dxg:GridControl.View>
+        </dxg:GridControl>
+
+        <!--<StackPanel Grid.Row="4" Grid.Column="1"
+                    HorizontalAlignment="Left" 
+                    Orientation="Horizontal"
+                    Margin="0,0,0,0"
+                    Width="250">
+            <dxe:SpinEdit IsFloatValue="False"  Width="70" Height="30"  Margin="5,5,5,5" MinValue="0" Increment="1" Value="{Binding AdditionalDays,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></dxe:SpinEdit>
+            <Label Content="{DynamicResource AddAuthorizedLeaveViewDays}" VerticalAlignment="Center"  ></Label>
+            <dxe:SpinEdit IsFloatValue="False"  Width="70" Height="30"  Margin="15,5,5,5" MinValue="0" Increment="1" Value="{Binding AdditionalHours,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" ></dxe:SpinEdit>
+            <Label Content="{DynamicResource AddAuthorizedLeaveViewHours}" VerticalAlignment="Center"  ></Label>
+        </StackPanel>-->
+
+        <!--<dxe:ListBoxEdit Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" DisplayMember="Value" ValueMember="IdLookupValue" 
+                         ItemsSource="{Binding AdditionalReasonList,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                         Height="250" Width="Auto">
+            
+            <dxe:ListBoxEdit.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" >
+                    </StackPanel>
+                </ItemsPanelTemplate>
+            </dxe:ListBoxEdit.ItemsPanel>
+
+            <dxe:ListBoxEditItem>
+                <StackPanel>
+                    <Label Content="Test1" />
+                    <dxe:SpinEdit  />
+                    <Label  Content="Test1" />
+                    <dxe:SpinEdit  />
+                </StackPanel>
+            </dxe:ListBoxEditItem>
+            
+            <dxe:ListBoxEdit.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel>
+                    <Label Content="Test1" />
+                    <dxe:SpinEdit  />
+                        <Label  Content="Test1" />
+                        <dxe:SpinEdit  />
+                    </StackPanel>
+                </DataTemplate>
+            </dxe:ListBoxEdit.ItemTemplate>
+        </dxe:ListBoxEdit>-->
+
+        <!--Compensation-->
+        <!--<Label Grid.Row="6" Grid.Column="0" Content="{DynamicResource AddAuthorizedLeaveViewCompensation}"  Height="30" FontSize="16"
+               HorizontalAlignment="Right" VerticalAlignment="Center" Margin="10,10,0,10"/>
+        <StackPanel Grid.Row="6" Grid.Column="1"
+                    HorizontalAlignment="Left" 
+                    Orientation="Horizontal"
+                    Margin="0,0,0,0"
+                    Width="250">
+            <dxe:SpinEdit IsFloatValue="False"  Width="70" Height="30"  Margin="5,5,5,5" MinValue="0" Increment="1" Value="{Binding AdditionalDays,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></dxe:SpinEdit>
+            <Label Content="{DynamicResource AddAuthorizedLeaveViewDays}" VerticalAlignment="Center"  ></Label>
+            <dxe:SpinEdit IsFloatValue="False"  Width="70" Height="30"  Margin="15,5,5,5" MinValue="0" Increment="1" Value="{Binding AdditionalHours,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" ></dxe:SpinEdit>
+            <Label Content="{DynamicResource AddAuthorizedLeaveViewHours}" VerticalAlignment="Center"  ></Label>
+        </StackPanel>-->
+
+        <!--Long Service-->
+        <!--<Label Grid.Row="7" Grid.Column="0" Content="{DynamicResource AddAuthorizedLeaveViewLongService}"  Height="30" FontSize="16"
+               HorizontalAlignment="Right" VerticalAlignment="Center" Margin="10,10,0,10"/>
+        <StackPanel Grid.Row="7" Grid.Column="1"
+                    HorizontalAlignment="Left" 
+                    Orientation="Horizontal"
+                    Margin="0,0,0,0"
+                    Width="250">
+            <dxe:SpinEdit IsFloatValue="False"  Width="70" Height="30"  Margin="5,5,5,5" MinValue="0" Increment="1" Value="{Binding AdditionalDays,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></dxe:SpinEdit>
+            <Label Content="{DynamicResource AddAuthorizedLeaveViewDays}" VerticalAlignment="Center"  ></Label>
+            <dxe:SpinEdit IsFloatValue="False"  Width="70" Height="30"  Margin="15,5,5,5" MinValue="0" Increment="1" Value="{Binding AdditionalHours,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" ></dxe:SpinEdit>
+            <Label Content="{DynamicResource AddAuthorizedLeaveViewHours}" VerticalAlignment="Center"  ></Label>
+        </StackPanel>-->
+
+        <!--Bonus-->
+        <!--<Label Grid.Row="8" Grid.Column="0" Content="{DynamicResource AddAuthorizedLeaveViewBonus}"  Height="30" FontSize="16"
+               HorizontalAlignment="Right" VerticalAlignment="Center" Margin="10,10,0,10"/>
+        <StackPanel Grid.Row="8" Grid.Column="1"
+                    HorizontalAlignment="Left" 
+                    Orientation="Horizontal"
+                    Margin="0,0,0,0"
+                    Width="250">
+            <dxe:SpinEdit IsFloatValue="False"  Width="70" Height="30"  Margin="5,5,5,5" MinValue="0" Increment="1" Value="{Binding AdditionalDays,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></dxe:SpinEdit>
+            <Label Content="{DynamicResource AddAuthorizedLeaveViewDays}" VerticalAlignment="Center"  ></Label>
+            <dxe:SpinEdit IsFloatValue="False"  Width="70" Height="30"  Margin="15,5,5,5" MinValue="0" Increment="1" Value="{Binding AdditionalHours,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" ></dxe:SpinEdit>
+            <Label Content="{DynamicResource AddAuthorizedLeaveViewHours}" VerticalAlignment="Center"  ></Label>
+        </StackPanel>-->
+
+        <!--Other-->
+        <!--<Label Grid.Row="9" Grid.Column="0" Content="{DynamicResource AddAuthorizedLeaveViewOther}"  Height="30" FontSize="16"
+               HorizontalAlignment="Right" VerticalAlignment="Center" Margin="10,10,0,10"/>
+        <StackPanel Grid.Row="9" Grid.Column="1"
+                    HorizontalAlignment="Left" 
+                    Orientation="Horizontal"
+                    Margin="0,0,0,0"
+                    Width="250">
+            <dxe:SpinEdit IsFloatValue="False"  Width="70" Height="30"  Margin="5,5,5,5" MinValue="0" Increment="1" Value="{Binding AdditionalDays,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></dxe:SpinEdit>
+            <Label Content="{DynamicResource AddAuthorizedLeaveViewDays}" VerticalAlignment="Center"  ></Label>
+            <dxe:SpinEdit IsFloatValue="False"  Width="70" Height="30"  Margin="15,5,5,5" MinValue="0" Increment="1" Value="{Binding AdditionalHours,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" ></dxe:SpinEdit>
+            <Label Content="{DynamicResource AddAuthorizedLeaveViewHours}" VerticalAlignment="Center"  ></Label>
+        </StackPanel>-->
+
+        <StackPanel Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2"
+                    HorizontalAlignment="Center" 
+                    Orientation="Horizontal"
+                    Margin="0,0,0,0"
+                    Width="250">
+
+            <Button Content="{DynamicResource AddAuthorizedLeaveViewAcceptButton}"
+                    Command="{Binding AddAuthorizedLeaveViewAcceptButtonCommand}"
+                    CommandParameter="{Binding ElementName=AdditionalReasonTableView}"
+                    Height="30"
+                    Width="100"
+                    Margin="5,0,10,0"
+                    Style="{DynamicResource Button16Style}"
+                    VerticalAlignment="Bottom" 
+                   IsEnabled="{Binding IsAcceptEnabled}"/>
+
+            <Button Content="{DynamicResource AddAuthorizedLeaveViewCancelButton}"
+                    Command="{Binding AddAuthorizedLeaveViewCancelButtonCommand}" 
+                    Height="30"
+                    Width="100"
+                    Margin="10,0,0,0"
+                    Style="{DynamicResource Button16Style}"
+                    VerticalAlignment="Bottom" />
+        </StackPanel>
+    </Grid>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="KeyDown">
+            <behaviors:InvokeDelegateCommandAction Command="{Binding CommandTextInput}" CommandParameter="{Binding Path=InvokeParameter, RelativeSource={RelativeSource Self}}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+</dxwui:WinUIDialogWindow> 

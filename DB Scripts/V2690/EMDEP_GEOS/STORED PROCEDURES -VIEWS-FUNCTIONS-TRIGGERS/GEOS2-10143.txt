@@ -1,0 +1,21 @@
+  --  DROP PROCEDURE IF exists GetUserModulesPermissions_V2690;
+DELIMITER $$
+CREATE PROCEDURE `GetUserModulesPermissions_V2690`(
+   IN _IdUser   int(10) UNSIGNED)
+BEGIN
+-- [pallavi.jadhav][Date:20/11/2025][GEOS2-10143]
+-- call GetUserModulesPermissions_V2690(1);
+    SELECT distinct  gm.*,
+    (select sump.IdGeosModule as IdGeosModulepermission from site_user_permission as sup
+      inner join site_user_module_geos_permission AS sump ON sup.Id = sump.IdSiteUserPermission
+      where sump.IdGeosModule = gm.IdGeosModule and sup.IdUser = _IdUser
+      limit 1
+    ) as IdGeosModulepermission
+    FROM GEOS_Modules AS gm
+   -- INNER JOIN site_user_permission AS sup ON sup.IdGeosModule = gm.IdGeosModule
+    -- INNER JOIN site_user_module_geos_permission AS sump ON sup.Id = sump.IdSiteUserPermission
+   inner join lookup_values AS lv on lv.IdLookupValue = gm.IdLookupValue and lv.IdLookupKey=190 and lv.InUse
+    -- WHERE sup.IdUser = 1
+    ;
+END$$
+   DELIMITER ;

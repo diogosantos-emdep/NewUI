@@ -1,0 +1,124 @@
+DROP PROCEDURE IF EXISTS OTM_GetShippingAddressForShowAll_V2680;
+DELIMITER $$
+CREATE PROCEDURE OTM_GetShippingAddressForShowAll_V2680(
+   IN _IdCustomer   smallint(5) UNSIGNED)
+BEGIN
+   /*
+       [Rahul.Gadhave][GEOS2-7226][Date:24-03-2025] https://helpdesk.emdep.com/browse/GEOS2-7226
+       call OTM_GetShippingAddressForShowAll_V2630(10);
+         //[Rahul.Gadhave][GEOS2-9517][Date:07-10-2025] https://helpdesk.emdep.com/browse/GEOS2-9517
+         call OTM_GetShippingAddressForShowAll_V2680(10);
+   */
+   SELECT sa.IdShippingAddress,
+          sa.Name,
+          cust.Name
+             AS CustomerName,
+          s.Name
+             AS PlantName,
+          c.iso,
+          -- sa.Address,
+          --                CONCAT(cust.Name, ' - ', s.Name) AS Address,
+          CONCAT(cust.Name,
+                 ' - ',
+                 REPLACE(s.Name, CONCAT('(', c.Name, ')'), ''))
+             AS Address,
+          --              RTRIM(REPLACE(sa.Address, ' ', '')) AS Address,
+          sa.ZipCode,
+          sa.City,
+          c.name
+             AS CountriesName,
+          lv.Value
+             AS Region,
+          CONCAT(sa.Address,
+                 ' ',
+                 sa.ZipCode,
+                 '- ',
+                 sa.City,
+                 '- ',
+                 c.name)
+             AS FullAddress,
+             cust.IdCustomer
+   FROM shippingaddresses sa
+        INNER JOIN countries c ON sa.IdCountry = c.idCountry
+        INNER JOIN emdep_geos.lookup_values lv
+           ON lv.IdLookupValue = c.IdRegion
+        INNER JOIN sites s ON s.idsite = sa.idsite
+        INNER JOIN customers cust ON cust.idcustomer = s.idcustomer
+        INNER JOIN countries co ON co.idcountry = s.idcountry
+   WHERE cust.idcustomer IN (_IdCustomer) AND sa.isdisabled = 0
+   ORDER BY cust.name, s.name, sa.IdShippingAddress ASC;
+END$$
+DELIMITER ;
+
+
+
+DROP PROCEDURE IF EXISTS OTM_GetShippingAddress_V2680;
+DELIMITER $$
+CREATE  PROCEDURE OTM_GetShippingAddress_V2680(
+   IN _IdSite   smallint(5) UNSIGNED)
+BEGIN
+   DECLARE _idregion     smallint(3) UNSIGNED;
+   DECLARE _idCustomer   smallint(3) UNSIGNED;
+
+
+   /*
+       [pooja.jadhav][GEOS2-7057]
+       call OTM_GetShippingAddress_V2620(3);
+       //[Rahul.Gadhave][GEOS2-9517][Date:07-10-2025] https://helpdesk.emdep.com/browse/GEOS2-9517
+      call OTM_GetShippingAddress_V2680(3);
+   */
+   SET _idregion =
+          (SELECT c.IdRegion
+           FROM sites s INNER JOIN countries c ON s.IdCountry = c.idCountry
+           WHERE s.IdSite = _IdSite);
+
+   SET _idCustomer =
+          (SELECT s.idCustomer
+           FROM sites s
+           WHERE s.IdSite = _IdSite);
+
+   SELECT sa.IdShippingAddress,
+          sa.Name,
+          cust.Name
+             AS CustomerName,
+          s.Name
+             AS PlantName,
+          c.iso,
+          -- sa.Address,
+          --                     CONCAT(cust.Name, ' - ', s.Name)
+          --                        AS Address,
+          CONCAT(cust.Name,
+                 ' - ',
+                 REPLACE(s.Name, CONCAT('(', c.Name, ')'), ''))
+             AS Address,
+          --           cust.Name
+          --              AS Address,
+          --              RTRIM(REPLACE(sa.Address, ' ', '')) AS Address,
+          sa.ZipCode,
+          sa.City,
+          c.name
+             AS CountriesName,
+          CONCAT(sa.Address,
+                 ' ',
+                 sa.ZipCode,
+                 '- ',
+                 sa.City,
+                 '- ',
+                 c.name)
+             AS FullAddress,
+          lv.Value
+             AS Region,
+             cust.IdCustomer
+   FROM shippingaddresses sa
+        INNER JOIN countries c ON sa.IdCountry = c.idCountry
+        INNER JOIN emdep_geos.lookup_values lv
+           ON lv.IdLookupValue = c.IdRegion
+        INNER JOIN sites s ON s.idsite = sa.idsite
+        INNER JOIN customers cust ON cust.idcustomer = s.idcustomer
+        INNER JOIN countries co ON co.idcountry = s.idcountry
+   WHERE     sa.isdisabled = 0
+         AND c.IdRegion = _idregion
+         AND cust.idcustomer IN (_idCustomer)
+   ORDER BY cust.name, s.name, sa.IdShippingAddress ASC;
+END$$
+DELIMITER ;

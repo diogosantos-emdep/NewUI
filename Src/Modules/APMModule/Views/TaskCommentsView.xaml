@@ -1,0 +1,337 @@
+﻿<dxwui:WinUIDialogWindow x:Class="Emdep.Geos.Modules.APM.Views.TaskCommentsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:sysglb="clr-namespace:System.Globalization;assembly=mscorlib"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+             xmlns:dxre="http://schemas.devexpress.com/winfx/2008/xaml/richedit"
+             xmlns:dxefl="clr-namespace:DevExpress.Xpf.Editors.Flyout.Native;assembly=DevExpress.Xpf.Core.v19.2"
+             xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+             xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:UIConverter="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.APM.Views"
+             mc:Ignorable="d"
+                          Title="{Binding WindowHeader}"
+                         TitleStyle="{DynamicResource WinUIDialogWindowTitleStyle}"
+                         Style="{DynamicResource WinUIDialogWindowStyle}"
+             d:DesignHeight="300" d:DesignWidth="300">
+
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape" Command="{Binding CancelButtonCommand}" />
+    </dxwui:WinUIDialogWindow.InputBindings>
+    <dxwui:WinUIDialogWindow.Resources>
+        <dxre:PlainTextToContentConverter x:Key="PlainTextToContentConverter" />
+        <dxre:RtfToContentConverter x:Key="rtfToContentConverter" />
+    </dxwui:WinUIDialogWindow.Resources>
+    <Grid  Height="{Binding DialogHeight}" Width="{Binding DialogWidth}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="5"/>
+            <RowDefinition Height="50"/>
+        </Grid.RowDefinitions>
+        <Border BorderThickness="0.3" BorderBrush="{DynamicResource TaskCommentBorderStyle}">
+        <Grid Grid.Row="0" Margin="5">
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="40"/>
+            </Grid.RowDefinitions>
+
+            <dxg:GridControl x:Name="gcComments" 
+                                             Grid.Row="0" MaxHeight="{Binding DialogHeight-200}" MinHeight="{Binding DialogHeight-400}"
+                                                 SelectionMode="Row"
+                                                 Grid.ColumnSpan="2"
+                                                 HorizontalAlignment="Stretch" VerticalAlignment="Top" 
+                                                 Padding="0"
+                                                 DockPanel.Dock="Top" 
+                                                 ItemsSource="{Binding DataContext.TaskCommentsList,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}, Mode=TwoWay}"
+                                                 SelectedItem="{Binding DataContext.SelectedComment, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ImplyNullLikeEmptyStringWhenFiltering="True">
+                <dxg:GridControl.Columns>
+                    <dxg:GridColumn FieldName="People.FullName" Header="{DynamicResource ActivityCommentUser}" FixedWidth="True" Width="150" FilterPopupMode="CheckedList">
+                        <dxg:GridColumn.DisplayTemplate>
+                            <ControlTemplate>
+                                <TextBlock Name="PART_Editor" FontWeight="Bold"></TextBlock>
+                            </ControlTemplate>
+                        </dxg:GridColumn.DisplayTemplate>
+                    </dxg:GridColumn>
+                    <dxg:GridColumn Binding="{Binding CreatedIn,StringFormat=g, ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}" 
+                                             Header="{DynamicResource ActivityCommentDate}" FixedWidth="True" Width="170" FilterPopupMode="CheckedList">
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <dxe:TextEdit Name="PART_Editor" DisplayFormatString="g" FontWeight="Bold" />
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+                    <dxg:GridColumn FieldName="Comments" Visible="False" ShowInColumnChooser="False" />
+
+
+                    <dxg:GridColumn Width="*" IsEnabled="False" AllowColumnFiltering="False" ShowInColumnChooser="False" />
+                    <dxg:GridColumn Width="40" FieldName="" FixedWidth="True" FilterPopupMode="CheckedList" AllowMoving="False" AllowColumnFiltering="False">
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Name="deleteRowComment"                                                            
+                                        Command="{Binding DataContext.DeleteCommentRowCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type dxg:GridControl}}}"                                                            
+                                        CommandParameter="{Binding RowData.Row}" IsEnabled="{Binding RowData.Row.IsDeleted, UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
+                                    <Button.ContentTemplate>
+                                        <DataTemplate>
+                                            <Image Height="16" Width="16" Source="/Emdep.Geos.Modules.APM;component/Assets/Images/Delete.png" />
+                                        </DataTemplate>
+                                    </Button.ContentTemplate>
+                                </Button>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+                </dxg:GridControl.Columns>
+             
+                <dxg:GridControl.View>
+                    <dxg:TableView x:Name="commentTable" 
+                                                       NavigationStyle="Row" 
+                                                       AutoWidth="True" 
+                                                       ShowGroupPanel="False" 
+                                                       AllowEditing="True" 
+                                                       HorizontalScrollbarVisibility="Hidden" 
+                                                       VerticalScrollbarVisibility="Auto" 
+                                                       ShowIndicator="False"
+                                                       FadeSelectionOnLostFocus="False"
+                                                       RowDetailsVisibilityMode="Visible"
+                                                       SearchPanelHorizontalAlignment="Stretch"
+                                                       ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly"
+                                                       SearchColumns="People.FullName;Comments"
+                                                       ShowSearchPanelMode="Always"
+                                                       FocusedRow="{Binding DataContext.SelectedComment, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                        <dxg:TableView.RowDetailsTemplate>
+                            <DataTemplate>
+                                <dx:DXExpander IsExpanded="{Binding Path=RowState.(UIHelper:ShowDetailBehavior.ShowDetail)}" HorizontalExpand="None" VerticalExpand="FromTopToBottom">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="50" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <dxe:ImageEdit ShowLoadDialogOnClickMode="Never" ShowMenu="False" Source="{Binding Row.People.OwnerImage}" Stretch="UniformToFill" Width="50" Height="50" HorizontalAlignment="Center" VerticalAlignment="Top" />
+
+                                        <dxre:RichEditControl VerticalAlignment="Stretch" HorizontalAlignment="Stretch" 
+                                                                              LayoutUnit="Document" MinHeight="50"                                  
+                                                                              VerticalScrollBarVisibility="Collapsed" HorizontalScrollBarVisibility="Collapsed"  
+                                                                              Grid.Column="1" Grid.Row="0" ReadOnly="True" 
+                                                                              ActiveViewType="Simple">
+
+                                            <dxre:RichEditControl.Style>
+                                                <Style>
+                                                    <Setter Property="dxre:RichEditControl.Content" Value="{Binding Path=Row.Comments,Converter={StaticResource rtfToContentConverter}, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Path=Row.IsRtfText,Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Value="False">
+                                                            <Setter Property="dxre:RichEditControl.Content" Value="{Binding Path=Row.Comments,Converter={StaticResource PlainTextToContentConverter},Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </dxre:RichEditControl.Style>
+                                            <dxmvvm:Interaction.Behaviors>
+                                                <UIHelper:RichEditControlSearchHelper SearchText="{Binding View.SearchString}" />
+                                            </dxmvvm:Interaction.Behaviors>
+                                            <dxre:RichEditControl.VerticalRulerOptions>
+                                                <dxre:DXRichEditVerticalRulerOptions Visibility="Hidden" />
+                                            </dxre:RichEditControl.VerticalRulerOptions>
+                                            <dxre:RichEditControl.HorizontalRulerOptions>
+                                                <dxre:DXRichEditHorizontalRulerOptions Visibility="Hidden" />
+                                            </dxre:RichEditControl.HorizontalRulerOptions>
+
+                                            <dxmvvm:Interaction.Triggers>
+                                                <dxmvvm:EventToCommand Command="{Binding DataContext.RichTextResizingCommand,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type dxre:RichEditControl}} }" EventName="Loaded" PassEventArgsToCommand="False" />
+                                                <dxmvvm:EventToCommand Command="{Binding DataContext.RichTextResizingCommand,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type dxre:RichEditControl}} }" EventName="ContentChanged" PassEventArgsToCommand="False" />
+
+                                            </dxmvvm:Interaction.Triggers>
+                                        </dxre:RichEditControl>
+
+                                    </Grid>
+                                </dx:DXExpander>
+                            </DataTemplate>
+                        </dxg:TableView.RowDetailsTemplate>
+                        <dxmvvm:Interaction.Behaviors>
+                            <dxmvvm:EventToCommand Command="{Binding DataContext.CommentsGridDoubleClickCommand,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"
+                                                                       EventName="MouseDoubleClick"
+                                                                       PassEventArgsToCommand="True">
+                                <dxmvvm:EventToCommand.EventArgsConverter>
+                                    <dx:EventArgsToDataRowConverter />
+                                </dxmvvm:EventToCommand.EventArgsConverter>
+
+                            </dxmvvm:EventToCommand>
+                            <UIHelper:ShowDetailBehavior />
+                        </dxmvvm:Interaction.Behaviors>
+                    </dxg:TableView>
+                </dxg:GridControl.View>
+            </dxg:GridControl>
+            <ToggleButton Grid.Row="1"
+                                            
+                                              Height="30"
+                                              Width="30"
+                                              Margin="0,5,5,5"
+                                              VerticalAlignment="Bottom"
+                                              HorizontalAlignment="Right"
+                                              DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"
+                                              FontWeight="Bold"
+                                                                                       
+                                              
+                                              
+                                              
+                                              Name="btnAddNewComment">
+
+                <dxmvvm:Interaction.Triggers>
+                    <dxmvvm:EventToCommand Command="{Binding CommentButtonCheckedCommand}" EventName="Checked" PassEventArgsToCommand="True" />
+                    <dxmvvm:EventToCommand Command="{Binding CommentButtonUncheckedCommand}" EventName="Unchecked" PassEventArgsToCommand="True" />
+                </dxmvvm:Interaction.Triggers>
+
+                <ToggleButton.ContentTemplate>
+                    <DataTemplate>
+                        <Image Height="24"
+                                                   Width="24"
+                                                   Margin="-10"
+                                                   VerticalAlignment="Stretch"
+                                                   HorizontalAlignment="Stretch"
+                                                   Style="{DynamicResource APMAddCommentButtonImageStyle}" />
+                    </DataTemplate>
+                </ToggleButton.ContentTemplate>
+            </ToggleButton>
+            <dxe:FlyoutControl StaysOpen="True" IsOpen="{Binding IsOpen,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" PlacementTarget="{Binding ElementName=btnAddNewComment}">
+                
+                <dxe:FlyoutControl.Settings>
+                    <dxe:FlyoutSettings Placement="Left" />
+                </dxe:FlyoutControl.Settings>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="20" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <UIHelper:BindableRichTextBox x:Name="BindableRichTextBox_Editor"
+                                            Grid.Row="0"
+                                            Grid.Column="0"
+                                            Grid.ColumnSpan="2"
+                                            Height="430"
+                                            Width="850"
+                                            Margin="-10"
+                                            Style="{DynamicResource RichTextBoxStyle}"
+                                            Document="{Binding DataContext.NewTaskComment,
+                                            Converter={UIConverter:RtfToFlowDocumentConverter},  RelativeSource={RelativeSource FindAncestor,
+                                            AncestorType={x:Type dxwui:WinUIDialogWindow}}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"                                       
+                                            Visibility="Visible">
+
+                    </UIHelper:BindableRichTextBox>
+                    <TextBox x:Name="BindableRichTextBox_Editor1"
+                                            TextWrapping="Wrap"
+                                            AcceptsReturn="True" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                            Grid.Row="0"
+                                            Grid.Column="0"
+                                            Grid.ColumnSpan="2" 
+                                            Height="430"
+                                            Width="850"
+                                            Margin="-10"
+                                            Text="{Binding DataContext.NewTaskComment,
+                                            RelativeSource={RelativeSource FindAncestor,
+                                            AncestorType={x:Type dxwui:WinUIDialogWindow}}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                           Visibility="Visible">
+
+                    </TextBox>
+                    <StackPanel Grid.Row="2"
+                                            Grid.Column="0"
+                                            HorizontalAlignment="Right"
+                                            VerticalAlignment="Bottom"
+                                            Orientation="Horizontal">
+                        <RadioButton Margin="0,0,15,0"
+                                                HorizontalAlignment="Right"
+                                                Content="{DynamicResource APMViewCommentTextNormal}"
+                                                GroupName="commentTextType"
+                                             
+                                                IsChecked="{Binding DataContext.IsNormal,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow,Mode=FindAncestor},Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+                            <dxmvvm:Interaction.Behaviors>
+                                <dxmvvm:EventToCommand Command="{Binding DataContext.IsnormalPreviewMouseRightButtonDown ,
+                                                        RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" 
+                                                                           EventName="Click"                                                           
+                                                                       CommandParameter="{Binding ElementName=BindableRichTextBox_Editor}"
+                                                               PassEventArgsToCommand="True">
+                                </dxmvvm:EventToCommand>
+                            </dxmvvm:Interaction.Behaviors>
+                        </RadioButton>
+                        <RadioButton Margin="0,0,5,0"
+                                                HorizontalAlignment="Left"
+                                                Content="{DynamicResource APMViewCommentTextRtf}"
+                                                GroupName="commentTextType"
+                                             
+                                                IsChecked="{Binding DataContext.IsRtf, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow,Mode=FindAncestor},UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
+                            <dxmvvm:Interaction.Behaviors>
+                                <dxmvvm:EventToCommand Command="{Binding DataContext.IsnormalPreviewMouseRightButtonDown ,
+                                                        RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" 
+                                                                           EventName="Click"                                                           
+                                                                       CommandParameter="{Binding ElementName=BindableRichTextBox_Editor}"
+                                                               PassEventArgsToCommand="True">
+                                </dxmvvm:EventToCommand>
+                            </dxmvvm:Interaction.Behaviors>
+                        </RadioButton>
+                    </StackPanel>
+                    <Button Grid.Row="2"
+                                                Grid.Column="1"
+                                                Height="30"
+                                                Width="Auto"
+                                                HorizontalAlignment="Right"
+                                                VerticalAlignment="Bottom"
+                                                Command="{Binding Path =(dxefl:FlyoutBase.Flyout).PlacementTarget.DataContext.AddNewCommentCommand, RelativeSource={RelativeSource Self}}"
+                                                CommandParameter="{Binding ElementName=BindableRichTextBox_Editor}"
+                                                Content="{Binding DataContext.CommentButtonText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" />
+                 
+                </Grid>
+            </dxe:FlyoutControl>
+        </Grid>
+            
+           
+        </Border>
+
+        <Grid Grid.Row="2" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid Grid.Row="2" VerticalAlignment="Center" HorizontalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="50"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Button Grid.Row="1" Grid.Column="0"
+                    Style="{DynamicResource Button16Style}"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Top"
+                    Content="{DynamicResource AddCatalogueAcceptButton}"
+                           Command="{Binding AcceptButtonActionCommand}"
+                     
+                    CommandParameter="{Binding ElementName=flowLayoutControl}"
+                    Height="30"
+                    Width="100" 
+                    
+                    />
+
+                <Button Grid.Row="1" Grid.Column="2"
+                    Style="{DynamicResource Button16Style}"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    Content="{DynamicResource AddCatalogueCancelButton}"
+                    Command="{Binding CancelButtonCommand}"
+                    Height="30"
+                    Width="100" />
+            </Grid>
+        </Grid>
+    </Grid>
+</dxwui:WinUIDialogWindow>

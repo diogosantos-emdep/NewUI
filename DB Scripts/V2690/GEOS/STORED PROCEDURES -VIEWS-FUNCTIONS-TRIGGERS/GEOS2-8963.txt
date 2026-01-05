@@ -1,0 +1,155 @@
+Drop procedure if exists TSM_GetAllPlantsDetails_V2690;
+delimiter $$
+CREATE PROCEDURE `TSM_GetAllPlantsDetails_V2690`(
+    IN _idUser   smallint(5) UNSIGNED)
+ BEGIN
+  --  [Pallavi.Kale][07/11/2025] [GEOS2-8963]
+ -- call geos.TSM_GetAllPlantsDetails_V2690(1);
+    SELECT emsi.idSite,
+           emsi.IP,
+           emsi.Code,
+           emsi.DatabaseIP,
+           si.ShortName,
+           si.Name,
+           co.idCountry,
+           co.name,
+           gp.ServiceProviderUrl
+      FROM emdepsites emsi
+           INNER JOIN sites si ON emsi.idSite = si.IdSite
+           INNER JOIN emdep_geos.site_user_permission usrpermission
+              ON usrpermission.IdCompany = si.IdSite
+           INNER JOIN countries co ON co.idCountry = si.IdCountry
+           INNER JOIN emdep_geos.geos_providers gp
+              ON gp.IdCompany = emsi.idSite
+     WHERE usrpermission.IdUser = _IdUser
+    GROUP BY emsi.idSite;
+    END $$
+    delimiter ;
+
+
+
+
+
+
+-----------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+Drop procedure if exists TSM_GetAllPlantNameToCheckDataSource_V2690;
+delimiter $$
+CREATE PROCEDURE  `TSM_GetAllPlantNameToCheckDataSource_V2690`()
+ BEGIN
+ --  [Pallavi.Kale][07/11/2025] [GEOS2-8963]
+ -- call geos.TSM_GetAllPlantNameToCheckDataSource_V2690()
+ select si.ShortName from emdepsites es inner join sites si on es.idSite=si.IdSite;
+ END $$
+delimiter ;
+
+
+
+
+
+-----------------------------------------------------------------------------------------------------------------
+
+
+
+
+drop procedure if exists TSM_PendingOrder_V2690 ;
+delimiter $$
+
+CREATE  PROCEDURE `TSM_PendingOrder_V2690`(IN _IdSite smallint unsigned)
+ BEGIN 
+    -- CALL geos.TSM_PendingOrder_V2690(18);
+  -- [ram.chavan][GEOS2-8963][28-11-2025]
+
+  SELECT 
+       ofs.IdOffer AS IdOffer,
+    	 ofs.Code AS OrderCode,
+   	 ot.IdOT AS IdOT,
+    	 ot.Code AS OTCode,
+       ot.NumOT,
+  	 CONCAT(ot.Code, ' OT ', ot.NumOT) AS MergeCode,
+    	 ofs.Title AS Description,
+   	 cu.IdCustomer AS IdGroup,
+    	 UPPER(cu.Name) AS 'Group',
+   	 cont.iso AS Iso,
+   	 cont.IdCountry AS IdCountry,
+   	 si.IdSite AS IdSite,
+    	 si.City AS Plant,
+    	 UPPER(cont.Name) AS Country,
+    	 lv.Value AS BusinessUnit,
+       cat.Category AS Category1,
+   	 cat.ProductSubCategory AS Category2,
+  	 ofs.RFQ AS RFQ,
+   	 carp.Name AS Project,
+    	 caro.Name AS OEM,
+      -- CAST(ri.UnitPrice AS DECIMAL(10,2)) AS 'Price',
+       CAST(SUM(ri.UnitPrice * ri.Quantity) AS DECIMAL(10,2)) AS Price,
+       c.IdCurrency,
+       c.Symbol,
+    	 ot.DeliveryDate AS DeliveryDate,
+   	 ofs.AssignedTo AS IdAssignee,
+       CONCAT(p.Name, ' ', p.Surname) AS Assignee,
+    	 wrf.Name As Status,
+      wrf.HtmlColor,
+   	 sis.ShortName AS PlantOwner,
+       qu.IdDetectionsTemplate,
+       TEMP_OTI.Services,
+       oti.idotitem
+    FROM ots AS ot
+    INNER JOIN otitems oti ON ot.IdOT = oti.IdOT
+    INNER JOIN revisionitems ri ON ri.IdRevisionItem = oti.IdRevisionItem
+    INNER JOIN quotations qu ON qu.IdQuotation = ot.IdQuotation
+    INNER JOIN offers ofs ON ofs.IdOffer = qu.IdOffer
+    INNER JOIN emdep_geos.lookup_values lv ON lv.IdLookupValue = ofs.IdBusinessUnit
+    INNER JOIN sites si ON si.IdSite = ofs.IdCustomer
+    INNER JOIN sites sis ON sis.IdSite = ofs.IdSite And sis.IdSite =_IdSite
+    INNER JOIN customers cu ON cu.IdCustomer = si.IdCustomer 
+    INNER JOIN countries cont ON si.IdCountry = cont.IdCountry
+    INNER JOIN people p ON p.IdPerson = ofs.AssignedTo
+    INNER JOIN currency c ON c.IdCurrency = ofs.IdCurrency
+    INNER JOIN emdep_geos.workflow_status wrf ON wrf.IdWorkflowStatus = ot.IdWorkflowStatus
+    INNER JOIN ( SELECT COUNT(*) AS Services,OTI.IdOT,OTI.IdOTItem 
+ 				FROM otitems OTI 
+ 				INNER JOIN revisionitems ri ON ri.IdRevisionItem = oti.IdRevisionItem 
+                 WHERE ri.Quantity > 0 GROUP BY OTI.IdOT 
+ 			  ) AS TEMP_OTI ON  ot.IdOT = TEMP_OTI.IdOT and  TEMP_OTI.IdOTItem=oti.IdOTItem 
+    LEFT JOIN car_projects carp ON carp.IdCarProject = ofs.IdCarProject
+    LEFT JOIN caroems caro ON caro.IdCarOEM = carp.IdCarOem
+    LEFT JOIN
+  		   (
+  				 SELECT DISTINCT pcoo.IdProductCategory AS IdProductSubCategory,
+  								pc.Name AS ProductSubCategory,
+  								pc.IdParent AS IdCategory,
+  								pcmaincat.Name AS Category
+  				  FROM product_category_offer_options pcoo
+  				  INNER JOIN product_categories pc ON pc.IdProductCategory = pcoo.IdProductCategory
+  				  LEFT JOIN product_categories pcmaincat ON pc.IdParent = pcmaincat.IdProductCategory
+  			) cat
+  			  ON ofs.IdProductCategory = cat.IdProductSubCategory
+    WHERE  qu.IdDetectionsTemplate=15 and oti.IdItemOtStatus = 1 and  ri.Quantity > 0 AND (ofs.IsGoAhead = 1 OR ofs.idOfferType = 1) -- And sis.IdSite =_IdSite
+    GROUP BY ot.IdOT ;
+    END $$
+    delimiter ;
+
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

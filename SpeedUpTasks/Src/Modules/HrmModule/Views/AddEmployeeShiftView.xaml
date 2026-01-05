@@ -1,0 +1,179 @@
+﻿<dxwui:WinUIDialogWindow x:Class="Emdep.Geos.Modules.Hrm.Views.AddEmployeeShiftView"
+                         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                         xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                         xmlns:local="clr-namespace:Emdep.Geos.Modules.Hrm.Views"
+                         xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+                         xmlns:Validation ="clr-namespace:Emdep.Geos.UI.Validations;assembly=Emdep.Geos.UI.Validations"
+                         xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+                         xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+                         xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+                         xmlns:dxp="http://schemas.devexpress.com/winfx/2008/xaml/printing" 
+                         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+                         xmlns:behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+                         mc:Ignorable="d" 
+                         d:DesignHeight="800" d:DesignWidth="800"
+                         Height="{Binding SystemParameters.PrimaryScreenHeight}" 
+                         Width="{Binding SystemParameters.PrimaryScreenWidth}"
+                         HorizontalAlignment="Stretch"
+                         VerticalAlignment="Stretch"
+                         HorizontalContentAlignment="Stretch"
+                         VerticalContentAlignment="Stretch"
+                         Title="{Binding WindowHeader,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+                         TitleStyle="{DynamicResource WinUIDialogWindowTitleStyle}"
+                         Style="{DynamicResource WinUIDialogWindowStyle}">
+
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape"  Command="{Binding AddEmployeeShiftViewCancelButtonCommand}"/>
+    </dxwui:WinUIDialogWindow.InputBindings>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="10"/>
+            <RowDefinition  Height="*"/>
+            <RowDefinition  Height="50"/>
+        </Grid.RowDefinitions>
+
+        <Grid.Resources>
+            <Style TargetType="{x:Type dxg:GridColumn}"  x:Key="GridColumnStyle"  >
+                <Setter Property="HorizontalHeaderContentAlignment" Value="Center"/>
+                <Setter Property="EditSettings">
+                    <Setter.Value>
+                        <dxe:DateEditSettings Mask="HH:mm" MaskUseAsDisplayFormat="True"/>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </Grid.Resources>
+
+        <dxg:GridControl VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Grid.Row="1" Grid.Column="0" 
+                         ItemsSource="{Binding CompanyShiftList,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
+                         AllowLiveDataShaping="True">
+
+            <dxg:GridControl.Bands>
+
+                <dxg:GridControlBand OverlayHeaderByChildren="True">
+                    <dxg:GridColumn Header=" " FieldName="" FilterPopupMode="CheckedList" Width="50">
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <dxe:CheckEdit VerticalAlignment="Center" HorizontalAlignment="Center" IsChecked="{Binding RowData.Row.IsExistShift,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="False"/>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+                </dxg:GridControlBand>
+
+                <dxg:GridControlBand OverlayHeaderByChildren="True">
+                    <dxg:GridColumn Header="{DynamicResource Company}" FieldName="CompanySchedule.Company.Alias" FilterPopupMode="CheckedList" Width="90"/>
+                </dxg:GridControlBand>
+
+                <dxg:GridControlBand OverlayHeaderByChildren="True">
+                    <dxg:GridColumn Header="{DynamicResource WorkSchedule}" FieldName="CompanySchedule.Name" FilterPopupMode="CheckedList"/>
+                </dxg:GridControlBand>
+
+                <dxg:GridControlBand OverlayHeaderByChildren="True">
+                    <dxg:GridColumn Header="{DynamicResource Name}" FieldName="Name" FilterPopupMode="CheckedList"/>
+                </dxg:GridControlBand>
+
+                <!--Monday-->
+                <dxg:GridControlBand Header="{DynamicResource AddShiftViewMonday}" Width="80" HorizontalHeaderContentAlignment="Center" VisibleIndex="{Binding IndexMon,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                    <dxg:GridColumn Header="{DynamicResource From}" FilterPopupMode="CheckedList"  FieldName="MonStartTime" Width="70" Style="{StaticResource GridColumnStyle}" />
+                    <dxg:GridColumn Header="{DynamicResource To}" FilterPopupMode="CheckedList" FieldName="MonEndTime" Width="70"  Style="{StaticResource GridColumnStyle}"/>
+                    <dxg:GridColumn Header="{DynamicResource BreakTime}"  FilterPopupMode="CheckedList" FieldName="MonBreakTime"  Width="80"  Style="{StaticResource GridColumnStyle}"/>
+                </dxg:GridControlBand>
+
+                <!--Tuesday-->
+                <dxg:GridControlBand Header="{DynamicResource AddShiftViewTuesday}" Width="80" HorizontalHeaderContentAlignment="Center" VisibleIndex="{Binding IndexTue,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                    <dxg:GridColumn Header="{DynamicResource From}" FilterPopupMode="CheckedList"  FieldName="TueStartTime" Width="70" Style="{StaticResource GridColumnStyle}" />
+                    <dxg:GridColumn Header="{DynamicResource To}" FilterPopupMode="CheckedList" FieldName="TueEndTime" Width="70" Style="{StaticResource GridColumnStyle}"/>
+                    <dxg:GridColumn Header="{DynamicResource BreakTime}"  FilterPopupMode="CheckedList" FieldName="TueBreakTime" Width="80" Style="{StaticResource GridColumnStyle}"/>
+                </dxg:GridControlBand>
+
+                <!--Wednesday-->
+                <dxg:GridControlBand Header="{DynamicResource AddShiftViewWednesday}" Width="80" HorizontalHeaderContentAlignment="Center"  VisibleIndex="{Binding IndexWed,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                    <dxg:GridColumn Header="{DynamicResource From}" FilterPopupMode="CheckedList"  FieldName="WedStartTime"  Width="70" Style="{StaticResource GridColumnStyle}" />
+                    <dxg:GridColumn Header="{DynamicResource To}" FilterPopupMode="CheckedList" FieldName="WedEndTime" Width="70" Style="{StaticResource GridColumnStyle}"/>
+                    <dxg:GridColumn Header="{DynamicResource BreakTime}"  FilterPopupMode="CheckedList" FieldName="WedBreakTime" Width="80" Style="{StaticResource GridColumnStyle}"/>
+                </dxg:GridControlBand>
+
+                <!--Thursday-->
+                <dxg:GridControlBand Header="{DynamicResource AddShiftViewThursday}" Width="80" HorizontalHeaderContentAlignment="Center" VisibleIndex="{Binding IndexThu,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                    <dxg:GridColumn Header="{DynamicResource From}" FilterPopupMode="CheckedList"  FieldName="ThuStartTime"  Width="70" Style="{StaticResource GridColumnStyle}" />
+                    <dxg:GridColumn Header="{DynamicResource To}" FilterPopupMode="CheckedList" FieldName="ThuEndTime" Width="70" Style="{StaticResource GridColumnStyle}"/>
+                    <dxg:GridColumn Header="{DynamicResource BreakTime}"  FilterPopupMode="CheckedList" FieldName="ThuBreakTime" Width="80" Style="{StaticResource GridColumnStyle}"/>
+                </dxg:GridControlBand>
+
+                <!--Friday-->
+                <dxg:GridControlBand Header="{DynamicResource AddShiftViewFriday}" Width="80" HorizontalHeaderContentAlignment="Center" VisibleIndex="{Binding IndexFri,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
+                    <dxg:GridColumn Header="{DynamicResource From}" FilterPopupMode="CheckedList"  FieldName="FriStartTime"  Width="70" Style="{StaticResource GridColumnStyle}" />
+                    <dxg:GridColumn Header="{DynamicResource To}" FilterPopupMode="CheckedList" FieldName="FriEndTime" Width="70" Style="{StaticResource GridColumnStyle}"/>
+                    <dxg:GridColumn Header="{DynamicResource BreakTime}"  FilterPopupMode="CheckedList" FieldName="FriBreakTime" Width="80"  Style="{StaticResource GridColumnStyle}"/>
+                </dxg:GridControlBand>
+
+                <!--Saturday-->
+                <dxg:GridControlBand Header="{DynamicResource AddShiftViewSaturday}" Width="80" HorizontalHeaderContentAlignment="Center" VisibleIndex="{Binding IndexSat,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                    <dxg:GridColumn Header="{DynamicResource From}" FilterPopupMode="CheckedList"  FieldName="SatStartTime"  Width="70" Style="{StaticResource GridColumnStyle}"/>
+                    <dxg:GridColumn Header="{DynamicResource To}" FilterPopupMode="CheckedList" FieldName="SatEndTime" Width="70" Style="{StaticResource GridColumnStyle}"/>
+                    <dxg:GridColumn Header="{DynamicResource BreakTime}"  FilterPopupMode="CheckedList" FieldName="SatBreakTime" Width="80" Style="{StaticResource GridColumnStyle}"/>
+                </dxg:GridControlBand>
+
+                <!--Sunday-->
+                <dxg:GridControlBand Header="{DynamicResource AddShiftViewSunday}" Width="80" HorizontalHeaderContentAlignment="Center" VisibleIndex="{Binding IndexSun,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                    <dxg:GridColumn Header="{DynamicResource From}" FilterPopupMode="CheckedList"  FieldName="SunStartTime" Width="70" Style="{StaticResource GridColumnStyle}" />
+                    <dxg:GridColumn Header="{DynamicResource To}" FilterPopupMode="CheckedList" FieldName="SunEndTime" Width="70" Style="{StaticResource GridColumnStyle}"/>
+                    <dxg:GridColumn Header="{DynamicResource BreakTime}"  FilterPopupMode="CheckedList" FieldName="SunBreakTime" Width="80" Style="{StaticResource GridColumnStyle}"/>
+                </dxg:GridControlBand>
+
+            </dxg:GridControl.Bands>
+
+            <dxg:GridControl.View>
+                <dxg:TableView x:Name="ShiftsTableView"
+                                NavigationStyle="Row"
+                                AllowHorizontalScrollingVirtualization="True" 
+                                RowDetailsVisibilityMode="Visible"
+                                ShowHorizontalLines="True"
+                                ShowSearchPanelMode="Never"
+                                ShowColumnHeaders="True"
+                                VerticalScrollbarVisibility="Auto"
+                                HorizontalScrollbarVisibility="Auto"
+                                AllowFixedColumnMenu="False"
+                                AutoWidth="False"
+                                ShowSearchPanelCloseButton="False"
+                                SearchPanelHorizontalAlignment="Stretch"
+                                ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly"
+                                AllowGrouping="True"
+                                ShowGroupPanel="False"
+                                ShowIndicator="False"
+                                ShowFixedTotalSummary="False">
+                </dxg:TableView>
+            </dxg:GridControl.View>
+        </dxg:GridControl>
+
+        <StackPanel Grid.Row="2" Grid.Column="0" 
+                    HorizontalAlignment="Center" 
+                    Orientation="Horizontal"
+                    Margin="0,0,0,0"
+                    Width="250">
+            <Button Content="{DynamicResource AcceptButton}"
+                    Command="{Binding AddEmployeeShiftViewAcceptButtonCommand}"
+                    Height="30"
+                    Width="100"
+                    Margin="0,0,10,0"
+                    Style="{DynamicResource Button16Style}"
+                    VerticalAlignment="Bottom"/>
+
+            <Button Content="{DynamicResource CancelButton}"
+                    Command="{Binding AddEmployeeShiftViewCancelButtonCommand}" 
+                    Height="30"
+                    Width="100"
+                    Margin="10,0,0,0"
+                    Style="{DynamicResource Button16Style}"
+                    VerticalAlignment="Bottom"/>
+        </StackPanel>
+
+    </Grid>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="KeyDown">
+            <behaviors:InvokeDelegateCommandAction Command="{Binding CommandTextInput}" CommandParameter="{Binding Path=InvokeParameter, RelativeSource={RelativeSource Self}}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+</dxwui:WinUIDialogWindow>

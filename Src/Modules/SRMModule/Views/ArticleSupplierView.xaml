@@ -1,0 +1,315 @@
+﻿<UserControl x:Class="Emdep.Geos.Modules.SRM.Views.ArticleSupplierView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.SRM.Views"
+             xmlns:Converters="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+             xmlns:dxwuin="http://schemas.devexpress.com/winfx/2008/xaml/windowsui/navigation" 
+             xmlns:dxb="http://schemas.devexpress.com/winfx/2008/xaml/bars"
+             xmlns:dxnav="http://schemas.devexpress.com/winfx/2008/xaml/navigation"
+             xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:sysglb="clr-namespace:System.Globalization;assembly=mscorlib"
+             xmlns:dxp="http://schemas.devexpress.com/winfx/2008/xaml/printing" 
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:ViewModels="clr-namespace:Emdep.Geos.Modules.SRM.ViewModels"
+             xmlns:SRMCommon ="clr-namespace:Emdep.Geos.Modules.SRM"
+             Style="{DynamicResource UserControlStyle}"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+
+    <Grid>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="*"  />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="100*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Label Content="{DynamicResource SRMSupplierHeader}" Style="{StaticResource LabelTitleStyle}" Grid.Row="0" />
+
+            <DockPanel Grid.Row="0" Grid.Column="1">
+
+                <Grid HorizontalAlignment="Right" Width="Auto" Height="45" >
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="45"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Waresouse combobox section -->
+                    <DockPanel Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Height="30" >
+                        <Image Style="{DynamicResource WarehouseImageStyle}" Width="24" Height="24" Margin="7,0,3,0" />
+                        <TextBlock Text="{DynamicResource Warehouse}"  FontWeight="Bold" Margin="5,2,5,0" VerticalAlignment="Bottom" />
+                    </DockPanel>
+                    <dxe:ComboBoxEdit Name="CbeWareHouse" Style="{DynamicResource ComboBoxEditStyle}" Grid.Column="1" Width="150" Height="30"
+                                       Margin="5,0,5,5" VerticalAlignment="Bottom" IsTextEditable="False"
+                                      ItemsSource ="{Binding Source={x:Static SRMCommon:SRMCommon.Instance}, Path=WarehouseList ,UpdateSourceTrigger=PropertyChanged , Mode=TwoWay}"
+                                    EditValue="{Binding Source={x:Static SRMCommon:SRMCommon.Instance}, Path=SelectedAuthorizedWarehouseList,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+                                      DisplayMember="Name" ShowError="False" ShowErrorToolTip="False"  >
+                        <dxe:ComboBoxEdit.StyleSettings>
+                            <dxe:CheckedComboBoxStyleSettings/>
+                        </dxe:ComboBoxEdit.StyleSettings>
+                        <dxmvvm:Interaction.Triggers>
+                            <dxmvvm:EventToCommand EventName="EditValueChanged"
+                                               Command="{Binding WarehouseEditValueChangedCommand}" 
+                                                   PassEventArgsToCommand="True"
+                                              />
+                        </dxmvvm:Interaction.Triggers>
+                    </dxe:ComboBoxEdit>
+                    
+                    
+                    
+                    <!--<DockPanel Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Height="30" >
+                        <Image Style="{DynamicResource WarehouseImageStyle}" Width="24" Height="24" Margin="7,0,3,0" />
+                        <TextBlock Text="{DynamicResource Warehouse}"  FontWeight="Bold" Margin="5,2,5,0" VerticalAlignment="Bottom" />
+                    </DockPanel>
+                    <dxe:ComboBoxEdit Name="CbeWareHouse" Style="{DynamicResource ComboBoxEditStyle}" Grid.Column="1" Width="150" Height="30"
+                                       Margin="5,0,5,5" VerticalAlignment="Bottom" IsTextEditable="False"
+                                      ItemsSource ="{Binding Source={x:Static SRMCommon:SRMCommon.Instance}, Path=WarehouseList ,UpdateSourceTrigger=PropertyChanged , Mode=TwoWay}"
+                                    SelectedItem="{Binding Source={x:Static SRMCommon:SRMCommon.Instance}, Path=Selectedwarehouse,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+                                      DisplayMember="Name" ShowError="False" ShowErrorToolTip="False"  >
+
+                        <dxmvvm:Interaction.Triggers>
+                            <dxmvvm:EventToCommand EventName="EditValueChanged"
+                                               Command="{Binding WarehouseEditValueChangedCommand}" CommandParameter="{Binding ElementName=CbeWareHouse,Path=SelectedItem}"
+                                              />
+                        </dxmvvm:Interaction.Triggers>
+                    </dxe:ComboBoxEdit>-->
+                    <!-- Add Button -->
+
+                    <Button Visibility="Visible"  Grid.Row="0" Grid.Column="2" Height="40" Width="40" HorizontalAlignment="Right"
+                    Margin="0,0,5,5"   
+                        Command="{Binding AddNewCompaniesCommand}"
+                        CommandParameter="{Binding ElementName=treeListView1}">
+                        <Button.ToolTip>
+                            <TextBlock Text="{DynamicResource AddCompaniesSuppliers}"/>
+                        </Button.ToolTip>
+                        <Button.ContentTemplate>
+                            <DataTemplate>
+                                <Image Style="{DynamicResource AddNewButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                            </DataTemplate>
+                        </Button.ContentTemplate>
+                    </Button>
+                    <!-- Refresh Button -->
+
+                    <Button Content=" " Grid.Row="0" Grid.Column="3" Height="40" Width="40" HorizontalAlignment="Right"  Command="{Binding RefreshCommand}" CommandParameter="{Binding ElementName=SupplierTableView}" Margin="0,0,5,5">
+                        <Button.ToolTip>
+                            <TextBlock Text="{DynamicResource ButtonRefresh}"/>
+                        </Button.ToolTip>
+                        <Button.ContentTemplate>
+                            <DataTemplate>
+                                <Image Style="{ DynamicResource WareHouseRefreshButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                            </DataTemplate>
+                        </Button.ContentTemplate>
+                    </Button>
+
+                    <!-- Print Button -->
+
+                    <Button Content=" " Grid.Row="0" Grid.Column="4" Height="40" Width="40" HorizontalAlignment="Right"  Command="{Binding PrintCommand}" CommandParameter="{Binding ElementName=SupplierTableView}" Margin="0,0,5,5">
+                        <Button.ToolTip>
+                            <TextBlock Text="{DynamicResource ButtonPrint}"/>
+                        </Button.ToolTip>
+                        <Button.ContentTemplate>
+                            <DataTemplate>
+                                <Image Style="{ DynamicResource PrinterButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                            </DataTemplate>
+                        </Button.ContentTemplate>
+                    </Button>
+
+                    <!-- Export Button -->
+
+                    <Button Content=" " Grid.Row="0" Grid.Column="5" Height="40" Width="40" HorizontalAlignment="Right"  Command="{Binding ExportCommand}" CommandParameter="{Binding ElementName=SupplierTableView}" Margin="0,0,5,5">
+                        <Button.ToolTip>
+                            <TextBlock Text="{DynamicResource ButtonExportToExcel}"/>
+                        </Button.ToolTip>
+                        <Button.ContentTemplate>
+                            <DataTemplate>
+                                <Image Style="{ DynamicResource ExcelExportButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                            </DataTemplate>
+                        </Button.ContentTemplate>
+                    </Button>
+
+                </Grid>
+
+            </DockPanel>
+        </Grid>
+
+        <DockPanel Grid.Row="1" HorizontalAlignment="Stretch" >
+            <dxg:GridControl DockPanel.Dock="Right" Name="gridControl" SelectionMode="Row"
+                             ShowBorder="True"
+                             ItemsSource="{Binding ArticleSupplierList,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" 
+                             SelectedItem="{Binding SelectedArticleSupplier, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                             ImplyNullLikeEmptyStringWhenFiltering="True" FilterString="[IsActive] In ('Yes')">
+                <!--[pmisal][GEOS2-4307][03.04.2023][Set the filter "IsActive=Yes" by default in suppliers grid]-->
+                <dxg:GridColumn Header="{DynamicResource SRMSupplier_Group}" FieldName="Group" MinWidth="200" Width="*" MaxWidth="300" FilterPopupMode="Default" ReadOnly="True" FixedWidth="True"/>
+                <dxg:GridColumn Header="{DynamicResource SRMSupplier_Name}" FieldName="Name" MinWidth="200" Width="*" MaxWidth="300" FilterPopupMode="Default" ReadOnly="True" FixedWidth="True"/>
+                <!--<dxg:GridColumn Header="{DynamicResource SRMSupplier_Country}" FieldName="Country.Name" MinWidth="120" Width="140" MaxWidth="160" FilterPopupMode="CheckedList" ReadOnly="True" FixedWidth="True"/>-->
+
+                <dxg:GridColumn Header="{DynamicResource SRMSupplier_Country}"  FieldName="Country.Name" MinWidth="120" Width="140" MaxWidth="300" FilterPopupMode="Default" ReadOnly="True" FixedWidth="True">
+                    <dxg:GridColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" Height="24">
+                                <Image  
+                            Source="{Binding RowData.Row.Country.CountryIconImage,UpdateSourceTrigger=PropertyChanged}"  
+                            VerticalAlignment="Center" Height="24" Width="24" Margin="2,0,0,0" />
+
+                                <TextBlock Text ="{Binding RowData.Row.Country.Name,UpdateSourceTrigger=PropertyChanged}"  VerticalAlignment="Center" Margin="5,0,0,0" ></TextBlock>
+                            </StackPanel>
+                        </DataTemplate>
+                    </dxg:GridColumn.CellTemplate>
+                </dxg:GridColumn>
+                
+                
+                <dxg:GridColumn Header="{DynamicResource SRMSupplier_RegistrationNumber}" FieldName="Cif" MinWidth="180" Width="200" MaxWidth="220" FilterPopupMode="Default" ReadOnly="True" FixedWidth="True"/>
+                <dxg:GridColumn Header="{DynamicResource SRMSupplier_City}" FieldName="City" MinWidth="120" Width="170" MaxWidth="190" FilterPopupMode="Default" ReadOnly="True" FixedWidth="True"/>
+                <dxg:GridColumn Header="{DynamicResource SRMSupplier_ZipCode}" FieldName="PostCode" MinWidth="120" Width="170" MaxWidth="190" FilterPopupMode="Default" ReadOnly="True" FixedWidth="True"/>
+                <dxg:GridColumn Header="{DynamicResource SRMSupplier_Address}" FieldName="Address" MinWidth="230" Width="250" MaxWidth="270" FilterPopupMode="Default" ReadOnly="True" FixedWidth="True"/>
+                <dxg:GridColumn FieldName="Email" Header="{DynamicResource SRMSupplier_Email}" MinWidth="150"  ReadOnly="True" MaxWidth="200" FilterPopupMode="Default">
+                    <dxg:GridColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Margin="5,0,0,0" VerticalAlignment="Center"  >
+                                        <Hyperlink TargetName="_blank"
+                                                   Command="{Binding View.DataContext.HyperlinkForEmail}" 
+                                                   CommandParameter="{Binding Data.Email}"
+                                                   Style="{DynamicResource hyperlinkGridStyle}">
+                                            <InlineUIContainer>
+                                                <TextBlock Text="{Binding Data.Email}" Style="{DynamicResource HyperlinkTextBlock}" TextDecorations="Underline" />
+                                            </InlineUIContainer>
+                                        </Hyperlink>
+                                    </TextBlock>
+                        </DataTemplate>
+                    </dxg:GridColumn.CellTemplate>
+                </dxg:GridColumn>
+
+                <dxg:GridColumn FieldName="Web" Header="{DynamicResource SRMSupplier_Website}"  MinWidth="200" ReadOnly="True" FilterPopupMode="Default">
+                    <dxg:GridColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Margin="5,0,0,0" VerticalAlignment="Center"  >
+                                            <Hyperlink TargetName="_blank"  
+                                                       Command="{Binding View.DataContext.HyperlinkForWebsite}" 
+                                                       CommandParameter="{Binding Data.Web}"
+                                                       Style="{DynamicResource hyperlinkGridStyle}">
+                                                <TextBlock Name="PART_Editor" Text="{Binding RowData.Row.Web}" Style="{DynamicResource HyperlinkTextBlock}" TextDecorations="Underline" />
+                                            </Hyperlink>
+                                        </TextBlock>
+                        </DataTemplate>
+                    </dxg:GridColumn.CellTemplate>
+                </dxg:GridColumn>
+                <dxg:GridColumn Header="{DynamicResource SRMSupplier_Phone1}" FieldName="Phone1" MinWidth="120" Width="170" MaxWidth="190" FilterPopupMode="Default" ReadOnly="True" FixedWidth="True"/>
+                <dxg:GridColumn Header="{DynamicResource SRMSupplier_Phone2}" FieldName="Phone2" MinWidth="120" Width="170" MaxWidth="190" FilterPopupMode="Default" ReadOnly="True" FixedWidth="True"/>
+                <dxg:GridColumn Header="{DynamicResource SRMSupplier_Category}" FieldName="Serie" MinWidth="80" Width="100" MaxWidth="120" FilterPopupMode="Default" ReadOnly="True" FixedWidth="True">
+                    <dxg:GridColumn.EditSettings>
+                        <dxe:TextEditSettings HorizontalContentAlignment="Center"/>
+                    </dxg:GridColumn.EditSettings>
+                    </dxg:GridColumn>
+                <dxg:GridColumn Header="{DynamicResource SRMSupplier_Age}" FieldName="Age" MinWidth="80" Width="100" MaxWidth="120" FilterPopupMode="Default" ReadOnly="True" FixedWidth="True"/>
+                <dxg:GridColumn Header="{DynamicResource SRMSupplier_State}" FieldName="State" MinWidth="80" Width="100" MaxWidth="120" FilterPopupMode="Default" ReadOnly="True" FixedWidth="True"/>
+                <dxg:GridColumn Header="{DynamicResource SRMSupplier_Contact}" FieldName="ContactCount" MinWidth="80" Width="140" MaxWidth="120" FilterPopupMode="Default" ReadOnly="True" FixedWidth="True"/>
+                <dxg:GridColumn Header="{DynamicResource SRMSupplier_TradeName}" FieldName="TradeName" MinWidth="80" Width="100" MaxWidth="120" FilterPopupMode="Default" ReadOnly="True" FixedWidth="True"/>
+                <dxg:GridColumn Header="{DynamicResource SRMSupplier_CreationDate}" FieldName="CreatedIn" MinWidth="80" Width="100" MaxWidth="120" FilterPopupMode="Default" ReadOnly="True" FixedWidth="True"/>
+                <dxg:GridColumn Header="{DynamicResource SRMSupplier_ModificationDate}" FieldName="ModificationDate" MinWidth="80" Width="100" MaxWidth="120" FilterPopupMode="Default" ReadOnly="True" FixedWidth="True"/>
+
+                <!--[rdixit][GEOS2-3436][19.11.2022]-->
+                <dxg:GridColumn Header="{DynamicResource SRMIsActiveText}" FieldName="IsActive" Width="100" FilterPopupMode="Default" ReadOnly="True" FixedWidth="True"/>
+                <dxg:GridColumn FieldName="" Header="{x:Null}" Width="*" ReadOnly="True" AllowSorting="False" AllowBestFit="True" AllowColumnFiltering="False" AllowEditing="False" ShowInColumnChooser="False" Visible="True" AllowPrinting="False" FilterPopupMode="Default"/>
+                <dxg:GridColumn Width="40" FieldName=""  AllowSorting="False" MaxWidth="40" FixedWidth="True" Fixed="Right" HorizontalHeaderContentAlignment="Center" AllowColumnFiltering="False" ShowInColumnChooser="False" Visible="True" AllowPrinting="False" FilterPopupMode="Default">
+                    <dxg:GridColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Name="deleteRowItem" ToolTip="{DynamicResource Delete}" 
+                                    Command="{Binding View.DataContext.DeleteCommand}" CommandParameter="{Binding ElementName=SupplierTableView}">
+                                <Button.ContentTemplate>
+                                    <DataTemplate>
+                                        <Image Height="16" Width="16"  Style="{ DynamicResource DeleteStyle}" />
+                                    </DataTemplate>
+                                </Button.ContentTemplate>
+                                <Button.Style>
+                                    <Style TargetType="{x:Type Button}">
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Cursor" Value="Hand"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                        </DataTemplate>
+                    </dxg:GridColumn.CellTemplate>
+                </dxg:GridColumn>
+                <dxg:GridControl.TotalSummary>
+                    <dxg:GridSummaryItem x:Name="summary" FieldName="Name" SummaryType="Count" DisplayFormat="Total Count: {0}" Visible="True"   Alignment="Left"/>
+                </dxg:GridControl.TotalSummary>
+                <dxmvvm:Interaction.Behaviors>
+                    <UIHelper:GridSelectingBehavior />
+                </dxmvvm:Interaction.Behaviors>
+
+                <dxg:GridControl.View>
+                    <dxg:TableView x:Name="SupplierTableView"                                 
+                                   NavigationStyle="Row"
+                                   RowDetailsVisibilityMode="Visible"
+                                   ShowHorizontalLines="True"
+                                   ShowSearchPanelMode="Always"
+                                   ShowColumnHeaders="True"
+                                   VerticalScrollbarVisibility="Visible"
+                                   AllowFixedColumnMenu="False"
+                                   ShowFixedTotalSummary="True" 
+                                   SearchPanelHorizontalAlignment="Stretch"
+                                   FocusedRow="{Binding SelectedArticleSupplier, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                   AllowGrouping="True"
+                                   ShowGroupPanel="False"
+                                   ShowIndicator="False" AutoWidth="True" >
+
+                        <dxg:TableView.Resources>
+                            <DataTemplate x:Key="SupplierListReportPrintHeaderTemplate">
+                                <Grid Width="{Binding UsablePageWidth}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="50" />
+                                        <ColumnDefinition Width="130" />
+                                    </Grid.ColumnDefinitions>
+                                    <dxe:TextEdit Text=" " Width="{Binding UsablePageWidth}" Grid.ColumnSpan="3" IsPrintingMode="True" Background="#333E5E" HorizontalAlignment="Stretch" 
+                                                      VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" Height="50" />
+                                    <dxe:TextEdit Text="Purchase Orders Report" IsPrintingMode="True" HorizontalAlignment="Stretch" 
+                                                      VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" />
+                                    <Image Source="/Emdep.Geos.Modules.Warehouse;component/Assets/Images/GeosReportLogo.png" Height="50" Width="80"  dxp:ExportSettings.TargetType="Image" Grid.Column="2" />
+                                </Grid>
+                            </DataTemplate>
+
+                            <DataTemplate x:Key="SupplierReportPrintFooterTemplate">
+                                <dxe:TextEdit HorizontalContentAlignment="Center" 
+                                                  Width="{Binding Path=UsablePageWidth, Mode=OneWay}" 
+                                                  dxp:ExportSettings.TargetType="PageNumber" 
+                                                  dxp:PageNumberExportSettings.Kind="NumberOfTotal" 
+                                                  dxp:PageNumberExportSettings.Format="Page {0} of {1}"/>
+                            </DataTemplate>
+
+                        </dxg:TableView.Resources>
+
+                        <dxmvvm:Interaction.Behaviors>
+                            <dxmvvm:EventToCommand  Command="{Binding GridDoubleClickCommand}" EventName="MouseDoubleClick" CommandParameter="{Binding ElementName=SupplierTableView}" >
+                                <dxmvvm:EventToCommand.EventArgsConverter>
+                                    <dx:EventArgsToDataRowConverter/>
+                                </dxmvvm:EventToCommand.EventArgsConverter>
+                            </dxmvvm:EventToCommand>
+                        </dxmvvm:Interaction.Behaviors>
+                    </dxg:TableView>
+                </dxg:GridControl.View>
+            </dxg:GridControl>
+        </DockPanel>
+    </Grid>
+
+</UserControl>

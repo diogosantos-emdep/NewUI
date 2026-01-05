@@ -1,0 +1,116 @@
+﻿<dxwui:WinUIDialogWindow x:Class="Emdep.Geos.Modules.Warehouse.Views.SendReadyExpeditionEmailView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.Warehouse.Views"
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+             mc:Ignorable="d" 
+             Title="{Binding WindowHeader,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"            
+             TitleStyle="{DynamicResource WinUIDialogWindowTitleStyle}" 
+             Style="{DynamicResource WinUIDialogWindowStyle}"
+             d:DesignHeight="300" d:DesignWidth="300"
+             >
+
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape" Command="{Binding CancelButtonCommand}"/>
+    </dxwui:WinUIDialogWindow.InputBindings>
+    
+    <Grid Width="550"  Height="{Binding DialogHeight}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="25"></RowDefinition>
+            <RowDefinition Height="15"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="5"></RowDefinition>
+            <RowDefinition Height="50"></RowDefinition>
+        </Grid.RowDefinitions>
+
+        <Label Grid.Row="0" Content="{DynamicResource ChooseWorkOrders}"   Height="30" FontSize="16" HorizontalAlignment="Left"></Label>
+
+        <dxg:GridControl Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                         ItemsSource="{Binding DataContext.SendEmailWorkOrderOtsList,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow,Mode=FindAncestor},Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+            <dxg:GridControl.Columns>
+
+                <dxg:GridColumn  Header="{DynamicResource GridColCode}" FieldName="MergeCode" FilterPopupMode="CheckedList" AllowEditing="False" Width="200" FixedWidth="True" ReadOnly="True"/>
+                <dxg:GridColumn Header="{DynamicResource GridColCustomer}" FieldName="Quotation.Site.Name"   FilterPopupMode="CheckedList" AllowEditing="False" ReadOnly="True" />
+                <dxg:GridColumn Header="{DynamicResource GridColWeek}"   AllowEditing="False" FieldName="DeliveryDate"  SortOrder="Ascending" Width="80" FixedWidth="True" FilterPopupMode="CheckedList" ReadOnly="True" ColumnFilterMode="DisplayText" >
+                </dxg:GridColumn>
+
+                <dxg:GridColumn Header=" " FieldName="IsSendReadyExpeditionEmail"   Width="40" FixedWidth="True"   AllowSorting="False" HorizontalHeaderContentAlignment="Center" AllowColumnFiltering="False" Fixed="Right" ShowInColumnChooser="False" Visible="True" AllowPrinting="False"  AllowMoving="False" ShowCheckBoxInHeader="True">
+                    <dxg:GridColumn.CellTemplate>
+                        <DataTemplate>
+                            <dxe:CheckEdit x:Name="PART_Editor" IsReadOnly="False" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="5,0,0,0"/>
+                            <!--<dxe:CheckEdit VerticalAlignment="Center" HorizontalAlignment="Center" IsChecked="{Binding RowData.Row.IsSendReadyExpeditionEmail,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="False"/>-->
+                        </DataTemplate>
+                    </dxg:GridColumn.CellTemplate>
+                </dxg:GridColumn>
+
+            </dxg:GridControl.Columns>
+
+            <dxg:GridControl.TotalSummary>
+                <dxg:GridSummaryItem x:Name="summary" FieldName="Code" SummaryType="Count" DisplayFormat="{DynamicResource GridSummary}" Visible="True" Alignment="Left"/>
+            </dxg:GridControl.TotalSummary>
+
+            <dxmvvm:Interaction.Behaviors>
+
+                <UIHelper:BestFitBehavior />
+
+                <dxmvvm:EventToCommand EventName="CustomColumnDisplayText"
+                                       Command="{Binding CustomColumnDisplayTextCommand}" PassEventArgsToCommand="True"/>
+            </dxmvvm:Interaction.Behaviors>
+
+            <dxg:GridControl.View>
+                <dxg:TableView x:Name="tblWorkOrder" 
+                               AllowBestFit="True"
+                               AllowEditing="True"
+                               ShowGroupPanel="False" 
+                               ShowIndicator="False"
+                               AutoWidth="True"
+                               ShowSearchPanelMode="Always" 
+                               SearchPanelHorizontalAlignment="Stretch"
+                               HorizontalScrollbarVisibility="Hidden"
+                               VerticalScrollbarVisibility="Auto"
+                               ShowFixedTotalSummary="True" 
+                               AllowPerPixelScrolling="True"
+                               RowDetailsVisibilityMode="Visible"
+                               ShowHorizontalLines="True"
+                               ShowColumnHeaders="True"
+                               AllowFixedColumnMenu="False"
+                               GroupRowCheckBoxFieldName="IsSendReadyExpeditionEmail"
+                               NavigationStyle="Cell"
+                               EnableImmediatePosting="True"
+                               ImmediateUpdateRowPosition="True"
+                               ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly"
+                               >
+                </dxg:TableView>
+            </dxg:GridControl.View>
+        </dxg:GridControl>
+
+        <StackPanel Grid.Row="4" 
+                    HorizontalAlignment="Center" 
+                    Orientation="Horizontal"
+                    Margin="20,0,0,0"
+                    Width="290">
+            <Button Content="{DynamicResource SendButton}"
+                    Command="{Binding SendButtonCommand}"  
+                    Height="30"
+                    Width="100"
+                    Margin="0,0,30,0"
+                    Style="{DynamicResource Button16Style}"
+                    VerticalAlignment="Bottom" />
+            <Button Content="{DynamicResource CancelButton}"
+                    Command="{Binding CancelButtonCommand}" 
+                    Height="30"
+                    Width="100"
+                    Margin="30,0,0,0"
+                    Style="{DynamicResource Button16Style}"
+                    VerticalAlignment="Bottom" />
+
+        </StackPanel>
+
+    </Grid>
+</dxwui:WinUIDialogWindow>

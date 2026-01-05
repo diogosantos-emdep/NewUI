@@ -1,0 +1,490 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core" xmlns:dxb="http://schemas.devexpress.com/winfx/2008/xaml/bars" xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors" xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm" xmlns:dxr="http://schemas.devexpress.com/winfx/2008/xaml/ribbon" xmlns:dxdiag="http://schemas.devexpress.com/winfx/2008/xaml/diagram" xmlns:dxdiagn="http://schemas.devexpress.com/winfx/2008/xaml/diagram/internal" xmlns:dxdiagt="http://schemas.devexpress.com/winfx/2008/xaml/diagram/themekeys" xmlns:dxdiagcore="clr-namespace:DevExpress.Diagram.Core;assembly=DevExpress.Diagram.v16.1.Core" xmlns:dxdst="http://schemas.devexpress.com/winfx/2008/xaml/core/themekeys">
+    <ResourceDictionary.MergedDictionaries>
+        <dxdst:ResourceDictionaryEx Source="RibbonItemsStyles.meta.designer.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
+    <Style x:Key="{dxdiagt:DiagramDesignerControlThemeKeys ResourceKey=SnapToGridButtonStyle}" TargetType="{x:Type dxb:BarEditItem}">
+        <Style.Setters>
+            <Setter Property="EditValue" Value="{Binding SnapToGrid, RelativeSource={RelativeSource AncestorType={x:Type dxdiag:DiagramControl}}}" />
+            <Setter Property="EditHorizontalAlignment" Value="Left" />
+            <Setter Property="CustomizationGlyph" Value="{dxdiag:DiagramSvgImage Path=Images/Svg/Check.svg}" />
+            <Setter Property="CustomizationContent" Value="{Binding ConverterParameter=SnapToGrid, Converter={StaticResource DiagramStringIdConverter}}" />
+            <Setter Property="SuperTip" Value="{dxdiag:DiagramItemToolTipProvider CaptionId=SnapToGrid, DescriptionId=SnapToGrid_Description}" />
+            <Setter Property="ShowScreenTip" Value="True" />
+        </Style.Setters>
+    </Style>
+
+    <Style x:Key="{dxdiagt:DiagramDesignerControlThemeKeys ResourceKey=SnapToItemsButtonStyle}" TargetType="{x:Type dxb:BarEditItem}">
+        <Style.Setters>
+            <Setter Property="EditValue" Value="{Binding SnapToItems, RelativeSource={RelativeSource AncestorType={x:Type dxdiag:DiagramControl}}}" />
+            <Setter Property="EditHorizontalAlignment" Value="Left" />
+            <Setter Property="CustomizationContent" Value="{Binding ConverterParameter=SnapToItems, Converter={StaticResource DiagramStringIdConverter}}" />
+            <Setter Property="CustomizationGlyph" Value="{dxdiag:DiagramSvgImage Path=Images/Svg/Check.svg}" />
+            <Setter Property="SuperTip" Value="{dxdiag:DiagramItemToolTipProvider CaptionId=SnapToItems, DescriptionId=SnapToItems_Description}" />
+            <Setter Property="ShowScreenTip" Value="True" />
+        </Style.Setters>
+    </Style>
+
+    <Style x:Key="{dxdiagt:DiagramDesignerControlThemeKeys ResourceKey=SnapDistanceEditorStyle}" TargetType="{x:Type dxb:BarEditItem}">
+        <Style.Setters>
+            <Setter Property="ToolTip" Value="{Binding ConverterParameter=Menu_SnapDistance_Editor, Converter={StaticResource DiagramStringIdConverter}}" />
+            <Setter Property="EditHorizontalAlignment" Value="Stretch" />
+            <Setter Property="EditValue" Value="{Binding SnapToItemsDistance, RelativeSource={RelativeSource AncestorType={x:Type dxdiag:DiagramControl}}, &#xD;&#xA;                Converter={dxdiagn:DoubleToDecimalConverter}}" />
+        </Style.Setters>
+    </Style>
+
+    <Style x:Key="{dxdiagt:DiagramDesignerControlThemeKeys ResourceKey=FontFamilySelectorStyle}" TargetType="{x:Type dxb:BarEditItem}">
+        <Style.Setters>
+            <Setter Property="EditWidth" Value="{DynamicResource {dxdiagt:DiagramDesignerControlThemeKeys ResourceKey=FontFamilyEditorWidth}}" />
+            <Setter Property="CustomizationContent" Value="{Binding ConverterParameter=FontFamily, Converter={StaticResource DiagramStringIdConverter}}" />
+            <Setter Property="SuperTip" Value="{dxdiag:DiagramItemToolTipProvider CaptionId=FontFamily, DescriptionId=FontFamily_Description}" />
+            <Setter Property="ShowScreenTip" Value="True" />
+        </Style.Setters>
+        <Style.Triggers>
+            <Trigger Property="dx:ThemeManager.IsTouchEnabled" Value="True">
+                <Setter Property="EditWidth" Value="150" />
+            </Trigger>
+            <Trigger Property="dx:ThemeManager.IsTouchlineTheme" Value="True">
+                <Setter Property="EditWidth" Value="150" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="{dxdiagt:DiagramDesignerControlThemeKeys ResourceKey=FontSizeSelectorStyle}" TargetType="{x:Type dxb:BarEditItem}">
+        <Style.Setters>
+            <Setter Property="EditWidth" Value="{DynamicResource {dxdiagt:DiagramDesignerControlThemeKeys ResourceKey=FontSizeEditorWidth}}" />
+            <Setter Property="CustomizationContent" Value="{Binding ConverterParameter=FontSize, Converter={StaticResource DiagramStringIdConverter}}" />
+            <Setter Property="SuperTip" Value="{dxdiag:DiagramItemToolTipProvider CaptionId=FontSize, DescriptionId=FontSize_Description}" />
+            <Setter Property="ShowScreenTip" Value="True" />
+        </Style.Setters>
+        <Style.Triggers>
+            <Trigger Property="dx:ThemeManager.IsTouchEnabled" Value="True">
+                <Setter Property="EditWidth" Value="100" />
+            </Trigger>
+            <Trigger Property="dx:ThemeManager.IsTouchlineTheme" Value="True">
+                <Setter Property="EditWidth" Value="100" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="{dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=ToggleFontBoldCommandItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=ToggleFontBoldCommandItemStyleBase}}" TargetType="{x:Type dxb:BarCheckItem}">
+        <Style.Setters>
+            <Setter Property="IsChecked" Value="{Binding SelectionToolsModel[IsFontBold], Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type dxdiag:DiagramControl}}}" />
+        </Style.Setters>
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=ToggleFontItalicCommandItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=ToggleFontItalicCommandItemStyleBase}}" TargetType="{x:Type dxb:BarCheckItem}">
+        <Style.Setters>
+            <Setter Property="IsChecked" Value="{Binding SelectionToolsModel[IsFontItalic], Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type dxdiag:DiagramControl}}}" />
+        </Style.Setters>
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=ToggleFontUnderlineCommandItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=ToggleFontUnderlineCommandItemStyleBase}}" TargetType="{x:Type dxb:BarCheckItem}">
+        <Style.Setters>
+            <Setter Property="IsChecked" Value="{Binding SelectionToolsModel[IsFontUnderline], Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type dxdiag:DiagramControl}}}" />
+        </Style.Setters>
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=ToggleFontStrikethroughCommandItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=ToggleFontStrikethroughCommandItemStyleBase}}" TargetType="{x:Type dxb:BarCheckItem}">
+        <Style.Setters>
+            <Setter Property="IsChecked" Value="{Binding SelectionToolsModel[IsFontStrikethrough], Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type dxdiag:DiagramControl}}}" />
+        </Style.Setters>
+    </Style>
+
+    <Style x:Key="{dxdiagt:DiagramDesignerControlThemeKeys ResourceKey=PageSizeBarItemStyle}" TargetType="{x:Type dxb:BarSubItem}">
+        <Style.Setters>
+            <Setter Property="Content" Value="{Binding ConverterParameter=PageSize, Converter={StaticResource DiagramStringIdConverter}}" />
+            <Setter Property="Glyph" Value="{dxdiag:DiagramSvgImage Path=Images/Svg/PageSize.svg}" />
+            <Setter Property="LargeGlyph" Value="{dxdiag:DiagramSvgImage Path=Images/Svg/PageSize.svg}" />
+            <Setter Property="SuperTip" Value="{dxdiag:DiagramItemToolTipProvider CaptionId=PageSizeHeader, DescriptionId=PageSize_Description}" />
+            <Setter Property="ShowScreenTip" Value="True" />
+        </Style.Setters>
+    </Style>
+    <Style x:Key="{dxdiagt:DiagramDesignerControlThemeKeys ResourceKey=CanvasAutoSizeBarItemStyle}" TargetType="{x:Type dxb:BarSubItem}">
+        <Style.Setters>
+            <Setter Property="Content" Value="{Binding ConverterParameter=AutoSize, Converter={StaticResource DiagramStringIdConverter}}" />
+            <Setter Property="Glyph" Value="{dxdiag:DiagramSvgImage Path=Images/Svg/AutoSize_AutoSize.svg}" />
+            <Setter Property="LargeGlyph" Value="{dxdiag:DiagramSvgImage Path=Images/Svg/AutoSize_AutoSize.svg}" />
+            <Setter Property="SuperTip" Value="{dxdiag:DiagramItemToolTipProvider CaptionId=AutoSize, DescriptionId=AutoSize_Description2}" />
+            <Setter Property="ShowScreenTip" Value="True" />
+        </Style.Setters>
+    </Style>
+    <Style x:Key="{dxdiagt:DiagramDesignerControlThemeKeys ResourceKey=PaperOrientationBarItemStyle}" TargetType="{x:Type dxb:BarSubItem}">
+        <Style.Setters>
+            <Setter Property="Content" Value="{dxdiag:DiagramControlLocalizedString PageOrientation}" />
+            <Setter Property="Glyph" Value="{dxdiag:DiagramSvgImage Path=Images/Svg/PageOrientation.svg}" />
+            <Setter Property="LargeGlyph" Value="{dxdiag:DiagramSvgImage Path=Images/Svg/PageOrientation.svg}" />
+            <Setter Property="GlyphSize" Value="Large" />
+            <Setter Property="SuperTip" Value="{dxdiag:DiagramItemToolTipProvider CaptionId=PageOrientationHeader, DescriptionId=PageOrientation_Description}" />
+            <Setter Property="ShowScreenTip" Value="True" />
+        </Style.Setters>
+    </Style>
+    <Style x:Key="{dxdiagt:DiagramDesignerControlThemeKeys ResourceKey=ReLayoutStyle}" TargetType="{x:Type dxb:BarSubItem}">
+        <Style.Setters>
+            <Setter Property="Content" Value="{dxdiag:DiagramControlLocalizedString ReLayout}" />
+            <Setter Property="Glyph" Value="{dxdiag:DiagramSvgImage Path=Images/Svg/ReLayout.svg}" />
+            <Setter Property="LargeGlyph" Value="{dxdiag:DiagramSvgImage Path=Images/Svg/ReLayout.svg}" />
+            <Setter Property="GlyphSize" Value="Large" />
+            <Setter Property="SuperTip" Value="{dxdiag:DiagramItemToolTipProvider CaptionId=ReLayout, DescriptionId=ReLayout_Description}" />
+            <Setter Property="ShowScreenTip" Value="True" />
+        </Style.Setters>
+    </Style>
+    <Style x:Key="{dxdiagt:DiagramDesignerControlThemeKeys ResourceKey=ReLayoutTreeStyle}" TargetType="{x:Type dxb:BarItemLinkMenuHeader}">
+        <Style.Setters>
+            <Setter Property="Content" Value="{dxdiag:DiagramControlLocalizedString ReLayoutTree}" />
+            <Setter Property="ItemsOrientation" Value="Horizontal" />
+        </Style.Setters>
+    </Style>
+    <Style x:Key="{dxdiagt:DiagramDesignerControlThemeKeys ResourceKey=ReLayoutSugiyamaStyle}" TargetType="{x:Type dxb:BarItemLinkMenuHeader}">
+        <Style.Setters>
+            <Setter Property="Content" Value="{dxdiag:DiagramControlLocalizedString ReLayoutSugiyama}" />
+            <Setter Property="ItemsOrientation" Value="Horizontal" />
+        </Style.Setters>
+    </Style>
+
+    <Style x:Key="{dxdiagt:DiagramDesignerControlThemeKeys ResourceKey=ShapeBackgroundColorSplitButtonStyle}" TargetType="{x:Type dxb:BarSplitButtonItem}">
+        <Style.Setters>
+            <Setter Property="CustomizationContent" Value="{dxdiag:DiagramControlLocalizedString BackgroundColor}" />
+            <Setter Property="Glyph" Value="{dxdiag:DiagramSvgImage Path=Images/Svg/FillBackground.svg}" />
+            <Setter Property="GlyphTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                        <Canvas Width="16" Height="16" DataContext="{Binding Path=Item, RelativeSource={RelativeSource AncestorType=dxb:BarItemLinkInfo}}">
+                            <Image Height="16" Width="16" Source="{dxdiag:DiagramSvgImage Path=Images/Svg/FillBackground.svg}" />
+                            <Border Name="border" Width="16" Height="3" Canvas.Left="0" Canvas.Top="16">
+                                <Border.Background>
+                                    <SolidColorBrush Color="{Binding Path=(dxdiagn:BarColorEditBehavior.BarColor)}" />
+                                </Border.Background>
+                            </Border>
+                        </Canvas>
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="GlyphSize" Value="Small" />
+            <Setter Property="SuperTip" Value="{dxdiag:DiagramItemToolTipProvider CaptionId=BackgroundColor, DescriptionId=BackgroundColor_Description}" />
+            <Setter Property="ShowScreenTip" Value="True" />
+        </Style.Setters>
+    </Style>
+    <Style x:Key="{dxdiagt:DiagramDesignerControlThemeKeys ResourceKey=ShapeForegroundColorSplitButtonStyle}" TargetType="{x:Type dxb:BarSplitButtonItem}">
+        <Style.Setters>
+            <Setter Property="CustomizationContent" Value="{dxdiag:DiagramControlLocalizedString ForegroundColor}" />
+            <Setter Property="Glyph" Value="{dxdiag:DiagramSvgImage Path=Images/Svg/FillForeground.svg}" />
+            <Setter Property="GlyphTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                        <Canvas Width="16" Height="16" DataContext="{Binding Path=Item, RelativeSource={RelativeSource AncestorType=dxb:BarItemLinkInfo}}">
+                            <Image Height="16" Width="16" Source="{dxdiag:DiagramSvgImage Path=Images/Svg/FillForeground.svg}" />
+                            <Border Name="border" Width="16" Height="3" Canvas.Left="0" Canvas.Top="16">
+                                <Border.Background>
+                                    <SolidColorBrush Color="{Binding Path=(dxdiagn:BarColorEditBehavior.BarColor)}" />
+                                </Border.Background>
+                            </Border>
+                        </Canvas>
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="GlyphSize" Value="Small" />
+            <Setter Property="SuperTip" Value="{dxdiag:DiagramItemToolTipProvider CaptionId=ForegroundColor, DescriptionId=ForegroundColor_Description}" />
+            <Setter Property="ShowScreenTip" Value="True" />
+        </Style.Setters>
+    </Style>
+
+    <Style x:Key="{dxdiagt:DiagramDesignerControlThemeKeys ResourceKey=ShapeStrokeColorSplitButtonStyle}" TargetType="{x:Type dxb:BarSplitButtonItem}">
+        <Style.Setters>
+            <Setter Property="CustomizationContent" Value="{dxdiag:DiagramControlLocalizedString StrokeColor}" />
+            <Setter Property="Glyph" Value="{dxdiag:DiagramSvgImage Path=Images/Svg/FillStroke.svg}" />
+            <Setter Property="GlyphTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                        <Canvas Width="16" Height="16" DataContext="{Binding Path=Item, RelativeSource={RelativeSource AncestorType=dxb:BarItemLinkInfo}}">
+                            <Image Height="16" Width="16" Source="{dxdiag:DiagramSvgImage Path=Images/Svg/FillStroke.svg}" />
+                            <Border Name="border" Width="16" Height="3" Canvas.Left="0" Canvas.Top="16">
+                                <Border.Background>
+                                    <SolidColorBrush Color="{Binding Path=(dxdiagn:BarColorEditBehavior.BarColor)}" />
+                                </Border.Background>
+                            </Border>
+                        </Canvas>
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="GlyphSize" Value="Small" />
+            <Setter Property="SuperTip" Value="{dxdiag:DiagramItemToolTipProvider CaptionId=StrokeColor, DescriptionId=StrokeColor_Description}" />
+            <Setter Property="ShowScreenTip" Value="True" />
+        </Style.Setters>
+    </Style>
+    <Style x:Key="{dxdiagt:DiagramDesignerControlThemeKeys ResourceKey=SetPageSizeButtonStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=SetPageParameters_PageSizeCommandItemStyleBase}}" TargetType="{x:Type dxb:BarButtonItem}">
+        <Style.Setters>
+            <!--<Setter Property="Content" Value="{dxdiag:DiagramControlLocalizedString DiagramCommand_SetPageParameters}"/>-->
+            <Setter Property="Glyph" Value="{dxdiag:DiagramSvgImage Path=Images/Svg/PageSize.svg}" />
+            <Setter Property="LargeGlyph" Value="{dxdiag:DiagramSvgImage Path=Images/Svg/PageSize.svg}" />
+            <Setter Property="GlyphSize" Value="Large" />
+            <!--<Setter Property="Command" Value="{Binding Commands.SetPageParameters, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type dxdiag:DiagramControl}}}"/>
+            <Setter Property="CommandParameter" Value="PageSize"/>
+            <Setter Property="SuperTip" Value="{dxdiag:DiagramItemToolTipProvider CaptionId=DiagramCommand_SetPageParameters_Header, DescriptionId=DiagramCommand_SetPageParameters_Description}"/>
+            <Setter Property="ShowScreenTip" Value="True"/>-->
+        </Style.Setters>
+    </Style>
+    <Style x:Key="{dxdiagt:DiagramDesignerControlThemeKeys ResourceKey=ShowRulerItemStyle}" TargetType="{x:Type dxb:BarEditItem}">
+        <Style.Setters>
+            <Setter Property="EditValue" Value="{Binding ShowRulers, RelativeSource={RelativeSource AncestorType={x:Type dxdiag:DiagramControl}}}" />
+            <Setter Property="EditHorizontalAlignment" Value="Left" />
+            <Setter Property="CustomizationContent" Value="{dxdiag:DiagramControlLocalizedString ShowRulers}" />
+            <Setter Property="CustomizationGlyph" Value="{dxdiag:DiagramSvgImage Path=Images/Svg/Check.svg}" />
+            <Setter Property="SuperTip" Value="{dxdiag:DiagramItemToolTipProvider CaptionId=ShowRulers, DescriptionId=ShowRulers_Description}" />
+            <Setter Property="ShowScreenTip" Value="True" />
+        </Style.Setters>
+    </Style>
+    <Style x:Key="{dxdiagt:DiagramDesignerControlThemeKeys ResourceKey=ShowGridItemStyle}" TargetType="{x:Type dxb:BarEditItem}">
+        <Style.Setters>
+            <Setter Property="EditValue" Value="{Binding ShowGrid, RelativeSource={RelativeSource AncestorType={x:Type dxdiag:DiagramControl}}}" />
+            <Setter Property="EditHorizontalAlignment" Value="Left" />
+            <Setter Property="CustomizationContent" Value="{dxdiag:DiagramControlLocalizedString ShowGrid}" />
+            <Setter Property="CustomizationGlyph" Value="{dxdiag:DiagramSvgImage Path=Images/Svg/Check.svg}" />
+            <Setter Property="SuperTip" Value="{dxdiag:DiagramItemToolTipProvider CaptionId=ShowGrid, DescriptionId=ShowGrid_Description}" />
+            <Setter Property="ShowScreenTip" Value="True" />
+        </Style.Setters>
+    </Style>
+    <Style x:Key="{dxdiagt:DiagramDesignerControlThemeKeys ResourceKey=ShowPageBreaksItemStyle}" TargetType="{x:Type dxb:BarEditItem}">
+        <Style.Setters>
+            <Setter Property="EditValue" Value="{Binding ShowPageBreaks, RelativeSource={RelativeSource AncestorType={x:Type dxdiag:DiagramControl}}}" />
+            <Setter Property="EditHorizontalAlignment" Value="Left" />
+            <Setter Property="CustomizationContent" Value="{dxdiag:DiagramControlLocalizedString ShowPageBreaks}" />
+            <Setter Property="CustomizationGlyph" Value="{dxdiag:DiagramSvgImage Path=Images/Svg/Check.svg}" />
+            <Setter Property="SuperTip" Value="{dxdiag:DiagramItemToolTipProvider CaptionId=ShowPageBreaks, DescriptionId=ShowPageBreaks_Description}" />
+            <Setter Property="ShowScreenTip" Value="True" />
+        </Style.Setters>
+    </Style>
+
+    <Style x:Key="{dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=SaveFileCommandItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=SaveFileCommandItemStyleBase}}" TargetType="{x:Type dxb:BarButtonItem}">
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding IsToolbarContrast, RelativeSource={RelativeSource AncestorType={x:Type dxdiag:DiagramDesignerControl}}}" Value="True">
+                <Setter Property="Glyph" Value="{dxdiag:DiagramSvgImage Path=Images/Svg/ThemedIcons/SaveFile_LightIcon.svg}" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=UndoCommandItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=UndoCommandItemStyleBase}}" TargetType="{x:Type dxb:BarButtonItem}">
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding IsToolbarContrast, RelativeSource={RelativeSource AncestorType={x:Type dxdiag:DiagramDesignerControl}}}" Value="True">
+                <Setter Property="Glyph" Value="{dxdiag:DiagramSvgImage Path=Images/Svg/ThemedIcons/Undo_LightIcon.svg}" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=RedoCommandItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=RedoCommandItemStyleBase}}" TargetType="{x:Type dxb:BarButtonItem}">
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding IsToolbarContrast, RelativeSource={RelativeSource AncestorType={x:Type dxdiag:DiagramDesignerControl}}}" Value="True">
+                <Setter Property="Glyph" Value="{dxdiag:DiagramSvgImage Path=Images/Svg/ThemedIcons/Redo_LightIcon.svg}" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=NewFileCommandItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=NewFileCommandItemStyleBase}}" TargetType="{x:Type dxb:BarButtonItem}">
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=OpenFileCommandItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=OpenFileCommandItemStyleBase}}" TargetType="{x:Type dxb:BarButtonItem}">
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=SaveFileAsCommandItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=SaveFileAsCommandItemStyleBase}}" TargetType="{x:Type dxb:BarButtonItem}">
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=PasteCommandItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=PasteCommandItemStyleBase}}" TargetType="{x:Type dxb:BarButtonItem}">
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=CutCommandItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=CutCommandItemStyleBase}}" TargetType="{x:Type dxb:BarButtonItem}">
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=CopyCommandItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=CopyCommandItemStyleBase}}" TargetType="{x:Type dxb:BarButtonItem}">
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=IncreaseFontSizeCommandItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=IncreaseFontSizeCommandItemStyleBase}}" TargetType="{x:Type dxb:BarButtonItem}">
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=DecreaseFontSizeCommandItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=DecreaseFontSizeCommandItemStyleBase}}" TargetType="{x:Type dxb:BarButtonItem}">
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=BringForwardCommandItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=BringForwardCommandItemStyleBase}}" TargetType="{x:Type dxb:BarButtonItem}">
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=BringToFrontCommandItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=BringToFrontCommandItemStyleBase}}" TargetType="{x:Type dxb:BarButtonItem}">
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=SendBackwardCommandItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=SendBackwardCommandItemStyleBase}}" TargetType="{x:Type dxb:BarButtonItem}">
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=SendToBackCommandItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=SendToBackCommandItemStyleBase}}" TargetType="{x:Type dxb:BarButtonItem}">
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=FitToPageCommandItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=FitToPageCommandItemStyleBase}}" TargetType="{x:Type dxb:BarButtonItem}">
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=FitToWidthCommandItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=FitToWidthCommandItemStyleBase}}" TargetType="{x:Type dxb:BarButtonItem}">
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=SetHorizontalAlignment_LeftCommandItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=SetHorizontalAlignment_LeftCommandItemStyleBase}}" TargetType="{x:Type dxb:BarCheckItem}">
+        <Setter Property="IsChecked" Value="{Binding SelectionToolsModel[TextAlignment],&#xD;&#xA;            Converter={dxdiagn:ObjectEqualityConverter},&#xD;&#xA;            ConverterParameter={x:Static dxdiagcore:TextAlignmentKind.Left},&#xD;&#xA;            RelativeSource={RelativeSource AncestorType={x:Type dxdiag:DiagramControl}}}" />
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=SetHorizontalAlignment_CenterCommandItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=SetHorizontalAlignment_CenterCommandItemStyleBase}}" TargetType="{x:Type dxb:BarCheckItem}">
+        <Setter Property="IsChecked" Value="{Binding SelectionToolsModel[TextAlignment],&#xD;&#xA;            Converter={dxdiagn:ObjectEqualityConverter},&#xD;&#xA;            ConverterParameter={x:Static dxdiagcore:TextAlignmentKind.Center},&#xD;&#xA;            RelativeSource={RelativeSource AncestorType={x:Type dxdiag:DiagramControl}}}" />
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=SetHorizontalAlignment_RightCommandItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=SetHorizontalAlignment_RightCommandItemStyleBase}}" TargetType="{x:Type dxb:BarCheckItem}">
+        <Setter Property="IsChecked" Value="{Binding SelectionToolsModel[TextAlignment],&#xD;&#xA;            Converter={dxdiagn:ObjectEqualityConverter},&#xD;&#xA;            ConverterParameter={x:Static dxdiagcore:TextAlignmentKind.Right},&#xD;&#xA;            RelativeSource={RelativeSource AncestorType={x:Type dxdiag:DiagramControl}}}" />
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=SetHorizontalAlignment_JustifyCommandItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=SetHorizontalAlignment_JustifyCommandItemStyleBase}}" TargetType="{x:Type dxb:BarCheckItem}">
+        <Setter Property="IsChecked" Value="{Binding SelectionToolsModel[TextAlignment],&#xD;&#xA;            Converter={dxdiagn:ObjectEqualityConverter},&#xD;&#xA;            ConverterParameter={x:Static dxdiagcore:TextAlignmentKind.Justify},&#xD;&#xA;            RelativeSource={RelativeSource AncestorType={x:Type dxdiag:DiagramControl}}}" />
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=SetVerticalAlignment_TopCommandItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=SetVerticalAlignment_TopCommandItemStyleBase}}" TargetType="{x:Type dxb:BarCheckItem}">
+        <Setter Property="IsChecked" Value="{Binding SelectionToolsModel[VerticalContentAlignment],&#xD;&#xA;            Converter={dxdiagn:ObjectEqualityConverter},&#xD;&#xA;            ConverterParameter={x:Static dxdiagcore:VerticalAlignmentKind.Top},&#xD;&#xA;            RelativeSource={RelativeSource AncestorType={x:Type dxdiag:DiagramControl}}}" />
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=SetVerticalAlignment_CenterCommandItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=SetVerticalAlignment_CenterCommandItemStyleBase}}" TargetType="{x:Type dxb:BarCheckItem}">
+        <Setter Property="IsChecked" Value="{Binding SelectionToolsModel[VerticalContentAlignment],&#xD;&#xA;            Converter={dxdiagn:ObjectEqualityConverter},&#xD;&#xA;            ConverterParameter={x:Static dxdiagcore:VerticalAlignmentKind.Center},&#xD;&#xA;            RelativeSource={RelativeSource AncestorType={x:Type dxdiag:DiagramControl}}}" />
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=SetVerticalAlignment_BottomCommandItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=SetVerticalAlignment_BottomCommandItemStyleBase}}" TargetType="{x:Type dxb:BarCheckItem}">
+        <Setter Property="IsChecked" Value="{Binding SelectionToolsModel[VerticalContentAlignment],&#xD;&#xA;            Converter={dxdiagn:ObjectEqualityConverter},&#xD;&#xA;            ConverterParameter={x:Static dxdiagcore:VerticalAlignmentKind.Bottom},&#xD;&#xA;            RelativeSource={RelativeSource AncestorType={x:Type dxdiag:DiagramControl}}}" />
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=TreeLayout_DownCommandItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=TreeLayout_DownCommandItemStyleBase}}" TargetType="{x:Type dxb:BarButtonItem}">
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=TreeLayout_UpCommandItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=TreeLayout_UpCommandItemStyleBase}}" TargetType="{x:Type dxb:BarButtonItem}">
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=TreeLayout_RightCommandItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=TreeLayout_RightCommandItemStyleBase}}" TargetType="{x:Type dxb:BarButtonItem}">
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=TreeLayout_LeftCommandItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=TreeLayout_LeftCommandItemStyleBase}}" TargetType="{x:Type dxb:BarButtonItem}">
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=SugiyamaLayout_DownCommandItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=SugiyamaLayout_DownCommandItemStyleBase}}" TargetType="{x:Type dxb:BarButtonItem}">
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=SugiyamaLayout_UpCommandItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=SugiyamaLayout_UpCommandItemStyleBase}}" TargetType="{x:Type dxb:BarButtonItem}">
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=SugiyamaLayout_RightCommandItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=SugiyamaLayout_RightCommandItemStyleBase}}" TargetType="{x:Type dxb:BarButtonItem}">
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=SugiyamaLayout_LeftCommandItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=SugiyamaLayout_LeftCommandItemStyleBase}}" TargetType="{x:Type dxb:BarButtonItem}">
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=SelectTool_PointerToolCommandItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=SelectTool_PointerToolCommandItemStyleBase}}" TargetType="{x:Type dxb:BarCheckItem}">
+        <Setter Property="IsChecked" Value="{Binding ActiveTool, RelativeSource={RelativeSource AncestorType={x:Type dxdiag:DiagramControl}}, Mode=TwoWay, Converter={dxdiagn:PointerToolConverter}}" />
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=SelectTool_ConnectorToolCommandItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=SelectTool_ConnectorToolCommandItemStyleBase}}" TargetType="{x:Type dxb:BarCheckItem}">
+        <Setter Property="IsChecked" Value="{Binding ActiveTool, RelativeSource={RelativeSource AncestorType={x:Type dxdiag:DiagramControl}}, Mode=TwoWay, Converter={dxdiagn:ConnectorToolConverter}}" />
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=SelectTool_RectangleToolCommandItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=SelectTool_RectangleToolCommandItemStyleBase}}" TargetType="{x:Type dxb:BarCheckItem}">
+        <Setter Property="IsChecked" Value="{Binding ActiveTool, RelativeSource={RelativeSource AncestorType={x:Type dxdiag:DiagramControl}}, Mode=TwoWay, Converter={dxdiagn:RectangleToolConverter}}" />
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=SelectTool_EllipseToolCommandItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=SelectTool_EllipseToolCommandItemStyleBase}}" TargetType="{x:Type dxb:BarCheckItem}">
+        <Setter Property="IsChecked" Value="{Binding ActiveTool, RelativeSource={RelativeSource AncestorType={x:Type dxdiag:DiagramControl}}, Mode=TwoWay, Converter={dxdiagn:EllipseToolConverter}}" />
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=SelectTool_RightTriangleToolCommandItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=SelectTool_RightTriangleToolCommandItemStyleBase}}" TargetType="{x:Type dxb:BarCheckItem}">
+        <Setter Property="IsChecked" Value="{Binding ActiveTool, RelativeSource={RelativeSource AncestorType={x:Type dxdiag:DiagramControl}}, Mode=TwoWay, Converter={dxdiagn:RightTriangleToolConverter}}" />
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=SelectTool_HexagonToolCommandItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=SelectTool_HexagonToolCommandItemStyleBase}}" TargetType="{x:Type dxb:BarCheckItem}">
+        <Setter Property="IsChecked" Value="{Binding ActiveTool, RelativeSource={RelativeSource AncestorType={x:Type dxdiag:DiagramControl}}, Mode=TwoWay, Converter={dxdiagn:HexagonToolConverter}}" />
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=FitToDrawingCommandItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=FitToDrawingCommandItemStyleBase}}" TargetType="{x:Type dxb:BarButtonItem}">
+    </Style>
+    <Style x:Key="{dxdiagt:DiagramDesignerControlThemeKeys ResourceKey=ExportAsStyle}" TargetType="{x:Type dxb:BarSplitButtonItem}">
+        <Setter Property="Glyph" Value="{dxdiag:DiagramSvgImage Path=Images/Svg/ExportAs.svg}" />
+        <Setter Property="LargeGlyph" Value="{dxdiag:DiagramSvgImage Path=Images/Svg/ExportAs.svg}" />
+        <Setter Property="Content" Value="{dxdiag:DiagramControlLocalizedString ExportAs}" />
+        <Setter Property="Description" Value="{Binding ConverterParameter=ExportAs_Description, Converter={StaticResource DiagramStringIdConverter}}" />
+        <Setter Property="GlyphSize" Value="Large" />
+        <Setter Property="Command" Value="{Binding Commands.ExportDiagram, RelativeSource={RelativeSource AncestorType={x:Type dxdiag:DiagramControl}}}" />
+        <Setter Property="CommandParameter" Value="PNG" />
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=ExportDiagram_PNGCommandItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=ExportDiagram_PNGCommandItemStyleBase}}" TargetType="{x:Type dxb:BarButtonItem}">
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=ExportDiagram_JPEGCommandItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=ExportDiagram_JPEGCommandItemStyleBase}}" TargetType="{x:Type dxb:BarButtonItem}">
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=ExportDiagram_BMPCommandItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=ExportDiagram_BMPCommandItemStyleBase}}" TargetType="{x:Type dxb:BarButtonItem}">
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=ExportDiagram_GIFCommandItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=ExportDiagram_GIFCommandItemStyleBase}}" TargetType="{x:Type dxb:BarButtonItem}">
+    </Style>
+    <!--<Style x:Key="{dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=ExportDiagram_WMFCommandItemStyle}" 
+           BasedOn="{StaticResource {dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=ExportDiagram_WMFCommandItemStyleBase}}"
+           TargetType="{x:Type dxb:BarButtonItem}">
+    </Style>-->
+    <Style x:Key="{dxdiagt:DiagramDesignerControlThemeKeys ResourceKey=PrintMenuStyle}" TargetType="{x:Type dxb:BarSplitButtonItem}">
+        <Setter Property="Glyph" Value="{dxdiag:DiagramSvgImage Path=Images/Svg/Print.svg}" />
+        <Setter Property="LargeGlyph" Value="{dxdiag:DiagramSvgImage Path=Images/Svg/Print.svg}" />
+        <Setter Property="Content" Value="{dxdiag:DiagramControlLocalizedString PrintMenu}" />
+        <Setter Property="Description" Value="{Binding ConverterParameter=PrintMenu_Description, Converter={StaticResource DiagramStringIdConverter}}" />
+        <Setter Property="GlyphSize" Value="Large" />
+        <Setter Property="Command" Value="{Binding Commands.Print, RelativeSource={RelativeSource AncestorType={x:Type dxdiag:DiagramControl}}}" />
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=PrintCommandItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=PrintCommandItemStyleBase}}" TargetType="{x:Type dxb:BarButtonItem}">
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=QuickPrintCommandItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlCommandsThemeKeys ResourceKey=QuickPrintCommandItemStyleBase}}" TargetType="{x:Type dxb:BarButtonItem}">
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlSourceItemsThemeKeys ResourceKey=AutoSize_AutoSizeItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlSourceItemsThemeKeys ResourceKey=AutoSize_AutoSizeItemStyleBase}}" TargetType="{x:Type dxb:BarCheckItem}">
+        <Style.Setters>
+            <Setter Property="AllowUncheckInGroup" Value="False" />
+            <Setter Property="Content" Value="{x:Static dxdiagn:CanvasSizeModeInfo.AutoSize}" />
+            <Setter Property="IsChecked" Value="{Binding RootToolsModel[CanvasSizeMode], RelativeSource={RelativeSource FindAncestor, &#xD;&#xA;                AncestorType={x:Type dxdiag:DiagramControl}}, Converter={dxdiagn:AutoSizeConverter}, ConverterParameter=AutoSize, Mode=TwoWay}" />
+        </Style.Setters>
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlSourceItemsThemeKeys ResourceKey=AutoSize_FillItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlSourceItemsThemeKeys ResourceKey=AutoSize_FillItemStyleBase}}" TargetType="{x:Type dxb:BarCheckItem}">
+        <Style.Setters>
+            <Setter Property="AllowUncheckInGroup" Value="False" />
+            <Setter Property="Content" Value="{x:Static dxdiagn:CanvasSizeModeInfo.Fill}" />
+            <Setter Property="IsChecked" Value="{Binding RootToolsModel[CanvasSizeMode], RelativeSource={RelativeSource FindAncestor, &#xD;&#xA;                AncestorType={x:Type dxdiag:DiagramControl}}, Converter={dxdiagn:AutoSizeConverter}, ConverterParameter=Fill, Mode=TwoWay}" />
+        </Style.Setters>
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlSourceItemsThemeKeys ResourceKey=AutoSize_NoneItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlSourceItemsThemeKeys ResourceKey=AutoSize_NoneItemStyleBase}}" TargetType="{x:Type dxb:BarCheckItem}">
+        <Style.Setters>
+            <Setter Property="AllowUncheckInGroup" Value="False" />
+            <Setter Property="Content" Value="{x:Static dxdiagn:CanvasSizeModeInfo.None}" />
+            <Setter Property="IsChecked" Value="{Binding RootToolsModel[CanvasSizeMode], RelativeSource={RelativeSource FindAncestor, &#xD;&#xA;                AncestorType={x:Type dxdiag:DiagramControl}}, Converter={dxdiagn:AutoSizeConverter}, ConverterParameter=None, Mode=TwoWay}" />
+        </Style.Setters>
+    </Style>
+
+    <Style x:Key="{dxdiagt:DesignerControlSourceItemsThemeKeys ResourceKey=PageOrientation_HorizontalItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlSourceItemsThemeKeys ResourceKey=PageOrientation_HorizontalItemStyleBase}}" TargetType="{x:Type dxb:BarCheckItem}">
+        <Style.Setters>
+            <Setter Property="AllowUncheckInGroup" Value="False" />
+            <Setter Property="IsChecked" Value="{Binding RootToolsModel[PageSize], RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type dxdiag:DiagramControl}}, &#xD;&#xA;                Converter={dxdiagn:PaperOrientationConverter}, ConverterParameter=Horizontal, Mode=TwoWay}" />
+        </Style.Setters>
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlSourceItemsThemeKeys ResourceKey=PageOrientation_VerticalItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlSourceItemsThemeKeys ResourceKey=PageOrientation_VerticalItemStyleBase}}" TargetType="{x:Type dxb:BarCheckItem}">
+        <Style.Setters>
+            <Setter Property="AllowUncheckInGroup" Value="False" />
+            <Setter Property="IsChecked" Value="{Binding RootToolsModel[PageSize], RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type dxdiag:DiagramControl}}, &#xD;&#xA;                Converter={dxdiagn:PaperOrientationConverter}, ConverterParameter=Vertical, Mode=TwoWay}" />
+        </Style.Setters>
+    </Style>
+
+    <Style x:Key="{dxdiagt:DesignerControlSourceItemsThemeKeys ResourceKey=PageSize_A3ItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlSourceItemsThemeKeys ResourceKey=PageSize_A3ItemStyleBase}}" TargetType="{x:Type dxdiag:BarMouseCheckOnlyItem}">
+        <Style.Setters>
+            <Setter Property="Content" Value="{dxdiagn:RibbonPageSizeContentProvider PaperKind=A3}" />
+            <Setter Property="IsChecked" Value="{Binding RootToolsModel[PageSize], RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type dxdiag:DiagramControl}}, &#xD;&#xA;                Converter={dxdiagn:SelectedPaperSizeConverter}, ConverterParameter=A3, Mode=TwoWay}" />
+        </Style.Setters>
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlSourceItemsThemeKeys ResourceKey=PageSize_A4ItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlSourceItemsThemeKeys ResourceKey=PageSize_A4ItemStyleBase}}" TargetType="{x:Type dxdiag:BarMouseCheckOnlyItem}">
+        <Style.Setters>
+            <Setter Property="Content" Value="{dxdiagn:RibbonPageSizeContentProvider PaperKind=A4}" />
+            <Setter Property="IsChecked" Value="{Binding RootToolsModel[PageSize], RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type dxdiag:DiagramControl}}, &#xD;&#xA;                Converter={dxdiagn:SelectedPaperSizeConverter}, ConverterParameter=A4, Mode=TwoWay}" />
+        </Style.Setters>
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlSourceItemsThemeKeys ResourceKey=PageSize_A5ItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlSourceItemsThemeKeys ResourceKey=PageSize_A5ItemStyleBase}}" TargetType="{x:Type dxdiag:BarMouseCheckOnlyItem}">
+        <Style.Setters>
+            <Setter Property="Content" Value="{dxdiagn:RibbonPageSizeContentProvider PaperKind=A5}" />
+            <Setter Property="IsChecked" Value="{Binding RootToolsModel[PageSize], RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type dxdiag:DiagramControl}}, &#xD;&#xA;                Converter={dxdiagn:SelectedPaperSizeConverter}, ConverterParameter=A5, Mode=TwoWay}" />
+        </Style.Setters>
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlSourceItemsThemeKeys ResourceKey=PageSize_B4ItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlSourceItemsThemeKeys ResourceKey=PageSize_B4ItemStyleBase}}" TargetType="{x:Type dxdiag:BarMouseCheckOnlyItem}">
+        <Style.Setters>
+            <Setter Property="Content" Value="{dxdiagn:RibbonPageSizeContentProvider PaperKind=B4}" />
+            <Setter Property="IsChecked" Value="{Binding RootToolsModel[PageSize], RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type dxdiag:DiagramControl}}, &#xD;&#xA;                Converter={dxdiagn:SelectedPaperSizeConverter}, ConverterParameter=B4, Mode=TwoWay}" />
+        </Style.Setters>
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlSourceItemsThemeKeys ResourceKey=PageSize_B5ItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlSourceItemsThemeKeys ResourceKey=PageSize_B5ItemStyleBase}}" TargetType="{x:Type dxdiag:BarMouseCheckOnlyItem}">
+        <Style.Setters>
+            <Setter Property="Content" Value="{dxdiagn:RibbonPageSizeContentProvider PaperKind=B5}" />
+            <Setter Property="IsChecked" Value="{Binding RootToolsModel[PageSize], RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type dxdiag:DiagramControl}}, &#xD;&#xA;                Converter={dxdiagn:SelectedPaperSizeConverter}, ConverterParameter=B5, Mode=TwoWay}" />
+        </Style.Setters>
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlSourceItemsThemeKeys ResourceKey=PageSize_ExecutiveItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlSourceItemsThemeKeys ResourceKey=PageSize_ExecutiveItemStyleBase}}" TargetType="{x:Type dxdiag:BarMouseCheckOnlyItem}">
+        <Style.Setters>
+            <Setter Property="Content" Value="{dxdiagn:RibbonPageSizeContentProvider PaperKind=Executive}" />
+            <Setter Property="IsChecked" Value="{Binding RootToolsModel[PageSize], RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type dxdiag:DiagramControl}}, &#xD;&#xA;                Converter={dxdiagn:SelectedPaperSizeConverter}, ConverterParameter=Executive, Mode=TwoWay}" />
+        </Style.Setters>
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlSourceItemsThemeKeys ResourceKey=PageSize_LegalItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlSourceItemsThemeKeys ResourceKey=PageSize_LegalItemStyleBase}}" TargetType="{x:Type dxdiag:BarMouseCheckOnlyItem}">
+        <Style.Setters>
+            <Setter Property="Content" Value="{dxdiagn:RibbonPageSizeContentProvider PaperKind=Legal}" />
+            <Setter Property="IsChecked" Value="{Binding RootToolsModel[PageSize], RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type dxdiag:DiagramControl}}, &#xD;&#xA;                Converter={dxdiagn:SelectedPaperSizeConverter}, ConverterParameter=Legal, Mode=TwoWay}" />
+        </Style.Setters>
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlSourceItemsThemeKeys ResourceKey=PageSize_LetterItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlSourceItemsThemeKeys ResourceKey=PageSize_LetterItemStyleBase}}" TargetType="{x:Type dxdiag:BarMouseCheckOnlyItem}">
+        <Style.Setters>
+            <Setter Property="Content" Value="{dxdiagn:RibbonPageSizeContentProvider PaperKind=Letter}" />
+            <Setter Property="IsChecked" Value="{Binding RootToolsModel[PageSize], RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type dxdiag:DiagramControl}}, &#xD;&#xA;                Converter={dxdiagn:SelectedPaperSizeConverter}, ConverterParameter=Letter, Mode=TwoWay}" />
+        </Style.Setters>
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlSourceItemsThemeKeys ResourceKey=PageSize_StatementItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlSourceItemsThemeKeys ResourceKey=PageSize_StatementItemStyleBase}}" TargetType="{x:Type dxdiag:BarMouseCheckOnlyItem}">
+        <Style.Setters>
+            <Setter Property="Content" Value="{dxdiagn:RibbonPageSizeContentProvider PaperKind=Statement}" />
+            <Setter Property="IsChecked" Value="{Binding RootToolsModel[PageSize], RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type dxdiag:DiagramControl}}, &#xD;&#xA;                Converter={dxdiagn:SelectedPaperSizeConverter}, ConverterParameter=Statement, Mode=TwoWay}" />
+        </Style.Setters>
+    </Style>
+    <Style x:Key="{dxdiagt:DesignerControlSourceItemsThemeKeys ResourceKey=PageSize_TabloidItemStyle}" BasedOn="{StaticResource {dxdiagt:DesignerControlSourceItemsThemeKeys ResourceKey=PageSize_TabloidItemStyleBase}}" TargetType="{x:Type dxdiag:BarMouseCheckOnlyItem}">
+        <Style.Setters>
+            <Setter Property="Content" Value="{dxdiagn:RibbonPageSizeContentProvider PaperKind=Tabloid}" />
+            <Setter Property="IsChecked" Value="{Binding RootToolsModel[PageSize], RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type dxdiag:DiagramControl}}, &#xD;&#xA;                Converter={dxdiagn:SelectedPaperSizeConverter}, ConverterParameter=Tabloid, Mode=TwoWay}" />
+        </Style.Setters>
+    </Style>
+
+</ResourceDictionary>

@@ -1,0 +1,17 @@
+Drop Procedure If Exists emdep_geos.APM_UpdateSendDateTime_V2680;
+DELIMITER $$
+CREATE PROCEDURE emdep_geos.APM_UpdateSendDateTime_V2680(
+      IN _IdActionPlanTask INT UNSIGNED,
+      IN _IdActionPlan INT UNSIGNED,
+      IN _IdEmployee SMALLINT UNSIGNED
+  )
+ BEGIN
+  -- [Shweta.Thube][GEOS2-9129][09-10-2025]
+  
+      UPDATE emdep_geos.action_plan_task
+      SET SentDateTime = NOW()
+      WHERE IdTask = _IdActionPlanTask
+        AND IdActionPlan = _IdActionPlan
+        AND IdResponsibleEmployee = _IdEmployee;
+  END $$
+  DELIMITER ;

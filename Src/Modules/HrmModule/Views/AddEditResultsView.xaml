@@ -1,0 +1,169 @@
+﻿<dxwui:WinUIDialogWindow    x:Class="Emdep.Geos.Modules.Hrm.Views.AddEditResultsView"
+                            xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                            xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                            xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                            xmlns:local="clr-namespace:Emdep.Geos.Modules.Hrm.Views"
+                            xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"
+                            xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors" 
+                            xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+                            xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+                            mc:Ignorable="d" 
+                            xmlns:Validation="clr-namespace:Emdep.Geos.UI.Validations;assembly=Emdep.Geos.UI.Validations"
+                            xmlns:UIConverter="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+                            d:DesignHeight="300" d:DesignWidth="300"
+                            Style="{DynamicResource WinUIDialogWindowStyle}"
+                            Title="{Binding WindowHeader}"
+                            TitleStyle="{DynamicResource WinUIDialogWindowTitleStyle}">
+
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape" Command="{Binding CancelButtonCommand}"/>
+    </dxwui:WinUIDialogWindow.InputBindings>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40" />
+            <RowDefinition Height="10" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="10" />
+            <RowDefinition Height="40" />
+            <RowDefinition Height="15" />
+            <RowDefinition Height="60" />
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="100" />
+            <ColumnDefinition Width="10" />
+            <ColumnDefinition Width="250" />
+            <ColumnDefinition Width="10" />
+            <ColumnDefinition Width="100" />
+        </Grid.ColumnDefinitions>
+
+        <!--Name-->
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="{DynamicResource NameWithColon}" Style="{StaticResource TextBlock16Style}" VerticalAlignment="Center" />
+
+        <Grid Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="4" Height="30">
+            <dxe:ComboBoxEdit Grid.Column="0" Width="Auto"      
+                       Style="{DynamicResource ComboBoxEditStyle}" 
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    IsTextEditable="False"
+                    ItemsSource="{Binding EmployeeListForResult,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                    DisplayMember="FullName" ValueMember="IdEmployee" ValidateOnTextInput="False"
+                    AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True"
+                    IsReadOnly="{Binding IsReadOnlyField,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+                    EditValue="{Binding SelectedTraineeList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                <dxe:ComboBoxEdit.StyleSettings>
+                    <dxe:CheckedComboBoxStyleSettings />
+                </dxe:ComboBoxEdit.StyleSettings>
+
+
+                <dxe:ComboBoxEdit.SelectedIndex>
+                    <Binding Path="SelectedIndexForTrainee" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                        <Binding.ValidationRules >
+                            <Validation:ResultInTrainingValidation FieldName="SelectedIndexForTrainee" ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True"/>
+                        </Binding.ValidationRules>
+                    </Binding>
+                </dxe:ComboBoxEdit.SelectedIndex>
+            </dxe:ComboBoxEdit>
+        </Grid>
+
+        <!--Name End-->
+        <!--Skills-->
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="{DynamicResource SkillsWithColon}" Style="{StaticResource TextBlock16Style}" VerticalAlignment="Center" />
+
+        <dxg:GridControl x:Name="grid"  Grid.Row="2"  Grid.Column="2" Grid.ColumnSpan="4" Height="150" 
+                        ItemsSource="{Binding ProfessionalTrainingSkillForResult,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"  
+                         SelectedItem="None"
+                        AutoGenerateColumns="None" ScrollViewer.HorizontalScrollBarVisibility="Hidden" ScrollViewer.VerticalScrollBarVisibility="Hidden" 
+                        ImplyNullLikeEmptyStringWhenFiltering="True">
+            <dxg:GridControl.Columns>
+                <dxg:GridColumn FieldName="Code" Header="{DynamicResource SkillsName}" 
+                                    ReadOnly="True" FilterPopupMode="CheckedList" Width="150" AllowEditing="False"/>
+
+                <dxg:GridColumn FieldName="ResultDuration" Header="{DynamicResource Results}" 
+                                FilterPopupMode="CheckedList" Width="150" AllowEditing="True" >
+                    <dxg:GridColumn.CellTemplate>
+                        <DataTemplate>
+                            <dxe:SpinEdit Name="PART_Editor" IsReadOnly="False" MinValue="0.00" MaxValue="10.00" AllowRoundOutOfRangeValue="True">
+                                <!--<dxe:SpinEdit.EditValue>
+                                    <Binding Path="Duration" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                                        <Binding.ValidationRules>
+                                            <Validation:ResultInTrainingValidation FieldName="ResultDuration" ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True"/>
+                                        </Binding.ValidationRules>
+                                    </Binding>
+                                </dxe:SpinEdit.EditValue>-->
+                            </dxe:SpinEdit>
+                        </DataTemplate>
+                    </dxg:GridColumn.CellTemplate>
+                    <dxg:GridColumn.EditSettings>
+                        <dxe:SpinEditSettings MaskType="Numeric" Mask="d" Increment="1"  />
+                    </dxg:GridColumn.EditSettings>
+                    
+                    
+                </dxg:GridColumn>
+
+            </dxg:GridControl.Columns>
+            <dxg:GridControl.View>
+                <dxg:TableView x:Name="SkillsListForGridTableView" AllowEditing="True" EditorShowMode="MouseUp"
+                               ShowGroupPanel="False" EditorButtonShowMode="ShowOnlyInEditor">
+                </dxg:TableView>
+            </dxg:GridControl.View>
+        </dxg:GridControl>
+        <!--Skills End-->
+        <TextBlock Grid.Row="4" Grid.Column="0" Text="{DynamicResource TrainingResultAttachmentWithColon}" Style="{StaticResource TextBlock16Style}" VerticalAlignment="Center" />
+
+        <dxe:ComboBoxEdit Grid.Row="4" Grid.Column="2"
+                          Height="30"
+                          VerticalContentAlignment="Center"
+                          EditValue="{Binding DataContext.AttachmentList,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow,Mode=FindAncestor},Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                          ItemsSource="{Binding DataContext.AttachmentList,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow,Mode=FindAncestor}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                          ScrollViewer.VerticalScrollBarVisibility="Auto"
+                           DisplayMember="OriginalFileName"
+                          HorizontalAlignment="Stretch"
+                          VerticalAlignment="Stretch"
+                          AllowDefaultButton="False"
+                          AutoComplete="True"
+                          ImmediatePopup="True"
+                          ValidateOnEnterKeyPressed="True" 
+                          ValidateOnTextInput="True"
+                          IsTextEditable="False" Style="{DynamicResource ComboBoxEditStyle}" 
+                         >
+
+            <dxe:ComboBoxEdit.StyleSettings>
+                <dxe:TokenComboBoxStyleSettings  NewTokenPosition="Far" EnableTokenWrapping="True"  />
+            </dxe:ComboBoxEdit.StyleSettings>
+        </dxe:ComboBoxEdit>
+
+        <!--ChooseFile-->
+        <Button Grid.Row="4" Grid.Column="4" Height="30" Content="{DynamicResource ChooseFile}" Width="Auto" HorizontalAlignment="Right" Command="{Binding ChooseFileCommand}" IsEnabled="{Binding IsAcceptEnabled}"/>
+
+        <Grid Grid.Row="6" ShowGridLines="False" Grid.Column="2" Grid.ColumnSpan="4" VerticalAlignment="Center">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Button  HorizontalAlignment="Right" Grid.Column="0"
+                     Style="{DynamicResource Button16Style}"
+                     VerticalAlignment="Top"
+                     Content="{DynamicResource Accept}"
+                     Command="{Binding AcceptButtonCommand}"
+                     CommandParameter="{Binding ElementName=SkillsListForGridTableView}"
+                     Height="30"
+                     Width="100" 
+                     IsEnabled="{Binding IsAcceptEnabled}"/>
+
+            <Button Grid.Column="2"
+                    HorizontalAlignment="Left"
+                    Style="{DynamicResource Button16Style}"
+                    VerticalAlignment="Top"
+                    Content="{DynamicResource Cancel}"
+                    Command="{Binding CancelButtonCommand }"
+                    Height="30"
+                    Width="100" />
+        </Grid>
+
+    </Grid>
+</dxwui:WinUIDialogWindow>

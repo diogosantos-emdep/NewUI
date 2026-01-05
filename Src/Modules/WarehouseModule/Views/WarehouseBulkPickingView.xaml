@@ -1,0 +1,220 @@
+﻿<UserControl xmlns:dxprg="http://schemas.devexpress.com/winfx/2008/xaml/propertygrid"  x:Class="Emdep.Geos.Modules.Warehouse.Views.WarehouseBulkPickingView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.Warehouse.Views"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:WarehouseCommon ="clr-namespace:Emdep.Geos.Modules.Warehouse"
+             xmlns:dxp="http://schemas.devexpress.com/winfx/2008/xaml/printing" 
+             xmlns:dxgt="http://schemas.devexpress.com/winfx/2008/xaml/grid/themekeys"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+               xmlns:dxb="http://schemas.devexpress.com/winfx/2008/xaml/bars"
+             mc:Ignorable="d"   xmlns:WmsApplication="clr-namespace:Emdep.Geos.Modules.Warehouse" >
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="100*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Label HorizontalAlignment="Left" Content="{DynamicResource WarehouseViewModelConfigurationWarehouseBulkPicking}" Style="{StaticResource LabelTitleStyle}" Grid.Row="0" Grid.Column="0"/>
+            <Grid HorizontalAlignment="Right" Width="Auto" Height="45" >
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="45"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Waresouse combobox section -->
+                <DockPanel Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Height="30" >
+                    <Image Style="{DynamicResource WarehouseImageStyle}" Width="24" Height="24" Margin="7,0,3,0" />
+                    <TextBlock Text="{DynamicResource Warehouse}"  FontWeight="Bold" Margin="5,2,5,0" VerticalAlignment="Bottom" />
+                </DockPanel>
+
+                <dxe:ComboBoxEdit Name="CbeWareHouse" Style="{DynamicResource ComboBoxEditStyle}" Grid.Column="1" Width="150" Height="30"
+                                        Margin="5,0,5,5" VerticalAlignment="Bottom" HorizontalAlignment="Right" IsTextEditable="False"
+                                   ItemsSource ="{Binding Source={x:Static WarehouseCommon:WarehouseCommon.Instance}, Path=WarehouseList ,UpdateSourceTrigger=PropertyChanged , Mode=TwoWay}"
+                                    SelectedItem="{Binding Source={x:Static WarehouseCommon:WarehouseCommon.Instance}, Path=Selectedwarehouse,UpdateSourceTrigger=PropertyChanged}"
+                                      DisplayMember="Name" ShowError="False" ShowErrorToolTip="False" >
+
+                    <dxmvvm:Interaction.Triggers>
+                        <dxmvvm:EventToCommand EventName="EditValueChanged" 
+                                               Command="{Binding CommandWarehouseEditValueChanged}" 
+                                                   CommandParameter="{Binding ElementName=CbeWareHouse,Path=SelectedItem}"/>
+                    </dxmvvm:Interaction.Triggers>
+                </dxe:ComboBoxEdit>
+
+                <!-- Add Bulk Picking Button -->
+                <Button Visibility="Visible"  Grid.Row="0" Grid.Column="2" Height="40" Width="40" HorizontalAlignment="Right"   IsEnabled="{Binding Source={x:Static WmsApplication:WarehouseCommon.Instance}, Path=IsPermissionEnabled}"
+                    Margin="0,0,5,5"   
+                        Command="{Binding AddNewBulkPickingCommand}"
+                        CommandParameter="{Binding ElementName=treeListView1}">
+                    <Button.ToolTip>
+                        <TextBlock Text="{DynamicResource AddBulkPicking}"/>
+                    </Button.ToolTip>
+                    <Button.ContentTemplate>
+                        <DataTemplate>
+                            <Image Style="{DynamicResource AddNewButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                        </DataTemplate>
+                    </Button.ContentTemplate>
+                </Button>
+                <!-- Refresh Button -->
+
+                <Button Content=" " Grid.Row="0" Grid.Column="3" Height="40" Width="40" HorizontalAlignment="Right" 
+                       Command="{Binding RefreshButtonCommand,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                        CommandParameter="{Binding ElementName=treeListView1}"  Margin="0,0,5,5">
+                    <Button.ToolTip>
+                        <TextBlock Text="{DynamicResource ButtonRefresh}"/>
+                    </Button.ToolTip>
+                    <Button.ContentTemplate>
+                        <DataTemplate>
+                            <Image Style="{ DynamicResource WareHouseRefreshButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                        </DataTemplate>
+                    </Button.ContentTemplate>
+                </Button>
+
+
+
+                <!-- Print Button -->
+
+                <Button Content=" " Grid.Row="0" Grid.Column="4" Height="40" Width="40" HorizontalAlignment="Right" Margin="0,0,5,5" 
+                          Command="{Binding PrintBulkPickingCommand}" CommandParameter="{Binding ElementName=treeListView1}">
+                    <Button.ToolTip>
+                        <TextBlock Text="{DynamicResource ButtonPrint}"/>
+                    </Button.ToolTip>
+                    <Button.ContentTemplate>
+                        <DataTemplate>
+                            <Image Style="{ DynamicResource PrinterButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                        </DataTemplate>
+                    </Button.ContentTemplate>
+                </Button>
+
+                <!-- Export Button -->
+
+                <Button Content=" " Grid.Row="0" Grid.Column="5" Height="40" Width="40" HorizontalAlignment="Right" Margin="0,0,5,5"      
+                         Command="{Binding ExportBulkPickingCommand}" CommandParameter="{Binding ElementName=treeListView1}">
+                    <Button.ToolTip>
+                        <TextBlock Text="{DynamicResource ButtonExportToExcel}"/>
+                    </Button.ToolTip>
+                    <Button.ContentTemplate>
+                        <DataTemplate>
+                            <Image Style="{ DynamicResource ExcelExportButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                        </DataTemplate>
+                    </Button.ContentTemplate>
+                </Button>
+            </Grid>
+
+        </Grid>
+        <Grid Grid.Row="1">
+        <dxg:GridControl Name="BulkPickingList" 
+                         ItemsSource="{Binding BulkPickingList,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+                         SelectedItem="{Binding SelectedBulkPickingList,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                         AllowLiveDataShaping="True" ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                              ImplyNullLikeEmptyStringWhenFiltering="True"
+                         
+                         SelectionMode="Row">
+            
+                    <dxg:GridColumn Header="{DynamicResource WMSAddBulkPickingReference}" FilterPopupMode="CheckedList" FieldName="Article.Reference" Width="50"/>
+                    <dxg:GridColumn Header="{DynamicResource WMSAddBulkPickingParent}" FieldName="ParentArticle.Reference" Width="50"/>
+                <dxg:GridColumn Width="20" AllowPrinting="False"  >
+                    <dxg:GridColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Name="deleteRowItem" ToolTip="{DynamicResource Delete}" 
+                                    Command="{Binding View.DataContext.DeleteButtonCommand,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" CommandParameter="{Binding ElementName=treeListView1}">
+                                <Button.ContentTemplate>
+                                    <DataTemplate>
+                                        <Image Height="16" Width="16"  Style="{DynamicResource DeleteStyle}" />
+                                    </DataTemplate>
+                                </Button.ContentTemplate>
+                                <Button.Style>
+                                    <Style TargetType="{x:Type Button}">
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Cursor" Value="Hand"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                        </DataTemplate>
+                    </dxg:GridColumn.CellTemplate>
+                </dxg:GridColumn>
+                <dxg:GridColumn FieldName="" Width="Auto" AllowResizing="False"/>
+                
+          
+
+                <dxg:GridControl.TotalSummary>
+                    <dxg:GridSummaryItem x:Name="summary" FieldName="" SummaryType="Count" DisplayFormat="Total Count : {0}" Visible="True" Alignment="Left"/>
+                </dxg:GridControl.TotalSummary>
+                <dxg:GridControl.View>
+                    <dxg:TableView Name="treeListView1"  NavigationStyle="Row"
+                                   RowDetailsVisibilityMode="Visible"
+                                   ShowHorizontalLines="True"                                 
+                                   ShowColumnHeaders="True"                                  
+                                   VerticalScrollbarVisibility="Auto" 
+                                   HorizontalScrollbarVisibility="Auto"
+                                   AllowFixedColumnMenu="False"
+                                 ShowFixedTotalSummary="True"
+                                   SearchPanelHorizontalAlignment="Stretch" 
+                                   ImmediateUpdateRowPosition="True"
+                                   FilterRowDelay="0"                          
+                                   AllowGrouping="True"
+                                   ShowGroupPanel="False"     
+                                   ShowIndicator="False" AutoWidth="True"
+                                   ShowSearchPanelMode="Always"
+                                   SearchString="{Binding MyFilterString,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                  >
+
+                        <dxg:TableView.ColumnMenuCustomizations>
+                            <dxb:RemoveBarItemAndLinkAction ItemName="{x:Static dxg:DefaultColumnMenuItemNames.ColumnChooser}"/>
+                        </dxg:TableView.ColumnMenuCustomizations>
+                        <dxmvvm:Interaction.Behaviors>
+                        
+                            <dxmvvm:EventToCommand  Command="{Binding DataContext.CommandGridDoubleClick,RelativeSource={RelativeSource AncestorType=dxg:GridControl}}" EventName="MouseDoubleClick" CommandParameter="{Binding ElementName=treeListView1}">
+                               
+                            </dxmvvm:EventToCommand>
+                        </dxmvvm:Interaction.Behaviors>
+                        <dxg:TableView.Resources>
+                            <DataTemplate x:Key="PageHeader">
+                                <Grid Width="{Binding UsablePageWidth}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="50" />
+                                        <ColumnDefinition Width="130" />
+                                    </Grid.ColumnDefinitions>
+                                    <dxe:TextEdit Text=" " Width="{Binding UsablePageWidth}" Grid.ColumnSpan="3" IsPrintingMode="True" Background="#333E5E" HorizontalAlignment="Stretch" 
+                                                  VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" Height="50" />
+                                    <dxe:TextEdit Text="Bulk Picking Report" IsPrintingMode="True" HorizontalAlignment="Left" 
+                                                  VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" />
+                                    <Image Source="/Emdep.Geos.Modules.Crm;component/Assets/Images/GeosReportLogo.png" Height="50" Width="80" dxp:ExportSettings.TargetType="Image" Grid.Column="2" />
+                                </Grid>
+                            </DataTemplate>
+                            <DataTemplate x:Key="PageFooter">
+                                <dxe:TextEdit HorizontalContentAlignment="Center" 
+                                               Width="{Binding Path=UsablePageWidth, Mode=OneWay}" 
+                                               dxp:ExportSettings.TargetType="PageNumber" 
+                                               dxp:PageNumberExportSettings.Kind="NumberOfTotal" 
+                                               dxp:PageNumberExportSettings.Format="Page {0} of {1}">
+                                </dxe:TextEdit>
+                            </DataTemplate>
+                        </dxg:TableView.Resources>
+                    </dxg:TableView>
+                
+            </dxg:GridControl.View>
+            
+        </dxg:GridControl>
+        </Grid>
+    </Grid>
+</UserControl>

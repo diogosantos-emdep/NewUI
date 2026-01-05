@@ -1,0 +1,1120 @@
+﻿<UserControl x:Class="Emdep.Geos.Modules.SCM.Views.SampleRegistrationView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:dxdo="http://schemas.devexpress.com/winfx/2008/xaml/docking"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:ViewModels="clr-namespace:Emdep.Geos.Modules.SCM.ViewModels"
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+             xmlns:dxp="http://schemas.devexpress.com/winfx/2008/xaml/printing"
+             xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+             xmlns:dxb="http://schemas.devexpress.com/winfx/2008/xaml/bars"
+             xmlns:Converters="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+             xmlns:dxnav="http://schemas.devexpress.com/winfx/2008/xaml/navigation"
+             xmlns:ve="http://schemas.devexpress.com/winfx/2008/xaml/docking/visualelements"
+             xmlns:dxn="http://schemas.devexpress.com/winfx/2008/xaml/navbar"                        
+             xmlns:sysglb="clr-namespace:System.Globalization;assembly=mscorlib"
+             xmlns:Interactive="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"                
+             xmlns:core="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:dxrudex="http://schemas.devexpress.com/winfx/2008/xaml/reports/userdesignerextensions"
+             xmlns:ScmApplication="clr-namespace:Emdep.Geos.Modules.SCM.Common_Classes" 
+             xmlns:Validation ="clr-namespace:Emdep.Geos.UI.Validations;assembly=Emdep.Geos.UI.Validations"
+             xmlns:UIConverter="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+             xmlns:dxwuit="http://schemas.devexpress.com/winfx/2008/xaml/windowsui/themekeys"   
+             xmlns:dxgt="http://schemas.devexpress.com/winfx/2008/xaml/grid/themekeys"
+             xmlns:dxet="http://schemas.devexpress.com/winfx/2008/xaml/editors/themekeys"
+             xmlns:dxeh="http://schemas.devexpress.com/winfx/2008/xaml/editors/internal"
+             xmlns:dxcn="http://schemas.devexpress.com/winfx/2008/xaml/core/internal" 
+             xmlns:dxwuii="http://schemas.devexpress.com/winfx/2008/xaml/windowsui/internal" 
+             xmlns:dxci="http://schemas.devexpress.com/winfx/2008/xaml/core/internal"
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.SCM.Views"
+             mc:Ignorable="d" d:DesignHeight="300" d:DesignWidth="300">
+    <!--[rdixit][GEOS2-5802][05.09.2024]-->
+    <UserControl.InputBindings>
+        <KeyBinding Key="Enter" Command="{Binding DataContext.SearchCommand,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{ Binding ElementName=lgCustom}"/>
+    </UserControl.InputBindings>
+
+    <UserControl.Resources>
+
+        <DataTemplate DataType="{x:Type ViewModels:ConnectorsListViewModel}">
+            <local:ConnectorsListView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type ViewModels:ConnectorDetailViewMode}">
+            <local:ConnectorDetailView />
+        </DataTemplate>
+        <Style x:Key="ColorImageStyle" TargetType="Image">
+            <Style.Triggers>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding Id}" Value="12" />
+                        <Condition Binding="{Binding Path=(dx:ThemeManager.TreeWalker).ThemeName, RelativeSource={RelativeSource Self}}" Value="BlackAndBlue" />
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="Source" Value="/Emdep.Geos.Modules.SCM;component/Assets/Images/wt_color_transparent.png" />
+                </MultiDataTrigger>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding Id}" Value="12" />
+                        <Condition Binding="{Binding Path=(dx:ThemeManager.TreeWalker).ThemeName, RelativeSource={RelativeSource Self}}" Value="WhiteAndBlue" />
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="Source" Value="/Emdep.Geos.Modules.SCM;component/Assets/Images/bt_color_transparent.png" />
+                </MultiDataTrigger>
+                <DataTrigger Binding="{Binding Id}" Value="17">
+                    <Setter Property="Source" Value="/Emdep.Geos.Modules.SCM;component/Assets/Images/ic_color_multicolor.png" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="ImageStyle" TargetType="Image">
+            <Style.Triggers>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding Id}" Value="2" />
+                        <Condition Binding="{Binding Path=(dx:ThemeManager.TreeWalker).ThemeName, RelativeSource={RelativeSource Self}}" Value="WhiteAndBlue" />
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="Source" Value="/Emdep.Geos.Modules.SCM;component/Assets/Images/FemaleUser_Blue_32x32.png" />
+                </MultiDataTrigger>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding Id}" Value="1" />
+                        <Condition Binding="{Binding Path=(dx:ThemeManager.TreeWalker).ThemeName, RelativeSource={RelativeSource Self}}" Value="WhiteAndBlue" />
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="Source" Value="/Emdep.Geos.Modules.SCM;component/Assets/Images/MaleUser_Blue_32x32.png" />
+                </MultiDataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+    <Grid VerticalAlignment="Stretch">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="55"/>
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="450" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Label Content="{DynamicResource SampleRegistrationHeader}" Margin="10,0,0,0" Style="{StaticResource LabelTitleStyle}" Grid.Row="0" Grid.Column="0"/>
+
+        <!--Save Button-->
+        <Button Content=" " Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right" Height="40" Width="40" VerticalAlignment="Center"    
+                    Visibility="{Binding Source={x:Static ScmApplication:SCMCommon.Instance},Path=IsSaveVisible, UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"         
+                    Command="{Binding DataContext.EditConnectorViewAcceptButtonCommand,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                    CommandParameter="{Binding ElementName=flowLayoutControl}">
+            <Button.ToolTip>
+                <TextBlock Text="{DynamicResource ButtonSave}"/>
+            </Button.ToolTip>
+            <Button.ContentTemplate>
+                <DataTemplate>
+                    <Image Style="{ DynamicResource SaveButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                </DataTemplate>
+            </Button.ContentTemplate>
+            <Button.Style>
+                <!--[rdixit][GEOS2-5479][06.05.2024]-->
+                <Style TargetType="Button">
+                    <Setter Property="Margin" Value="0,0,5,-45"/>
+                    <Setter Property="IsEnabled" Value="False" />
+                    <Setter Property="FontSize" Value="16"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Source={x:Static ScmApplication:SCMCommon.Instance},Path=TabIndex, UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" Value="-1">
+                            <Setter Property="Margin" Value="0,0,5,0"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsSCMEditConnectorStatus}" Value="True">
+                            <Setter Property="IsEnabled" Value="True" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsSCMPermissionAdmin}" Value="True">
+                            <Setter Property="IsEnabled" Value="True" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsSCMREditConnectorBasic}" Value="True">
+                            <Setter Property="IsEnabled" Value="True" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsSCMEditConnectorLinks}" Value="True">
+                            <Setter Property="IsEnabled" Value="True" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsSCMEditConnectorAdvanced}" Value="True">
+                            <Setter Property="IsEnabled" Value="True" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Button.Style>
+        </Button>
+
+        <!-- Switch View -->
+        <dx:DropDownButton x:Name="dropdownButton" Content="Dropdown button" Grid.Row="0" Grid.Column="1"                                 
+                           HorizontalAlignment="Right" Height="40" Width="40" VerticalAlignment="Center"
+                           Visibility="{Binding Source={x:Static ScmApplication:SCMCommon.Instance},Path=IsSwitchViewVisible, UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" >
+            <dx:DropDownButton.Style>
+                <Style TargetType="dx:DropDownButton">
+                    <Setter Property="dx:DropDownButtonBase.ArrowAlignment" Value="Right" />
+                    <Setter Property="dx:DropDownButtonBase.ArrowPadding" Value="0" />
+                    <Setter Property="Margin" Value="0,0,5,-45"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Source={x:Static ScmApplication:SCMCommon.Instance},Path=TabIndex, UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" Value="-1">
+                            <Setter Property="Margin" Value="0,0,5,0"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </dx:DropDownButton.Style>
+
+            <Button.ToolTip>
+                <TextBlock Text="Switch View"></TextBlock>
+            </Button.ToolTip>
+
+            <Button.ContentTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Image Style="{ DynamicResource PCMSwitchViewButtonImageStyle}" Grid.Column="0" Height="24" Width="24" Margin="-20" />
+                    </Grid>
+                </DataTemplate>
+            </Button.ContentTemplate>
+
+            <dxb:PopupMenu>
+                <dxb:BarButtonItem Name="GridView" Content="Grid View" Glyph="{DynamicResource SwitchActivityCalendar}" Command="{Binding ShowGridViewCommand}">
+                    <dxb:BarButtonItem.Style>
+                        <Style>
+                            <Style.Triggers>
+                                <Trigger Property="dxb:BarButtonItem.IsMouseOver" Value="True">
+                                    <Setter Property="dxb:BarButtonItem.Glyph" Value="{DynamicResource SwitchActivityCalendarMouseOver}" />
+                                </Trigger>
+                                <Trigger Property="dxb:BarButtonItem.IsMouseOver" Value="False">
+                                    <Setter Property="dxb:BarButtonItem.Glyph" Value="{DynamicResource SwitchActivityCalendar}" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </dxb:BarButtonItem.Style>
+                </dxb:BarButtonItem>
+
+                <dxb:BarButtonItem Name="BandView" Content="Band View" Glyph="{DynamicResource SwitchActivityGridview}" Command="{Binding ShowCardViewCommand}">
+                    <dxb:BarButtonItem.Style>
+                        <Style>
+                            <Style.Triggers>
+                                <Trigger Property="dxb:BarButtonItem.IsMouseOver" Value="True">
+                                    <Setter Property="dxb:BarButtonItem.Glyph" Value="{DynamicResource SwitchActivityGridviewMouseOver}" />
+                                </Trigger>
+                                <Trigger Property="dxb:BarButtonItem.IsMouseOver" Value="False">
+                                    <Setter Property="dxb:BarButtonItem.Glyph" Value="{DynamicResource SwitchActivityGridview}" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </dxb:BarButtonItem.Style>
+                </dxb:BarButtonItem>
+            </dxb:PopupMenu>
+        </dx:DropDownButton>
+
+        <Grid Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" HorizontalAlignment="Stretch">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <dxdo:DockLayoutManager x:Name="DemoDockContainer" FloatingMode="Desktop" MaxWidth="450" HorizontalAlignment="Left"
+                                FloatingDocumentContainer="{Binding SelectedItem.Id, ElementName=floatingDocumentContainerListBox}"
+                                RedrawContentWhenResizing="{Binding IsChecked, ElementName=redrawContentWhenResizingCheck}"
+                                ShowContentWhenDragging="{Binding IsChecked, ElementName=showContentWhenDraggingCheck}"
+                                ViewStyle="{Binding SelectedItem.Id, ElementName=viewStyleListBox}">
+                <dxdo:DockLayoutManager.ContextMenuCustomizations>
+                </dxdo:DockLayoutManager.ContextMenuCustomizations>
+                <dxdo:LayoutGroup>
+                    <dxdo:LayoutGroup Orientation="Vertical" ItemWidth="3*">
+                        <dxdo:LayoutGroup Name="group1" ItemHeight="3*">
+                            <dxdo:LayoutPanel Name="SCMFilter" AutoHideExpandState="Visible" AllowMinimize="False" AllowMaximize="False" AllowClose="False" 
+                                              ShowHideButton="False" AutoHidden="{Binding DataContext.IsPinned,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=UserControl}}"  
+                                              Caption="{DynamicResource SCMFilter}"  VerticalAlignment="Stretch" ItemWidth="350">
+                                <Grid HorizontalAlignment="Stretch">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="30" />
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="30" />
+                                        <RowDefinition Height="5" />
+                                        <RowDefinition Height="35" />
+                                    </Grid.RowDefinitions>
+                                    <Grid Grid.Row="0" Margin="5">
+                                        <Button x:Name="upButton" Padding="2" HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="Marlett"                                            
+                                                FontSize="20" Content="5" Width="40" Click="ScrollUpButton_Click" />
+                                    </Grid>
+                                    <Separator />
+                                    <ScrollViewer Name="scroll" ScrollViewer.VerticalScrollBarVisibility="Hidden"  Grid.Row="1" ScrollChanged="scroll_ScrollChanged" >
+                                        <Grid Name="mainGrid" Grid.Row="1" ShowGridLines="True" >
+                                            <StackPanel Name="stkContainer">
+                                                <dxlc:LayoutGroup Header="PROPERTIES" Name="lgProperties" View="GroupBox" Margin="5" dxlc:LayoutControl.AllowHorizontalSizing="True" IsCollapsible="True" IsCollapsed="False">
+                                                    <dxlc:LayoutGroup.HeaderTemplate>
+                                                        <DataTemplate>
+                                                            <Grid>
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="Auto" />
+                                                                    <ColumnDefinition Width="*" />
+                                                                </Grid.ColumnDefinitions>
+                                                                <TextBlock Text="{Binding}" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Stretch" />
+                                                            </Grid>
+                                                        </DataTemplate>
+                                                    </dxlc:LayoutGroup.HeaderTemplate>
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="80" />
+                                                            <ColumnDefinition Width="5" />
+                                                            <ColumnDefinition Width="40" />
+                                                            <ColumnDefinition Width="5" />
+                                                            <ColumnDefinition Width="*" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <Grid.RowDefinitions>
+                                                            <RowDefinition Height="30" />
+                                                            <RowDefinition Height="5" />
+                                                            <RowDefinition Height="30" />
+                                                            <RowDefinition Height="5" />
+                                                            <RowDefinition Height="*" />
+                                                        </Grid.RowDefinitions>
+
+                                                        <Label Grid.Row="0" Grid.Column="0" Margin="2,0,0,0" Content="{DynamicResource SCMFamily}" />
+                                                        <dxe:ComboBoxEdit Height="30" Grid.Row="0" Grid.Column="4" Name="cmbFamily" ScrollViewer.VerticalScrollBarVisibility="Auto"                                                                    
+                                                                          HorizontalAlignment="Stretch" VerticalAlignment="Stretch" IsTextEditable="False" KeyUp="cmbFamily_KeyUp"
+                                                                          Style="{DynamicResource ComboBoxEditStyle}" AutoComplete="True"  DisplayMember="Name" AllowDefaultButton="False"                                                                                                                                               
+                                                                          ItemsSource="{Binding DataContext.ListFamily, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType=UserControl}}"                                                                      
+                                                                          SelectedItem="{Binding DataContext.SelectedFamily, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                                                            <dxe:ComboBoxEdit.Buttons>
+                                                                <dxe:ButtonInfo GlyphKind="Custom" x:Name="btnClearFamily">
+                                                                    <dxe:ButtonInfo.Template>
+                                                                        <DataTemplate>
+                                                                            <dxe:ButtonClose HorizontalAlignment="Center" VerticalAlignment="Center" Margin="2,0"
+                                                                                         Visibility="{Binding DataContext.ClearFamily, UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                                         Command="{Binding (dxe:BaseEdit.OwnerEdit).SetNullValueCommand, RelativeSource={RelativeSource Self}}" />
+                                                                        </DataTemplate>
+                                                                    </dxe:ButtonInfo.Template>
+                                                                </dxe:ButtonInfo>
+                                                                <dxe:ButtonInfo IsDefaultButton="True" GlyphKind="DropDown" />
+                                                            </dxe:ComboBoxEdit.Buttons>
+                                                            <dxmvvm:Interaction.Triggers>
+                                                                <dxmvvm:EventToCommand EventName="PopupClosed"  Command="{Binding DataContext.FamilyPopupClosedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                                                                       PassEventArgsToCommand="True"/>
+                                                            </dxmvvm:Interaction.Triggers>
+                                                        </dxe:ComboBoxEdit>
+
+                                                        <Label Grid.Row="2" Grid.Column="0" Margin="2,0,0,0" Content="{DynamicResource SCMSubfamily}" />
+                                                        <dxe:ComboBoxEdit Height="30" Grid.Row="2" Grid.Column="4" Name="cmbSubfamily" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"                                                                      
+                                                                          ScrollViewer.VerticalScrollBarVisibility="Auto"  Style="{DynamicResource ComboBoxEditStyle}" AutoComplete="True"                                                                     
+                                                                          IsTextEditable="False" DisplayMember="Name" KeyUp="cmbSubfamily_KeyUp" AllowDefaultButton="False"                                                                           
+                                                                          ItemsSource="{Binding DataContext.NewListSubfamily, RelativeSource={RelativeSource AncestorType=UserControl, Mode=FindAncestor},   UpdateSourceTrigger=PropertyChanged , Mode=TwoWay}"                                                                      
+                                                                          SelectedItem="{Binding DataContext.SelectedSubfamily, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                                                            <dxe:ComboBoxEdit.Buttons>
+                                                                <dxe:ButtonInfo GlyphKind="Custom" x:Name="buttonClearSubfamily">
+                                                                    <dxe:ButtonInfo.Template>
+                                                                        <DataTemplate>
+                                                                            <dxe:ButtonClose HorizontalAlignment="Center" VerticalAlignment="Center" Margin="2,0"
+                                                                                         Visibility="{Binding DataContext.ClearSubfamily, UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                                         Command="{Binding (dxe:BaseEdit.OwnerEdit).SetNullValueCommand, RelativeSource={RelativeSource Self}}" />
+                                                                        </DataTemplate>
+                                                                    </dxe:ButtonInfo.Template>
+                                                                </dxe:ButtonInfo>
+                                                                <dxe:ButtonInfo IsDefaultButton="True" GlyphKind="DropDown" />
+                                                            </dxe:ComboBoxEdit.Buttons>
+                                                        </dxe:ComboBoxEdit>
+
+                                                        <Button x:Name="FamButton" Focusable="False" Grid.Row="0" Grid.Column="2"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" BorderThickness="0" 
+                                                                Command="{Binding DataContext.OpenFamilyImagesCommand,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,
+                                                                RelativeSource={RelativeSource AncestorType=UserControl, Mode=FindAncestor}}" CommandParameter="{Binding ElementName=MainGrid}"
+                                                               Visibility ="{Binding DataContext.FamilyImg, RelativeSource={RelativeSource AncestorType=UserControl, Mode=FindAncestor},   UpdateSourceTrigger=PropertyChanged , Mode=TwoWay}" >
+                                                            <Image x:Name="FamImage"  Height="18" Width="18" Source="/Emdep.Geos.Modules.SCM;component/Assets/Images/FamImage.png" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                                        </Button>
+
+                                                        <Button x:Name="SubFamButton" Grid.Row="2" Grid.Column="2"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" BorderThickness="0" 
+                                                                Command="{Binding DataContext.OpenSubFamilyImagesCommand,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,
+                                                                RelativeSource={RelativeSource AncestorType=UserControl, Mode=FindAncestor}}" CommandParameter="{Binding ElementName=MainGrid}"
+                                                                Visibility ="{Binding DataContext.SubfamilyImg, RelativeSource={RelativeSource AncestorType=UserControl, Mode=FindAncestor},   UpdateSourceTrigger=PropertyChanged , Mode=TwoWay}">
+                                                            <Image x:Name="SubFamImage"  Height="18" Width="18" Source="/Emdep.Geos.Modules.SCM;component/Assets/Images/FamImage.png" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                                        </Button>
+
+                                                        <StackPanel Name="stkOtherProperties" Grid.Row="4" Grid.ColumnSpan="5">
+                                                            <dxlc:LayoutGroup  Header="{DynamicResource SCMAppearance}" Name="lgAppearance" View="GroupBox"                                                                      
+                                                                               Margin="0,5,0,5" dxlc:LayoutControl.AllowHorizontalSizing="True" IsCollapsible="True" IsCollapsed="False">
+                                                                <dxlc:LayoutGroup.HeaderTemplate>
+                                                                    <DataTemplate>
+                                                                        <Grid>
+                                                                            <Grid.ColumnDefinitions>
+                                                                                <ColumnDefinition Width="Auto" />
+                                                                                <ColumnDefinition Width="*" />
+                                                                            </Grid.ColumnDefinitions>
+                                                                            <TextBlock Text="{Binding}" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Stretch" />
+                                                                        </Grid>
+                                                                    </DataTemplate>
+                                                                </dxlc:LayoutGroup.HeaderTemplate>
+                                                                <Grid>
+                                                                    <Grid.ColumnDefinitions>
+                                                                        <ColumnDefinition Width="100" />
+                                                                        <ColumnDefinition Width="5" />
+                                                                        <ColumnDefinition Width="*" />
+                                                                    </Grid.ColumnDefinitions>
+                                                                    <Grid.RowDefinitions>
+                                                                        <RowDefinition>
+                                                                            <RowDefinition.Style>
+                                                                                <Style TargetType="RowDefinition">
+                                                                                    <Setter Property="RowDefinition.Height" Value="30" />
+                                                                                    <Style.Triggers>
+                                                                                        <DataTrigger Value="{x:Null}" Binding="{Binding DataContext.ColorProp,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=UserControl}}">
+                                                                                            <Setter Property="RowDefinition.Height" Value="0" />
+                                                                                        </DataTrigger>
+                                                                                    </Style.Triggers>
+                                                                                </Style>
+                                                                            </RowDefinition.Style>
+                                                                        </RowDefinition>
+                                                                        <RowDefinition Height="5" />
+                                                                        <RowDefinition>
+                                                                            <RowDefinition.Style>
+                                                                                <Style TargetType="RowDefinition">
+                                                                                    <Setter Property="RowDefinition.Height" Value="30" />
+                                                                                    <Style.Triggers>
+                                                                                        <DataTrigger Value="{x:Null}" Binding="{Binding DataContext.Ways,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=UserControl}}">
+                                                                                            <Setter Property="RowDefinition.Height" Value="0" />
+                                                                                        </DataTrigger>
+                                                                                    </Style.Triggers>
+                                                                                </Style>
+                                                                            </RowDefinition.Style>
+                                                                        </RowDefinition>
+                                                                        <RowDefinition Height="5" />
+                                                                        <RowDefinition>
+                                                                            <RowDefinition.Style>
+                                                                                <Style TargetType="RowDefinition">
+                                                                                    <Setter Property="RowDefinition.Height" Value="30" />
+                                                                                    <Style.Triggers>
+                                                                                        <DataTrigger Value="{x:Null}" Binding="{Binding DataContext.GenderProp,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=UserControl}}">
+                                                                                            <Setter Property="RowDefinition.Height" Value="0" />
+                                                                                        </DataTrigger>
+                                                                                    </Style.Triggers>
+                                                                                </Style>
+                                                                            </RowDefinition.Style>
+                                                                        </RowDefinition>
+                                                                        <RowDefinition Height="5" />
+                                                                        <RowDefinition>
+                                                                            <RowDefinition.Style>
+                                                                                <Style TargetType="RowDefinition">
+                                                                                    <Setter Property="RowDefinition.Height" Value="30" />
+                                                                                    <Style.Triggers>
+                                                                                        <DataTrigger Value="{x:Null}" Binding="{Binding DataContext.SealingProp,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=UserControl}}">
+                                                                                            <Setter Property="RowDefinition.Height" Value="0" />
+                                                                                        </DataTrigger>
+                                                                                    </Style.Triggers>
+                                                                                </Style>
+                                                                            </RowDefinition.Style>
+                                                                        </RowDefinition>
+                                                                        <RowDefinition Height="0" />
+                                                                        <RowDefinition Height="0" />
+                                                                    </Grid.RowDefinitions>
+
+                                                                    <Label Grid.Row="0" Grid.Column="0" Margin="2,0,0,0" Content="{DynamicResource SCMColor}" />
+                                                                    <dxe:ComboBoxEdit Height="30" Grid.Row="0" Grid.Column="2" Name="cmbColor" HorizontalAlignment="Stretch" AutoComplete="True"                                                                             
+                                                                                      VerticalAlignment="Stretch" ScrollViewer.VerticalScrollBarVisibility="Auto" Style="{DynamicResource ComboBoxEditStyle}"                                                                              
+                                                                                      IsTextEditable="False" DisplayMember="Name" KeyUp="cmbColor_KeyUp" ApplyItemTemplateToSelectedItem="True" AllowDefaultButton="False"                                                                              
+                                                                                      IsEnabled="{Binding DataContext.ColorProp.IsEnabled,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=UserControl}}"                                                                              
+                                                                                      ItemsSource="{Binding DataContext.ListColor, RelativeSource={RelativeSource AncestorType=UserControl, Mode=FindAncestor}, UpdateSourceTrigger=PropertyChanged , Mode=TwoWay}"                                                                              
+                                                                                      SelectedItem="{Binding DataContext.SelectedColor, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                                                                        <dxe:ComboBoxEdit.Buttons>
+                                                                            <dxe:ButtonInfo GlyphKind="Custom"  x:Name="buttonClearColor">
+                                                                                <dxe:ButtonInfo.Template>
+                                                                                    <DataTemplate>
+                                                                                        <dxe:ButtonClose HorizontalAlignment="Center" VerticalAlignment="Center" Margin="2,0"
+                                                                                                 Visibility="{Binding DataContext.ClearColor, UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                                                 Command="{Binding (dxe:BaseEdit.OwnerEdit).SetNullValueCommand, RelativeSource={RelativeSource Self}}" />
+                                                                                    </DataTemplate>
+                                                                                </dxe:ButtonInfo.Template>
+                                                                            </dxe:ButtonInfo>
+                                                                            <dxe:ButtonInfo IsDefaultButton="True" GlyphKind="DropDown" />
+                                                                        </dxe:ComboBoxEdit.Buttons>
+                                                                        <dxe:ComboBoxEdit.ItemTemplate>
+                                                                            <DataTemplate>
+                                                                                <DockPanel>
+                                                                                    <Ellipse Visibility="{Binding ColorVisibility}" VerticalAlignment="Center" Width="18" Height="18" Margin="3,3,3,3" Fill="{Binding HtmlColor}" />
+                                                                                    <Image Visibility="{Binding ImageVisibility}" Style="{StaticResource ColorImageStyle}" VerticalAlignment="Center" Height="20" Width="20" Margin="2,3,3,3" />
+                                                                                    <TextBlock Text="{Binding Name}" Margin="5,0,0,0" Padding="3" >
+                                                                                        <TextBlock.Style>
+                                                                                            <Style TargetType="TextBlock">
+                                                                                                <Style.Triggers>
+                                                                                                    <Trigger Property="IsEnabled" Value="False">
+                                                                                                        <Setter Property="Foreground" Value="Gray" />
+                                                                                                    </Trigger>
+                                                                                                </Style.Triggers>
+                                                                                            </Style>
+                                                                                        </TextBlock.Style>
+                                                                                    </TextBlock>
+                                                                                </DockPanel>
+                                                                            </DataTemplate>
+                                                                        </dxe:ComboBoxEdit.ItemTemplate>
+                                                                    </dxe:ComboBoxEdit>
+
+                                                                    <Label Grid.Row="2" Grid.Column="0" Margin="2,0,0,0" Content="{DynamicResource SCMWays}" />
+                                                                    <dxe:TextEdit Grid.Column="2" Grid.Row="2" HorizontalAlignment="Stretch"                                                                                                                                                       
+                                                                                  Text="{Binding DataContext.Ways.DefaultValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=UserControl}}"                                                                               
+                                                                                  IsEnabled="{Binding DataContext.Ways.IsEnabled,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                                  VerticalContentAlignment="Center" Mask="######0;" AllowNullInput="True" MaskUseAsDisplayFormat="True" MaskType="Numeric"  NullText="{x:Null}">
+                                                                        <Binding Path="DataContext.Ways.DefaultValue" RelativeSource="{RelativeSource AncestorType=UserControl}" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay"
+                                                                                 ValidatesOnDataErrors="True">
+                                                                            <Binding.ValidationRules>
+                                                                                <Validation:SCMConnectorValidation FieldName="Ways.DefaultValue" ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True"/>
+                                                                            </Binding.ValidationRules>
+                                                                        </Binding>
+                                                                        <dxmvvm:Interaction.Behaviors>
+                                                                            <dxmvvm:EventToCommand Command="{Binding DataContext.SearchButtonVisible,RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                                                                                   EventName="EditValueChanged" CommandParameter="{Binding Path=.}" />
+                                                                        </dxmvvm:Interaction.Behaviors>
+                                                                    </dxe:TextEdit>
+
+                                                                    <Label Grid.Row="4" Grid.Column="0" Margin="2,0,0,0"  Content="{DynamicResource SCMGender}" />
+                                                                    <dxe:ComboBoxEdit Height="30" Grid.Row="4" Grid.Column="2" Name="cmbGender" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"                                                                                                                                                                    
+                                                                                      ScrollViewer.VerticalScrollBarVisibility="Auto" Style="{DynamicResource ComboBoxEditStyle}" AutoComplete="True"
+                                                                                      IsTextEditable="False" ApplyItemTemplateToSelectedItem="True" DisplayMember="Name" AllowDefaultButton="False" KeyUp="cmbGender_KeyUp"
+                                                                                      IsEnabled="{Binding DataContext.GenderProp.IsEnabled,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                                      ItemsSource="{Binding DataContext.ListGender, RelativeSource={RelativeSource AncestorType=UserControl, Mode=FindAncestor},UpdateSourceTrigger=PropertyChanged , Mode=TwoWay}"                                                                              
+                                                                                      SelectedItem="{Binding DataContext.SelectedGender, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                                                                        <dxe:ComboBoxEdit.Buttons>
+                                                                            <dxe:ButtonInfo GlyphKind="Custom" x:Name="buttonClearGender">
+                                                                                <dxe:ButtonInfo.Template>
+                                                                                    <DataTemplate>
+                                                                                        <dxe:ButtonClose HorizontalAlignment="Center" VerticalAlignment="Center" Margin="2,0"
+                                                                                                 Visibility="{Binding DataContext.ClearGender, UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                                                 Command="{Binding (dxe:BaseEdit.OwnerEdit).SetNullValueCommand, RelativeSource={RelativeSource Self}}" />
+                                                                                    </DataTemplate>
+                                                                                </dxe:ButtonInfo.Template>
+                                                                            </dxe:ButtonInfo>
+                                                                            <dxe:ButtonInfo IsDefaultButton="True" GlyphKind="DropDown" />
+                                                                        </dxe:ComboBoxEdit.Buttons>
+                                                                        <dxe:ComboBoxEdit.ItemTemplate>
+                                                                            <DataTemplate>
+                                                                                <DockPanel>
+                                                                                    <Image Style="{StaticResource ImageStyle}" VerticalAlignment="Center" Height="24" Width="24" Margin="0,0,5,0" />
+                                                                                    <TextBlock Text="{Binding Name}" Margin="5,0,0,0" Padding="3" >
+                                                                                        <TextBlock.Style>
+                                                                                            <Style TargetType="TextBlock">
+                                                                                                <Style.Triggers>
+                                                                                                    <Trigger Property="IsEnabled" Value="False">
+                                                                                                        <Setter Property="Foreground" Value="Gray" />
+                                                                                                    </Trigger>
+                                                                                                </Style.Triggers>
+                                                                                            </Style>
+                                                                                        </TextBlock.Style>
+                                                                                    </TextBlock>
+                                                                                </DockPanel>
+                                                                            </DataTemplate>
+                                                                        </dxe:ComboBoxEdit.ItemTemplate>
+                                                                    </dxe:ComboBoxEdit>
+
+                                                                    <Label Grid.Row="6" Grid.Column="0" Margin="2,0,5,0" Content="{DynamicResource SCMSealing}" />
+                                                                    <Grid Grid.Row="6"  Grid.Column="2"  Margin="0,0,5,0">
+                                                                        <Grid.ColumnDefinitions>
+                                                                            <ColumnDefinition Width="auto" />
+                                                                            <ColumnDefinition Width="auto" />
+                                                                            <ColumnDefinition Width="1" />
+                                                                            <ColumnDefinition Width="auto" />
+                                                                            <ColumnDefinition Width="*" />
+                                                                        </Grid.ColumnDefinitions>
+                                                                        <dxe:CheckEdit Name="Test1" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,0,0"                
+                                                                                       IsChecked="{Binding DataContext.SealingDefaultValue, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"                
+                                                                                       IsEnabled="{Binding DataContext.IsInternalEnable, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                                                            <dxmvvm:Interaction.Behaviors>
+                                                                                <dxmvvm:EventToCommand Command="{Binding DataContext.SearchButtonVisible,RelativeSource={RelativeSource AncestorType=UserControl}}"                                 
+                                                                                                       EventName="EditValueChanged" CommandParameter="{Binding Path=.}" />
+                                                                            </dxmvvm:Interaction.Behaviors>
+                                                                        </dxe:CheckEdit>
+
+                                                                        <Label Grid.Column="1" Margin="5,0,0,0" Content="{DynamicResource SCMSealed}" VerticalAlignment="Center" />
+                                                                        <dxe:CheckEdit Name="Test2" Grid.Column="3" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,0,0,0"                
+                                                                                       IsChecked="{Binding DataContext.UnSealedValue, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"                
+                                                                                       IsEnabled="{Binding DataContext.IsInternalEnable, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                                                            <dxmvvm:Interaction.Behaviors>
+                                                                                <dxmvvm:EventToCommand Command="{Binding DataContext.SearchButtonVisible,RelativeSource={RelativeSource AncestorType=UserControl}}"                                 
+                                                                                                       EventName="EditValueChanged" CommandParameter="{Binding Path=.}" />
+                                                                            </dxmvvm:Interaction.Behaviors>
+                                                                        </dxe:CheckEdit>
+                                                                        <Label Grid.Column="4" Margin="5,0,0,0" Content="{DynamicResource SCMUnSealed}"  VerticalAlignment=" Center" />
+                                                                    </Grid>
+                                                                </Grid>
+                                                            </dxlc:LayoutGroup>
+                                                            <!--Appearance end-->
+                                                            <!--Diameter start-->
+                                                            <dxlc:LayoutGroup Header="{DynamicResource SCMDiameter}" Name="lgDiameter" View="GroupBox" Margin="0,5,0,5"
+                                                                          dxlc:LayoutControl.AllowHorizontalSizing="True" IsCollapsible="False" IsCollapsed="True">
+                                                                <dxlc:LayoutGroup.HeaderTemplate>
+                                                                    <DataTemplate>
+                                                                        <Grid>
+                                                                            <Grid.ColumnDefinitions>
+                                                                                <ColumnDefinition Width="Auto" />
+                                                                                <ColumnDefinition Width="*" />
+                                                                            </Grid.ColumnDefinitions>
+                                                                            <TextBlock Text="{Binding}" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Stretch" />
+                                                                        </Grid>
+                                                                    </DataTemplate>
+                                                                </dxlc:LayoutGroup.HeaderTemplate>
+                                                                <Grid>
+                                                                    <Grid.ColumnDefinitions>
+                                                                        <ColumnDefinition Width="100" />
+                                                                        <ColumnDefinition Width="5" />
+                                                                        <ColumnDefinition Width="*" />
+                                                                    </Grid.ColumnDefinitions>
+                                                                    <Grid.RowDefinitions>
+                                                                        <RowDefinition>
+                                                                            <RowDefinition.Style>
+                                                                                <Style TargetType="RowDefinition">
+                                                                                    <Setter Property="RowDefinition.Height" Value="30" />
+                                                                                    <Style.Triggers>
+                                                                                        <DataTrigger Value="{x:Null}" Binding="{Binding DataContext.DiameterInternal,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=UserControl}}">
+                                                                                            <Setter Property="RowDefinition.Height" Value="0" />
+                                                                                        </DataTrigger>
+                                                                                    </Style.Triggers>
+                                                                                </Style>
+                                                                            </RowDefinition.Style>
+                                                                        </RowDefinition>
+                                                                        <RowDefinition Height="5" />
+                                                                        <RowDefinition>
+                                                                            <RowDefinition.Style>
+                                                                                <Style TargetType="RowDefinition">
+                                                                                    <Setter Property="RowDefinition.Height" Value="30" />
+                                                                                    <Style.Triggers>
+                                                                                        <DataTrigger Value="{x:Null}" Binding="{Binding DataContext.DiameterExternal,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=UserControl}}">
+                                                                                            <Setter Property="RowDefinition.Height" Value="0" />
+                                                                                        </DataTrigger>
+                                                                                    </Style.Triggers>
+                                                                                </Style>
+                                                                            </RowDefinition.Style>
+                                                                        </RowDefinition>
+                                                                    </Grid.RowDefinitions>
+                                                                    <Label Grid.Row="0" Grid.Column="0" Margin="2,0,0,0" Content="{DynamicResource SCMInternal}" />
+
+                                                                    <dxe:TextEdit  Grid.Column="2" Grid.Row="0" HorizontalAlignment="Stretch"                                                                                       
+                                                                                   Text="{Binding DataContext.DiameterInternal.DefaultValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=UserControl}}"                                                                                       
+                                                                                   IsEnabled="{Binding DataContext.DiameterInternal.IsEnabled,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=UserControl}}"                                                                                        
+                                                                                   VerticalContentAlignment="Center" Mask="######0;" AllowNullInput="True" MaskUseAsDisplayFormat="True" MaskType="Numeric"  NullText="{x:Null}">
+                                                                        <Binding Path="DataContext.DiameterInternal.DefaultValue" RelativeSource="{RelativeSource AncestorType=UserControl}" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay"
+                                                                                 ValidatesOnDataErrors="True">
+                                                                            <Binding.ValidationRules>
+                                                                                <Validation:SCMConnectorValidation FieldName="DiameterInternal.DefaultValue" ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True"/>
+                                                                            </Binding.ValidationRules>
+                                                                        </Binding>
+                                                                        <dxmvvm:Interaction.Behaviors>
+                                                                            <dxmvvm:EventToCommand Command="{Binding DataContext.SearchButtonVisible,RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                                                                                   EventName="EditValueChanged" 
+                                                                                                   CommandParameter="{Binding Path=.}" />
+                                                                        </dxmvvm:Interaction.Behaviors>
+                                                                    </dxe:TextEdit>
+
+                                                                    <Label Grid.Row="2" Grid.Column="0" Margin="2,0,0,0" Content="{DynamicResource SCMExternal}" />
+                                                                    <dxe:TextEdit Grid.Column="2" Grid.Row="2" HorizontalAlignment="Stretch"                                                                                                                                                       
+                                                                                  Text="{Binding DataContext.DiameterExternal.DefaultValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=UserControl}}"                                                                                       
+                                                                                  IsEnabled="{Binding DataContext.DiameterExternal.IsEnabled,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                                  VerticalContentAlignment="Center" Mask="######0;" AllowNullInput="True" MaskUseAsDisplayFormat="True" MaskType="Numeric"  NullText="{x:Null}">
+                                                                        <Binding Path="DataContext.DiameterExternal.DefaultValue" RelativeSource="{RelativeSource AncestorType=UserControl}" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay"
+                                                                                 ValidatesOnDataErrors="True">
+                                                                            <Binding.ValidationRules>
+                                                                                <Validation:SCMConnectorValidation FieldName="DiameterExternal.DefaultValue" ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True"/>
+                                                                            </Binding.ValidationRules>
+                                                                        </Binding>
+                                                                        <dxmvvm:Interaction.Behaviors>
+                                                                            <dxmvvm:EventToCommand Command="{Binding DataContext.SearchButtonVisible,RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                                                                                   EventName="EditValueChanged" 
+                                                                                                   CommandParameter="{Binding Path=.}" />
+                                                                        </dxmvvm:Interaction.Behaviors>
+                                                                    </dxe:TextEdit>
+                                                                </Grid>
+                                                            </dxlc:LayoutGroup>
+                                                            <!--Diameter end-->
+                                                            <!--Size start-->
+                                                            <dxlc:LayoutGroup Header="{DynamicResource SCMSize}" Name="lgSize" View="GroupBox" Margin="0,5,0,5"
+                                                                          dxlc:LayoutControl.AllowHorizontalSizing="True" IsCollapsible="False" IsCollapsed="True">
+                                                                <dxlc:LayoutGroup.HeaderTemplate>
+                                                                    <DataTemplate>
+                                                                        <Grid>
+                                                                            <Grid.ColumnDefinitions>
+                                                                                <ColumnDefinition Width="Auto" />
+                                                                                <ColumnDefinition Width="*" />
+                                                                            </Grid.ColumnDefinitions>
+                                                                            <TextBlock Text="{Binding }" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Stretch" />
+                                                                        </Grid>
+                                                                    </DataTemplate>
+                                                                </dxlc:LayoutGroup.HeaderTemplate>
+                                                                <Grid>
+                                                                    <Grid.ColumnDefinitions>
+                                                                        <ColumnDefinition Width="100" />
+                                                                        <ColumnDefinition Width="5" />
+                                                                        <ColumnDefinition Width="*" />
+                                                                    </Grid.ColumnDefinitions>
+                                                                    <Grid.RowDefinitions>
+                                                                        <RowDefinition>
+                                                                            <RowDefinition.Style>
+                                                                                <Style TargetType="RowDefinition">
+                                                                                    <Setter Property="RowDefinition.Height" Value="30" />
+                                                                                    <Style.Triggers>
+                                                                                        <DataTrigger Value="{x:Null}" Binding="{Binding DataContext.Height,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=UserControl}}">
+                                                                                            <Setter Property="RowDefinition.Height" Value="0" />
+                                                                                        </DataTrigger>
+                                                                                    </Style.Triggers>
+                                                                                </Style>
+                                                                            </RowDefinition.Style>
+                                                                        </RowDefinition>
+                                                                        <RowDefinition Height="5" />
+                                                                        <RowDefinition>
+                                                                            <RowDefinition.Style>
+                                                                                <Style TargetType="RowDefinition">
+                                                                                    <Setter Property="RowDefinition.Height" Value="30" />
+                                                                                    <Style.Triggers>
+                                                                                        <DataTrigger Value="{x:Null}" Binding="{Binding DataContext.Length,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=UserControl}}">
+                                                                                            <Setter Property="RowDefinition.Height" Value="0" />
+                                                                                        </DataTrigger>
+                                                                                    </Style.Triggers>
+                                                                                </Style>
+                                                                            </RowDefinition.Style>
+                                                                        </RowDefinition>
+                                                                        <RowDefinition Height="5" />
+                                                                        <RowDefinition>
+                                                                            <RowDefinition.Style>
+                                                                                <Style TargetType="RowDefinition">
+                                                                                    <Setter Property="RowDefinition.Height" Value="30" />
+                                                                                    <Style.Triggers>
+                                                                                        <DataTrigger Value="{x:Null}" Binding="{Binding DataContext.Width,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=UserControl}}">
+                                                                                            <Setter Property="RowDefinition.Height" Value="0" />
+                                                                                        </DataTrigger>
+                                                                                    </Style.Triggers>
+                                                                                </Style>
+                                                                            </RowDefinition.Style>
+                                                                        </RowDefinition>
+                                                                    </Grid.RowDefinitions>
+                                                                    <Label Grid.Row="0" Grid.Column="0" Margin="2,0,0,0" Content="{DynamicResource SCMHeight}" />
+
+
+                                                                    <dxe:TextEdit Grid.Row="0" Grid.Column="2" HorizontalAlignment="Stretch" VerticalContentAlignment="Center"                                                                                                                                                        
+                                                                                  Text="{Binding DataContext.Height.DefaultValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                                                                       IsEnabled="{Binding DataContext.Height.IsEnabled,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                                  Mask="######0;" AllowNullInput="True" MaskUseAsDisplayFormat="True" MaskType="Numeric"  NullText="{x:Null}" >
+                                                                        <Binding Path="DataContext.Height.DefaultValue" RelativeSource="{RelativeSource AncestorType=UserControl}" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay"
+                                                                                 ValidatesOnDataErrors="True">
+                                                                            <Binding.ValidationRules>
+                                                                                <Validation:SCMConnectorValidation FieldName="Height.DefaultValue" ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True"/>
+                                                                            </Binding.ValidationRules>
+                                                                        </Binding>
+                                                                        <dxmvvm:Interaction.Behaviors>
+                                                                            <dxmvvm:EventToCommand Command="{Binding DataContext.SearchButtonVisible,RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                                                                                   EventName="EditValueChanged" 
+                                                                                                   CommandParameter="{Binding Path=.}" />
+                                                                        </dxmvvm:Interaction.Behaviors>
+                                                                    </dxe:TextEdit>
+                                                                    <Label Grid.Row="2" Grid.Column="0" Margin="2,0,0,0" Content="{DynamicResource SCMLength}" />
+
+                                                                    <dxe:TextEdit Grid.Row="2" Grid.Column="2" HorizontalAlignment="Stretch" VerticalContentAlignment="Center"                                                                                  
+                                                                                  Text="{Binding DataContext.Length.DefaultValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=UserControl}}"                                                                                        
+                                                                                  IsEnabled="{Binding DataContext.Length.IsEnabled,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                                  Mask="######0;" AllowNullInput="True" MaskUseAsDisplayFormat="True" MaskType="Numeric"  NullText="{x:Null}">
+                                                                        <Binding Path="DataContext.Length.DefaultValue" RelativeSource="{RelativeSource AncestorType=UserControl}" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay"
+                                                                                 ValidatesOnDataErrors="True">
+                                                                            <Binding.ValidationRules>
+                                                                                <Validation:SCMConnectorValidation FieldName="Length.DefaultValue" ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True"/>
+                                                                            </Binding.ValidationRules>
+                                                                        </Binding>
+                                                                        <dxmvvm:Interaction.Behaviors>
+                                                                            <dxmvvm:EventToCommand Command="{Binding DataContext.SearchButtonVisible,RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                                                                                   EventName="EditValueChanged" 
+                                                                                                   CommandParameter="{Binding Path=.}" />
+                                                                        </dxmvvm:Interaction.Behaviors>
+                                                                    </dxe:TextEdit>
+
+                                                                    <Label Grid.Row="4" Grid.Column="0" Margin="2,0,0,0" Content="{DynamicResource SCMWidth}" />
+
+                                                                    <dxe:TextEdit Grid.Row="4" Grid.Column="6" HorizontalAlignment="Stretch" Text="{Binding DataContext.Width.DefaultValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=UserControl}}"                                                                                          
+                                                                                  IsEnabled="{Binding DataContext.Width.IsEnabled,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                                  VerticalContentAlignment="Center" Mask="######0;" AllowNullInput="True" MaskUseAsDisplayFormat="True" MaskType="Numeric"  NullText="{x:Null}">
+                                                                        <Binding Path="DataContext.Width.DefaultValue" RelativeSource="{RelativeSource AncestorType=UserControl}" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay"
+                                                                                 ValidatesOnDataErrors="True">
+                                                                            <Binding.ValidationRules>
+                                                                                <Validation:SCMConnectorValidation FieldName="Width.DefaultValue" ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True"/>
+                                                                            </Binding.ValidationRules>
+                                                                        </Binding>
+                                                                        <dxmvvm:Interaction.Behaviors>
+                                                                            <dxmvvm:EventToCommand Command="{Binding DataContext.SearchButtonVisible,RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                                                                                   EventName="EditValueChanged" 
+                                                                                                   CommandParameter="{Binding Path=.}" />
+                                                                        </dxmvvm:Interaction.Behaviors>
+                                                                    </dxe:TextEdit>
+
+                                                                </Grid>
+                                                            </dxlc:LayoutGroup>
+                                                            <!--Size end-->
+                                                            <!--Custom start-->
+                                                            <dxlc:LayoutGroup Header="{DynamicResource SCMCustom}" Name="lgCustom" View="GroupBox" Margin="0,5,0,5"
+                                                                          dxlc:LayoutControl.AllowHorizontalSizing="True" IsCollapsible="True" IsCollapsed="True"  >
+                                                                <dxlc:LayoutGroup.HeaderTemplate>
+                                                                    <DataTemplate>
+                                                                        <Grid>
+                                                                            <Grid.ColumnDefinitions>
+                                                                                <ColumnDefinition Width="Auto" />
+                                                                                <ColumnDefinition Width="*" />
+                                                                            </Grid.ColumnDefinitions>
+                                                                            <TextBlock Text="{Binding }" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Stretch" />
+                                                                        </Grid>
+                                                                    </DataTemplate>
+                                                                </dxlc:LayoutGroup.HeaderTemplate>
+                                                                <Grid x:Name="CustomItemsGrid" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+
+                                                                    <dxg:GridControl x:Name="CustomFieldGridControl" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" ScrollViewer.VerticalScrollBarVisibility="Auto" Height="300" Margin="0,10,0,0" ShowBorder="False"                                                       
+                                                                         ItemsSource="{Binding DataContext.CustomListByIdFamily,UpdateSourceTrigger=PropertyChanged, 
+                                                                        Mode=TwoWay, RelativeSource={RelativeSource AncestorType=UserControl, Mode=FindAncestor}}"                                                                                                        
+                                                                         Width="Auto"  ImplyNullLikeEmptyStringWhenFiltering="True" AllowLiveDataShaping="True" SelectionMode="None">
+                                                                        <dxg:GridColumn  FixedWidth="True" AllowMoving="False"  ReadOnly="True"  MinWidth="100" MaxWidth="100" Width="100" FieldName="CustomFamily" FilterPopupMode="CheckedList" >
+                                                                            <dxg:GridColumn.CellTemplate>
+                                                                                <DataTemplate>
+                                                                                    <Label Content="{Binding RowData.Row.CustomFamily,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Margin="5,5,5,5"/>
+                                                                                </DataTemplate>
+                                                                            </dxg:GridColumn.CellTemplate>
+                                                                        </dxg:GridColumn>
+                                                                        <!--[rdixit][03.03.2025][GEOS2-6983]-->
+                                                                        <dxg:GridColumn  FieldName="DefaultValue" Width="*" FilterPopupMode="CheckedList">
+                                                                            <dxg:GridColumn.CellTemplate>
+                                                                                <DataTemplate>
+                                                                                    <Grid>
+                                                                                        <dxe:TextEdit Text="{Binding RowData.Row.DefaultValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                                                                                      Margin="5" IsReadOnly="{Binding RowData.Row.IsReadOnly,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+                                                                                            <dxe:TextEdit.Style>
+                                                                                                <Style TargetType="dxe:TextEdit">
+                                                                                                    <Setter Property="Visibility" Value="Hidden"/>
+                                                                                                    <Style.Triggers>
+                                                                                                        <DataTrigger Binding="{Binding RowData.Row.IdConnectorType}" Value="1843">
+                                                                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                                                                        </DataTrigger>
+                                                                                                    </Style.Triggers>
+                                                                                                </Style>
+                                                                                            </dxe:TextEdit.Style>
+                                                                                        </dxe:TextEdit>
+                                                                                        <dxe:TextEdit Text="{Binding RowData.Row.DefaultValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" MaskType="Numeric"
+                                                                                                      Margin="5" IsReadOnly="{Binding RowData.Row.IsReadOnly,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+                                                                                            <dxe:TextEdit.Style>
+                                                                                                <Style TargetType="dxe:TextEdit">
+                                                                                                    <Setter Property="Visibility" Value="Hidden"/>
+                                                                                                    <Style.Triggers>
+                                                                                                        <DataTrigger Binding="{Binding RowData.Row.IdConnectorType,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Value="1825">
+                                                                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                                                                        </DataTrigger>
+                                                                                                    </Style.Triggers>
+                                                                                                </Style>
+                                                                                            </dxe:TextEdit.Style>
+                                                                                        </dxe:TextEdit>
+                                                                                        <dxe:ComboBoxEdit IsReadOnly="{Binding RowData.Row.IsReadOnly,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                                                                                                          Height="30" ItemsSource="{Binding RowData.Row.CustomFieldComboboxList,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                                                                                          SelectedItem="{Binding RowData.Row.SelectedcustomField}" ShowPopupIfReadOnly="False"
+                                                                                                          DisplayMember="Value_en" Margin="5" AllowUpdateTwoWayBoundPropertiesOnSynchronization="False"  AutoComplete="True"  
+                                                                                                          ImmediatePopup="True" ValueMember="Value_en" IsTextEditable="False" IncrementalFiltering="True">
+                                                                                            <dxe:ComboBoxEdit.Style>
+                                                                                                <Style TargetType="dxe:ComboBoxEdit">
+                                                                                                    <Setter Property="Visibility" Value="Hidden"/>
+                                                                                                    <Style.Triggers>
+                                                                                                        <DataTrigger Binding="{Binding RowData.Row.IdConnectorType}" Value="1826">
+                                                                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                                                                        </DataTrigger>
+                                                                                                    </Style.Triggers>
+                                                                                                </Style>
+                                                                                            </dxe:ComboBoxEdit.Style>
+                                                                                        </dxe:ComboBoxEdit>
+                                                                                        <dxe:ToggleSwitch x:Name="togswEngAnal" Grid.Row="6" Grid.Column="2" HorizontalAlignment="Left"
+                                                                                                          VerticalAlignment="Center" ContentPlacement="Inside" CheckedStateContent="On"
+                                                                                                          UncheckedStateContent="Off" ToggleSwitchWidth="50" ToggleSwitchHeight="22"
+                                                                                                          IsThreeState="False" Margin="5" 
+                                                                                                          IsReadOnly="{Binding RowData.Row.IsReadOnly,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"   
+                                                                                                          IsChecked="{Binding RowData.Row.DefaultValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+                                                                                            <dxe:ToggleSwitch.Style>
+                                                                                                <Style TargetType="dxe:ToggleSwitch">
+                                                                                                    <Setter Property="Visibility" Value="Hidden"/>
+                                                                                                    <Style.Triggers>
+                                                                                                        <DataTrigger Binding="{Binding RowData.Row.IdConnectorType}" Value="1827">
+                                                                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                                                                        </DataTrigger>
+                                                                                                    </Style.Triggers>
+                                                                                                </Style>
+                                                                                            </dxe:ToggleSwitch.Style>
+                                                                                        </dxe:ToggleSwitch>
+                                                                                    </Grid>
+                                                                                </DataTemplate>
+                                                                            </dxg:GridColumn.CellTemplate>
+                                                                        </dxg:GridColumn>
+                                                                        <dxg:GridControl.View>
+                                                                            <dxg:TableView x:Name="CustomFieldTableView" 
+                                                                              
+                                                                                           NavigationStyle="None" 
+                                                                                           VerticalScrollbarVisibility="Auto"
+                                                                                           HorizontalScrollbarVisibility="Auto"   
+                                                                                           RowDetailsVisibilityMode="Visible" 
+                                                                                           ShowHorizontalLines="False"      
+                                                                                           ShowVerticalLines="False"     
+                                                                                           ShowSearchPanelMode="Never"            
+                                                                                           ShowColumnHeaders="False"     
+                                                                                           AutoWidth="False"       
+                                                                                           AllowFixedColumnMenu="False"            
+                                                                                           ShowFixedTotalSummary="False"   
+                                                                                           ShowTotalSummary="False"         
+                                                                                           ShowSearchPanelCloseButton="True"          
+                                                                                           SearchPanelHorizontalAlignment="Stretch"        
+                                                                                           ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly"        
+                                                                                           AllowGrouping="True"                               
+                                                                                           ShowGroupPanel="False"  Focusable="False"  
+                                                                                           ShowIndicator="False">
+                                                                            </dxg:TableView>
+                                                                        </dxg:GridControl.View>
+                                                                    </dxg:GridControl>
+                                                                </Grid>
+                                                            </dxlc:LayoutGroup>
+
+                                                            <!--Custom end-->
+                                                            <!--Appearance end-->
+                                                        </StackPanel>
+                                                    </Grid>
+                                                </dxlc:LayoutGroup>
+                                                <dxlc:LayoutGroup Header="{DynamicResource SCMComponents}" Name="lgComponents" View="GroupBox" Margin="5"                                                          
+                                                                  IsCollapsible="True" IsCollapsed="True" dxlc:LayoutControl.AllowHorizontalSizing="True" dxlc:LayoutControl.AllowVerticalSizing="True">
+                                                    <dxlc:LayoutGroup.HeaderTemplate>
+                                                        <DataTemplate>
+                                                            <Grid>
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="Auto" />
+                                                                    <ColumnDefinition Width="*" />
+                                                                </Grid.ColumnDefinitions>
+                                                                <TextBlock Text="{Binding}" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Stretch" />
+                                                            </Grid>
+                                                        </DataTemplate>
+                                                    </dxlc:LayoutGroup.HeaderTemplate>
+                                                    <Grid Height="400">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <Grid.RowDefinitions>
+                                                            <RowDefinition Height="30" />
+                                                            <RowDefinition Height="5" />
+                                                            <RowDefinition Height="*" />
+                                                        </Grid.RowDefinitions>
+
+                                                        <!--[GEOS2-4602][rdixit[13.09.2023]-->
+                                                        <Button Content=" " Background="Gray" Grid.Row="0" Grid.Column="2" Width="35" HorizontalAlignment="Right"
+                                                            Command="{Binding DataContext.AddNewComponentFilerButtonCommand,RelativeSource={RelativeSource AncestorType=UserControl, Mode=FindAncestor}}" CommandParameter="{Binding ElementName=ComponentGridControl}">
+                                                            <Button.ToolTip>
+                                                                <TextBlock Text="{DynamicResource ButtonAddNewComponentFiler}"/>
+                                                            </Button.ToolTip>
+                                                            <Button.ContentTemplate>
+                                                                <DataTemplate>
+                                                                    <Image Source="{DynamicResource AddButtonImage}" Height="12" Width="12" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                                </DataTemplate>
+                                                            </Button.ContentTemplate>
+                                                        </Button>
+
+                                                        <dxg:GridControl  Name="ComponentGridControl" Grid.Row="2" Grid.Column="0" Margin="5" HorizontalAlignment="Stretch"  
+                                                                          VerticalAlignment="Stretch" ShowBorder="True" EnableSmartColumnsGeneration="True" SelectionMode="Cell" AllowLiveDataShaping="True"                                                                          
+                                                                          ItemsSource="{Binding DataContext.Componentlist,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=UserControl, Mode=FindAncestor}}"
+                                                                          SelectedItem="{Binding DataContext.SelectedComponentlist,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=UserControl, Mode=FindAncestor}}">
+                                                            <dxg:GridColumn Header="{DynamicResource ComponentCondition}" FieldName="SelectedCondition" MinWidth="100" FilterPopupMode="CheckedList">
+                                                                <dxg:GridColumn.CellTemplate>
+                                                                    <DataTemplate>
+                                                                        <dxe:ComboBoxEdit Name="PART_Editor"  ItemsSource="{Binding RowData.Row.ConditionList,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+                                                                                          ApplyItemTemplateToSelectedItem="True"
+                                                                                          HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" IsTextEditable="False"                                                                                          
+                                                                                          AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True"/>
+                                                                    </DataTemplate>
+                                                                </dxg:GridColumn.CellTemplate>
+                                                            </dxg:GridColumn>
+                                                            <dxg:GridColumn Header="{DynamicResource ComponentColor}" FieldName="SelectedColor" MinWidth="100" FilterPopupMode="CheckedList">
+
+                                                                <dxg:GridColumn.CellTemplate>
+                                                                    <DataTemplate>
+                                                                        <dxe:ComboBoxEdit Name="PART_Editor"  ItemsSource="{Binding RowData.Row.ColorList,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" AllowDefaultButton="False"                                                                                      
+                                                                                          HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" IsTextEditable="False"  ApplyItemTemplateToSelectedItem="True"                                                                                        
+                                                                                          DisplayMember="Name" ValueMember="Name" AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True"  Style="{DynamicResource ComboBoxEditStyle}" >
+                                                                            <dxe:ComboBoxEdit.ItemTemplate>
+                                                                                <DataTemplate>
+                                                                                    <DockPanel>
+                                                                                        <Rectangle Width="12" Height="12" Margin="3" Fill="{Binding HtmlColor}" />
+                                                                                        <TextBlock Text="{Binding Name}" />
+                                                                                    </DockPanel>
+                                                                                </DataTemplate>
+                                                                            </dxe:ComboBoxEdit.ItemTemplate>
+                                                                            <dxe:ComboBoxEdit.Buttons>
+                                                                                <dxe:ButtonInfo GlyphKind="Custom" x:Name="buttonClearGender">
+                                                                                    <dxe:ButtonInfo.Template>
+                                                                                        <DataTemplate>
+                                                                                            <dxe:ButtonClose HorizontalAlignment="Center"
+                                                                                                 VerticalAlignment="Center"
+                                                                                                 Margin="2,0"
+                                                                                                 Visibility="{Binding RowData.Row.ClearColor, UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource Self}}"
+                                                                                                 Command="{Binding (dxe:BaseEdit.OwnerEdit).SetNullValueCommand, RelativeSource={RelativeSource Self}}" />
+                                                                                        </DataTemplate>
+                                                                                    </dxe:ButtonInfo.Template>
+                                                                                </dxe:ButtonInfo>
+                                                                                <dxe:ButtonInfo IsDefaultButton="True"
+                                                                                    GlyphKind="DropDown" />
+                                                                            </dxe:ComboBoxEdit.Buttons>
+                                                                        </dxe:ComboBoxEdit>
+                                                                    </DataTemplate>
+                                                                </dxg:GridColumn.CellTemplate>
+                                                            </dxg:GridColumn>
+                                                            <dxg:GridColumn Header="{DynamicResource ComponentType}" FieldName="SelectedComponentType"  MinWidth="100" FilterPopupMode="CheckedList">
+                                                                <dxg:GridColumn.CellTemplate>
+                                                                    <DataTemplate>
+                                                                        <dxe:ComboBoxEdit Name="PART_Editor"  ItemsSource="{Binding RowData.Row.ComponentTypeList,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"       AllowDefaultButton="False"                                                                                      
+                                                                                          HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" IsTextEditable="False"                                                                                          
+                                                                                          DisplayMember="Name" ValueMember="Name" AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True"    Style="{DynamicResource ComboBoxEditStyle}" >
+                                                                            <dxe:ComboBoxEdit.ItemTemplate>
+                                                                                <DataTemplate>
+                                                                                    <DockPanel>
+                                                                                        <TextBlock Text="{Binding Name}" Margin="5,0,0,0" Padding="3" />
+                                                                                    </DockPanel>
+                                                                                </DataTemplate>
+                                                                            </dxe:ComboBoxEdit.ItemTemplate>
+                                                                            <dxe:ComboBoxEdit.Buttons>
+                                                                                <dxe:ButtonInfo GlyphKind="Custom" x:Name="buttonClearGender">
+                                                                                    <dxe:ButtonInfo.Template>
+                                                                                        <DataTemplate>
+                                                                                            <dxe:ButtonClose HorizontalAlignment="Center"
+                                                                                                 VerticalAlignment="Center"
+                                                                                                 Margin="2,0"
+                                                                                                 Visibility="{Binding RowData.Row.ClearType, UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource Self}}"
+                                                                                                 Command="{Binding (dxe:BaseEdit.OwnerEdit).SetNullValueCommand, RelativeSource={RelativeSource Self}}" />
+                                                                                        </DataTemplate>
+                                                                                    </dxe:ButtonInfo.Template>
+                                                                                </dxe:ButtonInfo>
+                                                                                <dxe:ButtonInfo IsDefaultButton="True"
+                                                                                    GlyphKind="DropDown" />
+                                                                            </dxe:ComboBoxEdit.Buttons>
+                                                                        </dxe:ComboBoxEdit>
+                                                                    </DataTemplate>
+                                                                </dxg:GridColumn.CellTemplate>
+                                                            </dxg:GridColumn>
+                                                            <dxg:GridColumn Header="{DynamicResource ComponentReference}" FieldName="Reference"  MinWidth="70" FilterPopupMode="CheckedList"/>
+                                                            <dxg:GridColumn MinWidth="30" Width="40" ReadOnly="True" FixedWidth="True" FilterPopupMode="Default" AllowPrinting="False" ShowInColumnChooser="False" AllowMoving="false">
+                                                                <dxg:GridColumn.CellTemplate>
+                                                                    <DataTemplate>
+                                                                        <Button Name="deleteRowItem" ToolTip="{DynamicResource Delete}" 
+                                                                                Command="{Binding View.DataContext.DeleteComponentFilterCommand}" CommandParameter="{Binding ElementName=ComponentListTableView}">
+                                                                            <Button.ContentTemplate>
+                                                                                <DataTemplate>
+                                                                                    <Image Height="16" Width="16"  Style="{ DynamicResource DeleteStyle}" />
+                                                                                </DataTemplate>
+                                                                            </Button.ContentTemplate>
+                                                                            <Button.Style>
+                                                                                <Style TargetType="{x:Type Button}">
+                                                                                    <Style.Triggers>
+                                                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                                                            <Setter Property="Cursor" Value="Hand"/>
+                                                                                        </Trigger>
+                                                                                    </Style.Triggers>
+                                                                                </Style>
+                                                                            </Button.Style>
+                                                                        </Button>
+                                                                    </DataTemplate>
+                                                                </dxg:GridColumn.CellTemplate>
+                                                            </dxg:GridColumn>
+
+                                                            <dxmvvm:Interaction.Behaviors>
+                                                                <UIHelper:GridSelectingBehavior />
+                                                            </dxmvvm:Interaction.Behaviors>
+                                                            <dxg:GridControl.View>
+                                                                <dxg:TableView x:Name="ComponentListTableView"                                                                                 
+                                                                               NavigationStyle="Cell"
+                                                                               RowDetailsVisibilityMode="Visible"
+                                                                               ShowHorizontalLines="True"
+                                                                               ShowSearchPanelMode="Always"
+                                                                               ShowColumnHeaders="True"                                                                         
+                                                                               VerticalScrollbarVisibility="Auto" 
+                                                                               HorizontalScrollbarVisibility="Auto"
+                                                                               AllowFixedColumnMenu="False"
+                                                                               ShowTotalSummary="False"
+                                                                               ShowFixedTotalSummary="False"
+                                                                               EnableImmediatePosting="True"
+                                                                               SearchPanelHorizontalAlignment="Stretch"                                                                             
+                                                                               ImmediateUpdateRowPosition="False"
+                                                                               AllowEditing="True"
+                                                                               ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly"
+                                                                               AllowGrouping="False"
+                                                                               Focusable="False"
+                                                                               ShowGroupPanel="False"
+                                                                               FilterRowDelay="0"
+                                                                               UseLegacyFilterEditor="True"
+                                                                               ShowIndicator="True"
+                                                                               AutoWidth="True"
+                                                                               SearchString="{Binding MyFilterString,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                                                               >
+                                                                </dxg:TableView>
+                                                            </dxg:GridControl.View>
+                                                        </dxg:GridControl>
+
+                                                        <!---->
+                                                        <!--[GEOS2-4602][rdixit[13.09.2023]-->
+                                                    </Grid>
+                                                </dxlc:LayoutGroup>
+                                            </StackPanel>
+                                        </Grid>
+                                    </ScrollViewer>
+                                    <Separator />
+                                    <Grid Grid.Row="2" Margin="5">
+                                        <Button x:Name="downButton" HorizontalAlignment="Center" Padding="2" VerticalAlignment="Center" FontFamily="Marlett"                                            
+                                                FontSize="20" Width="40" Content="6" Click="ScrollDownButton_Click" />
+                                    </Grid>
+                                    <Rectangle Grid.Row="3" HorizontalAlignment="Stretch" Fill="{DynamicResource LineColorStyle}"  Height="0.3" />
+                                    <!--Accept and Cancel Button-->
+                                    <Grid Grid.Row="4" ShowGridLines="False" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="100" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="120" />
+                                            <ColumnDefinition Width="120" />
+                                        </Grid.ColumnDefinitions>
+                                        <Button Grid.Column="0" Content="{DynamicResource SCMClear}" Margin="10,5,10,5" Name="clearbtn" Click="clearbtn_Click">
+                                            <dxmvvm:Interaction.Behaviors>
+                                                <dxmvvm:EventToCommand Command="{Binding DataContext.ClearCommand,RelativeSource={RelativeSource AncestorType=UserControl}}" EventName="Click" CommandParameter="{Binding Path=.}" />
+                                            </dxmvvm:Interaction.Behaviors>
+                                        </Button>
+                                        <Button Grid.Column="2" Content="{DynamicResource SCMAdd}" Margin="10,5,5,5" Width="100"  HorizontalAlignment="Right" IsEnabled="{Binding IsAddEnable}">
+                                            <dxmvvm:Interaction.Behaviors>
+                                                <dxmvvm:EventToCommand Command="{Binding DataContext.AddCommand,RelativeSource={RelativeSource AncestorType=UserControl}}" EventName="Click" CommandParameter="{Binding Path=.}"  />
+                                            </dxmvvm:Interaction.Behaviors>
+                                        </Button>
+                                        <Button Grid.Column="3" Content="{DynamicResource SCMSearch}" Margin="5,5,10,5" TabIndex="0" IsEnabled="{Binding IsFamilySelected}">
+                                            <dxmvvm:Interaction.Behaviors>
+                                                <dxmvvm:EventToCommand Command="{Binding DataContext.SearchCommand,RelativeSource={RelativeSource AncestorType=UserControl}}" EventName="Click" CommandParameter="{Binding Path=.}"  />
+                                            </dxmvvm:Interaction.Behaviors>
+                                        </Button>
+                                    </Grid>
+                                </Grid>
+                            </dxdo:LayoutPanel>
+                        </dxdo:LayoutGroup>
+                    </dxdo:LayoutGroup>
+                </dxdo:LayoutGroup>
+            </dxdo:DockLayoutManager>
+            <dx:DXTabControl ItemsSource="{Binding Source={x:Static ScmApplication:SCMCommon.Instance},Path=Tabs, UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"                
+                             SelectedIndex="{Binding Source={x:Static ScmApplication:SCMCommon.Instance},Path=TabIndex, UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"                                              
+                             Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" TabContentCacheMode="None">
+
+                <dx:DXTabControl.Style>
+                    <Style TargetType="dx:DXTabControl">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Source={x:Static ScmApplication:SCMCommon.Instance},Path=TabIndex, UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" Value="-1">
+                                <Setter Property="Margin" Value="0,0,5,0"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </dx:DXTabControl.Style>
+                <dx:DXTabControl.ItemContainerStyle>
+                    <Style TargetType="dx:DXTabItem">
+                        <Setter Property="Header" Value="{DXBinding Expr='TabName'}" />
+                        <Setter Property="CloseCommand" Value="{Binding RelativeSource={RelativeSource AncestorType=dx:DXTabControl}, Path=DataContext.CancelButtonCommand}"/>
+                        <Setter Property="CloseCommandParameter" Value="{Binding}"/>
+
+                    </Style>
+                </dx:DXTabControl.ItemContainerStyle>
+                <dx:DXTabControl.View>
+                    <dx:TabControlScrollView HideButtonShowMode="InAllTabs" SingleTabItemHideMode="Hide" NewButtonShowMode="NoWhere" NewTabCommand="{Binding AddNewTabCommand}" />
+                </dx:DXTabControl.View>
+            </dx:DXTabControl>
+        </Grid>
+    </Grid>
+    <!--[shweta.thube][GEOS2-6630][04.04.2025]-->
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="KeyDown">
+            <behaviors:InvokeDelegateCommandAction Command="{Binding CommandTextInput}" CommandParameter="{Binding Path=InvokeParameter, RelativeSource={RelativeSource Self}}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+</UserControl>

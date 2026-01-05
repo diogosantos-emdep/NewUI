@@ -1,0 +1,1591 @@
+﻿<dxwui:WinUIDialogWindow x:Class="Emdep.Geos.Modules.TSM.Views.ViewWorkOrderView "
+                         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                         xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                         xmlns:dxdo="http://schemas.devexpress.com/winfx/2008/xaml/docking"
+                         xmlns:dxnav="http://schemas.devexpress.com/winfx/2008/xaml/navigation"
+                         xmlns:dxn="http://schemas.devexpress.com/winfx/2008/xaml/navbar"
+                         xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"
+                         xmlns:dxwuin="http://schemas.devexpress.com/winfx/2008/xaml/windowsui/navigation"
+                         xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+                         xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+                         xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol" 
+                         xmlns:ViewModels="clr-namespace:Emdep.Geos.Modules.TSM.ViewModels"
+                         xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+                         xmlns:sysglb="clr-namespace:System.Globalization;assembly=mscorlib"
+                         xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+                         xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+                         xmlns:behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+                         xmlns:Converters="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+                         xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+                         xmlns:TSMCommon ="clr-namespace:Emdep.Geos.Modules.TSM.CommonClass"
+                         xmlns:dxefl="clr-namespace:DevExpress.Xpf.Editors.Flyout.Native;assembly=DevExpress.Xpf.Core.v19.2"
+                         xmlns:system="clr-namespace:System;assembly=mscorlib"
+                         xmlns:dxgt="http://schemas.devexpress.com/winfx/2008/xaml/grid/themekeys"
+                         xmlns:ve="http://schemas.devexpress.com/winfx/2008/xaml/docking/visualelements"
+                         xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+                         xmlns:core="http://schemas.devexpress.com/winfx/2008/xaml/core"
+                         xmlns:dxre="http://schemas.devexpress.com/winfx/2008/xaml/richedit"
+                         Style="{DynamicResource WinUIDialogWindowStyle}" 
+                         mc:Ignorable="d">
+    <dxmvvm:Interaction.Behaviors>
+        <dxmvvm:SaveFileDialogService Title="Download Attachment" />
+    </dxmvvm:Interaction.Behaviors>
+
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape" Command="{Binding CommandWorkOrderCancel}" />
+    </dxwui:WinUIDialogWindow.InputBindings>
+
+    <dxwui:WinUIDialogWindow.TitleStyle>
+        <Style TargetType="ContentControl">
+            <Setter Property="ContentTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                        <Grid ShowGridLines="False" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="300"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Text="{DynamicResource WorkOrderItemDetailsViewTitle}" Grid.Column="0"
+                                       Style="{DynamicResource CustomTitleStyle}" />
+                            <dxe:ListBoxEdit x:Name="WorkflowStatusBtns" Grid.Column="1"
+                                 ItemsSource="{Binding DataContext.WorkflowStatusButtons,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}"
+                                 SelectedItem="{Binding DataContext.SelectedWorkflowStatusButton, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}"
+                                 AllowItemHighlighting="False" SelectionMode="Single" Focusable="False" Margin="0,0,0,0" ShowBorder="False"  >
+                                <dxe:ListBoxEdit.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" >
+                                        </StackPanel>
+                                    </ItemsPanelTemplate>
+                                </dxe:ListBoxEdit.ItemsPanel>
+                                <dxe:ListBoxEdit.ItemTemplate>
+                                    <DataTemplate>
+                                        <Button x:Name="WorkflowStatusBtn" Style="{DynamicResource Button16Style}"
+                                                Content="{Binding Name}"
+                                                Height="30"
+                                                Width="200"
+                                                Command="{Binding DataContext.WorkflowButtonClickCommand, RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}"
+                                                CommandParameter="{Binding IdWorkflowStatus}"
+                                                Background="{Binding HtmlColor}" core:ThemeManager.ThemeName="None"/>
+                                    </DataTemplate>
+                                </dxe:ListBoxEdit.ItemTemplate>
+                            </dxe:ListBoxEdit>
+
+                        </Grid>
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </dxwui:WinUIDialogWindow.TitleStyle>
+
+    <dxwui:WinUIDialogWindow.Resources>
+        <Converters:ForegroundColorConverter x:Key="ForegroundColorConverter"/>
+        <system:Double x:Key="FontSize24">24</system:Double>
+
+        <Style x:Key="myGroupBoxStyle" TargetType="{x:Type dxlc:GroupBox}">
+            <Setter Property="MaximizeElementVisibility" Value="Visible" />
+            <Setter Property="Width" Value="300" />
+            <Setter Property="Height" Value="138" />
+
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding MaximizedElementPosition}" Value="Bottom">
+                    <Setter Property="Width" Value="300" />
+                    <Setter Property="Height" Value="27" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding MaximizedElementPosition}" Value="Top">
+                    <Setter Property="Width" Value="300" />
+                    <Setter Property="Height" Value="27" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style TargetType="{x:Type ve:AutoHideTray}">
+            <Setter Property="ItemsPanel">
+                <Setter.Value>
+                    <ItemsPanelTemplate>
+                        <ve:psvStackPanel HorizontalAlignment="Right" />
+                    </ItemsPanelTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <!--End-->
+
+    </dxwui:WinUIDialogWindow.Resources>
+
+    <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+          Height="{Binding DialogHeight}" Width="{Binding DialogWidth}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="50"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="300" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <dxlc:FlowLayoutControl Grid.Row="0"
+                                Grid.Column="0" Grid.ColumnSpan="2"
+                                AllowLayerSizing="False"
+                                AllowMaximizedElementMoving="False"
+                                Background="Transparent"
+                                BreakFlowToFit="True"
+                                DragScrolling="True"
+                                MaximizedElementPosition="{Binding MaximizedElementPosition}"
+                                VerticalAlignment="Stretch"
+                                Orientation="Horizontal"
+                                Padding="0"
+                                StretchContent="False">
+
+            <dxmvvm:Interaction.Behaviors>
+                <UIHelper:FlowLayoutControlForMinimiseMaximise />
+            </dxmvvm:Interaction.Behaviors>
+
+            <!--Work Order Details-->
+            <dxlc:GroupBox x:Name="WoDetails" Selector.IsSelected="True"
+                           Style="{StaticResource myGroupBoxStyle}">
+                <dxlc:GroupBox.HeaderTemplate>
+                    <DataTemplate>
+                        <DockPanel Margin="-5,0,0,0">
+                            <TextBlock Margin="5,0,0,0"
+                                       VerticalAlignment="Center"
+                                       FontWeight="Bold"
+                                       Text="{DynamicResource WorkOrderItemDetailsViewInfoHeader}" />
+                        </DockPanel>
+                    </DataTemplate>
+                </dxlc:GroupBox.HeaderTemplate>
+                <dxlc:GroupBox.ContentTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="80" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Text="{DynamicResource Code}" Grid.Row="0" Grid.Column="0"  VerticalAlignment="Stretch"  HorizontalAlignment="Stretch" TextAlignment="Left"  FontWeight="Bold"></TextBlock>
+
+                            <TextBlock Text="{Binding DataContext.OT.Code,RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}" VerticalAlignment="Stretch"   Grid.Row="0" Grid.Column="1" TextAlignment="Left"></TextBlock>
+
+                            <TextBlock Text="{DynamicResource Customer}" VerticalAlignment="Stretch"  HorizontalAlignment="Stretch" 
+                                       Grid.Row="1" Grid.Column="0" TextAlignment="Left"  FontWeight="Bold"></TextBlock>
+
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding DataContext.OT.Quotation.Site.Name,RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}"
+                                       VerticalAlignment="Stretch" HorizontalAlignment="Stretch" TextWrapping="Wrap" TextAlignment="Left" ></TextBlock>
+                        </Grid>
+                    </DataTemplate>
+                </dxlc:GroupBox.ContentTemplate>
+
+                <dxlc:GroupBox.MaximizedContentTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="auto"/>
+                                <RowDefinition Height="10"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="10"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="0">
+                                <Grid.RowDefinitions >
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="25"/>
+                                    <RowDefinition Height="25"/>
+                                    <RowDefinition Height="25"/>
+                                    <RowDefinition Height="25"/>
+
+                                </Grid.RowDefinitions>
+
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="5"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="5"/>
+                                    <ColumnDefinition Width="90"/>
+                                    <ColumnDefinition Width="5"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="5"/>
+                                    <ColumnDefinition Width="85"/>
+                                    <ColumnDefinition Width="5"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="5"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="50"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Text="{DynamicResource Code}" Grid.Row="0" Grid.Column="0" VerticalAlignment="Stretch"  HorizontalAlignment="Stretch"></TextBlock>
+
+                                <TextBlock Text="{Binding DataContext.OT.Code,RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}" VerticalAlignment="Stretch"  Grid.Row="0" Grid.Column="2"></TextBlock>
+
+                                <TextBlock Text="{DynamicResource WorkOrderComments}" Grid.Row="1" Grid.Column="0" VerticalAlignment="Stretch"  HorizontalAlignment="Left"></TextBlock>
+
+                                <TextBox Grid.Row="1" Grid.Column="2" Grid.RowSpan="2" Grid.ColumnSpan="5" ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                         VerticalAlignment="Stretch" TextAlignment="Left" HorizontalAlignment="Stretch" Text="{Binding DataContext.OT.Comments,RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}" TextWrapping="Wrap" IsReadOnly="True"/>
+
+                                <TextBlock Text="{DynamicResource PODate}" VerticalAlignment="Stretch"  HorizontalAlignment="Stretch" 
+                                           Grid.Row="3" Grid.Column="0">
+                                </TextBlock>
+
+                                <dxe:DateEdit Grid.Row="3" Grid.Column="2"
+                                              EditValue="{Binding DataContext.OT.Quotation.Offer.POReceivedInDate,RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}"
+                                              EditMode="Standalone"
+                                              IsPrintingMode="True" 
+                                              ShowEditorButtons="False" ShowBorder="False">
+                                </dxe:DateEdit>
+
+                                <TextBlock Text="{DynamicResource DeliveryDate}" VerticalAlignment="Center"   HorizontalAlignment="Stretch" Grid.Row="3" Grid.Column="4"></TextBlock>
+
+                                <dxe:DateEdit x:Name="DatetimePWO" Grid.Row="3" Grid.Column="6"  IsReadOnly="True" ShowEditorButtons="False"
+                                              ShowBorder="False" EditValue="{Binding DataContext.OT.DeliveryDate,RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}"
+                                              Mask="d" MaskType="DateTime" MaskUseAsDisplayFormat="True"
+                                              ShowClearButton="False" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" IsTextEditable="False"  
+                                              ShowError="False" ShowErrorToolTip="False" InvalidValueBehavior="AllowLeaveEditor"
+                                              Foreground="{Binding EditValue, RelativeSource={RelativeSource Self},Converter={Converters:CellColorConverter}}"
+                                              Focusable="False" MinValue="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=ServerDateTime}">
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger  EventName="PopupOpening">
+                                            <behaviors:InvokeDelegateCommandAction Command="{Binding PopupMenuShowingCommand}" 
+                                                       CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=InvokeParameter}" />
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
+                                </dxe:DateEdit>
+                                <!--Status-->
+                                
+                                <TextBlock Text="{DynamicResource Status}" Grid.Row="4" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                                <dxe:TextEdit x:Name="txtStatus" 
+                                                      Text="{Binding DataContext.OT.WorkflowStatus.Name, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}},UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" 
+                                                      Background="{Binding DataContext.OT.WorkflowStatus.HtmlColor, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}},UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+                                                      Foreground="{Binding ElementName=txtStatus, Path=Background, Converter={Converters:ForegroundColorConverter}}"
+                                                      Grid.Column="2" Grid.Row="4" VerticalAlignment="Center" 
+                                                      IsReadOnly="True" ShowBorder="False" TextWrapping="WrapWithOverflow"/>
+
+                                <dxe:HyperlinkEdit AllowAutoNavigate="True" Text="[View Workflow]"
+                                                           ToolTip="[View Workflow]"
+                                                           ShowNavigationUrlToolTip="False"
+                                                           VerticalAlignment="Center"  Grid.Row="4" Grid.Column="4"  Grid.ColumnSpan="5" Command="{Binding DataContext.OpenWorkflowDiagramCommand,RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}"/>
+
+
+
+
+
+                                <TextBlock Text="{DynamicResource CustomerWithColon}" VerticalAlignment="Stretch"  HorizontalAlignment="Stretch" 
+                                           Grid.Row="0" Grid.Column="4"/>
+
+                                <DockPanel Grid.Row="0" Grid.Column="6" LastChildFill="True">
+                                    <TextBlock DockPanel.Dock="Left"  Text="{Binding DataContext.OT.Quotation.Site.Name,RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}"
+                                               VerticalAlignment="Stretch" HorizontalAlignment="Stretch" TextWrapping="Wrap"></TextBlock>
+                                </DockPanel>
+
+                                <TextBlock Text="{DynamicResource WorkOrderItemCreatedBy}" Grid.Row="0" Grid.Column="8" VerticalAlignment="Center"  HorizontalAlignment="Stretch"></TextBlock>
+
+                                <TextBlock Text="{Binding DataContext.OT.CreatedByPerson.FullName,RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}" VerticalAlignment="Center"  Grid.Row="0" Grid.Column="10"></TextBlock>
+
+                                <TextBlock Text="{DynamicResource WorkOrderItemCreatedIn}" Grid.Row="1" Grid.Column="8" VerticalAlignment="Center"  HorizontalAlignment="Stretch"></TextBlock>
+
+                                <TextBlock Text="{Binding DataContext.OT.CreationDate, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}},StringFormat=d,ConverterCulture={x:Static GeosApplication:GeosApplication.CurrentCultureInfo}}" VerticalAlignment="Center"  Grid.Row="1" Grid.Column="10"></TextBlock>
+
+                                <TextBlock Text="{DynamicResource WorkOrderItemModifiedBy}" Grid.Row="2" Grid.Column="8" VerticalAlignment="Center"  HorizontalAlignment="Stretch"></TextBlock>
+
+                                <TextBlock Text="{Binding DataContext.OT.ModifiedByPerson.FullName,RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}" VerticalAlignment="Center"  Grid.Row="2" Grid.Column="10"></TextBlock>
+
+                                <TextBlock Text="{DynamicResource WorkOrderItemModifiedIn}" Grid.Row="3" Grid.Column="8" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
+
+                                <TextBlock Text="{Binding DataContext.OT.ModifiedIn,RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}, StringFormat=d, ConverterCulture={x:Static GeosApplication:GeosApplication.CurrentCultureInfo}}" 
+                                           VerticalAlignment="Center" Grid.Row="3" Grid.Column="10"/>
+
+                                <TextBlock Grid.Row="0" Grid.Column="12" Grid.RowSpan="3" Grid.ColumnSpan="3"  VerticalAlignment="Center" HorizontalAlignment="Right" 
+                                           Text="{Binding DataContext.OT.Quotation.Template.Name,RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}" TextAlignment="Center" FontWeight="Bold" FontSize="30"/>
+                            </Grid>
+                           
+                            <!--ITEM START-->
+
+                            <dxlc:LayoutGroup Orientation="Vertical"
+                                              Grid.Row="2"
+                                              View="GroupBox"
+                                              ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                              IsCollapsible="False"
+                                              IsCollapsed="False">
+                                <dxlc:LayoutGroup.HeaderTemplate>
+                                    <DataTemplate>
+                                        <Grid>
+
+                                            <TextBlock DockPanel.Dock="Left"
+                                            Text="{DynamicResource WorkOrderItemDetailsViewItemHeader}" 
+                                            VerticalAlignment="Center" 
+                                            FontSize="14" 
+                                            />
+                                        </Grid>
+                                    </DataTemplate>
+                                </dxlc:LayoutGroup.HeaderTemplate>
+
+
+                                <dxdo:DockLayoutManager Name="dockManager1" Grid.Row="2">
+                                    <dxdo:LayoutGroup x:Name="rootMainGroup" Orientation="Horizontal">
+
+                                        <dxdo:LayoutPanel x:Name="documentGroup1" ShowCaption="False" ShowCloseButton="False">
+                                            <dxg:GridControl Name="gridControl"
+                                                             Grid.Row="0" 
+                                                             MaxHeight="1000"
+                                                             Margin="-5"
+                                                             HorizontalAlignment="Stretch"
+                                                             VerticalAlignment="Stretch"
+                                                             ShowBorder="True" EnableSmartColumnsGeneration="True" SelectionMode="Row"
+                                                             ItemsSource="{Binding DataContext.OT.OtItems,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}"
+                                                             CurrentItem="{Binding DataContext.SelectedOtItem, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}" 
+                                                             ImplyNullLikeEmptyStringWhenFiltering="True" >
+
+                                                <dxmvvm:Interaction.Behaviors>
+                                                    <dxmvvm:EventToCommand EventName="CurrentItemChanged"
+                                                                           Command="{Binding DataContext.CurrentItemChangedCommand, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}"
+                                                                           PassEventArgsToCommand="True" />
+                                                </dxmvvm:Interaction.Behaviors>
+
+                                                <dxg:GridControl.TotalSummary>
+                                                    <dxg:GridSummaryItem x:Name="summary" FieldName="RevisionItem.NumItem" SummaryType="Count" DisplayFormat="Total Count: {0}"/>
+                                                </dxg:GridControl.TotalSummary>
+
+                                                <dxg:GridColumn Header="{DynamicResource GridColItem}" FieldName="RevisionItem.NumItem" MinWidth="100" FilterPopupMode="CheckedList"/>
+
+                                                <dxg:GridColumn Header="{DynamicResource GridColReference}" FieldName="RevisionItem.WarehouseProduct.Article.Reference" MinWidth="100" Width="150" FilterPopupMode="CheckedList"/>
+
+                                                <dxg:GridColumn Header="{DynamicResource GridColDescription}" FieldName="RevisionItem.WarehouseProduct.Article.Description" MinWidth="300" Width="450"  MaxWidth="450" FilterPopupMode="CheckedList"/>
+
+                                                <dxg:GridColumn Header=" " MinWidth="30" Width="40" ReadOnly="True" FixedWidth="True" FilterPopupMode="Default" Visible="True" AllowPrinting="False" ShowInColumnChooser="False" AllowMoving="false">
+                                                    <dxg:GridColumn.CellTemplate>
+                                                        <DataTemplate>
+                                                            <TextBlock VerticalAlignment="Center" Margin="10 0 0 0">
+                                                 <!--Comment Info Image-->
+                                                <!--<StackPanel Orientation="Horizontal">
+                                                    <Grid>
+                                                            <Image x:Name="image" VerticalAlignment="Center" Height="20" Width="20">
+
+                                                                <Image.Style>
+                                                                    <Style TargetType="{x:Type Image}">
+                                                                        <Setter Property="Style" Value="{DynamicResource InfoImageStyle}"/>
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding Path=RowData.Row.RevisionItem.InternalComment}" Value="{x:Null}">
+                                                                                <Setter Property="Source" Value="{x:Null}"/>
+                                                                            </DataTrigger>
+                                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                                <Setter Property="Cursor" Value="Hand"/>
+                                                                            </Trigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </Image.Style>
+                                                                <dxmvvm:Interaction.Behaviors>
+                                                                    <dxmvvm:EventToCommand Command="{Binding DataContext.ImageClickCommand,RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}"
+                                                                        EventName="MouseDown" CommandParameter="{Binding RowData.Row}">
+                                                                    </dxmvvm:EventToCommand>
+                                                                </dxmvvm:Interaction.Behaviors>
+                                                            </Image>
+                                                            <dxe:FlyoutControl IsOpen="{Binding RowData.Row.ShowComment,Mode=TwoWay}"  FollowTarget="True"
+                                                               PlacementTarget="{Binding ElementName=image}"
+                                                               Background="{Binding DataContext.InfoTooltipBackColor, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}" >
+                                                                <dxe:FlyoutControl.Settings>
+                                                                    <dxe:FlyoutSettings
+                                                                       IndicatorHorizontalAlignment="Center"
+                                                                       Placement="Top"
+                                                                       ShowIndicator="True"  />
+                                                                </dxe:FlyoutControl.Settings>
+                                                                <TextBlock Text="{Binding RowData.Row.RevisionItem.InternalComment}" TextWrapping="WrapWithOverflow" Style="{DynamicResource TextBlock25Style}" 
+                                                                                                                                      Foreground="Black" FontWeight="Bold"/>
+                                                            </dxe:FlyoutControl>
+                                                        </Grid>
+                                                    </StackPanel>-->
+                                                                </TextBlock>
+                                                        </DataTemplate>
+                                                    </dxg:GridColumn.CellTemplate>
+                                                </dxg:GridColumn>
+
+
+                                                <dxg:GridColumn Header="{DynamicResource GridColQuantity}" FieldName="RevisionItem.Quantity" MinWidth="100" FilterPopupMode="CheckedList"/>
+
+                                                <dxg:GridColumn Header="{DynamicResource WorkOrderItemSitiuation}" FieldName="Status.Name" MinWidth="90" FilterPopupMode="CheckedList"/>
+
+                                                <dxg:GridColumn Header="{DynamicResource Status}" FieldName="WorkflowStatusName"  MinWidth="100" Width="120" FixedWidth="True" FilterPopupMode="CheckedList">
+                                                    <dxg:GridColumn.CellStyle>
+                                                        <Style TargetType="{x:Type dxg:LightweightCellEditor}">
+                                                            <Setter Property="Background" Value="{Binding RowData.Row.WorkflowStatusHtmlColor}"/>
+                                                            <Setter Property="Foreground" Value="{Binding Path=Background,Converter={StaticResource ForegroundColorConverter}}"/>
+                                                        </Style>
+                                                    </dxg:GridColumn.CellStyle>
+                                                </dxg:GridColumn>
+
+                                                <dxg:GridControl.View>
+                                                    <dxg:TreeListView Name="WorkOrderItemTreeListView"
+                                                                      NavigationStyle="Row"
+                                                                      AutoWidth="True" 
+                                                                      KeyFieldName="KeyId"
+                                                                      ParentFieldName="ParentId"
+                                                                      AllowFixedColumnMenu="False"
+                                                                      AutoExpandAllNodes="False"
+                                                                      VerticalScrollbarVisibility="Auto"
+                                                                      SearchPanelHorizontalAlignment="Stretch"
+                                                                      ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly"
+                                                                      ShowTotalSummary="True"
+                                                                      ShowSearchPanelMode="Always"
+                                                                      ShowSearchPanelCloseButton="True"
+                                                                      FilterEditorShowOperandTypeIcon="True"
+                                                                      AllowColumnFiltering="True" >
+
+                                                    </dxg:TreeListView>
+                                                </dxg:GridControl.View>
+                                            </dxg:GridControl>
+                                        </dxdo:LayoutPanel>
+                                    </dxdo:LayoutGroup>
+
+                                    <!--Region AutoHideGroups-->
+                                    <dxdo:DockLayoutManager.AutoHideGroups>
+                                        <!--Article details-->
+                                        <dxdo:AutoHideGroup DockType="Right" AutoHideSize="300,250">
+                                            <dxdo:LayoutPanel Caption="{DynamicResource CaptionArticle}" 
+                                                              FontSize="{StaticResource FontSize24}"
+                                                              FontWeight="Bold" ItemWidth="250">
+                                                <Grid>
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="Auto" />
+                                                        <RowDefinition Height="250"/>
+                                                    </Grid.RowDefinitions>
+
+                                                    <TextBlock Grid.Row="0"
+                                                               Text="{Binding DataContext.SelectedOtItem.RevisionItem.WarehouseProduct.Article.Description, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}" 
+                                                               TextWrapping="Wrap"
+                                                               TextAlignment="Center"
+                                                               HorizontalAlignment="Stretch" 
+                                                               FontSize="{StaticResource FontSize24}" FontWeight="Bold" />
+
+                                                    <dxe:ImageEdit ShowMenu="False"
+                                                                   Grid.Row="1" Height="250"
+                                                                   Source="{Binding DataContext.SelectedOtItem.RevisionItem.WarehouseProduct.Article.ArticleImage, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}" />
+                                                </Grid>
+
+                                            </dxdo:LayoutPanel>
+                                        </dxdo:AutoHideGroup>
+                                    </dxdo:DockLayoutManager.AutoHideGroups>
+                                    <!--EndRegion AutoHideGroups-->
+                                </dxdo:DockLayoutManager>
+
+                            </dxlc:LayoutGroup>
+
+                            <!--ITEM END-->
+
+
+                            <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="4">
+                                <StackPanel Orientation="Vertical">
+                                    <TextBlock Text="{DynamicResource RemarksWithColon}" />
+                                    <dxe:TextEdit Height="50" Text="{Binding DataContext.Remark, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}" 
+                                                                  VerticalContentAlignment="Top" TextWrapping="Wrap"  HorizontalAlignment="Stretch"
+                                                                  ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Disabled" >
+
+                                    </dxe:TextEdit>
+                                </StackPanel>
+                            </Grid>
+                        </Grid>
+                    </DataTemplate>
+                </dxlc:GroupBox.MaximizedContentTemplate>
+            </dxlc:GroupBox>
+            <!--End-->
+
+            <!--Attachment-->
+            <dxlc:GroupBox x:Name="AttachmentDetails" Style="{StaticResource myGroupBoxStyle}">
+                <dxlc:GroupBox.HeaderTemplate>
+                    <DataTemplate>
+                        <DockPanel Margin="-5,0,0,0">
+                            <TextBlock Margin="5,0,0,0"
+                                       VerticalAlignment="Center"
+                                       FontWeight="Bold"
+                                       Text="{DynamicResource AttachmentWithColon}"/>
+                            <TextBlock Width="50"
+                                       Margin="5,1,0,0"
+                                       HorizontalAlignment="Left"
+                                       VerticalAlignment="Center"
+                                       FontWeight="Bold"
+                                       Name="AttachmentCount"
+                                       Text="{Binding DataContext.ListAttachment.Count, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" />
+                        </DockPanel>
+                    </DataTemplate>
+                </dxlc:GroupBox.HeaderTemplate>
+
+                <dxlc:GroupBox.ContentTemplate>
+                    <DataTemplate>
+
+                        <Grid Margin="-5" x:Name="PART_Root">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="25" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Row="0" Grid.Column="0" Margin="3,0,0,0" Padding="2" FontWeight="Bold" Text="{DynamicResource AttachmentsFileNameWithColon}" />
+                            <TextBlock Grid.Row="0" Grid.Column="1" Margin="3,0,0,0" Padding="2" Text="{Binding DataContext.ListAttachment[0].FileName, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" TextWrapping="Wrap" />
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Margin="3,0,0,0" Padding="2" FontWeight="Bold" Text="{DynamicResource AttachmentsFileSizeWithColon}" />
+                            <TextBlock Grid.Row="1" Grid.Column="1" Margin="3,0,0,0" Padding="2" Text="{Binding DataContext.ListAttachment[0].FileSize, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" TextWrapping="Wrap" />
+               
+                            <Grid.Style>
+                                <Style TargetType="{x:Type Grid}">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding DataContext.ListAttachment.Count, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" Value="0">
+                                            <Setter Property="Visibility" Value="Hidden" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Grid.Style>
+                        </Grid>
+
+                    </DataTemplate>
+                </dxlc:GroupBox.ContentTemplate>
+
+                <dxlc:GroupBox.MaximizedContentTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="40" />
+                            </Grid.RowDefinitions>
+                            <dxg:GridControl HorizontalAlignment="Stretch"
+                                         VerticalAlignment="Stretch"
+                                         Padding="0" 
+                                         MaxHeight="1000"
+                                         ImplyNullLikeEmptyStringWhenFiltering="True" 
+                                         ItemsSource="{Binding DataContext.ListAttachment, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}, Mode=TwoWay}">
+                            <dxg:GridControl.Columns>
+                                <dxg:GridColumn FixedWidth="True" Width="50" HorizontalHeaderContentAlignment="Center" FilterPopupMode="CheckedList">
+                                    <dxg:GridColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Image Source="{Binding Path=Data.AttachmentImage}" Height="24" Width="24" />
+                                        </DataTemplate>
+                                    </dxg:GridColumn.CellTemplate>
+                                </dxg:GridColumn>
+
+                                <dxg:GridColumn FieldName="FileName" Header="{DynamicResource GridColFileName}" FixedWidth="False" Width="300" HorizontalHeaderContentAlignment="Left" FilterPopupMode="CheckedList" />
+                                <dxg:GridColumn FieldName="FileExtension" Header="{DynamicResource GridColFileExtension}" FixedWidth="False" Width="80" HorizontalHeaderContentAlignment="Left" FilterPopupMode="CheckedList" />
+                                <dxg:GridColumn FieldName="FileSize" Header="{DynamicResource GridColFileSize}" FixedWidth="False" Width="60" SortMode="Custom" HorizontalHeaderContentAlignment="Left" FilterPopupMode="CheckedList" />
+
+                                <dxg:GridColumn FixedWidth="True" Width="45" HorizontalHeaderContentAlignment="Center">
+                                    <dxg:GridColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button Name="download"
+                                                            Command="{Binding DataContext.DownloadFileCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type dxlc:GroupBox}}}"
+                                                            CommandParameter="{Binding RowData.Row}"
+                                                            Content="" >
+                                                <Button.ContentTemplate>
+                                                    <DataTemplate>
+                                                        <Image Height="16" Width="16" Source="{DynamicResource DownloadAttachmentButtonImage}" />
+                                                    </DataTemplate>
+                                                </Button.ContentTemplate>
+                                            </Button>
+                                        </DataTemplate>
+                                    </dxg:GridColumn.CellTemplate>
+                                </dxg:GridColumn>
+                                <dxg:GridColumn FixedWidth="True" Width="45" HorizontalHeaderContentAlignment="Center">
+                                    <dxg:GridColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button Name="delete"
+                                                    Command="{Binding DataContext.DeleteFileCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type dxlc:GroupBox}}}"
+                                                    CommandParameter="{Binding RowData.Row}"
+                                                    Content="" >
+                                                <Button.ContentTemplate>
+                                                    <DataTemplate>
+                                                        <Image Height="16" Width="16" Source="{DynamicResource DownloadAttachmentButtonImage}" />
+                                                    </DataTemplate>
+                                                </Button.ContentTemplate>
+                                            </Button>
+                                        </DataTemplate>
+                                    </dxg:GridColumn.CellTemplate>
+                                </dxg:GridColumn>
+
+
+                            </dxg:GridControl.Columns>
+
+                            <dxmvvm:Interaction.Behaviors>
+                                <dxmvvm:EventToCommand EventName="CustomColumnSort"
+                                                       Command="{Binding DataContext.CustomSortColumnDataCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type dxlc:GroupBox}}}"
+                                                       PassEventArgsToCommand="True"/>
+                            </dxmvvm:Interaction.Behaviors>
+
+                            <dxg:GridControl.View>
+                                <dxg:TableView x:Name="attachmentTable" NavigationStyle="Row" 
+                                                       AutoWidth="True" 
+                                                       ShowGroupPanel="False" 
+                                                       AllowEditing="True" 
+                                                       Focusable="True" 
+                                                       FadeSelectionOnLostFocus="False"
+                                                       HorizontalScrollbarVisibility="Hidden" 
+                                                       VerticalScrollbarVisibility="Auto" 
+                                                       ShowIndicator="False"
+                                                       SearchPanelHorizontalAlignment="Stretch"
+                                                       ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly"
+                                                       >
+                                </dxg:TableView>
+                            </dxg:GridControl.View>
+
+
+                        </dxg:GridControl>
+                        <ToggleButton  Grid.Row="1"
+                                       Height="30"
+                                       Width="30"
+                                       Margin="0,0,-5,-5"
+                                       VerticalAlignment="Bottom"
+                                       HorizontalAlignment="Right"
+                                       DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}"
+                                       FontWeight="Bold"
+                                       IsChecked="{Binding DataContext.ShowCommentsFlyout, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type dxlc:GroupBox}}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                       Name="btnAddNewAttachment">
+                          
+                            <ToggleButton.ContentTemplate>
+                                <DataTemplate>
+                                    <Image Height="24"
+                                           Width="24"
+                                           Margin="-10"
+                                           VerticalAlignment="Stretch"
+                                           HorizontalAlignment="Stretch"
+                                           Style="{DynamicResource AttachmentImageStyle}" />
+                                </DataTemplate>
+                            </ToggleButton.ContentTemplate>
+                        </ToggleButton>
+                        <dxe:FlyoutControl PlacementTarget="{Binding ElementName=btnAddNewAttachment}" StaysOpen="True">
+
+                            <dxmvvm:Interaction.Behaviors>
+                                <UIHelper:FlyoutControlBehavior IsOpen="{Binding DataContext.ShowCommentsFlyout, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type dxlc:GroupBox}}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            </dxmvvm:Interaction.Behaviors>
+                            <dxe:FlyoutControl.Settings>
+                                <dxe:FlyoutSettings Placement="Left" />
+                            </dxe:FlyoutControl.Settings>
+                            <Grid HorizontalAlignment="Stretch" VerticalAlignment="Bottom">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="auto" />
+                                    <RowDefinition Height="auto" />
+                                </Grid.RowDefinitions>
+                                <dxe:ComboBoxEdit x:Name="editor" Width="650" Height="60" NullText="{DynamicResource ActivityNoFileChose}"
+                                 EditValue="{Binding DataContext.OTAttachmentList,RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type dxlc:GroupBox}},UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                 ItemsSource="{Binding DataContext.OTAttachmentList,RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type dxlc:GroupBox}},UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                 ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                 DisplayMember="FileUploadName" HorizontalAlignment="Stretch"
+                                 AllowDefaultButton="False"
+                                 AutoComplete="True"
+                                 ImmediatePopup="True"
+                                 ValidateOnEnterKeyPressed="True" 
+                                 ValidateOnTextInput="True"
+                                 IsTextEditable="False" Style="{DynamicResource ComboBoxEditStyle}">
+                                    <dxe:ComboBoxEdit.StyleSettings>
+                                        <dxe:TokenComboBoxStyleSettings NewTokenPosition="Far" EnableTokenWrapping="True" />
+                                    </dxe:ComboBoxEdit.StyleSettings>
+                                </dxe:ComboBoxEdit>
+                                <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <Button Height="30"
+                                            Width="Auto" Margin="0 5 0 0"
+                                            HorizontalAlignment="Right"
+                                            Command="{Binding Path =(dxefl:FlyoutBase.Flyout).PlacementTarget.DataContext.ChooseFileCommand, RelativeSource={RelativeSource Self}}"
+                                            CommandParameter="{Binding ElementName=gcattachment}"
+                                            Content="{DynamicResource ActivityFileChoose}" />
+                                   
+                                    <Button Height="30"
+                                            Margin="5 0 0 0"
+                                            VerticalAlignment="Bottom"
+                                            HorizontalAlignment="Right"
+                                            DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}"
+                                            FontWeight="Bold"
+                                            Command="{Binding UploadFileCommand}"
+                                            Name="btnAttachFile">
+                                      
+                                        <Button.Style>
+                                            <Style TargetType="{x:Type Button}">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding DataContext.OTAttachmentList.Count, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" Value="0">
+                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                        <Button.ContentTemplate>
+                                            <DataTemplate>
+                                                <Image Height="24"
+                                                       Width="24"
+                                                       Margin="-10"
+                                                       VerticalAlignment="Stretch"
+                                                       HorizontalAlignment="Stretch"
+                                                       Style="{DynamicResource UploadAttachmentButtonImageStyle}" />
+                                            </DataTemplate>
+                                        </Button.ContentTemplate>
+                                    </Button>
+                                </StackPanel>
+                            </Grid>
+                        </dxe:FlyoutControl>
+                        </Grid>
+
+                    </DataTemplate>
+                </dxlc:GroupBox.MaximizedContentTemplate>
+            </dxlc:GroupBox>
+           
+            <!--Work Log Details-->
+            <dxlc:GroupBox x:Name="WorklogDetails" Style="{StaticResource myGroupBoxStyle}">
+                <dxlc:GroupBox.HeaderTemplate>
+                    <DataTemplate>
+                        <DockPanel Margin="-5,0,0,0">
+                            <TextBlock Margin="5,0,0,0"
+                           VerticalAlignment="Center"
+                           FontWeight="Bold"
+                           Text="{DynamicResource WorkLog}"/>
+                            <TextBlock Width="50"
+                           Margin="5,1,0,0"
+                           HorizontalAlignment="Left"
+                           VerticalAlignment="Center"
+                           FontWeight="Bold"
+                           Name="PolyvalenceCount"
+                           Text="{Binding DataContext.WorkLogItemList.Count, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" />
+                        </DockPanel>
+                    </DataTemplate>
+                </dxlc:GroupBox.HeaderTemplate>
+
+                <dxlc:GroupBox.ContentTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <ItemsControl Grid.Row="0"
+                              HorizontalAlignment="Left" VerticalAlignment="Top" 
+                              ItemsSource="{Binding DataContext.UserImageList,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel IsItemsHost="True" Orientation="Horizontal" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <dxe:ImageEdit VerticalAlignment="Top" HorizontalAlignment="Left"
+                                           IsReadOnly="True" ShowMenu="False" 
+                                           Margin="2 0 0 0" Height="36" Width="36" ShowBorder="True" Stretch="Fill">
+                                            <dxe:ImageEdit.Style>
+                                                <Style TargetType="{x:Type dxe:ImageEdit}">
+                                                    <Setter Property="Source" Value="{Binding Path=UserImageInBytes,Converter={Converters:ByteArrayToImageConverter}}"/>
+                                                    <Setter Property="ToolTip" Value="{Binding Path=UserName}"/>
+                                                    <Style.Triggers>
+                                                        <MultiDataTrigger>
+                                                            <MultiDataTrigger.Conditions>
+                                                                <Condition Binding="{Binding Path=UserImageInBytes}" Value="{x:Null}"/>
+                                                                <Condition Binding="{Binding Path=IdUserGender}" Value="2"/>
+                                                            </MultiDataTrigger.Conditions>
+                                                            <Setter Property="Source" Value="{DynamicResource MaleUserWhiteImageStyle}"/>
+                                                        </MultiDataTrigger>
+                                                        <MultiDataTrigger>
+                                                            <MultiDataTrigger.Conditions>
+                                                                <Condition Binding="{Binding Path=UserImageInBytes}" Value="{x:Null}"/>
+                                                                <Condition Binding="{Binding Path=IdUserGender}" Value="1"/>
+                                                            </MultiDataTrigger.Conditions>
+                                                            <Setter Property="Source" Value="{DynamicResource FemaleUserWhiteImageStyle}"/>
+                                                        </MultiDataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </dxe:ImageEdit.Style>
+                                        </dxe:ImageEdit>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <TextBlock Grid.Row="1" Text="{Binding DataContext.WorklogTotalTime ,RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}" FontSize="40"
+                           VerticalAlignment="Stretch" HorizontalAlignment="Stretch" TextWrapping="Wrap" TextAlignment="Right" ></TextBlock>
+                        </Grid>
+
+                    </DataTemplate>
+                </dxlc:GroupBox.ContentTemplate>
+
+                <dxlc:GroupBox.MaximizedContentTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="5"/>
+                                <RowDefinition Height="45"/>
+                            </Grid.RowDefinitions>
+
+                            <dxg:GridControl Grid.Row="0"
+                             HorizontalAlignment="Stretch"
+                             VerticalAlignment="Stretch"
+                             Padding="0" 
+                             MaxHeight="1000"
+                             ImplyNullLikeEmptyStringWhenFiltering="True" 
+                             ItemsSource="{Binding DataContext.WorkLogItemList, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+                                <dxg:GridControl.Columns>
+                                    <dxg:GridColumn Header="{DynamicResource User}" FieldName="UserShortDetail.UserName"  FilterPopupMode="CheckedList"/>
+
+                                    <dxg:GridColumn Header="{DynamicResource StartDate}" FieldName="StartTime" FilterPopupMode="CheckedList">
+                                        <dxg:GridColumn.EditSettings>
+                                            <dxe:DateEditSettings Mask="d" MaskType="DateTime" MaskUseAsDisplayFormat="True"/>
+                                        </dxg:GridColumn.EditSettings>
+                                    </dxg:GridColumn>
+
+                                    <dxg:GridColumn Header="{DynamicResource StartTime}" FieldName="StartTime.TimeOfDay" ColumnFilterMode="DisplayText" FilterPopupMode="CheckedList">
+                                        <dxg:GridColumn.EditSettings>
+                                            <dxe:DateEditSettings Mask="t" MaskType="DateTime" MaskUseAsDisplayFormat="True"/>
+                                        </dxg:GridColumn.EditSettings>
+                                    </dxg:GridColumn>
+
+                                    <dxg:GridColumn Header="{DynamicResource EndDate}" FieldName="EndTime" FilterPopupMode="CheckedList">
+                                        <dxg:GridColumn.EditSettings>
+                                            <dxe:DateEditSettings Mask="d" MaskType="DateTime" MaskUseAsDisplayFormat="True" />
+                                        </dxg:GridColumn.EditSettings>
+                                    </dxg:GridColumn>
+
+                                    <dxg:GridColumn Header="{DynamicResource EndTime}" FieldName="EndTime.TimeOfDay" ColumnFilterMode="DisplayText" FilterPopupMode="CheckedList" >
+                                        <dxg:GridColumn.EditSettings>
+                                            <dxe:DateEditSettings Mask="t" MaskType="DateTime" MaskUseAsDisplayFormat="True" />
+                                        </dxg:GridColumn.EditSettings>
+                                    </dxg:GridColumn>
+
+                                    <dxg:GridColumn Header="{DynamicResource Total}" FieldName="Hours" FilterPopupMode="CheckedList" >
+
+                                        <dxg:GridColumn.EditSettings>
+                                            <dxe:DateEditSettings Mask="H\H m\M" MaskType="DateTime" MaskUseAsDisplayFormat="True"/>
+                                        </dxg:GridColumn.EditSettings>
+
+                                    </dxg:GridColumn>
+
+                                    <dxg:GridColumn Width="40" FieldName="" MaxWidth="40" BestFitWidth="40" AllowSorting="False" HorizontalHeaderContentAlignment="Center" AllowColumnFiltering="False" Fixed="Right" ShowInColumnChooser="False" Visible="True" AllowPrinting="False" FilterPopupMode="CheckedList" 
+                                        AllowMoving="False">
+                                        <dxg:GridColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Button Name="deleteworklog" Command="{Binding DataContext.DeleteWorkLogCommand, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox},Mode=TwoWay}" 
+                                                          CommandParameter="{Binding RowData.Row}" Content="" IsEnabled="{Binding DataContext.IsRemoveWorkLog, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
+                                                    <Button.ContentTemplate>
+                                                        <DataTemplate>
+                                                            <Image Height="16" Width="16" Source="/Emdep.Geos.Modules.TSM;component/Assets/Images/bDelete.png" />
+                                                        </DataTemplate>
+                                                    </Button.ContentTemplate>
+                                                    <Button.ToolTip>
+                                                        <TextBlock HorizontalAlignment="Stretch" Text="{DynamicResource WorkLogFileDelete}" />
+                                                    </Button.ToolTip>
+                                                </Button>
+                                            </DataTemplate>
+                                        </dxg:GridColumn.CellTemplate>
+                                    </dxg:GridColumn>
+
+                                </dxg:GridControl.Columns>
+
+                                <dxmvvm:Interaction.Behaviors>
+                                    <UIHelper:GridSelectingBehavior />
+                                </dxmvvm:Interaction.Behaviors>
+
+                                <dxg:GridControl.View>
+                                    <dxg:TableView x:Name="tblWorkLog" 
+                                    NavigationStyle="Row" 
+                                    AutoWidth="True" 
+                                    ShowGroupPanel="False" 
+                                    IsEnabled="{Binding DataContext.IsEditWorkLog, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                    FocusedRow="{Binding DataContext.SelectedWorklogRow,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox},UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                    AllowEditing="True"                                                     
+                                    HorizontalScrollbarVisibility="Hidden" 
+                                    VerticalScrollbarVisibility="Auto" 
+                                    ShowIndicator="False"
+                                    SearchPanelHorizontalAlignment="Stretch"
+                                    ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly" >
+
+                                       
+                                    </dxg:TableView>
+                                </dxg:GridControl.View>
+                            </dxg:GridControl>
+
+                        </Grid>
+                    </DataTemplate>
+                </dxlc:GroupBox.MaximizedContentTemplate>
+            </dxlc:GroupBox>
+            
+                <!--Spare Parts-->
+                <dxlc:GroupBox x:Name="Logs" Style="{StaticResource myGroupBoxStyle}">
+                <!--HeaderTemplate-->
+                <dxlc:GroupBox.HeaderTemplate>
+                    <DataTemplate>
+                        <DockPanel Margin="-5,0,0,0">
+                            <TextBlock Margin="5,0,0,0"
+						    VerticalAlignment="Center"
+						    FontWeight="Bold"
+						    Text="{DynamicResource SparePartsHeader}" />
+                            <TextBlock Width="50"
+						    Margin="5,1,0,0"
+						    HorizontalAlignment="Left"
+						    VerticalAlignment="Center"
+						    FontWeight="Bold"
+						    x:Name="ContactCount"
+						    Text="{Binding DataContext.OT.OTLogEntries.Count, UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}" />
+                        </DockPanel>
+                    </DataTemplate>
+                </dxlc:GroupBox.HeaderTemplate>
+
+                <!--ContentTemplate-->
+                <dxlc:GroupBox.ContentTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="30" />
+                                <RowDefinition Height="30" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <Label Content="{DynamicResource DateWithColon}"
+                                 Grid.Row="0"
+                                 Grid.Column="0" Margin="3,0,0,0" Padding="2"
+                                 FontWeight="Bold" VerticalContentAlignment="Stretch"/>
+                            <TextBlock 
+                            Text="{Binding DataContext.OT.OTLogEntries[0].Datetime,StringFormat=g, ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture},UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" 
+                            VerticalAlignment="Stretch"  Grid.Row="0" Grid.Column="1" Margin="3,0,0,0" Padding="2"/>
+
+                            <Label Content="{DynamicResource UserWithColon}"
+                             Grid.Row="1"
+                             Grid.Column="0" Margin="3,0,0,0" Padding="2"
+                             FontWeight="Bold" VerticalContentAlignment="Stretch"/>
+                            <TextBlock Text="{Binding DataContext.OT.OTLogEntries[0].People.FullName, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}" VerticalAlignment="Stretch"  Grid.Row="1" Grid.Column="1" Margin="3,0,0,0" Padding="2"
+                                ToolTip="{Binding DataContext.OT.OTLogEntries[0].People.FullName, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}"  TextWrapping="WrapWithOverflow" Width="Auto" TextTrimming="CharacterEllipsis"/>
+
+                            <Label Content="{DynamicResource ActionWithColon}"
+                             Grid.Row="2"
+                             Grid.Column="0" Margin="3,0,0,0" Padding="2"
+                             FontWeight="Bold" VerticalContentAlignment="Stretch"/>
+                            <TextBlock Text="{Binding DataContext.OT.OTLogEntries[0].Comments, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}" VerticalAlignment="Stretch"  Grid.Row="2" Grid.Column="1" Margin="3,0,0,0" Padding="2"
+                                ToolTip="{Binding DataContext.OT.OTLogEntries[0].Comments, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}"  TextWrapping="WrapWithOverflow" Width="Auto" TextTrimming="CharacterEllipsis"/>
+                        </Grid>
+                    </DataTemplate>
+                </dxlc:GroupBox.ContentTemplate>
+
+                <!--MaximizedContentTemplate-->
+                <dxlc:GroupBox.MaximizedContentTemplate>
+                    <DataTemplate>
+                        <Grid Margin="2">
+                            <dxg:GridControl x:Name="sparePartsGrid"
+						Margin="-10" SelectionMode="Row"
+						HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+						ShowBorder="True"
+						ItemsSource="{Binding DataContext.OT.OTLogEntries, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}, UpdateSourceTrigger=PropertyChanged}"  ImplyNullLikeEmptyStringWhenFiltering="True" >
+
+                               
+                                <dxmvvm:Interaction.Behaviors>
+                                    <UIHelper:GridSelectingBehavior />
+                                </dxmvvm:Interaction.Behaviors>
+
+
+                                <dxg:GridColumn Header="{DynamicResource Reference}" FieldName="People.FullName" MinWidth="170"  Width="220" FixedWidth="True" FilterPopupMode="CheckedList"/>
+                                <dxg:GridColumn Header="{DynamicResource Description}" FieldName="Datetime" Width="150" FixedWidth="True" FilterPopupMode="CheckedList"/>
+                                <dxg:GridColumn  Header="{DynamicResource Image}" FixedWidth="True" Width="50" HorizontalHeaderContentAlignment="Center" FilterPopupMode="CheckedList">
+                                    <dxg:GridColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Image Source="{Binding Path=Data.AttachmentImage}" Height="24" Width="24" />
+                                        </DataTemplate>
+                                    </dxg:GridColumn.CellTemplate>
+                                </dxg:GridColumn>
+                                <dxg:GridColumn Header="{DynamicResource Quantity}" FieldName="Comments" Width="*" FilterPopupMode="CheckedList"/>
+
+                                <dxg:GridControl.View>
+                                    <dxg:TableView x:Name="sparePartsGridTableView"
+								NavigationStyle="Row"
+								RowDetailsVisibilityMode="Visible"
+								ShowHorizontalLines="True"
+								ShowSearchPanelMode="Always"
+								ShowColumnHeaders="True"
+								VerticalScrollbarVisibility="Visible"
+								AllowFixedColumnMenu="False"
+								ShowTotalSummary="True"
+								SearchPanelHorizontalAlignment="Stretch"
+								AllowGrouping="True"
+								ShowGroupPanel="False"
+								ShowIndicator="False" AutoWidth="True"
+								ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly" >
+                                    </dxg:TableView>
+                                </dxg:GridControl.View>
+
+                            </dxg:GridControl>
+                        </Grid>
+                    </DataTemplate>
+                </dxlc:GroupBox.MaximizedContentTemplate>
+                </dxlc:GroupBox>
+            
+                 <!--OT Assigned users-->
+                <dxlc:GroupBox x:Name="AssignedUser" Style="{StaticResource myGroupBoxStyle}">
+                <dxlc:GroupBox.HeaderTemplate>
+                    <DataTemplate>
+                        <DockPanel Margin="-5,0,0,0">
+                            <TextBlock VerticalAlignment="Center"
+                            FontWeight="Bold"
+                            Text="{DynamicResource AssignedUsers}" />
+                            <TextBlock Width="50"
+                             Margin="5,1,0,0"
+                             HorizontalAlignment="Left"
+                             VerticalAlignment="Center"
+                             FontWeight="Bold"
+                             Name="ContactCount"
+                             Text="{Binding DataContext.OtAssignedUser.Count, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" />
+                        </DockPanel>
+                    </DataTemplate>
+                </dxlc:GroupBox.HeaderTemplate>
+                <dxlc:GroupBox.ContentTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <ItemsControl Grid.Row="0" 
+                               HorizontalAlignment="Left" VerticalAlignment="Center" 
+                               ItemsSource="{Binding DataContext.OtAssignedUser,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate >
+                                    <DataTemplate>
+                                        <dxe:ImageEdit VerticalAlignment="Top" HorizontalAlignment="Left" 
+                                            IsReadOnly="True" ShowMenu="False" Height="80" Width="67"
+                                            ShowBorder="True" 
+                                            Margin="2,0,0,0"
+                                            Stretch="Uniform">
+                                            <dxe:ImageEdit.Style>
+                                                <Style TargetType="{x:Type dxe:ImageEdit}">
+                                                    <Setter Property="Source" Value="{Binding Path=UserShortDetail.UserImage}" />
+                                                    <Setter Property="ToolTip" Value="{Binding Path=UserShortDetail.UserName}" />
+                                                    <Style.Triggers>
+                                                        <MultiDataTrigger>
+                                                            <MultiDataTrigger.Conditions>
+                                                                <Condition Binding="{Binding Path=UserShortDetail.UserImage}" Value="{x:Null}"/>
+                                                                <Condition Binding="{Binding Path=UserShortDetail.IdUserGender}" Value="2"/>
+                                                            </MultiDataTrigger.Conditions>
+                                                            <Setter Property="Source" Value="{DynamicResource MaleUserWhiteImageStyle}"/>
+                                                        </MultiDataTrigger>
+                                                        <MultiDataTrigger>
+                                                            <MultiDataTrigger.Conditions>
+                                                                <Condition Binding="{Binding Path=UserShortDetail.UserImage}" Value="{x:Null}"/>
+                                                                <Condition Binding="{Binding Path=UserShortDetail.IdUserGender}" Value="1"/>
+                                                            </MultiDataTrigger.Conditions>
+                                                            <Setter Property="Source" Value="{DynamicResource FemaleUserWhiteImageStyle}"/>
+                                                        </MultiDataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </dxe:ImageEdit.Style>
+                                        </dxe:ImageEdit>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Grid>
+                    </DataTemplate>
+                </dxlc:GroupBox.ContentTemplate>
+                <dxlc:GroupBox.MaximizedContentTemplate>
+                    <DataTemplate>
+                        <Grid Margin="-10"  IsEnabled="{Binding DataContext.IsAssignedUsers, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                            <dxdo:DockLayoutManager Margin="7" Name="DockManager" HorizontalAlignment="Stretch">
+                                <dxdo:LayoutGroup x:Name="RootGroup1" Orientation="Vertical" HorizontalAlignment="Stretch">
+                                    <dxdo:LayoutPanel x:Name="AssignedUserList" Margin="-4 -4 -4 0"
+                                           AllowHide="False" AllowClose="False"
+                                           ShowPinButton="False"
+                                           HorizontalAlignment="Stretch"
+                                           SnapsToDevicePixels="True">
+
+                                        <dxe:ListBoxEdit x:Name="ListBoxEditAssignedUser"
+                                              Width="{Binding ActualWidth, ElementName=AssignedUserList}"
+                                              ItemsSource="{Binding DataContext.OtAssignedUser,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                                              VerticalAlignment="Stretch"
+                                              HorizontalAlignment="Stretch"
+                                              ItemContainerStyle="{DynamicResource EditorListBoxThemeKey_DefaultItemStyle}">
+                                            <dxe:ListBoxEdit.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <WrapPanel Width="{Binding ActualWidth, ElementName=AssignedUserList}" IsItemsHost="True" Orientation="Horizontal" />
+                                                </ItemsPanelTemplate>
+                                            </dxe:ListBoxEdit.ItemsPanel>
+                                            <dxe:ListBoxEdit.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Style="{DynamicResource BorderStyle}">
+                                                        <Grid>
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="84" />
+                                                                <ColumnDefinition Width="16" />
+                                                                <ColumnDefinition Width="*" />
+                                                                <ColumnDefinition Width="16" />
+                                                                <ColumnDefinition Width="2" />
+                                                            </Grid.ColumnDefinitions>
+                                                            <Grid.RowDefinitions>
+                                                                <RowDefinition Height="30" />
+                                                                <RowDefinition Height="30" />
+                                                                <RowDefinition Height="32" />
+                                                            </Grid.RowDefinitions>
+
+
+                                                            <!--For Work Order Image-->
+
+                                                            <dxe:ImageEdit Grid.Column="0" Grid.Row="0" Grid.RowSpan="3" 
+                                                                VerticalAlignment="Center" HorizontalAlignment="Center"
+                                                                ShowMenu="False" ShowLoadDialogOnClickMode="Never"
+                                                                Source="{Binding Path=UserShortDetail.UserImage}"
+                                                                Stretch="Uniform"  Width="73" Height="73"/>
+
+
+                                                            <!--For Work Order Image-->
+
+                                                            <TextBlock Grid.Column="1"
+                                                             Grid.Row="0"
+                                                             Grid.ColumnSpan="2"
+                                                             HorizontalAlignment="Left"
+                                                             VerticalAlignment="Center"
+                                                             FontWeight="Bold"
+                                                             Style="{DynamicResource TextBlock16Style}"
+                                                             Text="{Binding Path=UserShortDetail.UserName}" />
+
+
+                                                            <!--For Phone-->
+
+                                                            <Image Height="16"
+                                                         Width="16"
+                                                         Grid.Column="1" Grid.Row="1"
+                                                         HorizontalAlignment="Left"
+                                                         VerticalAlignment="Center"
+                                                         Style="{DynamicResource PhoneColorImageStyle}" />
+                                                            <TextBlock Grid.Column="2" Grid.Row="1" 
+                                                            VerticalAlignment="Center" HorizontalAlignment="Left"
+                                                            Style="{DynamicResource TextBlock12Style}"
+                                                            Text="{Binding Path=UserShortDetail.PhoneNo}"
+                                                            TextTrimming="CharacterEllipsis" />
+
+                                                            <!--For Phone-->
+
+                                                            <!--For Email-->
+
+                                                            <Image Height="16"
+                                                         Width="16"
+                                                         Grid.Column="1" Grid.Row="2"
+                                                         HorizontalAlignment="Left"
+                                                         VerticalAlignment="Center"
+                                                         Style="{DynamicResource EmailColorImageStyle}" />
+                                                            <TextBlock Grid.Column="2" Grid.Row="2" 
+                                                            VerticalAlignment="Center" HorizontalAlignment="Left"
+                                                            TextTrimming="CharacterEllipsis">
+                                                                     <Hyperlink TargetName="_blank"
+                                                                         Command="{Binding DataContext.HyperlinkForEmail,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}"
+                                                                         CommandParameter="{Binding UserShortDetail.CompanyEmail}"
+                                                                         Style="{DynamicResource hyperlinkGridStyle}">
+                                                                         <InlineUIContainer>
+                                                                             <TextBlock Text="{Binding Path=UserShortDetail.CompanyEmail}" />
+                                                                         </InlineUIContainer>
+                                                                     </Hyperlink>
+                                                                 </TextBlock>
+
+                                                            <!--For Email-->
+
+                                                            <!--For close button-->
+
+                                                            <dxe:ButtonEdit Grid.Row="0"
+                                                                 Grid.Column="3"
+                                                                 HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                 ShowText="False" Width="15" Height="15" 
+                                                                 Background="Transparent"
+                                                                 AllowDefaultButton="False">
+                                                                <dxe:ButtonEdit.Buttons>
+                                                                    <dxe:ButtonInfo GlyphKind="Cancel">
+                                                                        <dxmvvm:Interaction.Behaviors>
+                                                                            <dxmvvm:EventToCommand Command="{Binding DataContext.AssignedWorkOrderItemCancelCommand,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}"
+                                                                                         EventName="Click"
+                                                                                         CommandParameter="{Binding Path=.}" />
+                                                                        </dxmvvm:Interaction.Behaviors>
+                                                                    </dxe:ButtonInfo>
+                                                                </dxe:ButtonEdit.Buttons>
+                                                            </dxe:ButtonEdit>
+
+                                                            <!--For close button-->
+
+                                                        </Grid>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </dxe:ListBoxEdit.ItemTemplate>
+                                        </dxe:ListBoxEdit>
+                                    </dxdo:LayoutPanel>
+                                </dxdo:LayoutGroup>
+
+                                <dxdo:DockLayoutManager.AutoHideGroups>
+                                    <dxdo:AutoHideGroup DockType="Bottom">
+                                        <dxdo:LayoutPanel x:Name="AddAssignedUser" ItemHeight="360"
+                                               Caption="{DynamicResource WorkOrderEditViewAddAssignedUser}" AllowClose="False">
+                                            <dxg:GridControl x:Name="AssignedUserContacts"
+                                                 DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox, Mode=FindAncestor}}"
+                                                 EnableSmartColumnsGeneration="True"
+                                                 ItemsSource="{Binding UserToAssingedUser}"
+                                                 SelectionMode="Row">
+
+                                                <dxg:GridColumn AllowEditing="False" FieldName="UserShortDetail.UserName" Header="{DynamicResource WorkOrderEditViewUserName}" />
+                                                <dxg:GridControl.View>
+                                                    <dxg:TableView x:Name="tableAssignedUser"
+                                                         AllowBestFit="True"
+                                                         AutoWidth="True"
+                                                         EnableImmediatePosting="True"
+                                                         HorizontalScrollbarVisibility="Auto"
+                                                         IndicatorWidth="25"
+                                                         NavigationStyle="Row"
+                                                         ShowGroupPanel="False"
+                                                         ShowIndicator="False"
+                                                         ShowAutoFilterRow="True"
+                                                         ShowSearchPanelMode="Default"
+                                                         VerticalScrollbarVisibility="Auto"
+                                                         SearchPanelHorizontalAlignment="Stretch"
+                                                         ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly">
+
+                                                        <dxmvvm:Interaction.Behaviors>
+                                                            <dxmvvm:EventToCommand Command="{Binding DataContext.GetWorkOrderUserContactCommand, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox, Mode=FindAncestor}}"
+                                                                         EventName="MouseDoubleClick"
+                                                                         PassEventArgsToCommand="True">
+                                                                <dxmvvm:EventToCommand.EventArgsConverter>
+                                                                    <dx:EventArgsToDataRowConverter />
+                                                                </dxmvvm:EventToCommand.EventArgsConverter>
+                                                            </dxmvvm:EventToCommand>
+                                                        </dxmvvm:Interaction.Behaviors>
+
+                                                    </dxg:TableView>
+                                                </dxg:GridControl.View>
+
+                                            </dxg:GridControl>
+                                        </dxdo:LayoutPanel>
+                                    </dxdo:AutoHideGroup>
+                                </dxdo:DockLayoutManager.AutoHideGroups>
+                            </dxdo:DockLayoutManager>
+                        </Grid>
+                    </DataTemplate>
+                </dxlc:GroupBox.MaximizedContentTemplate>
+            </dxlc:GroupBox>
+
+                <!--Comments-->
+  
+                <dxlc:GroupBox x:Name="Comment" Style="{StaticResource myGroupBoxStyle}">
+                <dxlc:GroupBox.HeaderTemplate>
+                    <DataTemplate>
+                        <DockPanel Margin="-5,0,0,0">
+                            <TextBlock VerticalAlignment="Center"
+                                        FontWeight="Bold"
+                                        Text="{DynamicResource CommentsGroupBoxHeader}" />
+                            <TextBlock x:Name="CommentsCount"
+                                Text="{Binding DataContext.CommentsList.Count, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"
+                                Width="50"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                FontWeight="Bold"
+                                Margin="5,1,0,0" />
+                        </DockPanel>
+                    </DataTemplate>
+                </dxlc:GroupBox.HeaderTemplate>
+                <dxlc:GroupBox.ContentTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="30" />
+                                <RowDefinition Height="30" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <Label Content="{DynamicResource DateWithColon}"
+                                   Grid.Row="0"
+                                   Grid.Column="0" Margin="3,0,0,0" Padding="2"
+                                   FontWeight="Bold" VerticalContentAlignment="Stretch"/>
+                            <TextBlock 
+                                Text="{Binding DataContext.OT.OTLogEntries[0].Datetime,StringFormat=g, ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture},UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" 
+                                VerticalAlignment="Stretch"  Grid.Row="0" Grid.Column="1" Margin="3,0,0,0" Padding="2"/>
+
+                            <Label Content="{DynamicResource UserWithColon}"
+                                    Grid.Row="1"
+                                    Grid.Column="0" Margin="3,0,0,0" Padding="2"
+                                    FontWeight="Bold" VerticalContentAlignment="Stretch"/>
+                            <TextBlock Text="{Binding DataContext.OT.OTLogEntries[0].People.FullName, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}" VerticalAlignment="Stretch"  Grid.Row="1" Grid.Column="1" Margin="3,0,0,0" Padding="2"
+                                 ToolTip="{Binding DataContext.OT.OTLogEntries[0].People.FullName, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}"  TextWrapping="WrapWithOverflow" Width="Auto" TextTrimming="CharacterEllipsis"/>
+
+                            <Label Content="{DynamicResource CommentWithColon}"
+                                 Grid.Row="2"
+                                  Grid.Column="0" Margin="3,0,0,0" Padding="2"
+                                     FontWeight="Bold" VerticalContentAlignment="Stretch"/>
+                            <TextBlock Text="{Binding DataContext.OT.OTLogEntries[0].Comments, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}" VerticalAlignment="Stretch"  Grid.Row="2" Grid.Column="1" Margin="3,0,0,0" Padding="2"
+                                 ToolTip="{Binding DataContext.OT.OTLogEntries[0].Comments, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}"  TextWrapping="WrapWithOverflow" Width="Auto" TextTrimming="CharacterEllipsis"/>
+                        </Grid>
+                    </DataTemplate>
+                </dxlc:GroupBox.ContentTemplate>
+                <dxlc:GroupBox.MaximizedContentTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="40" />
+                            </Grid.RowDefinitions>
+                            <dxg:GridControl Grid.Row="0" x:Name="gcComments"
+                                 HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                 SelectionMode="Row"  MaxHeight="1500" MaxWidth="2000"
+                                 ItemsSource="{Binding DataContext.CommentsList,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                 ImplyNullLikeEmptyStringWhenFiltering="True"
+                                 SelectedItem="{Binding DataContext.SelectedComment, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                <dxg:GridControl.Columns>
+                                    <dxg:GridColumn Width="170" FieldName="People.FullName"
+                                         FixedWidth="True"
+                                         Header="{DynamicResource User}" FilterPopupMode="CheckedList">
+                                        <dxg:GridColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <dxe:TextEdit DisplayFormatString="g" Name="PART_Editor" FontWeight="Bold" />
+                                            </DataTemplate>
+                                        </dxg:GridColumn.CellTemplate>
+                                    </dxg:GridColumn>
+                                    <dxg:GridColumn Width="*"
+                                          Binding="{Binding Datetime,StringFormat=g, ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}"
+                                          FixedWidth="True" Header="{DynamicResource CommentsDate}" FilterPopupMode="CheckedList">
+                                        <dxg:GridColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <dxe:TextEdit DisplayFormatString="g" Name="PART_Editor" FontWeight="Bold" />
+                                            </DataTemplate>
+                                        </dxg:GridColumn.CellTemplate>
+                                    </dxg:GridColumn>
+                                    <dxg:GridColumn  Fixed="Right" Width="40" FieldName="" FixedWidth="True" FilterPopupMode="CheckedList" AllowMoving="False" AllowColumnFiltering="false"
+                                         >
+                                        <dxg:GridColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Button Name="deleteRowComment"
+                                                        Command="{Binding DataContext.DeleteCommentRowCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type dxlc:GroupBox}}}"
+                                                        CommandParameter="{Binding RowData.Row}"  IsEnabled="{Binding RowData.Row.IsDeleteButtonEnabled}"
+                                                        Content="">
+                                                    <Button.ContentTemplate>
+                                                        <DataTemplate>
+                                                            <Image Height="16" Width="16" Source="/Emdep.Geos.Modules.TSM;component/Assets/Images/bDelete.png" />
+                                                        </DataTemplate>
+                                                    </Button.ContentTemplate>
+                                                </Button>
+                                            </DataTemplate>
+                                        </dxg:GridColumn.CellTemplate>
+                                    </dxg:GridColumn>
+                                    <dxg:GridColumn FieldName="Comment" Visible="False" />
+                                </dxg:GridControl.Columns>
+                                <dxmvvm:Interaction.Behaviors>
+                                    <UIHelper:GridSelectingBehavior />
+                                </dxmvvm:Interaction.Behaviors>
+                                <dxg:GridControl.View>
+                                    <dxg:TableView x:Name="commentTable"
+                                                   NavigationStyle="Row"
+                                                   AllowHorizontalScrollingVirtualization="True"
+                                                   RowDetailsVisibilityMode="Visible"
+                                                   ShowHorizontalLines="True"
+                                                   ShowColumnHeaders="True"
+                                                   VerticalScrollbarVisibility="Auto"
+                                                   HorizontalScrollbarVisibility="Auto"
+                                                   AllowFixedColumnMenu="False"
+                                                   AutoWidth="False"
+                                                   ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly"
+                                                   AllowGrouping="True"
+                                                   ShowGroupPanel="False"
+                                                   ShowIndicator="False"
+                                                   AllowColumnMoving="False"
+                                                   ShowSearchPanelMode="Always"
+                                                   SearchPanelHorizontalAlignment="Stretch"
+                                                   FocusedRow="{Binding DataContext.SelectedComment, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                   SearchColumns="People.FullName;Comment"                            >
+                                        <dxg:TableView.RowDetailsTemplate>
+                                            <DataTemplate>
+                                                <dx:DXExpander IsExpanded="{Binding Path=RowState.(UIHelper:ShowDetailBehavior.ShowDetail)}" HorizontalExpand="None" VerticalExpand="FromTopToBottom" >
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="50" />
+                                                            <ColumnDefinition Width="*" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <dxe:ImageEdit ShowLoadDialogOnClickMode="Never" ShowMenu="False" Source="{Binding Row.People.OwnerImage}" Stretch="UniformToFill" Width="50" Height="45" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+                                                        <TextBlock Grid.Row="0" Grid.Column="1" Padding="2"  Text="{Binding Row.Comment,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextWrapping="WrapWithOverflow"
+                                                            Width="Auto" TextTrimming="CharacterEllipsis"/>
+                                                    </Grid>
+                                                </dx:DXExpander>
+                                            </DataTemplate>
+                                        </dxg:TableView.RowDetailsTemplate>
+                                        <dxmvvm:Interaction.Behaviors>
+                                            <dxmvvm:EventToCommand Command="{Binding DataContext.CommentsGridDoubleClickCommand,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}"
+                                                    EventName="MouseDoubleClick"
+                                                    PassEventArgsToCommand="True">
+                                                <dxmvvm:EventToCommand.EventArgsConverter>
+                                                    <dx:EventArgsToDataRowConverter />
+                                                </dxmvvm:EventToCommand.EventArgsConverter>
+                                            </dxmvvm:EventToCommand>
+                                            <UIHelper:ShowDetailBehavior />
+                                        </dxmvvm:Interaction.Behaviors>
+                                        <dxg:TableView.RowStyle>
+                                            <Style TargetType="dxg:RowControl">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding RowData.Row.IsEnabled}" Value="False">
+                                                        <Setter Property="IsEnabled" Value="False"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </dxg:TableView.RowStyle>
+                                    </dxg:TableView>
+                                </dxg:GridControl.View>
+                            </dxg:GridControl>
+                            <!--Open Add or Edit comment window-->
+                            <Button Grid.Row="1"
+                                    Height="32" Width="32"
+                                    Margin="0,0,4,4"
+                                    VerticalAlignment="Bottom" HorizontalAlignment="Right"
+                                    Command="{Binding AddCommentsCommand}"
+                                    CommandParameter="{Binding ElementName=gcComments}"
+                                    ToolTip="Add Comment"
+                                    DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}">
+                                <Button.ContentTemplate>
+                                    <DataTemplate>
+                                        <Image Style="{DynamicResource AddButtonImageStyle}" Grid.Column="1" Height="24" Width="24" HorizontalAlignment="Right" Margin="-10" />
+                                    </DataTemplate>
+                                </Button.ContentTemplate>
+                            </Button>
+                        </Grid>
+                    </DataTemplate>
+                </dxlc:GroupBox.MaximizedContentTemplate>
+            </dxlc:GroupBox>
+
+                <!--Chnage Log-->
+                <dxlc:GroupBox x:Name="Logs1" Style="{StaticResource myGroupBoxStyle}">
+                <!--HeaderTemplate-->
+                <dxlc:GroupBox.HeaderTemplate>
+                    <DataTemplate>
+                        <DockPanel Margin="-5,0,0,0">
+                            <TextBlock Margin="5,0,0,0"
+								    VerticalAlignment="Center"
+								    FontWeight="Bold"
+								    Text="{DynamicResource ChangeLogHeader}" />
+                            <TextBlock Width="50"
+								    Margin="5,1,0,0"
+								    HorizontalAlignment="Left"
+								    VerticalAlignment="Center"
+								    FontWeight="Bold"
+								    x:Name="ContactCount"
+								    Text="{Binding DataContext.OT.OTLogEntries.Count, UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}" />
+                        </DockPanel>
+                    </DataTemplate>
+                </dxlc:GroupBox.HeaderTemplate>
+
+                <!--ContentTemplate-->
+                <dxlc:GroupBox.ContentTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="30" />
+                                <RowDefinition Height="30" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <Label Content="{DynamicResource DateWithColon}"
+                                            Grid.Row="0"
+                                            Grid.Column="0" Margin="3,0,0,0" Padding="2"
+                                            FontWeight="Bold" VerticalContentAlignment="Stretch"/>
+                            <TextBlock 
+                                       Text="{Binding DataContext.OT.OTLogEntries[0].Datetime,StringFormat=g, ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture},UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" 
+                                       VerticalAlignment="Stretch"  Grid.Row="0" Grid.Column="1" Margin="3,0,0,0" Padding="2"/>
+
+                            <Label Content="{DynamicResource UserWithColon}"
+                                        Grid.Row="1"
+                                        Grid.Column="0" Margin="3,0,0,0" Padding="2"
+                                        FontWeight="Bold" VerticalContentAlignment="Stretch"/>
+                            <TextBlock Text="{Binding DataContext.OT.OTLogEntries[0].People.FullName, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}" VerticalAlignment="Stretch"  Grid.Row="1" Grid.Column="1" Margin="3,0,0,0" Padding="2"
+                                           ToolTip="{Binding DataContext.OT.OTLogEntries[0].People.FullName, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}"  TextWrapping="WrapWithOverflow" Width="Auto" TextTrimming="CharacterEllipsis"/>
+
+                            <Label Content="{DynamicResource ActionWithColon}"
+                                        Grid.Row="2"
+                                        Grid.Column="0" Margin="3,0,0,0" Padding="2"
+                                        FontWeight="Bold" VerticalContentAlignment="Stretch"/>
+                            <TextBlock Text="{Binding DataContext.OT.OTLogEntries[0].Comments, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}" VerticalAlignment="Stretch"  Grid.Row="2" Grid.Column="1" Margin="3,0,0,0" Padding="2"
+                                           ToolTip="{Binding DataContext.OT.OTLogEntries[0].Comments, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}"  TextWrapping="WrapWithOverflow" Width="Auto" TextTrimming="CharacterEllipsis"/>
+                        </Grid>
+                    </DataTemplate>
+                </dxlc:GroupBox.ContentTemplate>
+
+                <!--MaximizedContentTemplate-->
+                <dxlc:GroupBox.MaximizedContentTemplate>
+                    <DataTemplate>
+                        <Grid Margin="2">
+                            <dxg:GridControl x:Name="warehousePOLogEntriesGrid"
+								Margin="-10" SelectionMode="Row"
+								HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+								ShowBorder="True"
+								ItemsSource="{Binding DataContext.OT.OTLogEntries, Mode=TwoWay, RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}, UpdateSourceTrigger=PropertyChanged}"  ImplyNullLikeEmptyStringWhenFiltering="True" >
+
+                                <dxg:GridControl.TotalSummary>
+                                    <dxg:GridSummaryItem FieldName="People.FullName" SummaryType="Count" DisplayFormat="Total Count: {0}"/>
+                                </dxg:GridControl.TotalSummary>
+
+                                <dxmvvm:Interaction.Behaviors>
+                                    <UIHelper:GridSelectingBehavior />
+                                </dxmvvm:Interaction.Behaviors>
+
+
+                                <dxg:GridColumn Header="{DynamicResource User}" FieldName="People.FullName" MinWidth="170"  Width="220" FixedWidth="True" FilterPopupMode="CheckedList"/>
+                                <dxg:GridColumn Header="{DynamicResource Date}" FieldName="Datetime" Width="150" FixedWidth="True" FilterPopupMode="CheckedList" >
+                                    <dxg:GridColumn.EditSettings>
+                                        <dxe:DateEditSettings DisplayFormat="g" Name="changeLogTime" />
+                                    </dxg:GridColumn.EditSettings>
+                                </dxg:GridColumn>
+                                <dxg:GridColumn Header="{DynamicResource Action}" FieldName="Comments" Width="*" FilterPopupMode="CheckedList"/>
+
+                                <dxg:GridControl.View>
+                                    <dxg:TableView x:Name="warehousePOLogEntriesTableView"
+										NavigationStyle="Row"
+										RowDetailsVisibilityMode="Visible"
+										ShowHorizontalLines="True"
+										ShowSearchPanelMode="Always"
+										ShowColumnHeaders="True"
+										VerticalScrollbarVisibility="Visible"
+										AllowFixedColumnMenu="False"
+										ShowTotalSummary="True"
+										SearchPanelHorizontalAlignment="Stretch"
+										AllowGrouping="True"
+										ShowGroupPanel="False"
+										ShowIndicator="False" AutoWidth="True"
+										ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly" >
+                                    </dxg:TableView>
+                                </dxg:GridControl.View>
+
+                            </dxg:GridControl>
+                        </Grid>
+                    </DataTemplate>
+                </dxlc:GroupBox.MaximizedContentTemplate>
+            </dxlc:GroupBox>
+
+            
+
+            
+           
+        </dxlc:FlowLayoutControl>
+
+        <Button Grid.Row="1" Grid.Column="1"
+                    Content="{DynamicResource ViewWorkOrderAccept}"
+                    Command="{Binding CommandWorkOrderAcceptCommand}"
+                    Height="30"
+                    Width="100"
+                    Margin="0,0,300,0"
+                    HorizontalAlignment="Center"
+                     />
+
+        <Button Grid.Row="1" Grid.Column="1" 
+                Content="{DynamicResource ViewWorkOrderCancel}"
+                Command="{Binding CommandWorkOrderCancel}" 
+                Height="30"
+                Width="100" 
+                HorizontalAlignment="Center" />
+    </Grid>
+
+</dxwui:WinUIDialogWindow>
+
+
+
+

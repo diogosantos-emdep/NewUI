@@ -1,0 +1,144 @@
+DROP PROCEDURE IF EXISTS `SRM_InsertPreOrder_V2680`;
+DELIMITER $$
+
+CREATE PROCEDURE `SRM_InsertPreOrder_V2680`(
+    IN _Code          VARCHAR(45),
+    IN _Observations  VARCHAR(500),
+    IN _IdWarehouse   INT UNSIGNED,
+    IN _CreationDate  DATETIME,
+    IN _IdCurrency    TINYINT UNSIGNED,
+    IN _IdLogistic    SMALLINT UNSIGNED,
+    IN _CreatedBy     smallint unsigned
+)
+BEGIN
+     -- [ramchavan][GEOS2-8252][10.11.2025]
+     -- Increased Observations parameter size from 100 to 500 
+    -- [rdixit][GEOS2-8252][15.10.2025]
+    -- Inserts a new PreOrder into warehousepreorders table
+    -- Example call:
+    -- CALL SRM_InsertPreOrder_V2680('EAES20250201.02', 'Notes', 18, NOW(), 1, 243, 1);
+
+    INSERT INTO warehousepreorders (
+        Code,    
+        IdWarehouse,
+        IdCurrency,
+        IdLogistic,
+        Observations,
+        CreationDate,
+        CreatedBy
+    )
+    VALUES (
+        _Code,
+        _IdWarehouse,
+        _IdCurrency,
+        _IdLogistic,
+        _Observations,
+        _CreationDate,
+        _CreatedBy
+    );
+    
+SELECT LAST_INSERT_ID();
+END $$
+DELIMITER ;
+
+ DROP PROCEDURE IF EXISTS `geos`.`SRM_GetExistingPreOrderCodes_V2680`;
+DELIMITER $$
+CREATE PROCEDURE `geos`.`SRM_GetExistingPreOrderCodes_V2680`(
+      IN _code          varchar(100))
+ BEGIN
+         -- [rdixit][GEOS2-8252][15.10.2025]
+         -- call SRM_GetExistingPreOrderCodes_V2680('EAES20250201')
+    SELECT wp.Code
+      FROM warehousepreorders wp
+      WHERE wp.Code = _code OR wp.Code LIKE CONCAT(_code, '.%');
+ END$$
+ 
+  DROP PROCEDURE IF EXISTS `geos`.`SRM_GetAllWarehousesByUserPermission_V2680`;
+DELIMITER $$
+CREATE PROCEDURE `geos`.`SRM_GetAllWarehousesByUserPermission_V2680`(
+     IN _idUser   smallint UNSIGNED)
+ BEGIN
+        -- [Sudhir.Jangra][GEOS2-4489]
+        -- [rdixit][GEOS2-8252][16.10.2025]
+        -- call SRM_GetAllWarehousesByUserPermission_V2680(1);
+ SELECT 
+     wh.IdWarehouse,
+     wh.Name,
+     si.IdSite,
+     si.ShortName,
+     si.Name AS SiteName,
+     empsi.IP,
+     empsi.Code,
+     empsi.DatabaseIP,
+     wh.IdTransitLocation,
+     wh.InUse,
+     cur.Name As CurName,
+     cur.IdCurrency,
+     cur.Symbol
+ FROM
+     warehouses wh
+         INNER JOIN
+     sites si ON wh.IdSite = si.IdSite
+         INNER JOIN
+     emdepsites empsi ON si.IdSite = empsi.idSite
+         INNER JOIN
+     emdep_geos.site_user_permission usrp ON si.IdSite = usrp.IdCompany
+         LEFT JOIN
+     currency cur ON cur.IdCurrency = wh.IdCurrency
+ WHERE
+     usrp.IdUser = _idUser AND wh.InUse = 1
+ GROUP BY wh.IdWarehouse
+ ORDER BY si.IdSite , wh.IdWarehouse;
+ END$$
+ 
+   DROP PROCEDURE IF EXISTS `geos`.`SRM_GetWarehousePreOrders_V2680`;
+DELIMITER $$
+
+CREATE PROCEDURE `geos`.`SRM_GetWarehousePreOrders_V2680`(
+      IN `_IdWarehouse`   int UNSIGNED,
+      IN `_fromDate`    DATETIME,
+      IN `_toDate`      DATETIME)
+ BEGIN
+		 -- [rdixit][GEOS2-8095][11.07.2025]
+         --  call SRM_GetWarehousePreOrders_V2680(2,'2024-10-16','2025-10-16')   
+         SELECT wr.IdWarehousePreOrder,
+                wr.Code,
+                wr.CalculationDate,
+                wr.CreatedBy,
+                wr.CreationDate,
+                wr.IdWarehouse,
+                wr.TotalPreOrder as TotalReOrder,
+                wr.TotalValue,
+                wr.IdCurrency,
+                wr.POList,
+                concat(ucre.FirstName, ' ', ucre.LastName) AS CreatedUsr,
+                concat(ucal.FirstName, ' ', ucal.LastName) AS CalculationUsr,
+                c.Name AS CurrencyName,
+                w.Name AS WarehouseName,                                 -- plant
+                ws.Name AS WorkflowStatus,
+                ws.IdWorkflow,
+                ws.IdWorkflowStatus,
+                lv.IdLookupValue AS LogisticId,
+                lv.Value AS LogisticName,
+                lv.HtmlColor AS LogisticColor,
+                count.idCountry,
+                count.name As CountryName,
+                count.iso,
+                count.iso3
+           FROM warehousepreorders wr
+                INNER JOIN warehouses w ON w.idWarehouse = wr.IdWarehouse              
+                INNER JOIN sites s ON s.IdSite = w.IdSite    
+                INNER JOIN countries count on count.idCountry = s.IdCountry
+                INNER JOIN emdep_geos.workflow_status ws
+                   ON ws.IdWorkflowStatus = wr.IdStatus
+                left JOIN currency c ON c.IdCurrency = w.IdCurrency
+                left JOIN emdep_geos.users ucre ON ucre.IdUser = wr.CreatedBy
+                left JOIN emdep_geos.users ucal
+                   ON ucal.IdUser = wr.CalculationBy
+                LEFT JOIN emdep_geos.lookup_values lv
+                   ON lv.IdLookupValue = wr.IdLogistic
+          WHERE     wr.IdWarehouse = _IdWarehouse
+                AND date(wr.CreationDate) >= date(_fromDate)
+                AND date(wr.CreationDate) <= date(_toDate)
+         GROUP BY wr.IdWarehousePreOrder;
+ END$$

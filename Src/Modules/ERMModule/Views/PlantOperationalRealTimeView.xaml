@@ -1,0 +1,286 @@
+﻿<dxwui:WinUIDialogWindow  x:Class="Emdep.Geos.Modules.ERM.Views.PlantOperationalRealTimeView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.ERM.Views"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+             xmlns:SAMCommon ="clr-namespace:Emdep.Geos.Modules.ERM"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+             xmlns:dxwuin="http://schemas.devexpress.com/winfx/2008/xaml/windowsui/navigation" 
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:dxgt="http://schemas.devexpress.com/winfx/2008/xaml/grid/themekeys"
+             xmlns:dxp="http://schemas.devexpress.com/winfx/2008/xaml/printing"
+             mc:Ignorable="d" 
+             xmlns:sysglb="clr-namespace:System.Globalization;assembly=mscorlib"
+             xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+             xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+              xmlns:Converters="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:UIConverter="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters" 
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:ViewModel="clr-namespace:Emdep.Geos.Modules.ERM.ViewModels"
+             xmlns:dxdo="http://schemas.devexpress.com/winfx/2008/xaml/docking"
+             xmlns:dxb="http://schemas.devexpress.com/winfx/2008/xaml/bars"
+              Height="400"
+              Width="800"
+              TitleStyle="{DynamicResource WinUIDialogWindowTitleStyle}"
+             Style="{DynamicResource WinUIDialogWindowStyle}"
+             Title="{Binding WindowHeader}"
+           
+                          >
+
+
+    <dxwui:WinUIDialogWindow.Resources>
+
+
+        <Converters:ForegroundColorConverter x:Key="ForegroundColorConverter"/>
+
+
+        <DataTemplate x:Key="CalenderWeekTemplate">
+            <ContentControl>
+                <dxg:GridColumn Header="{Binding HeaderText,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                FieldName="{Binding ColumnFieldName,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                Width="{Binding Width}"
+                                MinWidth="{Binding Width}"
+                                HorizontalHeaderContentAlignment="Left"
+                                Visible="{Binding Visible,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ReadOnly="True" FixedWidth="True"
+                               FilterPopupMode="Default"
+                                AllowMoving="True"  AllowResizing="True" Fixed="None" GroupIndex="0"
+                                >
+
+                    <dxg:GridColumn.CellTemplate>
+                        <DataTemplate>
+                            <dxe:TextEdit Name="PART_Editor"   MaskShowPlaceHolders="False" ValidateOnTextInput="True" HorizontalAlignment="Left"  ShowBorder="False" >
+
+                            </dxe:TextEdit>
+                        </DataTemplate>
+                    </dxg:GridColumn.CellTemplate>
+                    <dxg:GridColumn.EditSettings>
+                        <dxe:TextEditSettings HorizontalContentAlignment="Left"/>
+                    </dxg:GridColumn.EditSettings>
+                </dxg:GridColumn>
+            </ContentControl>
+        </DataTemplate>
+        <DataTemplate x:Key="EmployeeTemplate">
+            <ContentControl>
+                <dxg:GridColumn Header="{Binding HeaderText,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                FieldName="{Binding ColumnFieldName,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                
+                                Width="{Binding Width}"
+                                MinWidth="{Binding Width}"
+                                HorizontalHeaderContentAlignment="Left"
+                                Visible="{Binding Visible,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ReadOnly="True" FixedWidth="True">
+                    <dxg:GridColumn.EditSettings>
+                        <dxe:TextEditSettings HorizontalContentAlignment="Left"/>
+                    </dxg:GridColumn.EditSettings>
+
+
+
+                </dxg:GridColumn>
+
+            </ContentControl>
+
+        </DataTemplate>
+
+        <UIHelper:PlantOperationPlanningColumnTemplateSelector x:Key="newColumnTemplateSelector"
+                                                                   
+                                                                    CalenderWeek="{StaticResource CalenderWeekTemplate}"
+                                                                    Employee="{StaticResource EmployeeTemplate}"
+                                                                   />
+        <!--JobDescription="{StaticResource JobDescriptionTemplate}"-->
+        <DataTemplate x:Key="BandTemplate">
+            <ContentControl>
+                <dxg:GridControlBand UIHelper:NameBinder.Name="{Binding BandName,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  Header="{Binding BandHeader,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                                    HorizontalHeaderContentAlignment="Center" Visible="True"
+                                                    ColumnsSource="{Binding Columns,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                     AllowMoving="{Binding AllowMoving,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                    Fixed="{Binding FixedStyle,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                    ColumnGeneratorTemplateSelector="{StaticResource newColumnTemplateSelector}" OverlayHeaderByChildren="False"/>
+
+            </ContentControl>
+        </DataTemplate>
+
+
+
+
+
+    </dxwui:WinUIDialogWindow.Resources>
+
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape"  Command="{Binding EscapeButtonCommand}"/>
+    </dxwui:WinUIDialogWindow.InputBindings>
+
+    <Grid ShowGridLines="False" >
+        
+        <Grid.RowDefinitions>
+            <RowDefinition Height="5"/>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="5" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="5"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!--Start [GEOS2-4839][gulabrao lakade][27 09 2023] -->
+        <!--<Grid Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+
+            <dxg:GridControl x:Name="detectiongrid" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"  Grid.Row="1" Grid.Column="0" 
+                             ItemsSource="{Binding TimeTypesList,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"  Width="420" 
+                             ImplyNullLikeEmptyStringWhenFiltering="True" SelectionMode="Cell" FocusManager.IsFocusScope="True"  AllowLiveDataShaping="True" >
+
+
+                <dxg:GridColumn Header="{DynamicResource TimeType}" FieldName="ReasonValue" FilterPopupMode="Default" MinWidth="100" ReadOnly="True"  AllowResizing="True"/>
+
+                <dxg:GridColumn Header="{DynamicResource Real}" FieldName="Real" MinWidth="150" FilterPopupMode="Default" AllowResizing="True">
+
+                </dxg:GridColumn>
+
+
+                
+
+
+                <dxg:GridControl.View>
+                    <dxg:TableView  x:Name="tableView"  
+                                           AllowGrouping="False"
+                                           ShowGroupFooters="False"                                   
+                                       NavigationStyle="Cell"
+                                       AllowPerPixelScrolling="True"
+                                       ShowGroupPanel="False" 
+                                       ShowColumnHeaders="True" ShowVerticalLines="True"  AllowHorizontalScrollingVirtualization="True"
+                                       ShowIndicator="True" AutoWidth="True" 
+                                       HorizontalScrollbarVisibility="Auto" 
+                                       VerticalScrollbarVisibility="Auto"
+                                       HorizontalContentAlignment="Center"
+                                      
+                                       RowMinHeight="20"
+                                       AllowSorting="True" 
+                                       AllowScrollHeaders="True"
+                                       AllowEditing="False"
+                                       
+                                       AutoMoveRowFocus="False"
+                                       AllowScrollAnimation="False" 
+                                       AllowBestFit="True" AllowResizing="True"
+                                       AllowConditionalFormattingMenu="True"
+                               
+                                       
+                                        AllowConditionalFormattingManager="True">
+
+
+                    </dxg:TableView>
+                   
+                </dxg:GridControl.View>
+
+            </dxg:GridControl>
+        </Grid>
+
+
+        <Grid Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Column="3">
+
+            <dxg:GridControl x:Name="detectiongrid1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"  Grid.Row="1" Grid.Column="3" Visibility="{Binding IsGridControlVisible}"
+                             ItemsSource="{Binding LeaveTypesList,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"  Width="320" 
+                             ImplyNullLikeEmptyStringWhenFiltering="True" SelectionMode="Cell" FocusManager.IsFocusScope="True"  AllowLiveDataShaping="True" >
+
+
+                <dxg:GridColumn Header="{DynamicResource Leaves}" FieldName="LeaveType" FilterPopupMode="Default" MinWidth="100" ReadOnly="True"  AllowResizing="True"/>
+
+                <dxg:GridColumn Header="{DynamicResource Minutes}" FieldName="LeaveMinutes" MinWidth="150" FilterPopupMode="Default" AllowResizing="True">
+
+                </dxg:GridColumn>
+
+
+            
+
+
+                <dxg:GridControl.View>
+                    <dxg:TableView  x:Name="tableView1"  
+                                           AllowGrouping="False"
+                                           ShowGroupFooters="False"                                   
+                                       NavigationStyle="Cell"
+                                       AllowPerPixelScrolling="True"
+                                       ShowGroupPanel="False" 
+                                       ShowColumnHeaders="True" ShowVerticalLines="True"  AllowHorizontalScrollingVirtualization="True"
+                                       ShowIndicator="True" AutoWidth="True" 
+                                       HorizontalScrollbarVisibility="Auto" 
+                                       VerticalScrollbarVisibility="Auto"
+                                       HorizontalContentAlignment="Center"
+                                      
+                                       RowMinHeight="20"
+                                       AllowSorting="True" 
+                                       AllowScrollHeaders="True"
+                                       AllowEditing="False"
+                                       
+                                       AutoMoveRowFocus="False"
+                                       AllowScrollAnimation="False" 
+                                       AllowBestFit="True" AllowResizing="True"
+                                       AllowConditionalFormattingMenu="True"
+                               
+                                       
+                                        AllowConditionalFormattingManager="True">
+
+
+                    </dxg:TableView>
+                  
+                </dxg:GridControl.View>
+
+            </dxg:GridControl>
+        </Grid>-->
+
+
+
+        <Grid Grid.Column="0" Grid.ColumnSpan="4" Grid.Row="1">
+            <dxdo:DockLayoutManager x:Name="DemoDockContainer"
+                                FloatingMode="Desktop" 
+                                FloatingDocumentContainer="{Binding SelectedItem.Id, ElementName=floatingDocumentContainerListBox}"
+                                RedrawContentWhenResizing="{Binding IsChecked, ElementName=redrawContentWhenResizingCheck}"
+                                ShowContentWhenDragging="{Binding IsChecked, ElementName=showContentWhenDraggingCheck}"
+                                ViewStyle="{Binding SelectedItem.Id, ElementName=viewStyleListBox}">
+            <dxdo:LayoutGroup Orientation="Vertical" ItemWidth="3*">
+                <dxdo:LayoutGroup Name="group1" ItemHeight="3*">
+                    
+                    <dxdo:DocumentGroup  Name="documentContainer"
+                                                 DestroyOnClosingChildren="False" ItemsSource="{Binding DataContext.ListDocumentPanel , RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow, Mode=FindAncestor},UpdateSourceTrigger=PropertyChanged , Mode=TwoWay}" 
+                                                 ItemWidth="4.25*" CaptionLocation="{Binding CaptionLocation, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow, Mode=FindAncestor},UpdateSourceTrigger=PropertyChanged , Mode=TwoWay}" ShowDropDownButton="False" AllowContextMenu="True" ItemHeight="50">
+              
+                <dxb:BarManager.DXContextMenu>
+                    <dxb:PopupMenu>
+                        <dxb:PopupMenu.Items>
+                           
+                        </dxb:PopupMenu.Items>
+                    </dxb:PopupMenu>
+                </dxb:BarManager.DXContextMenu>
+            </dxdo:DocumentGroup>
+        </dxdo:LayoutGroup>
+            </dxdo:LayoutGroup>
+        </dxdo:DockLayoutManager>
+        </Grid>
+        <!--End [GEOS2-4839][gulabrao lakade][27 09 2023] -->
+        <!--Accept and Cancel Button-->
+        <Grid Background="Transparent" ShowGridLines="False" Grid.Row="3"  VerticalAlignment="Center"  HorizontalAlignment="Center" >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="220"/>
+                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Row="4" Grid.Column="3"
+                    Style="{DynamicResource Button16Style}"
+                    HorizontalAlignment="Right"
+                    Content="Cancel"
+                    Command="{Binding CancelButtonCommand}"
+                    Height="30"
+                    Width="100" />
+        </Grid>
+
+    </Grid>
+ 
+  
+</dxwui:WinUIDialogWindow>

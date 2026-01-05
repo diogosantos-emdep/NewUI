@@ -1,0 +1,93 @@
+drop procedure if exists geos.SRM_GeneratePurchasingReport_V2680 ;
+delimiter $$
+
+CREATE PROCEDURE `geos`. `SRM_GeneratePurchasingReport_V2680`(_IdArticleSupplier int(10) UNSIGNED, _IdArticle smallint(5) UNSIGNED,
+                                                           _IdWarehouse int(10) UNSIGNED, _FromDate datetime,
+                                                           _ToDate datetime)
+BEGIN
+  /*
+   [pallavi.kale][16-10-2025][GEOS2-9558]
+   CALL geos.SRM_GeneratePurchasingReport_V2680(0,0,18,'2024-08-01','2025-10-27')
+  */
+  SELECT   *
+  FROM     (SELECT DATE_FORMAT(wdn.deliverydate, '%d/%m/%Y')
+                     AS `Date`,
+                   wpo.idwarehousepurchaseorder
+                     AS IdOrder,
+                   wpo.Code
+                     AS `Order`,
+                   a.Reference
+                     AS Article,
+                   asp.Name
+                     AS Supplier,
+                   asp.TradeName
+                     AS TradeName,
+                   IFNULL((SELECT artSup.Reference
+                           FROM   (SELECT a.*
+                                   FROM   articlesbysupplier a
+                                          INNER JOIN articlesuppliers b
+                                            ON a.idArticleSupplier = b.idArticleSupplier AND a.idCurrency = b.idCurrency) artSup
+                           WHERE  artSup.idArticle = a.idArticle AND artSup.idArticleSupplier = asp.idArticleSupplier),
+                          '')
+                     AS SupplierReference,
+                   wpoi.quantity
+                     AS POQuantity,
+                   wdni.Quantity,
+                   0
+                     AS Value,
+                   0
+                     AS POValue,
+                   wdn.Code
+                     AS WarehouseDeliveryNoteCode,
+                   wpo.idcurrency,
+                   c.name
+                     AS nameCurrPO,
+                   c2.name
+                     AS nameCurrSelected,
+                   IFNULL(cc.exchangerate, 1)
+                     AS ExchangeRate11,
+                   wh.Name
+                     AS POWarehouse,
+                   wh.IdWarehouse,
+                   wpoi.unitPrice
+                     AS UnitPrice,
+                   wpoi.discount
+                     AS Discount,
+                   IFNULL(CASE WHEN wdn.IdCurrency = 1 THEN wdn.ExchangeRate WHEN wdn.IdCurrency <> 1 THEN CASE WHEN cc.idcurrencyFrom = cc.idcurrencyTo THEN 1 ELSE cc.exchangerate END END, 1)
+                     AS ExchangeRate,
+                   TransportCost,
+                   ImportClearanceCost,
+                   DutiesPercentage,
+                   Duties,
+                   0
+                     TotalPriceWithNewCost,
+                   wpoi.Description
+                     AS WarehouseItemDescription,
+                  ''
+                     AS Status,
+                   c.Symbol ,
+                    c2.Symbol as CurSymbolPlant
+            FROM   warehousedeliverynoteitems wdni
+                   INNER JOIN warehousedeliverynotes wdn ON wdni.idWarehouseDeliveryNote = wdn.idWarehouseDeliveryNote
+                   INNER JOIN warehousepurchaseorderitems wpoi ON wdni.idWarehousePurchaseOrderItem = wpoi.idWarehousePurchaseOrderItem
+                   INNER JOIN warehousepurchaseorders wpo ON wpoi.idWarehousePurchaseOrder = wpo.idWarehousePurchaseOrder
+                   INNER JOIN articles a ON wpoi.idArticle = a.idArticle
+                   INNER JOIN articleSuppliers asp ON wpo.idArticleSupplier = asp.idArticleSupplier
+                   INNER JOIN currency c ON wpo.idcurrency = c.idcurrency
+                   LEFT JOIN currencyconversions cc ON (cc.idcurrencyFrom = wpo.idcurrency AND cc.idcurrencyTo = 1)
+                   LEFT JOIN warehouses wh ON (wpo.idwarehouse = wh.idwarehouse)
+                   LEFT JOIN currency c2 ON c2.idcurrency = wh.idCurrency
+                  -- INNER JOIN warehouses wh1 ON wh1.idcurrency = c2.idcurrency
+            WHERE  wpo.idWarehouse = _IdWarehouse AND wpo.IdType IN (SELECT IdLookupValue
+                                                                     FROM   emdep_geos.lookup_values
+                                                                     WHERE  IdLookupKey IN (SELECT IdLookupKey
+                                                                                            FROM   emdep_geos.lookup_keys
+                                                                                            WHERE  LookupKeyName =
+                   'Supplier_PO_Type') AND Value = 'PO') AND a.IdArticle =
+                   CASE _IdArticle WHEN 0 THEN a.IdArticle ELSE _IdArticle END AND wpo.idArticleSupplier =
+                   CASE _IdArticleSupplier WHEN 0 THEN wpo.idArticleSupplier ELSE _IdArticleSupplier END AND wdn.deliverydate
+                   BETWEEN _FromDate
+                       AND _ToDate) AS abc
+  ORDER BY STR_TO_DATE(abc.`Date`, '%d/%m/%Y'), abc.Article;
+end $$
+delimiter ;

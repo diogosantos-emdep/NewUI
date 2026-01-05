@@ -1,0 +1,295 @@
+﻿<UserControl xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.Crm.Views"
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid" 
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:dxb="http://schemas.devexpress.com/winfx/2008/xaml/bars"
+             xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+             xmlns:UIConverter="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+             xmlns:sysglb="clr-namespace:System.Globalization;assembly=mscorlib"
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:dxp="http://schemas.devexpress.com/winfx/2008/xaml/printing"
+             xmlns:dxet="http://schemas.devexpress.com/winfx/2008/xaml/editors/themekeys"
+             xmlns:dxgt="clr-namespace:DevExpress.Xpf.Grid.Themes;assembly=DevExpress.Xpf.Grid.v19.2"
+             xmlns:ViewModels="clr-namespace:Emdep.Geos.Modules.Crm.ViewModels" 
+             x:Class="Emdep.Geos.Modules.Crm.Views.TargetAndForecastView"
+             xmlns:Interactive="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity" 
+             xmlns:Behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:dxci="http://schemas.devexpress.com/winfx/2008/xaml/core/internal"
+             xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+             mc:Ignorable="d" d:DesignHeight="300" d:DesignWidth="300"
+             Style="{DynamicResource UserControlStyle}">
+
+    <dxmvvm:Interaction.Behaviors>
+        <dxmvvm:SaveFileDialogService Title="Save Excel Report" />
+    </dxmvvm:Interaction.Behaviors>
+
+    <UserControl.Resources>
+        
+        <DataTemplate x:Key="DefaultColumnTemplate">
+            <ContentControl>
+                <dxg:GridColumn FieldName="{Binding FieldName}" 
+                                Header="{Binding HeaderText}"
+                                ReadOnly="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsPermissionReadOnly}"
+                                AllowCellMerge="{Binding AllowCellMerge}" 
+                                Width="{Binding  Width}"
+                                FixedWidth="{Binding FixedWidth}"   
+                                AllowBestFit="{Binding AllowBestFit}"
+                                Visible="{Binding Visible}" 
+                                AllowEditing="False" 
+                                AllowAutoFilter="False"  
+                                AllowMoving="True" 
+                                ShowInColumnChooser="True"
+                                FilterPopupMode="CheckedList" />
+            </ContentControl>
+        </DataTemplate>
+
+        <DataTemplate x:Key="HiddenColumnTemplate">
+            <ContentControl>
+                <dxg:GridColumn FieldName="{Binding FieldName}" 
+                                Header="{Binding HeaderText}"
+                                ReadOnly="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsPermissionReadOnly}"
+                                AllowCellMerge="{Binding AllowCellMerge}" 
+                                Width="{Binding  Width}"
+                                FixedWidth="{Binding FixedWidth}"   
+                                AllowBestFit="{Binding AllowBestFit}"
+                                Visible="False" 
+                                AllowEditing="False" 
+                                AllowAutoFilter="False"  
+                                AllowMoving="False" 
+                                ShowInColumnChooser="False"
+                                FilterPopupMode="CheckedList" />
+            </ContentControl>
+        </DataTemplate>
+        
+        <DataTemplate x:Key="AmountColumnTemplate">
+            <ContentControl>
+                <dxg:GridColumn FieldName="{Binding FieldName}" 
+                                ReadOnly="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsPermissionReadOnly}"
+                                AllowCellMerge="{Binding AllowCellMerge}" 
+                                Width="{Binding Width}" 
+                                 FixedWidth="{Binding FixedWidth}"   
+                                AllowBestFit="{Binding AllowBestFit}"
+                                AllowEditing="{Binding AllowEditing }" 
+                                 Visible="True" 
+                                 AllowMoving="True" 
+                                ShowInColumnChooser="True"
+                                HorizontalHeaderContentAlignment="Center"
+                                 FilterPopupMode="CheckedList">
+                    <dxg:GridColumn.EditSettings>
+                        <dxe:TextEditSettings DisplayFormat="c" />
+                    </dxg:GridColumn.EditSettings>
+                </dxg:GridColumn>
+            </ContentControl>
+        </DataTemplate>
+
+        <UIHelper:ColumnTemplateSelector x:Key="ColumnTemplateSelector" />
+        
+        <DataTemplate x:Key="SummaryTemplate">
+            <ContentControl>
+                <dxg:GridSummaryItem FieldName="{Binding Path=(dxci:DependencyObjectExtensions.DataContext).FieldName, RelativeSource={RelativeSource Self}}"
+                                     SummaryType="{Binding Path=(dxci:DependencyObjectExtensions.DataContext).Type, RelativeSource={RelativeSource Self}}"
+                                     DisplayFormat="{Binding Path=(dxci:DependencyObjectExtensions.DataContext).DisplayFormat, RelativeSource={RelativeSource Self}}" />
+            </ContentControl>
+        </DataTemplate>
+        
+    </UserControl.Resources>
+
+    <DockPanel LastChildFill="True">
+        <Grid DockPanel.Dock="Top" Margin="0,10,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="70*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="150" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="{DynamicResource CrmMainViewModelTargetForecast}" Grid.Column="0" Style="{DynamicResource TextBlock30Style}" FontWeight="Bold" />
+
+            <!-- Plant Owner -->
+            <DockPanel Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=CmbPlantOwnerUsers}">
+                <Image Style="{DynamicResource PlantOwnerImageStyle}" Width="24" Height="24" Margin="7,0,3,0" />
+                <TextBlock Text="{DynamicResource CommonPlantOwner}" FontWeight="Bold" Margin="5,2,5,0" />
+            </DockPanel>
+
+            <dxe:ComboBoxEdit Style="{DynamicResource ComboBoxEditStyle}" Grid.Column="3" 
+                                       Visibility="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=CmbPlantOwnerUsers}"
+                                      ItemsSource="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=PlantOwnerUsersList}" Margin="5,0,5,0"
+                                      DisplayMember="ShortName"
+                    EditValue="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=SelectedPlantOwnerUsersList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                <dxe:ComboBoxEdit.StyleSettings>
+                    <dxe:CheckedComboBoxStyleSettings />
+                </dxe:ComboBoxEdit.StyleSettings>
+                <dxmvvm:Interaction.Triggers>
+                    <dxmvvm:EventToCommand EventName="PopupClosed"
+                                               Command="{Binding DataContext.PlantOwnerPopupClosedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                               PassEventArgsToCommand="True" />
+                </dxmvvm:Interaction.Triggers>
+            </dxe:ComboBoxEdit>
+
+
+            <!-- Sales Owner -->
+            <DockPanel Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=CmbSalesOwnerUsers}">
+                <Image Style="{DynamicResource OwnerGroupImageStyle}" Width="24" Height="24" Margin="7,0,3,0" />
+                <TextBlock Text="{DynamicResource CommonSalesOwner}" FontWeight="Bold" Margin="5,2,5,0" />
+            </DockPanel>
+
+            <dxe:ComboBoxEdit Style="{DynamicResource ComboBoxEditStyle}" Grid.Column="3" 
+                                       Visibility="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=CmbSalesOwnerUsers}"
+                                      ItemsSource="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=SalesOwnerUsersList}" Margin="5,0,5,0"
+                                      DisplayMember="User.FullName"
+                                      EditValue="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=SelectedSalesOwnerUsersList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                <dxe:ComboBoxEdit.StyleSettings>
+                    <dxe:CheckedComboBoxStyleSettings />
+                </dxe:ComboBoxEdit.StyleSettings>
+                <dxmvvm:Interaction.Triggers>
+                    <dxmvvm:EventToCommand EventName="PopupClosed"
+                                               Command="{Binding DataContext.SalesOwnerPopupClosedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                                   PassEventArgsToCommand="True" />
+                </dxmvvm:Interaction.Triggers>
+            </dxe:ComboBoxEdit>
+
+
+            <Button Content=" " Height="40" Width="40" Grid.Column="4" Command="{Binding RefreshTargetAndForecastViewCommand}" CommandParameter="{Binding ElementName=DashBoardSalesGrid}" HorizontalAlignment="Right" Margin="0,0,5,0"
+                    >
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource ButtonRefresh}" />
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Image Style="{ DynamicResource RefreshButtonImageStyle}" Grid.Column="0" Height="24" Width="24" Margin="-10" />
+                        </Grid>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+
+            <Button Content=" " Height="40" Width="40" Margin="0,0,5,0"
+                    HorizontalAlignment="Right" Command="{Binding PrintButtonCommand}" CommandParameter="{Binding ElementName=DashBoardSalesGrid}" Grid.Column="5">
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource ButtonPrint}" />
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Image Style="{DynamicResource PrinterButtonImageStyle}" Grid.Column="0" Height="24" Width="24" Margin="-10" />
+                        </Grid>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+
+            <Button Content=" " Height="40" Width="40" HorizontalAlignment="Right" Grid.Column="6" Margin="0,0,5,0"
+                    Command="{Binding ExportButtonCommand}" CommandParameter="{Binding ElementName=DashBoardSalesGrid}">
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource ButtonExportToExcel}" />
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Image Style="{ DynamicResource ExcelExportButtonImageStyle}" Grid.Column="0" Height="24" Width="24" Margin="-10" />
+                        </Grid>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+
+
+        </Grid>
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="200*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+
+            <dxg:GridControl x:Name="grid" DockPanel.Dock="Top" Grid.Row="2" Height="Auto" 
+                             ItemsSource="{Binding DtTargetForecast,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                             ColumnsSource="{Binding Columns,UpdateSourceTrigger=PropertyChanged}" AutoGenerateColumns="None" ScrollViewer.HorizontalScrollBarVisibility="Visible"
+                             ColumnGeneratorTemplateSelector="{StaticResource ColumnTemplateSelector}"
+                             TotalSummarySource="{Binding TotalSummary,UpdateSourceTrigger=PropertyChanged}"
+                             TotalSummaryGeneratorTemplate="{StaticResource SummaryTemplate}"
+                             SelectionMode="Row" ImplyNullLikeEmptyStringWhenFiltering="True">
+                <dxmvvm:Interaction.Behaviors>
+                    <UIHelper:GridSelectingBehavior />
+                </dxmvvm:Interaction.Behaviors>
+                <dxg:GridControl.View>
+                    <dxg:TableView x:Name="DashBoardSalesGrid"
+                                   NavigationStyle="Row"
+                                   ShowHorizontalLines="True"
+                                   AllowPerPixelScrolling="False"
+                                   ShowTotalSummary="True"
+                                   AllowGrouping="False"
+                                   ShowGroupPanel="False"
+                                   IsColumnChooserVisible="{Binding IsTargetandforecastColumnChooserVisible,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged }"
+                                   ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly"
+                                   ShowColumnHeaders="True"
+                                   ShowVerticalLines="True"
+                                   ShowFixedTotalSummary="False"
+                                   ShowIndicator="False"
+                                   PrintBandHeaders="True" 
+                                   PrintColumnHeaders="True"
+                                   PrintAllDetails="True" 
+                                   AutoWidth="True"
+                                   ShowSearchPanelMode="Always"
+                                   VerticalScrollbarVisibility="Visible"
+                                   HorizontalScrollbarVisibility="Visible" 
+                                   ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                   ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                   SearchPanelHorizontalAlignment="Stretch">
+                        <dxg:TableView.Resources>
+                            <DataTemplate x:Key="PageHeader">
+                                <Grid Width="{Binding UsablePageWidth}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="50" />
+                                        <ColumnDefinition Width="130" />
+                                    </Grid.ColumnDefinitions>
+                                    <dxe:TextEdit Text=" " Width="{Binding UsablePageWidth}" Grid.ColumnSpan="3" IsPrintingMode="True" Background="#333E5E" HorizontalAlignment="Stretch" 
+                                                  VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" FontWeight="Bold" Style="{DynamicResource TextEdit20Style}" Height="50" />
+                                    <dxe:TextEdit Text="{DynamicResource CrmMainViewModelTargetForecastReport}" IsPrintingMode="True" HorizontalAlignment="Stretch" 
+                                                  VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" FontWeight="Bold" Style="{DynamicResource TextEdit20Style}" />
+                                    <Image Source="/Emdep.Geos.Modules.Crm;component/Assets/Images/GeosReportLogo.png" Height="50" Width="80" dxp:ExportSettings.TargetType="Image" Grid.Column="2" />
+                                </Grid>
+                            </DataTemplate>
+                            <DataTemplate x:Key="PageFooter">
+                                <dxe:TextEdit HorizontalContentAlignment="Center" 
+                                              Width="{Binding Path=UsablePageWidth, Mode=OneWay}" 
+                                              dxp:ExportSettings.TargetType="PageNumber" 
+                                              dxp:PageNumberExportSettings.Kind="NumberOfTotal" 
+                                              dxp:PageNumberExportSettings.Format="Page {0} of {1}">
+                                </dxe:TextEdit>
+                            </DataTemplate>
+                        </dxg:TableView.Resources>
+                        <Interactive:Interaction.Triggers>
+                            <Interactive:EventTrigger EventName="Loaded">
+                                <Behaviors:InvokeDelegateCommandAction Command="{Binding CustomCellAppearanceCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=InvokeParameter}" />
+                            </Interactive:EventTrigger>
+                            <i:EventTrigger EventName="RowDoubleClick">
+                                <Behaviors:InvokeDelegateCommandAction Command="{Binding CommandGridDoubleClick}" CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=InvokeParameter}" />
+                            </i:EventTrigger>
+                        </Interactive:Interaction.Triggers>
+                    </dxg:TableView>
+                </dxg:GridControl.View>
+            </dxg:GridControl>
+        </Grid>
+    </DockPanel>
+</UserControl>

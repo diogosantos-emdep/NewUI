@@ -1,0 +1,1156 @@
+<UserControl x:Class="Emdep.Geos.Modules.APM.Views.ActionPlansModernView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:dxb="http://schemas.devexpress.com/winfx/2008/xaml/bars"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:viewModel="clr-namespace:Emdep.Geos.Modules.APM.ViewModels"
+             xmlns:Converters="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+             xmlns:converters="clr-namespace:Emdep.Geos.Modules.APM.Converters"
+             xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+             xmlns:APMCommon="clr-namespace:Emdep.Geos.Modules.APM.CommonClasses"
+             mc:Ignorable="d" 
+             d:DesignHeight="800" d:DesignWidth="1400">
+
+    <UserControl.Resources>
+        <Converters:DrawingColorToBrushConverter x:Key="DrawingColorToBrushConverter" />
+        <Converters:ImageUrlToByteArrayConverter x:Key="ImageUrlToByteArrayConverter" />
+        <converters:PercentageToColorConverter x:Key="PercentageToColorConverter" />
+        
+        <!-- Style para performance do Grid -->
+        <Style x:Key="ModernGridStyle" TargetType="{x:Type dxg:GridControl}">
+            <Setter Property="EnableSmartColumnsGeneration" Value="False"/>
+            <Setter Property="AutoPopulateColumns" Value="False"/>
+        </Style>
+
+        <!-- Converters -->
+        <converters:EqualityConverter x:Key="EqualityConverter" />
+        <converters:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter" />
+        <converters:NumericToVisibilityConverter x:Key="NumericToVisibilityConverter" />
+        <converters:StringToColorBrushConverter x:Key="StringToColorBrushConverter" />
+        <converters:ForegroundColorConverter x:Key="ForegroundColorConverter" />
+        <dx:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <converters:BooleanToObjectConverter x:Key="ExpandSubTasksTooltipConverter" TrueValue="Collapse Sub-Tasks" FalseValue="Expand Sub-Tasks" />
+        <converters:BooleanToObjectConverter x:Key="ExpandTasksTooltipConverter" TrueValue="Collapse Tasks" FalseValue="Expand Tasks" />
+
+        <!-- Style para Expand Button -->
+        <Style x:Key="ExpandButtonStyle" TargetType="{x:Type Button}">
+            <Setter Property="Width" Value="30"/>
+            <Setter Property="Height" Value="24"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="BorderBrush" Value="Black"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="VerticalAlignment" Value="Stretch"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Padding="2">
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#E3F2FD"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#BBDEFB"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!-- Toolbar -->
+            <RowDefinition Height="Auto"/>
+            <!-- Search -->
+            <RowDefinition Height="Auto"/>
+            <!-- Filters -->
+            <RowDefinition Height="Auto"/>
+            <!-- Alert Buttons -->
+            <RowDefinition Height="*"/>
+            <!-- Grid -->
+            <RowDefinition Height="Auto"/>
+            <!-- Status bar -->
+        </Grid.RowDefinitions>
+
+        <!-- Toolbar -->
+        <Border Grid.Row="0" Background="#F5F5F5" BorderBrush="#DDDDDD" BorderThickness="0,0,0,1" Padding="10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Left Side: Period Selection and Action Buttons -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <!-- Period/Year Selection -->
+                    <StackPanel Orientation="Horizontal" Margin="0,0,15,0">
+                        <Image Source="/Emdep.Geos.Modules.APM;component/Assets/Images/bCalendar_32x32.png" Width="20" Height="20" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="Period:" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <dxe:ComboBoxEdit Width="150" Height="30"
+                                          ItemsSource="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=FinancialYearLst, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                          EditValue="{Binding Source={x:Static APMCommon:APMCommon.Instance}, Path=SelectedPeriod, UpdateSourceTrigger=PropertyChanged}">
+                            <dxe:ComboBoxEdit.StyleSettings>
+                                <dxe:CheckedComboBoxStyleSettings />
+                            </dxe:ComboBoxEdit.StyleSettings>
+                            <dxmvvm:Interaction.Triggers>
+                                <dxmvvm:EventToCommand EventName="PopupClosed"
+                                                       Command="{Binding SelectedYearChangedCommand}" 
+                                                       PassEventArgsToCommand="True"/>
+                            </dxmvvm:Interaction.Triggers>
+                        </dxe:ComboBoxEdit>
+                    </StackPanel>
+
+                    <!-- Separator -->
+                    <Border Width="1" Background="#CCCCCC" Margin="5,5,15,5"/>
+
+                    <!-- Add New Action Plan Button -->
+                    <Button Height="40" Width="40" Margin="0,0,5,0"
+                            Command="{Binding AddActionPlanCommand}"
+                            ToolTip="Add New Action Plan">
+                        <Image Source="/Emdep.Geos.Modules.APM;component/Assets/Images/bAdd.png" Width="24" Height="24"/>
+                    </Button>
+
+                    <!-- Import Button -->
+                    <Button Height="40" Width="40" Margin="0,0,5,0"
+                            Command="{Binding ImportCommand}"
+                            ToolTip="Import Action Plan">
+                        <Image Source="/Emdep.Geos.Modules.APM;component/Assets/Images/bImport.png" Width="24" Height="24"/>
+                    </Button>
+
+                    <!-- Print Dropdown -->
+                    <dx:DropDownButton Height="40" Width="40" Margin="0,0,5,0" ToolTip="Print">
+                        <dx:DropDownButton.Style>
+                            <Style>
+                                <Setter Property="dx:DropDownButtonBase.ArrowAlignment" Value="Right"/>
+                                <Setter Property="dx:DropDownButtonBase.ArrowPadding" Value="0"/>
+                            </Style>
+                        </dx:DropDownButton.Style>
+                        <dx:DropDownButton.ContentTemplate>
+                            <DataTemplate>
+                                <Image Source="/Emdep.Geos.Modules.APM;component/Assets/Images/bPrinter.png" Width="24" Height="24"/>
+                            </DataTemplate>
+                        </dx:DropDownButton.ContentTemplate>
+                        <dxb:PopupMenu>
+                            <dxb:BarButtonItem Content="Standard" Command="{Binding PrintButtonCommand}" CommandParameter="Standard"/>
+                            <dxb:BarButtonItem Content="Customer" Command="{Binding PrintButtonCommand}" CommandParameter="Customer"/>
+                        </dxb:PopupMenu>
+                    </dx:DropDownButton>
+
+                    <!-- Export Dropdown -->
+                    <dx:DropDownButton Height="40" Width="40" Margin="0,0,5,0" ToolTip="Export to Excel">
+                        <dx:DropDownButton.Style>
+                            <Style>
+                                <Setter Property="dx:DropDownButtonBase.ArrowAlignment" Value="Right"/>
+                                <Setter Property="dx:DropDownButtonBase.ArrowPadding" Value="0"/>
+                            </Style>
+                        </dx:DropDownButton.Style>
+                        <dx:DropDownButton.ContentTemplate>
+                            <DataTemplate>
+                                <Image Source="/Emdep.Geos.Modules.APM;component/Assets/Images/bXlsx.png" Width="24" Height="24"/>
+                            </DataTemplate>
+                        </dx:DropDownButton.ContentTemplate>
+                        <dxb:PopupMenu>
+                            <dxb:BarButtonItem Content="Standard" Command="{Binding ExportButtonCommand}"/>
+                            <dxb:BarButtonItem Content="Customer" Command="{Binding ExportCustomerButtonCommand}"/>
+                        </dxb:PopupMenu>
+                    </dx:DropDownButton>
+
+                    <!-- Switch View Dropdown -->
+                    <dx:DropDownButton Height="40" Width="40" Margin="0,0,5,0" ToolTip="Switch View">
+                        <dx:DropDownButton.Style>
+                            <Style>
+                                <Setter Property="dx:DropDownButtonBase.ArrowAlignment" Value="Right"/>
+                                <Setter Property="dx:DropDownButtonBase.ArrowPadding" Value="0"/>
+                            </Style>
+                        </dx:DropDownButton.Style>
+                        <dx:DropDownButton.ContentTemplate>
+                            <DataTemplate>
+                                <Image Source="/Emdep.Geos.Modules.APM;component/Assets/Images/bSwitchView_32x32.png" Width="24" Height="24"/>
+                            </DataTemplate>
+                        </dx:DropDownButton.ContentTemplate>
+                        <dxb:PopupMenu>
+                            <dxb:BarButtonItem Content="Grid View" Command="{Binding SwitchToGridViewCommand}"/>
+                            <dxb:BarButtonItem Content="Task View" Command="{Binding SwitchToTaskViewCommand}"/>
+                            <dxb:BarButtonItem Content="Task Cards" Command="{Binding SwitchToTaskCardsCommand}"/>
+                        </dxb:PopupMenu>
+                    </dx:DropDownButton>
+
+                    <!-- Separator -->
+                    <Border Width="1" Background="#CCCCCC" Margin="5,5,15,5"/>
+
+                    <!-- Refresh Button -->
+                    <Button Height="32" Padding="10,0" Margin="0,0,5,0"
+                            Command="{Binding RefreshCommand}"
+                            ToolTip="Refresh Data">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE72C;" FontSize="14" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                            <TextBlock Text="Refresh" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <!-- Expand All Button -->
+                    <Button Height="32" Padding="10,0" Margin="0,0,5,0"
+                            Command="{Binding ExpandAllActionPlansCommand}"
+                            ToolTip="Expand all Action Plans">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE710;" FontSize="12" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                            <TextBlock Text="Expand All" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <!-- Collapse All Button -->
+                    <Button Height="32" Padding="10,0" Margin="0,0,5,0"
+                            Command="{Binding CollapseAllActionPlansCommand}"
+                            ToolTip="Collapse all Action Plans">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE711;" FontSize="12" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                            <TextBlock Text="Collapse All" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <!-- Cancel Load Button (visible only when loading) -->
+                    <Button Height="32" Padding="10,0" Margin="0,0,5,0"
+                            Command="{Binding CancelLoadCommand}"
+                            Visibility="{Binding IsBusy, Converter={dx:BooleanToVisibilityConverter}}"
+                            ToolTip="Cancel current loading operation">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE711;" FontSize="12" VerticalAlignment="Center" Margin="0,0,5,0" Foreground="Red"/>
+                            <TextBlock Text="Cancel" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+
+                <!-- Right Side: Count and Status -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding ActionPlans.Count, StringFormat='Total: {0} Action Plans'}" 
+                               FontWeight="Bold"
+                               Margin="0,0,15,0"/>
+                    
+                    <!-- Loading Indicator -->
+                    <dx:LoadingDecorator Visibility="{Binding IsBusy, Converter={dx:BooleanToVisibilityConverter}}" 
+                                         Margin="0,0,10,0"/>
+                    <TextBlock Text="Loading..." 
+                               Visibility="{Binding IsBusy, Converter={dx:BooleanToVisibilityConverter}}"
+                               Foreground="Gray"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Search Bar -->
+        <Border Grid.Row="1" Background="White" BorderBrush="#DDDDDD" BorderThickness="0,0,0,1" Padding="10">
+            <dxe:TextEdit Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" 
+                          NullText="Search Action Plans..."
+                          Width="400"
+                          HorizontalAlignment="Left"/>
+        </Border>
+
+        <!-- Filters Section -->
+        <Border Grid.Row="2" Background="#FAFAFA" BorderBrush="#DDDDDD" BorderThickness="0,0,0,1" Padding="10,8">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Location Filter -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,15,0">
+                    <TextBlock Text="Location:" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <dxe:ComboBoxEdit Width="180" Height="28"
+                                      DisplayMember="Alias"
+                                      IsTextEditable="True"
+                                      AutoComplete="True"
+                                      ImmediatePopup="True"
+                                      IncrementalFiltering="True"
+                                      FilterCondition="Contains"
+                                      ItemsSource="{Binding Source={x:Static APMCommon:APMCommon.Instance}, Path=LocationList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      EditValue="{Binding SelectedLocation, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      NullText="All">
+                        <dxe:ComboBoxEdit.StyleSettings>
+                            <dxe:CheckedComboBoxStyleSettings />
+                        </dxe:ComboBoxEdit.StyleSettings>
+                        <dxe:ComboBoxEdit.ItemTemplate>
+                            <DataTemplate>
+                                <DockPanel>
+                                    <Image Margin="5,2,0,2"
+                                           Height="24"
+                                           Width="24"
+                                           HorizontalAlignment="Left"
+                                           Source="{Binding CountryIconUrl, Converter={StaticResource ImageUrlToByteArrayConverter}}" />
+                                    <TextBlock Margin="8,0,0,0"
+                                               HorizontalAlignment="Left"
+                                               VerticalAlignment="Center"
+                                               Text="{Binding Alias}" />
+                                </DockPanel>
+                            </DataTemplate>
+                        </dxe:ComboBoxEdit.ItemTemplate>
+                        <dxmvvm:Interaction.Triggers>
+                            <dxmvvm:EventToCommand EventName="PopupClosed"
+                                                   Command="{Binding LocationFilterChangedCommand}" 
+                                                   PassEventArgsToCommand="True"/>
+                        </dxmvvm:Interaction.Triggers>
+                    </dxe:ComboBoxEdit>
+                </StackPanel>
+
+                <!-- Responsible Filter -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,15,0">
+                    <TextBlock Text="Responsible:" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <dxe:ComboBoxEdit Width="180" Height="28"
+                                      DisplayMember="ResponsibleDisplayName"
+                                      IsTextEditable="True"
+                                      AutoComplete="True"
+                                      ImmediatePopup="True"
+                                      IncrementalFiltering="True"
+                                      FilterCondition="Contains"
+                                      ItemsSource="{Binding ListOfPerson, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      EditValue="{Binding SelectedPerson, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      NullText="All">
+                        <dxe:ComboBoxEdit.StyleSettings>
+                            <dxe:CheckedComboBoxStyleSettings />
+                        </dxe:ComboBoxEdit.StyleSettings>
+                        <dxe:ComboBoxEdit.ItemTemplate>
+                            <DataTemplate>
+                                <DockPanel>
+                                    <Image Margin="5,2,0,2"
+                                           Height="28"
+                                           Width="28"
+                                           HorizontalAlignment="Left"
+                                           Stretch="Fill"
+                                           Source="{Binding OwnerImage, TargetNullValue={x:Null}, FallbackValue={x:Null}}" />
+                                    <TextBlock Margin="8,0,0,0"
+                                               HorizontalAlignment="Left"
+                                               VerticalAlignment="Center"
+                                               Text="{Binding ResponsibleDisplayName}" />
+                                </DockPanel>
+                            </DataTemplate>
+                        </dxe:ComboBoxEdit.ItemTemplate>
+                        <dxmvvm:Interaction.Triggers>
+                            <dxmvvm:EventToCommand EventName="PopupClosed"
+                                                   Command="{Binding ResponsibleFilterChangedCommand}" 
+                                                   PassEventArgsToCommand="True"/>
+                        </dxmvvm:Interaction.Triggers>
+                    </dxe:ComboBoxEdit>
+                </StackPanel>
+
+                <!-- Business Unit Filter -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="0,0,15,0">
+                    <TextBlock Text="Business Unit:" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <dxe:ComboBoxEdit Width="150" Height="28"
+                                      AutoComplete="True"
+                                      ImmediatePopup="True"
+                                      IncrementalFiltering="True"
+                                      ItemsSource="{Binding Source={x:Static APMCommon:APMCommon.Instance}, Path=BusinessUnitList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      EditValue="{Binding SelectedBusinessUnit, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      NullText="All">
+                        <dxe:ComboBoxEdit.StyleSettings>
+                            <dxe:CheckedComboBoxStyleSettings />
+                        </dxe:ComboBoxEdit.StyleSettings>
+                        <dxmvvm:Interaction.Triggers>
+                            <dxmvvm:EventToCommand EventName="PopupClosed"
+                                                   Command="{Binding BusinessUnitFilterChangedCommand}" 
+                                                   PassEventArgsToCommand="True"/>
+                        </dxmvvm:Interaction.Triggers>
+                    </dxe:ComboBoxEdit>
+                </StackPanel>
+
+                <!-- Origin Filter -->
+                <StackPanel Grid.Column="3" Orientation="Horizontal" Margin="0,0,15,0">
+                    <TextBlock Text="Origin:" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <dxe:ComboBoxEdit Width="120" Height="28"
+                                      AutoComplete="True"
+                                      ImmediatePopup="True"
+                                      IncrementalFiltering="True"
+                                      ItemsSource="{Binding Source={x:Static APMCommon:APMCommon.Instance}, Path=OriginList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      EditValue="{Binding SelectedOrigin, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      NullText="All">
+                        <dxe:ComboBoxEdit.StyleSettings>
+                            <dxe:CheckedComboBoxStyleSettings />
+                        </dxe:ComboBoxEdit.StyleSettings>
+                        <dxmvvm:Interaction.Triggers>
+                            <dxmvvm:EventToCommand EventName="PopupClosed"
+                                                   Command="{Binding OriginFilterChangedCommand}" 
+                                                   PassEventArgsToCommand="True"/>
+                        </dxmvvm:Interaction.Triggers>
+                    </dxe:ComboBoxEdit>
+                </StackPanel>
+
+                <!-- Department Filter -->
+                <StackPanel Grid.Column="4" Orientation="Horizontal" Margin="0,0,15,0">
+                    <TextBlock Text="Department:" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <dxe:ComboBoxEdit Width="130" Height="28"
+                                      AutoComplete="True"
+                                      ImmediatePopup="True"
+                                      IncrementalFiltering="True"
+                                      ItemsSource="{Binding Source={x:Static APMCommon:APMCommon.Instance}, Path=DepartmentList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      EditValue="{Binding SelectedDepartment, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      NullText="All">
+                        <dxe:ComboBoxEdit.StyleSettings>
+                            <dxe:CheckedComboBoxStyleSettings />
+                        </dxe:ComboBoxEdit.StyleSettings>
+                        <dxmvvm:Interaction.Triggers>
+                            <dxmvvm:EventToCommand EventName="PopupClosed"
+                                                   Command="{Binding DepartmentFilterChangedCommand}" 
+                                                   PassEventArgsToCommand="True"/>
+                        </dxmvvm:Interaction.Triggers>
+                    </dxe:ComboBoxEdit>
+                </StackPanel>
+
+                <!-- Customer Filter -->
+                <StackPanel Grid.Column="5" Orientation="Horizontal" Margin="0,0,15,0">
+                    <TextBlock Text="Customer:" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <dxe:ComboBoxEdit Width="150" Height="28"
+                                      DisplayMember="GroupName"
+                                      IsTextEditable="True"
+                                      AutoComplete="True"
+                                      ImmediatePopup="True"
+                                      IncrementalFiltering="True"
+                                      FilterCondition="Contains"
+                                      ItemsSource="{Binding ListOfCustomer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      EditValue="{Binding SelectedCustomer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      NullText="All">
+                        <dxe:ComboBoxEdit.StyleSettings>
+                            <dxe:CheckedComboBoxStyleSettings />
+                        </dxe:ComboBoxEdit.StyleSettings>
+                        <dxmvvm:Interaction.Triggers>
+                            <dxmvvm:EventToCommand EventName="PopupClosed"
+                                                   Command="{Binding CustomerFilterChangedCommand}" 
+                                                   PassEventArgsToCommand="True"/>
+                        </dxmvvm:Interaction.Triggers>
+                    </dxe:ComboBoxEdit>
+                </StackPanel>
+
+                <!-- Clear Filters Button -->
+                <Button Grid.Column="8" Height="28" Padding="12,0"
+                        Command="{Binding ClearFiltersCommand}"
+                        ToolTip="Clear all filters">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE894;" FontSize="12" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                        <TextBlock Text="Clear Filters" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+            </Grid>
+        </Border>
+
+        <!-- Alert Buttons Section -->
+        <Border Grid.Row="3" Background="#FAFAFA" BorderBrush="#DDDDDD" BorderThickness="0,0,0,1" Padding="10">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Alert Section Header -->
+                <Grid Grid.Row="0" Margin="0,0,0,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0" 
+                               Text="Alerts" 
+                               FontSize="14" 
+                               FontWeight="SemiBold" 
+                               VerticalAlignment="Center"
+                               Margin="0,0,10,0"/>
+
+                    <ToggleButton Grid.Column="2"
+                                  Width="30" Height="30"
+                                  IsChecked="{Binding IsAlertSectionCollapsed, Mode=TwoWay}"
+                                  ToolTip="Collapse/Expand Alert Section"
+                                  Background="Transparent"
+                                  BorderBrush="#CCCCCC"
+                                  BorderThickness="1">
+                        <TextBlock FontFamily="Segoe MDL2 Assets" 
+                                   FontSize="14"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Text" Value="&#xE70E;"/> <!-- ChevronUp -->
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsAlertSectionCollapsed}" Value="True">
+                                            <Setter Property="Text" Value="&#xE70D;"/> <!-- ChevronDown -->
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </ToggleButton>
+                </Grid>
+
+                <!-- Alert Buttons ScrollViewer -->
+                <ScrollViewer Grid.Row="1" 
+                              HorizontalScrollBarVisibility="Auto" 
+                              VerticalScrollBarVisibility="Disabled"
+                              Visibility="{Binding IsAlertSectionCollapsed, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                    <ItemsControl ItemsSource="{Binding AlertListOfFilterTile}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button Width="180" Height="65" 
+                                        Margin="0,0,10,0"
+                                        Command="{Binding DataContext.AlertButtonClickCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        CommandParameter="{Binding}"
+                                        BorderThickness="2"
+                                        Cursor="Hand"
+                                        ToolTip="{Binding Caption}">
+                                    <Button.Style>
+                                        <Style TargetType="Button">
+                                            <Setter Property="Background" Value="{Binding BackColor}"/>
+                                            <Setter Property="BorderBrush" Value="#DDDDDD"/>
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="Button">
+                                                        <Border x:Name="border"
+                                                                Background="{TemplateBinding Background}" 
+                                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                                BorderThickness="{TemplateBinding BorderThickness}"
+                                                                CornerRadius="4"
+                                                                Padding="8">
+                                                            <Grid>
+                                                                <Grid.RowDefinitions>
+                                                                    <RowDefinition Height="Auto"/>
+                                                                    <RowDefinition Height="*"/>
+                                                                </Grid.RowDefinitions>
+
+                                                                <!-- Caption -->
+                                                                <TextBlock Grid.Row="0" 
+                                                                           Text="{Binding Caption}" 
+                                                                           FontSize="11" 
+                                                                           FontWeight="SemiBold"
+                                                                           Foreground="{Binding BackColor, Converter={Converters:ForegroundColorConverter}}"
+                                                                           TextWrapping="Wrap"
+                                                                           TextAlignment="Center"
+                                                                           Margin="0,0,0,4"/>
+
+                                                                <!-- Count -->
+                                                                <TextBlock Grid.Row="1" 
+                                                                           Text="{Binding EntitiesCount}" 
+                                                                           FontSize="16" 
+                                                                           FontWeight="Bold"
+                                                                           Foreground="{Binding BackColor, Converter={Converters:ForegroundColorConverter}}"
+                                                                           TextAlignment="Center"
+                                                                           VerticalAlignment="Center"
+                                                                           Opacity="0.8"/>
+                                                            </Grid>
+                                                        </Border>
+                                                        <ControlTemplate.Triggers>
+                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                <Setter TargetName="border" Property="Opacity" Value="0.9"/>
+                                                            </Trigger>
+                                                            <Trigger Property="IsPressed" Value="True">
+                                                                <Setter TargetName="border" Property="Opacity" Value="0.8"/>
+                                                            </Trigger>
+                                                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                                <Setter TargetName="border" Property="BorderBrush" Value="#1E88E5"/>
+                                                                <Setter TargetName="border" Property="BorderThickness" Value="3"/>
+                                                            </DataTrigger>
+                                                        </ControlTemplate.Triggers>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Grid>
+        </Border>
+
+        <!-- Main Grid: Side Tiles + Action Plans -->
+        <Grid Grid.Row="4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <!-- Side Tiles -->
+                <ColumnDefinition Width="*"/>
+                <!-- Grid -->
+            </Grid.ColumnDefinitions>
+
+            <!-- Side Tiles (Theme Filters) -->
+            <Border Grid.Column="0" 
+                    Background="White"
+                    BorderBrush="#DDDDDD" 
+                    BorderThickness="0,0,1,0"
+                    Padding="10,10,5,10"
+                    Width="250">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <ItemsControl ItemsSource="{Binding ListOfFilterTile}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Margin="0,0,0,8"
+                                        Background="{Binding BackColor, Converter={StaticResource StringToColorBrushConverter}}"
+                                        BorderBrush="#CCCCCC"
+                                        BorderThickness="1"
+                                        CornerRadius="4"
+                                        Height="{Binding Height}"
+                                        Cursor="Hand">
+                                    
+                                    <dxmvvm:Interaction.Behaviors>
+                                        <dxmvvm:EventToCommand Command="{Binding DataContext.SideTileClickCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                                               EventName="MouseLeftButtonDown"
+                                                               PassEventArgsToCommand="False"
+                                                               CommandParameter="{Binding}" />
+                                    </dxmvvm:Interaction.Behaviors>
+                                    
+                                    <Grid Margin="10">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="*"/>
+                                        </Grid.RowDefinitions>
+                                        
+                                        <!-- Count (top right, large) -->
+                                        <TextBlock Grid.Column="1" Grid.Row="0"
+                                                   Text="{Binding EntitiesCount}"
+                                                   FontSize="22"
+                                                   FontWeight="Bold"
+                                                   Foreground="{Binding BackColor, Converter={StaticResource ForegroundColorConverter}}"
+                                                   HorizontalAlignment="Right"
+                                                   VerticalAlignment="Top"
+                                                   Margin="0,-5,0,0"
+                                                   Opacity="0.6"
+                                                   Visibility="{Binding EntitiesCountVisibility, FallbackValue=Visible}"/>
+                                        
+                                        <!-- Caption (bottom left) -->
+                                        <TextBlock Grid.Column="0" Grid.Row="1"
+                                                 Text="{Binding Caption}"
+                                                 FontSize="11"
+                                                 FontWeight="SemiBold"
+                                                 TextTrimming="CharacterEllipsis"
+                                                 TextWrapping="Wrap"
+                                                 MaxHeight="34"
+                                                 Foreground="{Binding BackColor, Converter={StaticResource ForegroundColorConverter}}"
+                                                 HorizontalAlignment="Left"
+                                                 VerticalAlignment="Bottom"
+                                                 Visibility="Visible" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Border>
+
+            <!-- Action Plans Grid (Grid Única) -->
+            <dxg:GridControl Grid.Column="1"
+                             x:Name="gridControl"
+                             ItemsSource="{Binding ActionPlans}"
+                             SelectedItem="{Binding SelectedActionPlan, Mode=TwoWay}"
+                             Style="{StaticResource ModernGridStyle}"
+                             SelectionMode="Row"
+                             AutoExpandAllGroups="False">
+
+            <!-- Table View com Virtualização ATIVADA -->
+            <dxg:GridControl.View>
+                <dxg:TableView x:Name="tableView"
+                               ShowGroupPanel="False"
+                               AllowEditing="False"
+                               AllowGrouping="False"
+                               AutoWidth="True"
+                               ShowTotalSummary="True"
+                               ShowIndicator="False"
+                               NavigationStyle="Row"
+                               FadeSelectionOnLostFocus="False"
+                               AllowScrollAnimation="True"
+                               AllowPerPixelScrolling="True"
+                               ShowDetailButtons="False"
+                               RowDetailsVisibilityMode="Visible">
+                    
+                    <!-- VIRTUALIZAÇÃO: Critical for performance -->
+                    <dxg:TableView.RowStyle>
+                        <Style TargetType="{x:Type dxg:RowControl}">
+                            <Setter Property="VirtualizingStackPanel.IsVirtualizing" Value="True"/>
+                            <Setter Property="VirtualizingStackPanel.VirtualizationMode" Value="Recycling"/>
+                        </Style>
+                    </dxg:TableView.RowStyle>
+
+                    <!-- Detail View: Tasks (Master/Detail com Lazy-Load) -->
+                    <dxg:TableView.RowDetailsTemplate>
+                        <DataTemplate>
+                            <Border Background="#F5F5F5" 
+                                    BorderBrush="#E0E0E0" 
+                                    BorderThickness="1" 
+                                    Margin="5" 
+                                    Padding="10"
+                                    Visibility="{Binding Row.IsExpanded, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                    Loaded="RowDetails_Loaded">
+                                <Grid>
+                                    <!-- Loading Indicator -->
+                                    <StackPanel Orientation="Horizontal" 
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Center"
+                                                Visibility="{Binding Row.IsLoadingTasks, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <dx:LoadingDecorator />
+                                        <TextBlock Text="Loading tasks..." 
+                                                   Margin="10,0,0,0"
+                                                   VerticalAlignment="Center"/>
+                                    </StackPanel>
+
+                                    <!-- Tasks Grid with Sub-Tasks support -->
+                                    <dxg:GridControl x:Name="tasksGrid"
+                                                     ItemsSource="{Binding Row.Tasks}"
+                                                     Visibility="{Binding Row.IsLoadingTasks, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
+                                                     AutoPopulateColumns="False"
+                                                     SelectionMode="Row"
+                                                     MaxHeight="400">
+                                        <dxg:GridControl.View>
+                                            <dxg:TableView ShowGroupPanel="False"
+                                                           AllowEditing="False"
+                                                           AutoWidth="True"
+                                                           NavigationStyle="Row"
+                                                           ShowDetailButtons="False">
+                                                
+                                                <!-- Double-click to open Task -->
+                                                <dxmvvm:Interaction.Behaviors>
+                                                    <dxmvvm:EventToCommand Command="{Binding DataContext.OpenTaskCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                                                           EventName="RowDoubleClick"
+                                                                           PassEventArgsToCommand="True" />
+                                                </dxmvvm:Interaction.Behaviors>
+                                                
+                                                <!-- Sub-Tasks Detail Template -->
+                                                <dxg:TableView.RowDetailsTemplate>
+                                                    <DataTemplate>
+                                                        <Border Background="#EFEFEF" 
+                                                                BorderBrush="#D0D0D0" 
+                                                                BorderThickness="1" 
+                                                                Margin="20,5,5,5" 
+                                                                Padding="10"
+                                                                Visibility="{Binding Row.IsExpanded, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                            <Grid>
+                                                                <!-- Loading Sub-Tasks Indicator -->
+                                                                <StackPanel Orientation="Horizontal" 
+                                                                            HorizontalAlignment="Center"
+                                                                            VerticalAlignment="Center"
+                                                                            Visibility="{Binding Row.IsLoadingSubTasks, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                                    <dx:LoadingDecorator />
+                                                                    <TextBlock Text="Loading sub-tasks..." 
+                                                                               Margin="10,0,0,0"
+                                                                               VerticalAlignment="Center"/>
+                                                                </StackPanel>
+
+                                                                <!-- Sub-Tasks Grid -->
+                                                                <dxg:GridControl ItemsSource="{Binding Row.SubTasks}"
+                                                                                 Visibility="{Binding Row.IsLoadingSubTasks, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
+                                                                                 AutoPopulateColumns="False"
+                                                                                 SelectionMode="Row"
+                                                                                 MaxHeight="300">
+                                                                    <dxg:GridControl.View>
+                                                                        <dxg:TableView ShowGroupPanel="False"
+                                                                                       AllowEditing="False"
+                                                                                       AutoWidth="True"
+                                                                                       NavigationStyle="Row">
+                                                                            <!-- Double-click to open SubTask -->
+                                                                            <dxmvvm:Interaction.Behaviors>
+                                                                                <dxmvvm:EventToCommand Command="{Binding DataContext.OpenSubTaskCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                                                                                       EventName="RowDoubleClick"
+                                                                                                       PassEventArgsToCommand="True" />
+                                                                            </dxmvvm:Interaction.Behaviors>
+                                                                        </dxg:TableView>
+                                                                    </dxg:GridControl.View>
+
+                                                                    <!-- Sub-Tasks Columns -->
+                                                                    <dxg:GridColumn FieldName="Code" Header="Code" Width="80"/>
+                                                                    <dxg:GridColumn FieldName="Title" Header="Title" Width="200"/>
+                                                                    <dxg:GridColumn FieldName="Description" Header="Description" Width="250"/>
+                                                                    <dxg:GridColumn FieldName="Responsible" Header="Responsible" Width="120"/>
+                                                                    <dxg:GridColumn FieldName="Status" Header="Status" Width="100"/>
+                                                                    <dxg:GridColumn FieldName="Priority" Header="Priority" Width="80"/>
+                                                                    <dxg:GridColumn FieldName="DueDateDisplay" Header="Due Date" Width="90"/>
+                                                                    
+                                                                    <!-- Sub-Task Progress Column -->
+                                                                    <dxg:GridColumn FieldName="Percentage" Header="Progress" Width="120">
+                                                                        <dxg:GridColumn.DisplayTemplate>
+                                                                            <ControlTemplate>
+                                                                                <Grid>
+                                                                                    <Grid.ColumnDefinitions>
+                                                                                        <ColumnDefinition Width="Auto"/>
+                                                                                        <ColumnDefinition Width="*"/>
+                                                                                    </Grid.ColumnDefinitions>
+                                                                                    
+                                                                                    <TextBlock Grid.Column="0"
+                                                                                               Text="{Binding RowData.Row.Percentage, StringFormat='{}{0:0.0}%'}" 
+                                                                                               VerticalAlignment="Center"
+                                                                                               Margin="0,0,8,0"
+                                                                                               Width="40"
+                                                                                               TextAlignment="Right"/>
+                                                                                    
+                                                                                    <ProgressBar Grid.Column="1"
+                                                                                                 Value="{Binding RowData.Row.Percentage}" 
+                                                                                                 Maximum="100" 
+                                                                                                 Height="14"
+                                                                                                 VerticalAlignment="Center"
+                                                                                                 Foreground="{Binding RowData.Row.Percentage, Converter={StaticResource PercentageToColorConverter}}"/>
+                                                                                </Grid>
+                                                                            </ControlTemplate>
+                                                                        </dxg:GridColumn.DisplayTemplate>
+                                                                    </dxg:GridColumn>
+                                                                </dxg:GridControl>
+                                                            </Grid>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </dxg:TableView.RowDetailsTemplate>
+                                                
+                                            </dxg:TableView>
+                                        </dxg:GridControl.View>
+
+                                        <!-- Item Column (Expand Button + Task Number) -->
+                                        <dxg:GridColumn FieldName="TaskNumber" Header="Item" Width="60">
+                                            <dxg:GridColumn.DisplayTemplate>
+                                                <ControlTemplate>
+                                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="4,0,0,0">
+                                                        <Button Style="{StaticResource ExpandButtonStyle}"
+                                                                Command="{Binding DataContext.ToggleTaskExpandCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                CommandParameter="{Binding RowData.Row}"
+                                                                Visibility="{Binding RowData.Row.TotalSubTasks, Converter={StaticResource NumericToVisibilityConverter}}"
+                                                                ToolTip="{Binding RowData.Row.IsExpanded, Converter={StaticResource ExpandSubTasksTooltipConverter}}"
+                                                                Margin="0,0,4,0">
+                                                            <Button.Content>
+                                                                <TextBlock FontFamily="Segoe MDL2 Assets" 
+                                                                           FontSize="10" 
+                                                                           HorizontalAlignment="Center"
+                                                                           VerticalAlignment="Center">
+                                                                    <TextBlock.Style>
+                                                                        <Style TargetType="TextBlock">
+                                                                            <Setter Property="Foreground" Value="Black"/>
+                                                                            <Setter Property="Text" Value="&#xE710;"/> <!-- Add/Plus -->
+                                                                            <Style.Triggers>
+                                                                                <DataTrigger Binding="{Binding RowData.IsSelected}" Value="True">
+                                                                                    <Setter Property="Foreground" Value="White"/>
+                                                                                </DataTrigger>
+                                                                                <DataTrigger Binding="{Binding RowData.Row.IsExpanded}" Value="True">
+                                                                                    <Setter Property="Text" Value="&#xE738;"/> <!-- Remove/Minus -->
+                                                                                </DataTrigger>
+                                                                            </Style.Triggers>
+                                                                        </Style>
+                                                                    </TextBlock.Style>
+                                                                </TextBlock>
+                                                            </Button.Content>
+                                                        </Button>
+                                                        <TextBlock Text="{Binding RowData.Row.TaskNumber}" VerticalAlignment="Center"/>
+                                                    </StackPanel>
+                                                </ControlTemplate>
+                                            </dxg:GridColumn.DisplayTemplate>
+                                        </dxg:GridColumn>
+
+                                        <!-- Tasks Columns -->
+                                        <dxg:GridColumn FieldName="Title" Header="Title" Width="150"/>
+                                        <dxg:GridColumn FieldName="Responsible" Header="Responsible" Width="120"/>
+                                        
+                                        <!-- Status Column -->
+                                        <dxg:GridColumn FieldName="Status" Header="Status" Width="80"/>
+                                        
+                                        <dxg:GridColumn FieldName="Priority" Header="Priority" Width="70"/>
+                                        <dxg:GridColumn FieldName="Theme" Header="Theme" Width="100"/>
+                                        <dxg:GridColumn FieldName="OpenDateDisplay" Header="Open Date" Width="85"/>
+                                        <dxg:GridColumn FieldName="OriginalDueDateDisplay" Header="Original DueDate" Width="110"/>
+                                        <dxg:GridColumn FieldName="DueDateDisplay" Header="Due Date" Width="85"/>
+                                        <dxg:GridColumn FieldName="Duration" Header="Duration" Width="65"/>
+                                        
+                                        <!-- Due Days Column with color -->
+                                        <dxg:GridColumn FieldName="DueDays" Header="Due Days" Width="75">
+                                            <dxg:GridColumn.DisplayTemplate>
+                                                <ControlTemplate>
+                                                    <Border Background="{Binding RowData.Row.DueDaysColor, Converter={StaticResource StringToColorBrushConverter}}" 
+                                                            Padding="4,2" Margin="1">
+                                                        <TextBlock Text="{Binding RowData.Row.DueDays}" 
+                                                                   HorizontalAlignment="Center"
+                                                                   VerticalAlignment="Center"
+                                                                   Foreground="White"
+                                                                   FontWeight="Bold"/>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </dxg:GridColumn.DisplayTemplate>
+                                        </dxg:GridColumn>
+                                        
+                                        <dxg:GridColumn FieldName="LastUpdatedDisplay" Header="Last Updated" Width="90"/>
+                                        <dxg:GridColumn FieldName="ChangeCount" Header="Change Count" Width="95"/>
+                                        <dxg:GridColumn FieldName="DelegatedTo" Header="Delegated To" Width="110"/>
+                                        <dxg:GridColumn FieldName="OTItem" Header="OT Item" Width="70"/>
+                                        <dxg:GridColumn FieldName="OriginWeek" Header="Origin Week" Width="90"/>
+                                        <dxg:GridColumn FieldName="CommentsCount" Header="Comments" Width="80"/>
+                                        <dxg:GridColumn FieldName="FileCount" Header="Files" Width="50"/>
+                                        <dxg:GridColumn FieldName="ParticipantCount" Header="Participants" Width="85"/>
+                                        
+                                        <!-- Progress Column -->
+                                        <dxg:GridColumn FieldName="Percentage" Header="Progress" Width="120">
+                                            <dxg:GridColumn.DisplayTemplate>
+                                                <ControlTemplate>
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        
+                                                        <TextBlock Grid.Column="0"
+                                                                   Text="{Binding RowData.Row.Percentage, StringFormat='{}{0:0.0}%'}" 
+                                                                   VerticalAlignment="Center"
+                                                                   Margin="0,0,8,0"
+                                                                   Width="40"
+                                                                   TextAlignment="Right"/>
+                                                        
+                                                        <ProgressBar Grid.Column="1"
+                                                                     Value="{Binding RowData.Row.Percentage}" 
+                                                                     Maximum="100" 
+                                                                     Height="14"
+                                                                     VerticalAlignment="Center"
+                                                                     Foreground="{Binding RowData.Row.Percentage, Converter={StaticResource PercentageToColorConverter}}"/>
+                                                    </Grid>
+                                                </ControlTemplate>
+                                            </dxg:GridColumn.DisplayTemplate>
+                                        </dxg:GridColumn>
+                                    </dxg:GridControl>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </dxg:TableView.RowDetailsTemplate>
+
+                </dxg:TableView>
+            </dxg:GridControl.View>
+
+            <!-- Expand Button Column -->
+            <dxg:GridColumn FieldName="IsExpanded" 
+                            Header="" 
+                            Width="40"
+                            Fixed="Left"
+                            AllowEditing="False"
+                            AllowGrouping="False"
+                            AllowSorting="False">
+                <dxg:GridColumn.DisplayTemplate>
+                    <ControlTemplate>
+                        <Button Style="{StaticResource ExpandButtonStyle}"
+                                Command="{Binding DataContext.ToggleActionPlanExpandCommand, RelativeSource={RelativeSource AncestorType=dxg:GridControl}}"
+                                CommandParameter="{Binding RowData.Row}"
+                                Visibility="{Binding RowData.Row.TasksCount, Converter={StaticResource NumericToVisibilityConverter}}"
+                                ToolTip="{Binding RowData.Row.IsExpanded, Converter={StaticResource ExpandTasksTooltipConverter}}">
+                            <Button.Content>
+                                <TextBlock FontFamily="Segoe MDL2 Assets" 
+                                           FontSize="14" 
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Foreground" Value="Black"/>
+                                            <Setter Property="Text" Value="&#xE710;"/> <!-- Add/Plus -->
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding RowData.IsSelected}" Value="True">
+                                                    <Setter Property="Foreground" Value="White"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding RowData.Row.IsExpanded}" Value="True">
+                                                    <Setter Property="Text" Value="&#xE738;"/> <!-- Remove/Minus -->
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Button.Content>
+                        </Button>
+                    </ControlTemplate>
+                </dxg:GridColumn.DisplayTemplate>
+            </dxg:GridColumn>
+
+            <!-- Action Plans Columns -->
+            <dxg:GridColumn FieldName="Code" 
+                            Header="Code" 
+                            Width="120"
+                            Fixed="Left"
+                            SortIndex="0"
+                            SortOrder="Ascending" />
+
+            <dxg:GridColumn FieldName="Title" 
+                            Header="Title" 
+                            Width="300"/>
+
+            <dxg:GridColumn FieldName="Responsible" 
+                            Header="Responsible" 
+                            Width="180"/>
+
+            <dxg:GridColumn FieldName="Location" 
+                            Header="Location" 
+                            Width="180">
+                <dxg:GridColumn.CellTemplate>
+                    <DataTemplate>
+                        <DockPanel>
+                            <Image Margin="2,2,5,2"
+                                   Height="20"
+                                   Width="20"
+                                   HorizontalAlignment="Left"
+                                   VerticalAlignment="Center"
+                                   Source="{Binding RowData.Row.CountryIconUrl, Converter={StaticResource ImageUrlToByteArrayConverter}}" />
+                            <TextBlock VerticalAlignment="Center"
+                                       Text="{Binding RowData.Row.Location}" />
+                        </DockPanel>
+                    </DataTemplate>
+                </dxg:GridColumn.CellTemplate>
+            </dxg:GridColumn>
+
+            <dxg:GridColumn FieldName="Status" 
+                            Header="Status" 
+                            Width="120"/>
+
+            <dxg:GridColumn FieldName="Priority" 
+                            Header="Priority" 
+                            Width="100"/>
+
+            <dxg:GridColumn FieldName="DueDateDisplay" 
+                            Header="Due Date" 
+                            Width="110"/>
+
+            <!-- Progress Column com ProgressBar visual -->
+            <dxg:GridColumn FieldName="Percentage" 
+                            Header="Progress" 
+                            Width="150">
+                <dxg:GridColumn.DisplayTemplate>
+                    <ControlTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <TextBlock Grid.Column="0"
+                                       Text="{Binding RowData.Row.Percentage, StringFormat='{}{0:0.0}%'}" 
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,8,0"
+                                       Width="50"
+                                       TextAlignment="Right"/>
+                            
+                            <ProgressBar Grid.Column="1"
+                                         Value="{Binding RowData.Row.Percentage}" 
+                                         Maximum="100" 
+                                         Height="18"
+                                         VerticalAlignment="Center"
+                                         Foreground="{Binding RowData.Row.Percentage, Converter={StaticResource PercentageToColorConverter}}"/>
+                        </Grid>
+                    </ControlTemplate>
+                </dxg:GridColumn.DisplayTemplate>
+            </dxg:GridColumn>
+
+            <!-- Statistics Columns -->
+            <dxg:GridColumn FieldName="TasksCount" 
+                            Header="Tasks" 
+                            Width="80">
+                <dxg:GridColumn.DisplayTemplate>
+                    <ControlTemplate>
+                        <TextBlock Text="{Binding RowData.Row.TasksCount}" 
+                                   HorizontalAlignment="Center"
+                                   FontWeight="Bold"
+                                   Foreground="#2196F3"/>
+                    </ControlTemplate>
+                </dxg:GridColumn.DisplayTemplate>
+            </dxg:GridColumn>
+
+            <dxg:GridColumn FieldName="TotalActionItems" 
+                            Header="Items" 
+                            Width="80"/>
+
+            <dxg:GridColumn FieldName="TotalOpenItems" 
+                            Header="Open" 
+                            Width="80">
+                <dxg:GridColumn.DisplayTemplate>
+                    <ControlTemplate>
+                        <TextBlock Text="{Binding RowData.Row.TotalOpenItems}" 
+                                   HorizontalAlignment="Center"
+                                   FontWeight="Bold"
+                                   Foreground="#FF9800"/>
+                    </ControlTemplate>
+                </dxg:GridColumn.DisplayTemplate>
+            </dxg:GridColumn>
+
+            <dxg:GridColumn FieldName="TotalClosedItems" 
+                            Header="Closed" 
+                            Width="80">
+                <dxg:GridColumn.DisplayTemplate>
+                    <ControlTemplate>
+                        <TextBlock Text="{Binding RowData.Row.TotalClosedItems}" 
+                                   HorizontalAlignment="Center"
+                                   FontWeight="Bold"
+                                   Foreground="{Binding RowData.Row.TotalClosedColor, Converter={StaticResource DrawingColorToBrushConverter}}"/>
+                    </ControlTemplate>
+                </dxg:GridColumn.DisplayTemplate>
+            </dxg:GridColumn>
+
+            <dxg:GridColumn FieldName="GroupName" 
+                            Header="Group" 
+                            Width="150" />
+
+            </dxg:GridControl>
+
+            <!-- Overlay de Loading -->
+            <Border Background="#99000000" 
+                    Visibility="{Binding IsBusy, Converter={dx:BooleanToVisibilityConverter}}"
+                    VerticalAlignment="Stretch"
+                    HorizontalAlignment="Stretch">
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <dx:WaitIndicator DeferedVisibility="True" 
+                                      Content="Auto-loading Action Plans..."
+                                      Foreground="White"
+                                      FontSize="16"/>
+                    <TextBlock Text="{Binding ActionPlans.Count, StringFormat='Loaded: {0} Action Plans'}" 
+                               Foreground="White"
+                               FontSize="14"
+                               HorizontalAlignment="Center"
+                               Margin="0,10,0,0"/>
+                </StackPanel>
+            </Border>
+
+        </Grid>
+
+        <!-- Status Bar -->
+        <Border Grid.Row="5" Background="#F5F5F5" BorderBrush="#DDDDDD" BorderThickness="0,1,0,0" Padding="10">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Total Loaded: " FontWeight="Bold" VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding ActionPlans.Count}" 
+                           VerticalAlignment="Center"
+                           FontWeight="Bold"
+                           Foreground="#2196F3"
+                           FontSize="14"
+                           Margin="5,0,20,0"/>
+                
+                <TextBlock Text="Selected: " FontWeight="Bold" VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding SelectedActionPlan.Code, FallbackValue='-'}" 
+                           VerticalAlignment="Center"
+                           Margin="5,0,5,0"/>
+                <TextBlock Text="{Binding SelectedActionPlan.Title, FallbackValue='(No selection)'}" 
+                           VerticalAlignment="Center"
+                           FontStyle="Italic"
+                           Foreground="#666"/>
+            </StackPanel>
+        </Border>
+
+    </Grid>
+</UserControl>

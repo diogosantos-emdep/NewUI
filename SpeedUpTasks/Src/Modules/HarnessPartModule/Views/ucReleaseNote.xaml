@@ -1,0 +1,91 @@
+﻿<UserControl
+    x:Class="Emdep.Geos.Modules.HarnessPart.Views.ucReleaseNote"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+    xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+    xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors" 
+    xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+            xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"  
+       xmlns:dxgt="http://schemas.devexpress.com/winfx/2008/xaml/grid/themekeys"
+    Height="280" Width="auto" x:Name="objucRealeaseNote"
+            FontFamily="Calibri" FontSize="14" Background="#333333" >
+    <!--<UserControl.Background>
+        <SolidColorBrush Color="#FF494848" Opacity="0.95"/>
+        --><!--<SolidColorBrush Color="#4d4d4d " Opacity="0.95"/>--><!--
+
+    </UserControl.Background>-->
+    
+    <UserControl.Resources>
+        <Image x:Key="newImprovment" Source="/Emdep.Geos.Modules.HarnessPartcomponent/Image/star_logo.png"></Image>
+        <Image x:Key="bugFix" Source="/Emdep.Geos.Modules.HarnessPartcomponent/Image/ok_logo.png"></Image>
+       
+        <ControlTemplate x:Key="{dxgt:TableViewThemeKey IsThemeIndependent=true, ResourceKey=DataPresenterTemplate}" TargetType="{x:Type dxg:DataPresenter}">
+            <Border Background="#333333" >
+                <ContentPresenter  />
+            </Border>
+            
+        </ControlTemplate>
+    </UserControl.Resources>
+
+    <Grid Width="800" Background="Transparent">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="50*"/>
+            <RowDefinition Height="50"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="50*"/>
+        </Grid.ColumnDefinitions>
+
+
+        <Label Grid.Row="0" Content="What's New" FontSize="28"  Width="200" VerticalAlignment="Top" Foreground="White" ></Label>
+
+        <dxg:GridControl x:Name="dgvReleaseNote" HorizontalAlignment="Stretch" Grid.Row="1" VerticalAlignment="Stretch" SnapsToDevicePixels="True" IsHitTestVisible="True" SelectionMode="None" BorderThickness="0" ShowBorder="False" Margin="0,0,0,45" Grid.RowSpan="2" Background="Transparent">
+            <dxg:GridControl.Columns >
+
+                <dxg:GridColumn ReadOnly="True"  FieldName="Status" Width="25">
+                    <dxg:GridColumn.CellTemplate>
+                        <DataTemplate>
+                            <Border x:Name="stackBorder"  BorderThickness="0,0,2,0" Margin="0,5,12,5" >
+                                <StackPanel Name="stkImage_Text" Orientation="Horizontal" Height="21" >
+
+                                    <dxe:ImageEdit Name="Img_Editor" Height="16" Width="16" ShowBorder="False" EditMode="InplaceInactive" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
+                                <dxe:TextEdit Name="PART_Editor"  Height="16"   VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>                             
+                            </StackPanel>
+                        </Border>
+                            <DataTemplate.Triggers>
+                                <DataTrigger Binding="{Binding RowData.Row.IsShow}" Value="True">
+                                    <!--<Setter Property="Background" TargetName="stkImage_Text" Value="#F0FFE1"></Setter>-->
+                                    <Setter Property="Source" TargetName="Img_Editor" Value="{Binding Path=Source, Source={StaticResource newImprovment}}"></Setter>
+                                    <Setter Property="BorderBrush" TargetName="stackBorder" Value="#ffa500"></Setter>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding RowData.Row.IsShow}" Value="False">
+                                    <!--<Setter Property="Background" TargetName="stkImage_Text" Value="#FFEDCF"></Setter>-->
+                                    <Setter Property="Source" TargetName="Img_Editor" Value="{Binding Path=Source, Source={StaticResource bugFix}}"></Setter>
+                                    <Setter Property="BorderBrush" TargetName="stackBorder" Value="#A2FF29"></Setter>
+                                </DataTrigger>
+                            </DataTemplate.Triggers>
+                        </DataTemplate>
+                    </dxg:GridColumn.CellTemplate>
+                </dxg:GridColumn>
+
+                <dxg:GridColumn FieldName="Logs" ReadOnly="True" >
+
+                </dxg:GridColumn>
+                <!--<dxg:GridColumn FieldName="" />-->
+            </dxg:GridControl.Columns>
+            <dxg:GridControl.View>
+                <dxg:TableView  NavigationStyle="None" ShowHorizontalLines="True" AllowPerPixelScrolling="False"   AllowGrouping="False" ShowGroupPanel="False" ShowColumnHeaders="False" ShowVerticalLines="False" ShowIndicator="False" AutoWidth="True" BorderThickness="0" VerticalScrollbarVisibility="Auto" >
+                    
+                </dxg:TableView>
+            </dxg:GridControl.View>
+            
+            
+        </dxg:GridControl>
+
+        <Button  Content="Back" x:Name="btnBack" Grid.Row="2"  HorizontalAlignment="Left" VerticalAlignment="Center" Height="30"  Width="100" BorderThickness="0" ></Button>
+
+    </Grid>
+</UserControl>

@@ -1,0 +1,26 @@
+
+
+DROP PROCEDURE IF EXISTS CRM_GetAssigneeUserIdUserwise_V2680;
+DELIMITER $$
+CREATE PROCEDURE CRM_GetAssigneeUserIdUserwise_V2680(
+   IN _IdUser   int(10) UNSIGNED)
+BEGIN
+-- call CRM_GetAssigneeUserIdUserwise_V2680(1);
+  Select u.IdUser,u.FirstName,u.LastName
+  from emdep_geos.users u 
+  where u.IdUser=_IdUser;
+  END$$
+DELIMITER ;
+
+
+DROP PROCEDURE IF EXISTS CRM_GetPermissionUsers_V2680;
+DELIMITER $$
+CREATE PROCEDURE CRM_GetPermissionUsers_V2680()
+BEGIN
+-- call CRM_GetPermissionUsers_V2680();
+  Select up.IdUser,up.IdPermission,u.FirstName,u.LastName
+  from emdep_geos.user_permissions up
+  INNER JOIN emdep_geos.users u ON u.IdUser=up.IdUser
+  where up.IdPermission=27;
+  END$$
+DELIMITER ;

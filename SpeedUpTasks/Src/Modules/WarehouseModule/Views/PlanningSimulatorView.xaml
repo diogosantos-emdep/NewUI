@@ -1,0 +1,333 @@
+﻿<UserControl x:Class="Emdep.Geos.Modules.Warehouse.Views.PlanningSimulatorView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.Warehouse.Views"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:WarehouseCommon ="clr-namespace:Emdep.Geos.Modules.Warehouse"
+             xmlns:dxp="http://schemas.devexpress.com/winfx/2008/xaml/printing"
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:Converters="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+             xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:sysglb="clr-namespace:System.Globalization;assembly=mscorlib"
+             mc:Ignorable="d">
+    <UserControl.Resources>
+        <Converters:BackgroundColorConverter x:Key="backgroundColorConverter" />
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="55"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Label Content="{DynamicResource PlanningSimulator}" HorizontalAlignment="Left" Style="{StaticResource LabelTitleStyle}" Grid.Row="0" Grid.Column="0" />
+
+        <Grid HorizontalAlignment="Right" Grid.Row="0" Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="AUTO"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="AUTO"/>
+                <ColumnDefinition Width="AUTO" />
+                <ColumnDefinition Width="AUTO" />
+                <ColumnDefinition Width="AUTO" />
+                <ColumnDefinition Width="AUTO" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Waresouse combobox section -->
+            <DockPanel Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Height="30" >
+                <Image Style="{DynamicResource WarehouseImageStyle}" Width="24" Height="24" Margin="7,0,3,0" />
+                <TextBlock Text="{DynamicResource Warehouse}"  FontWeight="Bold" Margin="5,2,5,0" VerticalAlignment="Bottom" />
+            </DockPanel>
+
+            <dxe:ComboBoxEdit Name="CbeWareHouse" Style="{DynamicResource ComboBoxEditStyle}" Grid.Column="1" Width="150" Height="30" 
+                              Margin="5,0,5,5" VerticalAlignment="Bottom" HorizontalAlignment="Right" IsTextEditable="False" 
+                              ItemsSource ="{Binding Source={x:Static WarehouseCommon:WarehouseCommon.Instance}, Path=WarehouseList ,UpdateSourceTrigger=PropertyChanged , Mode=TwoWay}"
+                              SelectedItem="{Binding Source={x:Static WarehouseCommon:WarehouseCommon.Instance}, Path=Selectedwarehouse,UpdateSourceTrigger=PropertyChanged}"
+                              DisplayMember="Name" ShowError="False" ShowErrorToolTip="False">
+                <dxmvvm:Interaction.Triggers>
+                    <dxmvvm:EventToCommand EventName="EditValueChanged"
+                                           Command="{Binding CommandWarehouseEditValueChanged}" CommandParameter="{Binding ElementName=CbeWareHouse,Path=SelectedItem}">
+                    </dxmvvm:EventToCommand>
+                </dxmvvm:Interaction.Triggers>
+            </dxe:ComboBoxEdit>
+
+            <!-- Refresh Button -->
+            <Button Content=" " Grid.Row="0" Grid.Column="2" Height="40" Width="40" HorizontalAlignment="Right"
+                    Command="{Binding RefreshButtonCommand}" CommandParameter="{Binding ElementName=PlanningSimulatorTableView}" Margin="0,0,5,5">
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource ButtonRefresh}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Image Style="{ DynamicResource WareHouseRefreshButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+
+            <!-- Print Button -->
+            <Button Content=" " Grid.Row="0" Grid.Column="3" Height="40" Width="40" HorizontalAlignment="Right"
+                    Command="{Binding PrintButtonCommand}" CommandParameter="{Binding ElementName=PlanningSimulatorTableView}" Margin="0,0,5,5">
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource ButtonPrint}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Image Style="{ DynamicResource PrinterButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+
+            <!-- Export Button -->
+            <Button Content=" " Grid.Row="0" Grid.Column="4" Height="40" Width="40" HorizontalAlignment="Right"
+                    Command="{Binding ExportToExcelCommand}" CommandParameter="{Binding ElementName=PlanningSimulatorTableView}" Margin="0,0,5,5">
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource ButtonExportToExcel}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Image Style="{ DynamicResource ExcelExportButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+        </Grid>
+
+        <dxg:GridControl VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                         Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                         ItemsSource="{Binding PlanningSimulatorList,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                         SelectedItem="{Binding Path=SelectedPlanningSimulator, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                         SelectionMode="Row" 
+                         AllowLiveDataShaping="True">
+
+            <dxmvvm:Interaction.Behaviors>
+                <UIHelper:GridSelectingBehavior />
+                <UIHelper:BestFitBehaviorSimulator/>
+            </dxmvvm:Interaction.Behaviors>
+
+            <dxg:GridControl.Bands>
+                <!--Reference-->
+                <dxg:GridControlBand OverlayHeaderByChildren="True">
+                    <dxg:GridColumn Header="{DynamicResource GridColReference}" FieldName="Reference" FilterPopupMode="CheckedList" ReadOnly="True" >
+                        <!--<dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Margin="5 0 0 0" VerticalAlignment="Center"> 
+                                    <Hyperlink x:Name="hyperlink" TargetName="_blank"
+                                               Command="{Binding DataContext.ReferenceHyperlinkClickCommand,RelativeSource={RelativeSource AncestorType=dxg:GridControl}}"
+                                               CommandParameter="{Binding ElementName=PlanningSimulatorTableView}" Style="{DynamicResource hyperlinkGridStyle}"> 
+                                        <InlineUIContainer>
+                                            <TextBlock Text="{Binding Data.Reference}" Style="{DynamicResource HyperlinkTextBlock}" TextDecorations="Underline" />
+                                        </InlineUIContainer>
+                                    </Hyperlink> 
+                                </TextBlock>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>-->
+
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <dxe:HyperlinkEdit Name="PART_Editor" AllowAutoNavigate="True" Text="{Binding RowData.Row.Reference}"
+                                                   Command="{Binding DataContext.ReferenceHyperlinkClickCommand,RelativeSource={RelativeSource AncestorType=dxg:GridControl}}"
+                                                   CommandParameter="{Binding ElementName=PlanningSimulatorTableView}"/>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+                </dxg:GridControlBand>
+
+                <!--Week-->
+                <dxg:GridControlBand OverlayHeaderByChildren="True">
+                    <dxg:GridColumn Header="{DynamicResource GridColWeek}" FieldName="Week" FilterPopupMode="CheckedList" ReadOnly="True"/>
+                </dxg:GridControlBand>
+
+                <!--Out-->
+                <dxg:GridControlBand Header="{DynamicResource GridControlBandOut}" HorizontalHeaderContentAlignment="Center">
+
+                    <!--OT-->
+                    <dxg:GridColumn Header="{DynamicResource GridColOt}" FieldName="OTCode" FilterPopupMode="CheckedList" ReadOnly="True">
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <dxe:HyperlinkEdit Name="PART_Editor" AllowAutoNavigate="True" Text="{Binding RowData.Row.OTCode}"
+                                                   Command="{Binding DataContext.OtHyperlinkClickCommand,RelativeSource={RelativeSource AncestorType=dxg:GridControl}}"
+                                                   CommandParameter="{Binding ElementName=PlanningSimulatorTableView}"/>
+
+                                <!--<TextBlock Margin="5 0 0 0" VerticalAlignment="Center"> 
+                                    <Hyperlink x:Name="hyperlink" TargetName="_blank"
+                                               Command="{Binding DataContext.OtHyperlinkClickCommand,RelativeSource={RelativeSource AncestorType=dxg:GridControl}}"
+                                               CommandParameter="{Binding ElementName=PlanningSimulatorTableView}" Style="{DynamicResource hyperlinkGridStyle}"> 
+                                        <InlineUIContainer>
+                                            <TextBlock Text="{Binding Data.OTCode}" Style="{DynamicResource HyperlinkTextBlock}" TextDecorations="Underline" />
+                                        </InlineUIContainer>
+                                    </Hyperlink> 
+                                </TextBlock>-->
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+
+                    <!--Customer-->
+                    <dxg:GridColumn Header="{DynamicResource GridColCustomer}" FieldName="Customer" FilterPopupMode="CheckedList" ReadOnly="True"/>
+
+                    <!--Qty-->
+                    <dxg:GridColumn Header="{DynamicResource GridColQty}" FieldName="OTRemainingQty" FilterPopupMode="CheckedList" ReadOnly="True">
+                        <dxg:GridColumn.DisplayTemplate>
+                            <ControlTemplate>
+                                <TextBlock x:Name="qty" Text="{Binding RowData.Row.OTRemainingQty}" 
+                                           TextAlignment="Right"
+                                           VerticalAlignment="Stretch"
+                                           Foreground="{Binding ElementName=qty, Path=Background, Converter={Converters:ForegroundColorConverter}}" Padding="0 0 3 0">
+                                    <TextBlock.Resources>
+                                        <sys:String x:Key="Qty">Qty</sys:String>
+                                    </TextBlock.Resources>
+                                    <TextBlock.Background>
+                                        <MultiBinding Converter="{StaticResource backgroundColorConverter}">
+                                            <Binding Path="RowData.Row.OTRemainingQty"/>
+                                            <Binding Path="RowData.Row.CurrentArticleStock"/>
+                                            <Binding Source="{StaticResource Qty}"/>
+                                        </MultiBinding>
+                                    </TextBlock.Background>
+                                </TextBlock>
+                            </ControlTemplate>
+                        </dxg:GridColumn.DisplayTemplate>
+                    </dxg:GridColumn>
+
+                    <!--DeliveryDate-->
+                    <dxg:GridColumn Header="{DynamicResource GridColumnDeliveryDate}" FieldName="OTDeliveryDate" FilterPopupMode="CheckedList" ReadOnly="True">
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding RowData.Row.OTDeliveryDate, StringFormat=d, ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}"
+                                           HorizontalAlignment="Right"
+                                           VerticalAlignment="Center"
+                                           Margin="0 0 3 0"/>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+
+                </dxg:GridControlBand>
+
+                <!--IN-->
+                <dxg:GridControlBand Header="{DynamicResource GridControlBandIn}" HorizontalHeaderContentAlignment="Center">
+
+                    <!--PO-->
+                    <dxg:GridColumn Header="{DynamicResource GridColPO}" FieldName="POCode" FilterPopupMode="CheckedList" ReadOnly="True">
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <dxe:HyperlinkEdit Name="PART_Editor" AllowAutoNavigate="True" Text="{Binding RowData.Row.POCode}"
+                                                   Command="{Binding DataContext.POHyperlinkClickCommand,RelativeSource={RelativeSource AncestorType=dxg:GridControl}}"
+                                                   CommandParameter="{Binding ElementName=PlanningSimulatorTableView}"/>
+
+                                <!--<TextBlock Margin="5 0 0 0" VerticalAlignment="Center" HorizontalAlignment="Stretch"> 
+                                    <Hyperlink x:Name="hyperlink" TargetName="_blank"
+                                               Command="{Binding DataContext.POHyperlinkClickCommand,RelativeSource={RelativeSource AncestorType=dxg:GridControl}}"
+                                               CommandParameter="{Binding ElementName=PlanningSimulatorTableView}" Style="{DynamicResource hyperlinkGridStyle}"> 
+                                        <InlineUIContainer>
+                                            <TextBlock Text="{Binding Data.POCode}" Style="{DynamicResource HyperlinkTextBlock}" TextDecorations="Underline" />
+                                        </InlineUIContainer>
+                                    </Hyperlink> 
+                                </TextBlock>-->
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+
+                    <!--Supplier-->
+                    <dxg:GridColumn Header="{DynamicResource GridColSupplier}" FieldName="Supplier" FilterPopupMode="CheckedList" ReadOnly="True"/>
+
+                    <!--Qty-->
+                    <dxg:GridColumn Header="{DynamicResource GridColQty}" FieldName="PORemainingQty" FilterPopupMode="CheckedList" ReadOnly="True" />
+
+                    <!--Delivery Date-->
+                    <dxg:GridColumn Header="{DynamicResource GridColumnDeliveryDate}" FieldName="PODeliveryDate" FilterPopupMode="CheckedList" ReadOnly="True" >
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding RowData.Row.PODeliveryDate, StringFormat=d, ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}"
+                                           HorizontalAlignment="Right"
+                                           VerticalAlignment="Center"
+                                           Margin="0 0 3 0"/>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+
+                </dxg:GridControlBand>
+
+                <!--Expected Stock-->
+                <dxg:GridControlBand OverlayHeaderByChildren="True">
+                    <dxg:GridColumn Header="{DynamicResource GridColExpectedStock}" FieldName="ExpectedStock" FilterPopupMode="CheckedList" ReadOnly="True">
+                        <dxg:GridColumn.DisplayTemplate>
+                            <ControlTemplate>
+                                <TextBlock x:Name="expectedStock" Text="{Binding RowData.Row.ExpectedStock}"
+                                           TextAlignment="Right" Padding="0 0 3 0" 
+                                           Foreground="{Binding ElementName=expectedStock, Path=Background,Converter={Converters:ForegroundColorConverter}}">
+                                    <TextBlock.Resources>
+                                        <sys:String x:Key="ExpectedStock">ExpectedStock</sys:String>
+                                    </TextBlock.Resources>
+                                    <TextBlock.Background>
+                                        <MultiBinding Converter="{StaticResource backgroundColorConverter}">
+                                            <Binding Path="RowData.Row.ExpectedStock"/>
+                                            <Binding Path="RowData.Row.NextOtItemPickingStock"/>
+                                            <Binding Source="{StaticResource ExpectedStock}"/>
+                                        </MultiBinding>
+                                    </TextBlock.Background>
+                                </TextBlock>
+                            </ControlTemplate>
+                        </dxg:GridColumn.DisplayTemplate>
+                    </dxg:GridColumn>
+                </dxg:GridControlBand>
+            </dxg:GridControl.Bands>
+
+            <dxg:GridControl.View>
+                <dxg:TableView x:Name="PlanningSimulatorTableView"
+                                NavigationStyle="Row"
+                                AllowHorizontalScrollingVirtualization="True" 
+                                RowDetailsVisibilityMode="Visible"
+                                ShowHorizontalLines="True"
+                                ShowSearchPanelMode="Always"
+                                ShowColumnHeaders="True"
+                                VerticalScrollbarVisibility="Auto" 
+                                HorizontalScrollbarVisibility="Auto"
+                                ShowSearchPanelCloseButton="True" 
+                                SearchPanelHorizontalAlignment="Stretch"
+                                ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly"
+                                AllowGrouping="True"
+                                ShowGroupPanel="False"
+                                ShowIndicator="False"
+                                ShowFixedTotalSummary="True"
+                                FocusedRow="{Binding Path=SelectedPlanningSimulator,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+
+                    <dxg:TableView.Resources>
+                        <DataTemplate x:Key="PlanningSimulatorReportPrintHeaderTemplate">
+                            <Grid Width="{Binding UsablePageWidth}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="50" />
+                                    <ColumnDefinition Width="130" />
+                                </Grid.ColumnDefinitions>
+                                <dxe:TextEdit Text=" " Width="{Binding UsablePageWidth}" Grid.ColumnSpan="3" IsPrintingMode="True" Background="#333E5E" HorizontalAlignment="Stretch" 
+                                                      VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" Height="50" />
+                                <dxe:TextEdit Text="Planning Simulator Report" IsPrintingMode="True" HorizontalAlignment="Stretch" 
+                                                      VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" />
+                                <Image Source="/Emdep.Geos.Modules.Warehouse;component/Assets/Images/GeosReportLogo.png" Height="50" Width="80"  dxp:ExportSettings.TargetType="Image" Grid.Column="2" />
+                            </Grid>
+                        </DataTemplate>
+
+                        <DataTemplate x:Key="PlanningSimulatorReportPrintFooterTemplate">
+                            <dxe:TextEdit HorizontalContentAlignment="Center" 
+                                          Width="{Binding Path=UsablePageWidth, Mode=OneWay}" 
+                                          dxp:ExportSettings.TargetType="PageNumber" 
+                                          dxp:PageNumberExportSettings.Kind="NumberOfTotal" 
+                                          dxp:PageNumberExportSettings.Format="Page {0} of {1}"/>
+                        </DataTemplate>
+                    </dxg:TableView.Resources>
+
+                </dxg:TableView>
+            </dxg:GridControl.View>
+
+            <!--TotalSummary-->
+            <dxg:GridControl.TotalSummary>
+                <dxg:GridSummaryItem x:Name="summary" SummaryType="Count" DisplayFormat="Total Count: {0}" Visible="True" Alignment="Left" />
+            </dxg:GridControl.TotalSummary>
+
+        </dxg:GridControl>
+    </Grid>
+</UserControl>

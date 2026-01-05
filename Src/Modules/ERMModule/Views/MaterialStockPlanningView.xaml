@@ -1,0 +1,332 @@
+﻿<UserControl x:Class="Emdep.Geos.Modules.ERM.Views.MaterialStockPlanningView"
+             
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"             
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:dxga="http://schemas.devexpress.com/winfx/2008/xaml/gauges"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors" 
+             xmlns:dxp="http://schemas.devexpress.com/winfx/2008/xaml/printing"
+             xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+             xmlns:ViewModels="clr-namespace:Emdep.Geos.Modules.ERM.ViewModels"
+             xmlns:dxc="http://schemas.devexpress.com/winfx/2008/xaml/charts" 
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:sysglb="clr-namespace:System.Globalization;assembly=mscorlib"
+             xmlns:dxsch="http://schemas.devexpress.com/winfx/2008/xaml/scheduler"
+             xmlns:Scheduler="clr-namespace:DevExpress.Xpf.Scheduler.UI;assembly=DevExpress.Xpf.Scheduler.v19.2"
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:dxschcore="clr-namespace:DevExpress.XtraScheduler;assembly=DevExpress.XtraScheduler.v19.2.Core"
+             xmlns:behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+             xmlns:Interactive="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:Behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:dxci="http://schemas.devexpress.com/winfx/2008/xaml/core/internal"
+             xmlns:UIConverter="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+             xmlns:Converters="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+             xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+             xmlns:dxschint="http://schemas.devexpress.com/winfx/2008/xaml/scheduler/internal"
+             xmlns:dxscht="http://schemas.devexpress.com/winfx/2008/xaml/scheduler/themekeys"
+             xmlns:ERMApplication="clr-namespace:Emdep.Geos.Modules.ERM.CommonClasses"
+             xmlns:Serialization="clr-namespace:DevExpress.Xpf.LayoutControl.Serialization;assembly=DevExpress.Xpf.LayoutControl.v19.2"
+             xmlns:dxb="http://schemas.devexpress.com/winfx/2008/xaml/bars"
+             xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:dxgt="http://schemas.devexpress.com/winfx/2008/xaml/grid/themekeys"
+             xmlns:gif="http://wpfanimatedgif.codeplex.com"
+            xmlns:local="clr-namespace:Emdep.Geos.Modules.ERM.Views"
+             mc:Ignorable="d"
+             d:DesignHeight="300" d:DesignWidth="300"
+             IsEnabled="True">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="45" />
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="70*"/>
+
+            </Grid.ColumnDefinitions>
+            <Label Content="{DynamicResource  ArticleStockPlanning}" Margin="11,0,10,0" Style="{StaticResource LabelTitleStyle}" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
+
+            <Grid  Grid.Column="2" HorizontalAlignment="Right" ShowGridLines="True">
+                <Grid HorizontalAlignment="Right" Width="Auto" Height="45" ShowGridLines="False" >
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="45"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="5"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!--Add Button-->
+                    <!-- Plant -->
+                    <DockPanel Grid.Column="1" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="0,0,5,5">
+                        <Image  Style="{DynamicResource WarehouseImageStyle}" Width="24" Height="24" Margin="0,0,3,5"></Image>
+                        <TextBlock  Margin="3,0,7,0" Text="{DynamicResource GridColWarehouse}"
+                               HorizontalAlignment="Stretch" VerticalAlignment="Center" Style="{StaticResource TextBlock14Style}"/>
+                    </DockPanel>
+                    <dxe:ComboBoxEdit Grid.Row="0" Grid.Column="2"   Margin="0,0,5,5"
+                                      Width="120" Name="CbePlant" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+                                      ScrollViewer.VerticalScrollBarVisibility="Auto"  TextTrimming="CharacterEllipsis" 
+                                      TextWrapping="Wrap"  Style="{DynamicResource ComboBoxEditStyle}" 
+                                      IsTextEditable="False"  DisplayMember="Name" 
+                                         ItemsSource ="{Binding Source={x:Static ERMApplication:ERMCommon.Instance}, Path=WarehouseList ,UpdateSourceTrigger=PropertyChanged , Mode=TwoWay}"
+                                   SelectedItem="{Binding Source={x:Static ERMApplication:ERMCommon.Instance}, Path=Selectedwarehouse,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                       >
+
+                        <!--<dxmvvm:Interaction.Triggers>
+                            <dxmvvm:EventToCommand 
+                                  EventName="EditValueChanged" Command="{Binding DataContext.ChangeWarehouseCommand,RelativeSource={RelativeSource AncestorType=UserControl}}"  PassEventArgsToCommand="True"/>
+                        </dxmvvm:Interaction.Triggers>-->
+
+                        <dxmvvm:Interaction.Triggers>
+                            <dxmvvm:EventToCommand EventName="EditValueChanged"
+                           Command="{Binding ChangeWarehouseCommand}" 
+                           CommandParameter="{Binding ElementName=CbeWareHouse,Path=SelectedItem}"/>
+                        </dxmvvm:Interaction.Triggers>
+
+
+                    </dxe:ComboBoxEdit>
+                    <!--Period-->
+                    <DockPanel Grid.Column="5" Grid.Row="0" HorizontalAlignment="Right"   VerticalAlignment="Center" Margin="0,0,0,0" >
+                        <TextBlock Text="{DynamicResource Planningdate}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,-10,10,0" FontWeight="Bold"/>
+                        <!--<TextBlock Text="{Binding Source={x:Static ERMApplication:ERMCommon.Instance}, Path=PlanningDate,StringFormat=d,ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,-10,25,0"/>-->
+                        <!-- start [GEOS2-9402][gulab lakade][18 11 2025] MaxValue -->
+                        <dxe:DateEdit x:Name="MenuLayout"
+ HorizontalAlignment="Left" VerticalAlignment="Center"
+ Margin="0,0,5,0" Height="40" Width="120" 
+ DateTime="{Binding DataContext.PlanningDate, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+ ShowToday="False"
+ ShowClearButton="False"  AllowNullInput="False"
+ MinValue="{Binding DataContext.CurrentweeklstDate, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                      MaxValue="{Binding DataContext.MaxDateVisibleForDatepicker, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+>
+                            <dxmvvm:Interaction.Triggers>
+                                <dxmvvm:EventToCommand 
+                         EventName="EditValueChanged"  Command="{Binding DataContext.ApplyCommand,RelativeSource={RelativeSource AncestorType=UserControl}}"  PassEventArgsToCommand="True"/>
+                            </dxmvvm:Interaction.Triggers>
+                        </dxe:DateEdit>
+                    </DockPanel>
+                    <!-- end [GEOS2-9402][gulab lakade][18 11 2025] MaxValue -->
+
+                    <!-- Refresh Button -->
+                    <Button Content=" " Grid.Row="0" Grid.Column="6" Height="40" Width="40" HorizontalAlignment="Right"
+                             Command="{Binding RefreshMaterialStockPlanningCommand}" CommandParameter="{Binding ElementName=ArticleStockPlanningTableView}"  Margin="0,0,2,5">
+                        <Button.ToolTip>
+                            <TextBlock Text="{DynamicResource ButtonRefresh}"/>
+                        </Button.ToolTip>
+                        <Button.ContentTemplate>
+                            <DataTemplate>
+                                <Image Style="{ DynamicResource PCMRefreshButtonImageStyle}"   Height="24" Width="24" Margin="-10"/>
+                            </DataTemplate>
+                        </Button.ContentTemplate>
+                    </Button>
+                    <!-- Print -->
+                    <Button Content=" " Grid.Row="0" Grid.Column="7" Height="40" Width="40" HorizontalAlignment="Right"
+                             Command="{Binding PrintMaterialStockPlanningCommand}" CommandParameter="{Binding ElementName=ArticleStockPlanningTableView}" Margin="0,0,5,5">
+                        <Button.ToolTip>
+                            <TextBlock Text="{DynamicResource ButtonPrint}"/>
+                        </Button.ToolTip>
+                        <Button.ContentTemplate>
+                            <DataTemplate>
+                                <Image Style="{DynamicResource PCMPrintButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                            </DataTemplate>
+                        </Button.ContentTemplate>
+                    </Button>
+                    <!-- Export to Excel -->
+                    <Button Content=" " Grid.Row="0" Grid.Column="8" Height="40" Width="40" HorizontalAlignment="Right"
+                             Command="{Binding ExportMaterialStockPlanningCommand}" CommandParameter="{Binding ElementName=ArticleStockPlanningTableView}"   Margin="0,0,5,5">
+                        <Button.ToolTip>
+                            <TextBlock Text="{DynamicResource ButtonExportToExcel}"/>
+                        </Button.ToolTip>
+                        <Button.ContentTemplate>
+                            <DataTemplate>
+                                <Image Style="{DynamicResource PCMExportToExcelButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                            </DataTemplate>
+                        </Button.ContentTemplate>
+                    </Button>
+
+                </Grid>
+            </Grid>
+        </Grid>
+
+        <dxg:GridControl Grid.Row="1" ShowBorder="True"
+                         ItemsSource="{Binding ERMArticleStockPlanningList,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                     
+                         VerticalAlignment="Stretch" 
+                         HorizontalAlignment="Stretch" 
+                         SelectionMode="Row" ImplyNullLikeEmptyStringWhenFiltering="True" AllowLiveDataShaping="True" >
+            <dxg:GridColumn Header="{DynamicResource GridColWarehouse}"   Width="55"  FieldName="WarehousName" FilterPopupMode="Default" ReadOnly="True" />
+            <dxg:GridColumn Header="{DynamicResource GridColReference}"  Width="70"  FieldName="Reference" FilterPopupMode="Default" ReadOnly="True" />
+
+            <dxg:GridColumn Header="{DynamicResource GridColDescription}" Width="170"  FieldName="Description" FilterPopupMode="Default" ReadOnly="True" />
+            <dxg:GridColumn Header="{DynamicResource GridColStock}" Width="50"  FieldName="Stock" FilterPopupMode="Default"  ReadOnly="True" />
+            <dxg:GridColumn Header="{DynamicResource GridColMinimumStock}" Width="60"  FieldName="MinimumStock" FilterPopupMode="Default" ReadOnly="True" />
+            <dxg:GridColumn Header="{DynamicResource GridColMaximumStock}" Width="60" FieldName="MaximumStock" FilterPopupMode="Default" ReadOnly="True" />
+            <dxg:GridColumn Header="{DynamicResource GridColIncomingStock}" FieldName="IncomingStock"   Width="60" FilterPopupMode="Default" ReadOnly="True">
+                <dxg:GridColumn.CellTemplate>
+                    <DataTemplate>
+                        <TextBlock TextAlignment="Right">
+                             <Hyperlink x:Name="hyperlink" 
+                                               TargetName="_blank"
+                                               Command="{Binding DataContext.ArticleIncomingStockPopupWindowCommand,RelativeSource={RelativeSource AncestorType=dxg:GridControl}}"
+                                               CommandParameter="{Binding ElementName=ArticleStockPlanningTableView}" Style="{DynamicResource hyperlinkGridStyle}" >
+    
+                                        <InlineUIContainer>
+                                            <TextBlock Text="{Binding Data.IncomingStock}"  Style="{DynamicResource HyperlinkTextBlock}" TextDecorations="Underline" />
+                                        </InlineUIContainer>
+                                    </Hyperlink>
+                        </TextBlock>
+                    </DataTemplate>
+                </dxg:GridColumn.CellTemplate>
+            </dxg:GridColumn>
+
+            <dxg:GridColumn Header="{DynamicResource GridColOutgoingStock}" FieldName="OutgoingStock" FilterPopupMode="CheckedList"  Width="60">
+                <dxg:GridColumn.CellTemplate>
+                    <DataTemplate>
+                        <TextBlock  TextAlignment="Right" >
+                             <Hyperlink x:Name="hyperlink" 
+                                               TargetName="_blank"
+                                               Command="{Binding DataContext.ArticleOutgoingStockPopupWindowCommand,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                               CommandParameter="{Binding ElementName=ArticleStockPlanningTableView}" Style="{DynamicResource hyperlinkGridStyle}">
+    
+                                        <InlineUIContainer>
+                                            <TextBlock Text="{Binding Data.OutgoingStock}"  Style="{DynamicResource HyperlinkTextBlock}" TextDecorations="Underline" />
+                                        </InlineUIContainer>
+                                    </Hyperlink>
+                        </TextBlock>
+                    </DataTemplate>
+                </dxg:GridColumn.CellTemplate>
+            </dxg:GridColumn>
+            <dxg:GridColumn Header="{DynamicResource GridColProjectedStock}" FieldName="ProjectedStock"  Width="60" FilterPopupMode="CheckedList">
+                
+
+                <dxg:GridColumn.CellTemplate>
+                    <DataTemplate>
+                        <Border VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Background="{Binding Data.ProjectedStockHtmlColor, Mode=TwoWay}">
+                            <Label Width="Auto" Content="{Binding RowData.Row.ProjectedStock}" HorizontalAlignment="Stretch" 
+                    VerticalAlignment="Stretch" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" Padding="0 0 5 0" >
+                                <Label.Style>
+                                    <Style TargetType="Label">
+                                        <Style.Triggers>
+                                            <MultiDataTrigger>
+                                                <MultiDataTrigger.Conditions>
+                                                    <Condition Value="Red">
+                                                        <Condition.Binding>
+                                                            <MultiBinding  Converter="{Converters:CellBackgroundColorConverter}">
+                                                                <Binding Path="RowData.Row.ProjectedStock" />
+                                                                <Binding Path="RowData.Row.MinimumStock" />
+                                                            </MultiBinding>
+                                                        </Condition.Binding>
+                                                    </Condition>
+                                                </MultiDataTrigger.Conditions>
+                                                <Setter Property="Background" Value="Red" />
+                                            </MultiDataTrigger>
+
+                                            <MultiDataTrigger>
+                                                <MultiDataTrigger.Conditions>
+                                                    <Condition Value="Green">
+                                                        <Condition.Binding>
+                                                            <MultiBinding Converter="{Converters:CellBackgroundColorConverter}">
+                                                                <Binding Path="RowData.Row.ProjectedStock" />
+                                                                <Binding Path="RowData.Row.MinimumStock" />
+
+                                                            </MultiBinding>
+                                                        </Condition.Binding>
+                                                    </Condition>
+                                                </MultiDataTrigger.Conditions>
+                                                <Setter Property="Background" Value="Green" />
+                                            </MultiDataTrigger>
+
+                                            <MultiDataTrigger>
+                                                <MultiDataTrigger.Conditions>
+                                                    <Condition Value="Yellow">
+                                                        <Condition.Binding>
+                                                            <MultiBinding Converter="{Converters:CellBackgroundColorConverter}">
+                                                                <Binding Path="RowData.Row.ProjectedStock" />
+                                                                <Binding Path="RowData.Row.MinimumStock" />
+                                                            </MultiBinding>
+                                                        </Condition.Binding>
+                                                    </Condition>
+                                                </MultiDataTrigger.Conditions>
+                                                <Setter Property="Background" Value="Yellow" />
+                                                <Setter Property="Foreground" Value="Black" />
+                                            </MultiDataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Label.Style>
+                            </Label>
+                        </Border>
+                    </DataTemplate>
+                </dxg:GridColumn.CellTemplate>
+
+            </dxg:GridColumn>
+
+            <dxg:GridControl.TotalSummary>
+                <dxg:GridSummaryItem x:Name="Summary" SummaryType="Count"  DisplayFormat="Total Count : {0}" Visible="True" Alignment="Left"/>
+            </dxg:GridControl.TotalSummary>
+
+ 
+            <dxmvvm:Interaction.Behaviors>
+                <UIHelper:GridSelectingBehavior />
+            </dxmvvm:Interaction.Behaviors>
+
+            <dxg:GridControl.View>
+                <dxg:TableView x:Name="ArticleStockPlanningTableView"
+                               ShowGroupedColumns="True"  
+  HorizontalScrollbarVisibility="Disabled"  
+  VerticalScrollbarVisibility="Visible" 
+  ShowColumnHeaders="True"  
+  ShowGroupPanel="False"  
+  AllowEditing="True"  
+  ShowHorizontalLines="True"  
+  ShowVerticalLines="True"  
+  ShowSearchPanelMode="Always" 
+  SearchPanelHorizontalAlignment="Stretch" 
+  EnableImmediatePosting="True"
+  ImmediateUpdateRowPosition="False"
+  FilterRowDelay="500"
+  AllowColumnMoving="True"
+  NavigationStyle="Row"
+  ShowFixedTotalSummary="True"
+  ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly"
+  IsColumnChooserVisible="{Binding IsColumnChooserVisibleForGrid,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+  AllowBestFit="True"
+  AllowPerPixelScrolling="True"
+  AutoMoveRowFocus="False"
+  AllowScrollAnimation="True"
+  ShowIndicator="False"
+  AllowResizing="True"
+  AllowConditionalFormattingMenu="True"
+  HorizontalContentAlignment="Center"
+  UseLegacyFilterEditor="True"
+  AllowConditionalFormattingManager="True"
+  ShowTotalSummary="False"
+  
+     AutoWidth="True"  >
+                    <dxmvvm:Interaction.Behaviors>
+                        <dxmvvm:EventToCommand Command="{Binding TableViewLoadedCommand}" EventName="Loaded" PassEventArgsToCommand="True" />
+                    </dxmvvm:Interaction.Behaviors>
+                </dxg:TableView>
+            </dxg:GridControl.View>
+        </dxg:GridControl>
+    </Grid>
+</UserControl>

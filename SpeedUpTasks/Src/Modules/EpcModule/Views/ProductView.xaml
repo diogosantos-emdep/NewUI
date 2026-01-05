@@ -1,0 +1,296 @@
+﻿<UserControl x:Class="Emdep.Geos.Modules.Epc.Views.ProductView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid" 
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:viewModel="clr-namespace:Emdep.Geos.Modules.Epc.ViewModels"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:view="clr-namespace:Emdep.Geos.Modules.Epc.Views"
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"  
+             xmlns:Behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+             xmlns:UIConverter="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+             xmlns:dxb="http://schemas.devexpress.com/winfx/2008/xaml/bars"
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"
+             DataContext="{dxmvvm:ViewModelSource Type={x:Type viewModel:ProductViewModel}}"
+             x:Name="projectView" mc:Ignorable="d" 
+         
+             d:DesignHeight="300" d:DesignWidth="800">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Emdep.Geos.Modules.Epc;component/Resources/EpcCommonResource.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <UIConverter:DateTimeIsNullOrMinValueVisibility x:Key="IsDateTimeIsNullOrMinValueConverter"/>
+
+            <Style x:Key="ComboBoxEditStyle" TargetType="dxe:ComboBoxEditSettings">
+                <!--<Setter Property="EditNonEditableTemplate">
+                    <Setter.Value>
+                        <ControlTemplate>
+                            <StackPanel HorizontalAlignment="Left" VerticalAlignment="Center" Orientation="Horizontal">
+                                <Image Source="{Binding SelectedItem.IdImage, Converter={StaticResource RoadmapStatusToImageConverter}}"  Margin="5"/>
+                                <TextBlock Text="{Binding SelectedItem.Value}" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>-->
+                <Setter Property="ItemTemplate">
+                    <Setter.Value>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="{Binding IdImage, Converter={StaticResource RoadmapStatusToImageConverter}}"  Margin="0,0,5,0"/>
+                                <TextBlock Text="{Binding Value}" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="IsTextEditable" Value="False" />
+            </Style>
+
+            <dxmvvm:ObjectToObjectConverter x:Key="NodeLevelValueToBooleanConverter" DefaultTarget="False">
+                <dxmvvm:MapItem Source="0" Target="True" />
+            </dxmvvm:ObjectToObjectConverter>
+
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Loaded">
+            <i:InvokeCommandAction Command="{Binding ProjectViewLoadCommand}" CommandParameter="{Binding ElementName=projectView}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="40"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid Grid.ColumnSpan="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="40"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="20"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="40"/>
+            </Grid.ColumnDefinitions>
+
+            <dxwui:PageAdornerControl Visibility="{Binding PageAdornerVisibility}" Margin="-30,-15,-30,0" Padding="0" Grid.Row="0" Grid.Column="0"
+                                      HorizontalAlignment="Left" VerticalAlignment="Center" >
+                <!--<dxwui:PageAdornerControl.HeaderTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="70"/>
+                                <ColumnDefinition Width="20"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                        </Grid>
+                    </DataTemplate>
+                </dxwui:PageAdornerControl.HeaderTemplate>-->
+            </dxwui:PageAdornerControl>
+
+            <Label Style="{StaticResource LabelStyle}" Content="Product" Margin="-5,0,0,0" Padding="3" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="1" VerticalAlignment="Center" />
+            <Label Content="-" Margin="-2,0,0,0" Padding="3" Grid.Row="0" Grid.Column="2" FontSize="20" FontWeight="ExtraBold" VerticalAlignment="Center" />
+            <TextBlock Text="{Binding DataContext.ProductData.ProductName, RelativeSource={RelativeSource AncestorType= Grid, Mode=FindAncestor} }" Margin="-8,0,0,0" Padding="3" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Row="0" Grid.Column="3"  FontSize="20"/>
+
+            <Button x:Name="btnNewProjectAndVersion" HorizontalAlignment="Right" Width="40" Height="40" Grid.Row="0" Grid.Column="4" Margin="0" Padding="0"
+                Command="{Binding DataContext.NewRoadMapAndProjectButtonClickCommand, RelativeSource={RelativeSource Self}}" CommandParameter="{Binding SelectedItem.Header, ElementName=tabControlProduct}">
+                <StackPanel>
+                    <Image Height="24" Width="24" Stretch="Uniform" Margin="-10">
+                        <Image.Source>
+                            <Binding ElementName="tabControlProduct" Path="SelectedItem.Header">
+                                <Binding.Converter>
+                                    <dxmvvm:ObjectToObjectConverter>
+                                        <dxmvvm:MapItem Source="RoadMap" Target="{dx:DXImage Image=Map_32x32.png}"/>
+                                        <dxmvvm:MapItem Source="Projects" Target="{dx:DXImage Image=Project_32x32.png}"/>
+                                        <dxmvvm:MapItem Source="Versions" Target="{dx:DXImage Image=Fill_32x32.png}"/>
+                                    </dxmvvm:ObjectToObjectConverter>
+                                </Binding.Converter>
+                            </Binding>
+                        </Image.Source>
+                    </Image>
+                </StackPanel>
+                <Button.Style>
+                    <Style TargetType="{x:Type Button}">
+                        <Setter Property="Visibility" Value="Visible" />
+                        <Style.Triggers>
+                            <DataTrigger Binding = "{Binding IsSelected}" Value = "0">
+                                <Setter Property="Visibility" Value="Hidden" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+        </Grid>
+        
+        <dx:DXTabControl x:Name="tabControlProduct" Margin="10,0,0,0" Grid.Row="1" Grid.ColumnSpan="2">
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="SelectionChanged">
+                    <Behaviors:InvokeDelegateCommandAction Command="{Binding ProductViewTabSelectionChangedCommand}"  CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=InvokeParameter}"/>
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+
+            <dx:DXTabItem Header="RoadMap" x:Name="tabRoadMap" >
+                <dxg:TreeListControl Name="RoadMapTreeList" EnableSmartColumnsGeneration="True" SelectionMode="Row" ItemsSource="{Binding RoadMapList, Mode=TwoWay}" Margin="-10,5,-10,-10" Padding="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" >
+                    <dxg:TreeListControl.Columns>
+                        <dxg:TreeListColumn FieldName="Title" ReadOnly="True" AllowEditing="False" VisibleIndex="0"/>
+                        <dxg:TreeListColumn FieldName="RoadmapSource.Value" Header="Source" ReadOnly="True" AllowEditing="False" VisibleIndex="1" FixedWidth="True" Width="50" />
+                        <dxg:TreeListColumn FieldName="RoadmapPriority" Header="Priority" AllowEditing="False"  VisibleIndex="2" FixedWidth="True" Width="40" DisplayTemplate="{StaticResource RoadmapPriorityColumnDisplayTemplate}"/>
+                        <dxg:TreeListColumn FieldName="IdRoadmapStatus" Header="Status"  ReadOnly="False" IsSmart="True" VisibleIndex="3"  FixedWidth="True" Width="90">
+                            <dxg:TreeListColumn.EditSettings>
+                               
+                                <dxe:ComboBoxEditSettings ItemsSource="{Binding DataContext.RoadmapStatusList,RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=UserControl}}" 
+                                                          ValueMember="IdLookupValue" DisplayMember="Value" IsTextEditable="False" ApplyItemTemplateToSelectedItem="True"
+                                                          Style="{StaticResource ComboBoxEditStyle}" />
+                            </dxg:TreeListColumn.EditSettings>
+                            <!--<dxg:TreeListColumn.CellTemplate>
+                                <DataTemplate>
+                                    <dxe:ComboBoxEdit x:Name="PART_Editor" DisplayMember="Value" ValueMember="IdLookupValue" ApplyItemTemplateToSelectedItem="True"
+                                                      IsTextEditable="False"
+                                                      ItemsSource="{Binding DataContext.RoadmapStatusList,RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=UserControl}}"
+                                                      SelectedItem="{Binding IdRoadmapStatus,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                                      Style="{StaticResource ComboBoxEditStyle}">
+                                    </dxe:ComboBoxEdit>
+                                </DataTemplate>
+                            </dxg:TreeListColumn.CellTemplate>-->
+                        </dxg:TreeListColumn>
+                        <dxg:TreeListColumn FieldName="LinkedTo" Header="Linked To" ReadOnly="True" AllowEditing="False" VisibleIndex="4"  FixedWidth="True" Width="80">
+                            <dxg:TreeListColumn.CellTemplate>
+                                <DataTemplate>
+                                    <dxe:ComboBoxEdit x:Name="PART_Editor"></dxe:ComboBoxEdit>
+                                </DataTemplate>
+                            </dxg:TreeListColumn.CellTemplate>
+                        </dxg:TreeListColumn>
+                        <dxg:TreeListColumn FieldName="RequestDate" ReadOnly="True" AllowEditing="False" VisibleIndex="5"  FixedWidth="True" Width="80" />
+                    </dxg:TreeListControl.Columns>
+                    <dxg:TreeListControl.View>
+                        <dxg:TreeListView x:Name="roadMapTreeListView" ShowSearchPanelMode="Always" KeyFieldName="IdProductRoadmap" ParentFieldName="IdProductRoadmapType" 
+                                          AutoExpandAllNodes="True"  AutoWidth="True" AllowPerPixelScrolling="True" ShowTotalSummary="True" AllowBestFit="True"
+                                          ShowNodeImages="True" ImageFieldName="RoadmapImageIcon" >
+                            <dxg:TreeListView.RowCellMenuCustomizations>
+                                <dxb:BarButtonItem x:Name="AddNode" Content="Add Roadmap" IsVisible="{Binding Row.Node.Level, Converter={StaticResource NodeLevelValueToBooleanConverter}}"
+                                                   BarItemDisplayMode="ContentAndGlyph" Glyph="/Emdep.Geos.Modules.Epc;component/Images/Menu/wAdd.png" 
+                                                   Command="{Binding Path=(dxb:GridPopupMenuBase.GridMenuInfo).View.DataContext.RoadmapAddNodeCommand, RelativeSource={RelativeSource Self}}" 
+                                                   CommandParameter="{Binding Path=(dxg:GridPopupMenu.GridMenuInfo).Row, RelativeSource={RelativeSource Self}}" />
+                            </dxg:TreeListView.RowCellMenuCustomizations>
+                        </dxg:TreeListView>
+                    </dxg:TreeListControl.View>
+                    <dxmvvm:Interaction.Behaviors>
+                        <dxg:TreeListDragDropManager AllowDrag="True" AllowDrop="True" />
+                    </dxmvvm:Interaction.Behaviors>
+                </dxg:TreeListControl>
+            </dx:DXTabItem>
+
+            <dx:DXTabItem x:Name="tabProject" Header="Projects">
+                <DockPanel>
+                    <dxlc:LayoutControl DockPanel.Dock="Left" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="-20">
+                        <dxlc:GroupBox Name="projectsGroupBox" Margin="0" Width="250" >
+                            <dxlc:GroupBox.HeaderTemplate>
+                                <DataTemplate>
+                                    <WrapPanel>
+                                        <TextBlock Text="Projects : " ></TextBlock>
+                                        <TextBlock Text="{Binding DataContext.ProjectList.Count , RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}"  Padding="0,0,0,0"   TextAlignment="Right"  />
+                                    </WrapPanel>
+                                </DataTemplate>
+                            </dxlc:GroupBox.HeaderTemplate>
+
+                            <dxe:ListBoxEdit Name="projectsListBoxEdit" HorizontalContentAlignment="Stretch" ItemsSource="{Binding  DataContext.ProjectList, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" 
+                                             SelectedItem="{Binding DataContext.ActiveProject , RelativeSource={RelativeSource AncestorType=dxlc:GroupBox},Mode=TwoWay}"  DisplayMember="ProjectCode" Margin="-10" Padding="10,10,5,5" >
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="SelectedIndexChanged">
+                                        <i:InvokeCommandAction Command="{Binding SelectedProjectCommand}" CommandParameter="{RelativeSource AncestorType={x:Type dxlc:GroupBox}}"/>
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+
+                                <dxe:ListBoxEdit.ItemTemplate>
+                                    <DataTemplate >
+                                        <dxlc:LayoutGroup Header="Projects" View="GroupBox" x:Name="ProjectGroup"  Orientation="Vertical" IsCollapsible="True" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"  ItemLabelsAlignment="Local" Background="{Binding Category.HtmlColor}" >
+                                            <dxlc:LayoutGroup.HeaderTemplate>
+                                                <DataTemplate>
+                                                    <WrapPanel>
+                                                        <TextBlock Text="#"/>
+                                                        <TextBlock Text="{Binding DataContext.ProjectCode, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}"/>
+                                                    </WrapPanel>
+                                                </DataTemplate>
+                                            </dxlc:LayoutGroup.HeaderTemplate>
+                                            <dxlc:LayoutItem >
+                                                <TextBlock Text="{Binding ProjectName}" HorizontalAlignment="Left" Width="150"/>
+                                            </dxlc:LayoutItem>
+                                            <dxlc:LayoutItem>
+                                                <TextBlock Text="{Binding Customer.CustomerName}" HorizontalAlignment="Left" Width="150"    />
+                                            </dxlc:LayoutItem>
+                                            <dxlc:LayoutItem HorizontalAlignment="Right">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Image Style="{DynamicResource CalendarButtonImageStyle}" Visibility="{Binding DueDate, Converter={StaticResource IsDateTimeIsNullOrMinValueConverter}}" Width="16" Height="16" Margin="0,0,5,0" />
+                                                    <TextBlock  Text="{Binding DueDate, StringFormat=dd-MM-yyyy}" HorizontalAlignment="Right"  >
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="{x:Type TextBlock}">
+                                                                <Style.Triggers>
+                                                                    <MultiDataTrigger>
+                                                                        <MultiDataTrigger.Conditions>
+                                                                            <Condition Binding="{Binding DueDate}" Value="{x:Static sys:DateTime.MinValue}"/>
+                                                                        </MultiDataTrigger.Conditions>
+                                                                        <Setter Property="Visibility" Value="Hidden"/>
+                                                                    </MultiDataTrigger>
+                                                                    <MultiDataTrigger>
+                                                                        <MultiDataTrigger.Conditions>
+                                                                            <Condition Binding="{Binding DueDate}" Value="{x:Null}"/>
+                                                                        </MultiDataTrigger.Conditions>
+                                                                        <Setter Property="Visibility" Value="Hidden"/>
+                                                                    </MultiDataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                </StackPanel>
+                                            </dxlc:LayoutItem>
+                                        </dxlc:LayoutGroup>
+                                    </DataTemplate>
+                                </dxe:ListBoxEdit.ItemTemplate>
+                            </dxe:ListBoxEdit>
+                        </dxlc:GroupBox>
+                    </dxlc:LayoutControl>
+
+                    <Grid Background="Transparent">
+                        <view:ProjectView Margin="0,-20,0,0" DataContext="{Binding ProjectViewModel}" dxmvvm:ViewModelExtensions.ParentViewModel="{Binding DataContext, ElementName=projectView}" />
+                        <!--dxmvvm:ViewModelExtensions.ParentViewModel="{Binding Path=ProjectViewModel}"/>-->
+                    </Grid>
+
+                </DockPanel>
+            </dx:DXTabItem>
+
+            <dx:DXTabItem x:Name="tabVersions" Header="Versions">
+                <dxg:TreeListControl Name="versionsTreeList" ItemsSource="{Binding ListDataHelper}"  EnableSmartColumnsGeneration="True" SelectionMode="Row" Margin="-10" Padding="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"  >
+                    <dxg:TreeListControl.Columns>
+                        <!--<dxg:TreeListColumn FieldName="StringValue1" Header="Title" ReadOnly="True" AllowEditing="False" VisibleIndex="0" />
+                        <dxg:TreeListColumn FieldName="StringValue2" Header="Owner" ReadOnly="True" AllowEditing="False" VisibleIndex="1" FixedWidth="True" Width="100" />-->
+                        <dxg:TreeListColumn FieldName="StringValue3" Header="Version" ReadOnly="True" AllowEditing="False" VisibleIndex="0" />
+                        <dxg:TreeListColumn FieldName="DateTime1" Header="Beta Date" ReadOnly="True" AllowEditing="False" VisibleIndex="1" FixedWidth="True" Width="100" />
+                        <dxg:TreeListColumn FieldName="DateTime2" Header="Release Date" ReadOnly="True" AllowEditing="False" VisibleIndex="1" FixedWidth="True" Width="100" />
+                    </dxg:TreeListControl.Columns>
+                    <dxg:TreeListControl.View>
+                        <dxg:TreeListView Name="versionsTreeListView" KeyFieldName="StringValue1" ParentFieldName="StringValue2"  AutoExpandAllNodes="True" AutoWidth="True" AllowPerPixelScrolling="True" ShowTotalSummary="True" AllowBestFit="True" ShowNodeImages="True" ImageFieldName="RoadmapImageIcon" />
+                    </dxg:TreeListControl.View>
+                    <dxmvvm:Interaction.Behaviors>
+                        <dxg:TreeListDragDropManager AllowDrag="True" AllowDrop="True" />
+                    </dxmvvm:Interaction.Behaviors>
+                </dxg:TreeListControl>
+            </dx:DXTabItem>
+        </dx:DXTabControl>
+    </Grid>
+</UserControl>

@@ -1,0 +1,1060 @@
+﻿<UserControl x:Class="Emdep.Geos.Modules.Crm.Views.AccountView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid" 
+             xmlns:dxgt="http://schemas.devexpress.com/winfx/2008/xaml/grid/themekeys"
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:ViewModels="clr-namespace:Emdep.Geos.Modules.Crm.ViewModels"
+             xmlns:i="http://schemas.microsoft.com/expression/2008/interactivity"
+             xmlns:dxp="http://schemas.devexpress.com/winfx/2008/xaml/printing"
+             xmlns:Interactive="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:UIConverter="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters" 
+             xmlns:Behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+             xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+             xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+             xmlns:dxci="http://schemas.devexpress.com/winfx/2008/xaml/core/internal"
+             xmlns:dxnav="http://schemas.devexpress.com/winfx/2008/xaml/navigation"
+             Style="{DynamicResource UserControlStyle}">
+
+    <UserControl.Resources>
+        <!--[GEOS2-4324][26.04.2023][pmisal]-->
+        <UIConverter:ImageUrlToByteArrayConverter x:Key="ImageUrlToByteArrayConverter" />
+        <UIConverter:ForegroundColorConverter x:Key="ForegroundColorConverter"/>
+        <UIConverter:EmployeeCodeInitialToImageConverter x:Key="EmployeeCodeInitialToImageConverter" /> <!--  [pallavi.kale][GEOS2-9792][09-10-2025]  -->
+        <ControlTemplate x:Key="detailContainerTemplate" TargetType="{x:Type ContentControl}">
+            <Border BorderThickness="0,1,0,0" BorderBrush="{TemplateBinding BorderBrush}" HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch" Padding="12,12,12,12" Background="{TemplateBinding Background}">
+                <ContentControl/>
+            </Border>
+        </ControlTemplate>
+        <DataTemplate x:Key="DetailCoreTemplate">
+            <dx:MeasurePixelSnapper/>
+        </DataTemplate>
+        <DataTemplate x:Key="expandableRowDetailTemplate">
+            <StackPanel Orientation="Vertical">
+                <dx:MeasurePixelSnapper>
+                    <ContentPresenter x:Name="defaultRowPresenter" Content="{Binding}" ContentTemplate="{Binding View.DefaultDataRowTemplate}" />
+                </dx:MeasurePixelSnapper>
+                <dx:DXExpander IsExpanded="{Binding IsSelected}" HorizontalExpand="None" VerticalExpand="FromTopToBottom">
+                    <dxg:RowDetailContainerControl Template="{StaticResource detailContainerTemplate}" Content="{Binding}" ContentTemplate="{DynamicResource DetailCoreTemplate}" />
+                </dx:DXExpander>
+            </StackPanel>
+        </DataTemplate>
+        <!--[GEOS2-8957][29.09.2025][pallavi.kale]-->
+        <Style x:Key="HideButtonStyle" TargetType="{x:Type ToggleButton}">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ToggleButton}">
+                        <Border BorderThickness="0" Background="{TemplateBinding Background}">
+                            <Grid>
+                                <Image Stretch="None" VerticalAlignment="Center" HorizontalAlignment="Center"
+                            Source="/Emdep.Geos.Modules.Crm;component/Assets/Images/ArrowRight.png"
+                            Visibility="{TemplateBinding IsChecked, Converter={dxmvvm:BooleanToVisibilityConverter Inverse=True}}"/>
+                                <Image Stretch="None" VerticalAlignment="Center" HorizontalAlignment="Center"
+                            Source="/Emdep.Geos.Modules.Crm;component/Assets/Images/ArrowLeft.png"
+                            Visibility="{TemplateBinding IsChecked, Converter={dxmvvm:BooleanToVisibilityConverter}}"/>
+                            </Grid>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <!--[GEOS2-8957][29.09.2025][pallavi.kale]-->
+        <Style x:Key="LeftPanelTileItemStyle" TargetType="{x:Type dxnav:TileBarItem}">
+            <Setter Property="Foreground" Value="{Binding BackColor,Converter={UIConverter:ForegroundColorConverter}}"/>
+            <Setter Property="BorderBrush" Value="#FFD6D6D6"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Background" Value="{Binding BackColor}"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+            <Setter Property="Height" Value="{Binding Height}"/>
+            <Setter Property="Width" Value="{Binding Width}"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="SelectionPadding" Value="0" />
+            <Setter Property="ContentTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="135"/>
+                                <ColumnDefinition Width="40"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition>
+                                    <RowDefinition.Style>
+                                        <Style TargetType="RowDefinition">
+                                            <Setter Property="RowDefinition.Height" Value="37" />
+                                            <Style.Triggers>
+                                                <DataTrigger Value="Collapsed" Binding="{Binding EntitiesCountVisibility}">
+                                                    <Setter Property="RowDefinition.Height" Value="0" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </RowDefinition.Style>
+                                </RowDefinition>
+                                <RowDefinition Height="20"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Column="1" Grid.Row="0" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="-35,-5,0,0" Text="{Binding EntitiesCount,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" FontSize="30" Opacity="0.6" Visibility="{Binding EntitiesCountVisibility}"/>
+                            <TextBlock Grid.Column="0" Grid.Row="1" HorizontalAlignment="Left" Text="{Binding Caption}" ToolTip="{Binding Caption}" FontSize="13">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="VerticalAlignment" Value="Top"/>
+                                        <Setter Property="Margin" Value="3,-5,0,3"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Value="CUSTOM FILTERS" Binding="{Binding Caption}">
+                                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                                <Setter Property="Margin" Value="3,3,0,3"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Grid>
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="BorderThickness" Value="5"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource TileBarItemColorStyle}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid ShowGridLines="False">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0"  DockPanel.Dock="Top" Margin="0,10,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <Label Grid.Column="0" VerticalAlignment="Bottom" >
+                <!--  [pallavi.kale][GEOS2-8949][15-09-2025]  -->
+                <Label.Style>
+                    <Style TargetType="Label" BasedOn="{StaticResource LabelTitleStyle}">
+                        <Setter Property="FontWeight" Value="Bold"/>
+                        <Setter Property="FontSize" Value="28"/>
+                        <Setter Property="Content" Value="{DynamicResource AccountViewHeader}" />
+
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsTSMCustomerViewVisible}" Value="False">
+                                <Setter Property="Content" Value="{DynamicResource CustomerViewHeader}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Label.Style>
+            </Label>
+
+            <!-- Plant Owner -->
+            <DockPanel Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=CmbPlantOwnerUsers}" >
+                <Image Style="{DynamicResource PlantOwnerImageStyle}" Width="24" Height="24" Margin="7,0,3,0" />
+                <TextBlock Text="{DynamicResource CommonPlantOwner}"  FontWeight="Bold" Margin="5,2,5,0" />
+            </DockPanel>
+
+            <dxe:ComboBoxEdit Style="{DynamicResource ComboBoxEditStyle}" Grid.Column="2" Width="150" Height="40"
+                           Visibility="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=CmbPlantOwnerUsers}"
+                          ItemsSource="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=PlantOwnerUsersList}" Margin="5,0,5,0"
+                          DisplayMember="ShortName"
+        EditValue="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=SelectedPlantOwnerUsersList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                <dxe:ComboBoxEdit.StyleSettings>
+                    <dxe:CheckedComboBoxStyleSettings />
+                </dxe:ComboBoxEdit.StyleSettings>
+                <dxmvvm:Interaction.Triggers>
+                    <dxmvvm:EventToCommand EventName="PopupClosed"
+                                   Command="{Binding DataContext.PlantOwnerPopupClosedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                   PassEventArgsToCommand="True"/>
+                </dxmvvm:Interaction.Triggers>
+            </dxe:ComboBoxEdit>
+
+            <!-- Sales Owner -->
+            <DockPanel Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=CmbSalesOwnerUsers}" >
+                <Image Style="{DynamicResource OwnerGroupImageStyle}" Width="24" Height="24" Margin="7,0,3,0" />
+                <TextBlock Text="{DynamicResource CommonSalesOwner}"  FontWeight="Bold" Margin="5,2,5,0" />
+            </DockPanel>
+
+            <dxe:ComboBoxEdit Style="{DynamicResource ComboBoxEditStyle}" Grid.Column="2" Width="150" Height="40"
+                      Visibility="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=CmbSalesOwnerUsers}"
+                      ItemsSource="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=SalesOwnerUsersList}" Margin="5,0,5,0"
+                      DisplayMember="User.FullName"
+                      EditValue="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=SelectedSalesOwnerUsersList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                <dxe:ComboBoxEdit.StyleSettings>
+                    <dxe:CheckedComboBoxStyleSettings />
+                </dxe:ComboBoxEdit.StyleSettings>
+                <dxmvvm:Interaction.Triggers>
+                    <dxmvvm:EventToCommand EventName="PopupClosed"
+                                   Command="{Binding DataContext.SalesOwnerPopupClosedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                   PassEventArgsToCommand="True"/>
+                </dxmvvm:Interaction.Triggers>
+            </dxe:ComboBoxEdit>
+
+            <!--<StackPanel Orientation="Horizontal" Grid.Column="2" HorizontalAlignment="Right" Margin="-5,0,0,0">-->
+            <Button HorizontalAlignment="Left" Height="40" Width="40" Grid.Column="3"
+            Command="{Binding CommandNewAccountClick}" CommandParameter="{Binding ElementName=AccountTableView}"  Margin="0,0,5,0"
+            IsEnabled="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsPermissionEnabled}">
+                <!--  [pallavi.kale][GEOS2-8949][15-09-2025]  -->
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="Visibility" Value="Visible"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsTSMCustomerViewVisible}" Value="False">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource AccountAddCustomer}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Image Style="{DynamicResource AddButtonImageStyle}" Grid.Column="1" Height="24" Width="24" HorizontalAlignment="Right" Margin="-10" />
+                        </Grid>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+
+            <Button Content=" " Height="40" Width="40" Command="{Binding ImportAccountsCommand}" HorizontalAlignment="Right" 
+            Grid.Column="4" Margin="0,0,5,0" CommandParameter="{Binding ElementName=AccountTableView}"
+        IsEnabled="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsPermissionEnabled}">
+                <!--  [pallavi.kale][GEOS2-8949][15-09-2025]  -->
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="Visibility" Value="Visible"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsTSMCustomerViewVisible}" Value="False">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource AccountView_ImportAccounts}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Image Style="{DynamicResource ImportButtonImageStyle}" Grid.Column="0" Height="24" Width="24" Margin="-10"/>
+                        </Grid>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+            <Button Content=" " Height="40" Width="40" Grid.Column="5" Command="{Binding RefreshAccountViewCommand}" CommandParameter="{Binding ElementName=AccountTableView}" HorizontalAlignment="Right" Margin="0,0,5,0"  >
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource ButtonRefresh}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Image Style="{ DynamicResource RefreshButtonImageStyle}" Grid.Column="0" Height="24" Width="24" Margin="-10"/>
+                        </Grid>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+
+            <Button Content=" " Height="40" Width="40" Grid.Column="6" Command="{Binding PrintButtonCommand}" CommandParameter="{Binding ElementName=AccountTableView}" HorizontalAlignment="Right" Margin="0,0,5,0">
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource ButtonPrint}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Image Style="{ DynamicResource PrinterButtonImageStyle}" Grid.Column="0" Height="24" Width="24" Margin="-10"/>
+                        </Grid>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+
+            <Button Content=" " Height="40" Width="40"  HorizontalAlignment="Right" Grid.Column="7" Margin="0,0,5,0"
+        Command="{Binding ExportButtonCommand}" CommandParameter="{Binding ElementName=AccountTableView}" >
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource ButtonExportToExcel}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Image Style="{ DynamicResource ExcelExportButtonImageStyle}" Grid.Column="0" Height="24" Width="24" Margin="-10"/>
+                        </Grid>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+        </Grid>
+
+
+        <DockPanel Grid.Row="1" LastChildFill="True">
+
+            <UIHelper:DpiResizingPanel DockPanel.Dock="Left">
+                <dxnav:TileBar 
+         Visibility="{Binding ElementName=expandButton, Path=IsChecked, Converter={dxmvvm:BooleanToVisibilityConverter}}"
+         SelectedItem="{Binding SelectedTileBarItem,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+         Margin="0,-20,0,0"
+         SelectedIndex="{Binding SelectedTileIndex,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+         Orientation="Vertical"
+         Width="215"
+         ItemSpacing="5"
+         ItemsSource="{Binding Listofitem ,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+         ItemContainerStyle="{StaticResource LeftPanelTileItemStyle}"
+         Padding="0"  >
+
+                    <dxmvvm:Interaction.Behaviors>
+                        <dxmvvm:EventToCommand Command="{Binding CommandShowFilterPopupClick}" EventName="SelectionChanged" PassEventArgsToCommand="True"/>
+                        <dxmvvm:EventToCommand Command="{Binding CommandTileBarDoubleClick}"  EventName="MouseDoubleClick" CommandParameter="{Binding ElementName=AccountTableView}"/>
+                    </dxmvvm:Interaction.Behaviors>
+                </dxnav:TileBar>
+            </UIHelper:DpiResizingPanel>
+
+            <ToggleButton x:Name="expandButton" DockPanel.Dock="Left" Style="{StaticResource HideButtonStyle}" IsChecked="True"  VerticalAlignment="Center"/>
+
+            <Grid x:Name="mainGrid">
+
+                <dxg:GridControl x:Name="Accountgrid" ItemsSource="{Binding Companies,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Width="Auto" Height="Auto" 
+                                 FilterString="{Binding MyFilterString ,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" SelectionMode="Cell" 
+                                 SelectedItem="{Binding SelectedObject, Mode=TwoWay}" ImplyNullLikeEmptyStringWhenFiltering="True"  MouseMove="grid_MouseMove">
+                    <!--<dxg:GridControl.Columns>-->
+                    <dxg:GridColumn FieldName="Customer.CustomerName" Header="{DynamicResource AccountViewGroup}" MinWidth="60" Width="150" MaxWidth="200"  ReadOnly="True" FilterPopupMode="Default"/>
+                    <dxg:GridColumn FieldName="Name" Header="{DynamicResource AccountViewPlant}" MinWidth="60" Width="200"  ReadOnly="True" FilterPopupMode="Default" />
+                    <dxg:GridColumn FieldName="Country.Name" Header="{DynamicResource AccountViewCountry}"  MinWidth="100" Width="150" ReadOnly="True"  FilterPopupMode="Default">
+                        <!--[rdixit][GEOS2-4324][11.04.2023]-->
+                        <dxg:GridColumn.CellToolTipBinding>
+                            <Binding Path="RowData.Row.Country.Name" />
+                        </dxg:GridColumn.CellToolTipBinding>
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Height="24">
+                                    <!--[pmisal][GEOS2-4324][26.04.2023]-->
+                                    <Image Source="{Binding RowData.Row.Country.CountryIconUrl, Converter={StaticResource ImageUrlToByteArrayConverter},UpdateSourceTrigger=PropertyChanged ,ConverterParameter='image/png'}"  
+                                        VerticalAlignment="Center" Height="24" Width="24" Margin="2,0,0,0" />
+                                    <TextBlock Text ="{Binding RowData.Row.Country.Name,UpdateSourceTrigger=PropertyChanged}"  VerticalAlignment="Center" Margin="5,0,0,0" ></TextBlock>
+                                </StackPanel>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+                    <dxg:GridColumn FieldName="Country.Zone.Name" Header="{DynamicResource AccountViewRegion}"  MinWidth="100" Width="150" ReadOnly="True" FilterPopupMode="Default" />
+                    <dxg:GridColumn FieldName="RegisteredName"  Header ="{DynamicResource AccountViewRegisteredName}" MinWidth="60" Width="200" MaxWidth="350"  ReadOnly="True" FilterPopupMode="Default"/>
+                    <dxg:GridColumn FieldName="CIF" Header="{DynamicResource AccountViewRegistrationNumber}" MinWidth="100" Width="150" MaxWidth="200" ReadOnly="True" FilterPopupMode="Default">
+                        <!--  [pallavi.kale][GEOS2-8949][15-09-2025]  -->
+                        <dxg:GridColumn.Style>
+                            <Style TargetType="dxg:GridColumn">
+
+                                <Setter Property="Visible" Value="True"/>
+                                <Setter Property="ShowInColumnChooser" Value="True"/>
+
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsTSMCustomerViewVisible}" Value="False">
+                                        <Setter Property="Visible" Value="False"/>
+                                        <Setter Property="ShowInColumnChooser" Value="False"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </dxg:GridColumn.Style>
+                    </dxg:GridColumn>
+                    <dxg:GridColumn FieldName="City" Header="{DynamicResource AccountViewCity}"  MinWidth="100" Width="100" MaxWidth="150" ReadOnly="True" FilterPopupMode="Default" >
+                        <dxg:GridColumn.Style>
+                            <Style TargetType="dxg:GridColumn">
+
+                                <Setter Property="Visible" Value="True"/>
+                                <Setter Property="ShowInColumnChooser" Value="True"/>
+
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsTSMCustomerViewVisible}" Value="False">
+                                        <Setter Property="Visible" Value="False"/>
+                                        <Setter Property="ShowInColumnChooser" Value="False"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </dxg:GridColumn.Style>
+                    </dxg:GridColumn>
+
+                    <!--< Show in column chooser not in grid>-->
+
+                    <!--<dxg:GridColumn FieldName="NumberOfEmployees" Header="{DynamicResource AccountViewNoofEmp}"  MinWidth="60" Width="150" ReadOnly="True" ShowInColumnChooser="False" Visible="False" FilterPopupMode="CheckedList"/>
+                    <dxg:GridColumn FieldName="Size" Header="{DynamicResource AccountViewSize}"  MinWidth="60" Width="150" ReadOnly="True" ShowInColumnChooser="False" Visible="False" FilterPopupMode="CheckedList"/>-->
+                    <dxg:GridColumn FieldName="SourceName" Header="{DynamicResource AccountViewSource}"  MinWidth="60" Width="150" ReadOnly="True"  FilterPopupMode="Default">
+                        <!--  [pallavi.kale][GEOS2-8949][15-09-2025]  -->
+                        <dxg:GridColumn.Style>
+                            <Style TargetType="dxg:GridColumn">
+
+                                <Setter Property="Visible" Value="False"/>
+                                <Setter Property="ShowInColumnChooser" Value="True"/>
+
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsTSMCustomerViewVisible}" Value="False">
+                                        <Setter Property="Visible" Value="False"/>
+                                        <Setter Property="ShowInColumnChooser" Value="False"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </dxg:GridColumn.Style>
+                    </dxg:GridColumn>
+
+                    <dxg:GridColumn FieldName="BusinessField.Value" Header="{DynamicResource AccountViewBusinessField}" MinWidth="60" Width="130" MaxWidth="300" ReadOnly="True" FilterPopupMode="Default">
+                        <!--  [pallavi.kale][GEOS2-8949][15-09-2025]  -->
+                        <dxg:GridColumn.Style>
+                            <Style TargetType="dxg:GridColumn">
+                                
+
+                                <Setter Property="Visible" Value="False"/>
+                                <Setter Property="ShowInColumnChooser" Value="True"/>
+
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsTSMCustomerViewVisible}" Value="False">
+                                        <Setter Property="Visible" Value="True"/>
+                                        <Setter Property="ShowInColumnChooser" Value="True"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </dxg:GridColumn.Style>
+                    </dxg:GridColumn>
+
+                    <dxg:GridColumn FieldName="BusinessProductString" Header="{DynamicResource AccountViewBusinessProduct}"  MinWidth="60" Width="150" ReadOnly="True" 
+                                        UnboundType="String" UnboundExpression="[BusinessProductString]" FilterPopupMode="CheckedList">
+                        <dxg:GridColumn.Style>
+                            <Style TargetType="dxg:GridColumn">
+
+
+                                <Setter Property="Visible" Value="False"/>
+                                <Setter Property="ShowInColumnChooser" Value="True"/>
+
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsTSMCustomerViewVisible}" Value="False">
+                                        <Setter Property="Visible" Value="True"/>
+                                        <Setter Property="ShowInColumnChooser" Value="True"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </dxg:GridColumn.Style>
+                    </dxg:GridColumn>
+
+                    <dxg:GridColumn FieldName="BusinessCenter.Value" Header="{DynamicResource AccountViewBusinessType}" MinWidth="60" Width="130" MaxWidth="300" ReadOnly="True"  FilterPopupMode="Default">
+                        <!--  [pallavi.kale][GEOS2-8949][15-09-2025]  -->
+                        <dxg:GridColumn.Style>
+                            <Style TargetType="dxg:GridColumn">
+
+
+                                <Setter Property="Visible" Value="False"/>
+                                <Setter Property="ShowInColumnChooser" Value="True"/>
+
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsTSMCustomerViewVisible}" Value="False">
+                                        <Setter Property="Visible" Value="True"/>
+                                        <Setter Property="ShowInColumnChooser" Value="True"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </dxg:GridColumn.Style>
+                    </dxg:GridColumn>
+                    <!--removed[29/06/2022][GEOS2-1902]-->
+                    <!--<dxg:GridColumn FieldName="Line" Header="{DynamicResource AccountViewNoofLines}" MinWidth="60" Width="130" MaxWidth="300" ReadOnly="True" ShowInColumnChooser="True" Visible="False" FilterPopupMode="CheckedList"/>-->
+                    <!--<dxg:GridColumn FieldName="CuttingMachines" Header="{DynamicResource AccountViewNoofCuttingMachines}" MinWidth="60" Width="140" MaxWidth="300" ReadOnly="True" ShowInColumnChooser="True" Visible="False" FilterPopupMode="CheckedList"/>-->
+                    <!--<dxg:GridColumn FieldName="BothLongitudeLatitude" Header="{DynamicResource AccountViewCoordinates}" MinWidth="60" Width="130" MaxWidth="300" ReadOnly="True" ShowInColumnChooser="True" Visible="False"/>-->
+                    <dxg:GridColumn FieldName="Region" Header="{DynamicResource AccountViewState}" MinWidth="60" Width="100" MaxWidth="150" ReadOnly="True"  FilterPopupMode="Default">
+                        <!--  [pallavi.kale][GEOS2-8949][15-09-2025]  -->
+                        <dxg:GridColumn.Style>
+                            <Style TargetType="dxg:GridColumn">
+
+
+                                <Setter Property="Visible" Value="False"/>
+                                <Setter Property="ShowInColumnChooser" Value="True"/>
+
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsTSMCustomerViewVisible}" Value="False">
+                                        <Setter Property="Visible" Value="False"/>
+                                        <Setter Property="ShowInColumnChooser" Value="False"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </dxg:GridColumn.Style>
+                    </dxg:GridColumn>
+
+                    <dxg:GridColumn FieldName="ZipCode" Header="{DynamicResource AccountViewZipCode}" MinWidth="60" Width="100" MaxWidth="100" ReadOnly="True" FilterPopupMode="Default">
+                        <dxg:GridColumn.Style>
+                            <Style TargetType="dxg:GridColumn">
+
+
+                                <Setter Property="Visible" Value="False"/>
+                                <Setter Property="ShowInColumnChooser" Value="True"/>
+
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsTSMCustomerViewVisible}" Value="False">
+                                        <Setter Property="Visible" Value="False"/>
+                                        <Setter Property="ShowInColumnChooser" Value="False"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </dxg:GridColumn.Style>
+                    </dxg:GridColumn>
+
+                    <!--removed[29/06/2022]-->
+                    <!--<dxg:GridColumn FieldName="Fax" Header="{DynamicResource AccountViewFax}" MinWidth="60" Width="130" MaxWidth="300" ReadOnly="True" ShowInColumnChooser="True" Visible="False" FilterPopupMode="CheckedList"/>-->
+                    <dxg:GridColumn FieldName="CreatedIn" Header="{DynamicResource AccountViewCreationDate}" MinWidth="60" Width="130" MaxWidth="300" ReadOnly="True"  FilterPopupMode="Default">
+                        <dxg:GridColumn.Style>
+                            <Style TargetType="dxg:GridColumn">
+
+
+                                <Setter Property="Visible" Value="False"/>
+                                <Setter Property="ShowInColumnChooser" Value="True"/>
+
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsTSMCustomerViewVisible}" Value="False">
+                                        <Setter Property="Visible" Value="False"/>
+                                        <Setter Property="ShowInColumnChooser" Value="False"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </dxg:GridColumn.Style>
+                    </dxg:GridColumn>
+                    <dxg:GridColumn FieldName="ModifiedIn" Header="{DynamicResource AccountViewModificationDate}" MinWidth="60" Width="130" MaxWidth="300" ReadOnly="True"  FilterPopupMode="Default">
+                        <dxg:GridColumn.Style>
+                            <Style TargetType="dxg:GridColumn">
+
+
+                                <Setter Property="Visible" Value="False"/>
+                                <Setter Property="ShowInColumnChooser" Value="True"/>
+
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsTSMCustomerViewVisible}" Value="False">
+                                        <Setter Property="Visible" Value="False"/>
+                                        <Setter Property="ShowInColumnChooser" Value="False"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </dxg:GridColumn.Style>
+                    </dxg:GridColumn>
+                    <dxg:GridColumn FieldName="Age" Header="{DynamicResource AccountViewAge}" MinWidth="60" Width="100" MaxWidth="300" ReadOnly="True"  FilterPopupMode="Default" >
+                        <dxg:GridColumn.Style>
+                            <Style TargetType="dxg:GridColumn">
+
+
+                                <Setter Property="Visible" Value="False"/>
+                                <Setter Property="ShowInColumnChooser" Value="True"/>
+
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsTSMCustomerViewVisible}" Value="False">
+                                        <Setter Property="Visible" Value="False"/>
+                                        <Setter Property="ShowInColumnChooser" Value="False"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </dxg:GridColumn.Style>
+                    </dxg:GridColumn>
+                    
+                    <dxg:GridColumn FieldName="Email" Header="Email" MinWidth="150"  ReadOnly="True" MaxWidth="200" FilterPopupMode="Default">
+                        <dxg:GridColumn.Style>
+                            <Style TargetType="dxg:GridColumn">
+
+
+                                <Setter Property="Visible" Value="True"/>
+                                <Setter Property="ShowInColumnChooser" Value="True"/>
+
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsTSMCustomerViewVisible}" Value="False">
+                                        <Setter Property="Visible" Value="False"/>
+                                        <Setter Property="ShowInColumnChooser" Value="False"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </dxg:GridColumn.Style>
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Margin="5,0,0,0" VerticalAlignment="Center"  >
+                                        <Hyperlink TargetName="_blank"
+                                                   Command="{Binding View.DataContext.HyperlinkForEmail}" 
+                                                   CommandParameter="{Binding Data.Email}"
+                                                   Style="{DynamicResource hyperlinkGridStyle}">
+                                            <InlineUIContainer>
+                                                <TextBlock Text="{Binding Data.Email}" Style="{DynamicResource HyperlinkTextBlock}" TextDecorations="Underline" />
+                                            </InlineUIContainer>
+                                        </Hyperlink>
+                                    </TextBlock>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+
+                    <!--chitra.girigosavi GEOS2-7242 28/03/2025-->
+                    <dxg:GridColumn Header="{DynamicResource GridColCRMStatus}" FieldName="Status.Value" FilterPopupMode="Default" MinWidth="115" Width="115" FixedWidth="True">
+                        <dxg:GridColumn.Style>
+                            <Style TargetType="dxg:GridColumn">
+
+
+                                <Setter Property="Visible" Value="True"/>
+                                <Setter Property="ShowInColumnChooser" Value="True"/>
+
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsTSMCustomerViewVisible}" Value="False">
+                                        <Setter Property="Visible" Value="False"/>
+                                        <Setter Property="ShowInColumnChooser" Value="False"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </dxg:GridColumn.Style>
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Data.Status.Value}" Margin="3,0,3,0" VerticalAlignment="Center" />
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                        <dxg:GridColumn.CellStyle>
+                            <Style TargetType="{x:Type dxg:LightweightCellEditor}">
+                                <Style.Triggers>
+                                    <Trigger Property="SelectionState" Value="None">
+                                        <Setter Property="Background" Value="{Binding Data.Status.HtmlColor}"/>
+                                        <Setter Property="Foreground" Value="{Binding Path=Background,Converter={StaticResource ForegroundColorConverter}}"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </dxg:GridColumn.CellStyle>
+                    </dxg:GridColumn>
+
+                    <dxg:GridColumn FieldName="Website" Header="{DynamicResource AccountViewWebsite}"  MinWidth="200" ReadOnly="True" FilterPopupMode="Default">
+                        <dxg:GridColumn.Style>
+                            <Style TargetType="dxg:GridColumn">
+
+
+                                <Setter Property="Visible" Value="True"/>
+                                <Setter Property="ShowInColumnChooser" Value="True"/>
+
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsTSMCustomerViewVisible}" Value="False">
+                                        <Setter Property="Visible" Value="False"/>
+                                        <Setter Property="ShowInColumnChooser" Value="True"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </dxg:GridColumn.Style>
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Margin="5,0,0,0" VerticalAlignment="Center"  >
+                                            <Hyperlink TargetName="_blank"  
+                                                       Command="{Binding View.DataContext.HyperlinkForWebsite}" 
+                                                       CommandParameter="{Binding Data.Website}"
+                                                       Style="{DynamicResource hyperlinkGridStyle}">
+                                                <TextBlock Name="PART_Editor" Text="{Binding RowData.Row.Website}" Style="{DynamicResource HyperlinkTextBlock}" TextDecorations="Underline" />
+                                            </Hyperlink>
+                                        </TextBlock>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+
+                    <dxg:GridColumn FieldName="Telephone" Header="{DynamicResource AccountViewPhone}"  MinWidth="60" Width="150" ReadOnly="True" ShowInColumnChooser="True" FilterPopupMode="Default"/>
+                    <dxg:GridColumn FieldName="SalesOwnerUnbound" 
+                                        Header="{DynamicResource AccountViewSalesOwner}"
+                                        ColumnFilterMode="DisplayText" UnboundType="String"                                   
+                                        MinWidth="60" Width="150" ReadOnly="True" FilterPopupMode="CheckedList">
+                        <!--[rdixit][GEOS2-4903][27.10.2023]-->
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel>
+                                    <Grid>
+                                   
+                                        <Grid.RowDefinitions>
+                                        <RowDefinition>
+                                            <RowDefinition.Style>
+                                                <Style TargetType="RowDefinition">
+                                                    <Setter Property="RowDefinition.Height" Value="Auto" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Value="{x:Null}" Binding="{Binding RowData.Row.SalesOwnerEnabled}">
+                                                            <Setter Property="RowDefinition.Height" Value="0" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </RowDefinition.Style>
+                                        </RowDefinition>
+                                        <RowDefinition>
+                                            <RowDefinition.Style>
+                                                <Style TargetType="RowDefinition">
+                                                    <Setter Property="RowDefinition.Height" Value="Auto" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Value="{x:Null}" Binding="{Binding RowData.Row.SalesOwnerDisabled}">
+                                                            <Setter Property="RowDefinition.Height" Value="0" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </RowDefinition.Style>
+                                        </RowDefinition>
+                                    </Grid.RowDefinitions>
+                                    
+                                    <TextBlock Text="{Binding RowData.Row.SalesOwnerEnabled}" Grid.Row="0"/>
+                                    <TextBlock Text="{Binding RowData.Row.SalesOwnerDisabled}" Foreground="Gray" Grid.Row="1" />
+                                </Grid>
+                                <ItemsControl 
+                   ItemsSource="{Binding RowData.Row.SalesOwnerListForImages,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Width="auto"                              
+                   Height="auto" MaxHeight="300" HorizontalAlignment="Stretch" VerticalAlignment="Center" >
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <!--<StackPanel VerticalAlignment="Center" Orientation="Horizontal" Height="auto" Margin="2">
+                                                <TextBlock Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"  Margin="5,0,0,0"/>
+                                            </StackPanel>-->
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                </StackPanel>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+                    
+
+                    <!-- [GEOS2-4279][rdixit][05.05.2023] -->
+                    <!--<dxg:GridColumn FieldName="SalesOwnerUnbound" 
+                                        Header="{DynamicResource AccountViewSalesOwner}"
+                                        ColumnFilterMode="DisplayText" UnboundType="String" 
+                                        UnboundExpression="[People.FullName]+' '+[PeopleSalesResponsibleAssemblyBU.FullName]"
+                                        MinWidth="60" Width="150" ReadOnly="True" FilterPopupMode="CheckedList">
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Vertical">
+                                    <TextBlock Text="{Binding RowData.Row.People.FullName}" Margin="5 0"/>
+                                    <TextBlock Text="{Binding RowData.Row.PeopleSalesResponsibleAssemblyBU.FullName}" Margin="5 0"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>-->
+                    <!--<dxg:GridColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Vertical">
+                                        <TextBlock Text="{Binding RowData.Row.People.FullName}" Margin="5 0"/>
+                                        <TextBlock Text="{Binding RowData.Row.PeopleSalesResponsibleAssemblyBU.FullName}" Margin="5 0"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </dxg:GridColumn.CellTemplate>-->
+
+                    <!--//Removed[kshinde][04/07/2022]-->
+                    <!--<dxg:GridColumn FieldName="" Header="{x:Null}" Width="*" ReadOnly="True" AllowSorting="False" AllowBestFit="True" AllowColumnFiltering="False" AllowEditing="False" ShowInColumnChooser="False" Visible="True" AllowPrinting="False" FilterPopupMode="CheckedList"/>-->
+                    <dxg:GridColumn Width="40" FieldName=""  AllowSorting="False" MaxWidth="40" FixedWidth="True" Fixed="Right" HorizontalHeaderContentAlignment="Center" AllowColumnFiltering="False" ShowInColumnChooser="False" Visible="True" AllowPrinting="False" FilterPopupMode="Default" AllowMoving="False">
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Name="disableaccount" Command="{Binding DataContext.DisableAccountCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                     CommandParameter="{Binding RowData.Row}" Content="" Width="40" BorderBrush="Transparent" IsEnabled="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsPermissionEnabled}">
+                                    <Button.ContentTemplate>
+                                        <DataTemplate>
+                                            <Image Height="16" Width="16" Source="/Emdep.Geos.Modules.Crm;component/Assets/Images/Delete.png"/>
+                                        </DataTemplate>
+                                    </Button.ContentTemplate>
+                                    <Button.ToolTip>
+                                        <TextBlock HorizontalAlignment="Stretch" Text="{DynamicResource ActivityFileDelete}" />
+                                    </Button.ToolTip>
+                                </Button>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+                    <dxg:GridColumn FieldName="PeopleCreatedBy.FullName" Header="{DynamicResource AccountViewCreator}"  MinWidth="60" Width="200" MaxWidth="350"  ReadOnly="True"  FilterPopupMode="Default" >
+                        <dxg:GridColumn.Style>
+                            <Style TargetType="dxg:GridColumn">
+
+
+                                <Setter Property="Visible" Value="False"/>
+                                <Setter Property="ShowInColumnChooser" Value="True"/>
+
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsTSMCustomerViewVisible}" Value="False">
+                                        <Setter Property="Visible" Value="False"/>
+                                        <Setter Property="ShowInColumnChooser" Value="False"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </dxg:GridColumn.Style>
+                    </dxg:GridColumn>
+
+                    <!--  [pallavi.kale][GEOS2-8949][15-09-2025]  -->
+                    <dxg:GridColumn FieldName="FullAddress"
+                Header="{DynamicResource AccountViewFullAddress}"
+                MinWidth="60" Width="300" MaxWidth="600"
+                ReadOnly="True" FilterPopupMode="Default">
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Margin="5,0,5,0">
+                                    <!-- Location icon -->
+
+                                    <Image Height="16" Width="16">
+                                        <Image.Style>
+                                            <Style TargetType="Image">
+                                              
+                                                <Style.Triggers>
+                                                    <!-- Theme: BlackAndBlue + Selected + ShowIcon -->
+                                                    <MultiDataTrigger>
+                                                        <MultiDataTrigger.Conditions>
+                                                            <Condition Binding="{Binding RowData.Row.IsCoordinatesNull}" Value="True" />
+                                                            <Condition Binding="{Binding RowData.Row.IsSelectedRow}" Value="True" />
+                                                            <Condition Binding="{Binding Path=(dx:ThemeManager.TreeWalker).ThemeName, RelativeSource={RelativeSource Self}}" Value="BlackAndBlue" />
+                                                        </MultiDataTrigger.Conditions>
+                                                        <Setter Property="Source" Value="/Emdep.Geos.Modules.Crm;component/Assets/Images/bMapLocationSelected.png" />
+                                                    </MultiDataTrigger>
+
+                                                    <!-- Theme: WhiteAndBlue + Selected + ShowIcon -->
+                                                    <MultiDataTrigger>
+                                                        <MultiDataTrigger.Conditions>
+                                                            <Condition Binding="{Binding RowData.Row.IsCoordinatesNull}" Value="True" />
+                                                            <Condition Binding="{Binding RowData.Row.IsSelectedRow}" Value="True" />
+                                                            <Condition Binding="{Binding Path=(dx:ThemeManager.TreeWalker).ThemeName, RelativeSource={RelativeSource Self}}" Value="WhiteAndBlue" />
+                                                        </MultiDataTrigger.Conditions>
+                                                        <Setter Property="Source" Value="/Emdep.Geos.Modules.Crm;component/Assets/Images/wMapLocationSelected.png" />
+                                                    </MultiDataTrigger>
+
+                                                    <!-- Theme: BlackAndBlue + ShowIcon (default when not selected) -->
+                                                    <MultiDataTrigger>
+                                                        <MultiDataTrigger.Conditions>
+                                                            <Condition Binding="{Binding RowData.Row.IsCoordinatesNull}" Value="True" />
+                                                            <Condition Binding="{Binding RowData.Row.IsSelectedRow}" Value="False" />
+                                                            <Condition Binding="{Binding Path=(dx:ThemeManager.TreeWalker).ThemeName, RelativeSource={RelativeSource Self}}" Value="BlackAndBlue" />
+                                                        </MultiDataTrigger.Conditions>
+                                                        <Setter Property="Source" Value="/Emdep.Geos.Modules.Crm;component/Assets/Images/wMapLocationSelected.png" />
+                                                    </MultiDataTrigger>
+
+                                                    <!-- Theme: WhiteAndBlue + ShowIcon (default when not selected) -->
+                                                    <MultiDataTrigger>
+                                                        <MultiDataTrigger.Conditions>
+                                                            <Condition Binding="{Binding RowData.Row.IsCoordinatesNull}" Value="True" />
+                                                            <Condition Binding="{Binding RowData.Row.IsSelectedRow}" Value="False" />
+                                                            <Condition Binding="{Binding Path=(dx:ThemeManager.TreeWalker).ThemeName, RelativeSource={RelativeSource Self}}" Value="WhiteAndBlue" />
+                                                        </MultiDataTrigger.Conditions>
+                                                        <Setter Property="Source" Value="/Emdep.Geos.Modules.Crm;component/Assets/Images/bMapLocationSelected.png" />
+                                                    </MultiDataTrigger>
+
+                                                    <!-- Visibility Control -->
+                                                    <DataTrigger Binding="{Binding RowData.Row.IsCoordinatesNull}" Value="True">
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding RowData.Row.IsCoordinatesNull}" Value="False">
+                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                    </DataTrigger>
+
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Image.Style>
+
+                                        <Image.InputBindings>
+                                            <MouseBinding Gesture="LeftClick"
+                      Command="{Binding DataContext.LocationIconClickCommand, RelativeSource={RelativeSource AncestorType=dxg:GridControl}}"
+                      CommandParameter="{Binding RowData.Row}"/>
+                                        </Image.InputBindings>
+                                    </Image>
+
+                                    <!-- Show FullAddress -->
+                                    <TextBlock Text="{Binding RowData.Row.FullAddress}" 
+                           Margin="5,0,0,0"
+                           VerticalAlignment="Center"
+                           TextWrapping="Wrap"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                     <!--  [pallavi.kale][GEOS2-8949][15-09-2025]  -->
+                        <dxg:GridColumn.Style>
+                            <Style TargetType="dxg:GridColumn">
+
+
+                                <Setter Property="Visible" Value="False"/>
+                                <Setter Property="ShowInColumnChooser" Value="False"/>
+
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsTSMCustomerViewVisible}" Value="False">
+                                        <Setter Property="Visible" Value="True"/>
+                                        <Setter Property="ShowInColumnChooser" Value="True"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </dxg:GridColumn.Style>
+                    </dxg:GridColumn>
+
+                    <!--  [pallavi.kale][GEOS2-8949][15-09-2025]  -->
+                    <dxg:GridColumn FieldName="ContactCount" Header="{DynamicResource AccountViewContactCount}"  MinWidth="70" Width="70" MaxWidth="350"  ReadOnly="True" FilterPopupMode="Default" >
+                        <dxg:GridColumn.Style>
+                            <Style TargetType="dxg:GridColumn">
+
+
+                                <Setter Property="Visible" Value="False"/>
+                                <Setter Property="ShowInColumnChooser" Value="False"/>
+
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsTSMCustomerViewVisible}" Value="False">
+                                        <Setter Property="Visible" Value="True"/>
+                                        <Setter Property="ShowInColumnChooser" Value="True"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </dxg:GridColumn.Style>
+                    </dxg:GridColumn>
+
+
+                    <!--</dxg:GridControl.Columns>-->
+
+                    <dxg:GridControl.TotalSummary>
+                        <dxg:GridSummaryItem x:Name="summary" FieldName="Name" SummaryType="Count" DisplayFormat="Total Count: {0}" Alignment="Left"/>
+                    </dxg:GridControl.TotalSummary>
+
+                    <dxmvvm:Interaction.Behaviors>
+                        <UIHelper:GridSelectingBehavior />
+                        <dxmvvm:EventToCommand EventName="CustomUnboundColumnData"
+                                               Command="{Binding CustomUnboundColumnDataCommand}"
+                                               PassEventArgsToCommand="True"/>
+                        <!--<UIHelper:ToolTipSalesOwnerFlyoutControlBehavior x:Name="flyoutGridControlSalesOwnerBehavior" FlyoutControl="{Binding ElementName=SalesOwnerflyoutControl}">
+                        </UIHelper:ToolTipSalesOwnerFlyoutControlBehavior>-->
+                    </dxmvvm:Interaction.Behaviors>
+                    <!--[pramod.misal][GEOS2-1901][16-10-2023]-->
+                    <dxg:GridControl.View>
+                        <dxg:TableView  Name="AccountTableView" 
+                                        NavigationStyle="Row" 
+                                        RowDetailsVisibilityMode="Visible"
+                                        ShowHorizontalLines="True" 
+                                        ShowSearchPanelMode="Always"
+                                        ShowColumnHeaders="True" 
+                                        ShowTotalSummary="False"
+                                        ShowFixedTotalSummary="True"
+                                        FocusedRow="{Binding SelectedObject,Mode=TwoWay}"
+                                        VerticalScrollbarVisibility="Visible"
+                                        SearchPanelHorizontalAlignment="Stretch"
+                                        IsColumnChooserVisible="{Binding IsAccountColumnChooserVisible,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                        ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly"
+                                        AllowGrouping="True"
+                                        ShowGroupPanel="False"
+                                        ShowGroupedColumns="True"
+                                        AllowFixedGroups="False"
+                                        ShowIndicator="False" 
+                                        AutoWidth="True"
+                                        AllowColumnFiltering="True"
+                                        UseLegacyFilterEditor="True"
+                                        FilterEditorShowOperandTypeIcon="True"
+                                        ShowFilterPopup="{DXEvent Handler='@args.PopupBaseEdit.PopupWidth=200'}"
+                                        HorizontalScrollbarVisibility="Auto">
+
+
+                            <dxg:TableView.Resources>
+                                <DataTemplate x:Key="AccountViewCustomPrintHeaderTemplate">
+                                    <Grid Width="{Binding UsablePageWidth}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="50" />
+                                            <ColumnDefinition Width="130" />
+                                        </Grid.ColumnDefinitions>
+                                        <dxe:TextEdit Text=" " Width="{Binding UsablePageWidth}" Grid.ColumnSpan="3" IsPrintingMode="True" Background="#333E5E" HorizontalAlignment="Stretch" 
+                                                      VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" Height="50" />
+                                        <dxe:TextEdit Text="Accounts Report" IsPrintingMode="True" HorizontalAlignment="Stretch" 
+                                                      VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" />
+                                        <Image Source="/Emdep.Geos.Modules.Crm;component/Assets/Images/GeosReportLogo.png" Height="50" Width="80"  dxp:ExportSettings.TargetType="Image" Grid.Column="2" />
+                                    </Grid>
+                                </DataTemplate>
+
+                                <DataTemplate x:Key="AccountViewCustomPrintFooterTemplate">
+                                    <dxe:TextEdit HorizontalContentAlignment="Center" 
+                                                  Width="{Binding Path=UsablePageWidth, Mode=OneWay}" 
+                                                  dxp:ExportSettings.TargetType="PageNumber" 
+                                                  dxp:PageNumberExportSettings.Kind="NumberOfTotal" 
+                                                  dxp:PageNumberExportSettings.Format="Page {0} of {1}"/>
+                                </DataTemplate>
+                            </dxg:TableView.Resources>
+
+                            <Interactive:Interaction.Triggers>
+                                <Interactive:EventTrigger  EventName="Loaded">
+                                    <Behaviors:InvokeDelegateCommandAction Command="{Binding CustomCellAppearanceCommand}" 
+                                                                           CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=InvokeParameter}" />
+                                </Interactive:EventTrigger>
+                            </Interactive:Interaction.Triggers>
+
+                            <dxmvvm:Interaction.Behaviors>
+                                <dxmvvm:EventToCommand  Command="{Binding DataContext.CommandGridDoubleClick,RelativeSource={RelativeSource AncestorType=dxg:GridControl}}" EventName="MouseDoubleClick" CommandParameter="{Binding ElementName=AccountTableView}">
+                                    <dxmvvm:EventToCommand.EventArgsConverter>
+                                        <dx:EventArgsToDataRowConverter   />
+                                    </dxmvvm:EventToCommand.EventArgsConverter>
+                                </dxmvvm:EventToCommand>
+                                <dxmvvm:EventToCommand EventName="ShowFilterPopup"
+                                                       Command="{Binding SalesOwnerCustomShowFilterPopup}"
+                                                       PassEventArgsToCommand="True"/>
+                                <!--  [pallavi.kale][GEOS2-8949][15-09-2025]  -->
+                                <dxmvvm:EventToCommand EventName="Unloaded" Command="{Binding AccountGridControlUnloadedCommand}"                                            
+                                    PassEventArgsToCommand="True" CommandParameter="{Binding ElementName=Accountgrid}" />
+                                <!--  [pallavi.kale][GEOS2-8949][15-09-2025]  -->
+                                <dxmvvm:EventToCommand SourceObject="{Binding ElementName=AccountTableView, Path=FormatConditions}" EventName="CollectionChanged"                                                                                                    
+                                      Command="{Binding AccountGridControlUnloadedCommand}" CommandParameter="{Binding ElementName=Accountgrid}"/>
+                                <dxmvvm:EventToCommand EventName="FilterEditorCreated"
+                             Command="{Binding FilterEditorCreatedCommand}"
+                            PassEventArgsToCommand="True" >
+                                </dxmvvm:EventToCommand>
+                                
+                            </dxmvvm:Interaction.Behaviors>
+
+                        </dxg:TableView>
+                    </dxg:GridControl.View>
+
+                </dxg:GridControl>
+                
+            </Grid>
+           <!--  [pallavi.kale][GEOS2-9792][09-10-2025]  -->
+            <dxe:FlyoutControl x:Name="SalesOwnerflyoutControl" StaysOpen="True" BorderThickness="2" Padding="3"
+                     Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext}">
+                <dxe:FlyoutControl.ContentTemplate>
+                    <DataTemplate>
+                        <ItemsControl ItemsSource="{Binding}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid ShowGridLines="False" Height="70" Width="300">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="70"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid Grid.Column="0" Margin="2,2,0,2" Height="60" Width="60">
+                                            <Ellipse Stroke="Black" StrokeThickness="2" Fill="Transparent"/>
+                                            <Image Height="56" Width="56" HorizontalAlignment="Center" VerticalAlignment="Center"
+					           Stretch="UniformToFill"
+					           Source="{Binding SalesOwnerNameEmployeeCodesWithInitialLetters, Converter={StaticResource EmployeeCodeInitialToImageConverter}, UpdateSourceTrigger=PropertyChanged ,ConverterParameter='image/png'}">
+                                                <Image.Clip>
+                                                    <EllipseGeometry Center="28,28" RadiusX="28" RadiusY="28"/>
+                                                </Image.Clip>
+                                            </Image>
+                                        </Grid>
+                                        <StackPanel Orientation="Vertical"  Grid.Column="1">
+                                            <TextBlock Text="{Binding Name}" FontSize="14" Style="{DynamicResource TextBlock16Style}"  TextWrapping="WrapWithOverflow"/>
+                                            <TextBlock Text="{Binding JobDescriptionTitle}"  FontSize="12"  Style="{DynamicResource TextBlock16Style}" FontStyle="Italic" TextWrapping="WrapWithOverflow"/>
+                                            <StackPanel Orientation="Horizontal" Height="24" VerticalAlignment="Center">
+                                                <Image Source="/Emdep.Geos.Modules.Crm;component/Assets/Images/MailIcon.png" Height="20" Width="20" Margin="0,0,5,0" />
+                                                <TextBlock Text="{Binding Row.Inbox, UpdateSourceTrigger=PropertyChanged}" Style="{DynamicResource HyperlinkTextBlock}" TextDecorations="Underline"  Margin="5,0,0,0"/>
+                                                <TextBlock Style="{DynamicResource HyperlinkTextBlock}" Margin="2,0,0,0">
+                                     <Hyperlink Command="{Binding DataContext.HyperlinkForEmail,RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding Email}" TextDecorations="Underline">
+                                         <Run Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" />
+                                     </Hyperlink>
+                                                </TextBlock>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </DataTemplate>
+                </dxe:FlyoutControl.ContentTemplate>
+            </dxe:FlyoutControl>
+          
+        </DockPanel>
+    </Grid>
+</UserControl>
+ 

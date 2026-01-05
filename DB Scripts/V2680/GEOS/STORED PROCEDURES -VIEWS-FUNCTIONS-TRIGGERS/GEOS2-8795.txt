@@ -1,0 +1,26 @@
+DELIMITER $$
+drop procedure if exists geos.WMS_SaveWarehouseScheduleEvent_V2670$$
+CREATE PROCEDURE geos.`WMS_SaveWarehouseScheduleEvent_V2670`(
+    _IdWarehouse INT UNSIGNED, 
+    _CreatedBy SMALLINT UNSIGNED, 
+    _IdTypeEvent SMALLINT UNSIGNED,
+    _IdLogistic SMALLINT UNSIGNED, 
+    _StartDate DATETIME, 
+    _EndDate DATETIME, 
+    _Observations VARCHAR(1000)
+)
+begin	
+  /*
+    [nsatpute][23.09.2025][GEOS2-8795]
+    */
+    INSERT INTO warehouseschedule(
+        IdWarehouse, CreationDate, CreatedBy, IdTypeEvent, 
+        IdLogistic, StartDate, EndDate, Observations
+    )
+    VALUES (
+        _IdWarehouse, NOW(), _CreatedBy, _IdTypeEvent, 
+        NULLIF(_IdLogistic, 0),  
+        _StartDate, _EndDate, _Observations
+    );
+END$$
+DELIMITER ;

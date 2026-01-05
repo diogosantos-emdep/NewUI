@@ -1,0 +1,398 @@
+﻿<UserControl x:Class="Workbench.Views.HrmWindow"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Workbench.Views"
+             xmlns:ViewModels="clr-namespace:Workbench.ViewModels"
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"
+             xmlns:Helpers="clr-namespace:Emdep.Geos.Modules.Hrm.Views;assembly=Emdep.Geos.Modules.Hrm"
+             xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+             mc:Ignorable="d" 
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:dxdo="http://schemas.devexpress.com/winfx/2008/xaml/docking"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:dxn="http://schemas.devexpress.com/winfx/2008/xaml/navbar"
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+             xmlns:dxa="http://schemas.devexpress.com/winfx/2008/xaml/accordion"
+             xmlns:dxat="http://schemas.devexpress.com/winfx/2008/xaml/accordion/themekeys"
+             xmlns:HrmCommon="clr-namespace:Emdep.Geos.Modules.Hrm;assembly=Emdep.Geos.Modules.Hrm"
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+             d:DesignHeight="300" d:DesignWidth="300">
+    <UserControl.DataContext>
+        <ViewModels:HrmWindowViewModel></ViewModels:HrmWindowViewModel>
+    </UserControl.DataContext>
+
+    <Grid >
+        <!--<Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>-->
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+
+        <dxdo:DockLayoutManager Name="dockManager2">
+            <dxdo:LayoutGroup x:Name="rootMainGroup1" Orientation="Horizontal" Grid.Column="0" BorderThickness="0" >
+                <dxdo:LayoutPanel x:Name="documentGroup2" ShowCaption="False" ShowCloseButton="False">
+                    <Grid Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock FontSize="24" VerticalAlignment="Center" Margin="50,0,0,0">
+        <Run Text="{Binding ModuleShortName}" Foreground="#061C3D" FontWeight="SemiBold"/>
+        <Run Text="{Binding ModuleName}" Foreground="#42526B"/>
+                        </TextBlock>
+
+                        <dxwui:PageAdornerControl  Height="50"
+   Grid.Row="0" Grid.RowSpan="2" Grid.Column="0"
+   Visibility="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=TileBarVisibility}"
+   VerticalAlignment="Top" HorizontalAlignment="Left" Padding="-15,-18,0,0" >
+                            <dxwui:PageAdornerControl.HeaderTemplate>
+                                <DataTemplate>
+                                </DataTemplate>
+                            </dxwui:PageAdornerControl.HeaderTemplate>
+                        </dxwui:PageAdornerControl>
+
+                        <Button Grid.Row="0" Grid.Column="1" Content="X" Height="20" Command="{Binding HideTileBarButtonClickCommand}"                
+                                VerticalAlignment="Top" Background="Transparent" BorderBrush="Transparent" BorderThickness="0" Width="20">
+                            <Button.ToolTip>
+                                <TextBlock Text="{Binding ShowHideMenuButtonToolTip}"/>
+                            </Button.ToolTip>
+                            <Button.ContentTemplate>
+                                <DataTemplate>
+                                    <Image Height="20" Width="20" Margin="-10" Style="{DynamicResource TileBarButtonImageStyle}"
+                                           VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
+                                </DataTemplate>
+                            </Button.ContentTemplate>
+                        </Button>
+
+                        <Helpers:HrmMainView Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" />
+                    </Grid>
+                </dxdo:LayoutPanel>
+            </dxdo:LayoutGroup>
+            <dxdo:DockLayoutManager.AutoHideGroups>
+                <!--Create one AutoHideGroup on the right-->
+
+                <!--Shortcuts-->
+                <dxdo:AutoHideGroup DockType="Right" AutoHideSize="300,200">
+
+                    <dxdo:LayoutPanel Caption="{DynamicResource Shortcuts}" CaptionImage="{DynamicResource ShortcutImageImageSource}" ItemWidth="330">
+                        <!--[rdixit][16.01.2024][GEOS2-5074][5075][5076] Added Edit Permission-->
+                        <dxa:AccordionControl x:Name="accordionControl">
+                            <dxa:AccordionItem IsExpanded="True" >
+                                <dxa:AccordionItem.Header>
+                                    <!--Create-->
+                                    <StackPanel Orientation="Horizontal">
+                                        <Image  Height="25" Width="25" Style="{ DynamicResource AddShortcutImageStyle}" />
+                                        <TextBlock   Text="{DynamicResource Preference_Create}" Style="{StaticResource TextBlock14Style}" VerticalAlignment="Center" FontWeight="Bold" Margin="10,0,0,0"/>
+                                    </StackPanel>
+                                </dxa:AccordionItem.Header>
+                                <dxa:AccordionItem Uid="Attendance" IsEnabled="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsHRMPermissionEnabled}">
+                                    <dxa:AccordionItem.Header>
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="1"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="20"/>
+                                                <ColumnDefinition Width="30"/>
+                                                <ColumnDefinition Width="10"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="40"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <!--Attendance-->
+                                            <Image Grid.Row="1" Grid.Column="1" Height="25" Width="25" Style="{ DynamicResource AttendanceShortcutImageStyle}" />
+                                            <TextBlock Grid.Row="1" Grid.Column="3"  Text="{DynamicResource Attendance}" Style="{StaticResource TextBlock14Style}" VerticalAlignment="Center">
+                                            </TextBlock>
+                                            <TextBlock Grid.Row="1" Grid.Column="5" 
+                                                Text="{Binding Source={x:Static HrmCommon:HrmCommon.Instance}, Path=Attendance}" VerticalAlignment="Center" HorizontalAlignment="Right">
+                                            </TextBlock>
+                                        </Grid>
+                                    </dxa:AccordionItem.Header>
+                                </dxa:AccordionItem>
+
+                                <dxa:AccordionItem Uid="Employee" IsEnabled="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsHRMPermissionEnabled}">
+                                    <dxa:AccordionItem.Header>
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="1"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="20"/>
+                                                <ColumnDefinition Width="30"/>
+                                                <ColumnDefinition Width="10"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="40"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <!--Employee-->
+                                            <Image Grid.Row="1" Grid.Column="1" Height="25" Width="25" Style="{DynamicResource EmployeeShortcutImageStyle}" />
+                                            <TextBlock Grid.Row="1" Grid.Column="3"  Text="{DynamicResource HRMEmployee}" Style="{StaticResource TextBlock14Style}" VerticalAlignment="Center" />
+                                            <TextBlock Grid.Row="1" Grid.Column="5" 
+                                            Text="{Binding Source={x:Static HrmCommon:HrmCommon.Instance}, Path=Employee}" VerticalAlignment="Center" HorizontalAlignment="Right">
+                                            </TextBlock>
+                                        </Grid>
+                                    </dxa:AccordionItem.Header>
+                                </dxa:AccordionItem>
+
+                                <dxa:AccordionItem Uid="Holiday" IsEnabled="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsHRMPermissionEnabled}">
+                                    <dxa:AccordionItem.Header>
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="1"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="20"/>
+                                                <ColumnDefinition Width="30"/>
+                                                <ColumnDefinition Width="10"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="40"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <!--Holiday-->
+                                            <Image Grid.Row="1" Grid.Column="1" Height="25" Width="25" Style="{DynamicResource HolidayShortcutImageStyle}" />
+                                            <TextBlock Grid.Row="1" Grid.Column="3"  Text="{DynamicResource CompanyHoliday}" Style="{StaticResource TextBlock14Style}" VerticalAlignment="Center" />
+                                            <TextBlock Grid.Row="1" Grid.Column="5" 
+                                            Text="{Binding Source={x:Static HrmCommon:HrmCommon.Instance}, Path=Holiday}" VerticalAlignment="Center" HorizontalAlignment="Right">
+                                            </TextBlock>
+                                        </Grid>
+                                    </dxa:AccordionItem.Header>
+                                </dxa:AccordionItem>
+
+                                <dxa:AccordionItem Uid="JobDescriptions" IsEnabled="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsHRMPermissionEnabled}">
+                                    <dxa:AccordionItem.Header>
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="1"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="20"/>
+                                                <ColumnDefinition Width="30"/>
+                                                <ColumnDefinition Width="10"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="40"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <!--Job Descriptions-->
+                                            <Image Grid.Row="1" Grid.Column="1" Height="25" Width="25" Style="{DynamicResource JDShortcutImageStyle}" />
+                                            <TextBlock Grid.Row="1" Grid.Column="3"  Text="{DynamicResource Shortcut_JobDescriptions}" Style="{StaticResource TextBlock14Style}" VerticalAlignment="Center" />
+                                            <TextBlock Grid.Row="1" Grid.Column="5" 
+                                            Text="{Binding Source={x:Static HrmCommon:HrmCommon.Instance}, Path=JobDescriptions}" VerticalAlignment="Center" HorizontalAlignment="Right">
+                                            </TextBlock>
+                                        </Grid>
+                                    </dxa:AccordionItem.Header>
+                                </dxa:AccordionItem>
+
+                                <dxa:AccordionItem Uid="Leave" IsEnabled="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsHRMPermissionEnabled}">
+                                    <dxa:AccordionItem.Header>
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="1"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="20"/>
+                                                <ColumnDefinition Width="30"/>
+                                                <ColumnDefinition Width="10"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="40"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <!--Leave-->
+                                            <Image Grid.Row="1" Grid.Column="1" Height="25" Width="25" Style="{DynamicResource LeaveShortcutImageStyle}" />
+                                            <TextBlock Grid.Row="1" Grid.Column="3"  Text="{DynamicResource Shortcut_Leaves}" Style="{StaticResource TextBlock14Style}" VerticalAlignment="Center" />
+                                            <TextBlock Grid.Row="1" Grid.Column="5" 
+                                            Text="{Binding Source={x:Static HrmCommon:HrmCommon.Instance}, Path=Leave}" VerticalAlignment="Center" HorizontalAlignment="Right">
+                                            </TextBlock>
+                                        </Grid>
+                                    </dxa:AccordionItem.Header>
+                                </dxa:AccordionItem>
+                            </dxa:AccordionItem>
+                            <dxa:AccordionItem IsExpanded="True" >
+                                <dxa:AccordionItem.Header>
+                                    <!--Export-->
+                                    <StackPanel Orientation="Horizontal">
+                                        <Image  Height="25" Width="25" Style="{ DynamicResource DocumentExportButtonImageStyle}" />
+                                        <TextBlock Text="{DynamicResource Export}" Style="{StaticResource TextBlock14Style}" VerticalAlignment="Center" FontWeight="Bold" Margin="10,0,0,0"/>
+                                    </StackPanel>
+                                </dxa:AccordionItem.Header>
+                                <dxa:AccordionItem Uid="AttendanceList">
+                                    <!--[GEOS2-6499][14.11.2024][rdixit]-->
+                                    <dxa:AccordionItem.Style>
+                                        <Style TargetType="dxa:AccordionItem">
+                                            <Setter Property="IsEnabled" Value="True"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Value="True" Binding="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsHRMManageEmployeeContactsPermission}">
+                                                    <Setter Property="IsEnabled" Value="False"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </dxa:AccordionItem.Style>
+                                    <dxa:AccordionItem.Header>
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="1"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="20"/>
+                                                <ColumnDefinition Width="30"/>
+                                                <ColumnDefinition Width="10"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="40"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <!--AttendanceList-->
+                                            <Image Grid.Row="1" Grid.Column="1" Height="25" Width="25" Style="{DynamicResource AttendanceShortcutImageStyle}" />
+                                            <TextBlock Grid.Row="1" Grid.Column="3"  Text="{DynamicResource AttendanceList}" Style="{StaticResource TextBlock14Style}" VerticalAlignment="Center" />
+                                            <TextBlock Grid.Row="1" Grid.Column="5" 
+                                            Text="{Binding Source={x:Static HrmCommon:HrmCommon.Instance}, Path=AttendanceList}" VerticalAlignment="Center" HorizontalAlignment="Right">
+                                            </TextBlock>
+                                        </Grid>
+                                    </dxa:AccordionItem.Header>
+                                </dxa:AccordionItem>
+
+                                <dxa:AccordionItem Uid="OrganizationChart">
+                                    <!--[GEOS2-6499][14.11.2024][rdixit]-->
+                                    <dxa:AccordionItem.Style>
+                                        <Style TargetType="dxa:AccordionItem">
+                                            <Setter Property="IsEnabled" Value="True"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Value="True" Binding="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsHRMManageEmployeeContactsPermission}">
+                                                    <Setter Property="IsEnabled" Value="False"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </dxa:AccordionItem.Style>
+                                    <dxa:AccordionItem.Header>
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="1"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="20"/>
+                                                <ColumnDefinition Width="30"/>
+                                                <ColumnDefinition Width="10"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="40"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <!--OrganizationChart-->
+                                            <Image Grid.Row="1" Grid.Column="1" Height="25" Width="25" Style="{DynamicResource OrgChartShortcutImageStyle}" />
+                                            <TextBlock Grid.Row="1" Grid.Column="3"  Text="{DynamicResource OrgChart}" Style="{StaticResource TextBlock14Style}" VerticalAlignment="Center" />
+                                            <TextBlock Grid.Row="1" Grid.Column="5" 
+                                            Text="{Binding Source={x:Static HrmCommon:HrmCommon.Instance}, Path=OrganizationChart}" VerticalAlignment="Center" HorizontalAlignment="Right">
+                                            </TextBlock>
+                                        </Grid>
+                                    </dxa:AccordionItem.Header>
+                                </dxa:AccordionItem>
+
+                            </dxa:AccordionItem>
+
+                            <dxa:AccordionItem IsExpanded="True" >
+                                <dxa:AccordionItem.Header>
+                                    <!--Import-->
+                                    <StackPanel Orientation="Horizontal">
+                                        <Image  Height="25" Width="25" Style="{ DynamicResource ImportButtonImageStyle}" />
+                                        <TextBlock Text="{DynamicResource ButtonImport}" Style="{StaticResource TextBlock14Style}" VerticalAlignment="Center" FontWeight="Bold" Margin="10,0,0,0"/>
+                                    </StackPanel>
+                                </dxa:AccordionItem.Header>
+                                <dxa:AccordionItem Uid="ImportAttendance" IsEnabled="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsHRMPermissionEnabled}">
+                                    <dxa:AccordionItem.Header>
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="1"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="20"/>
+                                                <ColumnDefinition Width="30"/>
+                                                <ColumnDefinition Width="10"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="40"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <!--ImportAttendance-->
+                                            <Image Grid.Row="1" Grid.Column="1" Height="25" Width="25" Style="{ DynamicResource AttendanceShortcutImageStyle}" />
+                                            <TextBlock Grid.Row="1" Grid.Column="3"  Text="{DynamicResource Attendance}" Style="{StaticResource TextBlock14Style}" VerticalAlignment="Center">
+                                            </TextBlock>
+                                            <TextBlock Grid.Row="1" Grid.Column="5" 
+                                                Text="{Binding Source={x:Static HrmCommon:HrmCommon.Instance}, Path=ImportAttendance}" VerticalAlignment="Center" HorizontalAlignment="Right">
+                                            </TextBlock>
+                                        </Grid>
+                                    </dxa:AccordionItem.Header>
+                                </dxa:AccordionItem>
+                            </dxa:AccordionItem>
+
+                            <dxa:AccordionItem IsExpanded="True" >
+                                <dxa:AccordionItem.Header>
+                                
+                                <StackPanel Orientation="Horizontal">
+                                        <Image  Height="25" Width="25" Style="{DynamicResource SearchShortcutImageStyle}" />
+                                        <TextBlock Text="{DynamicResource HRMSearch}" Style="{StaticResource TextBlock14Style}" VerticalAlignment="Center" FontWeight="Bold" Margin="10,0,0,0"/>
+                                </StackPanel>
+                                </dxa:AccordionItem.Header>
+                                
+                                <dxa:AccordionItem Uid="SearchEmployee">
+                                    <dxa:AccordionItem.Header>
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="1"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="20"/>
+                                                <ColumnDefinition Width="30"/>
+                                                <ColumnDefinition Width="10"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="40"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            
+                                            <Image Grid.Row="1" Grid.Column="1" Height="25" Width="25" Style="{ DynamicResource EmployeeShortcutImageStyle}" />
+                                            <TextBlock Grid.Row="1" Grid.Column="3"  Text="{DynamicResource HRMEmployee}" Style="{StaticResource TextBlock14Style}" VerticalAlignment="Center">
+                                            </TextBlock>
+                                            <TextBlock Grid.Row="1" Grid.Column="5" 
+                                                Text="{Binding Source={x:Static HrmCommon:HrmCommon.Instance}, Path=SearchEmployee}" VerticalAlignment="Center" HorizontalAlignment="Right">
+                                            </TextBlock>
+                                        </Grid>
+                                    </dxa:AccordionItem.Header>
+                                </dxa:AccordionItem>
+                            </dxa:AccordionItem>
+                            <dxmvvm:Interaction.Behaviors>
+                                <dxmvvm:EventToCommand EventName="MouseDoubleClick" Command="{Binding Option_ClickCommand}" 
+                                                       CommandParameter="{Binding ElementName=accordionControl}"/>
+                            </dxmvvm:Interaction.Behaviors>
+                        </dxa:AccordionControl>
+                    </dxdo:LayoutPanel>
+                </dxdo:AutoHideGroup>
+            </dxdo:DockLayoutManager.AutoHideGroups>
+
+        </dxdo:DockLayoutManager>
+    </Grid>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="KeyDown">
+            <behaviors:InvokeDelegateCommandAction Command="{Binding CommandTextInput}" CommandParameter="{Binding Path=InvokeParameter, RelativeSource={RelativeSource Self}}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+</UserControl>

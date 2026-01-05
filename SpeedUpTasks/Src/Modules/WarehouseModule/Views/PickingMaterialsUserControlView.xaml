@@ -1,0 +1,805 @@
+﻿<UserControl x:Class="Emdep.Geos.Modules.Warehouse.Views.PickingMaterialsUserControlView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol" 
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:dxm="http://schemas.devexpress.com/winfx/2008/xaml/map"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:ViewModels="clr-namespace:Emdep.Geos.Modules.Warehouse.ViewModels"
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.Warehouse.Views"
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+             xmlns:dxi="http://schemas.devexpress.com/winfx/2008/xaml/core/internal"
+             xmlns:dxgt="http://schemas.devexpress.com/winfx/2008/xaml/grid/themekeys"
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+             xmlns:UIConverter="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+             xmlns:dxet="http://schemas.devexpress.com/winfx/2008/xaml/editors/themekeys"
+             xmlns:dxeh="http://schemas.devexpress.com/winfx/2008/xaml/editors/internal"
+             xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+             xmlns:UIValidation="clr-namespace:Emdep.Geos.UI.Validations;assembly=Emdep.Geos.UI.Validations"
+             xmlns:sysglb="clr-namespace:System.Globalization;assembly=mscorlib"
+             xmlns:system="clr-namespace:System;assembly=mscorlib"
+             xmlns:dxga="http://schemas.devexpress.com/winfx/2008/xaml/gauges" 
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             Style="{DynamicResource UserControlStyle}" 
+             Focusable="True" IsTabStop="True"
+             HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+             HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+             UIHelper:FocusExtension.IsFocused="{Binding FocusUserControl}">
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="MouseDown">
+            <behaviors:InvokeDelegateCommandAction Command="{Binding CommandKeyDown}" CommandParameter="{Binding Path=InvokeParameter, RelativeSource={RelativeSource Self}}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+    <UserControl.Resources>
+        <UIConverter:InvertedVisibilityConverter x:Key="invertedVisibilityConverter"/>
+        <UIConverter:DetailButtonVisibilityConverter x:Key="detailButtonVisibilityConverter"/>
+
+        <Style TargetType="dxlc:GroupBox" >
+            <Setter Property="FontSize" Value="24"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Padding" Value="0"/>
+        </Style>
+
+        <system:Double x:Key="FontSize15">15</system:Double>
+        <system:Double x:Key="FontSize18">18</system:Double>
+        <system:Double x:Key="FontSize19">19</system:Double>
+        <system:Double x:Key="FontSize24">24</system:Double>
+        <system:Double x:Key="FontSize33">33</system:Double>
+        <system:Double x:Key="FontSize35">35</system:Double>
+
+        <DataTemplate x:Key="rowIndicatorContentTemplate">
+            <Border x:Name="errorIndicatorBorder" Background="Transparent">
+                <ContentControl Name="iconPresenter">
+                    <Border />
+                </ContentControl>
+            </Border>
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding Path=IndicatorState}" Value="Focused">
+                    <Setter Property="ContentTemplate" Value="{dxi:ThemeResource {dxgt:RowIndicatorThemeKey ResourceKey=FocusedIconTemplate}}" TargetName="iconPresenter" />
+                    <Setter Property="ContentTemplate" TargetName="iconPresenter">
+                        <Setter.Value>
+                            <DataTemplate>
+                                <Image Source="{DynamicResource IndicatorImageStyle}" />
+                            </DataTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </DataTrigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
+
+        <ControlTemplate x:Key="{dxet:TrackBarEditThemeKey ResourceKey=PanelLeftSideTemplate, IsThemeIndependent=True}">
+            <Border Background="{Binding DataContext.TrackBarFgColor,UpdateSourceTrigger=PropertyChanged}" />
+        </ControlTemplate>
+
+        <ControlTemplate x:Key="{dxet:TrackBarEditThemeKey ResourceKey=PanelRightSideTemplate, IsThemeIndependent=True}">
+            <Border Background="Gray" />
+        </ControlTemplate>
+
+        <Style x:Key="{dxet:TrackBarEditThemeKey ResourceKey=PanelRightSideStyle}" TargetType="ContentControl">
+            <Setter Property="IsTabStop" Value="false" />
+            <Setter Property="Template" Value="{DynamicResource {dxet:TrackBarEditThemeKey ResourceKey=PanelRightSideTemplate}}" />
+            <Setter Property="Focusable" Value="false" />
+            <Setter Property="OverridesDefaultStyle" Value="True" />
+        </Style>
+
+        <Style x:Key="{dxet:TrackBarEditThemeKey ResourceKey=PanelLeftSideStyle}" TargetType="ContentControl">
+            <Setter Property="IsTabStop" Value="false" />
+            <Setter Property="Template" Value="{DynamicResource {dxet:TrackBarEditThemeKey ResourceKey=PanelLeftSideTemplate}}" />
+            <Setter Property="UseLayoutRounding" Value="{Binding Path=(dxe:BaseEdit.OwnerEdit).UseLayoutRounding}" />
+            <Setter Property="Focusable" Value="false" />
+            <Setter Property="OverridesDefaultStyle" Value="True" />
+        </Style>
+
+        <dxe:GridLengthConverter x:Key="GridLengthConverter" />
+
+        <ControlTemplate x:Key="{dxet:TrackBarEditThemeKey ResourceKey=PanelHorizontalTemplate,IsThemeIndependent=True}" TargetType="dxe:RangeEditBasePanel">
+            <Grid x:Name="root">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition x:Name="leftButton" Width="Auto" />
+                    <ColumnDefinition x:Name="leftColumn" Width="{Binding Path=(dxe:RangeEditBaseInfo.LayoutInfo).LeftSidePosition, Converter={StaticResource GridLengthConverter}}" />
+                    <ColumnDefinition x:Name="centerColumn" Width="Auto" />
+                    <ColumnDefinition x:Name="rightColumn" Width="{Binding Path=(dxe:RangeEditBaseInfo.LayoutInfo).RightSidePosition, Converter={StaticResource GridLengthConverter}}" />
+                    <ColumnDefinition x:Name="rightButton" Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <ContentControl x:Name="back" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Height="12"
+                                Style="{DynamicResource {dxet:TrackBarEditThemeKey ResourceKey=HorizontalBackgroundStyle}}" 
+                                dxeh:ControlHelper.ShowFocusedState="{Binding Path=(dxe:BaseEdit.OwnerEdit).IsKeyboardFocusWithin}">
+                </ContentControl>
+
+                <UIHelper:CustomTickBar x:Name="PART_BottomTick"
+                                        Grid.Row="0"
+                                        Grid.Column="1"
+                                        Grid.ColumnSpan="3"
+                                        Placement="Top"
+                                        Style="{DynamicResource {dxet:TrackBarEditThemeKey ResourceKey=TickBarStyle,IsThemeIndependent=True}}"/>
+
+                <RepeatButton x:Name="left" Grid.Column="1" Grid.Row="1" Height="5"
+                              Style="{DynamicResource {dxet:TrackBarEditThemeKey ResourceKey=PanelLeftSideStyle}}" 
+                              Command="{Binding Path=(dxe:BaseEdit.OwnerEdit).DecrementLargeCommand}" />
+
+                <Thumb x:Name="PART_Thumb" Grid.Column="2" Grid.Row="1" >
+                    <Thumb.Style>
+                        <Style TargetType="Thumb">
+                            <Setter Property="SnapsToDevicePixels" Value="True" />
+                            <Setter Property="OverridesDefaultStyle" Value="True" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Thumb">
+                                        <Ellipse Height="16" Width="16">
+                                            <Ellipse.Fill>
+                                                <SolidColorBrush Color="{Binding DataContext.TrackBarFgColor, UpdateSourceTrigger=PropertyChanged}"/>
+                                            </Ellipse.Fill>
+                                        </Ellipse>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </Thumb.Style>
+                </Thumb>
+
+                <RepeatButton x:Name="right" Grid.Column="3" Grid.Row="1" Height="5"
+                              Style="{DynamicResource {dxet:TrackBarEditThemeKey ResourceKey=PanelRightSideStyle}}" 
+                              Command="{Binding Path=(dxe:BaseEdit.OwnerEdit).IncrementLargeCommand}" />
+            </Grid>
+        </ControlTemplate>
+
+        <Style TargetType="dxg:HeaderContentControl" x:Key="MyHeaderStyle">
+            <Setter Property="TextBlock.FontSize" Value="28"/>
+        </Style>
+
+        <!--<Style TargetType="dxe:ToggleSwitch">
+            <Setter Property="ToggleSwitchWidth" Value="{Binding RelativeSource={RelativeSource Self}, Path=Parent.ActualWidth}"/>
+            <Setter Property="ToggleSwitchHeight" Value="{Binding RelativeSource={RelativeSource Self}, Path=Parent.ActualHeight}"/>
+            <Setter Property="ContentPlacement" Value="Inside"/>
+            <Setter Property="CheckedStateContent" Value="ON"/>
+            <Setter Property="UncheckedStateContent" Value="OFF"/>
+        </Style>-->
+
+        <ControlTemplate x:Key="DigitalGaugeControlTemplate">
+            <Grid>
+                <Rectangle>
+                    <Rectangle.Fill>
+                        <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0" MappingMode="RelativeToBoundingBox">
+                            <GradientStop Color="Transparent" Offset="1"/>
+                            <GradientStop Color="Transparent" Offset="0"/>
+                        </LinearGradientBrush>
+                    </Rectangle.Fill>
+                </Rectangle>
+
+            </Grid>
+        </ControlTemplate>
+        
+    </UserControl.Resources>
+    <!--<ScrollViewer ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto">-->
+    <Grid ShowGridLines="False" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Focusable="True" UIHelper:FocusExtension.IsFocused="{Binding FocusUserControl}">
+        <Grid.RowDefinitions>
+            <!--<RowDefinition Height="5*"/>-->
+            <RowDefinition Height="6*"/>
+            <RowDefinition>
+                <RowDefinition.Style>
+                    <Style TargetType="RowDefinition">
+                        <Setter Property="RowDefinition.Height" Value="0" />
+                        <Style.Triggers>
+                            <DataTrigger Value="Visible" Binding="{Binding ReadMeEntriesTitleVisibility,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
+                                <Setter Property="RowDefinition.Height" Value="6*" />
+                            </DataTrigger>
+                            <DataTrigger Value="Collapsed" Binding="{Binding ReadMeEntriesTitleVisibility,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
+                                <Setter Property="RowDefinition.Height" Value="0" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </RowDefinition.Style>
+            </RowDefinition>
+            <RowDefinition Height="3"/>
+            <RowDefinition Height="13*"/>
+            <RowDefinition Height="3"/>
+            <RowDefinition Height="69*"/>
+            <RowDefinition Height="6*"/>
+        </Grid.RowDefinitions>
+
+        <dxe:TrackBarEdit Grid.Row="0" 
+                          Minimum="0" Maximum="2" 
+                          TickFrequency="1" IsReadOnly="True"
+                          SmallStep="1" LargeStep="1" Cursor="Arrow" 
+                          EditValue="{Binding TrackBarEditvalue,UpdateSourceTrigger=PropertyChanged}"  
+                          HorizontalAlignment="Stretch" />
+
+        <dxga:DigitalGaugeControl Grid.Row="1" Name="digitalGaugeControl" Visibility="{Binding ReadMeEntriesTitleVisibility,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                      VerticalAlignment="Stretch" HorizontalAlignment="Stretch" SymbolCount="{Binding SymbolCount,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                      Text="{Binding ReadMeEntriesTitle,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" EnableAnimation="True" >
+            <dxga:DigitalGaugeControl.Layers>
+                <dxga:DigitalGaugeLayer>
+                    <dxga:DigitalGaugeLayer.Presentation>
+                        <dxga:CustomDigitalGaugeLayerPresentation GaugeLayerTemplate="{StaticResource DigitalGaugeControlTemplate}"/>
+                    </dxga:DigitalGaugeLayer.Presentation>
+                </dxga:DigitalGaugeLayer>
+            </dxga:DigitalGaugeControl.Layers>
+            <dxga:DigitalGaugeControl.SymbolView>
+                <dxga:MatrixView5x8 Height="Auto" Width="Auto" Animation="{Binding MatrixView5x8Animation}">
+                    <dxga:MatrixView5x8.Presentation>
+                        <dxga:DefaultMatrix5x8Presentation FillActive="{DynamicResource WarehouseInitialLocationBackground}"/>
+                    </dxga:MatrixView5x8.Presentation>
+                    <!--<dxga:MatrixView5x8.Animation>
+                        <dxga:BlinkingAnimation></dxga:BlinkingAnimation>
+                    </dxga:MatrixView5x8.Animation>-->
+                </dxga:MatrixView5x8>
+            </dxga:DigitalGaugeControl.SymbolView>
+            <dxga:DigitalGaugeControl.Model>
+                <dxga:DigitalDefaultModel InnerPadding="0"/>
+            </dxga:DigitalGaugeControl.Model>
+        </dxga:DigitalGaugeControl>
+
+        <Grid Grid.Row="3" HorizontalAlignment="Stretch">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="3"/>
+                <ColumnDefinition Width="2*"/>
+
+                <ColumnDefinition>
+                    <ColumnDefinition.Style>
+                        <Style TargetType="{x:Type ColumnDefinition}">
+                            <Setter Property="Width" Value="3"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsProducerVisible}" Value="Collapsed">
+                                    <Setter Property="Width" Value="0" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ColumnDefinition.Style>
+                </ColumnDefinition>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="3"/>
+                <ColumnDefinition Width="0.5*"></ColumnDefinition>
+                <ColumnDefinition Width="3"/>
+                <ColumnDefinition Width="0.6*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+
+            <dxlc:LayoutGroup Header="{DynamicResource PickingMaterialWorkOrder}" 
+                              HorizontalAlignment="Stretch"  VerticalAlignment="Stretch"
+                              View="GroupBox"
+                              IsCollapsible="False" IsCollapsed="False" Grid.Row="0" Grid.Column="0">
+                <Viewbox>
+                    <TextBlock Grid.Row="0"
+                           Text="{Binding PickingOt.Code}" 
+                           TextWrapping="Wrap" TextAlignment="Center" 
+                           VerticalAlignment="Center" HorizontalAlignment="Stretch" />
+                </Viewbox>
+            </dxlc:LayoutGroup>
+
+            <!--Customer-->
+            <dxlc:LayoutGroup Grid.Row="0" Grid.Column="2"
+                              Header="{DynamicResource PickingMaterialCustomer}" 
+                              HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+                              View="GroupBox"
+                              IsCollapsible="False" IsCollapsed="False">
+                <Viewbox>
+                    <TextBlock Grid.Row="0"
+                           Text="{Binding PickingOt.Quotation.Site.Name}" 
+                           TextAlignment="Center" TextWrapping="Wrap"
+                           VerticalAlignment="Center" HorizontalAlignment="Stretch" />
+                </Viewbox>
+            </dxlc:LayoutGroup>
+
+            <!--CountryGroup-->
+            <dxlc:LayoutGroup Grid.Row="0" Grid.Column="4"
+                              Header="{DynamicResource PickingMaterialProducer}" 
+                              HorizontalAlignment="Stretch" 
+                              Visibility="{Binding IsProducerVisible}"
+                              View="GroupBox"
+                              VerticalAlignment="Stretch"
+                              IsCollapsible="False" IsCollapsed="False">
+                <Grid Background="{Binding PickingOt.CountryGroup.HtmlColor}" >
+                    <Viewbox>
+                        <TextBlock TextAlignment="Center" TextWrapping="Wrap"
+                               Text="{Binding PickingOt.CountryGroup.Name}"
+                               VerticalAlignment="Center"
+                               Background="{Binding PickingOt.CountryGroup.HtmlColor}" 
+                               Foreground="{Binding PickingOt.CountryGroup.HtmlColor, Converter={UIConverter:ForegroundColorConverter}}"/>
+                    </Viewbox>
+                </Grid>
+            </dxlc:LayoutGroup>
+
+            <!--Status-->
+            <dxlc:LayoutGroup Grid.Row="0" Grid.Column="6"
+                              Header="{DynamicResource PickingMaterialStatus}" 
+                              HorizontalAlignment="Stretch"  
+                              VerticalAlignment="Stretch" 
+                              View="GroupBox"
+                              Padding="5"
+                              IsCollapsible="False" 
+                              IsCollapsed="False">
+
+                <dxe:ProgressBarEdit ShowBorder="False" 
+                                     Minimum="0" Maximum="100"
+                                     EditValue="{Binding PickingOt.Status}"
+                                     HorizontalContentAlignment="Center" 
+                                     VerticalAlignment="Stretch" 
+                                     HorizontalAlignment="Stretch" 
+                                     FontSize="{DXBinding Expr='@Self.ActualHeight*0.8'}" 
+                                     ContentDisplayMode="Value" 
+                                     DisplayFormatString="{}{0}%"/>
+            </dxlc:LayoutGroup>
+
+            <!--Time-->
+            <dxlc:LayoutGroup Grid.Row="0" Grid.Column="8"
+                              Header="{DynamicResource WorkTime}" 
+                              HorizontalAlignment="Stretch"  
+                              VerticalAlignment="Stretch" 
+                              View="GroupBox"
+                              Padding="5"
+                              IsCollapsible="False" 
+                              IsCollapsed="False">
+                <dxga:DigitalGaugeControl Grid.Row="1" Name="gaugeControl"
+                                      VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                                      Text="00:00" EnableAnimation="True">
+                    <dxga:DigitalGaugeControl.Layers>
+                        <dxga:DigitalGaugeLayer>
+                            <dxga:DigitalGaugeLayer.Presentation>
+                                <dxga:CustomDigitalGaugeLayerPresentation GaugeLayerTemplate="{StaticResource DigitalGaugeControlTemplate}"/>
+                            </dxga:DigitalGaugeLayer.Presentation>
+                        </dxga:DigitalGaugeLayer>
+                    </dxga:DigitalGaugeControl.Layers>
+                    <dxga:DigitalGaugeControl.SymbolView>
+                        <dxga:SevenSegmentsView Height="Auto" Width="Auto">
+                            <dxga:SevenSegmentsView.Animation>
+                                <dxga:BlinkingAnimation RefreshTime="00:000:00.5" SymbolsStates="0 0 1 0 0"/>
+                            </dxga:SevenSegmentsView.Animation>
+                            <dxga:SevenSegmentsView.Presentation>
+                                <dxga:DefaultSevenSegmentsPresentation FillActive="{DynamicResource WarehouseInitialLocationBackground}"/>
+                            </dxga:SevenSegmentsView.Presentation>
+                        </dxga:SevenSegmentsView>
+                    </dxga:DigitalGaugeControl.SymbolView>
+                    <dxga:DigitalGaugeControl.Model>
+                        <dxga:DigitalDefaultModel InnerPadding="0"/>
+                    </dxga:DigitalGaugeControl.Model>
+                    <dxmvvm:Interaction.Behaviors>
+                        <dxmvvm:EventToCommand EventName="Loaded" Command="{Binding DigitalGaugeControlLoadedCommand}"
+                                                   CommandParameter="{Binding ElementName=gaugeControl}" />
+                    </dxmvvm:Interaction.Behaviors>
+                </dxga:DigitalGaugeControl>
+            </dxlc:LayoutGroup>
+        </Grid>
+
+        <Grid Grid.Row="5" HorizontalAlignment="Stretch">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="35*"/>
+                <RowDefinition Height="65*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="65*"/>
+                <ColumnDefinition Width="3"/>
+                <ColumnDefinition Width="35*"/>
+            </Grid.ColumnDefinitions>
+
+            <dxlc:LayoutGroup Grid.Row="0" View="GroupBox" 
+                              HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                              IsCollapsible="False" IsCollapsed="False">
+                <dxlc:LayoutGroup.HeaderTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="3"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="{DynamicResource PickingMaterialPoint}" FontWeight="Bold" VerticalAlignment="Center"/>
+
+                            <Image Grid.Column="1" x:Name="errorImage" Height="24" Width="24" 
+                                    Source="/Emdep.Geos.Modules.Warehouse;component/Assets/Images/error.png" 
+                                    Visibility="{Binding DataContext.IsWrongLocationErrorVisible, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" 
+                                    DockPanel.Dock="Left"/>
+
+                            <TextBlock Grid.Column="3" Name="errorText"
+                                        Text="{Binding DataContext.WrongLocation, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" 
+                                        HorizontalAlignment="Right" VerticalAlignment="Center" FontWeight="Bold" Foreground="#FF0000" DockPanel.Dock="Right" />
+                        </Grid>
+                    </DataTemplate>
+                </dxlc:LayoutGroup.HeaderTemplate>
+
+                <Grid Background="{Binding BgColorLocation, UpdateSourceTrigger=PropertyChanged}" >
+                    <Viewbox>
+                        <TextBlock 
+                               VerticalAlignment="Center"
+                               Text="{Binding LocationName,UpdateSourceTrigger=PropertyChanged}"
+                               FontWeight="Bold"
+                               IsEnabled="False"
+                               Focusable="False"
+                               Foreground="{Binding FgColorLocation, UpdateSourceTrigger=PropertyChanged}"
+                               Background="{Binding BgColorLocation, UpdateSourceTrigger=PropertyChanged}">
+                        </TextBlock>
+                    </Viewbox>
+                </Grid>
+            </dxlc:LayoutGroup>
+
+            <dxlc:LayoutGroup Grid.Row="2" View="GroupBox" 
+                              HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+                              IsCollapsible="False" IsCollapsed="False">
+                <dxlc:LayoutGroup.HeaderTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="{DynamicResource PickingMaterialItem}" FontWeight="Bold" VerticalAlignment="Center"/>
+                            <DockPanel Grid.Column="1">
+                                <Image x:Name="errorImage" Height="24" Width="24" Source="/Emdep.Geos.Modules.Warehouse;component/Assets/Images/error.png" Visibility="{Binding DataContext.IsWrongItemErrorVisible,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" DockPanel.Dock="Left"/>
+                                <TextBlock Name="errorText" Text="{Binding DataContext.WrongItem, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" HorizontalAlignment="Right" VerticalAlignment="Center" FontWeight="Bold"  Foreground="#FF0000" DockPanel.Dock="Right" />
+                            </DockPanel>
+                        </Grid>
+                    </DataTemplate>
+                </dxlc:LayoutGroup.HeaderTemplate>
+
+                <UIHelper:GridControlWithoutClickEx AllowLiveDataShaping ="True" 
+                                                    ItemsSource="{Binding SelectedLocationList, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                                    CurrentItem="{Binding SelectedpickingMaterial, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                                                    HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+                                                    SelectionMode="None" MaxHeight="1000" 
+                                                    MinWidth="300"
+                                                    Width="Auto">
+                    <!--NumItem-->
+                    <dxg:GridColumn Header="{DynamicResource PickingMaterialItemColumn}" FieldName="RevisionItem.NumItem" Width="15*" AllowColumnFiltering ="False" AllowSorting="False">
+                        <dxg:GridColumn.EditSettings>
+                            <dxe:TextEditSettings HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+                        </dxg:GridColumn.EditSettings>
+                    </dxg:GridColumn>
+
+                    <!--Reference-->
+                    <dxg:GridColumn Header="{DynamicResource PickingMaterialReferenceColumn}" FieldName="Reference" Width="45*" AllowColumnFiltering ="False" AllowSorting="False">
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock VerticalAlignment="Center" Margin="10 0 0 0">
+                                    <!--Comment Info Image-->
+                                 <StackPanel Orientation="Horizontal">
+                                     <Grid>
+                                         <Image x:Name="image" VerticalAlignment="Center" Height="30" Width="30">
+                                                            
+                                          <Image.Style>
+                                                <Style TargetType="{x:Type Image}">
+                                                    <Setter Property="Source" Value="{DynamicResource InfoImageStyle}"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Path=RowData.Row.ArticleComment}" Value="{x:Null}">
+                                                            <Setter Property="Source" Value="{x:Null}"/>
+                                                        </DataTrigger>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                                <Setter Property="Cursor" Value="Hand"/>
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Image.Style> 
+                                            <dxmvvm:Interaction.Behaviors>
+                                                <dxmvvm:EventToCommand Command="{Binding DataContext.ImageClickCommand,RelativeSource={RelativeSource AncestorType=dxg:GridControl}}"
+                                                                        EventName="MouseDown" CommandParameter="{Binding RowData.Row}">                                                                                                                                                 
+                                                </dxmvvm:EventToCommand>                                                        
+                                            </dxmvvm:Interaction.Behaviors>
+                                            </Image>  
+                                            <dxe:FlyoutControl IsOpen="{Binding RowData.Row.ShowComment,Mode=TwoWay}" 
+                                                               PlacementTarget="{Binding ElementName=image}"
+                                                               Background="{Binding DataContext.InfoTooltipBackColor, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=dxg:GridControl}}" >
+                                                <dxe:FlyoutControl.Settings>
+                                                    <dxe:FlyoutSettings
+                                                        IndicatorHorizontalAlignment="Center"
+                                                        Placement="Top"
+                                                        ShowIndicator="True" 
+                                                        />
+                                                </dxe:FlyoutControl.Settings>
+                                                <TextBlock Text="{Binding RowData.Row.ArticleComment}" TextWrapping="WrapWithOverflow" Style="{DynamicResource TextBlock25Style}" 
+                                                                                                                                      Foreground="Black" FontWeight="Bold"/>
+                                            </dxe:FlyoutControl>
+                                        </Grid>
+                                         </StackPanel>
+                                    
+                                        <Hyperlink x:Name="hyperlink"
+                                                   TargetName="_blank"
+                                                   Command="{Binding DataContext.HyperlinkClickCommand,RelativeSource={RelativeSource AncestorType=dxg:GridControl}}"
+                                                   CommandParameter="{Binding RowData.Row}" Style="{DynamicResource hyperlinkGridStyle}" BaselineAlignment="Center">
+                                            <InlineUIContainer>
+                                                <TextBlock Text="{Binding Data.Reference}" Style="{DynamicResource HyperlinkTextBlock}" TextDecorations="Underline"/>
+                                            </InlineUIContainer>
+                                        </Hyperlink>
+                                     </TextBlock>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+
+                    <!--Date/DN-->
+                    <dxg:GridColumn Header="{DynamicResource PickingMaterialDateDNColumn}" 
+                                    Width="25*" 
+                                    AllowColumnFiltering ="False" 
+                                    AllowSorting="False">
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Grid.Row="0" 
+                                               Text="{Binding RowData.Row.UploadedIn, StringFormat=d, ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}"
+                                               HorizontalAlignment="Left"/>
+                                    <TextBlock Grid.Row="1" Text="{Binding RowData.Row.WarehouseDeliveryNote.Code}"
+                                               Margin="0 0 3 0"
+                                               HorizontalAlignment="Right" FontSize="{StaticResource FontSize18}"/>
+                                </Grid>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+
+                    <!--Quantity-->
+                    <dxg:GridColumn Header="{DynamicResource PickingMaterialQtyColumn}" 
+                                    Width="15*" 
+                                    AllowColumnFiltering ="False" AllowSorting="False">
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="3"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Grid.Row="0" Text="{Binding RowData.Row.DownloadQuantity}" HorizontalAlignment="Right"/>
+                                    <TextBlock Grid.Row="1" Text="{Binding RowData.Row.RevisionItem.Quantity}" HorizontalAlignment="Right" 
+                                               FontSize="{StaticResource FontSize18}"/>
+                                </Grid>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+
+                    <UIHelper:GridControlWithoutClickEx.View>
+                        <dxg:TableView x:Name="ItemsTableView"
+                                        ShowGroupPanel="False"
+                                        NavigationStyle="Row"
+                                        ShowColumnHeaders="True"
+                                        ShowIndicator="False" 
+                                        AutoWidth="True" 
+                                        RowMinHeight="60" 
+                                        FontSize="{StaticResource FontSize33}" 
+                                        IsColumnMenuEnabled="False"
+                                        SearchColumns="False"
+                                        HorizontalScrollbarVisibility="Auto"
+                                        VerticalScrollbarVisibility="Auto"
+                                        RowIndicatorContentTemplate="{StaticResource rowIndicatorContentTemplate}"
+                                        IndicatorWidth="60" IsEnabled="True"
+                                        FocusedRow="{Binding SelectedpickingMaterial, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                                        IsDetailButtonVisibleBinding="{Binding Row.ScanSerialNumbers, Converter={StaticResource detailButtonVisibilityConverter}}">
+                            <dxg:TableView.RowStyle>
+                                <Style >
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Path=DataContext.DownloadQuantity}" Value="0">
+                                            <Setter Property="dxg:RowControl.Background" Value="Green"/>
+                                            <Setter Property="dxg:RowControl.Foreground" Value="#FFFFFFFF"/>
+                                        </DataTrigger>
+                                        <Trigger Property="dxg:DataViewBase.IsFocusedRow" Value="True">
+                                            <Setter Property="dxg:RowControl.Background" Value="{Binding Path=View.DataContext.OnFocusBgColor,UpdateSourceTrigger=PropertyChanged}" />
+                                            <Setter Property="dxg:RowControl.Foreground" Value="{Binding Path=View.DataContext.OnFocusFgColor,UpdateSourceTrigger=PropertyChanged}" />
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </dxg:TableView.RowStyle>
+                        </dxg:TableView>
+                    </UIHelper:GridControlWithoutClickEx.View>
+
+                    <UIHelper:GridControlWithoutClickEx.DetailDescriptor>
+
+                        <dxg:DataControlDetailDescriptor x:Name="detail1" ItemsSourcePath="ScanSerialNumbers" ParentPath="MasterItem" >
+                            <dxg:DataControlDetailDescriptor.DataControl>
+                                <dxg:GridControl CurrentItem="{Binding SelectedSerialNumber, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+                                    <dxg:GridColumn Header="{DynamicResource SerialNumbers}" FieldName="Code" AllowSorting="False" AllowColumnFiltering="False" />
+
+                                    <dxg:GridControl.View>
+                                        <dxg:TableView AutoWidth="True"
+                                                        VerticalScrollbarVisibility="Auto" 
+                                                        ShowGroupPanel="False" 
+                                                        NavigationStyle="Row"
+                                                        AllowEditing="False"
+                                                        ShowTotalSummary="True"
+                                                        ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly"
+                                                        ColumnHeaderContentStyle="{StaticResource MyHeaderStyle}">
+                                            <dxg:TableView.RowStyle>
+
+                                                <Style>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Path=DataContext.IsScanned}" Value="True">
+                                                            <Setter Property="dxg:RowControl.Background" Value="Green"/>
+                                                            <Setter Property="dxg:RowControl.Foreground" Value="#FFFFFFFF"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </dxg:TableView.RowStyle>
+                                        </dxg:TableView>
+                                    </dxg:GridControl.View>
+                                </dxg:GridControl>
+                            </dxg:DataControlDetailDescriptor.DataControl>
+                        </dxg:DataControlDetailDescriptor>
+                    </UIHelper:GridControlWithoutClickEx.DetailDescriptor>
+                </UIHelper:GridControlWithoutClickEx>
+            </dxlc:LayoutGroup>
+
+            <dxlc:LayoutGroup Grid.Row="0" Grid.Column="2" Grid.RowSpan="2"
+                              View="GroupBox"
+                              Orientation="Vertical"
+                              HorizontalAlignment="Stretch"  
+                              VerticalAlignment="Stretch" 
+                              Header="{DynamicResource PickingMaterialInformation}" 
+                              IsCollapsible="False" IsCollapsed="False" >
+
+                <Grid ShowGridLines="False" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Visibility="{Binding IsInformationVisible}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Name="Container" HorizontalAlignment="Stretch" >
+                        <TextBlock Grid.Row="0"
+                               Text="{Binding SelectedpickingMaterial.Description}" TextWrapping="Wrap" TextAlignment="Center"
+                               HorizontalAlignment="Stretch" 
+                               Width="{Binding ElementName=Container,Path=ActualWidth}"
+                               FontSize="{StaticResource FontSize24}" FontWeight="Bold" />
+                    </StackPanel>
+
+                    <!--<TextBlock Grid.Row="0" 
+                               Text="{Binding SelectedpickingMaterial.Description}" TextWrapping="Wrap" TextAlignment="Center"
+                               HorizontalAlignment="Stretch" 
+                               FontSize="{StaticResource FontSize24}" FontWeight="Bold" />-->
+
+                    <Image Grid.Row="1"
+                           Source="{Binding ArticleImage,UpdateSourceTrigger=PropertyChanged}" 
+                           HorizontalAlignment="Stretch" 
+                           VerticalAlignment="Center"/>
+
+                    <Grid Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Center">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="3"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="3"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="3"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="175"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="175"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Row="1" Grid.Column="1" Background="{Binding TotalStockBgColor,UpdateSourceTrigger=PropertyChanged}" BorderThickness="1" BorderBrush="Gray">
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock Text="{DynamicResource PickingMaterialTotalStock}" TextBlock.Foreground="{Binding TotalStockFgColor}" HorizontalAlignment="Center" FontSize="{StaticResource FontSize19}"/>
+                                <TextBlock Text="{Binding TotalCurrentItemStock,UpdateSourceTrigger=PropertyChanged}" TextBlock.Foreground="{Binding TotalStockFgColor}"  HorizontalAlignment="Center"  FontSize="{StaticResource FontSize35}" FontWeight="Bold" />
+                            </StackPanel>
+                        </Border>
+
+                        <dxe:ProgressBarEdit Grid.Row="3" Grid.Column="1" 
+                                             Minimum="0" Maximum="{Binding ProgressbarArticleStock.ArticleStockForAllLocation, Mode=OneWay}" Value="{Binding ProgressbarArticleStock.AvgStock, Mode=OneWay}" 
+                                             FontSize="{StaticResource FontSize15}" ShowBorder="False" 
+                                             FontWeight="SemiBold" IsPercent="True" 
+                                             DisplayFormatString="p0" 
+                                             ContentDisplayMode="Value"/>
+
+                        <Border Grid.Row="1" Grid.Column="3" Background="{Binding LocationStockBgColor, UpdateSourceTrigger=PropertyChanged}" BorderThickness="1" BorderBrush="Gray" >
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock Text="{DynamicResource PickingMaterialLocationStock}" HorizontalAlignment="Center"  FontSize="{StaticResource FontSize19}" TextBlock.Foreground="{Binding LocationStockFgColor}"/>
+                                <TextBlock Text="{Binding ProgressbarLocationStock.LocationStock,UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center" FontSize="{StaticResource FontSize35}" FontWeight="Bold" 
+                                           TextBlock.Foreground="{Binding LocationStockFgColor}" />
+                            </StackPanel>
+                        </Border>
+
+                        <dxe:ProgressBarEdit Grid.Row="3" Grid.Column="3" ShowBorder="False"
+                                             Value="{Binding LocationStockValue,Mode=OneWay}"
+                                             Minimum="0" Maximum="{Binding ProgressbarLocationStock.MaximumStock, Mode=TwoWay}"
+                                             FontSize="{StaticResource FontSize15}" FontWeight="SemiBold" IsPercent="True" 
+                                             DisplayFormatString="p0" ContentDisplayMode="Value"/>
+                    </Grid>
+                </Grid>
+
+                <dxm:MapControl Name="mapControl" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Visibility="{Binding IsInformationVisible, Converter={StaticResource invertedVisibilityConverter}}">
+
+                    <dxm:MapControl.ScalePanelOptions>
+                        <dxm:ScalePanelOptions Visible="False" />
+                    </dxm:MapControl.ScalePanelOptions>
+                    <dxm:MapControl.ZoomTrackbarOptions>
+                        <dxm:ZoomTrackbarOptions Visible="False" />
+                    </dxm:MapControl.ZoomTrackbarOptions>
+                    <dxm:MapControl.ScrollButtonsOptions>
+                        <dxm:ScrollButtonsOptions Visible="False" />
+                    </dxm:MapControl.ScrollButtonsOptions>
+                    <dxm:MapControl.CoordinatesPanelOptions>
+                        <dxm:CoordinatesPanelOptions Visible="False" />
+                    </dxm:MapControl.CoordinatesPanelOptions>
+
+                    <!--<dxm:MapControl.MapEditor>
+                        <dxm:MapEditor x:Name="Editor" ActiveLayer="{Binding ElementName=vectorLayer}" MapItemCreating="{DXEvent 'ApplyColors(@args.Item)'}">
+                            <dxm:MapEditor.Mode>
+                                <dxm:MapEditorEditMode/>
+                            </dxm:MapEditor.Mode>
+                        </dxm:MapEditor>
+                    </dxm:MapControl.MapEditor>-->
+
+                    <dxm:VectorLayer x:Name="DataLayer" EnableSelection="false">
+                        <dxm:SvgFileDataAdapter FileUri="{Binding SvgUri, Mode=OneWay , UpdateSourceTrigger=PropertyChanged}" 
+                                                BoundaryPoint1="3.0549583994941538,-176.15739521873573" 
+                                                BoundaryPoint2="84.893298751861167,4.9498408125624227"/>
+                        <dxmvvm:Interaction.Behaviors>
+                            <dxmvvm:EventToCommand EventName="DataLoaded" Command="{Binding VectorLayerDataLoadedCommand}"
+                                                   CommandParameter="{Binding ElementName=mapControl}" />
+                        </dxmvvm:Interaction.Behaviors>
+                    </dxm:VectorLayer>
+
+                    <dxm:VectorLayer x:Name="vectorLayer">
+
+                        <dxm:ListSourceDataAdapter DataSource="{Binding MapItems, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                            <dxmvvm:Interaction.Behaviors>
+                                <dxmvvm:EventToCommand EventName="CustomizeMapItem" Command="{Binding CustomizeMapItemCommand}" PassEventArgsToCommand="True" />
+                            </dxmvvm:Interaction.Behaviors>
+
+                            <dxm:ListSourceDataAdapter.Mappings>
+                                <dxm:MapItemMappingInfo Latitude="Latitude" Longitude="Longitude" />
+                            </dxm:ListSourceDataAdapter.Mappings>
+
+                            <dxm:ListSourceDataAdapter.ItemSettings>
+                                <dxm:MapRectangleSettings />
+                            </dxm:ListSourceDataAdapter.ItemSettings>
+                        </dxm:ListSourceDataAdapter>
+                    </dxm:VectorLayer>
+
+                </dxm:MapControl>
+            </dxlc:LayoutGroup>
+        </Grid>
+
+        <!--</ScrollViewer>-->
+        <Grid Grid.Row="6" ShowGridLines="False" HorizontalAlignment="Stretch" VerticalAlignment="Bottom">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!--Back-->
+            <Button Grid.Column="0" Grid.Row="0" Width="150" 
+                    HorizontalAlignment="Right" VerticalContentAlignment="Center"
+                    Command="{Binding CommandBackButton}" 
+                    FontSize="{StaticResource FontSize24}" FontWeight="Bold" Focusable="False" 
+                    Content="{DynamicResource PickingMaterialBack}" 
+                    IsEnabled="{Binding IsBackButtonEnable, UpdateSourceTrigger=PropertyChanged}"/>
+
+            <!--Cancel-->
+            <Button Grid.Column="1" Grid.Row="0" Width="150" 
+                    HorizontalAlignment="Center" VerticalContentAlignment="Center"
+                    Command="{Binding CommandCancelButton}" 
+                    FontSize="{StaticResource FontSize24}" FontWeight="Bold" Focusable="False" 
+                    Content="{DynamicResource PickingMaterialCancel}"/>
+
+            <!--Next-->
+            <Button Grid.Column="2" Grid.Row="0" Width="150" 
+                    HorizontalAlignment="Left" VerticalContentAlignment="Center"
+                    Command="{Binding CommandNextButton}" CommandParameter="{Binding ElementName=ItemsTableView}" 
+                    FontSize="{StaticResource FontSize24}" FontWeight="Bold" Focusable="False" 
+                    IsEnabled="{Binding IsNextButtonEnable, UpdateSourceTrigger=PropertyChanged}" 
+                    Content="{DynamicResource PickingMaterialSkip}"/>
+        </Grid>
+
+    </Grid>
+    <!--</ScrollViewer>-->
+</UserControl>

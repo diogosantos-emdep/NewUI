@@ -1,0 +1,89 @@
+
+DROP PROCEDURE IF EXISTS emdep_geos.APM_RegionalEmployeelist_V2680;
+DELIMITER $$
+CREATE PROCEDURE emdep_geos.APM_RegionalEmployeelist_V2680(
+     IN _IdCompanies   LONGTEXT,   -- comma-separated list of companies
+     IN _TO_CC_Ids     LONGTEXT,
+     IN _CC_Ids        LONGTEXT
+ )
+ BEGIN
+     -- CALL APM_RegionalEmployeelist_V2680('18,20,23,55,57,58,199,370,559,560,895,917,936,1970,4031,11310,11434,11560,11633,11879,11976,12205,12301,12371,12604,12618,12668', '1417,1483,1484,1545,1546,3129', '4,118');
+	  -- [Shweta.Thube][GEOS2-8058][28-10-2025]
+      SELECT DISTINCT
+         emp.IdEmployee,
+         empcont.CompanyEmail,
+         ejd.IdJobDescription,
+         emp.FirstName,
+         emp.LastName,
+         emp.EmployeeCode,
+         ejd.IdCompany,
+         jd.JobDescriptionCode,
+         lvap.IdLookupValue AS IdJDScope,
+         lvap.Value AS Scope,
+         IFNULL(ejd.IdRegion, counRegion.IdLookupValue) AS IdRegion
+     FROM employees emp
+     INNER JOIN employee_job_descriptions ejd  ON emp.IdEmployee = ejd.IdEmployee
+     INNER JOIN (
+         SELECT ec.IdEmployee, ec.EmployeeContactValue AS CompanyEmail
+         FROM employee_contacts ec
+         WHERE ec.EmployeeContactIdType = 88 AND ec.IsCompanyUse = 1
+         GROUP BY ec.IdEmployee
+     ) empcont ON empcont.IdEmployee = emp.IdEmployee
+     INNER JOIN job_descriptions jd ON jd.IdJobDescription = ejd.IdJobDescription
+     LEFT JOIN companies com ON com.IdCompany = ejd.IdCompany
+     LEFT JOIN geos.countries coun ON coun.idCountry = com.IdCountry
+     LEFT JOIN lookup_values counRegion ON counRegion.IdLookupValue = coun.IdRegion
+     LEFT JOIN emdep_geos.lookup_values lvap ON lvap.IdLookupValue = jd.IdJDScope
+     WHERE
+         (DATE(CURDATE()) BETWEEN DATE(ejd.JobDescriptionStartDate)
+                              AND DATE(IFNULL(ejd.JobDescriptionEndDate, CURDATE())))
+         AND emp.IsEnabled
+         AND emp.IdEmployeeStatus = 136
+         AND lvap.IdLookupValue = 279  -- ✅ Only Regional JDs
+         AND (
+             (
+                 FIND_IN_SET(ejd.IdJobDescription, _CC_Ids)
+                 AND IFNULL(ejd.IdRegion, counRegion.IdLookupValue) IN (
+                     SELECT DISTINCT IFNULL(cout.IdRegion, 0)
+                     FROM companies comp
+                     INNER JOIN geos.countries cout ON cout.IdCountry = comp.IdCountry
+                     WHERE FIND_IN_SET(comp.IdCompany, _IdCompanies)
+                 )
+             )
+             OR FIND_IN_SET(emp.IdEmployee, _TO_CC_Ids)
+         );
+ END $$
+ DELIMITER ;
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Drop procedure if exists emdep_geos.APM_RegionlistwithCompanies_V2680;
+DELIMITER $$
+CREATE PROCEDURE emdep_geos.APM_RegionlistwithCompanies_V2680()
+ BEGIN
+       -- call APM_RegionlistwithCompanies_V2680();
+       -- [Shweta.Thube][GEOS2-8058][28-10-2025]
+       
+	SELECT 
+    LP.IdLookupValue AS IdRegion,
+    LP.Value AS REGION,
+    W.Alias,
+    W.IdCompany
+	FROM companies W
+	INNER JOIN geos.countries C 
+    ON C.IdCountry = W.IdCountry
+	INNER JOIN emdep_geos.lookup_values LP 
+    ON LP.IdLookupValue = C.IdRegion;
+	END $$
+	DELIMITER ;
+ 

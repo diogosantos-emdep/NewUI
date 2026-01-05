@@ -1,0 +1,133 @@
+DROP PROCEDURE IF EXISTS `sites_Insert_V2630`;
+DELIMITER $$
+CREATE PROCEDURE `sites_Insert_V2630`(
+   IN _IdCustomer           SMALLINT(5) UNSIGNED,
+   IN _Name                 VARCHAR(50),
+   IN _IdCountry            INT(10) UNSIGNED,
+   IN _Address              VARCHAR(100),
+   IN _Telephone            VARCHAR(30),
+   IN _Email                VARCHAR(50),
+   IN _Region               VARCHAR(100),
+   IN _Fax                  VARCHAR(20),
+   IN _IdBusinessCenter     TINYINT UNSIGNED,
+   IN _IdBusinessField      TINYINT UNSIGNED,
+   IN _CuttingMachines      SMALLINT(5) UNSIGNED,
+   IN _Line                 SMALLINT(5) UNSIGNED,
+   IN _Website              VARCHAR(255),
+   IN _City                 VARCHAR(50),
+   IN _PostCode             VARCHAR(100),
+   IN _CreatedBy            SMALLINT(5) UNSIGNED,
+   IN _CreatedIn            DATETIME,
+   IN _IdBusinessType       TINYINT UNSIGNED,
+   IN _Latitude             DOUBLE,
+   IN _Longitude            DOUBLE,
+   IN _ShortName            VARCHAR(6),
+   IN _RegisteredName       VARCHAR(100),
+   IN _RegistrationNumber   VARCHAR(50),
+   IN _IdSource             SMALLINT(3) UNSIGNED,
+   IN _IdIncomTerms         INT(10) UNSIGNED,
+   IN _IdPaymentType        INT(10) UNSIGNED,
+   IN _PaymentTerms         VARCHAR(100),
+   IN _IdStatus             SMALLINT(5) UNSIGNED
+)
+BEGIN
+
+DECLARE _LanguageForDocumentation CHAR(5);
+
+IF _IdCountry = 29 THEN 
+		SELECT MainLanguage INTO _LanguageForDocumentation FROM countries WHERE idCountry = _IdCountry;
+
+   INSERT INTO sites (
+      IdCustomer, Name, IdCountry, Address, Telephone, Email, Region, Fax,
+      IdBusinessCenter, IdBusinessField, CuttingMachines, Line, Website, City, PostCode,
+      CreatedBy, CreatedIn, IdBusinessType, Latitude, Longitude,
+      ShortName, RegisteredName, CIF, IdSource, IdIncomTerms,
+      PaymentTerms, IdPaymentType, IdStatus, LanguageForDocumentation
+   )
+   VALUES (
+      _IdCustomer,
+      CONCAT(
+         _Name, ' (',
+         REPLACE((SELECT name FROM countries WHERE idCountry = _IdCountry), "'", "\\'"),
+         ')'
+      ),
+      _IdCountry,
+      _Address,
+      _Telephone,
+      _Email,
+      _Region,
+      _Fax,
+      _IdBusinessCenter,
+      _IdBusinessField,
+      _CuttingMachines,
+      _Line,
+      _Website,
+      _City,
+      _PostCode,
+      _CreatedBy,
+      _CreatedIn,
+      _IdBusinessType,
+      _Latitude,
+      _Longitude,
+      _ShortName,
+      _RegisteredName,
+      _RegistrationNumber,
+      _IdSource,
+      _IdIncomTerms,
+      _PaymentTerms,
+      _IdPaymentType,
+      _IdStatus,
+      _LanguageForDocumentation
+   );
+
+ELSE
+
+   INSERT INTO sites (
+      IdCustomer, Name, IdCountry, Address, Telephone, Email, Region, Fax,
+      IdBusinessCenter, IdBusinessField, CuttingMachines, Line, Website, City, PostCode,
+      CreatedBy, CreatedIn, IdBusinessType, Latitude, Longitude,
+      ShortName, RegisteredName, CIF, IdSource, IdIncomTerms,
+      PaymentTerms, IdPaymentType, IdStatus
+   )
+   VALUES (
+      _IdCustomer,
+      CONCAT(
+         _Name, ' (',
+         REPLACE((SELECT name FROM countries WHERE idCountry = _IdCountry), "'", "\\'"),
+         ')'
+      ),
+      _IdCountry,
+      _Address,
+      _Telephone,
+      _Email,
+      _Region,
+      _Fax,
+      _IdBusinessCenter,
+      _IdBusinessField,
+      _CuttingMachines,
+      _Line,
+      _Website,
+      _City,
+      _PostCode,
+      _CreatedBy,
+      _CreatedIn,
+      _IdBusinessType,
+      _Latitude,
+      _Longitude,
+      _ShortName,
+      _RegisteredName,
+      _RegistrationNumber,
+      _IdSource,
+      _IdIncomTerms,
+      _PaymentTerms,
+      _IdPaymentType,
+      _IdStatus
+   );
+
+END IF;
+
+SELECT LAST_INSERT_ID();
+ 
+END$$
+
+DELIMITER ;

@@ -1,0 +1,321 @@
+﻿<dxwui:WinUIDialogWindow x:Class="Emdep.Geos.Modules.APM.Views.SubTaskAttachmentsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+             xmlns:dxefl="clr-namespace:DevExpress.Xpf.Editors.Flyout.Native;assembly=DevExpress.Xpf.Core.v19.2"
+             xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.APM.Views"
+             mc:Ignorable="d" 
+                          Title="{Binding WindowHeader}"
+                         TitleStyle="{DynamicResource WinUIDialogWindowTitleStyle}"
+                         Style="{DynamicResource WinUIDialogWindowStyle}"
+             d:DesignHeight="300" d:DesignWidth="300">
+
+    <dxmvvm:Interaction.Behaviors>
+        <dxmvvm:SaveFileDialogService Title="Download Attachment" />
+    </dxmvvm:Interaction.Behaviors>
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape" Command="{Binding CancelButtonCommand}" />
+    </dxwui:WinUIDialogWindow.InputBindings>
+
+
+
+    <Grid Height="{Binding DialogHeight}" Width="{Binding DialogWidth}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="5"/>
+            <RowDefinition Height="50"/>
+        </Grid.RowDefinitions>
+
+
+        <Grid Grid.Row="0" Margin="5" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="80" />
+            </Grid.RowDefinitions>
+            <dxg:GridControl x:Name="gcattachment" Grid.Row="0"
+                                                 HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+                                                 Padding="0"
+                                                 ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                                 DockPanel.Dock="Top" 
+                                                 ItemsSource="{Binding ListAttachment, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                                 SelectedItem="{Binding SelectedAttachment, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ImplyNullLikeEmptyStringWhenFiltering="True">
+                <dxg:GridControl.Columns>
+                    <!--FileName-->
+                    <dxg:GridColumn FieldName="OriginalFileName" Header="{DynamicResource AttachmentsFileNameHeader}" FixedWidth="False" Width="300" HorizontalHeaderContentAlignment="Left" FilterPopupMode="CheckedList" />
+
+                    <!--Description-->
+                    <dxg:GridColumn FieldName="Description" Header="{DynamicResource AttachmentsDescriptionHeader}" FixedWidth="False" Width="300" HorizontalHeaderContentAlignment="Left" FilterPopupMode="CheckedList" />
+
+                    <!--Uploaded By-->
+                    <dxg:GridColumn FieldName="CreatedByName" Header="{DynamicResource AttachmentsUploadedByHeader}" FixedWidth="False" Width="300" HorizontalHeaderContentAlignment="Left" FilterPopupMode="CheckedList" />
+
+                    <!--Uploaded At-->
+                    <dxg:GridColumn FieldName="CreatedIn" Header="{DynamicResource AttachmentsUploadedAtHeader}" FixedWidth="False" Width="300" HorizontalHeaderContentAlignment="Left" FilterPopupMode="CheckedList" >
+                        <dxg:GridColumn.EditSettings>
+                            <dxe:DateEditSettings DisplayFormat="g"  Name="PART_Editor" />
+                        </dxg:GridColumn.EditSettings>
+                    </dxg:GridColumn>
+
+                    <!--File-->
+                    <dxg:GridColumn FixedWidth="True" Width="50" HorizontalHeaderContentAlignment="Center" FilterPopupMode="CheckedList">
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <!--<Image Source="{Binding Value}"  Height="30" Width="30"/>-->
+                                <Image Source="{Binding Path=Data.AttachmentImage}" Height="24" Width="24" />
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+
+                    <!--Download-->
+                    <dxg:GridColumn Header=" " FieldName="IsUploaded" FixedWidth="True" Width="45" HorizontalHeaderContentAlignment="Center">
+                        <!--Fixed="Right"-->
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Name="download"
+                                                            Command="{Binding DataContext.DownloadFileCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type dxwui:WinUIDialogWindow}}}"
+                                                            CommandParameter="{Binding RowData.Row}"
+                                                            Content=""
+                                                            >
+                                    <Button.ContentTemplate>
+                                        <DataTemplate>
+                                            <Image Height="16" Width="16"
+                                                                       Style="{DynamicResource APMDownloadAttachmentButtonImageStyle}" />
+                                        </DataTemplate>
+                                    </Button.ContentTemplate>
+                                    <Button.Style>
+                                        <Style>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding RowData.Row.IsUploaded,UpdateSourceTrigger=PropertyChanged}" Value="True">
+                                                    <Setter Property="Button.IsEnabled" Value="False" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding RowData.Row.IsUploaded,UpdateSourceTrigger=PropertyChanged}" Value="False">
+                                                    <Setter Property="Button.IsEnabled" Value="True" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+
+                    <!--Delete-->
+                    <dxg:GridColumn Fixed="Right" Width="45" FieldName="" FixedWidth="True" HorizontalHeaderContentAlignment="Center">
+                        <!--Fixed="Right"-->
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Name="delete"
+                                                            Command="{Binding DataContext.DeleteFileCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type dxwui:WinUIDialogWindow}}}"
+                                                            CommandParameter="{Binding RowData.Row}"
+                                                            Content=""
+                                                            IsEnabled="{Binding RowData.Row.IsDeleted, UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
+                                    <Button.ContentTemplate>
+                                        <DataTemplate>
+                                            <Image Height="20" Width="20" Margin="-1,0,0,0" >
+                                                <Image.Style>
+                                                    <Style TargetType="Image">
+                                                        <Style.Triggers>
+                                                            <MultiDataTrigger>
+                                                                <MultiDataTrigger.Conditions>
+                                                                    <Condition Binding="{Binding Path=(dx:ThemeManager.TreeWalker).ThemeName, RelativeSource={RelativeSource Self}}" Value="BlackAndBlue" />
+                                                                </MultiDataTrigger.Conditions>
+                                                                <Setter Property="Source" Value="/Emdep.Geos.Modules.APM;component/Assets/Images/wDelete.png" />
+                                                            </MultiDataTrigger>
+                                                            <MultiDataTrigger>
+                                                                <MultiDataTrigger.Conditions>
+                                                                    <Condition Binding="{Binding Path=(dx:ThemeManager.TreeWalker).ThemeName, RelativeSource={RelativeSource Self}}" Value="WhiteAndBlue" />
+                                                                </MultiDataTrigger.Conditions>
+                                                                <Setter Property="Source" Value="/Emdep.Geos.Modules.APM;component/Assets/Images/bDelete.png" />
+                                                            </MultiDataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Image.Style>
+                                            </Image>
+
+                                        </DataTemplate>
+                                    </Button.ContentTemplate>
+                                </Button>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+                </dxg:GridControl.Columns>
+                <dxg:GridControl.View>
+                    <dxg:TableView x:Name="attachmentTable" NavigationStyle="Row" 
+                                                       AutoWidth="True" 
+                                                       ShowGroupPanel="False" 
+                                                       AllowEditing="True" 
+                                                       Focusable="True" 
+                                                       FadeSelectionOnLostFocus="False"
+                                                       HorizontalScrollbarVisibility="Hidden" 
+                                                       VerticalScrollbarVisibility="Auto" 
+                                                       ShowIndicator="False"
+                                                       SearchPanelHorizontalAlignment="Stretch"
+                                                       ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly"
+                                                       >
+                        <dxmvvm:Interaction.Behaviors>
+                            <dxmvvm:EventToCommand Command="{Binding DataContext.AttachmentGridDoubleClickCommand,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}"
+                                                                       EventName="MouseDoubleClick"
+                                                                       PassEventArgsToCommand="True">
+                                <dxmvvm:EventToCommand.EventArgsConverter>
+                                    <dx:EventArgsToDataRowConverter />
+                                </dxmvvm:EventToCommand.EventArgsConverter>
+                            </dxmvvm:EventToCommand>
+                        </dxmvvm:Interaction.Behaviors>
+                    </dxg:TableView>
+                </dxg:GridControl.View>
+            </dxg:GridControl>
+            <!--IsEnabled="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsPermissionEnabled}"-->
+            <ToggleButton Grid.Row="1"
+                                              Height="30"
+                                              Width="30"
+                                              Margin="0,5,5,5"
+                                              VerticalAlignment="top"
+                                              HorizontalAlignment="Right"
+                                              DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"
+                                              FontWeight="Bold"
+                                                                                      
+                                              
+                                              IsChecked="{Binding DataContext.ShowCommentsFlyout, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type dxwui:WinUIDialogWindow}}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                              Name="btnAddNewAttachment">
+                <!--IsEnabled="{Binding DataContext.IsUserWatcherEnabled, Mode=OneTime, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox},UpdateSourceTrigger=PropertyChanged}"-->
+
+                <ToggleButton.ContentTemplate>
+                    <DataTemplate>
+                        <Image Height="24"
+                                                   Width="24"
+                                                   Margin="-10"
+                                                   VerticalAlignment="Stretch"
+                                                   HorizontalAlignment="Stretch"
+                                                   Style="{DynamicResource AttachmentImageStyle}" />
+                    </DataTemplate>
+                </ToggleButton.ContentTemplate>
+            </ToggleButton>
+            <dxe:FlyoutControl IsOpen="{Binding IsOpen,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" PlacementTarget="{Binding ElementName=btnAddNewAttachment}" StaysOpen="True">
+                <!--<dxmvvm:Interaction.Behaviors>
+                        <UIHelper:FlyoutControlBehavior IsOpen="{Binding DataContext.ShowCommentsFlyout, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type dxlc:GroupBox}}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    </dxmvvm:Interaction.Behaviors>-->
+                <dxe:FlyoutControl.Settings>
+                    <dxe:FlyoutSettings Placement="Left" />
+                </dxe:FlyoutControl.Settings>
+                <Grid HorizontalAlignment="Stretch" VerticalAlignment="Bottom">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="60"/>
+                        <RowDefinition Height="10"/>
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                    </Grid.RowDefinitions>
+                    <dxe:TextEdit Grid.Row="0" Width="650" NullText="Description" ScrollViewer.VerticalScrollBarVisibility="Auto" 
+                                      ScrollViewer.HorizontalScrollBarVisibility="Disabled" AcceptsReturn="True"
+                        Text="{Binding Description,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Top" TextWrapping="Wrap">
+                    </dxe:TextEdit>
+                    <dxe:ComboBoxEdit Grid.Row="2"  x:Name="editor" Width="650" Height="60" NullText="{DynamicResource TaskNoFileChoose}"
+                                                            EditValue="{Binding SubTaskAttachmentList,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                            ItemsSource="{Binding SubTaskAttachmentList,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                            ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                                            DisplayMember="FileUploadName" HorizontalAlignment="Stretch"
+                                                            AllowDefaultButton="False"
+                                                            AutoComplete="True"
+                                                            ImmediatePopup="True"
+                                                            ValidateOnEnterKeyPressed="True" 
+                                                            ValidateOnTextInput="True"
+                                                            IsTextEditable="False" Style="{DynamicResource ComboBoxEditStyle}">
+                        <dxe:ComboBoxEdit.StyleSettings>
+                            <dxe:TokenComboBoxStyleSettings NewTokenPosition="Far" EnableTokenWrapping="True" />
+                        </dxe:ComboBoxEdit.StyleSettings>
+                    </dxe:ComboBoxEdit>
+                    <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right"
+                                            >
+                        <Button Height="30"
+                                                Width="Auto" Margin="0 5 0 0"
+                                                HorizontalAlignment="Right"
+                                                Command="{Binding Path =(dxefl:FlyoutBase.Flyout).PlacementTarget.DataContext.ChooseFileCommand, RelativeSource={RelativeSource Self}}"
+                                                CommandParameter="{Binding ElementName=gcattachment}"
+                                                Content="{DynamicResource TaskFileChoose}"
+                                                 
+                                                 />
+                        <!--IsEnabled="{Binding DataContext.IsUserWatcherEnabled, Mode=OneTime, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox},UpdateSourceTrigger=PropertyChanged}"-->
+                        <Button Height="30"
+                                                Margin="5 0 0 0"
+                                              VerticalAlignment="Bottom"
+                                              HorizontalAlignment="Right"
+                                                DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"
+                                              FontWeight="Bold"
+                                              Command="{Binding UploadFileCommand}"
+                                               
+                                                 Name="btnAttachFile">
+                            <!--IsEnabled="{Binding DataContext.IsUserWatcherEnabled,Mode=OneTime, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}"-->
+                            <Button.Style>
+                                <Style TargetType="{x:Type Button}">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding DataContext.SubTaskAttachmentList.Count, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" Value="0">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                            <Button.ContentTemplate>
+                                <DataTemplate>
+                                    <Image Height="24"
+                                                   Width="24"
+                                                   Margin="-10"
+                                                   VerticalAlignment="Stretch"
+                                                   HorizontalAlignment="Stretch"
+                                                   Style="{DynamicResource UploadAttachmentButtonImageStyle}" />
+                                </DataTemplate>
+                            </Button.ContentTemplate>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </dxe:FlyoutControl>
+        </Grid>
+
+
+
+        <Grid Grid.Row="2" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid Grid.Row="2" VerticalAlignment="Center" HorizontalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="50"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Button Grid.Row="1" Grid.Column="0"
+                    Style="{DynamicResource Button16Style}"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Top"
+                    Content="{DynamicResource AddCatalogueAcceptButton}"
+                           Command="{Binding AcceptButtonActionCommand}"
+                     
+                    CommandParameter="{Binding ElementName=flowLayoutControl}"
+                    Height="30"
+                    Width="100" 
+                    
+                    />
+
+                <Button Grid.Row="1" Grid.Column="2"
+                    Style="{DynamicResource Button16Style}"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    Content="{DynamicResource AddCatalogueCancelButton}"
+                    Command="{Binding CancelButtonCommand}"
+                    Height="30"
+                    Width="100" />
+            </Grid>
+        </Grid>
+    </Grid>
+</dxwui:WinUIDialogWindow>

@@ -1,0 +1,158 @@
+﻿<dxwui:WinUIDialogWindow  x:Class="Emdep.Geos.Modules.Warehouse.Views.WMSEditWorkLogView"
+            xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:Validation ="clr-namespace:Emdep.Geos.UI.Validations;assembly=Emdep.Geos.UI.Validations"                         
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300"
+                          Title="{Binding WindowHeader,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+                         TitleStyle="{DynamicResource WinUIDialogWindowTitleStyle}"
+                          Style="{DynamicResource WinUIDialogWindowStyle}">
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape" Command="{Binding EditWorkLogViewCancelButtonCommand}"/>
+    </dxwui:WinUIDialogWindow.InputBindings>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="150"/>
+            <ColumnDefinition Width="250"/>
+        </Grid.ColumnDefinitions>
+        <Label Grid.Row="0" Grid.Column="0" Content="{DynamicResource User}" Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,10,0,10"/>
+
+        <dxe:ComboBoxEdit Margin="0,0,0,5" Grid.Row="0" Height="30" Width="250" Grid.Column="1" ItemsSource="{Binding OtUserList,Mode=TwoWay}"  
+                                                                          DisplayMember="UserShortDetail.UserName" ValueMember="IdUser" 
+                                                                          IsEnabled="{Binding IsEnableSave,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+                          AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True">
+            <dxe:ComboBoxEdit.SelectedIndex>
+                <Binding Path="SelectedUserIndex" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+
+                </Binding>
+            </dxe:ComboBoxEdit.SelectedIndex>
+
+
+            <dxe:ComboBoxEdit.ItemContainerStyle>
+                <Style TargetType="dxe:ComboBoxEditItem">
+                    <Setter Property="IsEnabled" Value="{Binding IsEnabled}" />
+                </Style>
+            </dxe:ComboBoxEdit.ItemContainerStyle>
+
+        </dxe:ComboBoxEdit>
+
+        <Label Grid.Row="1" Grid.Column="0" Content="{DynamicResource StartDate}" Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,10,0,10"/>
+        <Grid Grid.Row="1" Grid.Column="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="70*"/>
+                <ColumnDefinition Width="30*"/>
+            </Grid.ColumnDefinitions>
+            <dxe:DateEdit Margin="0,0,0,5" Grid.Column="0" Width="170" Height="30" 
+                      HorizontalAlignment="Left" VerticalAlignment="Center"
+                      IsReadOnly="{Binding DataContext.IsReadOnlyField,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
+                <dxe:DateEdit.EditValue>
+                    <Binding Path="StartTime" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay"
+                                                 ValidatesOnDataErrors="True">
+                        <Binding.ValidationRules>
+                            <Validation:WorkLogValidation FieldName="StartTime" ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True"/>
+                        </Binding.ValidationRules>
+                    </Binding>
+                </dxe:DateEdit.EditValue>
+                <dxmvvm:Interaction.Behaviors>
+                    <dxmvvm:EventToCommand EventName="EditValueChanging" Command="{Binding DataContext.OnDateEditValueChangingCommand,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" PassEventArgsToCommand="True"/>
+                </dxmvvm:Interaction.Behaviors>
+            </dxe:DateEdit>
+            <dxe:DateEdit Margin="0,0,0,5" VerticalAlignment="Center" Grid.Column="1"  Mask="t" MaskType="DateTime" MaskUseAsDisplayFormat="True" HorizontalAlignment="Left" Width="75" Height="30">
+                <dxe:DateEdit.StyleSettings>
+                    <dxe:DateEditPickerStyleSettings/>
+                </dxe:DateEdit.StyleSettings>
+                <dxe:DateEdit.EditValue>
+                    <Binding Path="StartTimeOfDay" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay"
+                                           ValidatesOnDataErrors="True">
+                        <Binding.ValidationRules>
+                            <Validation:WorkLogValidation FieldName="StartTimeOfDay" ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True"/>
+                        </Binding.ValidationRules>
+                    </Binding>
+                </dxe:DateEdit.EditValue>
+                <dxmvvm:Interaction.Behaviors>
+                    <dxmvvm:EventToCommand EventName="EditValueChanging" Command="{Binding DataContext.OnTextEditValueChangingCommand,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" PassEventArgsToCommand="True"/>
+                </dxmvvm:Interaction.Behaviors>
+            </dxe:DateEdit>
+        </Grid>
+
+        <Label Grid.Row="2" Grid.Column="0" Content="{DynamicResource EndDate}" Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,10,0,10"/>
+        <Grid Grid.Row="2" Grid.Column="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="70*"/>
+                <ColumnDefinition Width="30*"/>
+            </Grid.ColumnDefinitions>
+            <dxe:DateEdit Margin="0,0,0,5"  Grid.Column="0" Width="170" Height="30" 
+                      HorizontalAlignment="Left" VerticalAlignment="Center"
+                      IsReadOnly="{Binding DataContext.IsReadOnlyField,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
+                <dxe:DateEdit.EditValue>
+                    <Binding Path="EndTime" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay"
+                                                 ValidatesOnDataErrors="True">
+                        <Binding.ValidationRules>
+                            <Validation:WorkLogValidation FieldName="EndTime" ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True"/>
+                        </Binding.ValidationRules>
+                    </Binding>
+                </dxe:DateEdit.EditValue>
+                <dxmvvm:Interaction.Behaviors>
+                    <dxmvvm:EventToCommand EventName="EditValueChanging" Command="{Binding DataContext.OnDateEditValueChangingCommand,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" PassEventArgsToCommand="True"/>
+                </dxmvvm:Interaction.Behaviors>
+            </dxe:DateEdit>
+            <dxe:DateEdit Margin="0,0,0,5" VerticalAlignment="Center" Grid.Column="1" Mask="t" MaskType="DateTime" MaskUseAsDisplayFormat="True" HorizontalAlignment="Left" Width="75" Height="30">
+                <dxe:DateEdit.StyleSettings>
+                    <dxe:DateEditPickerStyleSettings/>
+                </dxe:DateEdit.StyleSettings>
+                <dxe:DateEdit.EditValue>
+                    <Binding Path="EndTimeOfDay" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay"
+                                                 ValidatesOnDataErrors="True">
+                        <Binding.ValidationRules>
+                            <Validation:WorkLogValidation FieldName="EndTimeOfDay" ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True"/>
+                        </Binding.ValidationRules>
+                    </Binding>
+                </dxe:DateEdit.EditValue>
+                <dxmvvm:Interaction.Behaviors>
+                    <dxmvvm:EventToCommand EventName="EditValueChanging" Command="{Binding DataContext.OnTextEditValueChangingCommand,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" PassEventArgsToCommand="True"/>
+                </dxmvvm:Interaction.Behaviors>
+            </dxe:DateEdit>
+        </Grid>
+
+        <StackPanel Grid.Row="10" Grid.Column="1" Grid.ColumnSpan="2"
+                    HorizontalAlignment="Left" 
+                    Orientation="Horizontal"
+                    Margin="0,0,0,0"
+                    Width="250">
+
+            <Button Content="Accept"
+                    Command="{Binding EditWorkLogViewAcceptButtonCommand}"
+                    Height="30"
+                    Width="100"
+                    Margin="0,0,10,0"
+                    Style="{DynamicResource Button16Style}"
+                    VerticalAlignment="Bottom" 
+                  
+           IsEnabled="{Binding IsAcceptEnabled}"/>
+
+            <Button Content="Cancel"
+                    Command="{Binding EditWorkLogViewCancelButtonCommand}" 
+                    Height="30"
+                    Width="100"
+                    Margin="10,0,0,0"
+                    Style="{DynamicResource Button16Style}"
+                    VerticalAlignment="Bottom" />
+        </StackPanel>
+    </Grid>
+    </dxwui:WinUIDialogWindow>
+

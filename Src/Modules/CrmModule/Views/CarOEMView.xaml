@@ -1,0 +1,226 @@
+﻿<UserControl x:Class="Emdep.Geos.Modules.Crm.Views.CarOEMView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid" 
+             xmlns:dxgt="http://schemas.devexpress.com/winfx/2008/xaml/grid/themekeys"
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:ViewModels="clr-namespace:Emdep.Geos.Modules.Crm.ViewModels"              
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:i="http://schemas.microsoft.com/expression/2008/interactivity"
+             xmlns:dxp="http://schemas.devexpress.com/winfx/2008/xaml/printing"
+             xmlns:Interactive="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:Behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+             xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+             xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+             Style="{DynamicResource UserControlStyle}" >
+    <UserControl.Resources>
+        
+        <ControlTemplate x:Key="detailContainerTemplate" TargetType="{x:Type ContentControl}">
+            <Border BorderThickness="0,1,0,0" BorderBrush="{TemplateBinding BorderBrush}" HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch" Padding="12,12,12,12" Background="{TemplateBinding Background}">
+                <ContentControl/>
+            </Border>
+        </ControlTemplate>
+        <DataTemplate x:Key="DetailCoreTemplate">
+            <dx:MeasurePixelSnapper/>
+        </DataTemplate>
+        <DataTemplate x:Key="expandableRowDetailTemplate">
+            <StackPanel Orientation="Vertical">
+                <dx:MeasurePixelSnapper>
+                    <ContentPresenter x:Name="defaultRowPresenter" Content="{Binding}" ContentTemplate="{Binding View.DefaultDataRowTemplate}" />
+                </dx:MeasurePixelSnapper>
+                <dx:DXExpander IsExpanded="{Binding IsSelected}" HorizontalExpand="None" VerticalExpand="FromTopToBottom">
+                    <dxg:RowDetailContainerControl Template="{StaticResource detailContainerTemplate}" Content="{Binding}" ContentTemplate="{DynamicResource DetailCoreTemplate}" />
+                </dx:DXExpander>
+            </StackPanel>
+        </DataTemplate>
+
+        <Style x:Key="ColumnStyle" TargetType="dxg:GridColumn">
+            <Setter Property="Header" Value=""></Setter>
+        </Style>
+
+
+    </UserControl.Resources>
+
+    <Grid >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="60" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <DockPanel LastChildFill="True">
+            <Grid DockPanel.Dock="Top" Margin="0,10,0,10" Grid.Row="0" >
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="40" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <Label Content="{DynamicResource CarOEM}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,0,0,0" Style="{DynamicResource LabelTitleStyle}" Grid.Column="0" Grid.Row="0" />
+
+                <!--<StackPanel Orientation="Horizontal" Grid.Column="2" HorizontalAlignment="Right" Margin="-5,0,0,0">-->
+
+                <Button HorizontalAlignment="Right" Height="40" Width="40" Grid.Column="1" VerticalAlignment="Top" Grid.Row="0"
+                        Command="{Binding CommandAddCarOEMClick}" CommandParameter="{Binding ElementName=AccountTableView}" Visibility="Visible" Margin="0,0,5,0"
+                         IsEnabled="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsPermissionAdminOnly}" >
+                    <Button.ToolTip>
+                        <TextBlock Text="{DynamicResource AddCarOEMViewHeader}"/>
+                    </Button.ToolTip>
+                    <Button.ContentTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Image Style="{DynamicResource AddButtonImageStyle}" Grid.Column="1" Height="24" Width="24" HorizontalAlignment="Right" Margin="-10" />
+                            </Grid>
+                        </DataTemplate>
+                    </Button.ContentTemplate>
+                </Button>
+
+                <Button Content=" " Height="40" Width="40" Grid.Column="2" Grid.Row="0" Command="{Binding RefreshAccountViewCommand}" CommandParameter="{Binding ElementName=CardViewName}" HorizontalAlignment="Right" Margin="0,0,5,0"  >
+                    <Button.ToolTip>
+                        <TextBlock Text="{DynamicResource ButtonRefresh}"/>
+                    </Button.ToolTip>
+                    <Button.ContentTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Image Style="{ DynamicResource RefreshButtonImageStyle}" Grid.Column="2" Height="24" Width="24" Margin="-10"/>
+                            </Grid>
+                        </DataTemplate>
+                    </Button.ContentTemplate>
+                </Button>
+
+                <Button Content=" " Height="40" Width="40" Grid.Column="3" Grid.Row="0" Command="{Binding PrintButtonCommand}" CommandParameter="{Binding ElementName=CardViewName}"  HorizontalAlignment="Right" Margin="0,0,5,0">
+                    <Button.ToolTip>
+                        <TextBlock Text="{DynamicResource ButtonPrint}"/>
+                    </Button.ToolTip>
+                    <Button.ContentTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Image Style="{ DynamicResource PrinterButtonImageStyle}" Grid.Column="3" Height="24" Width="24" Margin="-10"/>
+                            </Grid>
+                        </DataTemplate>
+                    </Button.ContentTemplate>
+                </Button>
+
+                <Button Content=" " Height="40" Width="40"  HorizontalAlignment="Right" Grid.Column="4" Grid.Row="0" Margin="0,0,5,0"
+                    Command="{Binding ExportButtonCommand}" CommandParameter="{Binding ElementName=CardViewName}" >
+                    <Button.ToolTip>
+                        <TextBlock Text="{DynamicResource ButtonExportToExcel}"/>
+                    </Button.ToolTip>
+                    <Button.ContentTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Image Style="{ DynamicResource ExcelExportButtonImageStyle}" Grid.Column="0" Height="24" Width="24" Margin="-10"/>
+                            </Grid>
+                        </DataTemplate>
+                    </Button.ContentTemplate>
+                </Button>
+
+            </Grid>
+        </DockPanel>
+
+        <Grid Name="GridMain" Grid.Row="1" >
+            <dxg:GridControl  Name="GridControlCarOEM" ItemsSource="{Binding CarOEMList,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+                <!--<dxg:GridColumn FieldName="Icon" VisibleIndex="0"></dxg:GridColumn>-->
+                     <dxg:GridControl.Resources>
+                    <!--<ControlTemplate x:Key="{dxt:GridCardThemeKey ResourceKey=HeaderPanelTemplate}" TargetType="{x:Type ContentControl}"/>-->
+                          <DataTemplate x:Key="cardTemplate">
+
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center"  HorizontalAlignment="Center" >
+                            <dxe:ImageEdit Source="{Binding Path=DataContext.CarOEMImage}"
+                                   VerticalAlignment="Center" HorizontalAlignment="Center"
+                                   Width="150" Height="150" Margin="2,2,2,2"  IsReadOnly="True" 
+                                   />
+                        </StackPanel>
+                    </DataTemplate>
+                          <DataTemplate x:Key="PrintcardTemplate">
+                        <StackPanel Orientation="Horizontal" >
+                            <Grid>
+                        <StackPanel Orientation="Vertical">
+                          
+                            <dxe:TextEdit Text="{Binding Path=DataContext.Name}" IsPrintingMode="True" IsReadOnly="True" FontWeight="Bold" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" >
+                               
+                                 </dxe:TextEdit>
+                            <dxe:ImageEdit Source="{Binding Path=DataContext.CarOEMImage}" IsReadOnly="True"
+                                   VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                                   Width="150" Height="150" Margin="2,2,2,2" IsPrintingMode="True" 
+                                   />
+                        </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </DataTemplate>
+                     </dxg:GridControl.Resources>
+                     <dxg:GridColumn FieldName="Name" Visible="False" ></dxg:GridColumn>
+                     <dxg:GridControl.View>
+                          <dxg:CardView Name="CardViewName"  ShowSearchPanelMode="Always" SearchColumns="Name"
+                                  ShowColumnHeaders="False" ShowDragDropHint="False"
+                                  ShowFilterPanelMode="Default" 
+                                  ShowTargetInfoInDragDropHint="False"
+                                  PrintAllGroups="True"
+                                  PrintAutoCardWidth="True"
+                                  ShowGroupPanel="False"
+                                  ShowCardExpandButton="False"
+                                  HorizontalAlignment="Center"
+                                  VerticalAlignment="Center"
+                                  CardLayout="Rows"                                       
+                                  CardHeaderBinding="{Binding Data.Name}"                               
+                                  ShowTotalSummary="True"
+                                  NavigationStyle="Row"
+                                  ShowFixedTotalSummary="True" 
+                                  MultiSelectMode="None"
+                                  CardAlignment="Near"
+                                  Padding="0"
+                                  BorderBrush="Transparent"                                  
+                                  BorderThickness="0"
+                               
+                                  CardMargin="0"
+                                  CardTemplate = "{DynamicResource cardTemplate}"
+                                  PrintCardTemplate="{DynamicResource PrintcardTemplate}">
+                        <dxg:CardView.CardHeaderTemplate>
+                            <DataTemplate>
+                                <TextBlock>
+                                   <Run Text="{Binding Data.Name}"/>
+                                </TextBlock>
+                            </DataTemplate>
+                        </dxg:CardView.CardHeaderTemplate>
+                        <dxmvvm:Interaction.Behaviors>
+                            <dxmvvm:EventToCommand Command="{Binding CommandGridDoubleClick}"
+                                                       EventName="MouseDoubleClick" 
+                                                       CommandParameter="{Binding ElementName=CardViewName}">
+                                <dxmvvm:EventToCommand.EventArgsConverter>
+                                    <dx:EventArgsToDataRowConverter />
+                                </dxmvvm:EventToCommand.EventArgsConverter>
+                            </dxmvvm:EventToCommand>
+                        </dxmvvm:Interaction.Behaviors>
+                    </dxg:CardView>
+                    </dxg:GridControl.View>
+                        <dxg:GridControl.TotalSummary>
+                    <dxg:GridSummaryItem x:Name="summary" FieldName="Name" SummaryType="Count" DisplayFormat="Total Count: {0}" Visible="True"   Alignment="Left"/>
+                </dxg:GridControl.TotalSummary>
+            </dxg:GridControl>
+           
+        </Grid>
+    </Grid>
+</UserControl>

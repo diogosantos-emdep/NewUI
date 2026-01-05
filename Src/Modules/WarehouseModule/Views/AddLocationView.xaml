@@ -1,0 +1,332 @@
+﻿<dxwui:WinUIDialogWindow x:Class="Emdep.Geos.Modules.Warehouse.Views.AddLocationView"
+           xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.Warehouse.Views"
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm" 
+            xmlns:ViewModels="clr-namespace:Emdep.Geos.Modules.Warehouse.ViewModels"
+             xmlns:system="clr-namespace:System;assembly=mscorlib"
+             xmlns:WmsApplication="clr-namespace:Emdep.Geos.Modules.Warehouse"
+             xmlns:Validation ="clr-namespace:Emdep.Geos.UI.Validations;assembly=Emdep.Geos.UI.Validations" 
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             mc:Ignorable="d" Title="{Binding WindowHeader,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"           
+             TitleStyle="{DynamicResource WinUIDialogWindowTitleStyle}" 
+             Style="{DynamicResource WinUIDialogWindowStyle}" >
+
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape" Command="{Binding LocationViewCancelButtonCommand}"/>
+    </dxwui:WinUIDialogWindow.InputBindings>
+    <Grid ShowGridLines="False">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="24"/>
+            
+        </Grid.ColumnDefinitions>
+        <TextBlock Text="Type of Location" Grid.Column="0" Margin="5"  Grid.Row="0"  Width="180" Height="30" FontSize="16" Visibility="{Binding IsEdit, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
+        <StackPanel Orientation="Horizontal"  Grid.Row="0" Grid.Column="1"  Visibility="{Binding IsEdit, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
+
+            <RadioButton GroupName="FilterType"  Width="180" Height="30" FontSize="16" VerticalContentAlignment="Stretch" Content="Single Location" IsChecked="{Binding DataContext.IsSingleLocation, Mode=TwoWay,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" Margin="5,0,0,0"/>
+            <RadioButton GroupName="FilterType"  Width="180" Height="30" FontSize="16" VerticalContentAlignment="Stretch" Content="Range of Location" IsChecked="{Binding DataContext.IsRangeofLocation, Mode=TwoWay,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" Margin="5,0,0,0"/>
+        </StackPanel>
+        <Label Grid.Column="0" Grid.Row="1" Content="{DynamicResource AddLocationParent}" Margin="5" Width="180" Height="30" FontSize="16" ></Label>
+        <Label Grid.Column="0" Grid.Row="2"  Content="{DynamicResource AddLocationName}" Margin="5" Width="180" Height="30" FontSize="16" Visibility="{Binding IsVisibleSingleLocation, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" ></Label>
+        <Label Grid.Column="0" Grid.Row="3"  Content="{DynamicResource AddLocationLavel}" Margin="5" Width="180" Height="30" FontSize="16" Visibility="{Binding IsVisibleRangeofLocationLevel, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" ></Label>
+        <Label Grid.Column="0" Grid.Row="4"  Content="{DynamicResource AddLocationFrom}" Margin="5" Width="180" Height="30" FontSize="16" Visibility="{Binding IsVisibleRangeofLocation, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" ></Label>
+        <Label Grid.Column="1" Grid.Row="4"  Content="{DynamicResource AddLocationTo}"  Width="180" Height="30" FontSize="16" Margin="-170 0 0 0" Visibility="{Binding IsVisibleRangeofLocation, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" ></Label>
+
+        <Label Grid.Column="0" Grid.Row="5" Content="{DynamicResource AddLocationManufacturer}" Margin="5" Width="180" Height="30" FontSize="16" Visibility="{Binding ManufacturerVisibility, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" >
+          
+        </Label>
+        <Label Grid.Column="0" Grid.Row="6" Content="{DynamicResource AddLocationHtmlColour}" Margin="5" Width="180" Height="30" FontSize="16"></Label>
+        <Label Grid.Column="0" Grid.Row="7" Margin="5" Content="{DynamicResource AddLocationPosition}" Width="180" Height="30" FontSize="16"></Label>
+        <Label Grid.Column="0" Grid.Row="8" Margin="5" Content="{DynamicResource AddLocationDirection}" Width="180" Height="30" FontSize="16"></Label>
+        <dxg:LookUpEdit Name="lookUpEdit"  Width="200"  Height="30"   Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left" Margin="5"
+                           IsReadOnly="{Binding IsPermissionReadOnly, Mode=OneTime, Source={x:Static WmsApplication:WarehouseCommon.Instance}, UpdateSourceTrigger=PropertyChanged}"
+                           ItemsSource="{Binding WarehouseLocationList }" 
+                           IsPopupAutoWidth="False" PopupWidth="200" PopupMaxWidth="200" PopupMinWidth="200"
+                           AutoComplete="True" EditValue="{Binding SelectedParent, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" DisplayMember="FullName"
+                           AutoPopulateColumns="False"
+                           IsTextEditable="False">
+            <dxmvvm:Interaction.Behaviors>
+                <dxmvvm:EventToCommand  EventName="EditValueChanged" Command="{Binding ParentSelectionChangedCommand}" PassEventArgsToCommand="True"/>
+            </dxmvvm:Interaction.Behaviors>
+            <dxg:LookUpEdit.PopupContentTemplate>
+                <ControlTemplate>
+                    <dxg:GridControl x:Name="PART_GridControl"  SelectionMode="Row" Width="200" >
+                        <dxg:GridControl.Columns>
+                            <dxg:GridColumn FieldName="FullName" />
+                        </dxg:GridControl.Columns>
+                        <dxg:GridControl.View>
+                            <dxg:TreeListView Name="treeListView1" AutoWidth="True" ShowIndicator="False"
+                                  ParentFieldName="Parent" KeyFieldName="IdWarehouseLocation" ShowColumnHeaders="False"
+                                  TreeDerivationMode="Selfreference"  ShowAutoFilterRow="False">
+                            </dxg:TreeListView>
+                        </dxg:GridControl.View>
+                        <dxg:GridControl.SelectedItem>
+                            <Binding  Path="SelectedParent" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged" ValidatesOnNotifyDataErrors="True" ValidatesOnDataErrors="True" >
+                                <Binding.ValidationRules>
+                                    <Validation:LocationValidation FieldName="SelectedParent" ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True" />
+                                </Binding.ValidationRules>
+                            </Binding>
+                        </dxg:GridControl.SelectedItem>
+                    </dxg:GridControl>
+                </ControlTemplate>
+            </dxg:LookUpEdit.PopupContentTemplate>
+            <!--<dxg:LookUpEdit.StyleSettings>
+                <dxg:MultiSelectLookUpEditStyleSettings />
+            </dxg:LookUpEdit.StyleSettings>-->
+            <dxg:LookUpEdit.SelectedItem>
+                <Binding  Path="SelectedParent" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged" ValidatesOnNotifyDataErrors="True" ValidatesOnDataErrors="True" >
+                    <Binding.ValidationRules>
+                        <Validation:LocationValidation FieldName="SelectedParent" ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True" />
+                    </Binding.ValidationRules>
+                </Binding>
+            </dxg:LookUpEdit.SelectedItem>
+        </dxg:LookUpEdit>
+
+        <!--<dxe:ComboBoxEdit  Width="200"  Height="30"   Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" Margin="5"
+                           IsReadOnly="{Binding IsPermissionReadOnly, Mode=OneTime, Source={x:Static WmsApplication:WarehouseCommon.Instance}, UpdateSourceTrigger=PropertyChanged}"
+                           ItemsSource="{Binding WarehouseLocationList }" DisplayMember="FullName"  >
+            <dxmvvm:Interaction.Behaviors>
+                <dxmvvm:EventToCommand EventName="EditValueChanged" Command="{Binding ParentSelectionChangedCommand}"/>
+            </dxmvvm:Interaction.Behaviors>
+            <dxe:ComboBoxEdit.SelectedItem>
+                <Binding  Path="SelectedParent" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged" ValidatesOnNotifyDataErrors="True" ValidatesOnDataErrors="True" >
+                    <Binding.ValidationRules>
+                        <Validation:LocationValidation FieldName="SelectedParent" ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True" />
+                    </Binding.ValidationRules>
+                </Binding>
+            </dxe:ComboBoxEdit.SelectedItem>
+        </dxe:ComboBoxEdit>-->
+
+        <dxe:TextEdit  Width="200"  Height="30"   Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left" Margin="5" 
+                       IsReadOnly="{Binding IsPermissionReadOnly, Mode=OneTime, Source={x:Static WmsApplication:WarehouseCommon.Instance}, UpdateSourceTrigger=PropertyChanged}"
+                       CharacterCasing="Upper" MaskType="RegEx" Mask="{Binding RegExp}" Visibility="{Binding IsVisibleSingleLocation, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
+            <!--([A-Z]{1}[0-9]{2,3})-->
+            <dxe:TextEdit.Text>
+                <Binding  Path="LocationName" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged" ValidatesOnNotifyDataErrors="True" ValidatesOnDataErrors="True" >
+                    <Binding.ValidationRules>
+                        <Validation:LocationValidation FieldName="LocationName" ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True" />
+                    </Binding.ValidationRules>
+                </Binding>
+            </dxe:TextEdit.Text>
+        </dxe:TextEdit>
+        <dxe:PopupColorEdit Grid.Row="6" Grid.Column="1" Width="200" Height="30" HorizontalAlignment="Left" Margin="5" 
+                            VerticalAlignment="Center" 
+                            IsReadOnly="{Binding Source={x:Static WmsApplication:WarehouseCommon.Instance}, Path=IsPermissionReadOnly,Mode=OneTime,UpdateSourceTrigger=PropertyChanged}">
+
+            <dxe:PopupColorEdit.Color>
+                <Binding  Path="HTMLColor" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged" ValidatesOnNotifyDataErrors="True" ValidatesOnDataErrors="True" >
+                    <!--<Binding.ValidationRules>
+                        <Validation:LocationValidation FieldName="HTMLColor" ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True" />
+                    </Binding.ValidationRules>-->
+                </Binding>
+            </dxe:PopupColorEdit.Color>
+
+
+            <dxmvvm:Interaction.Behaviors>
+                <dxmvvm:EventToCommand EventName="CustomDisplayText" Command="{Binding ColorValueChangingCommand,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" PassEventArgsToCommand="True"/>
+            </dxmvvm:Interaction.Behaviors>
+        </dxe:PopupColorEdit>
+        
+        <!--Level-->
+        <dxe:ComboBoxEdit Grid.Row="3" Grid.Column="1" HorizontalAlignment="Left" Margin="5" 
+                   Width="200"  Height="30" VerticalAlignment="Center"  ItemsSource="{Binding AlphabetList,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"                         
+                   DisplayMember="Character" 
+               
+                     AutoComplete="True" ImmediatePopup="True" Visibility="{Binding IsVisibleRangeofLocationLevel, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                         Mask="{Binding SelectedLevel}"
+                          >
+
+            <dxe:ComboBoxEdit.SelectedIndex>
+                <Binding Path="SelectedLevel" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay" ValidatesOnNotifyDataErrors="True" ValidatesOnDataErrors="True">
+                    <Binding.ValidationRules>
+                        <Validation:LocationValidation FieldName="SelectedLevel" ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True" />
+                    </Binding.ValidationRules>
+                </Binding>
+                
+            </dxe:ComboBoxEdit.SelectedIndex>
+
+        </dxe:ComboBoxEdit>
+        
+        <!--From-->
+        <dxe:TextEdit Visibility="{Binding IsVisibleRangeofLocation,  Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"  Width="100"  Height="30" Grid.ColumnSpan="2"   Grid.Row="4" Grid.Column="0" HorizontalAlignment="Left" Margin="50 0 0 0" 
+             
+                       MaskType="Numeric" Mask="n0"
+                      >
+            <!--Mask="{Binding From}"-->
+            <dxe:TextEdit.Text>
+                <Binding  Path="From" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged"  ValidatesOnNotifyDataErrors="True" ValidatesOnDataErrors="True">
+                    <Binding.ValidationRules>
+                        <Validation:LocationValidation FieldName="From" ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True" />
+                    </Binding.ValidationRules>
+                </Binding>
+            </dxe:TextEdit.Text>
+        </dxe:TextEdit>
+        <!--To-->
+        <dxe:TextEdit  Width="100"  Height="30"   Grid.Row="4" Grid.Column="1" HorizontalAlignment="left" Margin="30 0 0 0" 
+      Visibility="{Binding IsVisibleRangeofLocation,  Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                          MaskType="Numeric" Mask="n0"
+                       IsReadOnly="{Binding  IsEdit,  Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                       >
+          
+            <dxe:TextEdit.Text>
+                <Binding  Path="To" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged"  ValidatesOnNotifyDataErrors="True" ValidatesOnDataErrors="True">
+                    <Binding.ValidationRules>
+                 <Validation:LocationValidation FieldName="To" ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True" />
+             </Binding.ValidationRules>
+                </Binding>
+            </dxe:TextEdit.Text>
+        </dxe:TextEdit>
+        <!--Manufacturer-->
+        <dxe:ComboBoxEdit Grid.Row="5" Grid.Column="1" HorizontalAlignment="Left" Margin="5" 
+                           Width="200"  Height="30" VerticalAlignment="Center"  ItemsSource="{Binding ManufacturerList,Mode=TwoWay}"                         
+                           DisplayMember="Name" ValueMember="IdManufacturer" 
+                           IsReadOnly="{Binding IsPermissionReadOnly, Mode=OneTime, Source={x:Static WmsApplication:WarehouseCommon.Instance}, UpdateSourceTrigger=PropertyChanged}"
+                             AutoComplete="True" ImmediatePopup="True" Visibility="{Binding ManufacturerVisibility, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" >
+           
+            <dxe:ComboBoxEdit.SelectedIndex>
+                <Binding Path="SelectedManufacturer" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay"></Binding>
+            </dxe:ComboBoxEdit.SelectedIndex>
+
+        </dxe:ComboBoxEdit>
+    
+            <dxe:SpinEdit Grid.Column="1" Grid.Row="7"  Margin="5"  IsFloatValue="False"   Width="100"  Height="30" HorizontalAlignment="Left" MinValue="1" Mask="#######0;"
+                        IsReadOnly="{Binding IsPermissionReadOnly, Mode=OneTime, Source={x:Static WmsApplication:WarehouseCommon.Instance}, UpdateSourceTrigger=PropertyChanged}"
+                      HorizontalContentAlignment="Right" AllowRoundOutOfRangeValue="True"  MaxValue="{Binding MaxPosition}"   InvalidValueBehavior="AllowLeaveEditor"   EditValueType="{x:Type system:Int32}">
+                <dxe:SpinEdit.EditValue>
+                    <Binding  Path="Position" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged" ValidatesOnDataErrors="True">
+                        <Binding.ValidationRules>
+                            <Validation:LocationValidation FieldName="Position" ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True" />
+                        </Binding.ValidationRules>
+                    </Binding>
+                </dxe:SpinEdit.EditValue>
+            </dxe:SpinEdit>
+        
+
+        <!--WMS	M051-13	Add new column Direction in locations configuration-->
+        <!--Direction-->
+        <dxe:ComboBoxEdit Grid.Row="8" Grid.Column="1" HorizontalAlignment="Left" Margin="5" 
+                           Width="200"  Height="30" VerticalAlignment="Center"  ItemsSource="{Binding DirectionList,Mode=TwoWay}"                         
+                           DisplayMember="Value" ValueMember="IdLookupValue" 
+                           IsReadOnly="{Binding IsPermissionReadOnly, Mode=OneTime, Source={x:Static WmsApplication:WarehouseCommon.Instance}, UpdateSourceTrigger=PropertyChanged}"
+                           AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True" ApplyItemTemplateToSelectedItem="True" IsTextEditable="False"  >
+            <dxe:ComboBoxEdit.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <Image Margin="5 0" Height="15" Width="15">
+                            <Image.Style>
+                                <Style>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IdImage}" Value="1">
+                                            <Setter Property="Image.Source" Value="{DynamicResource UpDirectionImageStyle}" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding IdImage}" Value="2">
+                                            <Setter Property="Image.Source" Value="{DynamicResource DownDirectionImageStyle}" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Image.Style>
+                        </Image>
+                        <TextBlock Text="{Binding Value}" Margin="5 0" />
+                    </StackPanel>
+                </DataTemplate>
+            </dxe:ComboBoxEdit.ItemTemplate>
+
+            <dxe:ComboBoxEdit.SelectedIndex>
+                <Binding Path="SelectedDirection" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay"></Binding>
+            </dxe:ComboBoxEdit.SelectedIndex>
+
+        </dxe:ComboBoxEdit>
+
+        <!--Warehouse Layout-->
+        <Label Grid.Column="0" Grid.Row="9" Margin="5" Content="{DynamicResource MapFile}" Width="180" Height="30" FontSize="16"></Label>
+        <dxe:ComboBoxEdit Grid.Row="9" Grid.Column="1" HorizontalAlignment="Left" Margin="5" 
+                          Width="200" Height="30" VerticalAlignment="Center" 
+                          ItemsSource="{Binding MapFiles, Mode=TwoWay}"
+                          DisplayMember="FileName"
+                          IsReadOnly="{Binding IsPermissionReadOnly, Mode=OneTime, Source={x:Static WmsApplication:WarehouseCommon.Instance}, UpdateSourceTrigger=PropertyChanged}"
+                          AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True" IsTextEditable="False"  >
+
+            <dxe:ComboBoxEdit.SelectedItem>
+                <Binding Path="SelectedMapFile" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged" ValidatesOnDataErrors="True"/>
+            </dxe:ComboBoxEdit.SelectedItem>
+
+        </dxe:ComboBoxEdit>
+
+        <!-- Location Image -->
+
+        <Image Grid.Row="9" Grid.Column="1" Height="24" Width="24"  Margin="70 0 0 0">
+            <Image.Style>
+                <Style>
+                    <Setter Property="Image.Source" Value="{DynamicResource MapLocationImageStyle}" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding DataContext.IsCoordinatesNull, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" Value="True">
+                            <Setter Property="Image.Source" Value="/Emdep.Geos.Modules.Warehouse;component/Assets/Images/gMapLocationSelected.png" />
+                            <!--<Setter Property="Image.ToolTip" Value="{Binding DataContext.MapLatitudeAndLongitude,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" />-->
+                            <Setter Property="Image.ToolTip" Value="{DynamicResource SetLocation}" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding DataContext.IsCoordinatesNull, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" Value="False">
+                            <Setter Property="Image.ToolTip" Value="{DynamicResource SetLocation}" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Image.Style>
+            <Image.InputBindings>
+                <MouseBinding Gesture="LeftClick" Command="{Binding AddMapLocatorCommand}" />
+            </Image.InputBindings>
+        </Image>
+
+        <Label Grid.Column="0" Grid.Row="10" Margin="5" Content="{DynamicResource AddLocationInuse}" Width="180" Height="30" FontSize="16"></Label>
+        <dxe:ToggleSwitch Grid.Row="10" Grid.Column="1"  IsChecked="{Binding InUse}" Margin="5" ContentPlacement="Inside" Width="55" HorizontalAlignment="Left"
+                          VerticalAlignment="Center"  IsReadOnly="{Binding IsPermissionReadOnly, Mode=OneTime, Source={x:Static WmsApplication:WarehouseCommon.Instance}, UpdateSourceTrigger=PropertyChanged}"
+                           CheckedStateContent="Yes" UncheckedStateContent="No" ToggleSwitchWidth="50" ToggleSwitchHeight="22" IsThreeState="False" />
+
+        <Label Grid.Column="0" Grid.Row="11" Margin="5" Content="{DynamicResource AddLocationIsLeaf}" Width="180" Height="30" FontSize="16"></Label>
+        <dxe:ToggleSwitch Grid.Row="11" Grid.Column="1"  IsChecked="{Binding IsLeaf}" Margin="5" ContentPlacement="Inside" Width="55" HorizontalAlignment="Left"
+                          VerticalAlignment="Center"  IsReadOnly="{Binding IsPermissionReadOnly, Mode=OneTime, Source={x:Static WmsApplication:WarehouseCommon.Instance}, UpdateSourceTrigger=PropertyChanged}"
+                           CheckedStateContent="Yes" UncheckedStateContent="No" ToggleSwitchWidth="50" ToggleSwitchHeight="22" IsThreeState="False" >
+            <dxe:ToggleSwitch.Style>
+                <Style TargetType="{x:Type dxe:ToggleSwitch}">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsLeaf}" Value="1">
+                            <Setter Property="dxe:ToggleSwitch.IsChecked" Value="True"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding IsLeaf}" Value="0">
+                            <Setter Property="dxe:ToggleSwitch.IsChecked" Value="False"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </dxe:ToggleSwitch.Style>
+
+        </dxe:ToggleSwitch>
+
+        <Button Content="{DynamicResource AddLocationAccept}"  FontSize="16" Height="30" Grid.Column="0" Grid.Row="13"
+                            Width="100"  Style="{DynamicResource Button16Style}" Margin="20"
+                            Command="{Binding AddLocationAcceptCommand}" IsEnabled="{Binding Source={x:Static WmsApplication:WarehouseCommon.Instance}, Path=IsPermissionEnabled}"  />
+        <Button Content="{DynamicResource AddLocationCancel}" Grid.Column="1" Grid.Row="13"
+                Command="{Binding LocationViewCancelButtonCommand}"  
+                FontSize="16" Margin="0 0 170 0" Height="30" Width="100" Style="{DynamicResource Button16Style}"/>
+
+
+    </Grid>
+</dxwui:WinUIDialogWindow>

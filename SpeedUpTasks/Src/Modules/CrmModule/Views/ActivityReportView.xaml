@@ -1,0 +1,189 @@
+﻿<dxwui:WinUIDialogWindow x:Class="Emdep.Geos.Modules.Crm.Views.ActivityReportView"
+                         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                         xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                         xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"    
+                         xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+                         xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors" 
+                         xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+                         xmlns:ViewModels="clr-namespace:Emdep.Geos.Modules.Crm.ViewModels"
+                         xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+                         xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+                         xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+                         xmlns:Validation ="clr-namespace:Emdep.Geos.UI.Validations;assembly=Emdep.Geos.UI.Validations"
+                         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+                         xmlns:behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+                         xmlns:sys="clr-namespace:System;assembly=mscorlib"
+                         mc:Ignorable="d" 
+                         d:DesignHeight="300" d:DesignWidth="350"
+                         Title="{DynamicResource ActivityReportHeader}"
+                         TitleStyle="{DynamicResource WinUIDialogWindowTitleStyle}" >
+
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape"  Command="{Binding ActivityReportCancelButtonCommand}"/>
+    </dxwui:WinUIDialogWindow.InputBindings>
+
+    <dxmvvm:Interaction.Behaviors>
+        <dxmvvm:SaveFileDialogService Title="Save Excel Report"/>
+    </dxmvvm:Interaction.Behaviors>
+
+    <dxwui:WinUIDialogWindow.Resources>
+        <!--<sys:String x:Key="ShortDateTimeFormat">dd/MM/yyyy hh:mm tt</sys:String>
+        <sys:String x:Key="ShortTimeFormat">hh:mm tt</sys:String>
+        <sys:String x:Key="ShortDateFormat">dd/MM/yyyy</sys:String>-->
+    </dxwui:WinUIDialogWindow.Resources>
+
+    <Grid HorizontalAlignment="Center">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="35"/>
+            <RowDefinition Height="35"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="35"/>
+            <RowDefinition Height="35"/>
+            <RowDefinition Height="35"/>
+            <RowDefinition Height="50"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="130"/>
+            <ColumnDefinition Width="180"/>
+        </Grid.ColumnDefinitions>
+
+        <!--From date-->
+        <Label Content= "{DynamicResource EditActivityFrom}" Style="{DynamicResource Label16Style}" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" />
+        <dxe:DateEdit Grid.Row="0" Grid.Column="1" Style="{DynamicResource BaseUniversalStyle}" Height="30"
+                      ShowClearButton="False"
+                      MinValue="{Binding DataContext.MinDate, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"
+                      MaxValue="{Binding DataContext.MaxDate, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"
+                      Mask="{Binding CultureInfo.CurrentCulture.DateTimeFormat.YearMonthPattern}" 
+                      MaskUseAsDisplayFormat="True"
+                      HorizontalAlignment="Stretch"  VerticalAlignment="Top" IsTextEditable="False" 
+                      HorizontalContentAlignment="Right" InvalidValueBehavior="AllowLeaveEditor">
+            <dxe:DateEdit.EditValue>
+                <Binding Path="DataContext.FromDate" RelativeSource="{RelativeSource AncestorType=dxwui:WinUIDialogWindow}" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                    <Binding.ValidationRules>
+                        <Validation:ActivityValidation FieldName="FromDate"/>
+                    </Binding.ValidationRules>
+                </Binding>
+            </dxe:DateEdit.EditValue>
+        </dxe:DateEdit>
+
+        <!--To date-->
+        <Label Content= "{DynamicResource EditActivityTo}" Grid.Row="1" Grid.Column="0" HorizontalAlignment="Left" Style="{DynamicResource Label16Style}"/>
+        <dxe:DateEdit Grid.Row="1" Grid.Column="1" Style="{DynamicResource BaseUniversalStyle}" Height="30"
+                      ShowClearButton="False"
+                      MinValue="{Binding DataContext.MinDate, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"
+                      MaxValue="{Binding DataContext.MaxDate, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"
+                      Mask="{Binding CultureInfo.CurrentCulture.DateTimeFormat.YearMonthPattern}" MaskUseAsDisplayFormat="True"
+                      HorizontalAlignment="Stretch" VerticalAlignment="Top" IsTextEditable="False" 
+                      HorizontalContentAlignment="Right" InvalidValueBehavior="AllowLeaveEditor"
+                      ValidateOnEnterKeyPressed="True" ValidateOnTextInput="True">
+            <dxe:DateEdit.EditValue>
+                <Binding Path="DataContext.ToDate" RelativeSource="{RelativeSource AncestorType=dxwui:WinUIDialogWindow}" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay"
+                         ValidatesOnDataErrors="True" >
+                    <Binding.ValidationRules>
+                        <Validation:ActivityValidation FieldName="ToDate"/>
+                    </Binding.ValidationRules>
+                </Binding>
+            </dxe:DateEdit.EditValue>
+        </dxe:DateEdit>
+
+        <!--SalesOwner-->
+        <Label Grid.Row="2" Grid.Column="0" Content="{DynamicResource ActivityReportSalesOwner}" Style="{DynamicResource Label16Style}" HorizontalAlignment="Stretch" VerticalAlignment="Center"
+               Visibility="{Binding SalesOwnerVisibility}"/>
+
+        <dxe:ComboBoxEdit Style="{DynamicResource ComboBoxEditStyle}" Height="30"
+                          Grid.Column="1" Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+                          ItemsSource="{Binding UserManagerDtlList,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                          EditValue="{Binding SelectedUserManagerDtl,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,ValidatesOnDataErrors=True}"
+                          DisplayMember="User.FullName"  Visibility="{Binding SalesOwnerVisibility}" Margin="0,0,0,5" >
+            <dxe:ComboBoxEdit.StyleSettings>
+                <dxe:CheckedComboBoxStyleSettings />
+            </dxe:ComboBoxEdit.StyleSettings>
+            <dxmvvm:Interaction.Triggers>
+                <dxmvvm:EventToCommand EventName="PopupClosed"
+                                       Command="{Binding DataContext.SalesOwnerPopupClosedCommand, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" 
+                                       PassEventArgsToCommand="True"/>
+            </dxmvvm:Interaction.Triggers>
+        </dxe:ComboBoxEdit>
+
+        <!--BusinessUnit-->
+        <Label Content="{DynamicResource ActivityReportBusinessUnit}"  Grid.Column="0" Grid.Row="3" Style="{DynamicResource Label16Style}" HorizontalAlignment="Stretch" VerticalAlignment="Center" />
+        <dxe:ComboBoxEdit Style="{DynamicResource ComboBoxEditStyle}" 
+                          Grid.Column="1" Grid.Row="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+                          ItemsSource="{Binding BusinessUnitList}" DisplayMember="Value" 
+                          Margin="0,0,0,5" IsTextEditable="False" ValidateOnTextInput="False" AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True">
+            <dxe:ComboBoxEdit.ItemContainerStyle>
+                <Style TargetType="dxe:ComboBoxEditItem">
+                    <Setter Property="IsEnabled" Value="{Binding InUse}" />
+                </Style>
+            </dxe:ComboBoxEdit.ItemContainerStyle>
+            <dxe:ComboBoxEdit.SelectedIndex>
+                <Binding Path="SelectedIndexBusinessUnit"  ValidatesOnDataErrors="False" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                    <!--<Binding.ValidationRules>
+                        <Validation:ActivityReportValidation FieldName="SelectedIndexBusinessUnit" ValidationStep="UpdatedValue" />
+                    </Binding.ValidationRules>-->
+                </Binding>
+            </dxe:ComboBoxEdit.SelectedIndex>
+        </dxe:ComboBoxEdit>
+
+        <!--Account-->
+        <Label Content="{DynamicResource ActivityReportAccount}"  Grid.Column="0" Grid.Row="4" Style="{DynamicResource Label16Style}" HorizontalAlignment="Stretch" VerticalAlignment="Center" />
+        <dxe:ComboBoxEdit Style="{DynamicResource ComboBoxEditStyle}" 
+                          Grid.Column="1" Grid.Row="4" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+                          ItemsSource="{Binding AccountList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" DisplayMember="GroupPlantName" 
+                          Margin="0,0,0,5" IsTextEditable="False" ValidateOnTextInput="False" AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True">
+            <dxe:ComboBoxEdit.SelectedIndex>
+                <Binding Path="SelectedIndexAccount"  ValidatesOnDataErrors="False" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                    <!--<Binding.ValidationRules>
+                        <Validation:ActivityReportValidation FieldName="SelectedIndexAccount" ValidationStep="UpdatedValue" />
+                    </Binding.ValidationRules>-->
+                </Binding>
+            </dxe:ComboBoxEdit.SelectedIndex>
+        </dxe:ComboBoxEdit>
+
+        <!--Contact-->
+        <Label Content="{DynamicResource ActivityReportContact}"  Grid.Column="0" Grid.Row="5" Style="{DynamicResource Label16Style}" HorizontalAlignment="Stretch" VerticalAlignment="Center" />
+        <dxe:ComboBoxEdit Style="{DynamicResource ComboBoxEditStyle}" 
+                          Grid.Column="1" Grid.Row="5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+                          ItemsSource="{Binding ContactList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" DisplayMember="FullName" 
+                          Margin="0,0,0,5" IsTextEditable="False" ValidateOnTextInput="False" AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True">
+            <dxe:ComboBoxEdit.SelectedIndex>
+                <Binding Path="SelectedIndexContact"  ValidatesOnDataErrors="False" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                    <!--<Binding.ValidationRules>
+                        <Validation:ActivityReportValidation FieldName="SelectedIndexAccount" ValidationStep="UpdatedValue" />
+                    </Binding.ValidationRules>-->
+                </Binding>
+            </dxe:ComboBoxEdit.SelectedIndex>
+        </dxe:ComboBoxEdit>
+
+        <StackPanel Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2"
+                    HorizontalAlignment="Center" 
+                    Orientation="Horizontal"
+                    Margin="20,0,0,0"
+                    Width="290">
+
+            <Button Content="{DynamicResource LeadsAddViewAccept}"
+                    Command="{Binding ActivityReportAcceptButtonCommand}"
+                    Height="30"
+                    Width="100"
+                    Margin="15,0,30,0"
+                    Style="{DynamicResource Button16Style}"
+                    VerticalAlignment="Bottom" />
+
+            <Button Content="{DynamicResource LeadsAddViewCancel}"
+                    Command="{Binding ActivityReportCancelButtonCommand}" 
+                    Height="30"
+                    Width="100"
+                    Margin="30,0,0,0"
+                    Style="{DynamicResource Button16Style}"
+                    VerticalAlignment="Bottom" />
+        </StackPanel>
+
+    </Grid>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="KeyDown">
+            <behaviors:InvokeDelegateCommandAction Command="{Binding CommandTextInput}" CommandParameter="{Binding Path=InvokeParameter, RelativeSource={RelativeSource Self}}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+</dxwui:WinUIDialogWindow>

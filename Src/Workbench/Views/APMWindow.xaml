@@ -1,0 +1,69 @@
+﻿<UserControl x:Class="Workbench.Views.APMWindow"
+              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"
+            xmlns:Views="clr-namespace:Emdep.Geos.Modules.APM.Views;assembly=Emdep.Geos.Modules.APM"
+             xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+             xmlns:local="clr-namespace:Workbench.Views"
+             xmlns:ViewModels="clr-namespace:Workbench.ViewModels"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+
+    <UserControl.DataContext>
+        <ViewModels:APMWindowViewModel />
+    </UserControl.DataContext>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+
+        <TextBlock FontSize="24" VerticalAlignment="Center" Margin="50,0,0,0">
+        <Run Text="{Binding ModuleShortName}" Foreground="#061C3D" FontWeight="SemiBold"/>
+        <Run Text="{Binding ModuleName}" Foreground="#42526B"/>
+        </TextBlock>
+
+        <dxwui:PageAdornerControl  Height="50"
+                       Grid.Row="0" Grid.RowSpan="2" Grid.Column="0"
+                       Visibility="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=TileBarVisibility}"
+                       VerticalAlignment="Top" HorizontalAlignment="Left" Padding="-15,-18,0,0" >
+            <dxwui:PageAdornerControl.HeaderTemplate>
+                <DataTemplate>
+                </DataTemplate>
+            </dxwui:PageAdornerControl.HeaderTemplate>
+        </dxwui:PageAdornerControl>
+
+        <Button Grid.Row="0" Grid.Column="1" Content="X" Height="20"
+                Command="{Binding HideTileBarButtonClickCommand}"
+                VerticalAlignment="Top"
+                Background="Transparent"
+                BorderBrush="Transparent"
+                BorderThickness="0"
+                Width="20">
+            <Button.ToolTip>
+                <TextBlock Text="{Binding ShowHideMenuButtonToolTip}"/>
+            </Button.ToolTip>
+            <Button.ContentTemplate>
+                <DataTemplate>
+                    <Image Height="20"
+                           Width="20"
+                           Margin="-10"
+                           VerticalAlignment="Stretch"
+                           HorizontalAlignment="Stretch"
+                           Style="{DynamicResource TileBarButtonImageStyle}" />
+                </DataTemplate>
+            </Button.ContentTemplate>
+        </Button>
+
+        <Views:APMMainWindow Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" />
+
+    </Grid>
+</UserControl>

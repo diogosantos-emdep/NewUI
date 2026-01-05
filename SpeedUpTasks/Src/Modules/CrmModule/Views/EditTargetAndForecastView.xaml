@@ -1,0 +1,159 @@
+﻿<dxwui:WinUIDialogWindow
+                        x:Class="Emdep.Geos.Modules.Crm.Views.EditTargetAndForecastView"
+                        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                        xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+                        xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+                        xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+                        xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+                        xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+                        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+                        xmlns:Validation ="clr-namespace:Emdep.Geos.UI.Validations;assembly=Emdep.Geos.UI.Validations"
+                         xmlns:behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+                        mc:Ignorable="d" 
+                        d:DesignHeight="300" d:DesignWidth="300"
+                        Title="{DynamicResource EditTargetAndForecastViewTitle}"
+                        TitleStyle="{DynamicResource WinUIDialogWindowTitleStyle}"
+                        Style="{DynamicResource WinUIDialogWindowStyle}">
+
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape"  Command="{Binding EditTargetAndForecastViewCancelButtonCommand}"/>
+    </dxwui:WinUIDialogWindow.InputBindings>
+
+    <Grid HorizontalAlignment="Center">
+        <Grid.Resources>
+            <Style TargetType="GroupBox">
+                <Setter Property="Margin" Value="4 2"/>
+                <Setter Property="HeaderTemplate">
+                    <Setter.Value>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding}" FontWeight="Medium"/>
+                        </DataTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="TabItemStyle" TargetType="dx:DXTabItem">
+                <Setter Property="Header" Value="{Binding Year }"/>
+                <!--<Setter Property="Content" Value="{Binding}"/>-->
+            </Style>
+            <!--<DataTemplate x:Key="TabItemHeaderTemplate">
+                <TextBlock Text="{Binding}" FontWeight="Medium"/>
+            </DataTemplate>-->
+            <DataTemplate x:Key="TabItemContentTemplate">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="100"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Row="0" Grid.Column="0" Content="{DynamicResource EditTargetAndForecastViewLabelTarget}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                    <dxe:TextEdit  Text="{Binding TargetAmount}"
+                                   MaskType="Numeric" Grid.Row="0" Grid.Column="1" Width="100" Height="30" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,5,0"
+                                   >
+
+                        <dxmvvm:Interaction.Behaviors>
+                            <dxmvvm:EventToCommand EventName="EditValueChanged" Command="{Binding DataContext.TargetAmountChangedCommand,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" PassEventArgsToCommand="True"/>
+                        </dxmvvm:Interaction.Behaviors>
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="LostFocus">
+                                <i:InvokeCommandAction Command="{Binding DataContext.TargetAmountLostFocusCommand,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"/>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                    </dxe:TextEdit>
+
+                    <dxe:ComboBoxEdit Grid.Row="0" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" Height="30" Width="100" DisplayMember="Name" 
+                                     ItemsSource="{Binding DataContext.Currencies,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" 
+                                     SelectedItem="{Binding DataContext.SelectedCurrency,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"
+                                      AutoComplete="True" ValidateOnTextInput="True" ImmediatePopup="True" IncrementalFiltering="True">
+                        <dxmvvm:Interaction.Behaviors>
+                            <dxmvvm:EventToCommand EventName="EditValueChanging" Command="{Binding DataContext.TargetCurrencyChangedCommand,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" PassEventArgsToCommand="True"/>
+                        </dxmvvm:Interaction.Behaviors>
+                    </dxe:ComboBoxEdit>
+
+                    <Label Grid.Row="1" Grid.Column="0" Content="{DynamicResource CurrencyRateDate}" Width="145" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,5,0,0"/>
+                    <dxe:DateEdit Margin="0,5,0,0" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Height="30" Width="175" HorizontalAlignment="Left" VerticalAlignment="Center" IsTextEditable="False" ShowClearButton="False"
+                                 EditValue="{Binding ExchangeRateDate}"
+                                  MinValue="{Binding DataContext.CurrencyRateMinDate,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"
+                                  MaxValue="{Binding DataContext.CurrencyRateMaxDate,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}">
+                        <dxmvvm:Interaction.Behaviors>
+                            <dxmvvm:EventToCommand EventName="EditValueChanging" Command="{Binding DataContext.CurrencyRateDateEditValueChangingCommand,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" PassEventArgsToCommand="True"/>
+                        </dxmvvm:Interaction.Behaviors>
+                    </dxe:DateEdit>
+                    <StackPanel Orientation="Horizontal" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,5,0,0">
+                        <dxe:TextEdit FontWeight="Bold" ShowBorder="False" IsReadOnly="True"
+                          FontSize="22" HorizontalAlignment="Stretch" VerticalAlignment="Center" MaskType="Numeric" Mask="n2" MaskUseAsDisplayFormat="True"  Margin="0,0,5,3">
+                            <Binding Path="TargetAmountWithExchangeRate" Mode="TwoWay"   UpdateSourceTrigger="PropertyChanged" ValidatesOnDataErrors="True">
+                                <Binding.ValidationRules>
+                                    <Validation:UserValidation FieldName="TargetAmountWithExchangeRate" ValidationStep="UpdatedValue" />
+                                </Binding.ValidationRules>
+                            </Binding>
+                        </dxe:TextEdit>
+                        <TextBlock Text="{Binding DataContext.ToCurrency,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" FontWeight="Bold"
+                          FontSize="22" HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="2,0,0,3"/>
+                    </StackPanel>
+                </Grid>
+            </DataTemplate>
+        </Grid.Resources>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="50"/>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <dx:DXTabControl Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
+            ItemsSource="{Binding DataContext.SalesTargetAndForcastBySiteList,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow},Mode=TwoWay,
+                                UpdateSourceTrigger=PropertyChanged}" 
+            ItemContainerStyle="{StaticResource TabItemStyle}"            
+            ItemTemplate="{StaticResource TabItemContentTemplate}"
+                          SelectedIndex="{Binding DataContext.TabIndex,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow},Mode=TwoWay,
+                                UpdateSourceTrigger=PropertyChanged}">
+            <dx:DXTabControl.View>
+                <dx:TabControlStretchView        
+                    HideButtonShowMode="NoWhere" 
+                    SingleTabItemHideMode="HideAndShowNewItem"/>
+            </dx:DXTabControl.View>
+        </dx:DXTabControl>
+
+        <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                    HorizontalAlignment="Center" 
+                    Orientation="Horizontal"
+                    Margin="20,0,0,0"
+                    Width="290">
+
+            <Button Content="{DynamicResource EditTargetAndForecastViewAccept}"
+                    Command="{Binding EditTargetAndForecastViewAcceptButtonCommand}"
+                    Height="30"
+                    Width="100"
+                    Margin="15,0,30,0"
+                    Style="{DynamicResource Button16Style}"
+                    VerticalAlignment="Bottom" />
+
+            <Button Content="{DynamicResource EditTargetAndForecastViewCancel}"
+                    Command="{Binding EditTargetAndForecastViewCancelButtonCommand}" 
+                    Height="30"
+                    Width="100"
+                    Margin="30,0,0,0"
+                    Style="{DynamicResource Button16Style}"
+                    VerticalAlignment="Bottom" />
+
+        </StackPanel>
+
+    </Grid>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="KeyDown">
+            <behaviors:InvokeDelegateCommandAction Command="{Binding CommandTextInput}" CommandParameter="{Binding Path=InvokeParameter, RelativeSource={RelativeSource Self}}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+</dxwui:WinUIDialogWindow>

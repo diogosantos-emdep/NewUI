@@ -1,0 +1,17 @@
+﻿using DevExpress.Mvvm;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Emdep.Geos.UI.Helper
+{
+ public   class TabContainer
+    {
+        public string Header { get; set; }
+        public string AllowHide { get; set; }
+        public bool IsSelected { get; set; }
+        public ViewModelBase Content { get; set; }
+    }
+}

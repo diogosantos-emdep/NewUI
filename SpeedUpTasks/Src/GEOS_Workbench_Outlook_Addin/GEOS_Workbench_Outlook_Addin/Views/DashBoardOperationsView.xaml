@@ -1,0 +1,576 @@
+﻿<UserControl
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:ViewModels="clr-namespace:Emdep.Geos.Modules.Crm.Views"
+             xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol" 
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:dxc="http://schemas.devexpress.com/winfx/2008/xaml/charts"
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:sysglb="clr-namespace:System.Globalization;assembly=mscorlib"
+             xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+             xmlns:Helper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+             xmlns:UIConverter="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+             x:Class="Emdep.Geos.Modules.Crm.Views.DashBoardOperationsView"
+             xmlns:gif="http://wpfanimatedgif.codeplex.com"
+             mc:Ignorable="d"
+             d:DesignHeight="600" d:DesignWidth="900"
+             Style="{DynamicResource UserControlStyle}">
+
+    <!--<UserControl.DataContext>
+        <ViewModels:DashBoardOperationsViewModel/>
+    </UserControl.DataContext>-->
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="45"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid.Resources>
+            <dxc:BrushOverlayConverter x:Key="brushOverlayConverter"/>
+            <UIConverter:NullToBooleanConverter x:Key="NullToBooleanConverter"/>
+
+            <dxmvvm:ObjectToObjectConverter x:Key="SalesStatusToImageConverter"
+                                            DefaultTarget="/Emdep.Geos.Modules.Crm;component/Assets/Images/NotAvailable.png">
+                <dxmvvm:MapItem Source="0">
+                    <dxmvvm:MapItem.Target>
+                        <BitmapImage UriSource="/Emdep.Geos.Modules.Crm;component/Assets/Images/Target.png"/>
+                    </dxmvvm:MapItem.Target>
+                </dxmvvm:MapItem>
+                <!--<dxmvvm:MapItem Source="1">
+                    <dxmvvm:MapItem.Target>
+                        <BitmapImage UriSource="/Emdep.Geos.Modules.Crm;component/Assets/Images/Forecast.png"/>
+                    </dxmvvm:MapItem.Target>
+                </dxmvvm:MapItem>
+                <dxmvvm:MapItem Source="2">
+                    <dxmvvm:MapItem.Target>
+                        <BitmapImage UriSource="/Emdep.Geos.Modules.Crm;component/Assets/Images/Qualified.png"/>
+                    </dxmvvm:MapItem.Target>
+                </dxmvvm:MapItem>-->
+                <dxmvvm:MapItem Source="3">
+                    <dxmvvm:MapItem.Target>
+                        <BitmapImage UriSource="/Emdep.Geos.Modules.Crm;component/Assets/Images/Quoted.png"/>
+                    </dxmvvm:MapItem.Target>
+                </dxmvvm:MapItem>
+                <dxmvvm:MapItem Source="4">
+                    <dxmvvm:MapItem.Target>
+                        <BitmapImage UriSource="/Emdep.Geos.Modules.Crm;component/Assets/Images/Won.png"/>
+                    </dxmvvm:MapItem.Target>
+                </dxmvvm:MapItem>
+                <!--<dxmvvm:MapItem Source="5">
+                    <dxmvvm:MapItem.Target>
+                        <BitmapImage UriSource="/Emdep.Geos.Modules.Crm;component/Assets/Images/Lost.png"/>
+                    </dxmvvm:MapItem.Target>
+                </dxmvvm:MapItem>
+                <dxmvvm:MapItem Source="6">
+                    <dxmvvm:MapItem.Target>
+                        <BitmapImage UriSource="/Emdep.Geos.Modules.Crm;component/Assets/Images/Rfq.png"/>
+                    </dxmvvm:MapItem.Target>
+                </dxmvvm:MapItem>-->
+            </dxmvvm:ObjectToObjectConverter>
+
+            <DataTemplate x:Key="itemTemplate">
+                <dxlc:GroupBox
+                                x:Name="groupsamplename"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                                Content="{Binding}"
+                                FlowDirection="LeftToRight"
+                                MaximizeElementVisibility="Hidden">
+                    <dxlc:GroupBox.HeaderTemplate>
+                        <DataTemplate>
+                            <Grid Margin="0,0,-28,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock x:Name="txtHeader"
+                                           Grid.Column="0"
+                                           Margin="-10,0,0,0"
+                                           HorizontalAlignment="Left"
+                                           Style="{DynamicResource TextBlock14Style}"
+                                           Text="{Binding DataContext.Value,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" />
+                            </Grid>
+                        </DataTemplate>
+                    </dxlc:GroupBox.HeaderTemplate>
+                    <dxlc:GroupBox.ContentTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <!--Quote-->
+                                <Image Grid.Row="0" Grid.Column="0" Margin="2,2,2,2"  Width="24" Height="24"
+                                       RenderOptions.BitmapScalingMode="NearestNeighbor"
+                                       Source="{Binding DataContext.SalesStatusTypeDetail[0].IdSalesStatusType,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}, Converter={StaticResource SalesStatusToImageConverter}}">
+                                    <Image.ToolTip>
+                                        <TextBlock Text="QUOTED"/>
+                                    </Image.ToolTip>
+                                </Image>
+                                <dxe:TextEdit Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" TextWrapping="Wrap" Margin="3,0,0,0"
+                                              IsPrintingMode="True" DisplayFormatString="C"
+                                              EditValue="{Binding DataContext.SalesStatusTypeDetail[0].TotalAmount,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}"/>
+
+                                <!--Won-->
+                                <Image Grid.Row="1" Grid.Column="0" Margin="2,2,2,2"  Width="24" Height="24" 
+                                       RenderOptions.BitmapScalingMode="NearestNeighbor"
+                                       Source="{Binding DataContext.SalesStatusTypeDetail[1].IdSalesStatusType,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}, Converter={StaticResource SalesStatusToImageConverter}}">
+                                    <Image.ToolTip>
+                                        <TextBlock Text="WON"/>
+                                    </Image.ToolTip>
+                                </Image>
+                                <dxe:TextEdit Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" TextWrapping="Wrap" Margin="3,0,0,0"
+                                              IsPrintingMode="True" DisplayFormatString="C"
+                                              EditValue="{Binding DataContext.SalesStatusTypeDetail[1].TotalAmount,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}"/>
+
+                                <!--Target-->
+                                <Image Grid.Row="2" Grid.Column="0" Margin="2,2,2,2"  Width="24" Height="24"
+                                       RenderOptions.BitmapScalingMode="NearestNeighbor" 
+                                       Source="{Binding DataContext.SalesStatusTypeDetail[2].IdSalesStatusType,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}, Converter={StaticResource SalesStatusToImageConverter}}">
+                                    <Image.ToolTip>
+                                        <TextBlock Text="TARGET"/>
+                                    </Image.ToolTip>
+                                </Image>
+                                <dxe:TextEdit Grid.Row="2" Grid.Column="1" VerticalAlignment="Center" TextWrapping="Wrap" Margin="3,0,0,0"
+                                              IsPrintingMode="True" DisplayFormatString="C" 
+                                              EditValue="{Binding DataContext.SalesStatusTypeDetail[2].TotalAmount,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}"/>
+
+                                <!--Business Unit Chart-->
+                                <dxc:ChartControl Name="BUChartControl" BorderThickness="0" AnimationMode="OnDataChanged"
+                                                  DataSource="{Binding DataContext.Tag,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}"
+                                                  Grid.Row="0" Grid.Column="2" Grid.RowSpan="3" 
+                                                  Width="100" Height="100">
+                                    <dxmvvm:Interaction.Triggers>
+                                        <dxmvvm:EventToCommand EventName="CustomDrawSeriesPoint" 
+                                                               Command="{Binding DataContext.PieChartDrawSeriesPointCommand,RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                                               PassEventArgsToCommand="True"/>
+                                    </dxmvvm:Interaction.Triggers>
+                                    <dxc:ChartControl.Annotations>
+                                        <dxc:Annotation Background="Transparent" BorderBrush="Transparent">
+                                            <dxc:Annotation.ContentTemplate>
+                                                <DataTemplate>
+                                                    <dxe:TextEdit EditValue="{Binding Path=DataContext.Percentage,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" DisplayFormatString="{}{0}%" IsPrintingMode="True" Style="{DynamicResource CustomStyle}"/>
+                                                </DataTemplate>
+                                            </dxc:Annotation.ContentTemplate>
+                                            <dxc:Annotation.AnchorPoint>
+                                                <dxc:ChartAnchorPoint X="50" Y="50"/>
+                                            </dxc:Annotation.AnchorPoint>
+                                            <dxc:Annotation.ShapePosition>
+                                                <dxc:RelativePosition Angle="0" ConnectorLength="0"/>
+                                            </dxc:Annotation.ShapePosition>
+                                        </dxc:Annotation>
+                                    </dxc:ChartControl.Annotations>
+                                    <dxc:ChartControl.Diagram>
+                                        <dxc:SimpleDiagram2D Margin="-15">
+                                            <dxc:SimpleDiagram2D.Series>
+                                                <dxc:PieSeries2D ToolTipPointPattern="{}{A} : {VP:p2}" AnimationAutoStartMode="SetStartState"
+                                                                 ArgumentDataMember="Name" HoleRadiusPercent="60"
+                                                                 ValueDataMember="Percentage">
+                                                    <!--ColorDataMember="Color">-->
+
+                                                    <dxc:PieSeries2D.PointAnimation>
+                                                        <dxc:Pie2DFlyInAnimation Duration="0:0:3" PointOrder="Random" />
+                                                    </dxc:PieSeries2D.PointAnimation>
+
+                                                    <dxc:PieSeries2D.Model >
+                                                        <dxc:CustomPie2DModel>
+                                                            <dxc:CustomPie2DModel.PointTemplate>
+                                                                <ControlTemplate >
+                                                                    <Path Stroke="Transparent"  Fill="{Binding PointColor, Converter={StaticResource brushOverlayConverter}}"
+                                                                          Data="{Binding Path=Clip, RelativeSource={RelativeSource TemplatedParent}}">
+                                                                    </Path>
+                                                                </ControlTemplate>
+                                                            </dxc:CustomPie2DModel.PointTemplate>
+                                                        </dxc:CustomPie2DModel>
+                                                    </dxc:PieSeries2D.Model>
+                                                </dxc:PieSeries2D>
+                                            </dxc:SimpleDiagram2D.Series>
+                                        </dxc:SimpleDiagram2D>
+                                    </dxc:ChartControl.Diagram>
+
+                                    <dxc:ChartControl.Legend>
+                                        <dxc:Legend Visible="False" />
+                                    </dxc:ChartControl.Legend>
+
+                                </dxc:ChartControl>
+                            </Grid>
+                        </DataTemplate>
+                    </dxlc:GroupBox.ContentTemplate>
+                </dxlc:GroupBox>
+            </DataTemplate>
+            <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+
+            <!--<Setter Property="Visibility" Value="Collapsed"/>
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="HorizontalAlignment" Value="Center" />-->
+
+            <!--<Style TargetType="{x:Type dxg:GridCardHeaderControl}">
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate>
+                            <Border Background="#FF515151" Height="1"/>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>-->
+
+            <Style x:Key="DashedLine" TargetType="{x:Type dxc:LineSeries2D}">
+                <Setter Property="LineStyle">
+                    <Setter.Value>
+                        <dxc:LineStyle Thickness="2">
+                            <dxc:LineStyle.DashStyle>
+                                <DashStyle Dashes="2,2,2,2" />
+                            </dxc:LineStyle.DashStyle>
+                        </dxc:LineStyle>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <DataTemplate x:Key="CardHeaderTemplate">
+                <TextBlock HorizontalAlignment="Center" Text="{Binding Path=(dxg:RowData.RowData).Row.People.FullName, RelativeSource={RelativeSource Self}}" />
+            </DataTemplate>
+
+            <DataTemplate x:Key="CardContentTemplate">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="120"/>
+                        
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <dxc:ChartControl Name="CardContentTemplateChartControl" BorderThickness="0" AnimationMode="OnDataChanged"
+                                      Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
+                                      DataSource="{Binding Path=(dxg:RowData.RowData).Row.Tag, RelativeSource={RelativeSource Self}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      Width="100" Height="100" >
+                        <dxmvvm:Interaction.Triggers>
+                            <dxmvvm:EventToCommand EventName="Loaded" Command="{Binding View.DataContext.PieChartSalesTeamLoadCommand}" PassEventArgsToCommand="True"/>
+                            <dxmvvm:EventToCommand EventName="CustomDrawSeriesPoint" Command="{Binding View.DataContext.PieChartDrawSeriesPointCommand}" PassEventArgsToCommand="True"/>
+                        </dxmvvm:Interaction.Triggers>
+                        <dxc:ChartControl.Annotations>
+                            <dxc:Annotation Background="Transparent" BorderBrush="Transparent">
+                                <dxc:Annotation.ContentTemplate>
+                                    <DataTemplate>
+                                        <dxe:TextEdit EditValue="{Binding Path=(dxg:RowData.RowData).Row.Percentage,RelativeSource={RelativeSource Self}}" DisplayFormatString="{}{0}%" IsPrintingMode="True" Style="{DynamicResource CustomStyle}"/>
+                                    </DataTemplate>
+                                </dxc:Annotation.ContentTemplate>
+                                <dxc:Annotation.AnchorPoint>
+                                    <dxc:ChartAnchorPoint X="50" Y="50"/>
+                                </dxc:Annotation.AnchorPoint>
+                                <dxc:Annotation.ShapePosition>
+                                    <dxc:RelativePosition Angle="0" ConnectorLength="0"/>
+                                </dxc:Annotation.ShapePosition>
+                            </dxc:Annotation>
+                        </dxc:ChartControl.Annotations>
+                        <dxc:ChartControl.Diagram>
+                            <dxc:SimpleDiagram2D Margin="-15">
+                                <dxc:SimpleDiagram2D.Series>
+                                    <dxc:PieSeries2D ToolTipPointPattern="{}{A} : {VP:p2}" AnimationAutoStartMode="SetStartState"
+                                                     ArgumentDataMember="Name" HoleRadiusPercent="60"
+                                                     ValueDataMember="Percentage">
+                                        <!--ColorDataMember="Color">-->
+                                        <dxc:PieSeries2D.PointAnimation>
+                                            <dxc:Pie2DFlyInAnimation Duration="0:0:3" PointOrder="Random" />
+                                        </dxc:PieSeries2D.PointAnimation>
+                                        <!--<dxc:PieSeries2D.Model>
+                                            <dxc:FlatPie2DModel />
+                                        </dxc:PieSeries2D.Model>-->
+                                        <dxc:PieSeries2D.Model >
+                                            <dxc:CustomPie2DModel>
+                                                <dxc:CustomPie2DModel.PointTemplate>
+                                                    <ControlTemplate >
+                                                        <ControlTemplate.Triggers>
+                                                            
+                                                        </ControlTemplate.Triggers>
+                                                        <Path Stroke="Transparent" StrokeThickness="0" Fill="{Binding PointColor, Converter={StaticResource brushOverlayConverter}}"
+                                                              Data="{Binding Path=Clip, RelativeSource={RelativeSource TemplatedParent}}">
+                                                        </Path>
+                                                    </ControlTemplate>
+                                                </dxc:CustomPie2DModel.PointTemplate>
+                                            </dxc:CustomPie2DModel>
+                                        </dxc:PieSeries2D.Model>
+                                    </dxc:PieSeries2D>
+                                </dxc:SimpleDiagram2D.Series>
+                            </dxc:SimpleDiagram2D>
+                        </dxc:ChartControl.Diagram>
+                        <dxc:ChartControl.Legend>
+                            <dxc:Legend Visible="False" />
+                        </dxc:ChartControl.Legend>
+
+                    </dxc:ChartControl>
+
+                    <dxe:ImageEdit Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2" ShowMenu="False"
+                                   Width="100" Height="100"
+                                   HorizontalAlignment="Center" Stretch="Fill">
+                        <dxe:ImageEdit.Style>
+                            <Style TargetType="dxe:ImageEdit">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Path=(dxg:RowData.RowData).Row.People.OwnerImage, RelativeSource={RelativeSource Self}, Converter={StaticResource NullToBooleanConverter}}" Value="True">
+                                        <Setter Property="EditValue" Value="{Binding Path=(dxg:RowData.RowData).Row.People.OwnerImage, RelativeSource={RelativeSource Self}}" />
+                                    </DataTrigger>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding Path=(dxg:RowData.RowData).Row.People.OwnerImage, RelativeSource={RelativeSource Self}, Converter={StaticResource NullToBooleanConverter}}" Value="False" />
+                                            <Condition Binding="{Binding Path=(dxg:RowData.RowData).Row.People.IdPersonGender, RelativeSource={RelativeSource Self}}" Value="1" />
+                                        </MultiDataTrigger.Conditions>
+                                        <Setter Property="EditValue" Value="{DynamicResource FemaleUser}" />
+                                    </MultiDataTrigger>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding Path=(dxg:RowData.RowData).Row.People.OwnerImage, RelativeSource={RelativeSource Self}, Converter={StaticResource NullToBooleanConverter}}" Value="False" />
+                                            <Condition Binding="{Binding Path=(dxg:RowData.RowData).Row.People.IdPersonGender, RelativeSource={RelativeSource Self}}" Value="2" />
+                                        </MultiDataTrigger.Conditions>
+                                        <Setter Property="EditValue" Value="{DynamicResource MaleUser}" />
+                                    </MultiDataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </dxe:ImageEdit.Style>
+                    </dxe:ImageEdit>
+
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="{DynamicResource DashboardOpsTarget}" />
+                    <dxe:TextEdit Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="3" HorizontalAlignment="Right"
+                                  EditValue="{Binding Path=(dxg:RowData.RowData).Row.SalesQuotaAmount, RelativeSource={RelativeSource Self}}" 
+                                  DisplayFormatString="C" IsPrintingMode="True"/>
+
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="{DynamicResource DashboardOpsActual}" />
+                    <dxe:TextEdit Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="3" HorizontalAlignment="Right"
+                                  EditValue="{Binding Path=(dxg:RowData.RowData).Row.WonValue, RelativeSource={RelativeSource Self}}" 
+                                  DisplayFormatString="C" IsPrintingMode="True"/>
+
+                    <dxlc:LayoutGroup Grid.Column="0" Grid.ColumnSpan="4" Padding="0,5,0,0" Grid.Row="3" HorizontalAlignment="Stretch" VerticalAlignment="Top"  View="GroupBox" IsCollapsed="False" IsCollapsible="False">
+                        <dxlc:LayoutGroup.HeaderTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="20"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="20"></ColumnDefinition>
+                                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                    </Grid.ColumnDefinitions>
+                                    <Image Grid.Column="0" Margin="-8,0,0,0" HorizontalAlignment="Left" Grid.Row="0" Source="{DynamicResource ActivityTypeAppointmentImageStyle}" Height="16" Width="16" />
+                                    <TextBlock Grid.Column="1" Grid.Row="0" Margin="-8,0,0,0" Text="Appointment" FontWeight ="Bold" HorizontalAlignment="Left" />
+                                </Grid>
+                            </DataTemplate>
+                        </dxlc:LayoutGroup.HeaderTemplate>
+                        <Grid VerticalAlignment="Top" >
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="20"/>
+                                <RowDefinition Height="20"/>
+                                <RowDefinition Height="20"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="40"></ColumnDefinition>
+                                <ColumnDefinition Width="*"></ColumnDefinition>
+                                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                               
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Text="Total " Grid.Column="0" Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding Path=(dxg:RowData.RowData).Row.Total, RelativeSource={RelativeSource Self}}" FontWeight ="Bold" Grid.Column="2" Grid.Row="0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+
+                            <TextBlock Text="YTD" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                            <dxe:ProgressBarEdit  Grid.Column="1" Grid.Row="1" Margin="5 0 0 0"
+                             HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                             Height="15"
+                             Minimum="0" Maximum="100" IsPercent="True" Value="{Binding Path=(dxg:RowData.RowData).Row.YTD, RelativeSource={RelativeSource Self}}" >
+                            </dxe:ProgressBarEdit>
+                            <TextBlock Text="{Binding Path=(dxg:RowData.RowData).Row.YTD, StringFormat={}{0}%,RelativeSource={RelativeSource Self}}" Margin="5 0 0 0" FontWeight ="Bold" Grid.Column="2" Grid.Row="1" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                           
+
+                            <TextBlock Text="Period " Grid.Column="0" Grid.Row="2" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                            <dxe:ProgressBarEdit  Grid.Column="1" Grid.Row="2" Margin="5 0 0 0"
+                             HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                             Height="15"
+                             Minimum="0" Maximum="100" IsPercent="True" Value="{Binding Path=(dxg:RowData.RowData).Row.Period, RelativeSource={RelativeSource Self}}">
+                            </dxe:ProgressBarEdit>
+                            <TextBlock Text="{Binding Path=(dxg:RowData.RowData).Row.Period,StringFormat={}{0}%, RelativeSource={RelativeSource Self}}" FontWeight ="Bold" Grid.Column="2" Grid.Row="2" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5 0 0 0" />
+                          
+                        </Grid>
+                    </dxlc:LayoutGroup>
+                </Grid>
+            </DataTemplate>
+
+        </Grid.Resources>
+
+        <Label Content="{DynamicResource DashboardOpsHeader}" VerticalAlignment="Top" Margin="10,0,0,0" Style="{DynamicResource LabelTitleStyle}" HorizontalAlignment="Left" Grid.Row="0"/>
+        <Image gif:ImageBehavior.RepeatBehavior="Forever" gif:ImageBehavior.AnimatedSource="/Emdep.Geos.Modules.Crm;component/Assets/Images/animatedWarning.gif" Visibility="{Binding IsShowFailedPlantWarning,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,Converter={StaticResource BoolToVis}}" Grid.Column="1" Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,2,5,0" Height="30" Width="30">
+            <Image.ToolTip>
+                <TextBlock Text="{Binding WarningFailedPlants}"/>
+            </Image.ToolTip>
+        </Image>
+
+        <DockPanel  Grid.Row="0" Grid.Column="2"  HorizontalAlignment="Stretch" Margin="0,5,0,0" Height="45"  >
+            <Grid HorizontalAlignment="Right" Width="Auto" Height="30"  >
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="30"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="30"/>
+
+                    <ColumnDefinition Width="70*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="30"/>
+
+                    <ColumnDefinition Width="80*"/>
+                    <ColumnDefinition Width="80*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Plant Owner -->
+                <DockPanel Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=CmbPlantOwnerUsers}" >
+                    <Image Style="{DynamicResource PlantOwnerImageStyle}" Width="24" Height="24" Margin="7,0,3,0" />
+                    <TextBlock Text="{DynamicResource CommonPlantOwner}"  FontWeight="Bold" Margin="5,2,5,0" />
+                </DockPanel>
+
+                <dxe:ComboBoxEdit Style="{DynamicResource ComboBoxEditStyle}" Grid.Column="1" 
+                                      Visibility="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=CmbPlantOwnerUsers}"
+                                      ItemsSource="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=PlantOwnerUsersList}" Margin="5,0,5,0"
+                                      DisplayMember="ShortName"
+                                      EditValue="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=SelectedPlantOwnerUsersList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                    <dxe:ComboBoxEdit.StyleSettings>
+                        <dxe:CheckedComboBoxStyleSettings />
+                    </dxe:ComboBoxEdit.StyleSettings>
+                    <dxmvvm:Interaction.Triggers>
+                        <dxmvvm:EventToCommand EventName="PopupClosed"
+                                               Command="{Binding DataContext.PlantOwnerPopupClosedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                               PassEventArgsToCommand="True"/>
+                    </dxmvvm:Interaction.Triggers>
+                </dxe:ComboBoxEdit>
+
+                <!-- Period -->
+                <DockPanel Grid.Column="3" HorizontalAlignment="Center" VerticalAlignment="Center" >
+                    <Image Style="{DynamicResource CalendarImageStyle}" Width="16" Height="16" Margin="7,0,3,0" />
+                    <TextBlock Text="{DynamicResource AnnualSalesPerformanceViewPeriod}"  FontWeight="Bold" Margin="5,0,0,0" />
+                </DockPanel>
+
+                <TextBlock Text="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=SelectedyearStarDate, StringFormat=d, ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="4" Margin="3,0,0,0"/>
+                <TextBlock Text=" - " HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="5" FontWeight="Bold"/>
+                <TextBlock Text="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=SelectedyearEndDate, StringFormat=d, ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="6"/>
+
+                <!-- Remaining -->
+                <DockPanel Grid.Column="8" HorizontalAlignment="Center" VerticalAlignment="Center" >
+                    <Image Style="{DynamicResource WatchImageStyle}" Width="16" Height="16" Margin="3,0,3,0" />
+                    <TextBlock Text="{DynamicResource AnnualSalesPerformanceViewRemaining}" FontWeight="Bold" Margin="5,0,0,0" />
+                </DockPanel>
+                <DockPanel Grid.Column="9" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0,0,0" >
+                    <TextBlock Text="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=RemainingDays}"  />
+                    <TextBlock Text="{DynamicResource AnnualSalesPerformanceViewDays}" Margin="3,0,5,0" />
+                </DockPanel>
+
+                <Button Content=" " Height="37.9" Width="38" Grid.Column="10" Command="{Binding RefreshDashboardOperationsViewCommand}" HorizontalAlignment="Right" Margin="0,-7.7,5,0">
+                    <Button.ToolTip>
+                        <TextBlock Text="{DynamicResource ButtonRefresh}"/>
+                    </Button.ToolTip>
+                    <Button.ContentTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Image Style="{ DynamicResource RefreshButtonImageStyle}" Grid.Column="0" Height="24" Width="24" Margin="-10"/>
+                            </Grid>
+                        </DataTemplate>
+                    </Button.ContentTemplate>
+                </Button>
+            </Grid>
+        </DockPanel>
+
+        <dxlc:LayoutControl Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3">
+            <dxlc:LayoutGroup Name="Root" Orientation="Horizontal">
+
+                <dxlc:LayoutGroup Orientation="Vertical">
+
+                    <!--Sale Status By Month-->
+                    <dxlc:LayoutGroup Orientation="Vertical" 
+                                  Header="{DynamicResource DashboardOpsSaleStatusByMonth}"
+                                  View="GroupBox" IsCollapsible="True" IsCollapsed="False">
+                        <dxc:ChartControl BorderThickness="0" x:Name="ChartSalesStatusByMonths"
+                                      HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                      DataSource="{Binding DataTableSalesStatusByMonthGraph, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                            <dxc:ChartControl.Legend>
+                                <dxc:Legend HorizontalPosition="RightOutside" />
+                            </dxc:ChartControl.Legend>
+                            <dxmvvm:Interaction.Triggers>
+                                <dxmvvm:EventToCommand EventName="Loaded" Command="{Binding ChartSalesStatusLoadCommand}" PassEventArgsToCommand="True"/>
+                                <dxmvvm:EventToCommand EventName="CustomDrawCrosshair" Command="{Binding ChartSalesStatusCustomDrawCrosshairCommand}" PassEventArgsToCommand="True"/>
+                            </dxmvvm:Interaction.Triggers>
+                        </dxc:ChartControl>
+                    </dxlc:LayoutGroup>
+
+                    <!--Top Customers-->
+                    <dxlc:LayoutGroup Header="{DynamicResource DashboardOpsCustomers}"
+                                      View="GroupBox" IsCollapsible="True" IsCollapsed="False">
+                        <dxc:ChartControl BorderThickness="0" DataSource="{Binding DataTableCustomerGraph, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                            <dxc:ChartControl.Legend>
+                                <dxc:Legend HorizontalPosition="RightOutside" />
+                            </dxc:ChartControl.Legend>
+                            <dxmvvm:Interaction.Triggers>
+                                <dxmvvm:EventToCommand EventName="Loaded" Command="{Binding ChartCustomersLoadCommand}" PassEventArgsToCommand="True"/>
+                                <dxmvvm:EventToCommand EventName="CustomDrawCrosshair" Command="{Binding ChartCustomersCustomDrawCrosshairCommand}" PassEventArgsToCommand="True"/>
+                            </dxmvvm:Interaction.Triggers>
+                        </dxc:ChartControl>
+                    </dxlc:LayoutGroup>
+                </dxlc:LayoutGroup>
+
+                <dxlc:LayoutGroup Orientation="Vertical">
+
+                    <!--Sales Team-->
+                    <dxlc:LayoutGroup Orientation="Vertical" 
+                                      Header="{DynamicResource DashboardOpsSales}"
+                                      View="GroupBox" IsCollapsible="True" IsCollapsed="False">
+                        <dxg:GridControl x:Name="grid"
+                                         VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                                         ItemsSource="{Binding FinalSalesUsersList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                            <dxg:GridControl.View>
+                                <dxg:CardView CardHeaderTemplate="{StaticResource CardHeaderTemplate}" CardTemplate="{StaticResource CardContentTemplate}"
+                                              NavigationStyle="Row" AllowGrouping="False" ShowGroupPanel="False" ShowCardExpandButton="False"
+                                              ShowColumnHeaders="False" ShowSearchPanelMode="Never" />
+                            </dxg:GridControl.View>
+                        </dxg:GridControl>
+                    </dxlc:LayoutGroup>
+
+                    <!--Business Unit-->
+                    <dxlc:LayoutGroup Header="{DynamicResource DashboardOpsBusinessUnits}"
+                                      View="GroupBox" IsCollapsible="True" IsCollapsed="False">
+                        <dxlc:FlowLayoutControl Orientation="Horizontal" Margin="-10"
+                                                ItemsSource="{Binding BusinessUnitList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                ItemTemplate="{StaticResource itemTemplate}">
+                        </dxlc:FlowLayoutControl>
+                    </dxlc:LayoutGroup>
+                </dxlc:LayoutGroup>
+
+            </dxlc:LayoutGroup>
+
+        </dxlc:LayoutControl>
+
+    </Grid>
+</UserControl>

@@ -1,0 +1,2247 @@
+
+-- DROP PROCEDURE IF exists ERM_ExpectedProductionTimeComparisonData_V2690;
+DELIMITER $$
+
+CREATE PROCEDURE `ERM_ExpectedProductionTimeComparisonData_V2690`(
+      IN _StartDate        Date,
+      IN _EndDate          Date,
+      IN _RecordLimit      INT,
+      IN _IdSite           INT,
+      IN _Region           text,
+      IN _IdStage          text,
+      IN _IdTemplate       text,
+      IN _IdCPType         text,
+      IN _DesignSystem     text,
+      IN _Type             text,
+      IN _DSAStatus        text,
+      IN _Numofways        text,
+      IN _NumofDetection   text,
+      IN _NumofOption      text,
+      IN _IdWays           text,
+      IN _IdDetection      text,
+      IN _IdOption         text,
+      IN _CurrentIdStage   text)
+ BEGIN
+         
+  	 
+         DROP TEMPORARY TABLE IF EXISTS temp_IDCounterPart;
+   
+      CREATE TEMPORARY TABLE IF NOT EXISTS temp_IDCounterPart
+      AS
+         (
+           SELECT
+    cpt.IdCounterpart
+      FROM counterpartstracking cpt
+      WHERE
+    Date(cpt.EndDate)>=Date(_StartDate)
+      AND  Date(cpt.EndDate)<=Date(_EndDate)
+       AND cpt.IdStage =_CurrentIdStage
+         )      ;
+   
+      DROP TEMPORARY TABLE IF EXISTS temp_IDCounterPartBY_Detection;
+      if(Trim(_NumofDetection) = ''and Trim(_IdDetection) = '') then 
+      begin     
+   
+      CREATE TEMPORARY TABLE IF NOT EXISTS temp_IDCounterPartBY_Detection
+      AS
+         (
+          SELECT
+   contp.IdCounterpart,
+   dtt.IdDetection,
+   cpdt.NumDetections,
+   dtt.Name
+    FROM ots AS ot
+               INNER JOIN otitems oti ON ot.IdOT = oti.IdOT
+               INNER JOIN counterparts contp ON contp.IdOTItem = oti.IdOTItem
+               INNER JOIN revisionitems ri   ON ri.IdRevisionItem = oti.IdRevisionItem
+              LEFT JOIN cp_detections cpdt ON ri.IdProduct = cpdt.CPProductID -- [pallavi.jadhav][GEOS2-9958][11 11 2025]
+  		   LEFT JOIN detections dtt ON  dtt.IdDetection = cpdt.DetectionID -- [pallavi.jadhav][GEOS2-9958][11 11 2025]
+     INNER JOIN temp_IDCounterPart tcptDetection ON tcptDetection.IdCounterpart=contp.IdCounterpart
+     GROUP BY contp.IdCounterpart
+   
+         )      ;
+   
+         end ;
+         elseif(Trim(_NumofDetection) = '') then
+         begin
+  	       
+  	       
+  	           CREATE TEMPORARY TABLE IF NOT EXISTS temp_IDCounterPartBY_Detection
+      AS
+         (
+          SELECT
+   contp.IdCounterpart,
+   dtt.IdDetection,
+   cpdt.NumDetections,
+   dtt.Name
+    FROM ots AS ot
+               INNER JOIN otitems oti ON ot.IdOT = oti.IdOT
+               INNER JOIN counterparts contp ON contp.IdOTItem = oti.IdOTItem
+               INNER JOIN revisionitems ri   ON ri.IdRevisionItem = oti.IdRevisionItem
+              LEFT JOIN cp_detections cpdt ON ri.IdProduct =cpdt.CPProductID -- [pallavi.jadhav][GEOS2-9958][11 11 2025]
+  		   LEFT JOIN detections dtt ON  dtt.IdDetection= cpdt.DetectionID  -- [pallavi.jadhav][GEOS2-9958][11 11 2025]
+     INNER JOIN temp_IDCounterPart tcptDetectionNo ON tcptDetectionNo.IdCounterpart=contp.IdCounterpart
+     WHERE -- FIND_IN_SET(dtt.IdDetection,  _IdDetection)
+    (FIND_IN_SET(tt.IdDetection, _IdDetection) OR tt.IdDetection IS NULL OR tt.IdDetection = '') -- [pallavi.jadhav][GEOS2-9958][11 11 2025]
+     GROUP BY contp.IdCounterpart
+   
+         )      ;
+  	       
+  	       
+  	       end;
+  	       elseif(Trim(_IdDetection) = '') then
+  	       begin
+  		          CREATE TEMPORARY TABLE IF NOT EXISTS temp_IDCounterPartBY_Detection
+      AS
+         (
+          SELECT
+   contp.IdCounterpart,
+   dtt.IdDetection,
+   cpdt.NumDetections,
+   dtt.Name
+    FROM ots AS ot
+               INNER JOIN otitems oti ON ot.IdOT = oti.IdOT
+               INNER JOIN counterparts contp ON contp.IdOTItem = oti.IdOTItem
+               INNER JOIN revisionitems ri   ON ri.IdRevisionItem = oti.IdRevisionItem
+               LEFT JOIN cp_detections cpdt ON ri.IdProduct =cpdt.CPProductID  -- [pallavi.jadhav][GEOS2-9958][11 11 2025]
+  		   LEFT JOIN detections dtt ON  dtt.IdDetection =cpdt.DetectionID -- [pallavi.jadhav][GEOS2-9958][11 11 2025]
+     INNER JOIN temp_IDCounterPart tcptDET ON tcptDET.IdCounterpart=contp.IdCounterpart
+     AND   -- FIND_IN_SET(cpdt.NumDetections,_NumofDetection)
+      (FIND_IN_SET(cpdt.NumDetections, _NumofDetection) OR cpdt.NumDetections IS NULL OR cpdt.NumDetections = '') -- [pallavi.jadhav][GEOS2-9958][11 11 2025]
+     GROUP BY contp.IdCounterpart
+   
+         )      ;
+  		       end;
+  	       
+  	       
+  	       else
+         begin
+  	       
+  	           CREATE TEMPORARY TABLE IF NOT EXISTS temp_IDCounterPartBY_Detection
+      AS
+         (
+          SELECT
+   contp.IdCounterpart,
+   dtt.IdDetection,
+   cpdt.NumDetections,
+   dtt.Name
+    FROM ots AS ot
+               INNER JOIN otitems oti ON ot.IdOT = oti.IdOT
+               INNER JOIN counterparts contp ON contp.IdOTItem = oti.IdOTItem
+               INNER JOIN revisionitems ri   ON ri.IdRevisionItem = oti.IdRevisionItem
+                LEFT JOIN cp_detections cpdt ON ri.IdProduct =cpdt.CPProductID -- [pallavi.jadhav][GEOS2-9958][11 11 2025]
+  		   LEFT JOIN detections dtt ON  dtt.IdDetection =cpdt.DetectionID -- [pallavi.jadhav][GEOS2-9958][11 11 2025]
+     INNER JOIN temp_IDCounterPart tcptDETNo ON tcptDETNo.IdCounterpart=contp.IdCounterpart
+     WHERE  -- FIND_IN_SET(dtt.IdDetection,  _IdDetection)
+  --  AND  FIND_IN_SET(cpdt.NumDetections,_NumofDetection)
+   (FIND_IN_SET(dtt.IdDetection, _IdDetection) OR dtt.IdDetection IS NULL OR dtt.IdDetection = '') -- [pallavi.jadhav][GEOS2-9958][11 11 2025]
+   AND    (FIND_IN_SET(cpdt.NumDetections, _NumofDetection) OR cpdt.NumDetections IS NULL OR cpdt.NumDetections = '') -- [pallavi.jadhav][GEOS2-9958][11 11 2025]
+     GROUP BY contp.IdCounterpart
+   
+         )      ;
+  	       
+  	       end; 
+  	       
+  	       end if;
+         
+         DROP TEMPORARY TABLE IF EXISTS temp_IDCounterPartBY_OPtion;
+         
+         if(Trim(_NumofOption) = ''and Trim(_IdOption) = '') then 
+         begin
+   
+      CREATE TEMPORARY TABLE IF NOT EXISTS temp_IDCounterPartBY_OPtion
+      AS
+         (
+          SELECT
+   contp.IdCounterpart,
+   dtt.IdDetection,
+   cpdt.NumDetections,
+   dtt.Name
+    FROM ots AS ot
+               INNER JOIN otitems oti ON ot.IdOT = oti.IdOT
+               INNER JOIN counterparts contp ON contp.IdOTItem = oti.IdOTItem
+               INNER JOIN revisionitems ri   ON ri.IdRevisionItem = oti.IdRevisionItem
+               LEFT JOIN cp_detections cpdt on ri.IdProduct = cpdt.CPProductID -- [pallavi.jadhav][GEOS2-9958][11 11 2025]
+            LEFT JOIN detections dtt ON cpdt.DetectionID = dtt.IdDetection -- [pallavi.jadhav][GEOS2-9958][11 11 2025]
+     INNER JOIN temp_IDCounterPart DETtcpt ON DETtcpt.IdCounterpart=contp.IdCounterpart   
+      GROUP BY contp.IdCounterpart
+   
+         )      ;
+         end;
+         elseif(Trim(_NumofOption) = '') then
+         begin
+  	       
+  	       
+      CREATE TEMPORARY TABLE IF NOT EXISTS temp_IDCounterPartBY_OPtion
+      AS
+         (
+          SELECT
+   contp.IdCounterpart,
+   dtt.IdDetection,
+   cpdt.NumDetections,
+   dtt.Name
+    FROM ots AS ot
+               INNER JOIN otitems oti ON ot.IdOT = oti.IdOT
+               INNER JOIN counterparts contp ON contp.IdOTItem = oti.IdOTItem
+               INNER JOIN revisionitems ri   ON ri.IdRevisionItem = oti.IdRevisionItem
+               LEFT JOIN cp_detections cpdt on ri.IdProduct = cpdt.CPProductID -- [pallavi.jadhav][GEOS2-9958][11 11 2025]
+            LEFT JOIN detections dtt ON cpdt.DetectionID = dtt.IdDetection -- [pallavi.jadhav][GEOS2-9958][11 11 2025]
+     INNER JOIN temp_IDCounterPart DETNOtcpt ON DETNOtcpt.IdCounterpart=contp.IdCounterpart
+     WHERE  -- FIND_IN_SET(dtt.IdDetection,  _IdOption)
+   (FIND_IN_SET(dtt.IdDetection, _IdOption) OR dtt.IdDetection IS NULL OR dtt.IdDetection = '') -- [pallavi.jadhav][GEOS2-9958][11 11 2025]
+      GROUP BY contp.IdCounterpart
+   
+         )      ;
+  	       
+  	       
+  	       
+  	       end; 
+  	       
+  	       elseif(Trim(_IdOption) = '') then
+  	       begin
+  		       
+  		           CREATE TEMPORARY TABLE IF NOT EXISTS temp_IDCounterPartBY_OPtion
+      AS
+         (
+          SELECT
+   contp.IdCounterpart,
+   dtt.IdDetection,
+   cpdt.NumDetections,
+   dtt.Name
+    FROM ots AS ot
+               INNER JOIN otitems oti ON ot.IdOT = oti.IdOT
+               INNER JOIN counterparts contp ON contp.IdOTItem = oti.IdOTItem
+               INNER JOIN revisionitems ri   ON ri.IdRevisionItem = oti.IdRevisionItem
+               LEFT JOIN cp_detections cpdt on ri.IdProduct = cpdt.CPProductID -- [pallavi.jadhav][GEOS2-9958][11 11 2025]
+            LEFT JOIN detections dtt ON cpdt.DetectionID = dtt.IdDetection -- [pallavi.jadhav][GEOS2-9958][11 11 2025]
+     INNER JOIN temp_IDCounterPart NoOptiontcpt ON NoOptiontcpt.IdCounterpart=contp.IdCounterpart
+     AND  -- FIND_IN_SET(cpdt.NumDetections, _NumofOption)
+   (FIND_IN_SET(cpdt.NumDetections, _NumofOption) OR cpdt.NumDetections IS NULL OR cpdt.NumDetections = '')  -- [pallavi.jadhav][GEOS2-9958][11 11 2025]
+    
+      GROUP BY contp.IdCounterpart
+   
+         )      ;
+  		       
+  		       
+  		       end;
+  	       
+  	       
+  	       
+  	       else
+         begin
+   
+      CREATE TEMPORARY TABLE IF NOT EXISTS temp_IDCounterPartBY_OPtion
+      AS
+         (
+          SELECT
+   contp.IdCounterpart,
+   dtt.IdDetection,
+   cpdt.NumDetections,
+   dtt.Name
+    FROM ots AS ot
+               INNER JOIN otitems oti ON ot.IdOT = oti.IdOT
+               INNER JOIN counterparts contp ON contp.IdOTItem = oti.IdOTItem
+               INNER JOIN revisionitems ri   ON ri.IdRevisionItem = oti.IdRevisionItem
+               LEFT JOIN cp_detections cpdt on ri.IdProduct = cpdt.CPProductID -- [pallavi.jadhav][GEOS2-9958][11 11 2025]
+            LEFT JOIN detections dtt ON cpdt.DetectionID = dtt.IdDetection -- [pallavi.jadhav][GEOS2-9958][11 11 2025]
+     INNER JOIN temp_IDCounterPart tcptOption ON tcptOption.IdCounterpart=contp.IdCounterpart
+     WHERE -- FIND_IN_SET(dtt.IdDetection,  _IdOption)
+   -- AND  FIND_IN_SET(cpdt.NumDetections, _NumofOption)
+   
+   (FIND_IN_SET(dtt.IdDetection, _IdOption) OR dtt.IdDetection IS NULL OR dtt.IdDetection = '') -- [pallavi.jadhav][GEOS2-9958][11 11 2025]
+   AND    (FIND_IN_SET(cpdt.NumDetections, _NumofOption) OR cpdt.NumDetections IS NULL OR cpdt.NumDetections = '') -- [pallavi.jadhav][GEOS2-9958][11 11 2025]
+ 
+      GROUP BY contp.IdCounterpart
+   
+         )      ;
+  	       end;
+         
+         end if;
+         
+         
+         
+         DROP TEMPORARY TABLE IF EXISTS temp_IDCounterPartBY_Way;
+   
+         if(Trim(_Numofways) = ''and Trim(_IdWays) = '') then 
+         begin
+      CREATE TEMPORARY TABLE IF NOT EXISTS temp_IDCounterPartBY_Way
+      AS
+         (
+          SELECT
+   contp.IdCounterpart,
+   dtt.IdDetection,
+   cpdt.NumDetections,
+   dtt.Name
+    FROM ots AS ot
+               INNER JOIN otitems oti ON ot.IdOT = oti.IdOT
+               INNER JOIN counterparts contp ON contp.IdOTItem = oti.IdOTItem
+               INNER JOIN revisionitems ri   ON ri.IdRevisionItem = oti.IdRevisionItem
+                LEFT JOIN cp_detections cpdt on ri.IdProduct = cpdt.CPProductID -- [pallavi.jadhav][GEOS2-9958][11 11 2025]
+            LEFT JOIN detections dtt ON cpdt.DetectionID = dtt.IdDetection -- [pallavi.jadhav][GEOS2-9958][11 11 2025]
+     INNER JOIN temp_IDCounterPart tcptWay ON tcptWay.IdCounterpart=contp.IdCounterpart
+    GROUP BY contp.IdCounterpart
+         )      ;
+      end;
+         elseif(Trim(_Numofways) = '') then
+         begin
+  	       
+  	       	        CREATE TEMPORARY TABLE IF NOT EXISTS temp_IDCounterPartBY_Way
+      AS
+         (
+          SELECT
+   contp.IdCounterpart,
+   dtt.IdDetection,
+   cpdt.NumDetections,
+   dtt.Name
+    FROM ots AS ot
+               INNER JOIN otitems oti ON ot.IdOT = oti.IdOT
+               INNER JOIN counterparts contp ON contp.IdOTItem = oti.IdOTItem
+               INNER JOIN revisionitems ri   ON ri.IdRevisionItem = oti.IdRevisionItem
+               LEFT JOIN cp_detections cpdt on ri.IdProduct = cpdt.CPProductID
+            LEFT JOIN detections dtt ON cpdt.DetectionID = dtt.IdDetection -- [pallavi.jadhav][GEOS2-9958][11 11 2025]
+   INNER JOIN temp_IDCounterPart tcpt ON tcpt.IdCounterpart=contp.IdCounterpart -- [pallavi.jadhav][GEOS2-9958][11 11 2025]
+     INNER JOIN temp_IDCounterPart tcptIdWays ON tcptIdWays.IdCounterpart=contp.IdCounterpart
+     WHERE -- FIND_IN_SET(dtt.IdDetection,  _IdWays)
+   (FIND_IN_SET(dtt.IdDetection, _IdWays) OR dtt.IdDetection IS NULL OR dtt.IdDetection = '') -- [pallavi.jadhav][GEOS2-9958][11 11 2025]
+    GROUP BY contp.IdCounterpart
+         )      ;
+  	       
+  	       end;
+  	       
+  	       elseif(Trim(_IdWays) = '') then
+  	           
+      begin
+  	        CREATE TEMPORARY TABLE IF NOT EXISTS temp_IDCounterPartBY_Way
+      AS
+         (
+          SELECT
+   contp.IdCounterpart,
+   dtt.IdDetection,
+   cpdt.NumDetections,
+   dtt.Name
+    FROM ots AS ot
+               INNER JOIN otitems oti ON ot.IdOT = oti.IdOT
+               INNER JOIN counterparts contp ON contp.IdOTItem = oti.IdOTItem
+               INNER JOIN revisionitems ri   ON ri.IdRevisionItem = oti.IdRevisionItem
+               LEFT JOIN cp_detections cpdt on ri.IdProduct = cpdt.CPProductID -- [pallavi.jadhav][GEOS2-9958][11 11 2025]
+            LEFT JOIN detections dtt ON cpdt.DetectionID = dtt.IdDetection -- [pallavi.jadhav][GEOS2-9958][11 11 2025]
+     INNER JOIN temp_IDCounterPart tcptNumofways ON tcptNumofways.IdCounterpart=contp.IdCounterpart
+     AND  -- FIND_IN_SET(cpdt.NumDetections,_Numofways)
+ 		(FIND_IN_SET(cpdt.NumDetections, _Numofways) OR cpdt.NumDetections IS NULL OR cpdt.NumDetections = '') -- [pallavi.jadhav][GEOS2-9958][11 11 2025]
+ 
+    GROUP BY contp.IdCounterpart
+         )      ;
+  	    
+  	    end;
+      else
+      begin
+  	        CREATE TEMPORARY TABLE IF NOT EXISTS temp_IDCounterPartBY_Way
+      AS
+         (
+          SELECT
+   contp.IdCounterpart,
+   dtt.IdDetection,
+   cpdt.NumDetections,
+   dtt.Name
+    FROM ots AS ot
+               INNER JOIN otitems oti ON ot.IdOT = oti.IdOT
+               INNER JOIN counterparts contp ON contp.IdOTItem = oti.IdOTItem
+               INNER JOIN revisionitems ri   ON ri.IdRevisionItem = oti.IdRevisionItem
+               LEFT JOIN cp_detections cpdt on ri.IdProduct = cpdt.CPProductID -- [pallavi.jadhav][GEOS2-9958][11 11 2025]
+            LEFT JOIN detections dtt ON cpdt.DetectionID = dtt.IdDetection -- [pallavi.jadhav][GEOS2-9958][11 11 2025]
+     INNER JOIN temp_IDCounterPart DETtcptNumofways ON DETtcptNumofways.IdCounterpart=contp.IdCounterpart
+     WHERE  -- FIND_IN_SET(dtt.IdDetection,  _IdWays)
+   -- AND  FIND_IN_SET(cpdt.NumDetections,_Numofways)
+   (FIND_IN_SET(dtt.IdDetection, _IdWays) OR dtt.IdDetection IS NULL OR dtt.IdDetection = '') -- [pallavi.jadhav][GEOS2-9958][11 11 2025]
+   AND    (FIND_IN_SET(cpdt.NumDetections, _Numofways) OR cpdt.NumDetections IS NULL OR cpdt.NumDetections = '') -- [pallavi.jadhav][GEOS2-9958][11 11 2025]
+  
+    GROUP BY contp.IdCounterpart
+         )      ;
+  	    
+  	    end;
+      
+   end if;
+  	    
+         DROP TEMPORARY TABLE IF EXISTS temp_IDCounterPartBY_Det_OPTION_Way;
+   
+      CREATE TEMPORARY TABLE IF NOT EXISTS temp_IDCounterPartBY_Det_OPTION_Way
+      AS
+         (
+          SELECT
+   w.IdCounterpart,
+   w.IdDetection AS 'Way_IdDetection',
+   w.NumDetections AS 'Way_num',
+   w.Name AS 'Way_Name',
+   o.IdDetection AS 'Op_IdDetection',
+   o.NumDetections AS 'Op_Num',
+   o.Name AS 'Op_Name',
+   d.IdDetection AS 'Det_Iddetection',
+   d.NumDetections AS 'Det_Num',
+   d.Name AS 'det_Nume'
+    FROM temp_IDCounterPartBY_Way AS w
+    INNER JOIN temp_IDCounterPartBY_OPtion o ON o.IdCounterpart=w.IdCounterpart
+    INNER JOIN temp_IDCounterPartBY_Detection d ON d.IdCounterpart=w.IdCounterpart
+         )      ;
+         -- start[GEOS2-7102][gulab lakade][13 09 2025]
+      --   CALL CalculateRework_Cursor_SP_V2590(_StartDate, _EndDate);
+          CALL ERM_CalculateRework_Cursor_SP_V2690(_StartDate, _EndDate,_CurrentIdStage);
+   -- select * from TempCADCounterPartsDetail;
+   -- end[GEOS2-7102][gulab lakade][13 09 2025]
+         DROP TEMPORARY TABLE IF EXISTS temp_timetracking_Info;
+   
+      CREATE TEMPORARY TABLE IF NOT EXISTS temp_timetracking_Info
+      AS
+         (SELECT concat(pp.name, ' ', pp.surname) AS DesignerName,
+                 ot.IdOT,
+                 cp.IdCP,
+                 cp.IdCPType,
+                 cpt.Name AS 'CPTypeName',
+                 contp.IdCounterpart,
+                 CONCAT(ot.Code, ' OT ', ot.NumOT) AS OTCode,
+                
+                 IFNULL(ri.NumItem, '(Blanks)')AS Item_No, 
+                
+   
+               IFNULL(IF(cp.DrawingType='','(Blanks)',cp.DrawingType), '(Blanks)')AS Design_Type, 
+                
+                 IFNULL(IF(cpdt_Way.NO_OF_Way='','(Blanks)',cpdt_Way.NO_OF_Way), '(Blanks)')AS No_Of_Ways, 
+                
+                 IFNULL( IF(cpdt_Way.WayName='','(Blanks)',cpdt_Way.WayName), '(Blanks)')AS TypeOf_Ways, 
+                 
+                 IFNULL(IF(cd_det.NO_OF_Detection='','(Blanks)',cd_det.NO_OF_Detection), '(Blanks)')AS NoOf_Detections, 
+   
+   
+   
+    IFNULL(IF(cd_det.DetectionName='','(Blanks)',cd_det.DetectionName), '(Blanks)') AS Detection_Name,
+                IFNULL(IF(cpdt_Option.NO_OF_Option='','(Blanks)',cpdt_Option.NO_OF_Option), '(Blanks)')  AS Nof_Option,
+                 IFNULL(IF(cpdt_Option.OptionName='','(Blanks)',cpdt_Option.OptionName), '(Blanks)')  AS Option_name,
+                 u.IdUser,
+                 countrr.IdOperator,
+                  
+                  cp.IdWorkflowStatus,
+                  (CASE
+                  WHEN  oti.IdItemOtStatus=6
+  			 THEN 
+  			 (
+  			 CASE
+  			 WHEN CP.IdEDSStatusBeforeWorkshop=17
+  			 THEN 'PR'
+  			 WHEN CP.IdEDSStatusBeforeWorkshop=18
+  			 THEN 'R'
+  			 WHEN CP.IdEDSStatusBeforeWorkshop=16
+  			 THEN 'P'
+  			 WHEN CP.IdEDSStatusBeforeWorkshop=19
+  			 THEN 'E'
+  			   ELSE 'D'
+  			  END
+  			 )
+  			 else
+  				   (CASE
+  			 WHEN CP.IDWORKFLOWSTATUS=17
+  			 THEN 'PR'
+  			 WHEN CP.IDWORKFLOWSTATUS=18
+  			 THEN 'R'
+  			 WHEN CP.IDWORKFLOWSTATUS=16
+  			 THEN 'P'
+  			 WHEN CP.IDWORKFLOWSTATUS=19
+  			 THEN 'E'
+  			 -- start [GEOS2-9395][gulab lakade][12 09 2025]
+  			 -- WHEN CP.IDWORKFLOWSTATUS IN (53, 54, 55, 56, 61, 62, 71) -- [gulab lakade ][only testing as per yuvraj sir suggested][15 05 2025]
+  			 -- THEN 'EF'  -- [gulab lakade ][only testing as per yuvraj sir suggested][15 05 2025] 
+  			 -- WHEN (CP.IDWORKFLOWSTATUS is NULL OR CP.IDWORKFLOWSTATUS is not NULL OR CP.IDWORKFLOWSTATUS NOT IN (16,17,18,19))
+  			 -- THEN
+  			 ELSE
+  			 'D'
+  			 
+  			 -- WHEN CP.IDWORKFLOWSTATUS is NULL
+  			  -- THEN 'D'
+  			  -- end [GEOS2-9395][gulab lakade][12 09 2025]
+  			 END
+  			 )
+                  END
+                  )
+   AS 'DSA_STATUS',   
+                
+                (  CASE
+           WHEN
+           (SELECT Count(*) FROM detection_cad_part_files dcpf WHERE dcpf.IdDetection IN (SELECT cpd12.DetectionID FROM cp_detections cpd12 WHERE cpd12.CPProductID=cp.IdCP)) >0
+           THEN
+           'EDS'
+   
+           ELSE 'GSM'
+       END)
+       AS 'Design_System',
+         temp.Name AS 'Template',
+         cp.IdDrawing,
+          IFNULL(lv_countries_Region.Value, '(Blanks)') AS Region, 
+        
+         ot.IdSite, siot.ShortName AS 'Plant'
+         ,
+         IFNULL(
+                (SELECT st.Code
+                   FROM counterpartstracking cpt
+                        INNER JOIN stages st ON cpt.IdStage = st.IdStage
+                  WHERE     cpt.IdCounterpart = contp.IdCounterpart
+                        AND cpt.EndDate IS NULL
+                        AND st.IsProductionStage = 1
+                  LIMIT 1),
+                (SELECT st.Code
+                   FROM counterpartstracking cpt
+                        INNER JOIN stages st ON cpt.IdStage = st.IdStage
+                  WHERE     cpt.IdCounterpart = contp.IdCounterpart
+                        AND cpt.IdCounterpartTracking =
+                               (SELECT max(IdCounterpartTracking)
+                                  FROM counterpartstracking cptt
+                                 WHERE cptt.IdCounterpart = contp.IdCounterpart)
+                        AND st.IsProductionStage = 1
+                  LIMIT 1))
+                AS stagename,
+                IFNULL(
+                (SELECT st.IdStage
+                   FROM counterpartstracking cpt
+                        INNER JOIN stages st ON cpt.IdStage = st.IdStage
+                  WHERE     cpt.IdCounterpart = contp.IdCounterpart
+                        AND cpt.EndDate IS NULL
+                        AND st.IsProductionStage = 1
+                  LIMIT 1),
+                (SELECT st.IdStage
+                   FROM counterpartstracking cpt
+                        INNER JOIN stages st ON cpt.IdStage = st.IdStage
+                  WHERE     cpt.IdCounterpart = contp.IdCounterpart
+                        AND cpt.IdCounterpartTracking =
+                               (SELECT max(IdCounterpartTracking)
+                                  FROM counterpartstracking cptt
+                                 WHERE cptt.IdCounterpart = contp.IdCounterpart)
+                        AND st.IsProductionStage = 1
+                  LIMIT 1))
+                AS IdStage,
+                oti.CustomerComment, 
+               IFNULL(IF(cpdt_Way.IdDetection='','0',cpdt_Way.IdDetection), '0')  AS Way_IdDetection,
+                  IFNULL(IF(cd_det.IdDetection='','0',cd_det.IdDetection), '0')  AS Det_IdDetection,
+                    IFNULL(IF(cpdt_Option.IdDetection='','0',cpdt_Option.IdDetection), '0') AS Option_IdDetection,
+                 contp.Code AS 'SerialNumber' -- [GEOS2-9234][rani dhamankar][13-08-2025]
+          FROM ots AS ot
+               INNER JOIN otitems oti ON ot.IdOT = oti.IdOT
+               INNER JOIN itemotstatustypes iotst
+                  ON iotst.IdItemOtStatus = oti.IdItemOtStatus
+               INNER JOIN revisionitems ri
+                  ON ri.IdRevisionItem = oti.IdRevisionItem
+               INNER JOIN quotations qu ON qu.IdQuotation = ot.IdQuotation
+               INNER JOIN offers `of` ON `of`.IdOffer = qu.IdOffer
+               INNER JOIN sites sii ON sii.IdSite = `of`.IdSite 
+               INNER JOIN templates t ON qu.idDetectionsTemplate = t.idTemplate 
+   
+                INNER JOIN sites siot ON siot.IdSite =  ot.IdSite 
+               
+             INNER JOIN countries ctry ON siot.IdCountry = ctry.idCountry 
+               LEFT JOIN emdep_geos.lookup_values lv_countries_Region
+                  ON ctry.IdRegion = lv_countries_Region.IdLookupValue   
+    INNER JOIN
+               (SELECT *
+                FROM cpproduct cp1
+                     LEFT JOIN emdep_geos.workflow_status ws
+                        ON cp1.IdStatusEDS = ws.IdWorkflowStatus
+              
+  
+  WHERE (ws.IdWorkflow = 4 )OR cp1.IdStatusEDS IS NULL) cp 
+                  ON cp.IdCP = ri.IdProduct
+               LEFT JOIN cpproductworkbooks cpw
+                  ON cp.IdWorkbookOfCpProducts = cpw.IdWorkbookOfCpProducts
+               INNER JOIN cptypes cpt ON cpt.IdCPType = cp.IdCPType
+               INNER JOIN counterparts contp ON contp.IdOTItem = oti.IdOTItem
+               INNER JOIN cptypesbytemplate cpttemp
+                  ON cpttemp.IdCPType = cp.IdCPType
+               INNER JOIN offerstatustypes ost
+                  ON ost.IdOfferStatusType = `of`.IdStatus
+               INNER JOIN sales_status_types sst
+                  ON sst.IdSalesStatusType = ost.IdSalesStatusType
+               INNER JOIN templates temp ON temp.IdTemplate = cpttemp.IdTemplate
+              
+   
+               LEFT JOIN (
+                SELECT cpdt.CPProductID, dtt.IdDetection,GROUP_CONCAT(cpdt.NumDetections SEPARATOR '\n') AS 'NO_OF_Way', GROUP_CONCAT(dtt.Name SEPARATOR '\n') AS 'WayName' FROM cp_detections cpdt
+     INNER JOIN detections dtt ON cpdt.DetectionID = dtt.IdDetection
+   
+    WHERE (dtt.IdDetectionType = 3 OR dtt.IdDetectionType IS NULL)
+      AND (dtt.IsEnabled = 1 OR dtt.IsEnabled IS NULL)
+                and (dtt.IdStatus != 224 OR dtt.IdStatus IS NULL) 
+                 AND  (cpdt.NumDetections!=0 OR cpdt.NumDetections IS NULL) 
+               
+     GROUP BY cpdt.CPProductID
+               )
+   
+                cpdt_Way ON cp.IdCP = cpdt_Way.CPProductID -- [pallavi.jadhav][GEOS2-9958][11 11 2025]
+   
+               LEFT JOIN (
+                SELECT cpdt.CPProductID, dtt.IdDetection,GROUP_CONCAT(cpdt.NumDetections SEPARATOR '\n') AS 'NO_OF_Detection', GROUP_CONCAT(dtt.Name SEPARATOR '\n') AS 'DetectionName' FROM cp_detections cpdt
+     INNER JOIN detections dtt ON cpdt.DetectionID = dtt.IdDetection
+   
+    where (dtt.IdDetectionType = 2 OR dtt.IdDetectionType IS NULL)  
+      AND  (dtt.IsEnabled = 1 OR dtt.IsEnabled IS NULL) 
+                AND   (dtt.IdStatus != 224 OR dtt.IdStatus IS NULL)
+                AND (cpdt.NumDetections!=0 OR cpdt.NumDetections IS NULL)
+                
+     GROUP BY cpdt.CPProductID
+               )
+   
+                cd_det ON cp.IdCP = cd_det.CPProductID -- [pallavi.jadhav][GEOS2-9958][11 11 2025]
+   
+   
+    LEFT JOIN (
+                SELECT cpdt.CPProductID, dtt.IdDetection,GROUP_CONCAT(cpdt.NumDetections SEPARATOR '\n') AS 'NO_OF_Option', GROUP_CONCAT(dtt.Name SEPARATOR '\n') AS 'OptionName' FROM cp_detections cpdt
+     INNER JOIN detections dtt ON cpdt.DetectionID = dtt.IdDetection
+   
+    where (dtt.IdDetectionType = 3 OR dtt.IdDetectionType IS NULL)  
+      AND (dtt.IsEnabled = 1 OR dtt.IsEnabled IS NULL) 
+                AND   (dtt.IdStatus != 224 OR dtt.IdStatus IS NULL)
+                AND (cpdt.NumDetections!=0 OR cpdt.NumDetections IS NULL)
+     GROUP BY cpdt.CPProductID
+               )
+   
+              cpdt_Option ON cp.IdCP = cpdt_Option.CPProductID -- [pallavi.jadhav][GEOS2-9958][11 11 2025]
+   
+   
+               INNER JOIN counterpartstracking countrr
+                  ON contp.IdCounterpart = countrr.IdCounterpart 
+                   AND countrr.IdStage=_CurrentIdStage
+  
+               INNER JOIN users u ON countrr.IdOperator = u.IdUser
+               
+               INNER JOIN people pp ON u.IdUser = pp.IdPerson
+          WHERE
+   
+     
+    ot.IdSite = _IdSite AND
+   FIND_IN_SET(lv_countries_Region.IdLookupValue,_Region)
+    AND
+   
+    FIND_IN_SET(TEMP.IDTEMPLATE ,_IDTEMPLATE)
+  
+   AND
+   
+  
+      contp.IdCounterpart IN (SELECT IdCounterpart FROM temp_IDCounterPartBY_Det_OPTION_Way GROUP BY IdCounterpart)
+      
+      
+      
+          GROUP BY contp.IdCounterpart
+   
+          
+          )      ;
+   
+   
+         DROP TEMPORARY TABLE IF EXISTS temp_timetracking_Info_withoutFilter;
+   
+      CREATE TEMPORARY TABLE IF NOT EXISTS temp_timetracking_Info_withoutFilter
+      AS
+         (
+         SELECT * FROM temp_timetracking_Info
+   
+         WHERE
+          FIND_IN_SET(IdStage, _IdStage) AND
+   
+   
+   FIND_IN_SET(IdCPType,_IDCPTYPE) AND
+    FIND_IN_SET(Design_System , _DESIGNSYSTEM) and
+    Design_Type in ('(Blanks)','U','X','N','M','C','x')
+    --   start [GEOS2-9395][gulab lakade][12 09 2025]
+   AND
+   FIND_IN_SET(DSA_Status ,_DSASTATUS)
+     -- end [GEOS2-9395][gulab lakade][12 09 2025]
+         )      ;
+   
+   
+         DROP TEMPORARY TABLE IF EXISTS temp_timetracking_Info;
+   
+      CREATE TEMPORARY TABLE IF NOT EXISTS temp_timetracking_Info
+      AS
+         (
+         SELECT * FROM temp_timetracking_Info_withoutFilter
+         )      ;
+   
+         DROP TEMPORARY TABLE IF EXISTS temp_timetracking_Infodetect;
+   
+      CREATE TEMPORARY TABLE IF NOT EXISTS temp_timetracking_Infodetect
+      AS
+         (SELECT IdCP
+          FROM temp_timetracking_Info)      ;
+   
+   
+         DROP TEMPORARY TABLE IF EXISTS temp_timetracking_InfoOption;
+   
+      CREATE TEMPORARY TABLE IF NOT EXISTS temp_timetracking_InfoOption
+      AS
+         (SELECT IdCP
+          FROM temp_timetracking_Info)      ;
+   
+         DROP TEMPORARY TABLE IF EXISTS temp_timetracking_InfoWays;
+   
+      CREATE TEMPORARY TABLE IF NOT EXISTS temp_timetracking_InfoWays
+      AS
+         (SELECT IdCP
+          FROM temp_timetracking_Info)      ;
+   
+         DROP TEMPORARY TABLE IF EXISTS temp_timetracking_InfoStructure;
+   
+      CREATE TEMPORARY TABLE IF NOT EXISTS temp_timetracking_InfoStructure
+      AS
+         (SELECT IdCPType
+          FROM temp_timetracking_Info)      ;
+   
+         DROP TEMPORARY TABLE IF EXISTS temp_timetracking_InfoStructureCP;
+   
+      CREATE TEMPORARY TABLE IF NOT EXISTS temp_timetracking_InfoStructureCP
+      AS
+         (SELECT IdCP
+          FROM temp_timetracking_Info)      ;
+   
+         DROP TEMPORARY TABLE IF EXISTS temp_timetracking_InfoModuleCP;
+   
+      CREATE TEMPORARY TABLE IF NOT EXISTS temp_timetracking_InfoModuleCP
+      AS
+         (SELECT IdCP
+          FROM temp_timetracking_Info)      ;
+   
+   
+         DROP TEMPORARY TABLE IF EXISTS temp_timetracking_Infodetect1;
+   
+      CREATE TEMPORARY TABLE IF NOT EXISTS temp_timetracking_Infodetect1
+      AS
+         (SELECT IdCP
+          FROM temp_timetracking_Info)      ;
+   
+         DROP TEMPORARY TABLE IF EXISTS temp_timetracking_Infodetect2;
+   
+      CREATE TEMPORARY TABLE IF NOT EXISTS temp_timetracking_Infodetect2
+      AS
+         (SELECT IdCP
+          FROM temp_timetracking_Info)      ;
+   
+         DROP TEMPORARY TABLE IF EXISTS temp_timetracking_InfoOption1;
+   
+      CREATE TEMPORARY TABLE IF NOT EXISTS temp_timetracking_InfoOption1
+      AS
+         (SELECT IdCP
+          FROM temp_timetracking_Info)      ;
+   
+         DROP TEMPORARY TABLE IF EXISTS temp_timetracking_InfoOption2;
+   
+      CREATE TEMPORARY TABLE IF NOT EXISTS temp_timetracking_InfoOption2
+      AS
+         (SELECT IdCP
+          FROM temp_timetracking_Info)      ;
+   
+         DROP TEMPORARY TABLE IF EXISTS temp_timetracking_InfoWays1;
+   
+      CREATE TEMPORARY TABLE IF NOT EXISTS temp_timetracking_InfoWays1
+      AS
+         (SELECT IdCP
+          FROM temp_timetracking_Info)      ;
+   
+         DROP TEMPORARY TABLE IF EXISTS temp_timetracking_InfoWays2;
+   
+      CREATE TEMPORARY TABLE IF NOT EXISTS temp_timetracking_InfoWays2
+      AS
+         (SELECT IdCP
+          FROM temp_timetracking_Info)      ;
+   
+   
+   
+         DROP TEMPORARY TABLE IF EXISTS temp_timetracking_Info_2;
+   
+      CREATE TEMPORARY TABLE temp_timetracking_Info_2
+      AS
+         SELECT * FROM temp_timetracking_Info      ;
+   
+   
+         DROP TEMPORARY TABLE IF EXISTS temp_timetracking_Info_3;
+   
+      CREATE TEMPORARY TABLE temp_timetracking_Info_3
+      AS
+         SELECT * FROM temp_timetracking_Info      ;
+   
+   
+   
+         DROP TEMPORARY TABLE IF EXISTS tt_exptime;
+   
+      CREATE TEMPORARY TABLE tt_exptime
+      AS
+         (SELECT CPProductID, IdStage, sum(operationTime) AS ExpectedTime
+          FROM (SELECT *
+                FROM (SELECT sod.Idstandardoperationsdictionary,
+                             cpd.CPProductID,
+                             sods.IdPlant,
+                             sodd.IdDetection,
+                             sum(
+                                Round(
+   
+   
+                                     CASE
+                                        WHEN (    (   cpd.DrawingType = 'U'
+                                                   OR cpd.DrawingType = 'M')
+                                              AND (   wbs.IdStage = 2
+                                                   OR wbs.IdStage = 6)
+                                              AND (ifnull(cpd.QTY, 0) !=
+                                                   ifnull(cpd.DRawingQTY, 0)))
+                                        THEN
+                                           IF(
+                                              (ifnull(cpd.QTY, 0) <
+                                               ifnull(cpd.DRawingQTY, 0)),
+                                              (  (  ifnull(cpd.QTY, 0)
+                                                  - ifnull(cpd.DRawingQTY, 0))
+                                               * (-1)),
+                                              (  ifnull(cpd.QTY, 0)
+                                               - ifnull(cpd.DRawingQTY, 0)))
+                                        ELSE
+                                           cpd.QTY
+                                     END
+   
+                                   * (Round(
+                                           Round(
+                                              (  (ifnull(sodd.ObservedTime,
+                                                         wo.ObservedTime))
+                                               * (  ifnull(sodd.Activity,
+                                                           wo.Activity)
+                                                  / 100)),
+                                              2)
+                                         * (1 + (sods.SupplementValue / 100)),
+                                         2)),
+                                   2))
+                                AS operationTime,
+                             wbs.IdStage
+                      FROM standard_operations_dictionary sod
+                           INNER JOIN
+                           standard_operations_dictionary_detection sodd
+                              ON sodd.IdStandardOperationsDictionary =
+                                 sod.Idstandardoperationsdictionary
+                           INNER JOIN work_operations wo
+                              ON     wo.IdWorkOperation = sodd.IdWorkoperation
+                                 AND wo.IsDeleted = 0
+                           INNER JOIN
+                           (SELECT cppr.IdCP
+                                      AS 'CPProductID',
+                                   cppr.DrawingType,
+                                   dt.DetectionID
+                                      AS 'DetectionID',
+                                   dt.NumDetections
+                                      AS 'QTY',
+                                   (SELECT dr.Quantity
+                                    FROM detectionsbydrawing dr
+                                    WHERE     dr.IdDrawing = cppr.IdDrawing
+                                          AND dr.IdDetection = dt.DetectionID)
+                                      AS 'DRawingQTY'
+                            FROM cp_detections dt
+                                 INNER JOIN cpproduct cppr
+                                    ON cppr.IdCP = dt.CPProductID
+                            WHERE CPProductID IN
+                                     (SELECT IdCP
+                                      FROM temp_timetracking_Infodetect1)
+                            UNION
+                            SELECT cppr.IdCP,
+                                   cppr.DrawingType,
+                                   dr.IdDetection
+                                      AS 'DetectionID',
+                                   (SELECT d.NumDetections
+                                    FROM cp_detections d
+                                    WHERE     dr.IdDetection = d.DetectionID
+                                          AND cppr.IdCP = d.CPProductID)
+                                      AS 'QTY',
+                                   dr.Quantity
+                                      AS 'DRawingQTY'
+                            FROM cpproduct cppr
+                                 INNER JOIN detectionsbydrawing dr
+                                    ON dr.IdDrawing = cppr.IdDrawing
+                            WHERE cppr.IdCP IN
+                                     (SELECT IdCP
+                                      FROM temp_timetracking_Infodetect2)) cpd
+                              ON cpd.DetectionID = sodd.IdDetection
+                           INNER JOIN revisionitems ri
+                              ON ri.IdProduct = cpd.CPProductID
+                           INNER JOIN otitems oti
+                              ON ri.IdRevIsionItem = oti.IdRevIsionItem
+                           INNER JOIN ots ot ON oti.IdOT = ot.IdOt
+                           INNER JOIN
+                           (SELECT IdPlant,
+                                   IdStandardOperationsDictionary,
+                                   sum(SupplementValue) AS SupplementValue
+                            FROM standard_operations_dictionary_supplements
+                            GROUP BY IdPlant, IdStandardOperationsDictionary)
+                           sods
+                              ON     sods.IdStandardOperationsDictionary =
+                                     sod.Idstandardoperationsdictionary
+                                 AND sods.IdPlant =  ot.IdSite
+                           INNER JOIN workoperation_by_stages wbs
+                              ON wbs.IdWorkOperation = sodd.IdWorkoperation
+                           INNER JOIN stages st ON st.IdStage = wbs.IdStage
+                      WHERE     sod.IdStatus = 1535
+                            AND cpd.CPProductID IN
+                                   (SELECT IdCP
+                                    FROM temp_timetracking_Infodetect)
+                            AND (ot.DeliveryDate BETWEEN sod.EffectiveDate
+                                                     AND sod.Due_Date)
+                            AND st.IsProductionStage = 1
+                            AND sods.SupplementValue > 0
+                      GROUP BY cpd.CPProductID,
+                               sod.Idstandardoperationsdictionary,
+                               sodd.IdDetection,
+                               wbs.IdStage
+                      HAVING max(sod.Idstandardoperationsdictionary))
+                     CPSODDectection
+                UNION
+                SELECT *
+                FROM (SELECT sod.Idstandardoperationsdictionary,
+                             cpd.CPProductID,
+                             sods.IdPlant,
+                             sodw.IdDetection,
+                             sum(
+                                Round(
+                                     CASE
+                                        WHEN (    (   cpd.DrawingType = 'U'
+                                                   OR cpd.DrawingType = 'M')
+                                              AND (   wbs.IdStage = 2
+                                                   OR wbs.IdStage = 6)
+                                              AND (ifnull(cpd.QTY, 0) !=
+                                                   ifnull(cpd.DRawingQTY, 0)))
+                                        THEN
+                                           IF(
+                                              (ifnull(cpd.QTY, 0) <
+                                               ifnull(cpd.DRawingQTY, 0)),
+                                              (  (  ifnull(cpd.QTY, 0)
+                                                  - ifnull(cpd.DRawingQTY, 0))
+                                               * (-1)),
+                                              (  ifnull(cpd.QTY, 0)
+                                               - ifnull(cpd.DRawingQTY, 0)))
+                                        ELSE
+                                           cpd.QTY
+                                     END
+                                   * (Round(
+                                           Round(
+                                              (  (ifnull(sodw.ObservedTime,
+                                                         wo.ObservedTime))
+                                               * (  ifnull(sodw.Activity,
+                                                           wo.Activity)
+                                                  / 100)),
+                                              2)
+                                         * (1 + (sods.SupplementValue / 100)),
+                                         2)),
+                                   2))
+                                AS operationTime,
+                             wbs.IdStage
+                      FROM standard_operations_dictionary sod
+                           INNER JOIN standard_operations_dictionary_ways sodw
+                              ON sodw.IdStandardOperationsDictionary =
+                                 sod.Idstandardoperationsdictionary
+                           INNER JOIN
+                           (SELECT cppr.IdCP
+                                      AS 'CPProductID',
+                                   cppr.DrawingType,
+                                   dt.DetectionID
+                                      AS 'DetectionID',
+                                   dt.NumDetections
+                                      AS 'QTY',
+                                   (SELECT dr.Quantity
+                                    FROM detectionsbydrawing dr
+                                    WHERE     dr.IdDrawing = cppr.IdDrawing
+                                          AND dr.IdDetection = dt.DetectionID)
+                                      AS 'DRawingQTY'
+                            FROM cp_detections dt
+                                 INNER JOIN cpproduct cppr
+                                    ON cppr.IdCP = dt.CPProductID
+                            WHERE CPProductID IN
+                                     (SELECT IdCP
+                                      FROM temp_timetracking_InfoWays1)
+                            UNION
+                            SELECT cppr.IdCP,
+                                   cppr.DrawingType,
+                                   dr.IdDetection
+                                      AS 'DetectionID',
+                                   (SELECT d.NumDetections
+                                    FROM cp_detections d
+                                    WHERE     dr.IdDetection = d.DetectionID
+                                          AND cppr.IdCP = d.CPProductID)
+                                      AS 'QTY',
+                                   dr.Quantity
+                                      AS 'DRawingQTY'
+                            FROM cpproduct cppr
+                                 INNER JOIN detectionsbydrawing dr
+                                    ON dr.IdDrawing = cppr.IdDrawing
+                            WHERE cppr.IdCP IN
+                                     (SELECT IdCP
+                                      FROM temp_timetracking_InfoWays2)) cpd
+                              ON cpd.DetectionID = sodw.IdDetection
+                           INNER JOIN work_operations wo
+                              ON     wo.IdWorkOperation = sodw.IdWorkoperation
+                                 AND wo.IsDeleted = 0
+                           INNER JOIN revisionitems ri
+                              ON ri.IdProduct = cpd.CPProductID
+                           INNER JOIN otitems oti
+                              ON ri.IdRevIsionItem = oti.IdRevIsionItem
+                           INNER JOIN ots ot ON oti.IdOT = ot.IdOt
+                           INNER JOIN
+                           (SELECT IdPlant,
+                                   IdStandardOperationsDictionary,
+                                   sum(SupplementValue) AS SupplementValue
+                            FROM standard_operations_dictionary_supplements
+                            GROUP BY IdPlant, IdStandardOperationsDictionary)
+                           sods
+                              ON     sods.IdStandardOperationsDictionary =
+                                     sod.Idstandardoperationsdictionary
+                                 AND sods.IdPlant =  ot.IdSite
+                           INNER JOIN workoperation_by_stages wbs
+                              ON wbs.IdWorkOperation = sodw.IdWorkoperation
+                           INNER JOIN stages st ON st.IdStage = wbs.IdStage
+                      WHERE     sod.IdStatus = 1535
+                            AND cpd.CPProductID IN
+                                   (SELECT IdCP FROM temp_timetracking_InfoWays)
+                            AND (ot.DeliveryDate BETWEEN sod.EffectiveDate
+                                                     AND sod.Due_Date)
+                            AND st.IsProductionStage = 1
+                            AND sods.SupplementValue > 0
+                      GROUP BY cpd.CPProductID,
+                               sod.Idstandardoperationsdictionary,
+                               sodw.IdDetection,
+                               wbs.IdStage
+                      HAVING max(sod.Idstandardoperationsdictionary)) CPSODways
+                UNION
+                SELECT *
+                FROM (SELECT sod.Idstandardoperationsdictionary,
+                             cpd.CPProductID,
+                             sods.IdPlant,
+                             sodo.IdDetection,
+                             sum(
+                                Round(
+                                     CASE
+                                        WHEN (    (   cpd.DrawingType = 'U'
+                                                   OR cpd.DrawingType = 'M')
+                                              AND (   wbs.IdStage = 2
+                                                   OR wbs.IdStage = 6)
+                                              AND (ifnull(cpd.QTY, 0) !=
+                                                   ifnull(cpd.DRawingQTY, 0)))
+                                        THEN
+                                           IF(
+                                              (ifnull(cpd.QTY, 0) <
+                                               ifnull(cpd.DRawingQTY, 0)),
+                                              (  (  ifnull(cpd.QTY, 0)
+                                                  - ifnull(cpd.DRawingQTY, 0))
+                                               * (-1)),
+                                              (  ifnull(cpd.QTY, 0)
+                                               - ifnull(cpd.DRawingQTY, 0)))
+                                        ELSE
+                                           cpd.QTY
+                                     END
+                                   * (Round(
+                                           Round(
+                                              (  (ifnull(sodo.ObservedTime,
+                                                         wo.ObservedTime))
+                                               * (  ifnull(sodo.Activity,
+                                                           wo.Activity)
+                                                  / 100)),
+                                              2)
+                                         * (1 + (sods.SupplementValue / 100)),
+                                         2)),
+                                   2))
+                                AS operationTime,
+                             wbs.IdStage
+                      FROM standard_operations_dictionary sod
+                           INNER JOIN standard_operations_dictionary_option sodo
+                              ON sodo.IdStandardOperationsDictionary =
+                                 sod.Idstandardoperationsdictionary
+                           INNER JOIN work_operations wo
+                              ON     wo.IdWorkOperation = sodo.IdWorkoperation
+                                 AND wo.IsDeleted = 0
+                           INNER JOIN
+                           (SELECT cppr.IdCP
+                                      AS 'CPProductID',
+                                   cppr.DrawingType,
+                                   dt.DetectionID
+                                      AS 'DetectionID',
+                                   dt.NumDetections
+                                      AS 'QTY',
+                                   (SELECT dr.Quantity
+                                    FROM detectionsbydrawing dr
+                                    WHERE     dr.IdDrawing = cppr.IdDrawing
+                                          AND dr.IdDetection = dt.DetectionID)
+                                      AS 'DRawingQTY'
+                            FROM cp_detections dt
+                                 INNER JOIN cpproduct cppr
+                                    ON cppr.IdCP = dt.CPProductID
+                            WHERE CPProductID IN
+                                     (SELECT IdCP
+                                      FROM temp_timetracking_InfoOption1)
+                            UNION
+                            SELECT cppr.IdCP,
+                                   cppr.DrawingType,
+                                   dr.IdDetection
+                                      AS 'DetectionID',
+                                   (SELECT d.NumDetections
+                                    FROM cp_detections d
+                                    WHERE     dr.IdDetection = d.DetectionID
+                                          AND cppr.IdCP = d.CPProductID)
+                                      AS 'QTY',
+                                   dr.Quantity
+                                      AS 'DRawingQTY'
+                            FROM cpproduct cppr
+                                 INNER JOIN detectionsbydrawing dr
+                                    ON dr.IdDrawing = cppr.IdDrawing
+                            WHERE cppr.IdCP IN
+                                     (SELECT IdCP
+                                      FROM temp_timetracking_InfoOption2)) cpd
+                              ON cpd.DetectionID = sodo.IdDetection
+                           INNER JOIN revisionitems ri
+                              ON ri.IdProduct = cpd.CPProductID
+                           INNER JOIN otitems oti
+                              ON ri.IdRevIsionItem = oti.IdRevIsionItem
+                           INNER JOIN ots ot ON oti.IdOT = ot.IdOt
+                           INNER JOIN
+                           (SELECT IdPlant,
+                                   IdStandardOperationsDictionary,
+                                   sum(SupplementValue) AS SupplementValue
+                            FROM standard_operations_dictionary_supplements
+                            GROUP BY IdPlant, IdStandardOperationsDictionary)
+                           sods
+                              ON     sods.IdStandardOperationsDictionary =
+                                     sod.Idstandardoperationsdictionary
+                                 AND sods.IdPlant = ot.IdSite
+                           INNER JOIN workoperation_by_stages wbs
+                              ON wbs.IdWorkOperation = sodo.IdWorkoperation
+                           INNER JOIN stages st ON st.IdStage = wbs.IdStage
+                      WHERE     sod.IdStatus = 1535
+                            AND cpd.CPProductID IN
+                                   (SELECT IdCP
+                                    FROM temp_timetracking_InfoOption)
+                            AND (ot.DeliveryDate BETWEEN sod.EffectiveDate
+                                                     AND sod.Due_Date)
+                            AND st.IsProductionStage = 1
+                            AND sods.SupplementValue > 0
+                      GROUP BY cpd.CPProductID,
+                               sod.Idstandardoperationsdictionary,
+                               sodo.IdDetection,
+                               wbs.IdStage
+                      HAVING max(sod.Idstandardoperationsdictionary))
+                     CPSODOption
+                UNION
+                SELECT *
+                FROM (SELECT sod.Idstandardoperationsdictionary,
+                             cpp.IdCP
+                                AS CPProductID,
+                             sods.IdPlant,
+                             sodm.IdCpType
+                                AS IdDetection,
+                             sum(
+                                Round(
+                                     Round(
+                                        (  (ifnull(sodm.ObservedTime,
+                                                   wo.ObservedTime))
+                                         * (  ifnull(sodm.Activity, wo.Activity)
+                                            / 100)),
+                                        2)
+                                   * (1 + (sods.SupplementValue / 100)),
+                                   2))
+                                AS operationTime,
+                             wbs.IdStage
+                      FROM standard_operations_dictionary sod
+                           INNER JOIN
+                           standard_operations_dictionary_modules sodm
+                              ON sodm.IdStandardOperationsDictionary =
+                                 sod.Idstandardoperationsdictionary
+                           INNER JOIN work_operations wo
+                              ON     wo.IdWorkOperation = sodm.IdWorkoperation
+                                 AND wo.IsDeleted = 0
+                           INNER JOIN cpproduct cpp
+                              ON cpp.IdCPType = sodm.IdCPType
+                           INNER JOIN revisionitems ri
+                              ON ri.IdProduct = cpp.IdCP
+                           INNER JOIN otitems oti
+                              ON ri.IdRevIsionItem = oti.IdRevIsionItem
+                           INNER JOIN ots ot ON oti.IdOT = ot.IdOt
+                           INNER JOIN
+                           (SELECT IdPlant,
+                                   IdStandardOperationsDictionary,
+                                   sum(SupplementValue) AS SupplementValue
+                            FROM standard_operations_dictionary_supplements
+                            GROUP BY IdPlant, IdStandardOperationsDictionary)
+                           sods
+                              ON     sods.IdStandardOperationsDictionary =
+                                     sod.Idstandardoperationsdictionary
+                                 AND sods.IdPlant = ot.IdSite
+                           INNER JOIN workoperation_by_stages wbs
+                              ON wbs.IdWorkOperation = sodm.IdWorkoperation
+                           INNER JOIN stages st ON st.IdStage = wbs.IdStage
+                      WHERE     sod.IdStatus = 1535
+                            AND cpp.IdCP IN
+                                   (SELECT IdCP
+                                    FROM temp_timetracking_InfoModuleCP)
+                            AND sodm.IdCpType IN
+                                   (SELECT IdCpType FROM temp_timetracking_Info)
+                            AND (ot.DeliveryDate BETWEEN sod.EffectiveDate
+                                                     AND sod.Due_Date)
+                            AND st.IsProductionStage = 1
+                            AND sods.SupplementValue > 0
+                      GROUP BY cpp.IdCP,
+                               sod.Idstandardoperationsdictionary,
+                               sodm.idCpType,
+                               wbs.IdStage
+                      HAVING max(sod.Idstandardoperationsdictionary))
+                     CPSODModule
+                UNION
+                SELECT *
+                FROM (SELECT sod.Idstandardoperationsdictionary,
+                             cpp.IdCP
+                                AS CPProductID,
+                             sods.IdPlant,
+                             sodstr.IdCpType
+                                AS IdDetection,
+                             sum(
+                                Round(
+                                     Round(
+                                        ((  ifnull(sodstr.ObservedTime,
+                                                   wo.ObservedTime)
+                                          * (ifnull(sodstr.Activity,
+                                                    wo.Activity))
+                                          / 100)),
+                                        2)
+                                   * (1 + (sods.SupplementValue / 100)),
+                                   2))
+                                AS operationTime,
+                             wbs.IdStage
+                      FROM standard_operations_dictionary sod
+                           INNER JOIN
+                           standard_operations_dictionary_structures sodstr
+                              ON sodstr.IdStandardOperationsDictionary =
+                                 sod.Idstandardoperationsdictionary
+                           INNER JOIN work_operations wo
+                              ON     wo.IdWorkOperation = sodstr.IdWorkoperation
+                                 AND wo.IsDeleted = 0
+                           INNER JOIN cpproduct cpp
+                              ON cpp.IdCPType = sodstr.IdCPType
+                           INNER JOIN revisionitems ri
+                              ON ri.IdProduct = cpp.IdCP
+                           INNER JOIN otitems oti
+                              ON ri.IdRevIsionItem = oti.IdRevIsionItem
+                           INNER JOIN ots ot ON oti.IdOT = ot.IdOt
+                           INNER JOIN
+                           (SELECT IdPlant,
+                                   IdStandardOperationsDictionary,
+                                   sum(SupplementValue) AS SupplementValue
+                            FROM standard_operations_dictionary_supplements
+                            GROUP BY IdPlant, IdStandardOperationsDictionary)
+                           sods
+                              ON     sods.IdStandardOperationsDictionary =
+                                     sod.Idstandardoperationsdictionary
+                                 AND sods.IdPlant = ot.IdSite
+                           INNER JOIN workoperation_by_stages wbs
+                              ON wbs.IdWorkOperation = sodstr.IdWorkoperation
+                           INNER JOIN stages st ON st.IdStage = wbs.IdStage
+                      WHERE     sod.IdStatus = 1535
+                            AND (ot.DeliveryDate BETWEEN sod.EffectiveDate
+                                                     AND sod.Due_Date)
+                            AND cpp.IdCP IN
+                                   (SELECT IdCP
+                                    FROM temp_timetracking_InfoStructureCP)
+                            AND sodstr.IdCpType IN
+                                   (SELECT IdCpType
+                                    FROM temp_timetracking_InfoStructure)
+                            AND st.IsProductionStage = 1
+                            AND sods.SupplementValue > 0
+                      GROUP BY cpp.IdCP,
+                               sod.Idstandardoperationsdictionary,
+                               sodstr.idCpType,
+                               wbs.IdStage
+                      HAVING max(sod.Idstandardoperationsdictionary))
+                     CPSODStructure) finalcounterpart
+          GROUP BY CPProductID, IdStage)      ;
+   
+   
+         DROP TEMPORARY TABLE IF EXISTS temp_GroupAVGproductionTime;
+   
+      CREATE TEMPORARY TABLE IF NOT EXISTS temp_GroupAVGproductionTime
+      AS
+         (
+   
+         SELECT
+   
+                tti.CPTypeName ,
+   
+                tti.Design_System,
+                tti.Design_Type ,
+   
+                tti.No_Of_Ways ,
+                tti.TypeOf_Ways ,
+                tti.NoOf_Detections,
+                tti.Detection_Name ,
+                tti.Nof_Option ,
+                tti.Option_name,
+                tti.Region,tti.stagename, 
+                AVG(tcdpd.PRODUCTIONTIME) AS 'Avg_ProductionTime'
+           FROM temp_timetracking_Info tti
+                INNER JOIN TempCADCounterPartsDetail tcdpd
+                   ON tcdpd.IDCOUNTERPART = tti.idcounterpart
+   
+                LEFT JOIN tt_exptime tte ON tti.IdCP =tte.CPProductID     -- [pallavi.jadhav][GEOS2-9958][11 11 2025]
+                 AND tte.IdStage= tti.IdStage   
+  
+   
+  
+   
+         GROUP BY tti.CPTypeName, tti.Design_System,tti.Design_Type , tti.No_Of_Ways, tti.TypeOf_Ways , tti.NoOf_Detections,
+                tti.Detection_Name ,
+                tti.Nof_Option ,
+                tti.Option_name
+         )      ;
+   
+         DROP TEMPORARY TABLE IF EXISTS temp_timetracking_TopD;
+   
+      CREATE TEMPORARY TABLE IF NOT EXISTS temp_timetracking_TopD
+      AS
+         (SELECT *
+          FROM temp_timetracking_Info)      ;
+   
+   
+         DROP TEMPORARY TABLE IF EXISTS TempCADCounterPartsDetail_TopD;
+   
+      CREATE TEMPORARY TABLE IF NOT EXISTS TempCADCounterPartsDetail_TopD
+      AS
+         (SELECT *
+          FROM TempCADCounterPartsDetail)      ;
+   
+   
+          CALL ERM_EXPECTEDPRODUCTIONTIMECOMPARISONDATADESIGNERWISE_V2690(_TYPE,
+                 _RECORDLIMIT,_CurrentIdStage);
+      
+      
+   
+ END$$
+ DELIMITER ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- DROP PROCEDURE IF exists ERM_EXPECTEDPRODUCTIONTIMECOMPARISONDATADESIGNERWISE_V2690;
+DELIMITER $$
+
+CREATE PROCEDURE `ERM_EXPECTEDPRODUCTIONTIMECOMPARISONDATADESIGNERWISE_V2690`(
+   IN _Type             text,
+      IN _RecordLimit   INT,IN _CurrentIdStage INT)
+BEGIN
+ -- calll ERM_EXPECTEDPRODUCTIONTIMECOMPARISONDATADESIGNERWISE_V2690('X',5,2) [GEOS2-9235][gulab lakade][14 11 2025]
+      DECLARE done               INT DEFAULT False;
+      DECLARE _DesignerName      TEXT DEFAULT NULL;
+      DECLARE _CPTypeName        TEXT DEFAULT NULL;
+      DECLARE _Design_System     TEXT DEFAULT NULL;
+      DECLARE _Design_Type       TEXT DEFAULT NULL;
+      DECLARE _No_Of_Ways        TEXT DEFAULT NULL;
+      DECLARE _TypeOf_Ways       TEXT DEFAULT NULL;
+      DECLARE _NoOf_Detections   TEXT DEFAULT NULL;
+      DECLARE _Detection_Name    TEXT DEFAULT NULL;
+      DECLARE _Nof_Option        TEXT DEFAULT NULL;
+      DECLARE _Option_name       TEXT DEFAULT NULL;
+      DECLARE _IDDrawing         INT DEFAULT NULL;
+   
+      DECLARE
+         Designer_cursor CURSOR FOR
+            (SELECT IFNULL(tti.DesignerName, NULL) AS DesignerName,
+                    IFNULL(tti.CPTypeName, NULL) AS CPTypeName,
+                    IFNULL(tti.Design_System, NULL) AS Design_System,
+                    IFNULL(tti.Design_Type, NULL) AS Design_Type,
+                    IFNULL(tti.No_Of_Ways, NULL) AS No_Of_Ways,
+                    IFNULL(tti.TypeOf_Ways, NULL) AS TypeOf_Ways,
+                    IFNULL(tti.NoOf_Detections,NULL) AS NoOf_Detections,
+                    IFNULL(tti.Detection_Name, NULL) AS Detection_Name,
+                    IFNULL(tti.Nof_Option, NULL) AS Nof_Option,
+                    IFNULL(tti.Option_name, NULL) AS Option_name,
+                    IFNULL(tti.IdDrawing, NULL) AS IDDrawing
+                   
+             FROM temp_timetracking_Info tti
+                  INNER JOIN TempCADCounterPartsDetail tcdpd
+                     ON tcdpd.IDCOUNTERPART = tti.idcounterpart
+                  LEFT JOIN tt_exptime tte    -- [pallavi.jadhav][GEOS2-9958][11 11 2025]
+                     ON  tti.IdCP = tte.CPProductID
+                      AND tte.IdStage = tti.IdStage   
+     
+             GROUP BY tti.DesignerName,
+                      tti.CPTypeName,
+                      tti.Design_System,
+                      tti.Design_Type,
+                      tti.No_Of_Ways,
+                      tti.TypeOf_Ways,
+                      tti.NoOf_Detections,
+                      tti.Detection_Name,
+                      tti.Nof_Option,
+                      tti.Option_name,
+                      tti.IdDrawing);
+   
+      
+      DECLARE CONTINUE HANDLER FOR NOT FOUND
+                 SET done = TRUE;
+     CALL ERM_ExpectedProductionTimeComparisonData_TempSetting(); 
+      DROP TEMPORARY TABLE IF EXISTS TempFinalDesignerDetails;
+   
+      CREATE TEMPORARY TABLE IF NOT EXISTS TempFinalDesignerDetails
+      (
+         Designer_Name VARCHAR(250),
+         Template_Name VARCHAR(250),
+         CP_Type VARCHAR(250),
+         OT_Code VARCHAR(100),
+         Item_No INT,
+         SerialNumber VARCHAR(20), 
+         Design_System VARCHAR(250),
+         Design_Type VARCHAR(25),
+         DSA_Status VARCHAR(250),
+         IDDrawing INT,
+         No_of_Way VARCHAR(100),
+         Type_of_way VARCHAR(250),
+         No_of_Detection VARCHAR(250),
+         Detection_Name VARCHAR(250),
+         No_of_Option VARCHAR(250),
+         Option_Name VARCHAR(250),
+         Rework_QTY VARCHAR(250),
+         FQU_OK_Date DATETIME,
+         Expected_Time TIME,
+         Production_Time TIME,
+         Rework_Time TIME,
+         Rework_Time_OWS TIME,
+         Production_Time_OWS TIME,
+         Production_ExpectedTime TIME,
+         Avg_ProductionTime TIME,
+         Total_Production TIME,Region Varchar(250),stagename varchar(250), IdSite Varchar(250),  Plant_Name VARCHAR(250),
+         CustomerComment varchar(5000),
+         -- start[GEOS2-7102][gulab lakade][13 09 2025]
+           EDSTime TIME,
+         AddinTime TIME,
+         PostServerTime TIME,
+            downloadTime TIME,
+               TrasnferTime TIME 
+               -- end[GEOS2-7102][gulab lakade][13 09 2025]
+      );
+   
+      
+      OPEN Designer_cursor;
+   
+     
+     read_loop:
+      LOOP
+         FETCH Designer_cursor
+              INTO _DesignerName,
+                   _CPTypeName,
+                   _Design_System,
+                   _Design_Type,
+                   _No_Of_Ways,
+                   _TypeOf_Ways,
+                   _NoOf_Detections,
+                   _Detection_Name,
+                   _Nof_Option,
+                   _Option_name,
+                   _IDDrawing;
+   
+         IF done
+         THEN
+            LEAVE read_loop;
+         END IF;
+   
+         INSERT INTO TempFinalDesignerDetails
+            SELECT *
+            FROM (SELECT tti.DesignerName
+                            AS 'Designer_Name',
+                         tti.Template
+                            AS 'Template_Name',
+                         tti.CPTypeName
+                            AS 'CP_Type',
+                         tti.OTCode
+                            AS 'OT_Code',
+                         tti.Item_No
+                            AS 'Item_No',
+                         tti.SerialNumber  ,
+                         tti.Design_System
+                            AS 'Design_System',
+                         tti.Design_Type
+                            AS 'Design_Type',
+                         tti.DSA_Status
+                            AS 'DSA_Status',
+                         tti.IdDrawing,
+                         tti.No_Of_Ways
+                            AS 'No_of_Way',
+                         tti.TypeOf_Ways
+                            AS 'Type_of_way',
+                         tti.NoOf_Detections
+                            AS 'No_of_Detection',
+                         tti.Detection_Name
+                            AS 'Detection_Name',
+                         tti.Nof_Option
+                            AS 'No_of_Option',
+                         tti.Option_name
+                            AS 'Option_Name',
+                         tcdpd.CAD_Rework_Count
+                            AS 'Rework_QTY',
+                         DATE_FORMAT(tcdpd.FQUEndDate, '%Y/%m/%d')
+                            AS 'FQU_OK_Date',
+                            -- [GEOS2-9235][gulab lakade][14 11 2025]
+                         -- SEC_TO_TIME(ROUND(tte.ExpectedTime * 60))
+                           -- AS 'Expected_Time',
+                           CASE
+                           WHEN tte.IdStage=tcs.IDStage
+                           THEN 
+                           CASE
+                           WHEN tcs.DesignTypeValue='C'
+                           THEN SEC_TO_TIME(ROUND(tcs.Value))
+                          WHEN tcs.DesignTypeValue='P'
+                           THEN SEC_TO_TIME(ROUND((tte.ExpectedTime * 60 * tcs.Value) / 100, 0))
+                          END
+                           ELSE
+                             SEC_TO_TIME(ROUND(tte.ExpectedTime * 60))
+                           END
+                         
+                            AS 'Expected_Time',
+                              -- [GEOS2-9235][gulab lakade][14 11 2025]
+    SEC_TO_TIME(ROUND(tcdpd.PRODUCTIONTIME % 86400))
+                            AS 'Production_Time',
+                         SEC_TO_TIME(ROUND(tcdpd.TOTALREWORKTIME % 86400))
+                            AS 'Rework_Time',
+                         SEC_TO_TIME(ROUND(tcdpd.TOTALREWORKOWS % 86400))
+                            AS 'Rework_Time_OWS',
+                         SEC_TO_TIME(ROUND(tcdpd.TOTALREWORKOWS % 86400))
+                            AS 'Production_Time_OWS',
+   
+    CASE 
+       WHEN 
+         ROUND(
+            (tcdpd.PRODUCTIONTIME - 
+             IF(tcs.DesignTypeValue = 'C', 
+                ROUND(tcs.Value, 0), 
+                IF(tcs.DesignTypeValue = 'P',
+                   ROUND((tte.ExpectedTime * 60 * tcs.Value) / 100, 0),
+                   ROUND(tte.ExpectedTime * 60, 0)
+                )
+             )
+         ), 0) < 0 
+       THEN 
+         CONCAT('-', 
+                
+                  
+                  SEC_TO_TIME(
+                    ABS(
+                      ROUND(
+                         (
+                          IF(tcs.DesignTypeValue = 'C', 
+                             ROUND(tcs.Value, 0), 
+                             IF(tcs.DesignTypeValue = 'P',
+                                ROUND((tte.ExpectedTime * 60 * tcs.Value) / 100, 0),
+                                ROUND(tte.ExpectedTime * 60, 0)
+                             )
+                          )-
+                         tcdpd.PRODUCTIONTIME
+                         
+                      ), 0)
+                      % 86400
+                    )
+                  )
+                 
+                  )
+       ELSE 
+        
+           SEC_TO_TIME(
+             ROUND(
+                (tcdpd.PRODUCTIONTIME - 
+                 IF(tcs.DesignTypeValue = 'C', 
+                    ROUND(tcs.Value, 0), 
+                    IF(tcs.DesignTypeValue = 'P',
+                       ROUND((tte.ExpectedTime * 60 * tcs.Value) / 100, 0),
+                       ROUND(tte.ExpectedTime * 60, 0)
+                    )
+                 )
+             ), 0)
+             % 86400
+           )
+           
+     END AS 'Production_ExpectedTime',
+   
+    
+                         SEC_TO_TIME(
+                            ROUND(
+                               (SELECT gapt.Avg_ProductionTime
+                                FROM temp_GroupAVGproductionTime gapt
+                                WHERE     gapt.CPTypeName = tti.CPTypeName
+                                      AND gapt.Design_System = tti.Design_System
+                                      AND IFNULL(gapt.Design_Type, 0) =
+                                          IFNULL(tti.Design_Type, 0)
+                                      AND IFNULL(gapt.No_Of_Ways, 0) =
+                                          IFNULL(tti.No_Of_Ways, 0)
+                                      AND IFNULL(gapt.TypeOf_Ways, 0) =
+                                          IFNULL(tti.TypeOf_Ways, 0)
+                                      AND IFNULL(gapt.NoOf_Detections, 0) =
+                                          IFNULL(tti.NoOf_Detections, 0)
+                                      AND IFNULL(gapt.Detection_Name, 0) =
+                                          IFNULL(tti.Detection_Name, 0)
+                                      AND IFNULL(gapt.Nof_Option, 0) =
+                                          IFNULL(tti.Nof_Option, 0)
+                                      AND IFNULL(gapt.Option_name, 0) =
+                                          IFNULL(tti.Option_name, 0))% 86400))
+                            AS 'Avg_ProductionTime',
+                         SEC_TO_TIME(ROUND(tcdpd.TOTALProductionTime % 86400))
+                            AS 'Total_Production',tti.Region,tti.stagename,tti.IdSite,
+                            tti.Plant As 'PlantName',
+                            tti.CustomerComment,
+                            -- start[GEOS2-7102][gulab lakade][13 09 2025]
+                             SEC_TO_TIME(ROUND(tcdpd.EDSTime% 86400)) AS 'EDSTime' ,
+               SEC_TO_TIME(ROUND(tcdpd.AddinTime% 86400)) AS 'AddinTime' ,
+               SEC_TO_TIME(ROUND(tcdpd.PostServerTime% 86400)) AS 'PostServerTime' ,
+                                                   SEC_TO_TIME(ROUND(tcdpd.downloadTime% 86400)) AS 'downloadTime' ,
+                                                   SEC_TO_TIME(ROUND(tcdpd.TrasnferTime% 86400)) AS 'TrasnferTime'
+                                                   -- end[GEOS2-7102][gulab lakade][13 09 2025]
+                  FROM temp_timetracking_Info tti
+                       INNER JOIN TempCADCounterPartsDetail tcdpd
+                          ON tcdpd.IDCOUNTERPART = tti.idcounterpart
+   
+    LEFT JOIN tt_exptime tte   -- [pallavi.jadhav][GEOS2-9958][11 11 2025]
+      ON  tti.IdCP = tte.CPProductID 
+     AND tte.IdStage = _CurrentIdStage  
+  
+  LEFT JOIN TempCADDesignSetting tcs
+      ON tcs.IDStage = _CurrentIdStage
+                                     AND tcs.DesignType = tti.Design_Type
+                  WHERE     tcdpd.TOTALProductionTime > 0
+                        AND tcdpd.PRODUCTIONTIME > 0
+   
+   
+                        AND  FIND_IN_SET( IFNULL(tti.DesignerName, NULL), _DesignerName)
+                        AND FIND_IN_SET(IFNULL(tti.CPTypeName, NULL), _CPTypeName)
+                        AND FIND_IN_SET( IFNULL(tti.Design_System, NULL), _Design_System)
+                        AND FIND_IN_SET(IFNULL(tti.Design_Type, NULL), _Design_Type)
+                        AND FIND_IN_SET(IFNULL(tti.No_Of_Ways, NULL), _No_Of_Ways)
+                        AND FIND_IN_SET(IFNULL(tti.TypeOf_Ways, NULL), _TypeOf_Ways)
+                        AND FIND_IN_SET(IFNULL(tti.NoOf_Detections, NULL), _NoOf_Detections)
+                        AND FIND_IN_SET( IFNULL(tti.Detection_Name, NULL), _Detection_Name)
+                        AND FIND_IN_SET(IFNULL(tti.Nof_Option, NULL), _Nof_Option)
+                        AND FIND_IN_SET(IFNULL(tti.Option_name, NULL), _Option_name)
+                        
+                         
+                       
+                  ORDER BY tcdpd.TOTALProductionTime DESC) AS FinalTopNRecord
+            LIMIT _RecordLimit;
+      END LOOP;
+   
+      
+      CLOSE Designer_cursor;
+   
+     select * from ( SELECT *
+      FROM TempFinalDesignerDetails 
+      GROUP BY SerialNumber) as e where FIND_IN_SET(Design_Type,_Type) 
+      ORDER BY Total_Production DESC;
+   END$$
+ DELIMITER ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- Drop procedure ERM_CalculateRework_Cursor_SP_V2690;
+ DELIMITER $$
+CREATE PROCEDURE `ERM_CalculateRework_Cursor_SP_V2690`(IN _FromDate   Date,
+                                                     IN _ToDate     Date,IN _CurrentIdStage  INT)
+ BEGIN
+         DECLARE reworkIdStage1          INT;
+         DECLARE reworkIdStage2          INT;
+         DECLARE reworkIdStage3          INT;
+         DECLARE reworkIdStage4          INT;
+   
+           DECLARE DetectIdStage1          INT;
+         DECLARE DetectIdStage2          INT;
+         DECLARE DetectIdStage3          INT;
+         DECLARE DetectIdStage4          INT;
+   
+          DECLARE _IdCounterpart  INT;
+     DECLARE _IdStage  INT;
+      DECLARE _StartDate DATETIME;
+       DECLARE _EndDate DATETIME;
+        DECLARE _CurrentTime  INT;
+         DECLARE _Rework  INT;
+         DECLARE _IdCounterpartTracking  INT;
+   
+          DECLARE _ReworkTime  INT;
+    DECLARE _ReworkOws  INT;
+           DECLARE _ReworkTime2  INT;
+    DECLARE _ReworkOws2  INT;
+     DECLARE _ReworkTime3  INT;
+    DECLARE _ReworkOws3  INT;
+     DECLARE _ReworkTime4  INT;
+    DECLARE _ReworkOws4  INT;
+    DECLARE CursorID INT;
+   DECLARE _IdCP INT;
+   DECLARE _ProductionTime INT;
+   DECLARE _ProductionTimeFlag INT;
+    DECLARE FinalReworkTime DECIMAL;
+     DECLARE FinalReworkOws  DECIMAL;
+     DECLARE _FQUEndDate  DATETIME;
+      DECLARE _CADReworkCount INT;
+      -- start[GEOS2-7102][gulab lakade][13 09 2025]
+       DECLARE _EDSTime INT;
+       DECLARE _AddinTime INT;
+       DECLARE _PostServerTime INT;
+       DECLARE _downloadTime INT;
+        DECLARE   _TrasnferTime INT;
+          DECLARE   _Tracking INT;
+   -- end[GEOS2-7102][gulab lakade][13 09 2025]
+   
+    DECLARE FirstCursorID INT;
+      -- start[GEOS2-7102][gulab lakade][13 09 2025]
+        DROP TEMPORARY TABLE IF EXISTS TempIdcounterpart;
+      CREATE TEMPORARY TABLE IF NOT EXISTS TempIdcounterpart
+      ( 
+      SELECT
+    cpt.IdCounterpart,
+    cpt.EndDate
+      FROM counterpartstracking cpt
+      WHERE 
+    Date(cpt.EndDate)>=Date(_FromDate)
+      AND  Date(cpt.EndDate)<=Date(_ToDate)
+        AND cpt.IdStage =_CurrentIdStage 
+            GROUP BY cpt.IdCounterpart
+      );
+           DROP TEMPORARY TABLE IF EXISTS TempCADTrackingDetail;
+      CREATE TEMPORARY TABLE IF NOT EXISTS TempCADTrackingDetail
+      ( 
+       SELECT
+    cpt.IdCounterpart,
+    cpt.EndDate,
+    cpt.IdCounterpartTracking,
+    cptt.StartTime,
+    cptt.EndTime,
+    cptt.ProductionActivityTimeType,
+     TIMESTAMPDIFF(SECOND, cptt.StartTime, cptt.EndTime) as 'TimeDiff'
+      FROM counterpartstracking cpt
+      inner join geos.counterpartstrackingtimes cptt on cptt.IdCounterpartTracking=cpt.IdCounterpartTracking
+      AND cpt.IdCounterpart IN (select IdCounterpart from TempIdcounterpart)
+      AND cpt.IdStage =_CurrentIdStage 
+     -- WHERE 
+      -- Date(cpt.EndDate)>=Date(_FromDate)
+     -- AND  Date(cpt.EndDate)<=Date(_ToDate)
+     --   AND
+       -- cpt.IdStage =2 
+      --  group by cpt.IdCounterpartTracking
+      );
+      
+       DROP TEMPORARY TABLE IF EXISTS TempCADTrackingDetail1;
+      CREATE TEMPORARY TABLE IF NOT EXISTS TempCADTrackingDetail1
+      (
+      select * from TempCADTrackingDetail
+      );
+       DROP TEMPORARY TABLE IF EXISTS TempCADTrackingDetail2;
+      CREATE TEMPORARY TABLE IF NOT EXISTS TempCADTrackingDetail2
+      (
+      select * from TempCADTrackingDetail
+      );
+       DROP TEMPORARY TABLE IF EXISTS TempCADTrackingDetail3;
+      CREATE TEMPORARY TABLE IF NOT EXISTS TempCADTrackingDetail3
+      (
+      select * from TempCADTrackingDetail
+      );
+       DROP TEMPORARY TABLE IF EXISTS TempCADTrackingDetail4;
+      CREATE TEMPORARY TABLE IF NOT EXISTS TempCADTrackingDetail4
+      (
+      select * from TempCADTrackingDetail
+      );
+     --  select * from TempCADTrackingDetail
+    -- end[GEOS2-7102][gulab lakade][13 09 2025]
+      BEGIN
+        DECLARE finished1, finished BOOLEAN DEFAULT FALSE;
+       
+    DECLARE curCP CURSOR FOR
+   
+     -- start[GEOS2-7102][gulab lakade][13 09 2025]
+   /* SELECT
+    cpt.IdCounterpart,
+    cpt.EndDate
+      FROM counterpartstracking cpt
+      WHERE 
+    Date(cpt.EndDate)>=Date(_FromDate)
+      AND  Date(cpt.EndDate)<=Date(_ToDate)
+        AND cpt.IdStage =2 
+            GROUP BY cpt.IdCounterpart;
+           */
+            SELECT
+    cpt.IdCounterpart,
+    cpt.EndDate
+      FROM TempIdcounterpart cpt
+            GROUP BY cpt.IdCounterpart;
+             -- start[GEOS2-7102][gulab lakade][13 09 2025]
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET finished1 = TRUE;
+   
+         
+    
+         DROP TEMPORARY TABLE IF EXISTS TempCADCounterPartsDetail;
+      CREATE TEMPORARY TABLE IF NOT EXISTS TempCADCounterPartsDetail (
+         IdCounterpart INT,
+        ProductionTime INT,
+         TotalReworkTime INT,
+         TotalReworkOws INT,
+         FQUEndDate DATETIME,
+         CAD_Rework_Count INT,
+          TOTALProductionTime INT,
+          EDSTime INT,
+           AddinTime INT,
+            PostServerTime INT,
+            downloadTime INT,
+            TrasnferTime INT,
+            IdCounterparttracking INT
+      )      ;
+   
+         OPEN curCP;
+   
+        curCP_loop:
+         LOOP
+            FETCH curCP   INTO _IdCP, _FQUEndDate;
+   
+            IF finished1
+            THEN
+               CLOSE curCP;
+   
+               LEAVE curCP_loop;
+            END IF;
+   
+            SET FirstCursorID = 0;
+            SET _ReworkTime = 0;
+            SET _ReworkOws = 0;
+            SET _ReworkTime2 = 0;
+            SET _ReworkOws2 = 0;
+            SET _ReworkTime3 = 0;
+            SET _ReworkOws3 = 0;
+            SET _ReworkTime4 = 0;
+            SET _ReworkOws4 = 0;
+   
+            SET CursorID = 1;
+            
+            SET reworkIdStage1 = 0;
+            SET reworkIdStage2 = 0;
+            SET reworkIdStage3 = 0;
+            SET reworkIdStage4 = 0;
+   
+            SET DetectIdStage1 = 0;
+            SET DetectIdStage2 = 0;
+            SET DetectIdStage3 = 0;
+            SET DetectIdStage4 = 0;
+            SET _ProductionTimeFlag = 0;
+            SET _ProductionTime = 0;
+            SET finished = FALSE;
+            SET _CADReworkCount = 0;
+            -- start[GEOS2-7102][gulab lakade][13 09 2025]
+    SET _EDSTime  = 0;
+       SET _AddinTime  = 0;
+       SET _PostServerTime = 0;
+       SET _downloadTime = 0; 
+        SET   _TrasnferTime = 0;
+        SET _Tracking=0;
+         -- start[GEOS2-7102][gulab lakade][13 09 2025]  
+           BLOCK2:
+            BEGIN
+     DECLARE CalculateRework_cursor CURSOR FOR
+    SELECT
+    cpt.IdCounterpart,
+    cpt.IdStage,
+     cpt.StartDate,
+      cpt.EndDate,
+       cpt.CurrentTime,
+        cpt.Rework,
+        cpt.IdCounterpartTracking
+      FROM counterpartstracking cpt
+           INNER JOIN stages st ON cpt.IdStage = st.IdStage
+      WHERE     cpt.IdCounterpart IN
+                   (_IdCP)  ORDER BY cpt.IdCounterpartTracking ASC;
+   
+                      
+     DECLARE CONTINUE HANDLER FOR NOT FOUND SET finished = TRUE;
+   
+               
+               OPEN CalculateRework_cursor;
+   
+              read_loop:
+               LOOP
+                  
+                  FETCH CalculateRework_cursor
+                       INTO _IdCounterpart,
+                            _IdStage,
+                            _StartDate,
+                            _EndDate,
+                            _CurrentTime,
+                            _Rework,
+                            _IdCounterpartTracking;
+   
+   
+                  IF finished
+                  THEN
+                     
+                     
+                     LEAVE read_loop;
+                  END IF;
+   
+                  SET CursorID = CursorID + 1;
+   
+                  
+                  
+                  
+                  IF reworkIdStage1 > 0 AND DetectIdStage1 > 0
+                  THEN
+                     
+                     IF reworkIdStage2 > 0 AND DetectIdStage2 > 0
+                     THEN
+                        
+                        IF reworkIdStage3 > 0 AND DetectIdStage3 > 0
+                        THEN
+                           
+                           IF reworkIdStage4 > 0 AND DetectIdStage4 > 0
+                           THEN
+                              
+                               IF DetectIdStage4 = _CurrentIdStage
+     
+                              THEN
+                                 SET _ReworkOws4 = _ReworkOws4 + _CurrentTime;
+                              
+                              END IF;                     
+   
+                              
+                              IF reworkIdStage4 = _IdStage
+                              THEN
+                                 SET DetectIdStage4 = 0;
+                                 SET reworkIdStage4 = 0;
+                              END IF;              
+                           
+                           ELSE
+                              
+                              IF _Rework = 1
+                              THEN
+                                 
+                                 IF reworkIdStage3 = _IdStage
+                                 THEN
+                                    SET reworkIdStage3 = 0;
+                                    SET DetectIdStage3 = 0;
+                                    
+   
+                                    SET FirstCursorID = CursorID + 1;
+                                    SET reworkIdStage3 = _IdStage;
+                                    SET _ReworkOws3 = _ReworkOws3 + _CurrentTime;
+                                 
+                                 ELSE
+                                    
+                                    SET FirstCursorID = CursorID + 1;
+                                    SET reworkIdStage4 = _IdStage;
+                                    SET _ReworkOws3 = _ReworkOws3 + _CurrentTime;
+                                 
+                                 END IF;           
+                              ELSE
+                                 
+                                 IF FirstCursorID = CursorID
+                                 THEN
+                                    SET DetectIdStage4 = _IdStage;
+   
+                                    
+                                   IF DetectIdStage4 = _CurrentIdStage
+    
+                                    THEN
+                                       SET _ReworkTime4 =
+                                              _ReworkTime4 + _CurrentTime;
+                                    
+                                    END IF;               
+                                 
+                                 
+                                 ELSE
+                                    
+                                     IF DetectIdStage3 = _CurrentIdStage
+    
+                                    THEN
+                                       SET _ReworkOws3 =
+                                              _ReworkOws3 + _CurrentTime;
+                                    
+                                    END IF;               
+   
+                                    
+                                    IF reworkIdStage3 = _IdStage
+                                    THEN
+                                       SET DetectIdStage3 = 0;
+                                       SET reworkIdStage3 = 0;
+                                    END IF;        
+                                 
+                                 END IF;               
+                              END IF;                                
+                           
+                           END IF;       
+                        
+                        ELSE
+                           
+                           IF _Rework = 1
+                           THEN
+                              
+                              IF reworkIdStage2 = _IdStage
+                              THEN
+                                 SET reworkIdStage2 = 0;
+                                 SET DetectIdStage2 = 0;
+                                 
+   
+                                 SET FirstCursorID = CursorID + 1;
+                                 SET reworkIdStage2 = _IdStage;
+                                 SET _ReworkOws2 = _ReworkOws2 + _CurrentTime;
+                              
+                              ELSE
+                                 
+                                 SET FirstCursorID = CursorID + 1;
+                                 SET reworkIdStage3 = _IdStage;
+                                 SET _ReworkOws2 = _ReworkOws2 + _CurrentTime;
+                              
+                              END IF;              
+                           ELSE
+                              
+                              IF FirstCursorID = CursorID
+                              THEN
+                                 SET DetectIdStage3 = _IdStage;
+   
+                                 
+                                  IF DetectIdStage3 = _CurrentIdStage
+    
+                                 THEN
+                                    SET _ReworkTime3 =
+                                           _ReworkTime3 + _CurrentTime;
+                                    SET _CADReworkCount = _CADReworkCount + 1; 
+                                 
+                                 END IF;                  
+                              
+                              
+                              ELSE
+                                 
+                                  IF DetectIdStage2 = _CurrentIdStage
+    
+                                 THEN
+                                    SET _ReworkOws2 = _ReworkOws2 + _CurrentTime;
+                                 
+                                 END IF;                  
+   
+                                 
+                                 IF reworkIdStage2 = _IdStage
+                                 THEN
+                                    SET DetectIdStage2 = 0;
+                                    SET reworkIdStage2 = 0;
+                                 END IF;           
+                              
+                              END IF;                  
+                           END IF;                                   
+                        
+                        END IF;          
+                     
+   
+                     ELSE
+                        
+                        IF _Rework = 1
+                        THEN
+                           
+                           IF reworkIdStage1 = _IdStage
+                           THEN
+                              SET reworkIdStage1 = 0;
+                              SET DetectIdStage1 = 0;
+                              
+                              SET FirstCursorID = CursorID + 1;
+                              SET reworkIdStage1 = _IdStage;
+                              SET _ReworkOws = _ReworkOws + _CurrentTime;
+                           
+                           ELSE
+                              
+                              SET FirstCursorID = CursorID + 1;
+                              SET reworkIdStage2 = _IdStage;
+                              SET _ReworkOws = _ReworkOws + _CurrentTime;
+                           
+                           END IF;                 
+                        ELSE
+                           
+                           IF FirstCursorID = CursorID
+                           THEN
+                              SET DetectIdStage2 = _IdStage;
+   
+                              
+                               IF DetectIdStage2 = _CurrentIdStage
+                              
+                              THEN
+                                 SET _ReworkTime2 = _ReworkTime2 + _CurrentTime;
+                                 SET _CADReworkCount = _CADReworkCount + 1; 
+                              
+                              END IF;                     
+                           
+                           
+                           ELSE
+                              
+                              IF reworkIdStage1 = _IdStage
+                              THEN
+                                 
+                                  IF DetectIdStage1 = _CurrentIdStage
+   
+                                 THEN
+                                    SET _ReworkOws = _ReworkOws + _CurrentTime;
+                                 END IF;                 
+   
+                                 
+                                 
+                                 
+                                 SET reworkIdStage1 = 0;
+                                 SET DetectIdStage1 = 0;
+                              ELSE
+                                 
+                                  IF DetectIdStage1 = _CurrentIdStage
+    
+                                 THEN
+                                    SET _ReworkOws = _ReworkOws + _CurrentTime;
+                                 END IF;                  
+                              
+   
+                              END IF;              
+                           
+                           END IF;                     
+                        END IF;                                      
+                     
+                     END IF;             
+                  
+   
+                  ELSE
+                     
+                     IF _Rework = 1
+                     THEN
+                        SET FirstCursorID = CursorID + 1;
+                        SET reworkIdStage1 = _IdStage;
+   
+                        
+                       IF _IdStage = _CurrentIdStage
+    
+                        THEN
+                           IF _ProductionTimeFlag = 0
+                           THEN
+                           -- start[GEOS2-7102][gulab lakade][13 09 2025]
+                             --  SET _ProductionTime = _CurrentTime;
+                                SET  _EDSTime=(SELECT IFNULL(SUM(TimeDiff), 0) as 'Timediff' FROM TempCADTrackingDetail where ProductionActivityTimeType=2230 and IdCounterpartTracking=_IdCounterpartTracking);
+                              SET  _AddinTime=(SELECT IFNULL(SUM(TimeDiff), 0) as 'Timediff' FROM TempCADTrackingDetail where ProductionActivityTimeType=2228 and IdCounterpartTracking=_IdCounterpartTracking);
+                               SET  _PostServerTime=(SELECT IFNULL(SUM(TimeDiff), 0) as 'Timediff' FROM TempCADTrackingDetail2 where ProductionActivityTimeType=0 and IdCounterpartTracking=_IdCounterpartTracking);
+                              SET _ProductionTime= _AddinTime + _PostServerTime;
+                              SET _downloadTime= (SELECT IFNULL(SUM(TimeDiff), 0) as 'Timediff' FROM TempCADTrackingDetail3 where ProductionActivityTimeType=1921 and IdCounterpartTracking=_IdCounterpartTracking);
+                               SET _TrasnferTime= (SELECT IFNULL(SUM(TimeDiff), 0) as 'Timediff' FROM TempCADTrackingDetail4 where ProductionActivityTimeType=1920 and IdCounterpartTracking=_IdCounterpartTracking);
+                             SET _Tracking=_IdCounterpartTracking;
+                             -- start[GEOS2-7102][gulab lakade][13 09 2025]
+                              SET _ProductionTimeFlag = 1;
+                           END IF;                 
+                        END IF;                                 
+                     
+                     
+                     ELSE
+                        
+                        IF FirstCursorID = CursorID
+                        THEN
+                           SET DetectIdStage1 = _IdStage;
+   
+                           
+                           IF DetectIdStage1 = _CurrentIdStage
+    
+                           THEN
+                              SET _ReworkTime = _ReworkTime + _CurrentTime;
+                              SET _CADReworkCount = _CADReworkCount + 1; 
+                           
+                           END IF;                       
+                        
+                        
+                        ELSE
+                           
+                            IF _IdStage = _CurrentIdStage
+   
+                           THEN
+                              IF _ProductionTimeFlag = 0
+                              THEN
+                                   -- start[GEOS2-7102][gulab lakade][13 09 2025]
+                                    -- SET _ProductionTime = _CurrentTime;
+                                   SET  _EDSTime=(SELECT IFNULL(SUM(TimeDiff), 0) as 'Timediff' FROM TempCADTrackingDetail where ProductionActivityTimeType=2230 and IdCounterpartTracking=_IdCounterpartTracking);
+                              SET  _AddinTime=(SELECT IFNULL(SUM(TimeDiff), 0) as 'Timediff' FROM TempCADTrackingDetail1 where ProductionActivityTimeType=2228 and IdCounterpartTracking=_IdCounterpartTracking);
+                                SET  _PostServerTime=(SELECT IFNULL(SUM(TimeDiff), 0) as 'Timediff' FROM TempCADTrackingDetail2 where ProductionActivityTimeType=0 and IdCounterpartTracking=_IdCounterpartTracking);
+                             SET _ProductionTime= _AddinTime + _PostServerTime;
+                             SET _downloadTime= (SELECT IFNULL(SUM(TimeDiff), 0) as 'Timediff' FROM TempCADTrackingDetail3 where ProductionActivityTimeType=1921 and IdCounterpartTracking=_IdCounterpartTracking);
+                               SET _TrasnferTime= (SELECT IFNULL(SUM(TimeDiff), 0) as 'Timediff' FROM TempCADTrackingDetail4 where ProductionActivityTimeType=1920 and IdCounterpartTracking=_IdCounterpartTracking);
+                                SET _Tracking=_IdCounterpartTracking;
+                                -- end[GEOS2-7102][gulab lakade][13 09 2025]
+                                 SET _ProductionTimeFlag = 1;
+                              END IF;              
+                           END IF;                              
+                        
+                        
+                        
+                        END IF;                     
+                     END IF;                                    
+                  
+                  END IF;          
+               END LOOP read_loop;
+   
+   
+               CLOSE CalculateRework_cursor;
+            END block2;
+   
+            
+            SET FINALREWORKTIME =
+                   (_REWORKTIME + _REWORKTIME2 + _REWORKTIME3 + _REWORKTIME4);
+            SET FINALREWORKOWS =
+                   (_REWORKOWS + _REWORKOWS2 + _REWORKOWS3 + _REWORKOWS4);
+   
+            INSERT INTO TEMPCADCOUNTERPARTSDETAIL(IDCOUNTERPART,
+                                                  PRODUCTIONTIME,
+                                                  TOTALREWORKTIME,
+                                                  TOTALREWORKOWS,
+                                                  FQUEndDate,
+                                                  CAD_Rework_Count,
+                                                  TOTALProductionTime,
+  												EDSTime ,
+  												AddinTime ,
+  												PostServerTime,
+                                                  downloadTime,
+                                                  TrasnferTime,
+                                                  IdCounterparttracking
+                                                  )
+            VALUES (_IDCP,
+                    _PRODUCTIONTIME,
+                    FINALREWORKTIME,
+                    FINALREWORKOWS,
+                    _FQUEndDate,
+                    _CADReworkCount,
+                    (_PRODUCTIONTIME + FINALREWORKTIME),
+                     _EDSTime ,
+  				_AddinTime ,
+  				_PostServerTime,
+                  _downloadTime,
+                  _TrasnferTime,
+                  _Tracking
+                    );
+         
+         
+   
+         END LOOP curCP_loop;
+      
+      END; -- end nested block for curCP
+   -- select * from TempCADCounterPartsDetail;
+    
+      END$$
+   DELIMITER $$

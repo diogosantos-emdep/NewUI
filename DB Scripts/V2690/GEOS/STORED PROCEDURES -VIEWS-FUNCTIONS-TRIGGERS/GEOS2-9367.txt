@@ -1,0 +1,41 @@
+DELIMITER $$
+drop procedure if exists geos.WMS_GetTransportFrequencyChangeLog_V2690$$
+create procedure geos.WMS_GetTransportFrequencyChangeLog_V2690()
+begin
+	
+/*
+ [nsatpute][21.11.2025][GEOS2-9367]
+ CALL geos.WMS_GetTransportFrequencyChangeLog_V2690();
+ */
+
+	select IdChangeLog, IdTransportFrequency, `Datetime`, usr.IdUser,   `Change`, Concat(usr.firstname,' ', usr.lastname) as UserName
+	FROM geos.Transport_Frequency_Changelog etp
+        INNER JOIN emdep_geos.users usr ON usr.IdUser = etp.IdUser
+        order by `Datetime` desc;
+end$$
+delimiter ;
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS geos.WMS_InsertTransportFrequencyChangeLog_V2690$$
+
+CREATE PROCEDURE geos.WMS_InsertTransportFrequencyChangeLog_V2690(
+_IdTransportFrequency int,
+    _Datetime DATETIME,
+    _IdUser smallint unsigned, 
+    _Change VARCHAR(10000)  
+)
+begin
+	
+	/*
+	 [nsatpute][21.11.2025][GEOS2-9367]
+	 CALL geos.WMS_InsertTransportFrequencyChangeLog_V2690(1,now(),1,'Test');
+	 */
+
+    INSERT INTO geos.Transport_Frequency_Changelog(IdTransportFrequency,`Datetime`, IdUser, `Change`)  
+    VALUES(_IdTransportFrequency ,_Datetime, _IdUser, _Change);
+END$$
+
+DELIMITER ;
+
+

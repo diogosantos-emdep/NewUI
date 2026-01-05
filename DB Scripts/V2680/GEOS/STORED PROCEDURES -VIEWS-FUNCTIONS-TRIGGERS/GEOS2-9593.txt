@@ -1,0 +1,701 @@
+DROP PROCEDURE IF EXISTS WMS_GetOpenPOsByPlant_V2680;
+DELIMITER $$
+
+CREATE  PROCEDURE WMS_GetOpenPOsByPlant_V2680()
+BEGIN
+  	-- [rdixit][GEOS2-9593][13.11.2025]
+         DECLARE v_KitArticleId VARCHAR(500);
+          -- Get the KitOfModulesReferences article ID once
+          SELECT GROUP_CONCAT(IdArticle)
+          INTO v_KitArticleId
+          FROM articles
+          WHERE FIND_IN_SET(
+         Reference,
+        (SELECT defaultValue
+         FROM emdep_geos.geos_app_settings
+         WHERE appSettingName = 'KitOfModulesReferences')
+          );
+          -- Create temporary table for active open POs
+          DROP TEMPORARY TABLE IF EXISTS ActivePlantPO;
+          CREATE TEMPORARY TABLE ActivePlantPO AS
+          SELECT 
+              wpo.*, 
+              s.IdCustomer, 
+              c.Name AS CustomerName,
+              s.Name AS Plant, 
+              s.IdSite,             
+              sa.Name AS ShippingAddress,  
+              es.Code AS SiteCode,
+  			concat(p.Name,' ',p.Surname) As PersonName,
+  			pro.ServiceProviderUrl,
+             es.FileServerIP
+          FROM warehousepurchaseorders wpo
+          INNER JOIN warehouses w ON wpo.IdArticleSupplier = w.IdArticleSupplier
+          INNER JOIN sites s ON s.IdSite = w.IdSite
+          INNER JOIN customers c ON c.IdCustomer=s.IdCustomer
+          INNER JOIN people p ON p.IdPerson = wpo.CreatedBy		
+          INNER JOIN emdepsites es ON es.IdSite = s.IdSite
+          INNER JOIN emdep_geos.geos_providers pro on w.IdSite  = pro.IdCompany
+          LEFT JOIN shippingaddresses sa ON sa.IdShippingAddress = wpo.IdShippingAddress
+          WHERE 
+              wpo.IsClosed = 0 
+              AND w.IsRegional = 1 
+              AND w.InUse = 1
+              AND wpo.IdWorkflowStatus = 6
+              -- ✅ Exclude those POs whose Code exists in customerpurchaseorders
+--               AND NOT EXISTS (
+--                   SELECT 1
+--                   FROM customerpurchaseorders cpo
+--                   WHERE cpo.Code = wpo.Code
+--               )
+              -- ✅ Exclude those POs that contain the Kit article
+              AND NOT EXISTS (
+                  SELECT 1
+                  FROM warehousepurchaseorderitems wpoi         
+                  WHERE 
+                      wpoi.IdWarehousePurchaseOrder = wpo.IdWarehousePurchaseOrder
+                      -- AND wpoi.IdArticle in (v_KitArticleId)
+                      AND FIND_IN_SET(wpoi.IdArticle, v_KitArticleId)
+              );
+          -- Show all active POs
+          SELECT * FROM ActivePlantPO;
+          -- Workaround: use derived table instead of direct reference to temp table
+          SELECT wpoi.*, a.Reference, a.IdArticleCategory, a.IsGeneric, a.IsBatch
+          FROM warehousepurchaseorderitems wpoi
+             inner join articles a on a.idArticle = wpoi.idArticle
+          INNER JOIN (
+              SELECT IdWarehousePurchaseOrder FROM ActivePlantPO
+          ) AS apo ON apo.IdWarehousePurchaseOrder = wpoi.IdWarehousePurchaseOrder
+          -- WHERE wpoi.IdArticle NOT IN (v_KitArticleId) 
+          WHERE NOT FIND_IN_SET(wpoi.IdArticle, v_KitArticleId)
+          AND wpoi.IdArticle NOT IN (3252,13339) AND wpoi.quantity > 0;
+   END$$
+DELIMITER ;
+
+
+
+
+
+
+DROP PROCEDURE IF EXISTS WMS_InsertOfferFromPO_V2680;
+DELIMITER $$
+CREATE PROCEDURE WMS_InsertOfferFromPO_V2680(
+       IN _Code                   VARCHAR(45),
+       IN _Title                  VARCHAR(500),
+       IN _IdOfferType            TINYINT UNSIGNED,
+       IN _IdCustomer             INT UNSIGNED,    
+       IN _Value                  DOUBLE,    
+       IN _IdCurrency             TINYINT UNSIGNED,
+       IN _Year                   INT UNSIGNED,
+       IN _Number                 INT UNSIGNED,     
+       IN _Rfq                    VARCHAR(60), 
+       IN _IdSite                 SMALLINT UNSIGNED,  
+       IN _IdCarriageMethod       SMALLINT UNSIGNED,
+       IN _IdSalesOwner           SMALLINT,
+       IN _InitialOfferValue      DOUBLE,
+       IN _IDSiteCreatedBy        int(10)
+)
+BEGIN
+    -- [rdixit][GEOS2-9593][13.11.2025]
+
+    DECLARE _IdShippingAddressDefault INT;
+
+    SELECT s.IdShippingAddress  
+      INTO _IdShippingAddressDefault 
+      FROM shippingaddresses s  
+     WHERE s.IdSite = _IdSite 
+       AND s.IsDefault = 1
+     LIMIT 1;
+
+    INSERT INTO offers(
+        Code,
+        Title,
+        IdOfferType,
+        IdCustomer,
+        Description,
+        IdStatus,
+        Value,
+        Year,
+        Number,
+        IdSite,
+        CreatedIn,
+        CreatedBy,
+        ModifiedBy,
+        ModifiedIn,
+        AssignedIn,
+        Comments,
+        Rfq,
+        Contact,
+        IdShippingAddress,
+        OfferedBy,
+       -- IdSalesOwner,
+        IdBusinessUnit,
+        IdSource,
+        IdCustomerToDelivery,
+        IdCurrency,
+        ProbabilityOfSuccess,
+        IdCarriageMethod,
+        InitialOfferValue,
+        RFQReception,
+        SendIn
+    )
+    VALUES (
+        _Code,
+        _Title,
+        _IdOfferType,
+        _IdCustomer,
+        _Title,
+        2,
+        _Value,
+        _Year,
+        _Number,
+        _IDSiteCreatedBy,
+        NOW(),
+        164,
+        164,
+        NOW(),
+        NOW(),
+        '',
+        _Rfq,
+        '',
+        _IdShippingAddressDefault,
+        164,
+      --  _IdSalesOwner,
+        5,
+        11,
+        0,
+        _IdCurrency,
+        0,
+        CASE 
+            WHEN _IdOfferType = 9 THEN 242
+            ELSE NULL
+        END,
+        _InitialOfferValue,
+        NOW(),
+        Now()
+    );
+
+    SELECT LAST_INSERT_ID();
+ END$$
+DELIMITER ;
+
+
+
+
+
+
+
+DROP PROCEDURE IF EXISTS `WMS_CheckIfOfferExists_V2680`;
+DELIMITER $$
+CREATE PROCEDURE `WMS_CheckIfOfferExists_V2680`(
+     IN _Code         VARCHAR(200),
+     IN _IdSite       SMALLINT,
+     in _Value 		DOUBLE,
+     in _IdCurrency TINYINT)
+ BEGIN
+      -- [rdixit][GEOS2-9593][13.11.2025]
+      IF ((SELECT count(*) FROM geos.customerpurchaseorders WHERE code = _Code AND IdSite = _IdSite and value = _Value AND IdCurrency = _IdCurrency) = 0)
+        THEN 
+ 		select 0 As IsExists;
+        else
+ 		select 1 As IsExists;
+        end if;
+ 
+ SELECT LAST_INSERT_ID();
+END$$
+DELIMITER ;
+
+
+
+
+
+DROP PROCEDURE IF EXISTS WMS_InsertCustomerPurchaseOrders_V2680;
+DELIMITER $$
+CREATE PROCEDURE WMS_InsertCustomerPurchaseOrders_V2680(
+      IN _IdSite                    smallint,
+      IN _Code                      varchar(200),
+      IN _Value                     double,
+      IN _IdCurrency                TINYINT,
+      IN _RecievedBy                varchar(200),
+      IN _IdSneder                  Int(10))
+BEGIN
+   -- [rdixit][GEOS2-9593][13.11.2025]
+   DECLARE _IdShippingAddressDefault int ;
+  		SELECT 
+      s.IdShippingAddress
+  INTO _IdShippingAddressDefault FROM
+      shippingaddresses s
+  WHERE
+      IdSite = _IdSite AND IsDefault = 1
+  LIMIT 1;
+
+      INSERT Into  customerpurchaseorders
+      SET IdPOType = 1,
+          IdSite = _IdSite,
+          Code = _Code,
+          ReceivedIn = now(),
+          ReceivedBy = _RecievedBy,
+          IdSender = _IdSneder,
+          IdShippingAddress = _IdShippingAddressDefault,
+          Value = _Value,
+          IdCurrency = _IdCurrency,     
+          CreatedBy = 164,
+          CreatedIn = now(),
+          modifiedIn = now(),
+          modifiedby =164 ;
+  SELECT LAST_INSERT_ID();
+END$$
+DELIMITER ;
+
+
+
+DROP PROCEDURE IF EXISTS `WMS_InsertCustomerPurchaseOrdersByOffer_V2680`;
+DELIMITER $$
+CREATE PROCEDURE `WMS_InsertCustomerPurchaseOrdersByOffer_V2680`(
+     IN _idCustomerPurchaseOrder         int,
+     IN _idOffer                    		int)
+ BEGIN
+ 	-- [rdixit][GEOS2-9593][13.11.2025]
+     INSERT Into  customerpurchaseordersbyoffer
+     SET  idCustomerPurchaseOrder = _idCustomerPurchaseOrder,
+         idOffer = _idOffer;
+ 
+ SELECT LAST_INSERT_ID();
+  END$$
+DELIMITER ;
+
+
+
+
+
+DROP PROCEDURE IF EXISTS `WMS_optionsbyoffer_MaterialPlanta_Insert_V2680`;
+DELIMITER $$
+CREATE PROCEDURE `WMS_optionsbyoffer_MaterialPlanta_Insert_V2680`(IN _IdOffer    int UNSIGNED)
+ BEGIN
+ 	-- [rdixit][GEOS2-9593][13.11.2025]
+ 	INSERT INTO optionsbyoffer(IdOffer, IdOption, Quantity) VALUES (_IdOffer, 21, 1); 		
+ END$$
+DELIMITER ;
+
+
+
+DROP PROCEDURE IF EXISTS `WMS_InsertMaterialPlantaQuotations_V2680`;
+DELIMITER $$
+CREATE PROCEDURE `WMS_InsertMaterialPlantaQuotations_V2680`(
+     IN _IdCustomer             SMALLINT UNSIGNED,
+     IN _Code                   VARCHAR(13),
+     IN _Year                   SMALLINT UNSIGNED,
+     IN _Number                 SMALLINT UNSIGNED,
+     IN _Description            VARCHAR(255),
+     IN _ProjectName            VARCHAR(255),
+     IN _IdOffer                INT UNSIGNED,
+     IN _IdCurrency                 SMALLINT 
+ )
+ BEGIN
+     -- [rdixit][GEOS2-9593][13.11.2025]
+     DECLARE _existingId INT UNSIGNED;
+     
+     -- Check if quotation already exists
+     SELECT idquotation INTO _existingId
+     FROM quotations
+     WHERE IdOffer = _IdOffer AND Code = _Code
+     LIMIT 1;
+     
+     -- Insert only if doesn't exist
+     IF _existingId IS NULL THEN
+         INSERT INTO quotations(
+             IdCustomer,
+             Code,
+             Year,
+             Number,
+             Description,
+             IdDetectionsTemplate,            
+             ProjectName,
+             CreatedIn,
+             IdCurrency,
+             IdOffer
+         ) VALUES (
+             _IdCustomer,
+             _Code,
+             _Year,
+             _Number,
+             _Description,
+             5,          
+             _ProjectName,
+             now(),
+             _IdCurrency,
+             _IdOffer
+         );
+         
+         SELECT LAST_INSERT_ID() AS idquotation;
+     ELSE
+         SELECT _existingId AS idquotation;
+     END IF;
+ END$$
+ DELIMITER ;
+ 
+ 
+ 
+ 
+
+DROP PROCEDURE IF EXISTS WMS_InsertMaterialPlantaRevision_V2680;
+DELIMITER $$
+CREATE  PROCEDURE WMS_InsertMaterialPlantaRevision_V2680(
+       IN _IdQuotation INT UNSIGNED,
+       IN _NumRevision TINYINT UNSIGNED,
+       IN _IdCurrency TINYINT UNSIGNED,
+       IN _ClosedIn  DATEtime )
+BEGIN
+       -- [rdixit][GEOS2-9593][13.11.2025]
+	DECLARE _existingId INT UNSIGNED;
+SELECT 
+     IdRevision
+INTO _existingId FROM
+     revisions
+WHERE
+     IdQuotation = _IdQuotation
+         AND NumRevision = _NumRevision
+LIMIT 1;
+      IF _existingId IS NULL THEN
+       INSERT INTO revisions (
+           IdQuotation,
+           NumRevision,
+           MadeBy,
+           ReviewedBy,
+           CreationDate,
+           ExpiryDate,
+           Closed,
+           discount,
+           IdCurrency
+       ) VALUES (
+           _IdQuotation,
+           _NumRevision,
+           164,
+           164,
+           NOW(),
+           NOW(),
+           _ClosedIn,
+           0,
+           COALESCE(_IdCurrency, 0)    
+       );
+		SELECT LAST_INSERT_ID() AS idquotation;
+      ELSE
+          SELECT _existingId;
+      END IF;
+   END$$
+DELIMITER ;
+
+
+
+
+DROP PROCEDURE IF EXISTS `WMS_GetArticlesByArticle_V2680`;
+DELIMITER $$
+CREATE PROCEDURE `WMS_GetArticlesByArticle_V2680`(IN p_idarticle INT)
+ BEGIN
+
+     -- [rdixit][GEOS2-9593][13.11.2025]
+     SELECT 
+         a.Reference, 
+         a.Description, 
+         a.Description_es, 
+         a.Description_fr,
+         aba.Quantity, 
+         aba.idcomponent
+     FROM articles a
+     INNER JOIN articlesbyarticle aba 
+         ON aba.idcomponent = a.idarticle
+     WHERE aba.idarticle = p_idarticle;
+ END$$
+DELIMITER ;
+
+
+
+
+
+DROP PROCEDURE IF EXISTS `WMS_check_Revisionitem_exists_V2680`;
+DELIMITER $$
+CREATE PROCEDURE `WMS_check_Revisionitem_exists_V2680`(
+     IN _IdRevision INT UNSIGNED,
+     IN _IdProduct INT
+ )
+ BEGIN
+     -- [rdixit][GEOS2-9593][13.11.2025]
+     DECLARE _existingId INT UNSIGNED;
+ 
+     SELECT IdRevisionItem
+     INTO _existingId
+     FROM geos.revisionitems
+     WHERE IdRevision = _IdRevision AND IdProduct = _IdProduct
+     LIMIT 1;
+ 
+     SELECT IFNULL(_existingId, 0) AS IdRevisionItem;
+ END$$
+  DELIMITER ;
+  
+  
+  
+  
+  
+
+DROP PROCEDURE IF EXISTS `WMS_InsertRevisionItems_V2680`;
+DELIMITER $$
+CREATE PROCEDURE `WMS_InsertRevisionItems_V2680`(
+     IN _IdRevision  			INT UNSIGNED,
+     IN _NumItem     			VARCHAR(5),
+     IN _IdProduct   			INT UNSIGNED,
+     IN _Quantity    			INT UNSIGNED,
+     IN _UnitPrice   			DECIMAL(10,4),
+ 	IN _CustomerComment        	varchar(5000)
+ )
+ BEGIN
+     -- [rdixit][GEOS2-9593][13.11.2025]
+     IF (SELECT COUNT(*) 
+         FROM geos.revisionitems
+         WHERE IdRevision = _IdRevision AND NumItem = _NumItem) = 0 THEN
+         
+         INSERT INTO geos.revisionitems (
+             IdRevision,
+             NumItem,
+             IdProduct,
+             Quantity,
+             UnitPrice,
+             CreatedBy,
+             CreatedIn,
+             CustomerComment
+         )
+         VALUES (
+             _IdRevision,
+             _NumItem,
+             _IdProduct,
+             _Quantity,
+             _UnitPrice,
+             164,
+             NOW(),
+             ''
+         );
+ 
+         -- Return the new inserted ID
+         SELECT LAST_INSERT_ID() AS NewId;
+     ELSE
+         -- Optionally return a flag or message if the item already exists
+         SELECT NULL AS NewId;
+     END IF;
+ END$$
+DELIMITER ;
+
+
+
+DROP PROCEDURE IF EXISTS WMS_InsertOT_V2680;
+DELIMITER $$
+   CREATE PROCEDURE WMS_InsertOT_V2680(
+     IN _NumOT INT UNSIGNED,
+     IN _IdSite SMALLINT UNSIGNED,
+     IN _IdQuotation INT UNSIGNED,
+     IN _Code VARCHAR(13),
+     IN _Year SMALLINT UNSIGNED,
+     IN _Number SMALLINT UNSIGNED
+ )
+BEGIN
+	-- [rdixit][GEOS2-9593][13.11.2025]
+
+     DECLARE _IdShippingAddressDefault INT;
+	 DECLARE _IdCarriageMethod int;
+ 
+ 
+	SELECT o.IdCarriageMethod into _IdCarriageMethod
+         FROM geos.offers o inner join quotations q on q.IdOffer = o.idoffer
+         WHERE idquotation = _IdQuotation limit 1;
+
+ 
+     -- Check if the OT already exists
+     IF (SELECT COUNT(*)
+         FROM geos.ots
+         WHERE Code = _Code AND NumOT = _NumOT) = 0
+     THEN
+         -- Get default shipping address for the site (if any)
+         SELECT s.IdShippingAddress
+           INTO _IdShippingAddressDefault
+           FROM geos.shippingaddresses s
+          WHERE s.IdSite = _IdSite
+            AND s.IsDefault = 1
+          LIMIT 1;
+ 
+         -- Insert new OT
+         INSERT INTO geos.ots (
+             NumOT,
+             CreationDate,
+             IdSite,
+             CreatedBy,
+             ReviewedBy,
+             IdQuotation,
+             Code,
+             Year,
+             Number,
+             IdShippingAddress,
+             DeliveryDate,
+             IdCarriageMethod
+         )
+         VALUES (
+             _NumOT,
+             NOW(),
+             _IdSite,
+             164,          -- CreatedBy
+             164,          -- ReviewedBy
+             _IdQuotation,
+             _Code,
+             _Year,
+             _Number,
+             NULLIF(_IdShippingAddressDefault, 0),
+             now(),
+             _IdCarriageMethod
+         );
+ 
+         -- Return the new inserted ID
+         SELECT LAST_INSERT_ID() AS NewId;
+     ELSE
+         -- If it already exists, return its ID
+         SELECT IdOT
+           FROM geos.ots
+          WHERE Code = _Code AND NumOT = _NumOT
+          LIMIT 1;
+     END IF;
+   END$$
+DELIMITER ;
+
+
+
+
+
+DROP PROCEDURE IF EXISTS `WMS_InsertOTItem_V2680`;
+DELIMITER $$
+CREATE PROCEDURE `WMS_InsertOTItem_V2680`(
+      IN _IDOT int unsigned,
+      IN _REVISIONITEM int unsigned,
+      IN _CUSTOMERCOMMENT varchar(5000),
+      IN _IsBatch tinyint 
+  )
+ BEGIN
+	-- [rdixit][GEOS2-9593][13.11.2025]
+    IF ((SELECT count(*) FROM geos.otitems WHERE IdRevisionItem = _REVISIONITEM AND IdOT = _IDOT) = 0)
+        THEN 	
+         INSERT INTO geos.otitems (IdOT, IdRevisionItem, IdItemOtStatus,CustomerComment, CreatedBy, CreatedIn, IsBatch) 
+         VALUES (_IDOT, _REVISIONITEM, 11,'', 164, now(), _IsBatch);
+ 		Select LAST_INSERT_ID();
+ 	END IF;
+  END$$
+DELIMITER ;
+
+
+DROP PROCEDURE IF EXISTS `WMS_InsertWarehouseProductComponents_V2680`;
+DELIMITER $$
+CREATE PROCEDURE `WMS_InsertWarehouseProductComponents_V2680`(
+ 		IN _IdWarehouseProduct  int UNSIGNED,
+ 		IN _IdArticle          	int UNSIGNED,
+ 		IN _Parent              int UNSIGNED,
+ 		IN _Quantity            float)
+ BEGIN
+      -- [rdixit][GEOS2-9593][13.11.2025]
+      INSERT INTO warehouseproductcomponents(IdWarehouseProduct,IdArticle,Parent,Quantity)
+      VALUES (_IdWarehouseProduct,  _IdArticle, _Parent, _Quantity);
+             
+             SELECT LAST_INSERT_ID();
+   END$$
+   DELIMITER ;
+
+DROP PROCEDURE IF EXISTS WMS_UpdateOfferStatusToAccept_V2680;
+DELIMITER $$
+
+CREATE PROCEDURE `WMS_UpdateOfferStatusToAccept_V2680`( in _IdOffer int unsigned)
+ BEGIN
+	-- [rdixit][GEOS2-9593][20-11-2025]
+ 	update offers set IdStatus = 3 where IdOffer = _IdOffer;	
+ END$$
+
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS WMS_InsertOfferContacts_V2680;
+DELIMITER $$
+
+CREATE PROCEDURE WMS_InsertOfferContacts_V2680(
+   _IdOffer                  int,
+   _IdContact                int,
+   _IsPrimaryOfferContact    int)
+BEGIN
+   DECLARE _existingId   INT UNSIGNED;
+
+   SELECT _IdContact
+   INTO _existingId
+   FROM offer_contacts
+   WHERE IdOffer = _IdOffer AND IdContact = _IdContact
+   LIMIT 1;
+
+   IF _existingId IS NULL
+   THEN
+      INSERT IGNORE INTO offer_contacts(IdOffer,
+                                        IdContact,
+                                        IsPrimaryOfferContact)
+      VALUES (_IdOffer, _IdContact, _IsPrimaryOfferContact);
+   END IF;
+ END$$
+ 
+ 
+DROP PROCEDURE IF EXISTS geos.WMS_CheckCustomerPurchasOrderExists;
+DELIMITER $$
+CREATE PROCEDURE geos.WMS_CheckCustomerPurchasOrderExists (IN _WPOCode VARCHAR(200))
+BEGIN
+    IF EXISTS (SELECT 1 
+               FROM customerpurchaseorders 
+               WHERE Code = _WPOCode) THEN
+        SELECT 1 AS ExistsFlag;   
+    ELSE
+        SELECT 0 AS ExistsFlag;   
+    END IF;
+END$$
+DELIMITER ;
+
+
+DROP PROCEDURE IF EXISTS geos.WMS_GetOfferCounter_V2680;
+DELIMITER $$
+
+CREATE PROCEDURE geos.WMS_GetOfferCounter_V2680(
+    IN _idOfferType    TINYINT UNSIGNED,
+    IN _Code           VARCHAR(50),
+    IN _year           INT
+)
+BEGIN
+ 
+ 
+    DECLARE _nextNumber INT;
+    DECLARE _fullCode   VARCHAR(200);
+ 
+    -- Fetch next number
+SELECT 
+    NextNumber
+INTO _nextNumber FROM
+    counters
+WHERE
+    idOfferType = _idOfferType
+        AND Year = _year;
+ 
+    -- Build full code to check existence
+    SET _fullCode = CONCAT(_Code, _nextNumber);
+ 
+    -- Check if offer already exists
+    IF EXISTS (SELECT 1 FROM offers WHERE Code = _fullCode) THEN
+        CALL UpdateOfferCounter(_idOfferType, _year);
+ 
+       SELECT NextNumber FROM counters WHERE idOfferType = _idOfferType AND Year = _year;
+SELECT 
+    NextNumber
+FROM
+    counters
+WHERE
+    idOfferType = _idOfferType
+        AND Year = _year;
+ 
+    ELSE
+        SELECT _nextNumber AS NextNumber;
+    END IF;
+ 
+   END$$
+DELIMITER ;

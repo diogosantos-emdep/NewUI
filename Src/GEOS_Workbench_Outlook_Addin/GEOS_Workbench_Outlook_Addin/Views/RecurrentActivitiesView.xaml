@@ -1,0 +1,215 @@
+﻿<UserControl x:Class="Emdep.Geos.Modules.Crm.Views.RecurrentActivitiesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.Crm.Views"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:dxp="http://schemas.devexpress.com/winfx/2008/xaml/printing" 
+             xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core" 
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+
+    <!--Sprint 46 CRM	M046-02	Add new section Recurrent Activities in Configuration-Sdesai-->
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="55"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="335"/>
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <TextBlock Text="{DynamicResource CrmMainViewModelRecurrentActivities}" Grid.Row="0" Grid.Column="0"  Style="{DynamicResource TextBlock30Style}" FontWeight="Bold" />
+        <Grid HorizontalAlignment="Right" Grid.Row="0" Grid.Column="1" Margin="0,5,0,0" >
+            <Grid.RowDefinitions>
+                <RowDefinition Height="AUTO"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="AUTO"/>
+                <ColumnDefinition Width="150"/>
+                <ColumnDefinition Width="AUTO"/>
+                <ColumnDefinition Width="AUTO"/>
+                <ColumnDefinition Width="AUTO"/>
+                <ColumnDefinition Width="AUTO"/>
+
+            </Grid.ColumnDefinitions>
+
+            <!-- Plant Owner -->
+
+            <DockPanel Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=CmbPlantOwnerUsers}" >
+                <Image Style="{DynamicResource PlantOwnerImageStyle}" Width="24" Height="24" Margin="7,0,3,0" />
+                <TextBlock Text="{DynamicResource CommonPlantOwner}"  FontWeight="Bold" Margin="5,0,5,0" />
+            </DockPanel>
+
+            <dxe:ComboBoxEdit Style="{DynamicResource ComboBoxEditStyle}" Grid.Column="1" Height="40"
+                                      Visibility="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=CmbPlantOwnerUsers}"
+                                      ItemsSource="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=PlantOwnerUsersList}" Margin="5,0,5,5"
+                                      DisplayMember="ShortName"
+                                      EditValue="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=SelectedPlantOwnerUsersList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                <dxe:ComboBoxEdit.StyleSettings>
+                    <dxe:CheckedComboBoxStyleSettings />
+                </dxe:ComboBoxEdit.StyleSettings>
+                <dxmvvm:Interaction.Triggers>
+                    <dxmvvm:EventToCommand EventName="PopupClosed"
+                                               Command="{Binding DataContext.PlantOwnerPopupClosedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                               PassEventArgsToCommand="True" />
+                </dxmvvm:Interaction.Triggers>
+            </dxe:ComboBoxEdit>
+
+            <!-- Sales Owner -->
+            <DockPanel Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=CmbSalesOwnerUsers}">
+                <Image Style="{DynamicResource OwnerGroupImageStyle}" Width="24" Height="24" Margin="7,0,3,0" />
+                <TextBlock Text="{DynamicResource CommonSalesOwner}" FontWeight="Bold" Margin="5,2,5,0" />
+            </DockPanel>
+
+            <dxe:ComboBoxEdit Style="{DynamicResource ComboBoxEditStyle}" Grid.Column="1" Height="40"
+                                       Visibility="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=CmbSalesOwnerUsers}"
+                                      ItemsSource="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=SalesOwnerUsersList}" Margin="5,0,5,5"
+                                      DisplayMember="User.FullName"
+                                      EditValue="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=SelectedSalesOwnerUsersList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                <dxe:ComboBoxEdit.StyleSettings>
+                    <dxe:CheckedComboBoxStyleSettings />
+                </dxe:ComboBoxEdit.StyleSettings>
+                <dxmvvm:Interaction.Triggers>
+                    <dxmvvm:EventToCommand EventName="PopupClosed"
+                                               Command="{Binding DataContext.SalesOwnerPopupClosedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                                   PassEventArgsToCommand="True" />
+                </dxmvvm:Interaction.Triggers>
+            </dxe:ComboBoxEdit>
+
+            <!--Select range of dates:Start date End date-->
+            <Button Visibility="Visible" Grid.Row="0" Grid.Column="2" Height="40" Width="40" HorizontalAlignment="Right" 
+                     Margin="0,0,5,5"  Command="{Binding SelectRangeofDatesCommand}" CommandParameter="{Binding ElementName=recurrentActivityTableView}"
+                     IsEnabled="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsPermissionAdminOnly}">
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource SelectRangeofDatesRecurrentActivities}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Image Style="{DynamicResource SelectRangeOfDateImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+            <!-- Refresh Recurrent Activities Grid-->
+            <Button Visibility="Visible" Grid.Row="0" Grid.Column="3" Height="40" Width="40" HorizontalAlignment="Right"  Margin="0,0,5,5"
+                     Command="{Binding RefreshButtonCommand}" CommandParameter="{Binding ElementName=recurrentActivityTableView}">
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource RefreshRecurrentActivities}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Image Style="{DynamicResource RefreshButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+
+            <!-- Print Recurrent Activities List-->
+            <Button Visibility="Visible" Grid.Row="0" Grid.Column="4" Height="40" Width="40" HorizontalAlignment="Right"  Margin="0,0,5,5"
+                    Command="{Binding PrintButtonCommand}" CommandParameter="{Binding ElementName=recurrentActivityTableView}">
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource PrintRecurrentActivities}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Image Style="{DynamicResource PrinterButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+
+            <!-- Export to excel Recurrent Activities-->
+            <Button Content=" " Height="40" Width="40"  HorizontalAlignment="Right" Grid.Row="0" Grid.Column="5" Margin="0,0,5,5"
+                    Command="{Binding ExportButtonCommand}" CommandParameter="{Binding ElementName=recurrentActivityTableView}" >
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource ButtonExportToExcel}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Image Style="{ DynamicResource ExcelExportButtonImageStyle}" Grid.Column="0" Height="24" Width="24" Margin="-10"/>
+                        </Grid>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+
+        </Grid>
+
+
+        <dxg:GridControl x:Name="recurrentActivityGrid" Grid.Row="1" Grid.ColumnSpan="2" ItemsSource="{Binding RecurrentActivityList,Mode=TwoWay}"
+                  SelectedItem="{Binding SelectedRecurranceActivity,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Width="Auto" Height="Auto" SelectionMode="Row"  ImplyNullLikeEmptyStringWhenFiltering="True">
+            <dxg:GridControl.Columns>
+                <dxg:GridColumn  FieldName="Group" Header="{DynamicResource RecurrentActivityGroupHeader}" Width="300" BestFitMode="VisibleRows" ReadOnly="True" AllowBestFit="True" FilterPopupMode="CheckedList" />
+                <dxg:GridColumn FieldName="SiteNameWithoutCountry" Header="{DynamicResource RecurrentActivityPlantHeader}" Width="250"  BestFitMode="VisibleRows" ReadOnly="True" AllowBestFit="True" FilterPopupMode="CheckedList" />
+                <dxg:GridColumn FieldName="Country" Header="{DynamicResource RecurrentActivityCountryHeader}" Width="180"  BestFitMode="VisibleRows" ReadOnly="True" AllowBestFit="True" FilterPopupMode="CheckedList" />
+                <dxg:GridColumn FieldName="Region" Header="{DynamicResource RecurrentActivityRegionHeader}" Width="90"  BestFitMode="VisibleRows" ReadOnly="True" AllowBestFit="True" FilterPopupMode="CheckedList" />
+                <dxg:GridColumn FieldName="SalesOwner" Header="{DynamicResource RecurrentActivitySalesOwnerHeader}" Width="220"  BestFitMode="VisibleRows" ReadOnly="True" AllowBestFit="True" FilterPopupMode="CheckedList" />
+                <dxg:GridColumn FieldName="WeekDay" Header="{DynamicResource RecurrentActivityWeekDayHeader}" Width="150" BestFitMode="VisibleRows" ReadOnly="True" AllowBestFit="True" FilterPopupMode="CheckedList" />
+                <dxg:GridColumn FieldName="Periodicity"  Header="{DynamicResource RecurrentActivityPeriodicityHeader}" Width="100"  BestFitMode="VisibleRows" ReadOnly="True" AllowBestFit="True" FilterPopupMode="CheckedList" />
+            </dxg:GridControl.Columns>
+            <dxg:GridControl.TotalSummary>
+                <dxg:GridSummaryItem x:Name="summary" FieldName="Group" SummaryType="Count" DisplayFormat="Total Count: {0}" Visible="True"   Alignment="Left"/>
+            </dxg:GridControl.TotalSummary>
+
+            <dxmvvm:Interaction.Behaviors>
+                <UIHelper:GridSelectingBehavior />
+            </dxmvvm:Interaction.Behaviors>
+
+            <dxg:GridControl.View>
+                <dxg:TableView Name="recurrentActivityTableView" NavigationStyle="Row" RowDetailsVisibilityMode="Visible" ShowHorizontalLines="True" ShowSearchPanelMode="Always"
+                                       VerticalScrollbarVisibility="Visible" AllowFixedColumnMenu="False" 
+                                       ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly"
+                                       ShowFixedTotalSummary="True"                                      
+                                       AllowGrouping="False" ShowGroupPanel="False" ShowIndicator="False" SearchPanelHorizontalAlignment="Stretch"
+                                        ShowGroupedColumns="False"                                       
+                                       AllowFixedGroups="False"
+                                      FocusedRow="{Binding SelectedRecurranceActivity,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged }">
+                    <dxg:TableView.Resources>
+                        <DataTemplate x:Key="RecurrentActivitiesReportPrintHeaderTemplate">
+                            <Grid Width="{Binding UsablePageWidth}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="50" />
+                                    <ColumnDefinition Width="130" />
+                                </Grid.ColumnDefinitions>
+                                <dxe:TextEdit Text=" " Width="{Binding UsablePageWidth}" Grid.ColumnSpan="3" IsPrintingMode="True" Background="#333E5E" HorizontalAlignment="Stretch" 
+                                                      VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" Height="50" />
+                                <dxe:TextEdit Text="Recurrent Activities Report" IsPrintingMode="True" HorizontalAlignment="Stretch" 
+                                                      VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" />
+                                <Image Source="/Emdep.Geos.Modules.Crm;component/Assets/Images/GeosReportLogo.png" Height="50" Width="80"  dxp:ExportSettings.TargetType="Image" Grid.Column="2" />
+                            </Grid>
+                        </DataTemplate>
+
+                        <DataTemplate x:Key="RecurrentActivitiesReportPrintFooterTemplate">
+                            <dxe:TextEdit HorizontalContentAlignment="Center" 
+                                                  Width="{Binding Path=UsablePageWidth, Mode=OneWay}" 
+                                                  dxp:ExportSettings.TargetType="PageNumber" 
+                                                  dxp:PageNumberExportSettings.Kind="NumberOfTotal" 
+                                                  dxp:PageNumberExportSettings.Format="Page {0} of {1}"/>
+                        </DataTemplate>
+
+                    </dxg:TableView.Resources>
+
+                    <dxmvvm:Interaction.Behaviors>
+
+                        <dxmvvm:EventToCommand Command="{Binding RecurrentActivitiesGridDoubleClickCommand}"
+                                                   EventName="MouseDoubleClick" CommandParameter="{Binding ElementName=recurrentActivityTableView}"
+                                                   PassEventArgsToCommand="True">
+                            <dxmvvm:EventToCommand.EventArgsConverter>
+                                <dx:EventArgsToDataRowConverter />
+                            </dxmvvm:EventToCommand.EventArgsConverter>
+                        </dxmvvm:EventToCommand>
+                    </dxmvvm:Interaction.Behaviors>
+                </dxg:TableView>
+            </dxg:GridControl.View>
+        </dxg:GridControl>
+    </Grid>
+</UserControl>

@@ -1,0 +1,502 @@
+﻿<UserControl x:Class="Emdep.Geos.Modules.Warehouse.Views.InventoryAuditView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.Warehouse.Views"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:WarehouseCommon ="clr-namespace:Emdep.Geos.Modules.Warehouse"
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+             xmlns:dxp="http://schemas.devexpress.com/winfx/2008/xaml/printing"
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:Converters="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+             xmlns:dxgt="http://schemas.devexpress.com/winfx/2008/xaml/grid/themekeys"
+             xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+             xmlns:dxwuit="http://schemas.devexpress.com/winfx/2008/xaml/windowsui/themekeys"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <Grid Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="100*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Label Content="{DynamicResource InventoryAudits}" Style="{StaticResource LabelTitleStyle}" Grid.Row="0" Grid.Column="0"/>
+
+            <DockPanel Grid.Row="0" Grid.Column="1">
+
+                <Grid HorizontalAlignment="Right" Width="Auto" Height="45" >
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="45"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Waresouse combobox section -->
+                    <DockPanel Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Height="30" >
+                        <Image Style="{DynamicResource WarehouseImageStyle}" Width="24" Height="24" Margin="7,0,3,0" />
+                        <TextBlock Text="{DynamicResource Warehouse}"  FontWeight="Bold" Margin="5,2,5,0" VerticalAlignment="Bottom" />
+                    </DockPanel>
+
+                    <dxe:ComboBoxEdit Name="CbeWareHouse" Style="{DynamicResource ComboBoxEditStyle}" Grid.Column="1" Width="150" Height="30"
+                                      Margin="5,0,5,5" VerticalAlignment="Bottom" HorizontalAlignment="Right" IsTextEditable="False"
+                                      ItemsSource ="{Binding Source={x:Static WarehouseCommon:WarehouseCommon.Instance}, Path=WarehouseList ,UpdateSourceTrigger=PropertyChanged , Mode=TwoWay}"
+                                      SelectedItem="{Binding Source={x:Static WarehouseCommon:WarehouseCommon.Instance}, Path=Selectedwarehouse,UpdateSourceTrigger=PropertyChanged}"
+                                      DisplayMember="Name" ShowError="False" ShowErrorToolTip="False" >
+
+                        <dxmvvm:Interaction.Triggers>
+                            <dxmvvm:EventToCommand EventName="EditValueChanged"
+                                               Command="{Binding CommandWarehouseEditValueChanged}" CommandParameter="{Binding ElementName=CbeWareHouse,Path=SelectedItem}"
+                                              />
+                        </dxmvvm:Interaction.Triggers>
+                    </dxe:ComboBoxEdit>
+
+                    <!--add new Inventory Audits-->
+
+                    <Button Visibility="Visible" Grid.Row="0" Grid.Column="2" Height="40" Width="40" HorizontalAlignment="Right" 
+                                 Command="{Binding AddNewInventoryAuditCommand}" 
+                                 CommandParameter="{Binding ElementName=InventoryAuditsTableView}" 
+                                 Margin="0,0,5,5"
+                          IsEnabled="{Binding Source={x:Static GeosApplication:GeosApplication.Instance},Path=IsCreateInventoryAuditPermissionForWMS}"
+                            >
+                        <!--IsEnabled="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsInventoryAuditPermissionForWMS}"-->
+                        <Button.ToolTip>
+                            <TextBlock Text="{DynamicResource AddNewInventoryAudit}"/>
+                        </Button.ToolTip>
+                        <Button.ContentTemplate>
+                            <DataTemplate>
+                                <Image Style="{DynamicResource AddNewButtonImageStyle}"  Height="24" Width="24" Margin="-10" />
+                            </DataTemplate>
+                        </Button.ContentTemplate>
+                    </Button>
+
+                    <!-- Refresh Button -->
+                    <Button Content=" " Grid.Row="0" Grid.Column="3" Height="40" Width="40" HorizontalAlignment="Right"  Command="{Binding RefreshInventoryAuditViewCommand}"  Margin="0,0,5,5">
+                        <Button.ToolTip>
+                            <TextBlock Text="{DynamicResource ButtonRefresh}"/>
+                        </Button.ToolTip>
+                        <Button.ContentTemplate>
+                            <DataTemplate>
+                                <Image Style="{ DynamicResource WareHouseRefreshButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                            </DataTemplate>
+                        </Button.ContentTemplate>
+                    </Button>
+
+                    <!-- Print Button -->
+
+                    <Button Content=" " Grid.Row="0" Grid.Column="4" Height="40" Width="40" HorizontalAlignment="Right"  Command="{Binding PrintInventoryAuditViewCommand}" CommandParameter="{Binding ElementName=InventoryAuditsTableView}" Margin="0,0,5,5">
+                        <Button.ToolTip>
+                            <TextBlock Text="{DynamicResource ButtonPrint}"/>
+                        </Button.ToolTip>
+                        <Button.ContentTemplate>
+                            <DataTemplate>
+                                <Image Style="{ DynamicResource PrinterButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                            </DataTemplate>
+                        </Button.ContentTemplate>
+                    </Button>
+
+                    <!-- Export Button -->
+
+                    <Button Content=" " Grid.Row="0" Grid.Column="5" Height="40" Width="40" HorizontalAlignment="Right"  Command="{Binding ExportInventoryAuditViewCommand}" CommandParameter="{Binding ElementName=InventoryAuditsTableView}" Margin="0,0,5,5">
+                        <Button.ToolTip>
+                            <TextBlock Text="{DynamicResource ButtonExportToExcel}"/>
+                        </Button.ToolTip>
+                        <Button.ContentTemplate>
+                            <DataTemplate>
+                                <Image Style="{ DynamicResource ExcelExportButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                            </DataTemplate>
+                        </Button.ContentTemplate>
+                    </Button>
+                  
+                    <!-- Inventory Button -->
+                    <Button Content=" " Grid.Column="6" Focusable="False" 
+                            Height="40" Width="40"
+                            HorizontalAlignment="Right"
+                            Command="{Binding InventoryCommand}" 
+                            CommandParameter="{Binding ElementName=InventoryAuditsTableView}" 
+                            Padding="-4"
+                            Margin="0,0,5,5">
+                        <Button.ToolTip>
+                            <TextBlock Text="{DynamicResource WarehouseInventory}"/>
+                        </Button.ToolTip>
+                        <Button.ContentTemplate>
+                            <DataTemplate>
+                                <Image Style="{ DynamicResource WareHouseInventoryButtonImageStyle}" 
+                                       Height="28" Width="28"/>
+                            </DataTemplate>
+                        </Button.ContentTemplate>
+                    </Button>
+
+                </Grid>
+            </DockPanel>
+
+        </Grid>
+
+
+        <dxg:GridControl Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" 
+                         ItemsSource="{Binding WarehouseInventoryAuditList,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" 
+                         AllowLiveDataShaping="True" 
+                         SelectedItem="{Binding SelectedInventoryAudit,Mode=TwoWay ,UpdateSourceTrigger=PropertyChanged}"
+                         SelectionMode="Row" ImplyNullLikeEmptyStringWhenFiltering="True">
+
+            <dxmvvm:Interaction.Behaviors>
+                <UIHelper:GridSelectingBehavior />
+                <UIHelper:BestFitBehaviorSimulator/>
+            </dxmvvm:Interaction.Behaviors>
+
+            <dxg:GridColumn Header="{DynamicResource GridColName}" FieldName="Name" FilterPopupMode="CheckedList"  ReadOnly="True"/>
+
+            <dxg:GridColumn Header="{DynamicResource StartDate}" FieldName="StartDate" FilterPopupMode="CheckedList" ReadOnly="True"
+                            EditSettings="{dxe:TextSettings Mask='dd/MM/yyyy' ,
+                               MaskUseAsDisplayFormat=True, MaskType=DateTime,
+                               HorizontalContentAlignment=Right}" />
+            <dxg:GridColumn Header="{DynamicResource EndDate}" FieldName="EndDate" FilterPopupMode="CheckedList"  ReadOnly="True"
+                            EditSettings="{dxe:TextSettings Mask='dd/MM/yyyy' ,
+                               MaskUseAsDisplayFormat=True, MaskType=DateTime,
+                               HorizontalContentAlignment=Right}" />
+            <!--[GEOS2-3962][22.12.2022][rdixit]-->
+            <dxg:GridColumn Header="{DynamicResource totalItems}" FieldName="TotalItems" FilterPopupMode="CheckedList"  ReadOnly="True" >
+                <dxg:GridColumn.CellTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <ProgressBar Name="pbTotalItem" Style="{DynamicResource ProgressBarBgColor}"  Value="{Binding RowData.Row.TotalItemsPercentage}" Maximum="100" Minimum="0"/>
+                            <TextBlock Text="{Binding RowData.Row.TotalItems}" Margin="5,0,0,0"  HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="#d3d3d3"/>
+                        </Grid>
+                    </DataTemplate>
+                </dxg:GridColumn.CellTemplate>
+
+                <!--<dxg:GridColumn.EditSettings>
+                    <dxe:ProgressBarEditSettings ContentDisplayMode="Value" DisplayFormat="{}{0}%" Maximum="100" Minimum="0" >
+                        <dxe:ProgressBarEditSettings.ContentTemplate >
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}" HorizontalAlignment="Left" Foreground="#d3d3d3"/>
+                            </DataTemplate>
+                        </dxe:ProgressBarEditSettings.ContentTemplate>
+                    </dxe:ProgressBarEditSettings>
+                </dxg:GridColumn.EditSettings>-->
+               
+                
+                <!--<dxg:GridColumn.PrintCellStyle>
+                    <Style TargetType="dxe:ProgressBarEdit">
+                        <Setter Property="dxp:ExportSettings.TargetType" Value="Image" />
+                        <Setter Property="DisplayTemplate">
+                            <Setter.Value>
+                                <ControlTemplate>
+                                    <Grid>
+                                        <ProgressBar Name="pbTotalItem" Value="{Binding RowData.Row.TotalItems}" Foreground="#d3d3d3" Background="White" />
+                                        
+                                        <dxe:TextEdit EditValue="{Binding ElementName=pbTotalItem, Path=Value}" DisplayFormatString="{Binding Column.ActualEditSettings.DisplayFormat}" IsReadOnly="True" IsPrintingMode="True" HorizontalAlignment="left" />
+                                       
+                                    </Grid>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </dxg:GridColumn.PrintCellStyle>-->
+            </dxg:GridColumn>
+            <!--[GEOS2-3962][22.12.2022][rdixit]-->
+            <dxg:GridColumn Header="{DynamicResource TotalLocations}" FieldName="TotalLocations" FilterPopupMode="CheckedList" ReadOnly="True" >
+
+                <dxg:GridColumn.CellTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <ProgressBar Name="pbTotalItem" Style="{DynamicResource ProgressBarBgColor}" Value="{Binding RowData.Row.TotalLocationsPercentage}" Maximum="100" Minimum="0"/>
+                            <TextBlock Text="{Binding RowData.Row.TotalLocations}" Margin="5,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="#d3d3d3"/>
+                        </Grid>
+                    </DataTemplate>
+                </dxg:GridColumn.CellTemplate>
+                <!--<dxg:GridColumn.EditSettings>
+                    <dxe:ProgressBarEditSettings ContentDisplayMode="Value" Maximum="100" Minimum="0" DisplayFormat="{}{0}%" >
+                        <dxe:ProgressBarEditSettings.ContentTemplate >
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}" HorizontalAlignment="Left"  Foreground="#d3d3d3"/>
+                            </DataTemplate>
+                        </dxe:ProgressBarEditSettings.ContentTemplate>
+                    </dxe:ProgressBarEditSettings>
+                </dxg:GridColumn.EditSettings>-->
+                 <!--<dxg:GridColumn.PrintCellStyle>
+                    <Style TargetType="dxe:ProgressBarEdit">
+                        <Setter Property="dxp:ExportSettings.TargetType" Value="Image" />
+                        <Setter Property="DisplayTemplate">
+                            <Setter.Value>
+                                <ControlTemplate>
+                                    <Grid >
+                                        <ProgressBar Name="pbTotalLocations" Value="{Binding RowData.Row.TotalLocations}" Foreground="#d3d3d3" Background="White" />
+                                        <dxe:TextEdit EditValue="{Binding ElementName=pbTotalLocations, Path=Value}" DisplayFormatString="{Binding Column.ActualEditSettings.DisplayFormat}" IsReadOnly="True" IsPrintingMode="True" HorizontalContentAlignment="Left"  />
+                                    </Grid>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </dxg:GridColumn.PrintCellStyle>-->
+            </dxg:GridColumn>
+
+            <dxg:GridColumn Header="{DynamicResource OKItems}" FieldName="OKItems" FilterPopupMode="CheckedList"  ReadOnly="True" >
+                <dxg:GridColumn.EditSettings>
+                    <dxe:TextEditSettings HorizontalContentAlignment="Left"/>
+                </dxg:GridColumn.EditSettings>
+            </dxg:GridColumn>
+
+            <dxg:GridColumn Header="{DynamicResource NOKItems}" FieldName="NOKItems" FilterPopupMode="CheckedList"  ReadOnly="True" >
+                <dxg:GridColumn.EditSettings>
+                    <dxe:TextEditSettings HorizontalContentAlignment="Left"/>
+                </dxg:GridColumn.EditSettings>
+            </dxg:GridColumn>
+
+            <dxg:GridColumn Header="{DynamicResource SuccessRate}" FieldName="SuccessRate" MinWidth="100" FilterPopupMode="CheckedList" ReadOnly="True">
+
+                <dxg:GridColumn.EditSettings>
+                    <dxe:ProgressBarEditSettings Maximum="100" Minimum="0"  ContentDisplayMode="Value" DisplayFormat="{}{0}%"  />
+                </dxg:GridColumn.EditSettings>
+
+                <dxg:GridColumn.PrintCellStyle>
+                            <Style TargetType="dxe:ProgressBarEdit">
+                                <Setter Property="dxp:ExportSettings.TargetType" Value="Image" />
+                                <Setter Property="DisplayTemplate">
+                                    <Setter.Value>
+                                        <ControlTemplate>
+                                            <Grid >
+                                        <ProgressBar Name="pbSuccessRate" Value="{Binding RowData.Row.SuccessRate}" Foreground="#d3d3d3" Background="White" />
+                                            <dxe:TextEdit EditValue="{Binding ElementName=pbSuccessRate, Path=Value}" DisplayFormatString="{Binding Column.ActualEditSettings.DisplayFormat}" IsReadOnly="True" IsPrintingMode="True" HorizontalAlignment="Center"/>
+                                            </Grid>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </dxg:GridColumn.PrintCellStyle>
+               
+            </dxg:GridColumn>
+
+            <dxg:GridColumn Header="{DynamicResource BalanceAmount}" FieldName="BalanceAmount" 
+                            FilterPopupMode="CheckedList" ReadOnly="True" MinWidth="120"><!--FieldName="BalanceAmount"-->
+                <dxg:GridColumn.EditSettings>
+                    <dxe:TextEditSettings HorizontalContentAlignment="Left"/>
+                </dxg:GridColumn.EditSettings>
+                <dxg:GridColumn.CellTemplate>
+                    <DataTemplate>
+                        <StackPanel MinWidth="120" Orientation="Horizontal">
+                            <StackPanel Orientation="Vertical" MinWidth="20" VerticalAlignment="Center">
+                                <Polygon Points="0,16,16,16,7,0" VerticalAlignment="Center" Margin="5 0 0 0" HorizontalAlignment="Left">
+                                    <Polygon.Style>
+                                        <Style TargetType="{x:Type Polygon}">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Data.BalanceAmount, Converter={Converters:BalanceAmountForeColorConverter}}" Value="-1">
+                                                    <Setter Property="Polygon.Fill" Value="Red" />
+                                                    <Setter Property="Polygon.Stroke" Value="Red" />
+                                                    <Setter Property="Polygon.Visibility" Value="Collapsed" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Data.BalanceAmount, Converter={Converters:BalanceAmountForeColorConverter}}" Value="+1">
+                                                    <Setter Property="Polygon.Fill" Value="Green" />
+                                                    <Setter Property="Polygon.Stroke" Value="Green" />
+                                                    <Setter Property="Polygon.Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Data.BalanceAmount, Converter={Converters:BalanceAmountForeColorConverter}}" Value="0">
+                                                    <Setter Property="Polygon.Visibility" Value="Collapsed" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Polygon.Style>
+                                </Polygon>
+
+                                <Polygon Points="0,0 8,16, 16,0" Stroke="Red" Fill="Red" Margin="5 5 0 0" HorizontalAlignment="Right" >
+                                    <Polygon.Style>
+                                        <Style TargetType="{x:Type Polygon}">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Data.BalanceAmount, Converter={Converters:BalanceAmountForeColorConverter}}" Value="-1">
+                                                    <Setter Property="Polygon.Fill" Value="Red" />
+                                                    <Setter Property="Polygon.Stroke" Value="Red" />
+                                                    <Setter Property="Polygon.Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Data.BalanceAmount, Converter={Converters:BalanceAmountForeColorConverter}}" Value="+1">
+                                                    <Setter Property="Polygon.Fill" Value="Green" />
+                                                    <Setter Property="Polygon.Stroke" Value="Green" />
+                                                    <Setter Property="Polygon.Visibility" Value="Collapsed" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Data.BalanceAmount, Converter={Converters:BalanceAmountForeColorConverter}}" Value="0">
+                                                    <Setter Property="Polygon.Visibility" Value="Collapsed" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Polygon.Style>
+                                </Polygon>
+                            
+                                <Line Name="Zero1" Stroke="Gray" X1="0" Y1="2" X2="15" Y2="2" SnapsToDevicePixels="True" RenderOptions.EdgeMode="Aliased" Margin="5 0 0 0" StrokeThickness="3" >
+                                        <Line.Style>
+                                            <Style TargetType="{x:Type Line}">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Data.BalanceAmount, Converter={Converters:BalanceAmountForeColorConverter}}" Value="-1">
+                                                        <Setter Property="Line.Visibility" Value="Collapsed" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Data.BalanceAmount, Converter={Converters:BalanceAmountForeColorConverter}}" Value="+1">
+                                                        <Setter Property="Line.Visibility" Value="Collapsed" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Data.BalanceAmount, Converter={Converters:BalanceAmountForeColorConverter}}" Value="0">
+                                                        <Setter Property="Line.Visibility" Value="Visible" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Line.Style>
+                                    </Line>
+
+                                <Line Name="Zero2" Stroke="Gray" X1="0" Y1="4" X2="15" Y2="4" SnapsToDevicePixels="True" RenderOptions.EdgeMode="Aliased" Margin="5 0 0 0" StrokeThickness="3" >
+                                    <Line.Style>
+                                        <Style TargetType="{x:Type Line}">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Data.BalanceAmount, Converter={Converters:BalanceAmountForeColorConverter}}" Value="-1">
+                                                    <Setter Property="Line.Visibility" Value="Collapsed" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Data.BalanceAmount, Converter={Converters:BalanceAmountForeColorConverter}}" Value="+1">
+                                                    <Setter Property="Line.Visibility" Value="Collapsed" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Data.BalanceAmount, Converter={Converters:BalanceAmountForeColorConverter}}" Value="0">
+                                                    <Setter Property="Line.Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Line.Style>
+                                </Line>
+                            </StackPanel>
+                            <TextBlock Text="{Binding Row.BalanceAmountwithCurrentSymbol, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
+                                    Margin="4,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left" 
+                                    TextAlignment="Left">
+                                <!--<TextBlock.Style>
+                                    <Style TargetType="{x:Type TextBlock}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Row.BalanceAmount, Converter={Converters:BalanceAmountForeColorConverter}}" Value="-1">
+                                                <Setter Property="TextBlock.Foreground" Value="Red" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Row.BalanceAmount, Converter={Converters:BalanceAmountForeColorConverter}}" Value="+1">
+                                                <Setter Property="TextBlock.Foreground" Value="Green" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>-->
+                            </TextBlock>                            
+                        </StackPanel>
+                    </DataTemplate>
+                </dxg:GridColumn.CellTemplate>
+                <dxg:GridColumn.PrintCellStyle>
+                    <Style TargetType="dxe:TextEdit">
+                        <Setter Property="dxp:ExportSettings.TargetType" Value="Panel" />
+                        <Setter Property="DisplayTemplate">
+                            <Setter.Value>
+                                <ControlTemplate>
+                                    <Grid >
+                                        <StackPanel Orientation="Horizontal">
+                                            <dxe:TextEdit EditValue="{Binding Path= RowData.Row.BalanceAmountwithCurrentSymbol}" DisplayFormatString="c2" IsPrintingMode="True" /> <!--{Binding Column.ActualEditSettings.DisplayFormat}-->
+                                        </StackPanel>
+                                    </Grid>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </dxg:GridColumn.PrintCellStyle>
+            </dxg:GridColumn>
+            <dxg:GridColumn Header=" " MinWidth="30" Width="40" ReadOnly="True" FixedWidth="True" FilterPopupMode="CheckedList" Visible="True" AllowPrinting="False">
+                <dxg:GridColumn.CellTemplate>
+                    <DataTemplate>
+                        <Button Name="deleteRowItem" ToolTip="Delete" 
+                               Visibility="{Binding RowData.Row.IsDeleteInventoryAuditVisibility}"
+                                CommandParameter="{Binding RowData.Row}"
+                                 IsEnabled="{Binding Source={x:Static GeosApplication:GeosApplication.Instance},Path=IsRemoveInventoryAuditPermissionForWMS}"
+                            Command="{Binding View.DataContext.DeleteInventoryAuditCommand,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
+                            <Button.ContentTemplate>
+                                <DataTemplate>
+                                    <Image Height="16" Width="16"  Style="{DynamicResource DeleteStyle}" />
+                                </DataTemplate>
+                            </Button.ContentTemplate>
+                            <Button.Style>
+                                <Style TargetType="{x:Type Button}">
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Cursor" Value="Hand"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                    </DataTemplate>
+                </dxg:GridColumn.CellTemplate>
+            </dxg:GridColumn>
+
+
+            <dxg:GridControl.TotalSummary>
+                <dxg:GridSummaryItem x:Name="summary" FieldName="Name" SummaryType="Count" DisplayFormat="Total Count: {0}" Visible="True"   Alignment="Left"/>
+            </dxg:GridControl.TotalSummary>
+
+            <dxg:GridControl.View>
+                <dxg:TableView x:Name="InventoryAuditsTableView"   
+                               NavigationStyle="Row"
+                               RowDetailsVisibilityMode="Visible"
+                               ShowHorizontalLines="True"
+                               ShowSearchPanelMode="Always"
+                               ShowColumnHeaders="True"
+                               VerticalScrollbarVisibility="Visible"
+                               AllowFixedColumnMenu="False"
+                               ShowFixedTotalSummary="True" 
+                               SearchPanelHorizontalAlignment="Stretch"
+                               ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly"
+                               AllowGrouping="False"
+                               ShowGroupPanel="False" 
+                               ShowIndicator="False" AutoWidth="True"
+                               FilterEditorShowOperandTypeIcon="True" 
+                               AllowColumnFiltering="True"
+                               FocusedRow="{Binding SelectedInventoryAudit,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" 
+                               SearchString="{Binding SearchString,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+       
+                    <dxg:TableView.Resources>
+                        <DataTemplate x:Key="InventoryAuditReportPrintHeaderTemplate">
+                            <Grid Width="{Binding UsablePageWidth}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="50" />
+                                    <ColumnDefinition Width="130" />
+                                </Grid.ColumnDefinitions>
+                                <dxe:TextEdit Text=" " Width="{Binding UsablePageWidth}" Grid.ColumnSpan="3" IsPrintingMode="True" Background="#333E5E" HorizontalAlignment="Stretch" 
+                                                      VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" Height="50" />
+                                <dxe:TextEdit Text="Warehouse Inventory Audit Report" IsPrintingMode="True" HorizontalAlignment="Stretch" 
+                                                      VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" />
+                                <Image Source="/Emdep.Geos.Modules.Warehouse;component/Assets/Images/GeosReportLogo.png" Height="50" Width="80"  dxp:ExportSettings.TargetType="Image" Grid.Column="2" />
+                            </Grid>
+                        </DataTemplate>
+
+                        <DataTemplate x:Key="InventoryAuditReportPrintFooterTemplate">
+                            <dxe:TextEdit HorizontalContentAlignment="Center" 
+                                                  Width="{Binding Path=UsablePageWidth, Mode=OneWay}" 
+                                                  dxp:ExportSettings.TargetType="PageNumber" 
+                                                  dxp:PageNumberExportSettings.Kind="NumberOfTotal" 
+                                                  dxp:PageNumberExportSettings.Format="Page {0} of {1}"/>
+                        </DataTemplate>
+                    </dxg:TableView.Resources>
+                    <dxmvvm:Interaction.Behaviors>
+                        <dxmvvm:EventToCommand EventName="MouseDoubleClick"
+                                               Command="{Binding CommandGridDoubleClick}"
+                                               CommandParameter="{Binding ElementName=InventoryAuditsTableView}" >
+                            <dxmvvm:EventToCommand.EventArgsConverter>
+                                <dx:EventArgsToDataRowConverter/>
+                            </dxmvvm:EventToCommand.EventArgsConverter>
+                        </dxmvvm:EventToCommand>
+                    </dxmvvm:Interaction.Behaviors>
+
+                </dxg:TableView>
+            </dxg:GridControl.View>
+        </dxg:GridControl>
+        
+    </Grid>
+</UserControl>

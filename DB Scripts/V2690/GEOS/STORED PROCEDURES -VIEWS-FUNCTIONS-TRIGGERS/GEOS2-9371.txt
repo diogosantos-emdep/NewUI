@@ -1,0 +1,58 @@
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS geos.WMS_InsertUpdateSiteTransportFrequencies_V2690$$
+
+CREATE PROCEDURE geos.WMS_InsertUpdateSiteTransportFrequencies_V2690(
+    _IdSite SMALLINT UNSIGNED, 
+    _TransportMethod SMALLINT UNSIGNED, 
+    _Frequency INT
+)
+/*
+ [nsatpute][19.11.2025][GEOS2-9371]
+ CALL geos.WMS_InsertUpdateSiteTransportFrequencies_V2690(18,1632,50);
+*/
+BEGIN
+    IF _TransportMethod = 0 THEN
+        -- Looking for records where TransportMethod is NULL
+        IF EXISTS (
+            SELECT 1 
+            FROM geos.frequencytransport 
+            WHERE IdSite = _IdSite 
+            AND TransportMethod IS NULL
+        ) THEN
+            
+            UPDATE geos.frequencytransport
+            SET Frequency = _Frequency
+            WHERE IdSite = _IdSite 
+            AND TransportMethod IS NULL;
+            
+        ELSE
+            
+            INSERT INTO geos.frequencytransport(IdSite, TransportMethod, Frequency)
+            VALUES (_IdSite, NULL, _Frequency);
+            
+        END IF;
+    ELSE
+        -- Looking for records with specific TransportMethod value
+        IF EXISTS (
+            SELECT 1 
+            FROM geos.frequencytransport 
+            WHERE IdSite = _IdSite 
+            AND TransportMethod = _TransportMethod
+        ) THEN
+            
+            UPDATE geos.frequencytransport
+            SET Frequency = _Frequency
+            WHERE IdSite = _IdSite 
+            AND TransportMethod = _TransportMethod;
+            
+        ELSE
+            
+            INSERT INTO geos.frequencytransport(IdSite, TransportMethod, Frequency)
+            VALUES (_IdSite, _TransportMethod, _Frequency);
+            
+        END IF;
+    END IF;
+END$$
+
+DELIMITER ;

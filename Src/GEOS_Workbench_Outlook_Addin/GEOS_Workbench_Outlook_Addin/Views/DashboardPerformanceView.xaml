@@ -1,0 +1,573 @@
+﻿<UserControl x:Class="Emdep.Geos.Modules.Crm.Views.DashboardPerformanceView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid" 
+             xmlns:dxgt="http://schemas.devexpress.com/winfx/2008/xaml/grid/themekeys"
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:ViewModels="clr-namespace:Emdep.Geos.Modules.Crm.ViewModels"
+             xmlns:i="http://schemas.microsoft.com/expression/2008/interactivity"
+             xmlns:dxp="http://schemas.devexpress.com/winfx/2008/xaml/printing"
+             xmlns:dxc="http://schemas.devexpress.com/winfx/2008/xaml/charts"
+             xmlns:dxga="http://schemas.devexpress.com/winfx/2008/xaml/gauges"
+             xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+             xmlns:Interactive="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:Behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+             xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+             xmlns:sysglb="clr-namespace:System.Globalization;assembly=mscorlib"
+             xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"          
+             xmlns:gif="http://wpfanimatedgif.codeplex.com"
+             Style="{DynamicResource UserControlStyle}">
+
+    <!--<UserControl.DataContext>
+        <ViewModels:DahsBoardPerformanceViewModel />
+    </UserControl.DataContext>-->
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="45"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Label Content="{DynamicResource CrmMainViewModelDashboard3}" VerticalAlignment="Top" Margin="10,0,0,0" Style="{DynamicResource LabelTitleStyle}" HorizontalAlignment="Left"  Grid.Row="0"/>
+        <Image gif:ImageBehavior.RepeatBehavior="Forever" gif:ImageBehavior.AnimatedSource="/Emdep.Geos.Modules.Crm;component/Assets/Images/animatedWarning.gif" Visibility="{Binding IsShowFailedPlantWarning,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,Converter={StaticResource BoolToVis}}" Grid.Column="1" Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,2,5,0" Height="30" Width="30">
+            <Image.ToolTip>
+                <TextBlock Text="{Binding WarningFailedPlants}"/>
+            </Image.ToolTip>
+        </Image>
+
+        <DockPanel Grid.Column="2" Grid.Row="0"  HorizontalAlignment="Stretch" Margin="0,5,0,0" Height="45">
+
+            <Grid HorizontalAlignment="Right" Width="Auto" Height="30" >
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="30"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="70*"/>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="30"/>
+
+                    <ColumnDefinition Width="70*"/>
+                    <ColumnDefinition Width="50*"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="50*"/>
+                    <ColumnDefinition Width="30"/>
+
+                    <ColumnDefinition Width="80*"/>
+                    <ColumnDefinition Width="80*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Plant Owner -->
+                <DockPanel Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=CmbPlantOwnerUsers}" >
+                    <Image Style="{DynamicResource PlantOwnerImageStyle}" Width="24" Height="24" Margin="7,0,3,0" />
+                    <TextBlock Text="{DynamicResource CommonPlantOwner}"  FontWeight="Bold" Margin="5,2,5,0" />
+                </DockPanel>
+
+                <dxe:ComboBoxEdit Style="{DynamicResource ComboBoxEditStyle}" Grid.Column="1" 
+                                      Visibility="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=CmbPlantOwnerUsers}"
+                                      ItemsSource="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=PlantOwnerUsersList}" Margin="5,0,5,0"
+                                      DisplayMember="ShortName"
+                    EditValue="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=SelectedPlantOwnerUsersList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                    <dxe:ComboBoxEdit.StyleSettings>
+                        <dxe:CheckedComboBoxStyleSettings />
+                    </dxe:ComboBoxEdit.StyleSettings>
+                    <dxmvvm:Interaction.Triggers>
+                        <dxmvvm:EventToCommand EventName="PopupClosed"
+                                               Command="{Binding DataContext.PlantOwnerPopupClosedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                               PassEventArgsToCommand="True"/>
+                    </dxmvvm:Interaction.Triggers>
+                </dxe:ComboBoxEdit>
+
+                <!-- Sales Owner -->
+                <DockPanel Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=CmbSalesOwnerUsers}" >
+                    <Image Style="{DynamicResource OwnerGroupImageStyle}" Width="24" Height="24" Margin="7,0,3,0" />
+                    <TextBlock Text="{DynamicResource CommonSalesOwner}"  FontWeight="Bold" Margin="5,2,5,0" />
+                </DockPanel>
+
+                <dxe:ComboBoxEdit Style="{DynamicResource ComboBoxEditStyle}" Grid.Column="1"
+                                  Visibility="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=CmbSalesOwnerUsers}"
+                                  ItemsSource="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=SalesOwnerUsersList}" Margin="5,0,0,0"
+                                  DisplayMember="User.FullName"
+                                  EditValue="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=SelectedSalesOwnerUsersList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                    <dxe:ComboBoxEdit.StyleSettings>
+                        <dxe:CheckedComboBoxStyleSettings />
+                    </dxe:ComboBoxEdit.StyleSettings>
+                    <dxmvvm:Interaction.Triggers>
+                        <dxmvvm:EventToCommand EventName="PopupClosed"
+                                               Command="{Binding DataContext.SalesOwnerPopupClosedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                               PassEventArgsToCommand="True"/>
+                    </dxmvvm:Interaction.Triggers>
+                </dxe:ComboBoxEdit>
+
+                <!-- Period -->
+                <DockPanel Grid.Column="3" HorizontalAlignment="Center" VerticalAlignment="Center" >
+                    <Image Style="{DynamicResource CalendarImageStyle}" Width="16" Height="16" Margin="7,0,3,0" />
+                    <TextBlock Text="{DynamicResource AnnualSalesPerformanceViewPeriod}"  FontWeight="Bold" Margin="5,0,0,0" />
+                </DockPanel>
+
+                <TextBlock Text="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=SelectedyearStarDate, StringFormat=d, ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="4" Margin="3,0,0,0"/>
+                <TextBlock Text=" - " HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="5" FontWeight="Bold"/>
+                <TextBlock Text="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=SelectedyearEndDate, StringFormat=d, ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="6"/>
+
+                <!-- Remaining -->
+                <DockPanel Grid.Column="8" HorizontalAlignment="Center" VerticalAlignment="Center" >
+                    <Image Style="{DynamicResource WatchImageStyle}" Width="16" Height="16" Margin="3,0,3,0" />
+                    <TextBlock Text="{DynamicResource AnnualSalesPerformanceViewRemaining}" FontWeight="Bold" Margin="5,0,0,0" />
+                </DockPanel>
+                <DockPanel Grid.Column="9" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0,0,0" >
+                    <TextBlock Text="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=RemainingDays}"  />
+                    <TextBlock Text="{DynamicResource AnnualSalesPerformanceViewDays}" Margin="3,0,5,0" />
+                </DockPanel>
+
+                <Button Content=" " Height="37.9" Width="38" Grid.Column="10" Command="{Binding RefreshDahsBoardPerformanceViewCommand}" HorizontalAlignment="Right" Margin="0,-7.7,5,0">
+                    <Button.ToolTip>
+                        <TextBlock Text="{DynamicResource ButtonRefresh}"/>
+                    </Button.ToolTip>
+                    <Button.ContentTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Image Style="{ DynamicResource RefreshButtonImageStyle}" Grid.Column="0" Height="24" Width="24" Margin="-10"/>
+                            </Grid>
+                        </DataTemplate>
+                    </Button.ContentTemplate>
+                </Button>
+
+
+            </Grid>
+        </DockPanel>
+
+        <dxlc:FlowLayoutControl Orientation="Vertical" ItemSpace="12" LayerSpace="12" Background="Transparent" 
+                                AllowMaximizedElementMoving="False"  Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
+                                BreakFlowToFit="False" MaximizedElementPosition="Right" Margin="0" >
+            <dxmvvm:Interaction.Behaviors>
+                <UIHelper:FlowLayoutControlForMinimiseMaximise/>
+            </dxmvvm:Interaction.Behaviors>
+
+            <dxlc:GroupBox x:Name="LeadSource" Width="300" Height="200" MaximizeElementVisibility="Visible">
+                <dxlc:GroupBox.Style>
+                    <Style TargetType="dxlc:GroupBox">
+                        <Setter Property="Header">
+                            <Setter.Value>
+                                <DockPanel>
+                                    <TextBlock Text="LEAD SOURCE" Margin="5,0,0,0" FontWeight="Bold" VerticalAlignment="Center"/>
+                                </DockPanel>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </dxlc:GroupBox.Style>
+                <dxlc:GroupBox.ContentTemplate>
+                    <DataTemplate>
+                        <!-- Start Grid -->
+
+                        <dxc:ChartControl Name="chart" BorderThickness="0" CrosshairEnabled="False" >
+                            <dxc:ChartControl.Diagram>
+                                <dxc:SimpleDiagram3D>
+                                    <dxc:SimpleDiagram3D.Series >
+                                        <dxc:PieSeries3D DataSource="{Binding DataContext.OfferLeadSourcelst,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox},Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                                                         ArgumentDataMember="Source.Value" ValueDataMember="NumberOfOffers" 
+                                                         HoleRadiusPercent="0" DepthTransform="0.5"  LegendTextPattern="{}{A}" >
+
+                                            <!--region #Model-->
+                                            <dxc:PieSeries3D.Model>
+                                                <dxc:SemiRectanglePie3DModel />
+                                            </dxc:PieSeries3D.Model>
+                                            <!--endregion #Model-->
+
+                                            <dxc:PieSeries3D.PointOptions>
+                                                <dxc:PointOptions>
+                                                    <dxc:PointOptions.ValueNumericOptions>
+                                                        <dxc:NumericOptions Format="Percent" Precision="2" />
+                                                    </dxc:PointOptions.ValueNumericOptions>
+                                                </dxc:PointOptions>
+                                            </dxc:PieSeries3D.PointOptions>
+
+                                        </dxc:PieSeries3D>
+                                    </dxc:SimpleDiagram3D.Series>
+                                </dxc:SimpleDiagram3D>
+                            </dxc:ChartControl.Diagram>
+                        </dxc:ChartControl>
+                        <!-- Start Grid -->
+                    </DataTemplate>
+                </dxlc:GroupBox.ContentTemplate>
+
+                <dxlc:GroupBox.MaximizedContentTemplate>
+                    <DataTemplate>
+                        <!-- Start Grid -->
+                        <dxc:ChartControl Name="chart" BorderThickness="0" CrosshairEnabled="False" >
+                            <dxc:ChartControl.Diagram>
+                                <dxc:SimpleDiagram3D>
+                                    <dxc:SimpleDiagram3D.Series>
+                                        <dxc:PieSeries3D ArgumentScaleType="Qualitative" 
+                                                         DataSource="{Binding DataContext.OfferLeadSourcelst,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox},Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                                                         ArgumentDataMember="Source.Value" ValueDataMember="NumberOfOffers"
+                                                         HoleRadiusPercent="0"  DepthTransform="0.5" ShowInLegend="True" LegendTextPattern="{}{A}"
+                                                         LabelsVisibility="True" >
+                                            <dxc:PieSeries3D.Label>
+                                                <dxc:SeriesLabel ResolveOverlappingMode="JustifyAllAroundPoint"
+                                                                 dxc:PieSeries.LabelPosition="TwoColumns"
+                                                                 TextPattern="{}{A}: {VP:P0}"/>
+                                            </dxc:PieSeries3D.Label>
+                                            <!--region #LegendPointOptions-->
+                                            <dxc:PieSeries3D.LegendPointOptions>
+                                                <dxc:PointOptions Pattern="{}{A}: {VP:P0}" />
+                                            </dxc:PieSeries3D.LegendPointOptions>
+                                            <!--endregion #LegendPointOptions-->
+
+                                        </dxc:PieSeries3D>
+                                    </dxc:SimpleDiagram3D.Series>
+                                </dxc:SimpleDiagram3D>
+                            </dxc:ChartControl.Diagram>
+                            <dxc:ChartControl.Legends>
+                                <dxc:Legend/>
+                            </dxc:ChartControl.Legends>
+                        </dxc:ChartControl>
+
+                        <!-- Start Grid -->
+                    </DataTemplate>
+                </dxlc:GroupBox.MaximizedContentTemplate>
+            </dxlc:GroupBox>
+
+            <!--<dxlc:GroupBox x:Name="Pipeline" Width="300" Height="200" MaximizeElementVisibility="Visible">
+                <dxlc:GroupBox.Style>
+                    <Style TargetType="dxlc:GroupBox">
+                        <Setter Property="Header">
+                            <Setter.Value>
+                                <DockPanel>
+                                    <TextBlock Text="PIPELINE" Margin="5,0,0,0" FontWeight="Bold" VerticalAlignment="Center"/>
+                                </DockPanel>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </dxlc:GroupBox.Style>
+
+                <dxlc:GroupBox.ContentTemplate>
+                    <DataTemplate>
+                        <dxc:ChartControl BorderThickness="0">
+                            <dxc:ChartControl.Diagram>
+                                <dxc:SimpleDiagram2D>
+                                    <dxc:FunnelSeries2D DataSource="{Binding DataContext.FinalSalesStatusTypesPipeline,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}"
+                                                        ArgumentDataMember="Name" ValueDataMember="NumberOfOffers"
+                                                        ColorDataMember="HtmlColor"
+                                                        LegendTextPattern="{}{A}: {VP: P0}" 
+                                                        HeightToWidthRatioAuto="True" HeightToWidthRatio="0.9" >
+                                    </dxc:FunnelSeries2D>
+                                </dxc:SimpleDiagram2D>
+                            </dxc:ChartControl.Diagram>
+                        </dxc:ChartControl>
+                    </DataTemplate>
+                </dxlc:GroupBox.ContentTemplate>
+
+                <dxlc:GroupBox.MaximizedContentTemplate>
+                    <DataTemplate>
+                        --><!-- Start Grid --><!--
+                        <dxc:ChartControl BorderThickness="0">
+                            <dxc:ChartControl.Diagram>
+                                <dxc:SimpleDiagram2D>
+                                    <dxc:FunnelSeries2D DataSource="{Binding DataContext.FinalSalesStatusTypesPipeline,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" 
+                                                        ArgumentDataMember="Name" ValueDataMember="NumberOfOffers"
+                                                        LabelsVisibility="True" ColorDataMember="HtmlColor"
+                                                        LegendTextPattern="{}{A}: {VP: P0}" 
+                                                        HeightToWidthRatioAuto="True" HeightToWidthRatio="0.9" >
+                                        <dxc:FunnelSeries2D.Label>
+                                            <dxc:SeriesLabel Visible="True" TextPattern=" {VP: P0}"
+                                                             dxc:FunnelSeries2D.LabelPosition="Center" />
+                                        </dxc:FunnelSeries2D.Label>
+                                    </dxc:FunnelSeries2D>
+                                </dxc:SimpleDiagram2D>
+                            </dxc:ChartControl.Diagram>
+                            <dxc:ChartControl.Legend>
+                                <dxc:Legend/>
+                            </dxc:ChartControl.Legend>
+                        </dxc:ChartControl>
+                        --><!-- Start Grid --><!--
+                    </DataTemplate>
+                </dxlc:GroupBox.MaximizedContentTemplate>
+            </dxlc:GroupBox>-->
+
+            <dxlc:GroupBox x:Name="SalesPerformance" Width="300" Height="200" MaximizeElementVisibility="Visible">
+                <dxlc:GroupBox.Style>
+                    <Style TargetType="dxlc:GroupBox">
+                        <Setter Property="Header">
+                            <Setter.Value>
+                                <DockPanel>
+                                    <TextBlock Text="TARGET ACHIEVED" Margin="5,0,0,0" FontWeight="Bold" VerticalAlignment="Center"/>
+                                </DockPanel>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </dxlc:GroupBox.Style>
+
+                <dxlc:GroupBox.ContentTemplate>
+                    <DataTemplate>
+                        <dxga:CircularGaugeControl x:Name="gaugeSalesPerformance" MaxWidth="400" EnableAnimation="True" HorizontalAlignment="Center" VerticalAlignment="Center" >
+                            <dxga:CircularGaugeControl.Model>
+                                <dxga:CircularFlatLightModel />
+                            </dxga:CircularGaugeControl.Model>
+                            <dxga:CircularGaugeControl.Scales>
+                                <dxga:ArcScale HorizontalAlignment="Center"  StartAngle="180" EndAngle="360" MajorIntervalCount="5" StartValue="0" EndValue="100">
+                                    <dxga:ArcScale.Needles>
+                                        <dxga:ArcScaleNeedle Value="{Binding DataContext.TargetAchieved,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}">
+                                            <dxga:ArcScaleNeedle.Presentation>
+                                                <dxga:DefaultArcScaleNeedlePresentation Fill="{DynamicResource GaugesArcScaleNeedleFillColor}" />
+                                            </dxga:ArcScaleNeedle.Presentation>
+                                            <dxga:ArcScaleNeedle.Animation>
+                                                <dxga:IndicatorAnimation Duration="00:00:02.0000000">
+                                                    <dxga:IndicatorAnimation.EasingFunction>
+                                                        <BounceEase/>
+                                                    </dxga:IndicatorAnimation.EasingFunction>
+                                                </dxga:IndicatorAnimation>
+                                            </dxga:ArcScaleNeedle.Animation>
+                                        </dxga:ArcScaleNeedle>
+                                        <!--<dxga:ArcScaleNeedle Value="{Binding TargetAchieved}"/>-->
+                                    </dxga:ArcScale.Needles>
+                                    <!--<dxga:ArcScale.RangeBars>
+                                        <dxga:ArcScaleRangeBar Value="{Binding DataContext.RangeBarValue,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}"/>
+                                    </dxga:ArcScale.RangeBars>-->
+                                    <dxga:ArcScale.Ranges>
+                                        <dxga:ArcScaleRange StartValue="67%" EndValue="100%"/>
+                                        <dxga:ArcScaleRange StartValue="33%" EndValue="67%"/>
+                                        <dxga:ArcScaleRange StartValue="0%" EndValue="33%"/>
+                                    </dxga:ArcScale.Ranges>
+                                </dxga:ArcScale>
+                            </dxga:CircularGaugeControl.Scales>
+                        </dxga:CircularGaugeControl>
+                    </DataTemplate>
+                </dxlc:GroupBox.ContentTemplate>
+
+                <dxlc:GroupBox.MaximizedContentTemplate>
+                    <DataTemplate>
+                        <!-- Start Grid -->
+                        <dxga:CircularGaugeControl x:Name="gaugeSalesPerformance" MaxWidth="400" EnableAnimation="True" HorizontalAlignment="Center" VerticalAlignment="Center" >
+                            <dxga:CircularGaugeControl.Model>
+                                <dxga:CircularFlatLightModel />
+                            </dxga:CircularGaugeControl.Model>
+                            <dxga:CircularGaugeControl.Scales>
+                                <dxga:ArcScale HorizontalAlignment="Center"  StartAngle="180" EndAngle="360" MajorIntervalCount="5" StartValue="0" EndValue="100">
+                                    <dxga:ArcScale.Needles>
+                                        <dxga:ArcScaleNeedle Value="{Binding DataContext.TargetAchieved,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}">
+                                            <dxga:ArcScaleNeedle.Presentation>
+                                                <dxga:DefaultArcScaleNeedlePresentation Fill="{DynamicResource GaugesArcScaleNeedleFillColor}" />
+                                            </dxga:ArcScaleNeedle.Presentation>
+                                            <dxga:ArcScaleNeedle.Animation>
+                                                <dxga:IndicatorAnimation Duration="00:00:02.0000000">
+                                                    <dxga:IndicatorAnimation.EasingFunction>
+                                                        <BounceEase/>
+                                                    </dxga:IndicatorAnimation.EasingFunction>
+                                                </dxga:IndicatorAnimation>
+                                            </dxga:ArcScaleNeedle.Animation>
+                                        </dxga:ArcScaleNeedle>
+                                        <!--<dxga:ArcScaleNeedle Value="{Binding TargetAchieved}"/>-->
+                                    </dxga:ArcScale.Needles>
+                                    <dxga:ArcScale.CustomLabels>
+                                        <dxga:ScaleCustomLabel Content="{Binding DataContext.StrTargetAchieved,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" FontSize="20" FontWeight="Bold" Offset="-160" Value="-20" />
+                                    </dxga:ArcScale.CustomLabels>
+                                    <!--<dxga:ArcScale.RangeBars>
+                                        <dxga:ArcScaleRangeBar Value="{Binding DataContext.RangeBarValue,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}"/>
+                                    </dxga:ArcScale.RangeBars>-->
+                                    <dxga:ArcScale.Ranges>
+                                        <dxga:ArcScaleRange StartValue="67%" EndValue="100%"/>
+                                        <dxga:ArcScaleRange StartValue="33%" EndValue="67%"/>
+                                        <dxga:ArcScaleRange StartValue="0%" EndValue="33%"/>
+                                    </dxga:ArcScale.Ranges>
+                                </dxga:ArcScale>
+                            </dxga:CircularGaugeControl.Scales>
+                        </dxga:CircularGaugeControl>
+                        <!-- Start Grid -->
+                    </DataTemplate>
+                </dxlc:GroupBox.MaximizedContentTemplate>
+            </dxlc:GroupBox>
+
+            <dxlc:GroupBox x:Name="SalesRate" Width="300" Height="200" MaximizeElementVisibility="Visible">
+                <dxlc:GroupBox.Style>
+                    <Style TargetType="dxlc:GroupBox">
+                        <Setter Property="Header">
+                            <Setter.Value>
+                                <DockPanel>
+                                    <TextBlock Text="SUCCESS RATE" Margin="5,0,0,0" FontWeight="Bold" VerticalAlignment="Center"/>
+                                </DockPanel>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </dxlc:GroupBox.Style>
+
+                <dxlc:GroupBox.ContentTemplate>
+                    <DataTemplate>
+                        <dxga:CircularGaugeControl x:Name="gaugeSalesRate"  MaxWidth="400"  EnableAnimation="True" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <dxga:CircularGaugeControl.Model>
+                                <dxga:CircularFlatLightModel/>
+                            </dxga:CircularGaugeControl.Model>
+                            <dxga:CircularGaugeControl.Scales>
+                                <dxga:ArcScale HorizontalAlignment="Center" StartAngle="180" EndAngle="360" MajorIntervalCount="5" StartValue="0" EndValue="100" >
+
+                                    <dxga:ArcScale.Needles>
+                                        <dxga:ArcScaleNeedle Value="{Binding DataContext.SuccessRate,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}">
+                                            <dxga:ArcScaleNeedle.Presentation>
+                                                <dxga:DefaultArcScaleNeedlePresentation Fill="{DynamicResource GaugesArcScaleNeedleFillColor}"/>
+                                            </dxga:ArcScaleNeedle.Presentation>
+                                            <dxga:ArcScaleNeedle.Animation>
+                                                <dxga:IndicatorAnimation Duration="00:00:02.0000000">
+                                                    <dxga:IndicatorAnimation.EasingFunction>
+                                                        <BounceEase/>
+                                                    </dxga:IndicatorAnimation.EasingFunction>
+                                                </dxga:IndicatorAnimation>
+                                            </dxga:ArcScaleNeedle.Animation>
+                                        </dxga:ArcScaleNeedle>
+                                        <!--<dxga:ArcScaleNeedle Value="{Binding SuccessRate}"/>-->
+                                    </dxga:ArcScale.Needles>
+                                    <dxga:ArcScale.Ranges>
+                                        <dxga:ArcScaleRange StartValue="67%" EndValue="100%"/>
+                                        <dxga:ArcScaleRange StartValue="33%" EndValue="67%"/>
+                                        <dxga:ArcScaleRange StartValue="0%" EndValue="33%"/>
+                                    </dxga:ArcScale.Ranges>
+                                </dxga:ArcScale>
+                            </dxga:CircularGaugeControl.Scales>
+                        </dxga:CircularGaugeControl>
+                    </DataTemplate>
+                </dxlc:GroupBox.ContentTemplate>
+
+                <dxlc:GroupBox.MaximizedContentTemplate>
+                    <DataTemplate>
+                        <!-- Start Grid -->
+                        <dxga:CircularGaugeControl x:Name="gaugeSalesRate"  MaxWidth="400"  EnableAnimation="True" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <dxga:CircularGaugeControl.Model>
+                                <dxga:CircularFlatLightModel/>
+                            </dxga:CircularGaugeControl.Model>
+                            <dxga:CircularGaugeControl.Scales>
+                                <dxga:ArcScale HorizontalAlignment="Center" StartAngle="180" EndAngle="360" MajorIntervalCount="5" StartValue="0" EndValue="100" >
+                                    <!--<dxga:ArcScale.Layers>
+                                <dxga:ArcScaleLayer/>
+                                <dxga:ArcScaleLayer/>
+                            </dxga:ArcScale.Layers>-->
+                                    <dxga:ArcScale.Needles>
+                                        <dxga:ArcScaleNeedle Value="{Binding DataContext.SuccessRate,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}">
+                                            <dxga:ArcScaleNeedle.Presentation>
+                                                <dxga:DefaultArcScaleNeedlePresentation Fill="{DynamicResource GaugesArcScaleNeedleFillColor}"/>
+                                            </dxga:ArcScaleNeedle.Presentation>
+                                            <dxga:ArcScaleNeedle.Animation>
+                                                <dxga:IndicatorAnimation Duration="00:00:02.0000000">
+                                                    <dxga:IndicatorAnimation.EasingFunction>
+                                                        <BounceEase/>
+                                                    </dxga:IndicatorAnimation.EasingFunction>
+                                                </dxga:IndicatorAnimation>
+                                            </dxga:ArcScaleNeedle.Animation>
+                                        </dxga:ArcScaleNeedle>
+                                        <!--<dxga:ArcScaleNeedle Value="{Binding SuccessRate}"/>-->
+                                    </dxga:ArcScale.Needles>
+                                    <dxga:ArcScale.CustomLabels>
+                                        <dxga:ScaleCustomLabel Content="{Binding DataContext.StrSuccessRate,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" FontSize="20" FontWeight="Bold" Offset="-170" Value="-27" />
+                                    </dxga:ArcScale.CustomLabels>
+                                    <!--<dxga:ArcScale.RangeBars>
+                                        <dxga:ArcScaleRangeBar Value="{Binding DataContext.RangeBarValue,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}"/>
+                                    </dxga:ArcScale.RangeBars>-->
+                                    <dxga:ArcScale.Ranges>
+                                        <dxga:ArcScaleRange StartValue="67%" EndValue="100%"/>
+                                        <dxga:ArcScaleRange StartValue="33%" EndValue="67%"/>
+                                        <dxga:ArcScaleRange StartValue="0%" EndValue="33%"/>
+                                    </dxga:ArcScale.Ranges>
+                                </dxga:ArcScale>
+                            </dxga:CircularGaugeControl.Scales>
+                        </dxga:CircularGaugeControl>
+                        <!-- End Grid -->
+                    </DataTemplate>
+                </dxlc:GroupBox.MaximizedContentTemplate>
+            </dxlc:GroupBox>
+
+            <dxlc:GroupBox x:Name="OpportunitiesStatus" Width="300" Height="200" MaximizeElementVisibility="Visible">
+                <dxlc:GroupBox.Style>
+                    <Style TargetType="dxlc:GroupBox">
+                        <Setter Property="Header">
+                            <Setter.Value>
+                                <DockPanel>
+                                    <TextBlock Text="LOST REASONS" Margin="5,0,0,0" FontWeight="Bold" VerticalAlignment="Center"/>
+                                </DockPanel>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </dxlc:GroupBox.Style>
+
+                <dxlc:GroupBox.ContentTemplate>
+                    <DataTemplate>
+                        <dxc:ChartControl Name="chartControl3D" BorderThickness="0">
+                            <dxc:ChartControl.Diagram>
+                                <dxc:SimpleDiagram3D>
+                                    <dxc:SimpleDiagram3D.Series >
+                                        <dxc:PieSeries3D DataSource="{Binding DataContext.LostReasonsByOfferlst,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox},Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                                                         ArgumentDataMember="OfferLostReason.Name" ValueDataMember="NumberOfOffers" 
+                                                         HoleRadiusPercent="0" DepthTransform="0.5"  LegendTextPattern="{}{A}" >
+
+                                            <!--region #Model-->
+                                            <dxc:PieSeries3D.Model>
+                                                <dxc:SemiRectanglePie3DModel />
+                                            </dxc:PieSeries3D.Model>
+                                            <!--endregion #Model-->
+
+                                            <dxc:PieSeries3D.PointOptions>
+                                                <dxc:PointOptions>
+                                                    <dxc:PointOptions.ValueNumericOptions>
+                                                        <dxc:NumericOptions Format="Percent" Precision="2" />
+                                                    </dxc:PointOptions.ValueNumericOptions>
+                                                </dxc:PointOptions>
+                                            </dxc:PieSeries3D.PointOptions>
+
+                                        </dxc:PieSeries3D>
+                                    </dxc:SimpleDiagram3D.Series>
+                                </dxc:SimpleDiagram3D>
+                            </dxc:ChartControl.Diagram>
+                        </dxc:ChartControl>
+                    </DataTemplate>
+                </dxlc:GroupBox.ContentTemplate>
+
+                <dxlc:GroupBox.MaximizedContentTemplate>
+                    <DataTemplate>
+                        <!-- Start ChartControl -->
+                        <dxc:ChartControl Name="chart" BorderThickness="0">
+                            <dxc:ChartControl.Diagram>
+                                <dxc:SimpleDiagram3D>
+                                    <dxc:SimpleDiagram3D.Series>
+                                        <dxc:PieSeries3D ArgumentScaleType="Qualitative" 
+                                                         DataSource="{Binding DataContext.LostReasonsByOfferlst,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" 
+                                                         ArgumentDataMember="OfferLostReason.Name" ValueDataMember="NumberOfOffers"
+                                                         HoleRadiusPercent="0"  DepthTransform="0.5" ShowInLegend="True" LegendTextPattern="{}{A}"
+                                                         LabelsVisibility="True">
+                                            <dxc:PieSeries3D.Label>
+                                                <dxc:SeriesLabel ResolveOverlappingMode="JustifyAllAroundPoint"
+                                                                 dxc:PieSeries.LabelPosition="TwoColumns"
+                                                                 TextPattern="{}{A}: {VP:P2}">
+                                                </dxc:SeriesLabel>
+                                            </dxc:PieSeries3D.Label>
+                                            <!--region #LegendPointOptions-->
+                                            <dxc:PieSeries3D.LegendPointOptions>
+                                                <dxc:PointOptions Pattern="{}{A}: {VP:P0}" />
+                                            </dxc:PieSeries3D.LegendPointOptions>
+                                            <!--endregion #LegendPointOptions-->
+
+                                        </dxc:PieSeries3D>
+                                    </dxc:SimpleDiagram3D.Series>
+                                </dxc:SimpleDiagram3D>
+                            </dxc:ChartControl.Diagram>
+                            <dxc:ChartControl.Legends>
+                                <dxc:Legend/>
+                            </dxc:ChartControl.Legends>
+                        </dxc:ChartControl>
+                        <!-- End ChartControl -->
+                    </DataTemplate>
+                </dxlc:GroupBox.MaximizedContentTemplate>
+            </dxlc:GroupBox>
+
+        </dxlc:FlowLayoutControl>
+    </Grid>
+
+</UserControl>

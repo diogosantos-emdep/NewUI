@@ -1,0 +1,226 @@
+﻿<Window x:Class="Emdep.Geos.Modules.ERM.Views.PDAShowAverageDaysPOView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"             
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:dxga="http://schemas.devexpress.com/winfx/2008/xaml/gauges"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors" 
+             xmlns:dxp="http://schemas.devexpress.com/winfx/2008/xaml/printing"
+             xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+             xmlns:ViewModels="clr-namespace:Emdep.Geos.Modules.ERM.ViewModels"
+             xmlns:dxc="http://schemas.devexpress.com/winfx/2008/xaml/charts" 
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:sysglb="clr-namespace:System.Globalization;assembly=mscorlib"
+             xmlns:dxsch="http://schemas.devexpress.com/winfx/2008/xaml/scheduler"
+             xmlns:Scheduler="clr-namespace:DevExpress.Xpf.Scheduler.UI;assembly=DevExpress.Xpf.Scheduler.v19.2"
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:dxschcore="clr-namespace:DevExpress.XtraScheduler;assembly=DevExpress.XtraScheduler.v19.2.Core"
+             xmlns:behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+             xmlns:Interactive="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:Behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:dxci="http://schemas.devexpress.com/winfx/2008/xaml/core/internal"
+             xmlns:UIConverter="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+             xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+             xmlns:dxschint="http://schemas.devexpress.com/winfx/2008/xaml/scheduler/internal"
+             xmlns:dxscht="http://schemas.devexpress.com/winfx/2008/xaml/scheduler/themekeys"
+             xmlns:ERMApplication="clr-namespace:Emdep.Geos.Modules.ERM.CommonClasses"
+             xmlns:Serialization="clr-namespace:DevExpress.Xpf.LayoutControl.Serialization;assembly=DevExpress.Xpf.LayoutControl.v19.2"
+             xmlns:dxb="http://schemas.devexpress.com/winfx/2008/xaml/bars"
+             xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:dxgt="http://schemas.devexpress.com/winfx/2008/xaml/grid/themekeys"
+             xmlns:gif="http://wpfanimatedgif.codeplex.com"
+            xmlns:local="clr-namespace:Emdep.Geos.Modules.ERM.Views"
+             mc:Ignorable="d" WindowState="Maximized"
+              >
+    
+    <Window.InputBindings>
+        <KeyBinding Key="Escape" Command="{Binding CloseButtonCommand}"/>
+    </Window.InputBindings>
+    <Window.Resources>
+
+        <Style x:Key="FirstSeriesStyle" TargetType="dxc:BarSideBySideSeries2D">
+            <Setter Property="Brush" Value="#3F76BF"/>
+        </Style>
+        <Style x:Key="SecondSeriesStyle" TargetType="dxc:BarSideBySideSeries2D">
+            <Setter Property="Brush" Value="#9E9E9E"/>
+        </Style>
+    </Window.Resources>
+    
+    <Grid Background="{DynamicResource AppointmentHeaderBackground}">
+
+        <dxlc:LayoutGroup dxlc:LayoutControl.AllowHorizontalSizing="True"
+                                    Header="{DynamicResource AverageDaysPo}" View="GroupBox"  
+                                  IsCollapsible="True" IsCollapsed="False" Margin="5,0,5,5">
+
+            <dxlc:LayoutGroup.GroupBoxStyle>
+                <Style TargetType="dxlc:GroupBox">
+                    <Setter Property="BorderThickness" Value="2" />
+
+                </Style>
+            </dxlc:LayoutGroup.GroupBoxStyle>
+
+            <Grid ShowGridLines="False" HorizontalAlignment="Stretch">
+                    <Grid.ColumnDefinitions>
+
+                        <ColumnDefinition Width="5" />
+                        <ColumnDefinition Width="20*" />
+                        <ColumnDefinition Width="10" />
+                        <ColumnDefinition Width="0" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="40"/>
+                        <RowDefinition Height="*"/>
+
+
+                    </Grid.RowDefinitions>
+                <!--MinHeight="150" MaxHeight="500"-->
+
+                <dxc:ChartControl x:Name="ChartJobPosition"  Padding="0" Margin="25,0,15,20"   AutoLayout="False" 
+                                                          Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" 
+                                                           VerticalAlignment="Bottom"  HorizontalAlignment="Left"  CrosshairEnabled="True" BorderThickness="0"  DataSource="{Binding POGoAheadAndSampleDaysList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+
+                    <dxc:ChartControl.Legend>
+                        <dxc:Legend HorizontalPosition="Center" VerticalPosition="TopOutside"  Orientation="Horizontal"/>
+                    </dxc:ChartControl.Legend>
+                    <dxc:XYDiagram2D >
+
+                        <dxc:BarSideBySideSeries2D x:Name="firstSeriesOfJobPosition" ArgumentDataMember="Plant" LabelsVisibility="True" ValueDataMember="PoGoheadDays"  DisplayName="PO"  Style="{StaticResource FirstSeriesStyle}" >
+                            <dxc:BarSideBySideSeries2D.Label>
+                                <dxc:SeriesLabel ConnectorThickness="0" Indent="18" ResolveOverlappingMode="Default" dxc:BarSideBySideSeries2D.LabelPosition="Outside" >
+                                </dxc:SeriesLabel>
+                            </dxc:BarSideBySideSeries2D.Label>
+                        </dxc:BarSideBySideSeries2D>
+
+                        <dxc:BarSideBySideSeries2D x:Name="secondSeriesOfJobPosition" 
+                                                                       ArgumentDataMember="Plant" ValueDataMember="SampleDays" LabelsVisibility="True"  AxisY="{Binding ElementName=secondAxisYOfJobPosition}" DisplayName="Sa" Style="{StaticResource SecondSeriesStyle}" >
+                            <dxc:BarSideBySideSeries2D.Label>
+                                <dxc:SeriesLabel ConnectorThickness="0" Indent="18" ResolveOverlappingMode="Default" dxc:BarSideBySideSeries2D.LabelPosition="Outside" >
+                                </dxc:SeriesLabel>
+                            </dxc:BarSideBySideSeries2D.Label>
+                        </dxc:BarSideBySideSeries2D>
+
+                        <dxc:XYDiagram2D.AxisY>
+                            <dxc:AxisY2D>
+                                <dxc:AxisY2D.Title>
+                                    <dxc:AxisTitle Content="Zero = Agreed ETD" />
+                                </dxc:AxisY2D.Title>
+                            </dxc:AxisY2D>
+                        </dxc:XYDiagram2D.AxisY>
+                    </dxc:XYDiagram2D>
+                </dxc:ChartControl>
+
+
+
+                <!--<Grid ShowGridLines="True" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" >
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80" />
+                        <ColumnDefinition Width="30" />
+                        <ColumnDefinition Width="150" />
+                        <ColumnDefinition Width="30" />
+                        <ColumnDefinition Width="110" />
+                        --><!--<ColumnDefinition Width="30" />
+                                                <ColumnDefinition Width="50" />
+                                                <ColumnDefinition Width="30" />
+                                                <ColumnDefinition Width="40" />
+                                                <ColumnDefinition Width="30" />
+                                                <ColumnDefinition Width="40" />
+                                                <ColumnDefinition Width="30" />
+                                                <ColumnDefinition Width="50" />--><!--
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="40"/>
+                    </Grid.RowDefinitions>
+
+
+
+                    <Rectangle  Fill="#3F76BF"  Grid.Column="1" VerticalAlignment="Top" Grid.Row="0" Width="15" Height="15" />
+                    <TextBlock Text ="{DynamicResource POGoAhead}" VerticalAlignment="Top" FontSize="13"  Grid.Column="2" Grid.Row="0" Style="{StaticResource TextBlock14Style}" Foreground="{DynamicResource AppointmentHeaderForeground}"/>
+
+                    <Rectangle  Fill="#9E9E9E"  Grid.Column="3" VerticalAlignment="Top" Grid.Row="0" Width="15" Height="15"  />
+                    <TextBlock Text="{DynamicResource Sample}" VerticalAlignment="Top" FontSize="13"   Grid.Column="4" Grid.Row="0" Style="{StaticResource TextBlock14Style}" Foreground="{DynamicResource AppointmentHeaderForeground}" />
+
+
+                </Grid>-->
+
+
+                <!--<dxc:ChartControl x:Name="ChartDaysPOtoShipment" 
+                                          AutoLayout="False" 
+                                          Padding="0" Margin="25,0,15,10" 
+                                                          Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                                                           VerticalAlignment="Bottom"  HorizontalAlignment="Left" 
+                                           CrosshairEnabled="True" BorderThickness="0"    
+                                          ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                          DataSource="{Binding POGoAheadAndSampleDaysList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                        --><!--MinHeight="150" MaxHeight="400" MinWidth="700" MaxWidth="1000" Width="{Binding ChartWidth}"--><!--
+                        <dxc:XYDiagram2D>
+                            <dxc:XYDiagram2D.AxisX>
+                                <dxc:AxisX2D LabelVisibilityMode="Default"  >
+
+
+                                    <dxc:AxisX2D.NumericScaleOptions>
+                                        <dxc:ContinuousNumericScaleOptions AutoGrid="False" GridSpacing="1"></dxc:ContinuousNumericScaleOptions>
+                                    </dxc:AxisX2D.NumericScaleOptions>
+                                </dxc:AxisX2D>
+                            </dxc:XYDiagram2D.AxisX>
+                            <dxc:XYDiagram2D.AxisY>
+                                <dxc:AxisY2D  LabelVisibilityMode="Default">
+                                    <dxc:AxisY2D.NumericScaleOptions>
+                                        <dxc:ContinuousNumericScaleOptions AutoGrid="False" GridSpacing="1"></dxc:ContinuousNumericScaleOptions>
+                                    </dxc:AxisY2D.NumericScaleOptions>
+                                </dxc:AxisY2D>
+                            </dxc:XYDiagram2D.AxisY>
+                        </dxc:XYDiagram2D>
+
+
+                        <dxmvvm:Interaction.Triggers>
+                            <dxmvvm:EventToCommand EventName="Loaded" Command="{Binding ChartDaysPOtoShipmentLoadActionCommand}" CommandParameter="{Binding ElementName=ChartDaysPOtoShipment}" />
+                            <dxmvvm:EventToCommand EventName="CustomDrawCrosshair" Command="{Binding ChartDashboardSaleCustomDrawCrosshairCommand}" PassEventArgsToCommand="True" />
+                            <dxmvvm:EventToCommand EventName="MouseDoubleClick"  Command="{Binding ShowAverageDaysPOShipmentDialogWindowCommand}" PassEventArgsToCommand="True" />
+                        </dxmvvm:Interaction.Triggers>
+                    </dxc:ChartControl>
+
+                    <Grid ShowGridLines="False" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" >
+
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="80" />
+                            <ColumnDefinition Width="30" />
+                            <ColumnDefinition Width="150" />
+                            <ColumnDefinition Width="30" />
+                            <ColumnDefinition Width="110" />
+                            --><!--<ColumnDefinition Width="30" />
+                                                <ColumnDefinition Width="50" />
+                                                <ColumnDefinition Width="30" />
+                                                <ColumnDefinition Width="40" />
+                                                <ColumnDefinition Width="30" />
+                                                <ColumnDefinition Width="40" />
+                                                <ColumnDefinition Width="30" />
+                                                <ColumnDefinition Width="50" />--><!--
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="40"/>
+                        </Grid.RowDefinitions>
+
+
+
+                        <Rectangle  Fill="#9E9E9E"  Grid.Column="1" VerticalAlignment="Top" Grid.Row="0" Width="15" Height="15" RadiusX="7" RadiusY="7"/>
+                        <TextBlock Text ="{DynamicResource POGoAhead}" VerticalAlignment="Top" FontSize="13"  Grid.Column="2" Grid.Row="0" Style="{StaticResource TextBlock14Style}"/>
+
+                        <Rectangle  Fill="#3F76BF"  Grid.Column="3" VerticalAlignment="Top" Grid.Row="0" Width="15" Height="15"  RadiusX="7" RadiusY="7"/>
+                        <TextBlock Text="{DynamicResource Sample}" VerticalAlignment="Top" FontSize="13"   Grid.Column="4" Grid.Row="0" Style="{StaticResource TextBlock14Style}"/>
+
+
+                    </Grid>-->
+
+                </Grid>
+            
+
+        </dxlc:LayoutGroup>
+
+
+    </Grid>
+</Window>

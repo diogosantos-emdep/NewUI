@@ -1,0 +1,55 @@
+Drop Procedure if exists emdep_geos.APM_GetAuthorizedLocationListByIdUser_V2690;
+DELIMITER $$
+CREATE PROCEDURE emdep_geos.APM_GetAuthorizedLocationListByIdUser_V2690(
+    IN _idUser   smallint(5) UNSIGNED)
+ BEGIN
+	   --  [Shweta.Thube][18/11/2025][GEOS2-9870]
+       -- call emdep_geos.APM_GetAuthorizedLocationListByIdUser_V2690(1);
+       IF (_idUser != 0)
+       THEN
+          SELECT sup.IdCompany,
+                 comp.Name AS CompanyName,
+                 comp.IdCountry,
+                 comp.Alias,
+                 co.Name AS CountryName,
+                 comp.IsLocation,
+                 comp.IsOrganization,
+                 comp.IsCompany,
+                 comp.IsStillActive,
+                 cu.IdCurrency,
+                 co.Iso AS CountryISO,
+                 counRegion.Value as region,
+                 counRegion.IdLookupValue as IdRegion
+            FROM site_user_permission sup
+                 INNER JOIN companies comp ON sup.IdCompany = comp.IdCompany
+                 INNER JOIN countries co ON co.idCountry = comp.IdCountry
+                 INNER JOIN geos.countries C ON C.IdCountry = comp.IdCountry
+				 LEFT JOIN lookup_values counRegion ON counRegion.IdLookupValue = C.IdRegion
+                 INNER JOIN currencies cu
+                    ON cu.IdCurrency = co.IdOfficialCurrency
+           WHERE sup.IdUser = _idUser
+          GROUP BY sup.IdCompany
+          ORDER BY comp.IdCountry;
+       ELSE
+          SELECT comp.IdCompany,
+                 comp.Name AS CompanyName,
+                 comp.IdCountry,
+                 comp.Alias,
+                 co.Name AS CountryName,
+                 comp.IsLocation,
+                 comp.IsOrganization,
+                 comp.IsCompany,
+                 comp.IsStillActive,
+				 co.Iso AS CountryISO,
+                 counRegion.Value as region,
+                 counRegion.IdLookupValue as IdRegion
+            FROM companies comp
+                 INNER JOIN countries co ON co.idCountry = comp.IdCountry
+				 INNER JOIN geos.countries C ON C.IdCountry = comp.IdCountry
+				 LEFT JOIN lookup_values counRegion ON counRegion.IdLookupValue = C.IdRegion
+          GROUP BY comp.IdCompany
+          ORDER BY comp.IdCountry;
+       END IF;
+    END $$
+    DELIMITER ;
+    

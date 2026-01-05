@@ -1,0 +1,155 @@
+
+
+Drop procedure if exists emdep_geos.APM_InsertTaskForActionPlan_V2690;
+DELIMITER $$
+CREATE PROCEDURE emdep_geos.APM_InsertTaskForActionPlan_V2690(
+    IN _IdActionPlan            INT(10) UNSIGNED,
+    IN _TaskNumber              INT(10),
+    IN _Title                   VARCHAR(255),
+    IN _IdLocation              SMALLINT(5) UNSIGNED,
+    IN _IdResponsibleEmployee   SMALLINT(5) UNSIGNED,
+    IN _IdStatus                SMALLINT(3) UNSIGNED,
+    IN _IdPriority              SMALLINT(3) UNSIGNED,
+    IN _IdTheme                 SMALLINT(3) UNSIGNED,
+    IN _DueDate                 DATETIME,
+    IN _DelegatedTo             INT(10),
+    IN _Progress                TINYINT(3) UNSIGNED,
+    IN _CreatedBy               SMALLINT(5) UNSIGNED,
+    IN _CloseDate               datetime,
+    IN _DelegatedIn             datetime,
+    IN _Description             Text,
+    IN _ClosedBy                smallint(5) UNSIGNED,
+    IN _IdOTItem                INT(10) UNSIGNED,
+	IN _IdCustomerSite          smallint unsigned    )
+ BEGIN
+       
+       DECLARE nextTaskNumber   INT(10);
+       DECLARE newIdTask        INT(10);
+ 
+       SELECT IFNULL(MAX(TaskNumber), 0) + 1
+         INTO nextTaskNumber
+         FROM action_plan_Task
+        WHERE IdActionPlan = _IdActionPlan;
+ 
+       INSERT INTO action_plan_Task(IdActionPlan,
+                                    TaskNumber,
+                                    Title,
+                                    IdLocation,
+                                    IdResponsibleEmployee,
+                                    IdStatus,
+                                    IdPriority,
+                                    IdTheme,
+                                    DueDate,
+                                    DelegatedTo,
+                                    Progress,
+                                    CreatedBy,
+                                    CreatedIn,
+                                    OriginalDueDate,
+                                    CloseDate,
+                                    DelegatedIn,
+                                    Description,
+                                    IdOTItem,
+                                    IdCustomerSite)
+       VALUES (_IdActionPlan,
+               nextTaskNumber,
+               _Title,
+               _IdLocation,
+               _IdResponsibleEmployee,
+               _IdStatus,
+               _IdPriority,
+               _IdTheme,
+               _DueDate,
+               _DelegatedTo,
+               _Progress,
+               _CreatedBy,
+               CURDATE(),
+               _DueDate,
+               _CloseDate,
+               _DelegatedIn,
+               _Description,
+               _IdOTItem,
+               _IdCustomerSite);
+ 
+ 
+       SET newIdTask = LAST_INSERT_ID();
+ 
+ 
+       IF (_IdStatus = 1982)
+       THEN
+          UPDATE emdep_geos.action_plan_task
+             SET CloseDate = NOW(), Progress = 100, ClosedBy = _ClosedBy
+           WHERE IdTask = newIdTask;
+       END IF;
+ 
+ 
+       SELECT newIdTask;
+    END $$
+    DELIMITER ;
+    
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+Drop procedure if exists emdep_geos.APM_UpdateTaskForActionPlan_V2690;
+DELIMITER $$
+CREATE PROCEDURE emdep_geos.APM_UpdateTaskForActionPlan_V2690(
+    IN _IdTask                  INT(10) UNSIGNED,
+    IN _IdActionPlan            INT(10) UNSIGNED,
+    IN _TaskNumber              INT(10),
+    IN _Title                   VARCHAR(255),
+    IN _IdLocation              SMALLINT(5) UNSIGNED,
+    IN _IdResponsibleEmployee   SMALLINT(5) UNSIGNED,
+    IN _IdStatus                SMALLINT(3) UNSIGNED,
+    IN _IdPriority              SMALLINT(3) UNSIGNED,
+    IN _IdTheme                 SMALLINT(3) UNSIGNED,
+    IN _DueDate                 DATETIME,
+    IN _DelegatedTo             INT(10),
+    IN _Progress                TINYINT(3) UNSIGNED,
+    IN _ModifiedBy              SMALLINT(5) UNSIGNED,
+    IN _CloseDate               datetime,
+    IN _DueDateChangeCount      int(10),
+    IN _DelegatedIn             datetime,
+    IN _Description             Text,
+    IN _ClosedBy                smallint(5) UNSIGNED,
+    IN _IdOTItem                INT(10) UNSIGNED,
+	IN _IdCustomerSite			smallint unsigned)
+ BEGIN
+       
+       UPDATE action_plan_Task
+          SET IdActionPlan = _IdActionPlan,
+              TaskNumber = _TaskNumber,
+              Title = _Title,
+              IdLocation = _IdLocation,
+              IdResponsibleEmployee = _IdResponsibleEmployee,
+              IdStatus = _IdStatus,
+              IdPriority = _IdPriority,
+              IdTheme = _IdTheme,
+              DueDate = _DueDate,
+              DelegatedTo = _DelegatedTo,
+              Progress = _Progress,
+              ModifiedBy = _ModifiedBy,
+              ModifiedIn = CURDATE(),
+              CloseDate = _CloseDate,
+              DueDateChangeCount = _DueDateChangeCount,
+              DelegatedIn = _DelegatedIn,
+              Description = _Description,
+              IdOTItem=_IdOTItem,
+              IdCustomerSite= _IdCustomerSite	
+        WHERE IdTask = _IdTask;
+ 
+ 
+       IF (_IdStatus = 1982)
+       THEN
+          UPDATE emdep_geos.action_plan_task
+             SET CloseDate = now(), Progress = 100, ClosedBy = _ClosedBy
+           WHERE IdTask = _IdTask;
+       END IF;
+    END $$
+    DELIMITER ;
+    

@@ -1,0 +1,161 @@
+﻿<dxwui:WinUIDialogWindow x:Class="GEOS_Workbench_Outlook_Addin.AddEngineeringAnalysisView"
+                         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                         xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"
+                         xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+                         xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+                         xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+                         xmlns:ViewModels="clr-namespace:GEOS_Workbench_Outlook_Addin.ViewModels"
+                         xmlns:behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+                         xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+                         xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+                         xmlns:UIConverter ="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+                         xmlns:Validation ="clr-namespace:Emdep.Geos.UI.Validations;assembly=Emdep.Geos.UI.Validations"
+                         xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+                         Height="400" Width="500"
+                         Title ="{DynamicResource LeadsEngineeringAnalysis}"
+                         TitleStyle="{DynamicResource WinUIDialogWindowTitleStyle}"
+                         Style="{DynamicResource WinUIDialogWindowStyle}">
+
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape" Command="{Binding AddEngineeringAnalysisCancelButtonCommand}"/>
+    </dxwui:WinUIDialogWindow.InputBindings>
+
+    <Grid ShowGridLines="False" HorizontalAlignment="Center" VerticalAlignment="Top" Height="Auto "
+          Width="400" Background="Transparent" >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="2*" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="50" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Vertical" Grid.Row="0" Margin="0,5,0,0">
+            <Label Content="{DynamicResource LeadEngAnalysisType}" FontWeight="Bold" />
+            <dxe:ListBoxEdit x:Name="References" Height="105"
+                             ItemsSource="{Binding EngineeringAnalysisTypes,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                             ScrollViewer.VerticalScrollBarVisibility="Auto"
+                             DisplayMember="Reference"
+                             ValidateOnEnterKeyPressed="True" 
+                             ValidateOnTextInput="True"
+                             IsReadOnly="{Binding IsEngineeringAnalysisTypesReadOnly, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                <dxe:ListBoxEdit.EditValue>
+                    <Binding Path="SelectedEngineeringAnalysisTypes" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay" ValidatesOnDataErrors="True" >
+                        <Binding.ValidationRules>
+                            <Validation:EngineeringAnalysisValidation ValidationStep="UpdatedValue" FieldName="SelectedEngineeringAnalysisTypes" />
+                        </Binding.ValidationRules>
+                    </Binding>
+                </dxe:ListBoxEdit.EditValue>
+
+                <dxe:ListBoxEdit.StyleSettings>
+                    <dxe:CheckedListBoxEditStyleSettings/>
+                </dxe:ListBoxEdit.StyleSettings>
+            </dxe:ListBoxEdit>
+        </StackPanel>
+
+        <StackPanel Orientation="Vertical" Grid.Row="1">
+            <Label Content="{DynamicResource LeadEngAnalysisComments}" FontWeight="Bold"/>
+            <dxe:TextEdit Text="{Binding DataContext.Comments,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" 
+                          Height="75"  TextWrapping="WrapWithOverflow"
+                          HorizontalAlignment="Stretch"
+                          VerticalAlignment="Top"
+                          AcceptsReturn="True"
+                          VerticalScrollBarVisibility="Visible" 
+                          VerticalContentAlignment="Stretch"
+                          HorizontalContentAlignment="Left"
+                          Style="{DynamicResource TextEditStyle}"  InvalidValueBehavior="AllowLeaveEditor"
+                          IsReadOnly="{Binding DataContext.IsCommentsReadOnly, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                          EditValue="{Binding DataContext.Comments, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow},ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+                <!--<dxe:TextEdit.EditValue>
+                    <Binding Path="DataContext.Comments"  RelativeSource="{RelativeSource AncestorType=dxwui:WinUIDialogWindow}" ValidatesOnDataErrors="True"  UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                        <Binding.ValidationRules>
+                            <Validation:EngineeringAnalysisValidation FieldName="Comments"/>
+                        </Binding.ValidationRules>
+                    </Binding>
+                </dxe:TextEdit.EditValue>-->
+            </dxe:TextEdit>
+        </StackPanel>
+
+        <StackPanel Orientation="Vertical" Grid.Row="2" Margin="0,5,0,0">
+            <Label Content="{DynamicResource LeadEngAnalysisAttachments}"  FontWeight="Bold"   />
+            <dxe:ComboBoxEdit x:Name="editor" Height="75" NullText="{DynamicResource ActivityNoFileChose}" 
+                              EditValue="{Binding TempAttachmentListUI, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                              ItemsSource="{Binding TempAttachmentListUI,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                              ScrollViewer.VerticalScrollBarVisibility="Auto"
+                              DisplayMember="OriginalFileName"
+                              AllowDefaultButton="False"
+                              AutoComplete="True"
+                              ImmediatePopup="True" Margin="0 0 0 0"
+                              ValidateOnEnterKeyPressed="True" 
+                              ValidateOnTextInput="True"
+                              IsTextEditable="False" Style="{DynamicResource ComboBoxEditStyle}" 
+                              IsReadOnly="{Binding DataContext.IsEngineeringAnalysisTypesReadOnly, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                <dxe:ComboBoxEdit.SelectedIndex>
+                    <Binding Path="DataContext.SelectedIndexAttachment" RelativeSource="{RelativeSource AncestorType=dxwui:WinUIDialogWindow}" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                        <!--<Binding.ValidationRules>
+                            <Validation:EngineeringAnalysisValidation FieldName="SelectedIndexAttachment" ValidationStep="UpdatedValue" />
+                        </Binding.ValidationRules>-->
+                    </Binding>
+                </dxe:ComboBoxEdit.SelectedIndex>
+                <dxe:ComboBoxEdit.StyleSettings>
+                    <dxe:TokenComboBoxStyleSettings  NewTokenPosition="Far" EnableTokenWrapping="True"  />
+                </dxe:ComboBoxEdit.StyleSettings>
+            </dxe:ComboBoxEdit>
+            <Button Content= "{DynamicResource LeadEngAnalysisChooseFile}"
+                    Height="30" 
+                    HorizontalAlignment="Right" 
+                    Margin="0,5,0,0" 
+                    VerticalAlignment="Center" 
+                    Width="110"
+                    Command="{Binding ChooseFileCommand}" Style="{DynamicResource ButtonStyle}" 
+                    IsEnabled="{Binding IsEngAnalysisChooseFileEnable,Mode=OneTime}"/>
+        </StackPanel>
+
+        <StackPanel Orientation="Vertical" Grid.Row="3">
+            <Label Content="{DynamicResource LeadEngAnalysisDueDate}" FontWeight="Bold" />
+            <dxe:DateEdit HorizontalAlignment="Stretch" 
+                              VerticalAlignment="Top" ValidateOnTextInput="True" 
+                              Height="30"  
+                              Mask="{Binding CultureInfo.CurrentCulture.DateTimeFormat.YearMonthPattern}" MaskUseAsDisplayFormat="True"
+                              IsTextEditable="False"
+                              HorizontalContentAlignment="Right"  InvalidValueBehavior="AllowLeaveEditor"
+                              IsReadOnly="{Binding DataContext.IsDateReadOnly, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                <dxe:DateEdit.EditValue>
+                    <Binding Path="DataContext.DueDate" RelativeSource="{RelativeSource AncestorType=dxwui:WinUIDialogWindow}" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                        <Binding.ValidationRules>
+                            <Validation:EngineeringAnalysisValidation FieldName="DueDate"/>
+                        </Binding.ValidationRules>
+                    </Binding>
+                </dxe:DateEdit.EditValue>
+            </dxe:DateEdit>
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal" Grid.Row="4">
+            <Label Content="{DynamicResource ActivityCompleted}" 
+                   HorizontalAlignment="Left" VerticalAlignment="Center" FontWeight="Bold" />
+            <dxe:CheckEdit Height="30" Margin="10 0 0 0"
+                           HorizontalAlignment="Left" VerticalAlignment="Center"
+                           IsReadOnly="{Binding DataContext.IsCompletedReadOnly, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                           IsChecked="{Binding DataContext.IsCompleted, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                <dxe:CheckEdit.LayoutTransform>
+                    <ScaleTransform ScaleX="1.2" ScaleY="1.2" />
+                </dxe:CheckEdit.LayoutTransform>
+            </dxe:CheckEdit>
+        </StackPanel>
+
+        <DockPanel Grid.Row="5" HorizontalAlignment="Center" VerticalAlignment="Center" Width="250" Height="30"  Margin="0 5 0 0">
+            <Button HorizontalAlignment="Left" Width="100" Command="{Binding AddEngineeringAnalysisAcceptButtonCommand}" Content="{DynamicResource LeadEngAnalysisAccept}"
+                    IsEnabled="{Binding IsAcceptEnable,Mode=OneTime}"/>
+            <Button HorizontalAlignment="Right" Width="100" Command="{Binding AddEngineeringAnalysisCancelButtonCommand}" Content="{DynamicResource LeadEngAnalysisCancel}"/>
+        </DockPanel>
+    </Grid>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="KeyDown">
+            <behaviors:InvokeDelegateCommandAction Command="{Binding CommandTextInput}" CommandParameter="{Binding Path=InvokeParameter, RelativeSource={RelativeSource Self}}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+</dxwui:WinUIDialogWindow>

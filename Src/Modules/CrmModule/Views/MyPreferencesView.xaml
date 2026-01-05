@@ -1,0 +1,712 @@
+﻿<dxwui:WinUIDialogWindow x:Class="Emdep.Geos.Modules.Crm.Views.MyPreferencesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"    
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors" 
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:ViewModels="clr-namespace:Emdep.Geos.Modules.Crm.ViewModels"
+             xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+             xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:Validation ="clr-namespace:Emdep.Geos.UI.Validations;assembly=Emdep.Geos.UI.Validations"
+                         xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+                         xmlns:behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+             mc:Ignorable="d" 
+             d:DesignHeight="400" d:DesignWidth="900"
+             Title="{DynamicResource CrmMainViewModelMyPreferences}"
+             TitleStyle="{DynamicResource WinUIDialogWindowTitleStyle}">
+
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape"  Command="{Binding MyPreferencesViewCancelButtonCommand}"/>
+    </dxwui:WinUIDialogWindow.InputBindings>
+    <dxwui:WinUIDialogWindow.Resources>
+        <Style x:Key="CRMSectionsImage" TargetType="{x:Type Image}">
+            <!--<Setter Property="Image.Source" Value="{DynamicResource UsersImageStyle}"/>-->
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding SectionName}" Value="Dashboard 1">
+                    <Setter Property="Image.Source" Value="{DynamicResource Dashboard1ImageStyle}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding SectionName}" Value="Dashboard 2">
+                    <Setter Property="Image.Source" Value="{DynamicResource Dashboard2ImageStyle}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding SectionName}" Value="Dashboard 3">
+                    <Setter Property="Image.Source" Value="{DynamicResource Dashboard3ImageStyle}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding SectionName}" Value="DashBoard Ops. Review">
+                    <Setter Property="Image.Source" Value="{DynamicResource DashBoardOpsReviewImageStyle}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding SectionName}" Value="Engineering Analysis">
+                    <Setter Property="Image.Source" Value="{DynamicResource EngineeringAnalysisImageStyle}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding SectionName}" Value="ACTIVITIES">
+                    <Setter Property="Image.Source" Value="{DynamicResource ActivitiesImageStyle}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding SectionName}" Value="Accounts">
+                    <Setter Property="Image.Source" Value="{DynamicResource AccountsImageStyle}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding SectionName}" Value="Contacts">
+                    <Setter Property="Image.Source" Value="{DynamicResource ContactsImageStyle}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding SectionName}" Value="Timeline">
+                    <Setter Property="Image.Source" Value="{DynamicResource TimelineImageStyle}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding SectionName}" Value="Pipeline">
+                    <Setter Property="Image.Source" Value="{DynamicResource PipelineImageStyle}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding SectionName}" Value="ORDERS">
+                    <Setter Property="Image.Source" Value="{DynamicResource OrdersImageStyle}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding SectionName}" Value="Items Forecast">
+                    <Setter Property="Image.Source" Value="{DynamicResource ItemForecastImageStyle}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding SectionName}" Value="Report Dashboard">
+                    <Setter Property="Image.Source" Value="{DynamicResource ReportDashboardImageStyle}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding SectionName}" Value="ExchangeRate View">
+                    <Setter Property="Image.Source" Value="{DynamicResource ExchangeRateViewImageStyle}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding SectionName}" Value="Target &amp; Forecast">
+                    <Setter Property="Image.Source" Value="{DynamicResource TargetandForecastImageStyle}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding SectionName}" Value="Plant Quota">
+                    <Setter Property="Image.Source" Value="{DynamicResource PlantQuotaImageStyle}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding SectionName}" Value="Users">
+                    <Setter Property="Image.Source" Value="{DynamicResource UsersImageStyle}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </dxwui:WinUIDialogWindow.Resources>
+
+    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="Transparent">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="10"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="10"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="10"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="20"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <dx:DXTabControl Grid.Row="1" Width="630">
+
+            <dx:DXTabItem Header="Shortcuts" Width="150" Height="60">
+                <dx:DXTabItem.HeaderTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <Image Height="25" Width="25" Style="{ DynamicResource ShortcutImageStyle}" />
+                            <TextBlock Text="{DynamicResource Shortcuts}" Margin="5,0,0,0"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </dx:DXTabItem.HeaderTemplate>
+
+                <dx:DXTabItem.ContentTemplate>
+                    <DataTemplate>
+                        <Grid Grid.Column="0" Grid.Row="0" >
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="10"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="10"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="10"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="10"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="10"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <!--Create-->
+                            <Grid Grid.Row="1">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="5"/>
+                                    <ColumnDefinition Width="30"/>
+                                    <ColumnDefinition Width="10"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Image Grid.Row="1" Grid.Column="1" Height="25" Width="25" Style="{ DynamicResource AddShortcutImageStyle}" />
+                                <TextBlock Grid.Row="1" Grid.Column="3"  Text="{DynamicResource Preference_Create}" Style="{StaticResource TextBlock14Style}" VerticalAlignment="Center" FontWeight="Bold"/>
+                            </Grid>
+                            <Grid Grid.Row="3">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="1"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="10"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="10"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="10"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="10"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="10"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="10"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="10"/>
+                                    <RowDefinition Height="Auto"/>
+                                     <RowDefinition Height="10"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="20"/>
+                                    <ColumnDefinition Width="30"/>
+                                    <ColumnDefinition Width="10"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="75"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <!--Opportunity-->
+                                <Image Grid.Row="1" Grid.Column="1" Height="25" Width="25" Style="{ DynamicResource OpportunityShortcutImageStyle}" />
+                                <TextBlock Grid.Row="1" Grid.Column="3"  Text="{DynamicResource ActivityOpportunity}" Style="{StaticResource TextBlock14Style}" VerticalAlignment="Center" />
+                                <dxe:TextEdit Text="{Binding DataContext.Opportunity,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" 
+                                              Height="30" 
+                                              MaxLength="100" TextWrapping="Wrap"
+                                              Grid.Row="1" Grid.Column="5" Grid.ColumnSpan="2"
+                                              HorizontalAlignment="Stretch" IsReadOnly="True"
+                                              IsEnabled="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsPermissionEnabled}">
+                                    <dxmvvm:Interaction.Behaviors>
+                                        <dxmvvm:EventToCommand 
+                                                            EventName="KeyDown" Command="{Binding DataContext.Opportunity_KeyDownCommand, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" PassEventArgsToCommand="True">
+                                        </dxmvvm:EventToCommand>
+                                        <dxmvvm:KeyToCommand Event="PreviewKeyDown" KeyGesture="Ctrl+A"  Command="{Binding DataContext.Opportunity_PreviewKeyDownAllCommand, RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}" MarkRoutedEventsAsHandled="True"/>
+                                        <dxmvvm:KeyToCommand Event="PreviewKeyDown" KeyGesture="Ctrl+C"  Command="{Binding DataContext.Opportunity_PreviewKeyDownCopyCommand, RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}" MarkRoutedEventsAsHandled="True"/>
+                                        <dxmvvm:KeyToCommand Event="PreviewKeyDown" KeyGesture="Ctrl+V" Command="{Binding DataContext.Opportunity_PreviewKeyDownPasteCommand, RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}" CommandParameter="{Binding Path=InvokeParameter, RelativeSource={RelativeSource Self}}" MarkRoutedEventsAsHandled="True"/>
+                                    </dxmvvm:Interaction.Behaviors>
+                                    <dxe:TextEdit.EditValue>
+                                        <Binding Path="DataContext.Opportunity" RelativeSource="{RelativeSource AncestorType=dxwui:WinUIDialogWindow}" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                                            <Binding.ValidationRules>
+                                                <Validation:MyPreferencesValidations FieldName="Opportunity" />
+                                            </Binding.ValidationRules>
+                                        </Binding>
+                                    </dxe:TextEdit.EditValue>
+                                </dxe:TextEdit>
+                                <!--Contact-->
+                                <Image Grid.Row="3" Grid.Column="1" Height="25" Width="25" Style="{ DynamicResource ContactShortcutImageStyle}" />
+                                <TextBlock Grid.Row="3" Grid.Column="3"  Text="{DynamicResource CustomerContactHeader}" Style="{StaticResource TextBlock14Style}" VerticalAlignment="Center" />
+                                <dxe:TextEdit Text="{Binding DataContext.Contact,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" 
+                                              Height="30" 
+                                              MaxLength="100" TextWrapping="Wrap"
+                                              Grid.Row="3" Grid.Column="5" Grid.ColumnSpan="4"
+                                              HorizontalAlignment="Stretch" IsReadOnly="True"
+                                              IsEnabled="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsPermissionEnabled}">
+                                    <dxe:TextEdit.EditValue>
+                                        <Binding Path="DataContext.Contact" RelativeSource="{RelativeSource AncestorType=dxwui:WinUIDialogWindow}" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                                            <Binding.ValidationRules>
+                                                <Validation:MyPreferencesValidations FieldName="Contact" />
+                                            </Binding.ValidationRules>
+                                        </Binding>
+                                    </dxe:TextEdit.EditValue>
+                                    <dxmvvm:Interaction.Behaviors>
+                                        <dxmvvm:EventToCommand 
+                                                            EventName="KeyDown" Command="{Binding DataContext.Contact_KeyDownCommand, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" PassEventArgsToCommand="True">
+                                        </dxmvvm:EventToCommand>
+                                        <dxmvvm:KeyToCommand Event="PreviewKeyDown" KeyGesture="Ctrl+A"  Command="{Binding DataContext.Contact_PreviewKeyDownAllCommand, RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}" MarkRoutedEventsAsHandled="True"/>
+                                        <dxmvvm:KeyToCommand Event="PreviewKeyDown" KeyGesture="Ctrl+C"  Command="{Binding DataContext.Contact_PreviewKeyDownCopyCommand, RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}" MarkRoutedEventsAsHandled="True"/>
+                                        <dxmvvm:KeyToCommand Event="PreviewKeyDown" KeyGesture="Ctrl+V" Command="{Binding DataContext.Contact_PreviewKeyDownPasteCommand, RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}" CommandParameter="{Binding Path=InvokeParameter, RelativeSource={RelativeSource Self}}" MarkRoutedEventsAsHandled="True"/>
+                                    </dxmvvm:Interaction.Behaviors>
+                                </dxe:TextEdit>
+                                <!--Account-->
+                                <Image Grid.Row="5" Grid.Column="1" Height="25" Width="25" Style="{ DynamicResource AccountShortcutImageStyle}" />
+                                <TextBlock Grid.Row="5" Grid.Column="3"  Text="{DynamicResource ActivityAccount}" Style="{StaticResource TextBlock14Style}" VerticalAlignment="Center" />
+                                <dxe:TextEdit Text="{Binding DataContext.Account,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" 
+                                              Height="30"
+                                              MaxLength="100" TextWrapping="Wrap"
+                                              Grid.Row="5" Grid.Column="5" Grid.ColumnSpan="4"
+                                              HorizontalAlignment="Stretch" IsReadOnly="True"
+                                              IsEnabled="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsPermissionEnabled}">
+                                    <dxe:TextEdit.EditValue>
+                                        <Binding Path="DataContext.Account" RelativeSource="{RelativeSource AncestorType=dxwui:WinUIDialogWindow}" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                                            <Binding.ValidationRules>
+                                                <Validation:MyPreferencesValidations FieldName="Account" />
+                                            </Binding.ValidationRules>
+                                        </Binding>
+                                    </dxe:TextEdit.EditValue>
+                                    <dxmvvm:Interaction.Behaviors>
+                                        <dxmvvm:EventToCommand 
+                                                            EventName="KeyDown" Command="{Binding DataContext.Account_KeyDownCommand, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" PassEventArgsToCommand="True">
+                                        </dxmvvm:EventToCommand>
+                                        <dxmvvm:KeyToCommand Event="PreviewKeyDown" KeyGesture="Ctrl+A"  Command="{Binding DataContext.Account_PreviewKeyDownAllCommand, RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}" MarkRoutedEventsAsHandled="True"/>
+                                        <dxmvvm:KeyToCommand Event="PreviewKeyDown" KeyGesture="Ctrl+C"  Command="{Binding DataContext.Account_PreviewKeyDownCopyCommand, RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}" MarkRoutedEventsAsHandled="True"/>
+                                        <dxmvvm:KeyToCommand Event="PreviewKeyDown" KeyGesture="Ctrl+V" Command="{Binding DataContext.Account_PreviewKeyDownPasteCommand, RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}" CommandParameter="{Binding Path=InvokeParameter, RelativeSource={RelativeSource Self}}" MarkRoutedEventsAsHandled="True"/>
+
+                                    </dxmvvm:Interaction.Behaviors>
+                                </dxe:TextEdit>
+                                <!--Appointment-->
+                                <Image Grid.Row="7" Grid.Column="1" Height="25" Width="25" Style="{ DynamicResource AppointmentShortcutImageStyle}" />
+                                <TextBlock Grid.Row="7" Grid.Column="3"  Text="{DynamicResource ShortcutAppointment}" Style="{StaticResource TextBlock14Style}" VerticalAlignment="Center" />
+                                <dxe:TextEdit Text="{Binding DataContext.Appointment,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" 
+                                              Height="30" 
+                                              MaxLength="100" TextWrapping="Wrap"
+                                              Grid.Row="7" Grid.Column="5" Grid.ColumnSpan="4"
+                                              HorizontalAlignment="Stretch" IsReadOnly="True"
+                                              IsEnabled="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsPermissionEnabled}">
+                                    <dxe:TextEdit.EditValue>
+                                        <Binding Path="DataContext.Appointment" RelativeSource="{RelativeSource AncestorType=dxwui:WinUIDialogWindow}" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                                            <Binding.ValidationRules>
+                                                <Validation:MyPreferencesValidations FieldName="Appointment" />
+                                            </Binding.ValidationRules>
+                                        </Binding>
+                                    </dxe:TextEdit.EditValue>
+                                    <dxmvvm:Interaction.Behaviors>
+                                        <dxmvvm:EventToCommand 
+                                                            EventName="KeyDown" Command="{Binding DataContext.Appointment_KeyDownCommand, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" PassEventArgsToCommand="True">
+                                        </dxmvvm:EventToCommand>
+                                        <dxmvvm:KeyToCommand Event="PreviewKeyDown" KeyGesture="Ctrl+A"  Command="{Binding DataContext.Appointment_PreviewKeyDownAllCommand, RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}" MarkRoutedEventsAsHandled="True"/>
+                                        <dxmvvm:KeyToCommand Event="PreviewKeyDown" KeyGesture="Ctrl+C"  Command="{Binding DataContext.Appointment_PreviewKeyDownCopyCommand, RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}" MarkRoutedEventsAsHandled="True"/>
+                                        <dxmvvm:KeyToCommand Event="PreviewKeyDown" KeyGesture="Ctrl+V" Command="{Binding DataContext.Appointment_PreviewKeyDownPasteCommand, RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}" CommandParameter="{Binding Path=InvokeParameter, RelativeSource={RelativeSource Self}}" MarkRoutedEventsAsHandled="True"/>
+
+                                    </dxmvvm:Interaction.Behaviors>
+                                </dxe:TextEdit>
+                                <!--Call-->
+                                <Image Grid.Row="9" Grid.Column="1" Height="25" Width="25" Style="{ DynamicResource CallShortcutImageStyle}" />
+                                <TextBlock Grid.Row="9" Grid.Column="3"  Text="{DynamicResource ShortcutCall}" Style="{StaticResource TextBlock14Style}" VerticalAlignment="Center" />
+                                <dxe:TextEdit Text="{Binding DataContext.Call,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" 
+                                              Height="30" 
+                                              MaxLength="100" TextWrapping="Wrap"
+                                              Grid.Row="9" Grid.Column="5" Grid.ColumnSpan="4"
+                                              HorizontalAlignment="Stretch" IsReadOnly="True"
+                                              IsEnabled="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsPermissionEnabled}">
+                                    <dxe:TextEdit.EditValue>
+                                        <Binding Path="DataContext.Call" RelativeSource="{RelativeSource AncestorType=dxwui:WinUIDialogWindow}" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                                            <Binding.ValidationRules>
+                                                <Validation:MyPreferencesValidations FieldName="Call" />
+                                            </Binding.ValidationRules>
+                                        </Binding>
+                                    </dxe:TextEdit.EditValue>
+                                    <dxmvvm:Interaction.Behaviors>
+                                        <dxmvvm:EventToCommand 
+                                                            EventName="KeyDown" Command="{Binding DataContext.Call_KeyDownCommand, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" PassEventArgsToCommand="True">
+                                        </dxmvvm:EventToCommand>
+                                        <dxmvvm:KeyToCommand Event="PreviewKeyDown" KeyGesture="Ctrl+A"  Command="{Binding DataContext.Call_PreviewKeyDownAllCommand, RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}" MarkRoutedEventsAsHandled="True"/>
+                                        <dxmvvm:KeyToCommand Event="PreviewKeyDown" KeyGesture="Ctrl+C"  Command="{Binding DataContext.Call_PreviewKeyDownCopyCommand, RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}" MarkRoutedEventsAsHandled="True"/>
+                                        <dxmvvm:KeyToCommand Event="PreviewKeyDown" KeyGesture="Ctrl+V" Command="{Binding DataContext.Call_PreviewKeyDownPasteCommand, RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}" CommandParameter="{Binding Path=InvokeParameter, RelativeSource={RelativeSource Self}}" MarkRoutedEventsAsHandled="True"/>
+
+                                    </dxmvvm:Interaction.Behaviors>
+                                </dxe:TextEdit>
+                                <!--Task-->
+                                <Image Grid.Row="11" Grid.Column="1" Height="25" Width="25" Style="{ DynamicResource TaskShortcutImageStyle}" />
+                                <TextBlock Grid.Row="11" Grid.Column="3"  Text="{DynamicResource ShortcutTask}" Style="{StaticResource TextBlock14Style}" VerticalAlignment="Center" />
+                                <dxe:TextEdit Text="{Binding DataContext.Task,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" 
+                                              Height="30" 
+                                              MaxLength="100" TextWrapping="Wrap"
+                                              Grid.Row="11" Grid.Column="5" Grid.ColumnSpan="4"
+                                              HorizontalAlignment="Stretch" IsReadOnly="True"
+                                              IsEnabled="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsPermissionEnabled}">
+                                    <dxe:TextEdit.EditValue>
+                                        <Binding Path="DataContext.Task" RelativeSource="{RelativeSource AncestorType=dxwui:WinUIDialogWindow}" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                                            <Binding.ValidationRules>
+                                                <Validation:MyPreferencesValidations FieldName="Task" />
+                                            </Binding.ValidationRules>
+                                        </Binding>
+                                    </dxe:TextEdit.EditValue>
+                                    <dxmvvm:Interaction.Behaviors>
+                                        <dxmvvm:EventToCommand 
+                                                            EventName="KeyDown" Command="{Binding DataContext.Task_KeyDownCommand, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" PassEventArgsToCommand="True">
+                                        </dxmvvm:EventToCommand>
+                                        <dxmvvm:KeyToCommand Event="PreviewKeyDown" KeyGesture="Ctrl+A"  Command="{Binding DataContext.Task_PreviewKeyDownAllCommand, RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}" MarkRoutedEventsAsHandled="True"/>
+                                        <dxmvvm:KeyToCommand Event="PreviewKeyDown" KeyGesture="Ctrl+C"  Command="{Binding DataContext.Task_PreviewKeyDownCopyCommand, RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}" MarkRoutedEventsAsHandled="True"/>
+                                        <dxmvvm:KeyToCommand Event="PreviewKeyDown" KeyGesture="Ctrl+V" Command="{Binding DataContext.Task_PreviewKeyDownPasteCommand, RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}" CommandParameter="{Binding Path=InvokeParameter, RelativeSource={RelativeSource Self}}" MarkRoutedEventsAsHandled="True"/>
+
+                                    </dxmvvm:Interaction.Behaviors>
+                                </dxe:TextEdit>
+                                <!--Email-->
+                                <Image Grid.Row="13" Grid.Column="1" Height="25" Width="25" Style="{ DynamicResource EmailShortcutImageStyle}" />
+                                <TextBlock Grid.Row="13" Grid.Column="3"  Text="{DynamicResource CustomerAddViewEmail}" Style="{StaticResource TextBlock14Style}" VerticalAlignment="Center" />
+                                <dxe:TextEdit Text="{Binding DataContext.Email,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" 
+                                              Height="30" 
+                                              MaxLength="100" TextWrapping="Wrap"
+                                              Grid.Row="13" Grid.Column="5" Grid.ColumnSpan="4"
+                                              HorizontalAlignment="Stretch" IsReadOnly="True"
+                                              IsEnabled="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsPermissionEnabled}">
+                                    <dxe:TextEdit.EditValue>
+                                        <Binding Path="DataContext.Email" RelativeSource="{RelativeSource AncestorType=dxwui:WinUIDialogWindow}" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                                            <Binding.ValidationRules>
+                                                <Validation:MyPreferencesValidations FieldName="Email" />
+                                            </Binding.ValidationRules>
+                                        </Binding>
+                                    </dxe:TextEdit.EditValue>
+                                    <dxmvvm:Interaction.Behaviors>
+                                        <dxmvvm:EventToCommand 
+                                                            EventName="KeyDown" Command="{Binding DataContext.Email_KeyDownCommand, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" PassEventArgsToCommand="True">
+                                        </dxmvvm:EventToCommand>
+                                        <dxmvvm:KeyToCommand Event="PreviewKeyDown" KeyGesture="Ctrl+A"  Command="{Binding DataContext.Email_PreviewKeyDownAllCommand, RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}" MarkRoutedEventsAsHandled="True"/>
+                                        <dxmvvm:KeyToCommand Event="PreviewKeyDown" KeyGesture="Ctrl+C"  Command="{Binding DataContext.Email_PreviewKeyDownCopyCommand, RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}" MarkRoutedEventsAsHandled="True"/>
+                                        <dxmvvm:KeyToCommand Event="PreviewKeyDown" KeyGesture="Ctrl+V" Command="{Binding DataContext.Email_PreviewKeyDownPasteCommand, RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}" CommandParameter="{Binding Path=InvokeParameter, RelativeSource={RelativeSource Self}}" MarkRoutedEventsAsHandled="True"/>
+
+                                    </dxmvvm:Interaction.Behaviors>
+                                </dxe:TextEdit>
+                                <!--Action-->
+                                <Image Grid.Row="15" Grid.Column="1" Height="25" Width="25" Style="{ DynamicResource ActionShortcutImageStyle}" />
+                                <TextBlock Grid.Row="15" Grid.Column="3"  Text="{DynamicResource CommonAction}" Style="{StaticResource TextBlock14Style}" VerticalAlignment="Center" />
+                                <dxe:TextEdit Text="{Binding DataContext.Action,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" 
+                                              Height="30" 
+                                              MaxLength="100" TextWrapping="Wrap"
+                                              Grid.Row="15" Grid.Column="5" Grid.ColumnSpan="4"
+                                              HorizontalAlignment="Stretch" IsReadOnly="True"
+                                              IsEnabled="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsPermissionEnabled}">
+                                    <dxe:TextEdit.EditValue>
+                                        <Binding Path="DataContext.Action" RelativeSource="{RelativeSource AncestorType=dxwui:WinUIDialogWindow}" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                                            <Binding.ValidationRules>
+                                                <Validation:MyPreferencesValidations FieldName="Action" />
+                                            </Binding.ValidationRules>
+                                        </Binding>
+                                    </dxe:TextEdit.EditValue>
+                                    <dxmvvm:Interaction.Behaviors>
+                                        <dxmvvm:EventToCommand 
+                                                            EventName="KeyDown" Command="{Binding DataContext.Action_KeyDownCommand, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" PassEventArgsToCommand="True">
+                                        </dxmvvm:EventToCommand>
+                                        <dxmvvm:KeyToCommand Event="PreviewKeyDown" KeyGesture="Ctrl+A"  Command="{Binding DataContext.Action_PreviewKeyDownAllCommand, RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}" MarkRoutedEventsAsHandled="True"/>
+                                        <dxmvvm:KeyToCommand Event="PreviewKeyDown" KeyGesture="Ctrl+C"  Command="{Binding DataContext.Action_PreviewKeyDownCopyCommand, RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}" MarkRoutedEventsAsHandled="True"/>
+                                        <dxmvvm:KeyToCommand Event="PreviewKeyDown" KeyGesture="Ctrl+V" Command="{Binding DataContext.Action_PreviewKeyDownPasteCommand, RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}" CommandParameter="{Binding Path=InvokeParameter, RelativeSource={RelativeSource Self}}" MarkRoutedEventsAsHandled="True"/>
+
+                                    </dxmvvm:Interaction.Behaviors>
+                                </dxe:TextEdit>
+                            </Grid>
+                            <Grid Grid.Row="5">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="5"/>
+                                    <ColumnDefinition Width="30"/>
+                                    <ColumnDefinition Width="10"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <!--Search-->
+                                <Image Grid.Row="5" Grid.Column="1" Height="25" Width="25" Style="{ DynamicResource SearchShortcutImageStyle}" />
+                                <TextBlock Grid.Row="5" Grid.Column="3"  Text="{DynamicResource Preference_Search}" Style="{StaticResource TextBlock14Style}" VerticalAlignment="Center" FontWeight="Bold" />
+                            </Grid>
+                            <Grid Grid.Row="7">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="1"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="10"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="10"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="20"/>
+                                    <ColumnDefinition Width="30"/>
+                                    <ColumnDefinition Width="10"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="30"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <!--SearchOpportunityOrOrder-->
+                                <Image Grid.Row="1" Grid.Column="1" Height="25" Width="25" Style="{ DynamicResource OpportunityShortcutImageStyle}" />
+                                <TextBlock Grid.Row="1" Grid.Column="3"  Text="{DynamicResource ShortcutSearchOpportunityOrOrder}" Style="{StaticResource TextBlock14Style}" VerticalAlignment="Center" />
+                                <dxe:TextEdit Text="{Binding DataContext.SearchOpportunityOrOrder,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" 
+                                              Height="30" 
+                                              MaxLength="100" TextWrapping="Wrap"
+                                              Grid.Row="1" Grid.Column="5" Grid.ColumnSpan="4"
+                                              HorizontalAlignment="Stretch" IsReadOnly="True"
+                                              IsEnabled="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsPermissionEnabled}">
+                                    <dxe:TextEdit.EditValue>
+                                        <Binding Path="DataContext.SearchOpportunityOrOrder" RelativeSource="{RelativeSource AncestorType=dxwui:WinUIDialogWindow}" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                                            <Binding.ValidationRules>
+                                                <Validation:MyPreferencesValidations FieldName="SearchOpportunityOrOrder" />
+                                            </Binding.ValidationRules>
+                                        </Binding>
+                                    </dxe:TextEdit.EditValue>
+                                    <dxmvvm:Interaction.Behaviors>
+                                        <dxmvvm:EventToCommand 
+                                                            EventName="KeyDown" Command="{Binding DataContext.SearchOpportunityOrOrder_KeyDownCommand, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" PassEventArgsToCommand="True">
+                                        </dxmvvm:EventToCommand>
+                                        <dxmvvm:KeyToCommand Event="PreviewKeyDown" KeyGesture="Ctrl+A"  Command="{Binding DataContext.SearchOpportunityOrOrder_PreviewKeyDownAllCommand, RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}" MarkRoutedEventsAsHandled="True"/>
+                                        <dxmvvm:KeyToCommand Event="PreviewKeyDown" KeyGesture="Ctrl+C"  Command="{Binding DataContext.SearchOpportunityOrOrder_PreviewKeyDownCopyCommand, RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}" MarkRoutedEventsAsHandled="True"/>
+                                        <dxmvvm:KeyToCommand Event="PreviewKeyDown" KeyGesture="Ctrl+V" Command="{Binding DataContext.SearchOpportunityOrOrder_PreviewKeyDownPasteCommand, RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}" CommandParameter="{Binding Path=InvokeParameter, RelativeSource={RelativeSource Self}}" MarkRoutedEventsAsHandled="True"/>
+
+                                    </dxmvvm:Interaction.Behaviors>
+                                </dxe:TextEdit>
+                                <!--MatrixList-->
+                                <Image Grid.Row="3" Grid.Column="1" Height="25" Width="25" Style="{ DynamicResource ButtonViewMatrix}" />
+                                <TextBlock Grid.Row="3" Grid.Column="3"  Text="{DynamicResource CrmMainViewModelMatrix}" Style="{StaticResource TextBlock14Style}" VerticalAlignment="Center" />
+                                <dxe:TextEdit Text="{Binding DataContext.MatrixList,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" 
+                                              Height="30" 
+                                              MaxLength="100" TextWrapping="Wrap"
+                                              Grid.Row="3" Grid.Column="5" Grid.ColumnSpan="4"
+                                              HorizontalAlignment="Stretch" IsReadOnly="True"
+                                              IsEnabled="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsPermissionEnabled}">
+                                    <dxe:TextEdit.EditValue>
+                                        <Binding Path="DataContext.MatrixList" RelativeSource="{RelativeSource AncestorType=dxwui:WinUIDialogWindow}" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                                            <Binding.ValidationRules>
+                                                <Validation:MyPreferencesValidations FieldName="MatrixList" />
+                                            </Binding.ValidationRules>
+                                        </Binding>
+                                    </dxe:TextEdit.EditValue>
+                                    <dxmvvm:Interaction.Behaviors>
+                                        <dxmvvm:EventToCommand 
+                                                            EventName="KeyDown" Command="{Binding DataContext.MatrixList_KeyDownCommand, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" PassEventArgsToCommand="True">
+                                        </dxmvvm:EventToCommand>
+                                        <dxmvvm:KeyToCommand Event="PreviewKeyDown" KeyGesture="Ctrl+A"  Command="{Binding DataContext.MatrixList_PreviewKeyDownAllCommand, RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}" MarkRoutedEventsAsHandled="True"/>
+                                        <dxmvvm:KeyToCommand Event="PreviewKeyDown" KeyGesture="Ctrl+C"  Command="{Binding DataContext.MatrixList_PreviewKeyDownCopyCommand, RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}" MarkRoutedEventsAsHandled="True"/>
+                                        <dxmvvm:KeyToCommand Event="PreviewKeyDown" KeyGesture="Ctrl+V" Command="{Binding DataContext.MatrixList_PreviewKeyDownPasteCommand, RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}" CommandParameter="{Binding Path=InvokeParameter, RelativeSource={RelativeSource Self}}" MarkRoutedEventsAsHandled="True"/>
+
+                                    </dxmvvm:Interaction.Behaviors>
+                                </dxe:TextEdit>
+                            </Grid>
+                        </Grid>
+                    </DataTemplate>
+                </dx:DXTabItem.ContentTemplate>
+            </dx:DXTabItem>
+            <dx:DXTabItem Header="General"  Width="150" Height="60">
+                <dx:DXTabItem.HeaderTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <Image Height="25" Width="25" Style="{ DynamicResource SettingImageStyle}" />
+                            <TextBlock Text="{DynamicResource Preference_General}" Margin="5,0,0,0"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </dx:DXTabItem.HeaderTemplate>
+
+                <dx:DXTabItem.ContentTemplate>
+                    <DataTemplate>
+                        <Grid Grid.Column="2" Grid.Row="0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="0"/>
+                                <RowDefinition Height="0"/>
+                                <RowDefinition Height="100"/>
+                                <RowDefinition Height="35"/>
+                                <RowDefinition Height="35"/>
+                                <RowDefinition Height="35"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="35"/>
+                                <RowDefinition Height="50"/>
+                            </Grid.RowDefinitions>
+
+                            <Grid.Resources>
+                                <ResourceDictionary>
+                                    <Validation:MyPreferencesValidations x:Key="MyPreferencesValidations" />
+                                </ResourceDictionary>
+                            </Grid.Resources>
+
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="130"/>
+                                <ColumnDefinition Width="500"/>
+                                <!--<ColumnDefinition Width="250"/>-->
+                            </Grid.ColumnDefinitions>
+                            <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Style="{DynamicResource LabelTitleStyle}"  Content="{DynamicResource CrmMainViewModelMyPreferences}" Width="280"  HorizontalAlignment="Center"  VerticalAlignment="Center" Margin="-10,0,0,0"/>
+                            <Label Grid.Row="1" Grid.Column="0" Content="Region:" HorizontalAlignment="Stretch" VerticalAlignment="Center" Visibility="Hidden"/>
+                            <dxe:ComboBoxEdit Grid.Row="1" Grid.Column="1" HorizontalAlignment="Stretch" Height="30" VerticalAlignment="Stretch" SelectedIndex="{Binding DataContext.SelectedIndexRegion,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" Visibility="Hidden"/>
+
+                            <Label Grid.Row="2" Grid.Column="0" Content="{DynamicResource MyPreferencesViewPeriod}" Style="{DynamicResource Label16Style}" HorizontalAlignment="Stretch" VerticalAlignment="Top"/>
+                            <Grid Grid.Row="2" Grid.Column="1">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="30"/>
+                                    <RowDefinition Height="30"/>
+                                    <RowDefinition Height="30"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="50"/>
+                                    <ColumnDefinition Width="150"/>
+                                </Grid.ColumnDefinitions>
+
+                                <RadioButton Grid.Row="0" Grid.Column="0" GroupName="periodType" Content="{DynamicResource MyPreferencesViewYear}" Style="{DynamicResource RadioButton16Style}"  IsChecked="{Binding DataContext.IsYearChecked,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow},Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,0,0" />
+                                <dxe:ComboBoxEdit Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2"
+                          IsTextEditable="False" Margin="2,0,0,0"
+                          HorizontalAlignment="Left"
+                          Height="27"
+                          MaxLength="4" Width="171"
+                          VerticalAlignment="Center" 
+                          ItemsSource="{Binding DataContext.FinancialYearLst,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" IsEnabled="{Binding DataContext.IsYearChecked,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"
+                          SelectedItem="{Binding DataContext.SelectedPeriod,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow},Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+                                    <dxe:ComboBoxEdit.StyleSettings>
+                                        <dxe:ComboBoxStyleSettings />
+                                    </dxe:ComboBoxEdit.StyleSettings>
+                                    <dxe:ComboBoxEdit.ErrorToolTipContentTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="Please fill Correct Year" Foreground="Red" />
+                                        </DataTemplate>
+                                    </dxe:ComboBoxEdit.ErrorToolTipContentTemplate>
+                                </dxe:ComboBoxEdit>
+
+
+                                <RadioButton Grid.Row="1" Grid.Column="0" GroupName="periodType" Content="{DynamicResource MyPreferencesViewCustom}" Style="{DynamicResource RadioButton16Style}" IsChecked="{Binding DataContext.IsCustomChecked,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow},Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,0,0" />
+                                <Label Grid.Row="1" Grid.Column="1" Content="{DynamicResource MyPreferencesViewFrom}" Style="{DynamicResource Label16Style}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                <dxe:DateEdit Grid.Row="1" Grid.Column="2"  Height="27" Width="120" Margin="2,0,0,0" 
+                                              ShowClearButton="False" ShowToday="True" 
+                                              Mask="{Binding DataContext.CultureInfo.CurrentCulture.DateTimeFormat.YearMonthPattern,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" MaskUseAsDisplayFormat="True"
+                                              IsTextEditable="False" 
+                                              HorizontalAlignment="Left" VerticalAlignment="Center" 
+                                              HorizontalContentAlignment="Right" InvalidValueBehavior="AllowLeaveEditor" IsEnabled="{Binding DataContext.IsCustomChecked,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}">
+                                    <dxe:DateEdit.EditValue>
+                                        <Binding Path="DataContext.FromDate" RelativeSource="{RelativeSource AncestorType=dxwui:WinUIDialogWindow}" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                                            <Binding.ValidationRules>
+                                                <Validation:MyPreferencesValidations FieldName="FromDate"/>
+                                            </Binding.ValidationRules>
+                                        </Binding>
+                                    </dxe:DateEdit.EditValue>
+                                </dxe:DateEdit>
+                                <Label Grid.Row="2" Grid.Column="1" Content="{DynamicResource MyPreferencesViewTo}" Style="{DynamicResource Label16Style}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                <dxe:DateEdit Grid.Row="2" Grid.Column="2" Height="27"  Width="120" Margin="2,0,0,0"
+                                              ShowClearButton="False" ShowToday="True" 
+                                              Mask="{Binding DataContext.CultureInfo.CurrentCulture.DateTimeFormat.YearMonthPattern,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" MaskUseAsDisplayFormat="True"
+                                              IsTextEditable="False"
+                                              HorizontalAlignment="Left" VerticalAlignment="Center" 
+                                              HorizontalContentAlignment="Right" InvalidValueBehavior="AllowLeaveEditor" IsEnabled="{Binding DataContext.IsCustomChecked,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}">
+                                    <dxe:DateEdit.EditValue>
+                                        <Binding Path="DataContext.ToDate" RelativeSource="{RelativeSource AncestorType=dxwui:WinUIDialogWindow}" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                                            <Binding.ValidationRules>
+                                                <Validation:MyPreferencesValidations FieldName="ToDate"/>
+                                            </Binding.ValidationRules>
+                                        </Binding>
+                                    </dxe:DateEdit.EditValue>
+                                </dxe:DateEdit>
+                            </Grid>
+
+                            <Label Grid.Row="3" Grid.Column="0" Content="{DynamicResource MyPreferencesViewTop}" Style="{DynamicResource Label16Style}" HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
+                            <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.Column="1" >
+                                <dxe:ComboBoxEdit IsTextEditable="False"  HorizontalAlignment="Left" VerticalAlignment="Center" Height="30" Width="100" ItemsSource="{Binding DataContext.lstTopRange,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" SelectedIndex="{Binding DataContext.SelectedIndexTopOffers,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"/>
+                                <Label Content="{DynamicResource MyPreferencesViewProjects}" HorizontalAlignment="Center" Style="{DynamicResource LabelStyle}" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                            </StackPanel>
+                            <Label Grid.Row="4" Grid.Column="0" Content="{DynamicResource MyPreferencesViewTop}" Style="{DynamicResource Label16Style}" HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
+                            <StackPanel Orientation="Horizontal" Grid.Row="4" Grid.Column="1">
+                                <dxe:ComboBoxEdit  IsTextEditable="False" HorizontalAlignment="Left" VerticalAlignment="Center" Height="30" Width="100" ItemsSource="{Binding DataContext.lstTopRange,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" SelectedIndex="{Binding DataContext.SelectedIndexTopCustomer,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"/>
+                                <Label Content="{DynamicResource MyPreferencesViewCustomers}" HorizontalAlignment="Center" Style="{DynamicResource LabelStyle}" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                            </StackPanel>
+
+                            <Label Grid.Row="5" Grid.Column="0" Content="{DynamicResource MyPreferencesViewCurrency}" Style="{DynamicResource Label16Style}" HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
+                            <dxe:ComboBoxEdit  Grid.Row="5" Grid.Column="1" IsTextEditable="False" AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True" ValidateOnTextInput="True" HorizontalAlignment="Left" VerticalAlignment="Center" Height="30" Width="100" DisplayMember="Name" ItemsSource="{Binding DataContext.Currencies,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" SelectedIndex="{Binding DataContext.SelectedIndexCurrency,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"/>
+
+                            <Label Grid.Row="6" Grid.Column="0" Content="{DynamicResource MyPreferencesViewAutoRefresh}" Style="{DynamicResource Label16Style}" HorizontalAlignment="Stretch" VerticalAlignment="Top"/>
+                            <StackPanel Grid.Row="6" Grid.Column="1" Orientation="Vertical">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="185"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+
+                                    <dxe:ToggleSwitch VerticalAlignment="Center" ContentPlacement="Inside" Grid.Column="0" Grid.Row="0"
+                                    CheckedStateContent="On" UncheckedStateContent="Off" ToggleSwitchWidth="40" ToggleSwitchHeight="22" IsThreeState="False"
+                                    IsChecked="{Binding DataContext.IsAutoRefresh,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"/>
+                                    <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="1">
+                                        <dxe:ListBoxEdit Name="list" ShowBorder="False" Visibility="{Binding DataContext.LoadDataVisisbility,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow},Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"  
+                              StyleSettings="{dxe:RadioListBoxEditStyleSettings}">
+                                            <dxe:ListBoxEdit.Items>
+                                                <dxe:ListBoxEditItem Content="{DynamicResource MyPreferencesViewAutoRefreshOption1}" />
+                                                <!--Load data on demand-->
+                                                <dxe:ListBoxEditItem Content="{DynamicResource MyPreferencesViewAutoRefreshOption2}" />
+                                                <!--Load data on startup-->
+                                            </dxe:ListBoxEdit.Items>
+                                            <dxe:ListBoxEdit.SelectedIndex>
+                                                <Binding Path="DataContext.AutoRefreshOffOption" RelativeSource="{RelativeSource AncestorType=dxwui:WinUIDialogWindow}" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                                                    <!--<Binding.ValidationRules>
+                                <Validation:MyPreferencesValidations FieldName="AutoRefreshOffOption" ValidationStep="UpdatedValue" />
+                            </Binding.ValidationRules>-->
+                                                </Binding>
+                                            </dxe:ListBoxEdit.SelectedIndex>
+                                        </dxe:ListBoxEdit>
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" Orientation="Horizontal" HorizontalAlignment="Left"  Visibility="{Binding DataContext.IsSectionVisible,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                        <Label  Style="{DynamicResource Label16Style}" HorizontalAlignment="Left" VerticalAlignment="Bottom" Content="{DynamicResource MyPreferencesViewSections}"/>
+                                        <dxe:ComboBoxEdit Style="{DynamicResource ComboBoxEditStyle}" Width="150" Margin="5,0,5,0" Height="25" VerticalAlignment="Bottom" 
+                              ItemsSource="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=CrmsectionsList}" DisplayMember="SectionName"
+                              EditValue="{Binding DataContext.SelectedCRMSections,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                            <dxe:ComboBoxEdit.ItemTemplate>
+                                                <DataTemplate>
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="{Binding SectionName}" Margin="5 0"/>
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </dxe:ComboBoxEdit.ItemTemplate>
+                                            <dxe:ComboBoxEdit.StyleSettings>
+                                                <dxe:CheckedComboBoxStyleSettings />
+                                            </dxe:ComboBoxEdit.StyleSettings>
+                                            <dxmvvm:Interaction.Triggers>
+                                                <dxmvvm:EventToCommand EventName="PopupClosed"
+                                               Command="{Binding CRMSectionsPopupClosedCommand,RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                               PassEventArgsToCommand="True"/>
+                                            </dxmvvm:Interaction.Triggers>
+                                        </dxe:ComboBoxEdit>
+                                    </StackPanel>
+                                </Grid>
+                            </StackPanel>
+                            <!--<StackPanel Grid.Row="6" Orientation="Horizontal" HorizontalAlignment="Left" Grid.Column="2" Visibility="{Binding DataContext.IsSectionVisible,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+            <Label  Style="{DynamicResource Label16Style}" HorizontalAlignment="Left" VerticalAlignment="Bottom" Content="{DynamicResource MyPreferencesViewSections}"/>
+            <dxe:ComboBoxEdit Style="{DynamicResource ComboBoxEditStyle}" Width="150" Margin="5,0,5,0" Height="25" VerticalAlignment="Bottom" 
+                              ItemsSource="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=CrmsectionsList}" DisplayMember="SectionName"
+                              EditValue="{Binding SelectedCRMSections, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                <dxe:ComboBoxEdit.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding SectionName}" Margin="5 0"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </dxe:ComboBoxEdit.ItemTemplate>
+                <dxe:ComboBoxEdit.StyleSettings>
+                    <dxe:CheckedComboBoxStyleSettings />
+                </dxe:ComboBoxEdit.StyleSettings>
+                <dxmvvm:Interaction.Triggers>
+                    <dxmvvm:EventToCommand EventName="PopupClosed"
+                                               Command="{Binding DataContext.CRMSectionsPopupClosedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                               PassEventArgsToCommand="True"/>
+                </dxmvvm:Interaction.Triggers>
+            </dxe:ComboBoxEdit>
+        </StackPanel>-->
+                            <Label Grid.Row="7" Grid.Column="0" Content="{DynamicResource MyPreferencesViewCurrentProfile}" Style="{DynamicResource Label16Style}" HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
+
+                            <dxe:ComboBoxEdit AutoComplete="True" 
+				          IsTextEditable="True"
+				          ImmediatePopup="True"
+				          IncrementalFiltering="True"
+                          Grid.Row="7" Grid.Column="1"
+                          Height="30" Width="180"
+                          HorizontalAlignment="Left"
+                          VerticalAlignment="Center"
+                          ItemsSource="{Binding DataContext.WorkbenchUserPermissions,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow} }" 
+                          SelectedIndex="{Binding DataContext.SelectedIndexWorkbenchUserPermission,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"
+                          DisplayMember="Permission.PermissionName">
+                            </dxe:ComboBoxEdit>
+
+                        </Grid>
+                    </DataTemplate>
+                </dx:DXTabItem.ContentTemplate>
+            </dx:DXTabItem>
+            <dx:DXTabControl.View>
+                <dx:TabControlScrollView HeaderLocation="Left" HeaderOrientation="Horizontal" />
+            </dx:DXTabControl.View>
+        </dx:DXTabControl>
+        <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
+                    HorizontalAlignment="Center" 
+                    Orientation="Horizontal"
+                    Margin="20,0,0,0"
+                    Width="290">
+
+            <Button Content="{DynamicResource LeadsAddViewAccept}"
+                    Command="{Binding MyPreferencesViewAcceptButtonCommand}"
+                    Height="30"
+                    Width="100"
+                    Margin="0,0,30,0"
+                    Style="{DynamicResource Button16Style}"
+                    VerticalAlignment="Bottom" />
+
+            <Button Content="{DynamicResource LeadsAddViewCancel}"
+                    Command="{Binding MyPreferencesViewCancelButtonCommand}" 
+                    Height="30"
+                    Width="100"
+                    Margin="30,0,0,0"
+                    Style="{DynamicResource Button16Style}"
+                    VerticalAlignment="Bottom" />
+
+        </StackPanel>
+    </Grid>
+
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="KeyDown">
+            <behaviors:InvokeDelegateCommandAction Command="{Binding CommandTextInput}" CommandParameter="{Binding Path=InvokeParameter, RelativeSource={RelativeSource Self}}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+
+</dxwui:WinUIDialogWindow>

@@ -1,0 +1,82 @@
+﻿<UserControl x:Class="Emdep.Geos.Modules.SAM.Views.SAMMainView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+             xmlns:dxwuin="http://schemas.devexpress.com/winfx/2008/xaml/windowsui/navigation"
+             xmlns:dxnav="http://schemas.devexpress.com/winfx/2008/xaml/navigation" 
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:dxnavi="http://schemas.devexpress.com/winfx/2008/xaml/navigation/internal"
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.SAM.Views"
+             xmlns:ViewModels="clr-namespace:Emdep.Geos.Modules.SAM.ViewModels"
+             xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+             xmlns:UIConverter="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+             xmlns:Helper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+             xmlns:view="clr-namespace:Emdep.Geos.Modules.SAM.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+    <UserControl.DataContext>
+        <ViewModels:SAMMainViewModel/>
+    </UserControl.DataContext>
+
+    <Grid>
+        <Grid.Resources>
+            <Style TargetType="{x:Type dxnav:TileBarItem}" x:Key="TileBarItemStyleBase">
+                <Setter Property="FontFamily" Value="{Binding Path=FontFamilyAsPerTheme,Source={x:Static GeosApplication:GeosApplication.Instance}}"/>
+                <Setter Property="Content" Value="{Binding Caption}"/>
+                <Setter Property="Width" Value="{Binding Width}"/>
+                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="Command" Value="{Binding NavigateCommand}"/>
+                <Setter Property="Background" Value="{Binding BackColor}"/>
+                <Setter Property="TileGlyph" Value="{Binding GlyphUri, Converter={UIConverter:ImageConverterByModule}, ConverterParameter='SAM'}" />
+                <Setter Property="AllowGlyphTheming" Value="False"/>
+                <Setter Property="Visibility" Value="{Binding Visibility}"/>
+                <Setter Property="dxmvvm:Interaction.BehaviorsTemplate">
+                    <Setter.Value>
+                        <DataTemplate>
+                            <ContentControl>
+                                <Helper:FlyoutHelperBehavior />
+                            </ContentControl>
+                        </DataTemplate>
+                    </Setter.Value>
+                </Setter>
+                <!--<Setter Property="AllowGlyphTheming" Value="True"/>-->
+            </Style>
+            <Style TargetType="{x:Type dxnav:TileBarItem}" BasedOn="{StaticResource TileBarItemStyleBase}" x:Key="TileBarItemStyleExtended">
+                <Setter Property="dxnav:TileBar.GroupHeader" Value="{Binding Group}"/>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsHasChildren}" Value="true">
+                        <Setter Property="FlyoutContent" Value="{Binding Children}"/>
+                        <Setter Property="FlyoutContentTemplate">
+                            <Setter.Value>
+                                <DataTemplate>
+                                    <dxnav:TileBar ItemsSource="{Binding}" ItemContainerStyle="{StaticResource TileBarItemStyleBase}" ItemColorMode="Inverted"/>
+                                </DataTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+            <!--<DataTemplate x:Key="waitIndicator">
+                <dx:WaitIndicator DeferedVisibility="True"/>
+            </DataTemplate>-->
+        </Grid.Resources>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <dxnav:TileBar ItemsSource="{Binding TileCollection, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                       ItemContainerStyle="{StaticResource TileBarItemStyleExtended}"
+                       Visibility="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=TileBarVisibility}">
+
+        </dxnav:TileBar>
+        <dxwui:NavigationFrame x:Name="Navigatedframe" Grid.Row="1" AnimationType="SlideHorizontal">
+            <dxmvvm:Interaction.Behaviors>
+                <dxwuin:FrameNavigationService/>
+            </dxmvvm:Interaction.Behaviors>
+        </dxwui:NavigationFrame>
+    </Grid>
+</UserControl>

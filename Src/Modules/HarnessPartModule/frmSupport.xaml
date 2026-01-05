@@ -1,0 +1,89 @@
+﻿<dxwui:WinUIDialogWindow 
+    x:Class="Emdep.Geos.Modules.HarnessPart.frmSupport"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+    xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+    Height="380" Width="550" x:Name="objEditProfile" 
+    xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors" 
+    xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+    xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid" 
+    
+    KeyUp="objfrmSupport_KeyUp" WindowStyle="None" FontFamily="Calibri" FontSize="14" >
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"></RowDefinition>
+            <RowDefinition Height="30"></RowDefinition>
+            <RowDefinition Height="27"></RowDefinition>
+            <RowDefinition Height="100"></RowDefinition>
+            <RowDefinition Height="110"></RowDefinition>
+            <RowDefinition Height="40"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="138"></ColumnDefinition>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+
+        <Label Grid.Row="0" Grid.ColumnSpan="2" Content="Raise a New Ticket" FontSize="28" FontWeight="Bold" HorizontalAlignment="Left" FontFamily="Calibri" Margin="0,0,0,0" ></Label>
+
+        <Label Content="Urgency"  Grid.Column="0" Grid.Row="1" ></Label>
+
+        <dxe:ComboBoxEdit  HorizontalAlignment="Left"  Width="162" SelectedIndex="0" Grid.Row="1" Grid.Column="1" Margin="0,3">
+            <dxe:ComboBoxEditItem Content="Low"/>
+            <dxe:ComboBoxEditItem Content="Medium"/>
+            <dxe:ComboBoxEditItem Content="High"/>
+            <dxe:ComboBoxEditItem Content="Very High"/>
+        </dxe:ComboBoxEdit>
+        <Label Content="Title"  Grid.Column="0" Grid.Row="2"></Label>
+        <dxe:TextEdit HorizontalAlignment="Left" Width="378"  Grid.Row="2" Grid.Column="1" Height="25" VerticalAlignment="Top"/>
+
+        <Label Content="Description" Grid.Column="0" Grid.Row="3"></Label>
+        <dxe:TextEdit  Width="378" Height="100" HorizontalAlignment="Right" VerticalScrollBarVisibility="Visible" VerticalContentAlignment="Top" AcceptsReturn="True" Grid.Row="3" Grid.Column="1"  VerticalAlignment="Top" Margin="0,0,25,0"/>
+        <StackPanel Grid.Column="0"  Grid.Row="4" Orientation="Vertical">
+            <Label Content= "Attachments:" HorizontalAlignment="Center" Margin="10,0,26,0" Width="100" HorizontalContentAlignment="Left" VerticalContentAlignment="Center"/>
+
+        </StackPanel>
+        <StackPanel Grid.Row="4"  HorizontalAlignment="Center" Orientation="Vertical" Margin="0,4,24,0" Width="380" Grid.Column="1"  >
+            <dxg:GridControl Grid.Row="4" Grid.Column="1" ShowBorder="True" Margin="1,4,1,-3" Width="378"  ItemsSource="{Binding Artifacts}" x:Name="grid"   Height="58"
+        		SelectedItem="{Binding SelectedItem, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
+                <dxg:GridControl.Columns>
+                    <dxg:GridColumn Binding="{Binding Tags}" FieldName="Tags" Visible="False"/>
+                </dxg:GridControl.Columns>
+                <dxg:GridControl.View>
+                    <dxg:TableView  NavigationStyle="None" ShowHorizontalLines="True" RowMinHeight="20" AllowPerPixelScrolling="True"   AllowGrouping="False" ShowGroupPanel="False" ShowColumnHeaders="False" ShowVerticalLines="False" ShowIndicator="False" AutoWidth="True" ScrollViewer.VerticalScrollBarVisibility="Visible">
+                        <dxg:TableView.DataRowTemplate>
+                            <DataTemplate>
+                                <dxe:ComboBoxEdit  IsReadOnly="False" IsTextEditable="False" EditValue="{Binding Row.Tags}" SelectAllOnGotFocus="False" ShowEditorButtons="False"
+        							CausesValidation="False" TextWrapping="Wrap" ShowBorder="True"
+        							HorizontalAlignment="Stretch" ShowError="False" 
+        							ShowErrorToolTip="False" TextTrimming="WordEllipsis" VerticalAlignment="Stretch">
+                                    <dxe:ComboBoxEdit.StyleSettings>
+                                        <dxe:TokenComboBoxStyleSettings EnableTokenWrapping="True" TokenTextTrimming="WordEllipsis"/>
+                                    </dxe:ComboBoxEdit.StyleSettings>
+                                    <!--<dxe:ComboBoxEdit.Items>
+                                        <dxe:ComboBoxEditItem Content="One"/>
+                                        <dxe:ComboBoxEditItem Content="Two"/>
+                                        <dxe:ComboBoxEditItem Content="Tree"/>
+                                        <dxe:ComboBoxEditItem Content="Four"/>
+                                        <dxe:ComboBoxEditItem Content="Five"/>
+                                    </dxe:ComboBoxEdit.Items>-->
+                                </dxe:ComboBoxEdit>
+                            </DataTemplate>
+                        </dxg:TableView.DataRowTemplate>
+                    </dxg:TableView>
+                </dxg:GridControl.View>
+            </dxg:GridControl>
+            <!--<Button Content="Browse" Height="25" HorizontalAlignment="Left" Margin="10,10,0,0" 
+                Name="button1" VerticalAlignment="Top" Width="100" Click="buttonOpenDialog_Click" />-->
+            <Button Content="Browse" Height="30" HorizontalAlignment="Right"  Margin="0,12,3,0"   
+                Name="button1" VerticalAlignment="Bottom"  Width="100" Click="buttonOpenDialog_Click" />
+
+        </StackPanel>
+
+        <StackPanel Grid.Row="6" HorizontalAlignment="Center" Orientation="Horizontal" Margin="140,0,0,0" Width="290" Grid.ColumnSpan="2">
+            <Button Content="Accept" Click= "Button_Click_1"  Height="30" Width="100" Margin="0,0,30,0" FontFamily="Calibri" VerticalAlignment="Bottom" />
+            <Button Content="Cancel" Click="Button_Click"  Height="30"  Width="100" Margin="30,0,0,0" FontFamily="Calibri" VerticalAlignment="Bottom"  />
+            <!--<Button Content="Cancle" Click="Button_Click_2"></Button>-->
+        </StackPanel>
+    </Grid>
+</dxwui:WinUIDialogWindow >

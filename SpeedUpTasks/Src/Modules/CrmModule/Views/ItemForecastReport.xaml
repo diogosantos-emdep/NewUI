@@ -1,0 +1,339 @@
+﻿<UserControl x:Class="Emdep.Geos.Modules.Crm.Views.ItemForecastReport"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:ViewModels="clr-namespace:Emdep.Geos.Modules.Crm.ViewModels"
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+             xmlns:UIConverter="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+             xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:dxc="http://schemas.devexpress.com/winfx/2008/xaml/charts"
+             xmlns:dxci="http://schemas.devexpress.com/winfx/2008/xaml/core/internal"
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:dxp="http://schemas.devexpress.com/winfx/2008/xaml/printing"
+             xmlns:sysglb="clr-namespace:System.Globalization;assembly=mscorlib"
+             xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+             xmlns:gif="http://wpfanimatedgif.codeplex.com"
+             mc:Ignorable="d"
+             d:DesignHeight="600" d:DesignWidth="600"
+             Style="{DynamicResource UserControlStyle}">
+
+    <!--<UserControl.DataContext>
+        <ViewModels:ItemForecastReportViewModel />
+    </UserControl.DataContext>-->
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <!--<UIHelper:ColumnTemplateSelector x:Key="ColumnTemplateSelector"/>-->
+
+        <!--<DataTemplate x:Key="DefaultColumnTemplate">
+            <ContentControl>
+                <dxg:GridColumn FieldName="{Binding ColumnFieldName}" Header="{Binding HeaderText}" AllowCellMerge="{Binding AllowCellMerge}"  FixedWidth="{Binding FixedWidth}" AllowBestFit="true" Width="{Binding  Width}" AllowEditing="False" AllowAutoFilter="False"  Visible="{Binding Visible}" />
+            </ContentControl>
+        </DataTemplate>-->
+
+        <DataTemplate x:Key="DefaultColumnTemplate">
+            <ContentControl>
+                <dxg:GridColumn FieldName="{Binding ColumnFieldName}" Header="{Binding HeaderText}" AllowCellMerge="True" AllowBestFit="true" Width="{Binding Width}" AllowEditing="False" AllowAutoFilter="False"  Visible="True" FilterPopupMode="CheckedList" >
+                    <!--FixedWidth="{Binding FixedWidth}"-->
+
+                    <dxg:GridColumn.HeaderTemplate>
+                        <DataTemplate>
+                            <StackPanel VerticalAlignment="Center" >
+                                <TextBlock Text="{Binding}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                <Separator Margin="-5,0,-500,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding Path=DataContext.TotalSummaryText, RelativeSource={RelativeSource AncestorType=dxg:GridColumnHeader}}"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </dxg:GridColumn.HeaderTemplate>
+
+                    <!--<dxg:GridColumn.PrintColumnHeaderStyle>
+                        <Style TargetType="dxe:TextEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintHeaderStyle}}">
+                            <Style.Setters>
+                                <Setter Property="dxp:ExportSettings.TargetType" Value="Text" />
+                                <Setter Property="dxp:TextExportSettings.HorizontalAlignment" Value="Left"/>
+                            </Style.Setters>
+                        </Style>
+                    </dxg:GridColumn.PrintColumnHeaderStyle>-->
+
+                </dxg:GridColumn>
+            </ContentControl>
+        </DataTemplate>
+
+        <DataTemplate x:Key="colMonthCellTemplate">
+            <TextBlock Margin="4,0,0,0" Text="{Binding Path=Value}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+        </DataTemplate>
+
+        <UIHelper:CellTemplateSelectorHelper x:Key="newMyCellTemplateSelector" template1="{StaticResource colMonthCellTemplate}" />
+
+        <DataTemplate x:Key="AlternateColumnTemplate">
+            <ContentControl>
+                <dxg:GridColumn FieldName="{Binding ColumnFieldName}" Header="{Binding HeaderText}" AllowCellMerge="True" CellTemplateSelector="{StaticResource newMyCellTemplateSelector}"
+                                AllowBestFit="true" Width="{Binding Width}" AllowEditing="False" AllowAutoFilter="False" Visible="True" FilterPopupMode="CheckedList" >
+                    <!--FixedWidth="{Binding FixedWidth}"-->
+                    <dxg:GridColumn.HeaderTemplate>
+                        <DataTemplate>
+                            <StackPanel VerticalAlignment="Center" >
+                                <TextBlock Text="" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                <Separator Margin="-5,0,-500,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </dxg:GridColumn.HeaderTemplate>
+
+                    <!--<dxg:GridColumn.PrintColumnHeaderStyle>
+                        <Style TargetType="dxe:TextEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintHeaderStyle}}">
+                            <Style.Setters>
+                                <Setter Property="dxp:ExportSettings.TargetType" Value="Text" />
+                                <Setter Property="dxp:TextExportSettings.HorizontalAlignment" Value="Left"/>
+                            </Style.Setters>
+                        </Style>
+                    </dxg:GridColumn.PrintColumnHeaderStyle>-->
+
+                </dxg:GridColumn>
+            </ContentControl>
+        </DataTemplate>
+
+        <UIHelper:MyColumnTemplateSelector x:Key="newMyColumnTemplateSelector" template1="{StaticResource DefaultColumnTemplate}" template2="{StaticResource AlternateColumnTemplate}" />
+
+        <DataTemplate x:Key="BandTemplate">
+            <ContentControl>
+                <UIHelper:MyGridControlBand Header="{Binding BandHeader}" HorizontalHeaderContentAlignment="Center" 
+                                            ColumnsSource="{Binding Columns}" ColumnTemplateSelector="{StaticResource newMyColumnTemplateSelector}"
+                                            />
+            </ContentControl>
+        </DataTemplate>
+
+        <DataTemplate x:Key="SummaryTemplate">
+            <ContentControl>
+                <dxg:GridSummaryItem FieldName="{Binding Path=(dxci:DependencyObjectExtensions.DataContext).FieldName, RelativeSource={RelativeSource Self}}"
+                                     SummaryType="{Binding Path=(dxci:DependencyObjectExtensions.DataContext).Type, RelativeSource={RelativeSource Self}}"
+                                     DisplayFormat= " {0}"/>
+            </ContentControl>
+        </DataTemplate>
+
+    </UserControl.Resources>
+
+    <DockPanel LastChildFill="True">
+        <Grid DockPanel.Dock="Top" Margin="10,10,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="{DynamicResource ItemsForecastHeader}" Grid.Column="0" Style="{DynamicResource TextBlock30Style}" FontWeight="Bold" />
+
+            <Image gif:ImageBehavior.RepeatBehavior="Forever" gif:ImageBehavior.AnimatedSource="/Emdep.Geos.Modules.Crm;component/Assets/Images/animatedWarning.gif" Visibility="{Binding IsShowFailedPlantWarning,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,Converter={StaticResource BoolToVis}}" Grid.Column="1" Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,2,5,0" Height="30" Width="30">
+                <Image.ToolTip>
+                    <TextBlock Text="{Binding WarningFailedPlants}"/>
+                </Image.ToolTip>
+            </Image>
+            <DockPanel Grid.Column="2" Grid.Row="0"  HorizontalAlignment="Stretch" Margin="0" Height="45"  >
+                <Grid HorizontalAlignment="Right" Width="Auto" Height="30" >
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="30"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="70*"/>
+                        <ColumnDefinition Width="150"/>
+                        <ColumnDefinition Width="30"/>
+
+                        <ColumnDefinition Width="70*"/>
+                        <ColumnDefinition Width="50*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="50*"/>
+
+                        <ColumnDefinition Width="30"/>
+                        <ColumnDefinition Width="80*"/>
+                        <ColumnDefinition Width="80*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Plant Owner -->
+                    <DockPanel Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=CmbPlantOwnerUsers}" >
+                        <Image Style="{DynamicResource PlantOwnerImageStyle}" Width="24" Height="24" Margin="7,0,3,0" />
+                        <TextBlock Text="{DynamicResource CommonPlantOwner}"  FontWeight="Bold" Margin="5,2,5,0" />
+                    </DockPanel>
+
+                    <dxe:ComboBoxEdit Style="{DynamicResource ComboBoxEditStyle}" Grid.Column="1" 
+                                      Visibility="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=CmbPlantOwnerUsers}"
+                                      ItemsSource="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=PlantOwnerUsersList}" Margin="5,0,5,0"
+                                      DisplayMember="ShortName"
+                    EditValue="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=SelectedPlantOwnerUsersList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                        <dxe:ComboBoxEdit.StyleSettings>
+                            <dxe:CheckedComboBoxStyleSettings />
+                        </dxe:ComboBoxEdit.StyleSettings>
+                        <dxmvvm:Interaction.Triggers>
+                            <dxmvvm:EventToCommand EventName="PopupClosed"
+                                               Command="{Binding DataContext.PlantOwnerPopupClosedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                               PassEventArgsToCommand="True"/>
+                        </dxmvvm:Interaction.Triggers>
+                    </dxe:ComboBoxEdit>
+
+
+                    <!-- Sales Owner -->
+                    <DockPanel Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=CmbSalesOwnerUsers}">
+                        <Image Style="{DynamicResource OwnerGroupImageStyle}" Width="24" Height="24" Margin="7,0,3,0" />
+                        <TextBlock Text="{DynamicResource CommonSalesOwner}"  FontWeight="Bold" Margin="5,2,5,0" />
+                    </DockPanel>
+
+                    <dxe:ComboBoxEdit Style="{DynamicResource ComboBoxEditStyle}" Grid.Column="1"
+                                      Visibility="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=CmbSalesOwnerUsers}"
+                                      ItemsSource="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=SalesOwnerUsersList}" Margin="5,0,0,0"
+                                      DisplayMember="User.FullName"
+                                      EditValue="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=SelectedSalesOwnerUsersList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                        <dxe:ComboBoxEdit.StyleSettings>
+                            <dxe:CheckedComboBoxStyleSettings />
+                        </dxe:ComboBoxEdit.StyleSettings>
+                        <dxmvvm:Interaction.Triggers>
+                            <dxmvvm:EventToCommand EventName="PopupClosed"
+                                                   Command="{Binding DataContext.SalesOwnerPopupClosedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                                   PassEventArgsToCommand="True"/>
+                        </dxmvvm:Interaction.Triggers>
+                    </dxe:ComboBoxEdit>
+
+                    <!-- Period -->
+                    <DockPanel Grid.Column="3" HorizontalAlignment="Center" VerticalAlignment="Center" >
+                        <Image Style="{DynamicResource CalendarImageStyle}" Width="16" Height="16" Margin="7,0,3,0" />
+                        <TextBlock Text="{DynamicResource AnnualSalesPerformanceViewPeriod}"  FontWeight="Bold" Margin="5,0,0,0" />
+                    </DockPanel>
+
+                    <TextBlock Text="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=SelectedyearStarDate, StringFormat=d, ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="4" Margin="3,0,0,0"/>
+                    <TextBlock Text=" - " HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="5" FontWeight="Bold"/>
+                    <TextBlock Text="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=SelectedyearEndDate, StringFormat=d, ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="6"/>
+
+                    <!-- Remaining -->
+                    <DockPanel Grid.Column="8" HorizontalAlignment="Center" VerticalAlignment="Center" >
+                        <Image Style="{DynamicResource WatchImageStyle}" Width="16" Height="16" Margin="3,0,3,0" />
+                        <TextBlock Text="{DynamicResource AnnualSalesPerformanceViewRemaining}" FontWeight="Bold" Margin="5,0,0,0" />
+                    </DockPanel>
+                    <DockPanel Grid.Column="9" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0,0,0" >
+                        <TextBlock Text="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=RemainingDays}"  />
+                        <TextBlock Text="{DynamicResource AnnualSalesPerformanceViewDays}" Margin="3,0,5,0" />
+                    </DockPanel>
+
+                    <Button Content=" " Height="37.9" Width="38" Grid.Column="10" Command="{Binding RefreshItemForecastReportViewCommand}" HorizontalAlignment="Right" Margin="0,-7.7,5,0">
+                        <Button.ToolTip>
+                            <TextBlock Text="{DynamicResource ButtonRefresh}"/>
+                        </Button.ToolTip>
+                        <Button.ContentTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Image Style="{ DynamicResource RefreshButtonImageStyle}" Grid.Column="0" Height="24" Width="24" Margin="-10"/>
+                                </Grid>
+                            </DataTemplate>
+                        </Button.ContentTemplate>
+                    </Button>
+                </Grid>
+            </DockPanel>
+            <!--<Button Content=" " Height="40" Width="40" Margin="0,0,20,0" HorizontalAlignment="Right" Command="{Binding PrintButtonCommand }" CommandParameter="{Binding ElementName=ItemsForecastGridTableView}" Grid.Column="1">
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Image Style="{ DynamicResource PrinterButtonImageStyle}" Grid.Column="0" Height="24" Width="24" Margin="-10" />
+                        </Grid>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>-->
+        </Grid>
+
+        <dxlc:LayoutControl Name="layoutControl1" Orientation="Vertical" Margin="2">
+            <dxlc:LayoutGroup Orientation="Vertical">
+                <dxlc:LayoutGroup dxlc:LayoutControl.AllowHorizontalSizing="True">
+                    <dxc:ChartControl x:Name="ChartItemsForecast"
+                                      VerticalAlignment="Stretch"
+                                      HorizontalAlignment="Stretch"
+                                      Margin="-12" CrosshairEnabled="True" BorderThickness="0" 
+                                      ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                      DataSource="{Binding GraphDataTable, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                        <dxc:ChartControl.Legend>
+                            <dxc:Legend HorizontalPosition="RightOutside" />
+                        </dxc:ChartControl.Legend>
+                        <dxc:XYDiagram2D>
+                            <dxc:XYDiagram2D.AxisX>
+                                <dxc:AxisX2D >
+                                    <dxc:AxisX2D.Title>
+                                        <dxc:AxisTitle Content="Months" />
+                                    </dxc:AxisX2D.Title>
+                                </dxc:AxisX2D>
+                            </dxc:XYDiagram2D.AxisX>
+                            <dxc:XYDiagram2D.AxisY>
+                                <dxc:AxisY2D>
+                                    <dxc:AxisY2D.Title>
+                                        <dxc:AxisTitle Content="Quantity" />
+                                    </dxc:AxisY2D.Title>
+                                </dxc:AxisY2D>
+                            </dxc:XYDiagram2D.AxisY>
+                        </dxc:XYDiagram2D>
+                        <dxmvvm:Interaction.Triggers>
+                            <dxmvvm:EventToCommand EventName="Loaded" Command="{Binding ChartItemsForecastLoadCommand}" CommandParameter="{Binding ElementName=ChartItemsForecast}"/>
+                            <dxmvvm:EventToCommand EventName="CustomDrawCrosshair" Command="{Binding ChartDashboardSaleCustomDrawCrosshairCommand}" PassEventArgsToCommand="True"/>
+                        </dxmvvm:Interaction.Triggers>
+                        <!--<i:Interaction.Triggers>
+                            <i:EventTrigger EventName="Loaded">
+                                <i:InvokeCommandAction Command="{Binding ChartItemsForecastLoadCommand}" CommandParameter="{Binding ElementName=ChartItemsForecast}" />
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>-->
+                    </dxc:ChartControl>
+                </dxlc:LayoutGroup>
+
+                <dxlc:LayoutGroup Header="{Binding CustomerTotal}" Name="layoutGroup12" View="GroupBox" 
+                                  dxlc:LayoutControl.AllowHorizontalSizing="True"
+                                  IsCollapsible="True" IsCollapsed="False">
+                    <dxlc:LayoutGroup.HeaderTemplate>
+                        <DataTemplate>
+                            <Grid >
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{Binding}" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Stretch"/>
+                            </Grid>
+                        </DataTemplate>
+                    </dxlc:LayoutGroup.HeaderTemplate>
+
+                    <UIHelper:MyGridControl x:Name="ItemsForecastGrid" DockPanel.Dock="Top" Margin="-5"
+                                            HorizontalAlignment="Stretch"
+                                            VerticalAlignment="Stretch" AutoGenerateColumns="None" 
+                                            ItemsSource="{Binding DtItemsForecast,Mode=TwoWay}"
+                                            BandsSource="{Binding Bands}" BandTemplate="{StaticResource BandTemplate}"
+                                            TotalSummarySource="{Binding TotalSummary}"
+                                            TotalSummaryGeneratorTemplate="{StaticResource SummaryTemplate}"
+                                            FilterString="{Binding MyFilterString,Mode=TwoWay ,UpdateSourceTrigger=PropertyChanged}">
+
+                        <!--ColumnsSource="{Binding Columns}" AutoGenerateColumns="None" 
+                                     ColumnGeneratorTemplateSelector="{StaticResource ColumnTemplateSelector}"
+                                     FilterString="{Binding MyFilterString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">-->
+
+                        <dxg:GridControl.View>
+                            <dxg:TableView Name="ItemsForecastGridTableView" 
+                                           AutoWidth="False"
+                                           AllowPerPixelScrolling="True"
+                                           AllowCellMerge="True"
+                                           AllowGrouping="False" 
+                                           ShowGroupPanel="False" 
+                                           ShowIndicator="False"
+                                           HorizontalScrollbarVisibility="Visible" 
+                                           VerticalScrollbarVisibility="Auto" 
+                                           SearchPanelHorizontalAlignment="Stretch"
+                                           ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly"/>
+                        </dxg:GridControl.View>
+                    </UIHelper:MyGridControl>
+
+                </dxlc:LayoutGroup>
+            </dxlc:LayoutGroup>
+        </dxlc:LayoutControl>
+    </DockPanel>
+</UserControl>

@@ -1,0 +1,151 @@
+﻿<UserControl x:Class="Emdep.Geos.Modules.Epc.Views.CalendarView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:dxn="http://schemas.devexpress.com/winfx/2008/xaml/navbar"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:dxsch="http://schemas.devexpress.com/winfx/2008/xaml/scheduler"
+             xmlns:viewModel="clr-namespace:Emdep.Geos.Modules.Epc.ViewModels"
+             xmlns:Converter="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"  
+             xmlns:Behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+             xmlns:views="clr-namespace:Emdep.Geos.Modules.Epc.Views"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             mc:Ignorable="d"  
+             d:DesignHeight="700" d:DesignWidth="800">
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Loaded">
+            <i:InvokeCommandAction Command="{Binding LoadCommand}"  CommandParameter="{Binding  ElementName= dateNvigatorCalendar}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+    <UserControl.DataContext>
+        <viewModel:CalendarViewModel />
+    </UserControl.DataContext>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Label Style="{StaticResource LabelStyle}"  Content="Calendar" Margin="0" Padding="5" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" />
+        <Border Style="{DynamicResource BorderStyle}" VerticalAlignment="Stretch" HorizontalAlignment="Right" Grid.Row="1" Grid.Column="0">
+            <dxn:NavBarControl HorizontalAlignment="Left"  VerticalAlignment="Top" Width="280">
+                <dxn:NavBarGroup Header="Calendar" DisplaySource="Content">
+                    <dxn:NavBarGroup.Content>
+                        <StackPanel Orientation="Vertical">
+                            <dxe:DateNavigator x:Name="dateNvigatorCalendar"    SelectedDates="{Binding SelectedDates ,Mode=TwoWay}"   HighlightSpecialDates="True" ShowTodayButton="True"
+                                       ShowWeekNumbers="True" WeekNumberRule="FirstDay" IsMultiSelect="True" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="SelectedDatesChanged">
+                                        <Behaviors:InvokeDelegateCommandAction Command="{Binding SelectDateCommand}"  CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=InvokeParameter}"/>
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+
+                                <dxe:DateNavigator.StyleSettings>
+                                    <dxsch:SchedulerDateNavigatorStyleSettings SchedulerControl="{Binding ElementName=schedulerControlCalendar}"/>
+                                </dxe:DateNavigator.StyleSettings>
+                            </dxe:DateNavigator>
+
+                            <TextBlock Text="Day Events"  ></TextBlock>
+                            <dxe:ListBoxEdit x:Name="lstFilter" Grid.IsSharedSizeScope="True" EditValue="{Binding  SelectedFilters, Mode=TwoWay}" ShowCustomItems="False" DisplayMember="Name"   SelectionMode="Multiple" ItemsSource="{Binding Filters }">
+                                <dxe:ListBoxEdit.ItemTemplate>
+                                    <DataTemplate>
+                                        <DockPanel LastChildFill="True" >
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="200" SharedSizeGroup="Key" />
+                                                    <ColumnDefinition Width="40" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <TextBlock Grid.Column="0" TextWrapping="Wrap" Text="{Binding Name}" FontWeight="Bold" />
+                                                <Rectangle Grid.Column="1" Fill="{Binding StringValue1}" DockPanel.Dock="Right" HorizontalAlignment="Right" Margin="5,0,0,0"
+                                                           StrokeThickness="0" Height="12" Width="35" />
+                                            </Grid>
+                                        </DockPanel>
+                                    </DataTemplate>
+                                </dxe:ListBoxEdit.ItemTemplate>
+
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="EditValueChanged">
+                                        <Behaviors:InvokeDelegateCommandAction Command="{Binding SelectFilterCommand}"  CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=InvokeParameter}"/>
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                                <dxe:ListBoxEdit.StyleSettings>
+                                    <dxe:CheckedListBoxEditStyleSettings ></dxe:CheckedListBoxEditStyleSettings>
+                                </dxe:ListBoxEdit.StyleSettings>
+
+                            </dxe:ListBoxEdit>
+                        </StackPanel>
+
+                    </dxn:NavBarGroup.Content>
+                </dxn:NavBarGroup>
+
+
+                <dxn:NavBarControl.View>
+                    <dxn:NavigationPaneView IsOverflowPanelVisible="False" MaxVisibleGroupCount="2"  ShowBorder="True" dxn:ScrollingSettings.ScrollMode="Buttons"/>
+                </dxn:NavBarControl.View>
+            </dxn:NavBarControl>
+        </Border>
+        <dxsch:SchedulerControl x:Name="schedulerControlCalendar" ShowBorder="True" Grid.Row="1" Grid.Column="1" ActiveViewType="Month"  AllowAppointmentDelete="schedulerControlCalendar_AllowAppointmentDelete" FormCustomizationUsingMVVMLocal="false">
+
+
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="EditAppointmentFormShowing">
+                    <Behaviors:InvokeDelegateCommandAction Command="{Binding AllowEditAppointmentCommand }" CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=InvokeParameter}"/>
+                </i:EventTrigger>
+                <i:EventTrigger EventName="PopupMenuShowing">
+                    <Behaviors:InvokeDelegateCommandAction Command="{Binding PopupMenuShowingCommand }" CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=InvokeParameter}"/>
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+
+            <dxsch:SchedulerControl.MonthView>
+                <dxsch:MonthView>
+                    <dxsch:MonthView.AppointmentDisplayOptions>
+                        <dxsch:SchedulerMonthViewAppointmentDisplayOptions  
+                    TimeDisplayType="Text" 
+                    EndTimeVisibility="Never" 
+                    StartTimeVisibility="Never" />
+                    </dxsch:MonthView.AppointmentDisplayOptions>
+                </dxsch:MonthView>
+            </dxsch:SchedulerControl.MonthView>
+            <dxsch:SchedulerControl.FullWeekView>
+                <dxsch:FullWeekView Enabled="True"/>
+            </dxsch:SchedulerControl.FullWeekView>
+            <dxsch:SchedulerControl.WeekView>
+                <dxsch:WeekView Enabled="False"/>
+            </dxsch:SchedulerControl.WeekView>
+
+            <dxsch:SchedulerControl.Storage>
+                <dxsch:SchedulerStorage>
+                    <dxsch:SchedulerStorage.AppointmentStorage>
+                        <dxsch:AppointmentStorage DataSource="{Binding ProjectTasksDeliveryList}" Labels="{Binding Labels}" ResourceSharing="True">
+                            <dxsch:AppointmentStorage.Mappings>
+                                <dxsch:AppointmentMapping 
+                                    Start="StartTime"
+                                    End="EndTime"
+                                    Subject="Subject"
+                                    Description="Description"
+                                    Label="Label"
+                                    AppointmentId="Data"
+                                    ResourceId="ResourceId"
+                                    AllDay="AllDay" 
+                                    Location="Location"
+                                    RecurrenceInfo="RecurrenceInfo"
+                                    ReminderInfo="ReminderInfo"
+                                    Status="Status"
+                                    Type="EventType" />
+                            </dxsch:AppointmentStorage.Mappings>
+
+                        </dxsch:AppointmentStorage>
+                    </dxsch:SchedulerStorage.AppointmentStorage>
+                </dxsch:SchedulerStorage>
+            </dxsch:SchedulerControl.Storage>
+        </dxsch:SchedulerControl>
+    </Grid>
+</UserControl>

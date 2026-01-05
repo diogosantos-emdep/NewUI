@@ -1,0 +1,93 @@
+﻿<dxwui:WinUIDialogWindow x:Class="Emdep.Geos.Modules.PCM.Views.PCMPrintModuleDetectionView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm" 
+             xmlns:ViewModels="clr-namespace:Emdep.Geos.Modules.PCM.ViewModels"
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.PCM.Views"             
+             mc:Ignorable="d"
+             d:DesignHeight="500" d:DesignWidth="900"
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"   
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors" 
+             xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+             xmlns:PCMCommon ="clr-namespace:Emdep.Geos.Modules.PCM"
+             Title="{DynamicResource PCMPrintModuleDetectionView}"
+             TitleStyle="{DynamicResource WinUIDialogWindowTitleStyle}"
+              >
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape" Command="{Binding PCMPrintModuleDetectionViewCancelButtonCommand}"/>
+    </dxwui:WinUIDialogWindow.InputBindings>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="15"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="15"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="15"/>
+            <RowDefinition Height="45"/>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0" Grid.Column="0">
+            <TextBlock   Text="{DynamicResource PCMPrintModuleDetectionViewLanguage}"
+                   Style="{StaticResource TextBlock14Style}" VerticalAlignment="Center" HorizontalAlignment="Left" />
+            <dxe:ComboBoxEdit  ApplyItemTemplateToSelectedItem="True" Margin="70 0 0 0"
+                            IsTextEditable="False"
+                            Height="30"
+                            VerticalAlignment="Top"
+                            HorizontalAlignment="Stretch"
+                            Style="{DynamicResource ComboBoxEditStyle}"
+                            ItemsSource="{Binding DataContext.Languages, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"
+                            ValueMember="IdLanguage"
+                            DisplayMember="Name"
+                            SelectedIndex="{Binding DataContext.SettingWindowLanguageSelectedIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"
+                            IsSynchronizedWithCurrentItem="True">
+                <dxe:ComboBoxEdit.ItemTemplate>
+                    <DataTemplate>
+                        <DockPanel >
+                            <Image Source="{Binding LanguageImage, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         Margin="5,2,2,2" Height="24" Width="24"/>
+                            <TextBlock Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             Padding="2" Margin="5,0,0,0" Style="{DynamicResource TextBlockStyle}" />
+                        </DockPanel>
+                    </DataTemplate>
+                </dxe:ComboBoxEdit.ItemTemplate>
+            </dxe:ComboBoxEdit>
+        </Grid>
+
+        <dxe:CheckEdit Grid.Row="2" Grid.Column="0" 
+         IsChecked="{Binding DataContext.IsPCMPrintModuleDetectionAttachments, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" 
+          HorizontalAlignment="Left" VerticalAlignment="Center"/>
+        <TextBlock Grid.Row="2" Grid.Column="1" Margin="20 0 0 0" Text="{DynamicResource PCMPrintModuleDetectionViewAttachments}"
+                   Style="{StaticResource TextBlock14Style}" VerticalAlignment="Center" HorizontalAlignment="Left" />
+        <dxe:CheckEdit Grid.Row="4" Grid.Column="0" 
+         IsChecked="{Binding DataContext.IsPCMPrintModuleDetectionLinks, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" 
+          HorizontalAlignment="Left" VerticalAlignment="Center"/>
+        <TextBlock Grid.Row="4" Grid.Column="1" Margin="20 0 0 0" Text="{DynamicResource PCMPrintModuleDetectionViewLinks}"
+                   Style="{StaticResource TextBlock14Style}" VerticalAlignment="Center" HorizontalAlignment="Left" />
+        <!--Accept and Cancel Button-->
+        <Grid Grid.Row="6" ShowGridLines="False" VerticalAlignment="Center" HorizontalAlignment="Center" >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Row="3" Grid.Column="0"
+                    Style="{DynamicResource Button16Style}"
+                    HorizontalAlignment="Right"
+                    Content="{DynamicResource AddCatalogueAcceptButton}"
+                    Command="{Binding DataContext.PCMPrintModuleDetectionViewAcceptButtonCommand,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"
+                    Height="30"
+                    Width="100" />
+
+            <Button Grid.Row="3" Grid.Column="2"
+                    Style="{DynamicResource Button16Style}"
+                    HorizontalAlignment="Left"
+                    Content="{DynamicResource AddCatalogueCancelButton}"
+                    Command="{Binding PCMPrintModuleDetectionViewCancelButtonCommand}"
+                    Height="30"
+                    Width="100" />
+        </Grid>
+    </Grid>
+</dxwui:WinUIDialogWindow>

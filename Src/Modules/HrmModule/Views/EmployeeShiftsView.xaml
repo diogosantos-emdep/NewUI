@@ -1,0 +1,328 @@
+﻿<UserControl x:Class="Emdep.Geos.Modules.Hrm.Views.EmployeeShiftsView"
+              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.Hrm.Views"
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+             xmlns:Converters="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+             xmlns:sysglb="clr-namespace:System.Globalization;assembly=mscorlib"
+             xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+             xmlns:dxsch="http://schemas.devexpress.com/winfx/2008/xaml/scheduling"
+             xmlns:dxscht="http://schemas.devexpress.com/winfx/2008/xaml/scheduling/themekeys"
+             xmlns:dxet="http://schemas.devexpress.com/winfx/2008/xaml/editors/themekeys"
+             xmlns:dxschcore="http://schemas.devexpress.com/winfx/2008/xaml/scheduling/core"
+             xmlns:dxschc="http://schemas.devexpress.com/winfx/2008/xaml/scheduling/common"
+             xmlns:dxschv="http://schemas.devexpress.com/winfx/2008/xaml/scheduling/visual"
+             xmlns:dxr="http://schemas.devexpress.com/winfx/2008/xaml/ribbon"
+             xmlns:dxb="http://schemas.devexpress.com/winfx/2008/xaml/bars"
+             xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+             xmlns:dxa="http://schemas.devexpress.com/winfx/2008/xaml/accordion" 
+             xmlns:dxschd="clr-namespace:DevExpress.Xpf.Scheduler.Drawing;assembly=DevExpress.Xpf.Scheduler.v19.2"
+             xmlns:HrmApplication="clr-namespace:Emdep.Geos.Modules.Hrm"
+             xmlns:ViewModel="clr-namespace:Emdep.Geos.Modules.Hrm.ViewModels"
+               xmlns:dxt="http://schemas.devexpress.com/winfx/2008/xaml/grid/themekeys"
+             xmlns:behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+             xmlns:UIConverter="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters" 
+             xmlns:dxp="http://schemas.devexpress.com/winfx/2008/xaml/printing" 
+             xmlns:dxgt="http://schemas.devexpress.com/winfx/2008/xaml/grid/themekeys"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             mc:Ignorable="d" 
+            >
+    <UserControl.Resources>
+        <dx:BoolToObjectConverter x:Key="BoolToTextConverter" TrueValue="✓" FalseValue="No" />
+    </UserControl.Resources>
+
+    <Grid Background="{DynamicResource EmpDetailBackColor}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="55" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="350" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Grid.Resources>
+            <Style TargetType="{x:Type dxg:GridColumn}" x:Key="GridColumnStyle">
+                <Setter Property="HorizontalHeaderContentAlignment" Value="Center" />
+                <Setter Property="EditSettings">
+                    <Setter.Value>
+                        <dxe:DateEditSettings Mask="HH:mm" MaskUseAsDisplayFormat="True" DisplayFormat="HH:mm"/>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </Grid.Resources>
+
+        <Label Content="{DynamicResource Shifts}" HorizontalAlignment="Left" Style="{StaticResource LabelTitleStyle}" Grid.Row="0" Grid.Column="0" />
+
+        <Grid HorizontalAlignment="Right" Grid.Row="0" Grid.Column="1" Margin="0,5,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="AUTO" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="AUTO" />
+                <ColumnDefinition Width="AUTO" />
+                <ColumnDefinition Width="AUTO" />
+                <ColumnDefinition Width="AUTO" />
+                <ColumnDefinition Width="AUTO" />
+                <ColumnDefinition Width="AUTO" />
+                <ColumnDefinition Width="AUTO" />
+                <ColumnDefinition Width="AUTO" />
+                <ColumnDefinition Width="AUTO" />
+                <ColumnDefinition Width="AUTO" />
+
+            </Grid.ColumnDefinitions>
+            <!--Plant-->
+            <TextBlock Text="{DynamicResource CommonPlant}" Grid.Row="0" Grid.Column="0" FontWeight="Bold" HorizontalAlignment="Right" Height="25" IsEnabled="True" />
+            <dxe:ComboBoxEdit Style="{DynamicResource ComboBoxEditStyle}" Width="150" Height="30"
+                                Grid.Row="0" Grid.Column="1"
+                                ItemsSource="{Binding Source={x:Static HrmApplication:HrmCommon.Instance}, Path=UserAuthorizedPlantsList}"
+                                EditValue="{Binding Source={x:Static HrmApplication:HrmCommon.Instance}, Path=SelectedAuthorizedPlantsList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                DisplayMember="ShortName" Margin="5">
+                <dxmvvm:Interaction.Behaviors>
+                    <dxmvvm:EventToCommand Command="{Binding CompanyEditValueChangedCommand}" CommandParameter="{Binding ElementName=ShiftsTableView}" EventName="EditValueChanged" />
+                </dxmvvm:Interaction.Behaviors>
+                <dxe:ComboBoxEdit.StyleSettings>
+                    <dxe:CheckedComboBoxStyleSettings />
+                </dxe:ComboBoxEdit.StyleSettings>
+
+                <dxmvvm:Interaction.Triggers>
+                    <dxmvvm:EventToCommand EventName="PopupClosed"
+                                               Command="{Binding DataContext.PlantOwnerPopupClosedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                               PassEventArgsToCommand="True" />
+                </dxmvvm:Interaction.Triggers>
+            </dxe:ComboBoxEdit>
+
+
+
+            <!--Period-->
+            <DockPanel Grid.Column="2" Grid.Row="0" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0,0,0">
+                <Image Style="{DynamicResource CalendarImageStyle}" Width="30" Height="20" Margin="2,0,3,0" />
+                <TextBlock Text="{DynamicResource AnnualSalesPerformanceViewPeriod}" FontWeight="Bold" Margin="0,0,0,0" IsEnabled="True" />
+            </DockPanel>
+
+            <dxe:ComboBoxEdit Grid.Row="0" Grid.Column="3" 
+                                Name="cmbPeriod"
+                                IsTextEditable="False" Margin="5,0,0,0"
+                                HorizontalAlignment="Left"
+                                IsEnabled="True"
+                                Height="30"
+                                Width="100"
+                                MaxLength="4" 
+                                VerticalAlignment="Center" 
+                                ItemsSource="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=FinancialYearLst, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                               SelectedItem="{Binding Source={x:Static HrmApplication:HrmCommon.Instance}, Path=SelectedPeriod,UpdateSourceTrigger=PropertyChanged}">
+                <dxe:ComboBoxEdit.StyleSettings>
+                    <dxe:ComboBoxStyleSettings />
+                </dxe:ComboBoxEdit.StyleSettings>
+
+            </dxe:ComboBoxEdit>
+
+            <!-- Add New Shift -->
+            <!--[GEOS2-6509][05.11.2024][rdixit]-->
+            <Button Visibility="Visible" Grid.Row="0" Grid.Column="5"
+                    Height="40" Width="40" HorizontalAlignment="Right" 
+                    Command="{Binding ButtonAddNewShiftCommand}"
+                    IsEnabled="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsHRMManageShiftPermission}"
+                    Margin="5,0,5,5" >
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource AddShiftEntry}" />
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Image Style="{DynamicResource AddNewButtonImageStyle}" Height="24" Width="24" Margin="-10" />
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+            <!-- Refresh Shifts Grid-->
+
+            <Button Visibility="Visible" Grid.Row="0" Grid.Column="6" Height="40" Width="40" HorizontalAlignment="Right" 
+                    Command="{Binding ButtonRefreshCommand}" CommandParameter="{Binding ElementName=ShiftsTableView}"
+                         Margin="0,0,5,5">
+                <dxmvvm:Interaction.Behaviors>
+                    <dxmvvm:EventToCommand EventName="Click" />
+                </dxmvvm:Interaction.Behaviors>
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource ButtonRefresh}" />
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Image Style="{DynamicResource RefreshButtonImageStyle}" Height="24" Width="24" Margin="-10" />
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+            <!-- Print shifts List-->
+            <Button Visibility="Visible" Grid.Row="0" Grid.Column="7" Height="40" Width="40" HorizontalAlignment="Right" 
+                    Command="{Binding PrintButtonCommand}"
+                        CommandParameter="{Binding ElementName=ShiftsTableView}"
+                         Margin="0,0,5,5">
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource ButtonPrint}" />
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Image Style="{DynamicResource PrinterButtonImageStyle}" Height="24" Width="24" Margin="-10" />
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+            <!-- Export Shifts List-->
+            <Button Visibility="Visible" Grid.Row="0" Grid.Column="8" Height="40" Width="40" HorizontalAlignment="Right" 
+                    Command="{Binding ExportButtonCommand}"
+                    Margin="0,0,5,5" CommandParameter="{Binding ElementName=ShiftsTableView}"
+                         >
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource ButtonExportToExcel}" />
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Image Style="{DynamicResource ExcelExportButtonImageStyle}" Height="24" Width="24" Margin="-10" />
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+        </Grid>
+        
+        <dxg:GridControl VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                          ItemsSource="{Binding CompanyShiftsList,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" SelectionMode="Row" 
+                          SelectedItem="{Binding Path=SelectedCompanyShift,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                          AllowLiveDataShaping="True" FilterString="[ShiftInUseYesNo] In ('Yes')">   <!--Added default filter to InUse Column-->
+
+            <dxg:GridControl.Bands>
+                <dxg:GridControlBand OverlayHeaderByChildren="True">
+                    <dxg:GridColumn Header="{DynamicResource Company}" Width="100" MinWidth="100" FieldName="CompanySchedule.Company.Alias" FilterPopupMode="CheckedList" />
+                </dxg:GridControlBand>
+                <dxg:GridControlBand OverlayHeaderByChildren="True">
+                    <dxg:GridColumn Header="{DynamicResource WorkSchedule}" Width="*" MinWidth="140" FieldName="CompanySchedule.Name" FilterPopupMode="CheckedList" />
+                </dxg:GridControlBand>
+                <dxg:GridControlBand OverlayHeaderByChildren="True">
+                    <dxg:GridColumn Header="{DynamicResource Name}" Width="*" MinWidth="240" FieldName="Name" FilterPopupMode="CheckedList" />
+                </dxg:GridControlBand>
+                <dxg:GridControlBand OverlayHeaderByChildren="True">
+                    <dxg:GridColumn Header="{DynamicResource EditShiftType}" Width="*" MinWidth="100" FieldName="TypeValue" FilterPopupMode="CheckedList" />
+                </dxg:GridControlBand>
+
+                <!--Monday-->
+                <dxg:GridControlBand Header="{DynamicResource AddShiftViewMonday}" Width="Auto" HorizontalHeaderContentAlignment="Center" VisibleIndex="{Binding IndexMon,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                    <dxg:GridColumn Header="{DynamicResource From}" FilterPopupMode="CheckedList" FieldName="MonStartTime" Width="60" MinWidth="40" Style="{StaticResource GridColumnStyle}" />
+                    <dxg:GridColumn Header="{DynamicResource To}" FilterPopupMode="CheckedList" FieldName="MonEndTime" Width="60" MinWidth="40" Style="{StaticResource GridColumnStyle}" />
+                    <dxg:GridColumn Header="{DynamicResource BreakTime}" FilterPopupMode="CheckedList" FieldName="MonBreakTime" Width="80" MinWidth="40" Style="{StaticResource GridColumnStyle}" />
+                </dxg:GridControlBand>
+                <!--Tuesday-->
+                <dxg:GridControlBand Header="{DynamicResource AddShiftViewTuesday}" Width="Auto" HorizontalHeaderContentAlignment="Center" VisibleIndex="{Binding IndexTue,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                    <dxg:GridColumn Header="{DynamicResource From}" FilterPopupMode="CheckedList" FieldName="TueStartTime" Width="60" MinWidth="40" Style="{StaticResource GridColumnStyle}" />
+                    <dxg:GridColumn Header="{DynamicResource To}" FilterPopupMode="CheckedList" FieldName="TueEndTime" Width="60" MinWidth="40" Style="{StaticResource GridColumnStyle}" />
+                    <dxg:GridColumn Header="{DynamicResource BreakTime}" FilterPopupMode="CheckedList" FieldName="TueBreakTime" Width="80" MinWidth="40" Style="{StaticResource GridColumnStyle}" />
+                </dxg:GridControlBand>
+                <!--Wednesday-->
+                <dxg:GridControlBand Header="{DynamicResource AddShiftViewWednesday}" Width="Auto" HorizontalHeaderContentAlignment="Center" VisibleIndex="{Binding IndexWed,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                    <dxg:GridColumn Header="{DynamicResource From}" FilterPopupMode="CheckedList" FieldName="WedStartTime" Width="60" MinWidth="40" Style="{StaticResource GridColumnStyle}" />
+                    <dxg:GridColumn Header="{DynamicResource To}" FilterPopupMode="CheckedList" FieldName="WedEndTime" Width="60" MinWidth="40" Style="{StaticResource GridColumnStyle}" />
+                    <dxg:GridColumn Header="{DynamicResource BreakTime}" FilterPopupMode="CheckedList" FieldName="WedBreakTime" Width="80" MinWidth="40" Style="{StaticResource GridColumnStyle}" />
+                </dxg:GridControlBand>
+                 <!--thursday-->
+                <dxg:GridControlBand Header="{DynamicResource AddShiftViewThursday}" Width="Auto" HorizontalHeaderContentAlignment="Center" VisibleIndex="{Binding IndexThu,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                    <dxg:GridColumn Header="{DynamicResource From}" FilterPopupMode="CheckedList" FieldName="ThuStartTime" Width="60" MinWidth="40" Style="{StaticResource GridColumnStyle}" />
+                    <dxg:GridColumn Header="{DynamicResource To}" FilterPopupMode="CheckedList" FieldName="ThuEndTime" Width="60" MinWidth="40" Style="{StaticResource GridColumnStyle}" />
+                    <dxg:GridColumn Header="{DynamicResource BreakTime}" FilterPopupMode="CheckedList" FieldName="ThuBreakTime" Width="80" MinWidth="40" Style="{StaticResource GridColumnStyle}" />
+                </dxg:GridControlBand>
+                <!--Friday-->
+                <dxg:GridControlBand Header="{DynamicResource AddShiftViewFriday}" Width="Auto" HorizontalHeaderContentAlignment="Center" VisibleIndex="{Binding IndexFri,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                    <dxg:GridColumn Header="{DynamicResource From}" FilterPopupMode="CheckedList" FieldName="FriStartTime" Width="60" MinWidth="40" Style="{StaticResource GridColumnStyle}" />
+                    <dxg:GridColumn Header="{DynamicResource To}" FilterPopupMode="CheckedList" FieldName="FriEndTime" Width="60" MinWidth="40" Style="{StaticResource GridColumnStyle}" />
+                    <dxg:GridColumn Header="{DynamicResource BreakTime}" FilterPopupMode="CheckedList" FieldName="FriBreakTime" Width="80" MinWidth="40" Style="{StaticResource GridColumnStyle}" />
+                </dxg:GridControlBand>
+                <!--Saturday-->
+                <dxg:GridControlBand Header="{DynamicResource AddShiftViewSaturday}" Width="Auto" HorizontalHeaderContentAlignment="Center" VisibleIndex="{Binding IndexSat,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                    <dxg:GridColumn Header="{DynamicResource From}" FilterPopupMode="CheckedList" FieldName="SatStartTime" Width="60" MinWidth="40" Style="{StaticResource GridColumnStyle}" />
+                    <dxg:GridColumn Header="{DynamicResource To}" FilterPopupMode="CheckedList" FieldName="SatEndTime" Width="60" MinWidth="40" Style="{StaticResource GridColumnStyle}" />
+                    <dxg:GridColumn Header="{DynamicResource BreakTime}" FilterPopupMode="CheckedList" FieldName="SatBreakTime" Width="80" MinWidth="40" Style="{StaticResource GridColumnStyle}" />
+                </dxg:GridControlBand>
+                <!--Sunday-->
+                <dxg:GridControlBand Header="{DynamicResource AddShiftViewSunday}" Width="Auto" HorizontalHeaderContentAlignment="Center" VisibleIndex="{Binding IndexSun,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                    <dxg:GridColumn Header="{DynamicResource From}" FilterPopupMode="CheckedList" FieldName="SunStartTime" Width="60" MinWidth="40" Style="{StaticResource GridColumnStyle}" />
+                    <dxg:GridColumn Header="{DynamicResource To}" FilterPopupMode="CheckedList" FieldName="SunEndTime" Width="60" MinWidth="40" Style="{StaticResource GridColumnStyle}" />
+                    <dxg:GridColumn Header="{DynamicResource BreakTime}" FilterPopupMode="CheckedList" FieldName="SunBreakTime" Width="80" MinWidth="40" Style="{StaticResource GridColumnStyle}" />
+                </dxg:GridControlBand>
+
+                <!--InUse--> 
+
+                <dxg:GridControlBand OverlayHeaderByChildren="True">
+                    <dxg:GridColumn Header="{DynamicResource InUse}" Width="*" MinWidth="70" FieldName="ShiftInUseYesNo" FilterPopupMode="CheckedList" />
+                </dxg:GridControlBand>
+
+                <!--Night Shift-->
+                
+                <dxg:GridControlBand OverlayHeaderByChildren="True">
+                    <dxg:GridColumn Header="{DynamicResource ShiftNightShift}" Width="*" MinWidth="90" FieldName="IsNightShiftYesNo" FilterPopupMode="CheckedList" />
+                </dxg:GridControlBand>
+
+
+
+            </dxg:GridControl.Bands>
+            
+            <dxg:GridControl.View>
+                <dxg:TableView x:Name="ShiftsTableView"
+                                   NavigationStyle="Row"
+                                   AllowHorizontalScrollingVirtualization="True" 
+                                   RowDetailsVisibilityMode="Visible"
+                                   ShowHorizontalLines="True"
+                                   ShowSearchPanelMode="Always"
+                                   ShowColumnHeaders="True"                                  
+                                   VerticalScrollbarVisibility="Auto" 
+                                   HorizontalScrollbarVisibility="Auto"
+                                   AllowFixedColumnMenu="False"
+                                   AutoWidth="False" 
+                                   ShowSearchPanelCloseButton="True" 
+                                   SearchPanelHorizontalAlignment="Stretch"   
+                                   ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly"                             
+                                   AllowGrouping="True"
+                                   ShowGroupPanel="False"                             
+                                   ShowIndicator="False"                            
+                                   ShowFixedTotalSummary="True"                                  
+                                   FocusedRow="{Binding Path=SelectedCompanyShift,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                   >
+                    <dxg:TableView.Resources>
+                        <DataTemplate x:Key="ShiftsReportPrintHeaderTemplate">
+                            <Grid Width="{Binding UsablePageWidth}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="50" />
+                                    <ColumnDefinition Width="130" />
+                                </Grid.ColumnDefinitions>
+                                <dxe:TextEdit Text=" " Width="{Binding UsablePageWidth}" Grid.ColumnSpan="3" IsPrintingMode="True" Background="#333E5E" HorizontalAlignment="Stretch" 
+                                                      VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" Height="50" />
+                                <dxe:TextEdit Text="{DynamicResource ShiftsReport}" IsPrintingMode="True" HorizontalAlignment="Stretch" 
+                                                      VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" />
+                                <Image Source="/Emdep.Geos.Modules.Hrm;component/Assets/Images/GeosReportLogo.png" Height="50" Width="80" dxp:ExportSettings.TargetType="Image" Grid.Column="2" />
+                            </Grid>
+                        </DataTemplate>
+
+                        <DataTemplate x:Key="ShiftsReportPrintFooterTemplate">
+                            <dxe:TextEdit HorizontalContentAlignment="Center" 
+                                                  Width="{Binding Path=UsablePageWidth, Mode=OneWay}" 
+                                                  dxp:ExportSettings.TargetType="PageNumber" 
+                                                  dxp:PageNumberExportSettings.Kind="NumberOfTotal" 
+                                                  dxp:PageNumberExportSettings.Format="Page {0} of {1}" />
+                        </DataTemplate>
+                    </dxg:TableView.Resources>
+                    <dxmvvm:Interaction.Behaviors>
+                        <dxmvvm:EventToCommand Command="{Binding EditShiftsDoubleClickCommand}" EventName="MouseDoubleClick" CommandParameter="{Binding ElementName=ShiftsTableView}">
+                            <dxmvvm:EventToCommand.EventArgsConverter>
+                                <dx:EventArgsToDataRowConverter />
+                            </dxmvvm:EventToCommand.EventArgsConverter>
+                        </dxmvvm:EventToCommand>
+                    </dxmvvm:Interaction.Behaviors>
+                </dxg:TableView>
+            </dxg:GridControl.View>
+            <dxg:GridControl.TotalSummary>
+                <dxg:GridSummaryItem x:Name="summary" SummaryType="Count" DisplayFormat="Total Count: {0}" Visible="True" Alignment="Left" />
+            </dxg:GridControl.TotalSummary>
+
+        </dxg:GridControl>
+    </Grid>
+
+</UserControl>

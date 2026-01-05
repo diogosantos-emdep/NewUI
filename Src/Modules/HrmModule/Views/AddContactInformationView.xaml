@@ -1,0 +1,167 @@
+﻿<dxwui:WinUIDialogWindow x:Class="Emdep.Geos.Modules.Hrm.Views.AddContactInformationView"
+                         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                         xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"
+                         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                         xmlns:local="clr-namespace:Emdep.Geos.Modules.Hrm.Views"
+                         xmlns:HrmApplication="clr-namespace:Emdep.Geos.Modules.Hrm" 
+                         xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+                         xmlns:Validation ="clr-namespace:Emdep.Geos.UI.Validations;assembly=Emdep.Geos.UI.Validations"
+                         xmlns:Coverter="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+                         xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+                         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+                         xmlns:behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+                         mc:Ignorable="d"
+                         d:DesignHeight="300" d:DesignWidth="300"
+                         Style="{DynamicResource WinUIDialogWindowStyle}"
+                         Title="{Binding WindowHeader,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+                         TitleStyle="{DynamicResource WinUIDialogWindowTitleStyle}">
+
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape"  Command="{Binding AddContactViewCancelButtonCommand}"/>
+    </dxwui:WinUIDialogWindow.InputBindings>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="100"/>
+            <RowDefinition Height="40"/>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="120"/>
+            <ColumnDefinition Width="220"/>
+        </Grid.ColumnDefinitions>
+
+        <Label Grid.Row="0" Grid.Column="0" Content="{DynamicResource EmpContactType}" Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,10,0,10"/>
+
+        <dxe:ComboBoxEdit Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left"
+                          Width="200" Height="30" VerticalAlignment="Center"
+                          ItemsSource="{Binding ContactTypeList,Mode=TwoWay}"
+                          DisplayMember="Value" ValueMember="IdLookupValue"
+                          AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True"
+                          SelectedItem="{Binding SelectedContactType,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
+
+            <dxe:ComboBoxEdit.SelectedIndex>
+                <Binding Path="SelectedIndexContactType" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                    <Binding.ValidationRules>
+                        <Validation:EmployeeProfileValidation FieldName="SelectedIndexContactType" ValidationStep="UpdatedValue" />
+                    </Binding.ValidationRules>
+                </Binding>
+            </dxe:ComboBoxEdit.SelectedIndex>
+            <dxmvvm:Interaction.Behaviors>
+                <dxmvvm:EventToCommand EventName="SelectedIndexChanged" Command="{Binding SelectedIndexContactTypeCommand}" PassEventArgsToCommand="True"/>
+            </dxmvvm:Interaction.Behaviors>
+
+            <dxe:ComboBoxEdit.ItemContainerStyle>
+                <Style TargetType="dxe:ComboBoxEditItem">
+                    <Setter Property="IsEnabled" Value="{Binding InUse}" />
+                </Style>
+            </dxe:ComboBoxEdit.ItemContainerStyle>
+
+        </dxe:ComboBoxEdit>
+
+        <Label Grid.Row="1" Grid.Column="0" Content="{DynamicResource EmpContactValue}" Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,10,0,10"/>
+
+        <dxe:TextEdit Text="{Binding ContactType, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                      Visibility="{Binding IsTextbox, Converter={Coverter:BoolToVisibilityConverter}}"
+                      Margin="0,0,0,0" Grid.Row="1" Grid.Column="1" Width="200" Height="30" 
+                      VerticalAlignment="Center" HorizontalAlignment="Left" 
+                      MaskType="RegEx" MaskUseAsDisplayFormat="True" AllowNullInput="True" InvalidValueBehavior="AllowLeaveEditor">
+
+            <dxe:TextEdit.Style>
+                <Style TargetType="{x:Type dxe:TextEdit}">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Path=SelectedContactType.IdLookupValue}" Value="87">
+                            <Setter Property="Mask" Value="([a-z0-9A-Z]+\s)*[a-z0-9A-Z._]+ "/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Path=SelectedContactType.IdLookupValue}" Value="88">
+                            <Setter Property="Mask" Value="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Path=SelectedContactType.IdLookupValue}" Value="89">
+                            <Setter Property="Mask" Value="([0-9]+\s)*[a-z0-9+ ()-.]+"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Path=SelectedContactType.IdLookupValue}" Value="90">
+                            <Setter Property="Mask" Value="([0-9]+\s)*[a-z0-9+ ()-.]+"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </dxe:TextEdit.Style>
+
+            <dxe:TextEdit.EditValue>
+                <Binding Path="ContactValue" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                    <Binding.ValidationRules>
+                        <Validation:EmployeeProfileValidation FieldName="ContactValue" ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True"/>
+                    </Binding.ValidationRules>
+                </Binding>
+            </dxe:TextEdit.EditValue>
+        </dxe:TextEdit>
+
+        <dxe:ComboBoxEdit Margin="0,0,0,0" Grid.Row="1" Grid.Column="1" Width="200" Height="30" VerticalAlignment="Center" HorizontalAlignment="Left" 
+                          Visibility="{Binding IsCombobox, Converter={Coverter:BoolToVisibilityConverter}}"
+                          ItemsSource="{Binding SuggestionsList,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                          IsTextEditable="True"
+                          AutoComplete="True"
+                          ImmediatePopup="True"
+                          IsPopupOpen="True"
+                          SelectionStart="0"
+                          IncrementalFiltering="True"
+                          AllowDefaultButton="False"
+                          IsReadOnly="{Binding IsReadOnlyField,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
+
+            <!--IsReadOnly="{Binding Source={x:Static HrmApplication:HrmCommon.Instance}, Path=IsPermissionReadOnly,Mode=OneTime,UpdateSourceTrigger=PropertyChanged}">-->
+
+
+            <dxe:ComboBoxEdit.EditValue>
+                <Binding Path="ContactValue" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                    <Binding.ValidationRules>
+                        <Validation:EmployeeProfileValidation FieldName="ContactValue" ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True"/>
+                    </Binding.ValidationRules>
+                </Binding>
+            </dxe:ComboBoxEdit.EditValue>
+        </dxe:ComboBoxEdit>
+
+        <Label Grid.Row="2" Grid.Column="0" Content="{DynamicResource EmployeeRemarks}" Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,0,10"/>
+
+        <TextBox Margin="0,0,0,0" Grid.Row="2" Grid.Column="1" Width="200" Height="90" TextWrapping="Wrap" 
+                 VerticalAlignment="Center" HorizontalAlignment="Left" ScrollViewer.VerticalScrollBarVisibility="Auto" 
+                 Text="{Binding Remark,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" AcceptsReturn="True"
+                 IsReadOnly="{Binding IsReadOnlyField,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
+        </TextBox>
+
+        <StackPanel Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2"
+                    HorizontalAlignment="Left" 
+                    Orientation="Horizontal"
+                    Margin="0,0,0,0"
+                    Width="250">
+
+            <Button Content="Accept"
+                    Command="{Binding AddContactViewAcceptButtonCommand}"
+                    Height="30"
+                    Width="100"
+                    Margin="0,0,10,0"
+                    Style="{DynamicResource Button16Style}"
+                    VerticalAlignment="Bottom" 
+                    IsEnabled="{Binding IsAcceptEnabled}"/>
+
+            <Button Content="Cancel"
+                    Command="{Binding AddContactViewCancelButtonCommand}" 
+                    Height="30"
+                    Width="100"
+                    Margin="10,0,0,0"
+                    Style="{DynamicResource Button16Style}"
+                    VerticalAlignment="Bottom" />
+        </StackPanel>
+
+    </Grid>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="KeyDown">
+            <behaviors:InvokeDelegateCommandAction Command="{Binding CommandTextInput}" CommandParameter="{Binding Path=InvokeParameter, RelativeSource={RelativeSource Self}}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+</dxwui:WinUIDialogWindow>

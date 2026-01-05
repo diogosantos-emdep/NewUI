@@ -1,0 +1,893 @@
+﻿<UserControl x:Class="Emdep.Geos.Modules.Warehouse.Views.ScheduleEventsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.Warehouse.Views"
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:Converters="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+             xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:WarehouseCommon ="clr-namespace:Emdep.Geos.Modules.Warehouse"
+             xmlns:dxp="http://schemas.devexpress.com/winfx/2008/xaml/printing"
+             xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:dxsch="http://schemas.devexpress.com/winfx/2008/xaml/scheduler"
+             xmlns:dxnav="http://schemas.devexpress.com/winfx/2008/xaml/navigation"
+             mc:Ignorable="d" 
+             Style="{DynamicResource UserControlStyle}"
+             d:DesignHeight="300" d:DesignWidth="300">
+    <!--[nsatpute][12.09.2025][GEOS2-8791]-->
+    <UserControl.Resources>
+        <Converters:ButtonToParametersConverter x:Key="ButtonToParametersConverter"/>
+        <Converters:EditGridCellDataToStringConverter x:Key="EditGridCellDataToStringConverter"/>
+        <Style x:Key="SelectionStateCellStyle" TargetType="dxg:LightweightCellEditor">
+            <Style.Triggers>
+                <Trigger Property="SelectionState" Value="Selected">
+                    <Setter Property="Background" Value="Transparent"/>                   
+                </Trigger>
+                <Trigger Property="SelectionState" Value="FocusedAndSelected">
+                    <Setter Property="Background" Value="Transparent"/>                    
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="PopupContentStyle" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#FFCCCCCC"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Padding" Value="10"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.3"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="PopupButtonStyle" TargetType="Button">
+            <Setter Property="Margin" Value="5,0,0,0"/>
+            <Setter Property="Padding" Value="8,2"/>
+            <Setter Property="MinWidth" Value="60"/>
+        </Style>
+        <DataTemplate x:Key="MonthHeaderTemplate">
+
+            <TextBlock Text="{Binding}" FontWeight="Bold" FontSize="14" Foreground="Black"  Height="35"  Padding="15,8,0,0"
+                       HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+                       TextWrapping="Wrap" TextAlignment="Center"/>
+
+        </DataTemplate>
+    </UserControl.Resources>
+    
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="100*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <Label Content="{DynamicResource Scheduleeventsview_Schedule}" Style="{StaticResource LabelTitleStyle}" Grid.Row="0" Grid.Column="0"/>
+
+                <DockPanel Grid.Row="0" Grid.Column="1">
+
+                    <Grid HorizontalAlignment="Right" Width="Auto" Height="45" >
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="45"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Waresouse combobox section -->
+                        <DockPanel Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Height="30" >
+                            <Image Style="{DynamicResource WarehouseImageStyle}" Width="24" Height="24" Margin="7,0,3,0" />
+                            <TextBlock Text="{DynamicResource Warehouse}"  FontWeight="Bold" Margin="5,2,5,0" VerticalAlignment="Center" />
+                        </DockPanel>
+
+                        <dxe:ComboBoxEdit Name="CbeWareHouse" Style="{DynamicResource ComboBoxEditStyle}" Grid.Column="1" Width="150" Height="30"
+                                      Margin="5,0,25,5" VerticalAlignment="Bottom" HorizontalAlignment="Right" IsTextEditable="False"
+                                      ItemsSource ="{Binding Source={x:Static WarehouseCommon:WarehouseCommon.Instance}, Path=WarehouseList ,UpdateSourceTrigger=PropertyChanged , Mode=TwoWay}"
+                                      SelectedItem="{Binding Source={x:Static WarehouseCommon:WarehouseCommon.Instance}, Path=Selectedwarehouse,UpdateSourceTrigger=PropertyChanged}"
+                                      DisplayMember="Name" ShowError="False" ShowErrorToolTip="False" >
+
+                            <dxmvvm:Interaction.Triggers>
+                                <dxmvvm:EventToCommand EventName="EditValueChanged"
+                                               Command="{Binding WarehouseValueChangedCommand}" CommandParameter="{Binding ElementName=CbeWareHouse,Path=SelectedItem}"
+                                              />
+                            </dxmvvm:Interaction.Triggers>
+                        </dxe:ComboBoxEdit>
+
+
+                        <DockPanel Grid.Column="2" Grid.Row="0" HorizontalAlignment="Right"   VerticalAlignment="Center" Margin="5,0,0,0" >
+                            <Image Style="{DynamicResource CalendarImageStyle}" Width="30" Height="20" Margin="2,0,3,0" />
+                            <TextBlock Text="{DynamicResource AnnualSalesPerformanceViewPeriod}"  FontWeight="Bold" Margin="0,0,0,0" IsEnabled="True" />
+                        </DockPanel>
+
+                        <dxe:ComboBoxEdit Grid.Row="0" Grid.Column="6" 
+                   IsTextEditable="False" Margin="5,5,25,0" 
+                   HorizontalAlignment="Left"
+                   Height="30"
+                   Width="150"
+                   MaxLength="4" 
+                   VerticalAlignment="Center" 
+                   ItemsSource="{Binding ScheduleYears, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                   SelectedItem="{Binding SelectedYear, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                            <dxe:ComboBoxEdit.StyleSettings>
+                                <dxe:ComboBoxStyleSettings />
+                            </dxe:ComboBoxEdit.StyleSettings>
+                            <dxmvvm:Interaction.Triggers>
+                                <dxmvvm:EventToCommand EventName="EditValueChanged"
+                                Command="{Binding DataContext.SelectedYearChangedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                PassEventArgsToCommand="True"/>
+                            </dxmvvm:Interaction.Triggers>
+                        </dxe:ComboBoxEdit>
+
+
+                        <!--Add Button -->
+
+                        <Button Content=" " Grid.Column="7" Focusable="False" 
+                        Height="40" Width="40"  
+                        HorizontalAlignment="Right"
+                        Command="{Binding AddNewScheduleButtonCommand}" 
+                            IsEnabled="{Binding IsEditable}"
+                        CommandParameter="{Binding ElementName=ScheduleEventTableView}"
+                        Padding="-4"
+                        Margin="0,0,5,5">
+                            <Button.ToolTip>
+                                <TextBlock Text="{DynamicResource ButtonAdd}"/>
+                            </Button.ToolTip>
+                            <Button.ContentTemplate>
+                                <DataTemplate>
+                                    <Image Style="{ DynamicResource AddNewButtonImageStyle}" 
+                   Height="28" Width="28"/>
+                                </DataTemplate>
+                            </Button.ContentTemplate>
+                        </Button>
+
+
+                        <!-- Refresh Button -->
+
+                        <Button Content=" " Grid.Row="0" Grid.Column="8" Height="40" Width="40" HorizontalAlignment="Right"  Command="{Binding RefreshScheduleEventCommand}" CommandParameter="{Binding ElementName=ScheduleEventTableView}" Margin="0,0,5,5">
+                            <Button.ToolTip>
+                                <TextBlock Text="{DynamicResource ButtonRefresh}"/>
+                            </Button.ToolTip>
+                            <Button.ContentTemplate>
+                                <DataTemplate>
+                                    <Image Style="{ DynamicResource WareHouseRefreshButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                                </DataTemplate>
+                            </Button.ContentTemplate>
+                        </Button>
+
+                        <!-- Print Button -->
+
+                        <Button Content=" " Grid.Row="0" Grid.Column="9" Height="40" Width="40" HorizontalAlignment="Right"  Command="{Binding PrintWarehouseArticleViewCommand}" CommandParameter="{Binding ElementName=ScheduleEventTableView}" Margin="0,0,5,5">
+                            <Button.ToolTip>
+                                <TextBlock Text="{DynamicResource ButtonPrint}"/>
+                            </Button.ToolTip>
+                            <Button.ContentTemplate>
+                                <DataTemplate>
+                                    <Image Style="{ DynamicResource PrinterButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                                </DataTemplate>
+                            </Button.ContentTemplate>
+                        </Button>
+
+                        <!-- Export Button -->
+
+                        <Button  Content=" " Grid.Row="0" Grid.Column="10" Height="40" Width="40" HorizontalAlignment="Right"  Command="{Binding ExportWarehouseArticleViewCommand}" CommandParameter="{Binding ElementName=ScheduleEventTableView}" Margin="0,0,5,5">
+                            <Button.ToolTip>
+                                <TextBlock Text="{DynamicResource ButtonExportToExcel}"/>
+                            </Button.ToolTip>
+                            <Button.ContentTemplate>
+                                <DataTemplate>
+                                    <Image Style="{ DynamicResource ExcelExportButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                                </DataTemplate>
+                            </Button.ContentTemplate>
+                        </Button>
+
+
+
+                    </Grid>
+                </DockPanel>
+            </Grid>
+        <Border BorderThickness="0.5" BorderBrush="Gray" Grid.Row="1">
+            <Grid >
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="85*"/>
+                    <ColumnDefinition Width="200"/>
+                </Grid.ColumnDefinitions>
+                <dxg:GridControl x:Name="gridControl" Grid.Row="1" ItemsSource="{Binding MonthList}" SelectionMode="Cell" AllowDrop="True" 
+                 AutoGenerateColumns="None" xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid" 
+                 xmlns:dxa="http://schemas.devexpress.com/winfx/2008/xaml/accordion">
+                    <dxg:GridColumn FieldName="Day" Header="" MinWidth="30">
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border Background="#EAEBEF">
+                                    <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding Row.Day, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                                </Border>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+
+                    <dxg:GridColumn FieldName="JanuaryData" Header="January" MinWidth="130" HeaderTemplate="{StaticResource MonthHeaderTemplate}">
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border BorderThickness="1" x:Name="CellBorder">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="BorderBrush" Value="Transparent"/>
+                                            <Style.Triggers>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsMouseOver}" Value="True"/>
+                                                        <Condition Binding="{Binding Row.JanuaryCircleVisibility}" Value="Visible"/>
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="BorderBrush" Value="Gray"/>
+                                                </MultiDataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <Grid Background="{Binding Row.JanuaryBackColor, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay, FallbackValue=gray}">
+                                        <TextBlock HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+        Visibility="{Binding Row.JanuaryShowButton, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+        Margin="0,0,0,0" Padding="0,0,0,0" FontSize="12"  Height="40"
+        Background="{Binding Row.JanuaryButtonBackgroundColor, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+        Foreground="{Binding Row.JanuaryButtonForegroundColor, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+        FontWeight="{Binding Row.JanuaryFontWeight, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+        TextAlignment="Center">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Row.JanuaryWeekend, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
+                                       VerticalAlignment="Center" Margin="0,10,5,0"/>
+                            <Grid Width="70" Height="30" VerticalAlignment="Center" Margin="0,5,0,0" Visibility="{Binding Row.JanuaryCircleVisibility}">
+                                <Ellipse Width="29" Height="29" Fill="{Binding Row.JanuaryFirstEllipseHtmlColor}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="22,0,0,0" Visibility="{Binding Row.JanuaryFirstEllipseVisibility}"/>
+                                <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center"  Margin="31,-2,0,0"  Visibility="{Binding Row.JanuaryFirstEllipseVisibility}"
+                                           FontSize="14" Foreground="White" FontWeight="Bold" Text="{Binding Row.JanuaryFirstEllipse}"/>
+                                <Ellipse Width="29" Height="29" Fill="{Binding Row.JanuarySecondEllipseHtmlColor}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="39,0,0,0" Visibility="{Binding Row.JanuarySecondEllipseVisibility}"/>
+                                <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Margin="49,-2,0,0"  Visibility="{Binding Row.JanuarySecondEllipseVisibility}"
+                                           FontSize="14" Foreground="White" FontWeight="Bold" Text="{Binding Row.JanuarySecondEllipse}"/>
+                            </Grid>
+                        </StackPanel>
+                    </TextBlock>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+
+                    <dxg:GridColumn FieldName="FebruaryData" Header="February"  MinWidth="130" HeaderTemplate="{StaticResource MonthHeaderTemplate}">
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border BorderThickness="1" x:Name="CellBorder">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="BorderBrush" Value="Transparent"/>
+                                            <Style.Triggers>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsMouseOver}" Value="True"/>
+                                                        <Condition Binding="{Binding Row.FebruaryCircleVisibility}" Value="Visible"/>
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="BorderBrush" Value="Gray"/>
+                                                </MultiDataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <Grid Background="{Binding Row.FebruaryBackColor, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay, FallbackValue=gray}">
+                                        <TextBlock HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+        Visibility="{Binding Row.FebruaryShowButton, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+        Margin="0,0,0,0" Padding="0,0,0,0" FontSize="12"  Height="40"
+        Background="{Binding Row.FebruaryButtonBackgroundColor, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+        Foreground="{Binding Row.FebruaryButtonForegroundColor, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+        FontWeight="{Binding Row.FebruaryFontWeight, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+        TextAlignment="Center">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Row.FebruaryWeekend, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
+                                       VerticalAlignment="Center" Margin="0,10,5,0"/>
+                            <Grid Width="70" Height="30" VerticalAlignment="Center" Margin="0,5,0,0" Visibility="{Binding Row.FebruaryCircleVisibility}">
+                                <Ellipse Width="29" Height="29" Fill="{Binding Row.FebruaryFirstEllipseHtmlColor}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="22,0,0,0" Visibility="{Binding Row.FebruaryFirstEllipseVisibility}"/>
+                                <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center"  Margin="31,-2,0,0"  Visibility="{Binding Row.FebruaryFirstEllipseVisibility}"
+                                           FontSize="14" Foreground="White" FontWeight="Bold" Text="{Binding Row.FebruaryFirstEllipse}"/>
+                                <Ellipse Width="29" Height="29" Fill="{Binding Row.FebruarySecondEllipseHtmlColor}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="39,0,0,0" Visibility="{Binding Row.FebruarySecondEllipseVisibility}"/>
+                                <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Margin="49,-2,0,0"  Visibility="{Binding Row.FebruarySecondEllipseVisibility}"
+                                           FontSize="14" Foreground="White" FontWeight="Bold" Text="{Binding Row.FebruarySecondEllipse}"/>
+                            </Grid>
+                        </StackPanel>
+                    </TextBlock>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+
+                    <dxg:GridColumn FieldName="MarchData" Header="March" MinWidth="130" HeaderTemplate="{StaticResource MonthHeaderTemplate}">
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border BorderThickness="1" x:Name="CellBorder">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="BorderBrush" Value="Transparent"/>
+                                            <Style.Triggers>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsMouseOver}" Value="True"/>
+                                                        <Condition Binding="{Binding Row.MarchCircleVisibility}" Value="Visible"/>
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="BorderBrush" Value="Gray"/>
+                                                </MultiDataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <Grid Background="{Binding Row.MarchBackColor, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay, FallbackValue=gray}">
+                                        <TextBlock HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+        Visibility="{Binding Row.MarchShowButton, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+        Margin="0,0,0,0" Padding="0,0,0,0" FontSize="12"  Height="40"
+        Background="{Binding Row.MarchButtonBackgroundColor, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+        Foreground="{Binding Row.MarchButtonForegroundColor, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+        FontWeight="{Binding Row.MarchFontWeight, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+        TextAlignment="Center">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Row.MarchWeekend, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
+                                       VerticalAlignment="Center" Margin="0,10,5,0"/>
+                            <Grid Width="70" Height="30" VerticalAlignment="Center" Margin="0,5,0,0" Visibility="{Binding Row.MarchCircleVisibility}">
+                                <Ellipse Width="29" Height="29" Fill="{Binding Row.MarchFirstEllipseHtmlColor}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="22,0,0,0" Visibility="{Binding Row.MarchFirstEllipseVisibility}"/>
+                                <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center"  Margin="31,-2,0,0"  Visibility="{Binding Row.MarchFirstEllipseVisibility}"
+                                           FontSize="14" Foreground="White" FontWeight="Bold" Text="{Binding Row.MarchFirstEllipse}"/>
+                                <Ellipse Width="29" Height="29" Fill="{Binding Row.MarchSecondEllipseHtmlColor}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="39,0,0,0" Visibility="{Binding Row.MarchSecondEllipseVisibility}"/>
+                                <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Margin="49,-2,0,0"  Visibility="{Binding Row.MarchSecondEllipseVisibility}"
+                                           FontSize="14" Foreground="White" FontWeight="Bold" Text="{Binding Row.MarchSecondEllipse}"/>
+                            </Grid>
+                        </StackPanel>
+                    </TextBlock>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+
+                    <dxg:GridColumn FieldName="AprilData" Header="April" MinWidth="130" HeaderTemplate="{StaticResource MonthHeaderTemplate}">
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border BorderThickness="1" x:Name="CellBorder">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="BorderBrush" Value="Transparent"/>
+                                            <Style.Triggers>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsMouseOver}" Value="True"/>
+                                                        <Condition Binding="{Binding Row.AprilCircleVisibility}" Value="Visible"/>
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="BorderBrush" Value="Gray"/>
+                                                </MultiDataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <Grid Background="{Binding Row.AprilBackColor, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay, FallbackValue=gray}">
+                                        <TextBlock HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+        Visibility="{Binding Row.AprilShowButton, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+        Margin="0,0,0,0" Padding="0,0,0,0" FontSize="12"  Height="40"
+        Background="{Binding Row.AprilButtonBackgroundColor, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+        Foreground="{Binding Row.AprilButtonForegroundColor, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+        FontWeight="{Binding Row.AprilFontWeight, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+        TextAlignment="Center">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Row.AprilWeekend, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
+                                       VerticalAlignment="Center" Margin="0,10,5,0"/>
+                            <Grid Width="70" Height="30" VerticalAlignment="Center" Margin="0,5,0,0" Visibility="{Binding Row.AprilCircleVisibility}">
+                                <Ellipse Width="29" Height="29" Fill="{Binding Row.AprilFirstEllipseHtmlColor}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="22,0,0,0" Visibility="{Binding Row.AprilFirstEllipseVisibility}"/>
+                                <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center"  Margin="31,-2,0,0"  Visibility="{Binding Row.AprilFirstEllipseVisibility}"
+                                           FontSize="14" Foreground="White" FontWeight="Bold" Text="{Binding Row.AprilFirstEllipse}"/>
+                                <Ellipse Width="29" Height="29" Fill="{Binding Row.AprilSecondEllipseHtmlColor}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="39,0,0,0" Visibility="{Binding Row.AprilSecondEllipseVisibility}"/>
+                                <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Margin="49,-2,0,0"  Visibility="{Binding Row.AprilSecondEllipseVisibility}"
+                                           FontSize="14" Foreground="White" FontWeight="Bold" Text="{Binding Row.AprilSecondEllipse}"/>
+                            </Grid>
+                        </StackPanel>
+                    </TextBlock>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+
+                    <dxg:GridColumn FieldName="MayData" Header="May" MinWidth="130" HeaderTemplate="{StaticResource MonthHeaderTemplate}">
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border BorderThickness="1" x:Name="CellBorder">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="BorderBrush" Value="Transparent"/>
+                                            <Style.Triggers>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsMouseOver}" Value="True"/>
+                                                        <Condition Binding="{Binding Row.MayCircleVisibility}" Value="Visible"/>
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="BorderBrush" Value="Gray"/>
+                                                </MultiDataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <Grid Background="{Binding Row.MayBackColor, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay, FallbackValue=gray}">
+                                        <TextBlock HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+        Visibility="{Binding Row.MayShowButton, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+        Margin="0,0,0,0" Padding="0,0,0,0" FontSize="12"  Height="40"
+        Background="{Binding Row.MayButtonBackgroundColor, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+        Foreground="{Binding Row.MayButtonForegroundColor, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+        FontWeight="{Binding Row.MayFontWeight, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+        TextAlignment="Center">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Row.MayWeekend, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
+                                       VerticalAlignment="Center" Margin="0,10,5,0"/>
+                            <Grid Width="70" Height="30" VerticalAlignment="Center" Margin="0,5,0,0" Visibility="{Binding Row.MayCircleVisibility}">
+                                <Ellipse Width="29" Height="29" Fill="{Binding Row.MayFirstEllipseHtmlColor}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="22,0,0,0" Visibility="{Binding Row.MayFirstEllipseVisibility}"/>
+                                <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center"  Margin="31,-2,0,0"  Visibility="{Binding Row.MayFirstEllipseVisibility}"
+                                           FontSize="14" Foreground="White" FontWeight="Bold" Text="{Binding Row.MayFirstEllipse}"/>
+                                <Ellipse Width="29" Height="29" Fill="{Binding Row.MaySecondEllipseHtmlColor}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="39,0,0,0" Visibility="{Binding Row.MaySecondEllipseVisibility}"/>
+                                <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Margin="49,-2,0,0"  Visibility="{Binding Row.MaySecondEllipseVisibility}"
+                                           FontSize="14" Foreground="White" FontWeight="Bold" Text="{Binding Row.MaySecondEllipse}"/>
+                            </Grid>
+                        </StackPanel>
+                    </TextBlock>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+
+                    <dxg:GridColumn FieldName="JuneData" Header="June" MinWidth="130" HeaderTemplate="{StaticResource MonthHeaderTemplate}">
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border BorderThickness="1" x:Name="CellBorder">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="BorderBrush" Value="Transparent"/>
+                                            <Style.Triggers>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsMouseOver}" Value="True"/>
+                                                        <Condition Binding="{Binding Row.JuneCircleVisibility}" Value="Visible"/>
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="BorderBrush" Value="Gray"/>
+                                                </MultiDataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <Grid Background="{Binding Row.JuneBackColor, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay, FallbackValue=gray}">
+                                        <TextBlock HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+        Visibility="{Binding Row.JuneShowButton, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+        Margin="0,0,0,0" Padding="0,0,0,0" FontSize="12"  Height="40"
+        Background="{Binding Row.JuneButtonBackgroundColor, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+        Foreground="{Binding Row.JuneButtonForegroundColor, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+        FontWeight="{Binding Row.JuneFontWeight, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+        TextAlignment="Center">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Row.JuneWeekend, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
+                                       VerticalAlignment="Center" Margin="0,10,5,0"/>
+                            <Grid Width="70" Height="30" VerticalAlignment="Center" Margin="0,5,0,0" Visibility="{Binding Row.JuneCircleVisibility}">
+                                <Ellipse Width="29" Height="29" Fill="{Binding Row.JuneFirstEllipseHtmlColor}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="22,0,0,0" Visibility="{Binding Row.JuneFirstEllipseVisibility}"/>
+                                <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center"  Margin="31,-2,0,0"  Visibility="{Binding Row.JuneFirstEllipseVisibility}"
+                                           FontSize="14" Foreground="White" FontWeight="Bold" Text="{Binding Row.JuneFirstEllipse}"/>
+                                <Ellipse Width="29" Height="29" Fill="{Binding Row.JuneSecondEllipseHtmlColor}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="39,0,0,0" Visibility="{Binding Row.JuneSecondEllipseVisibility}"/>
+                                <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Margin="49,-2,0,0"  Visibility="{Binding Row.JuneSecondEllipseVisibility}"
+                                           FontSize="14" Foreground="White" FontWeight="Bold" Text="{Binding Row.JuneSecondEllipse}"/>
+                            </Grid>
+                        </StackPanel>
+                    </TextBlock>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+
+                    <dxg:GridColumn FieldName="JulyData" Header="July" MinWidth="130" HeaderTemplate="{StaticResource MonthHeaderTemplate}">
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border BorderThickness="1" x:Name="CellBorder">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="BorderBrush" Value="Transparent"/>
+                                            <Style.Triggers>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsMouseOver}" Value="True"/>
+                                                        <Condition Binding="{Binding Row.JulyCircleVisibility}" Value="Visible"/>
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="BorderBrush" Value="Gray"/>
+                                                </MultiDataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <Grid Background="{Binding Row.JulyBackColor, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay, FallbackValue=gray}">
+                                        <TextBlock HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+        Visibility="{Binding Row.JulyShowButton, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+        Margin="0,0,0,0" Padding="0,0,0,0" FontSize="12"  Height="40"
+        Background="{Binding Row.JulyButtonBackgroundColor, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+        Foreground="{Binding Row.JulyButtonForegroundColor, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+        FontWeight="{Binding Row.JulyFontWeight, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+        TextAlignment="Center">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Row.JulyWeekend, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
+                                       VerticalAlignment="Center" Margin="0,10,5,0"/>
+                            <Grid Width="70" Height="30" VerticalAlignment="Center" Margin="0,5,0,0" Visibility="{Binding Row.JulyCircleVisibility}">
+                                <Ellipse Width="29" Height="29" Fill="{Binding Row.JulyFirstEllipseHtmlColor}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="22,0,0,0" Visibility="{Binding Row.JulyFirstEllipseVisibility}"/>
+                                <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center"  Margin="31,-2,0,0"  Visibility="{Binding Row.JulyFirstEllipseVisibility}"
+                                           FontSize="14" Foreground="White" FontWeight="Bold" Text="{Binding Row.JulyFirstEllipse}"/>
+                                <Ellipse Width="29" Height="29" Fill="{Binding Row.JulySecondEllipseHtmlColor}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="39,0,0,0" Visibility="{Binding Row.JulySecondEllipseVisibility}"/>
+                                <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Margin="49,-2,0,0"  Visibility="{Binding Row.JulySecondEllipseVisibility}"
+                                           FontSize="14" Foreground="White" FontWeight="Bold" Text="{Binding Row.JulySecondEllipse}"/>
+                            </Grid>
+                        </StackPanel>
+                    </TextBlock>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+
+                    <dxg:GridColumn FieldName="AugustData" Header="August" MinWidth="130" HeaderTemplate="{StaticResource MonthHeaderTemplate}">
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border BorderThickness="1" x:Name="CellBorder">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="BorderBrush" Value="Transparent"/>
+                                            <Style.Triggers>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsMouseOver}" Value="True"/>
+                                                        <Condition Binding="{Binding Row.AugustCircleVisibility}" Value="Visible"/>
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="BorderBrush" Value="Gray"/>
+                                                </MultiDataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <Grid Background="{Binding Row.AugustBackColor, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay, FallbackValue=gray}">
+                                        <TextBlock HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+        Visibility="{Binding Row.AugustShowButton, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+        Margin="0,0,0,0" Padding="0,0,0,0" FontSize="12"  Height="40"
+        Background="{Binding Row.AugustButtonBackgroundColor, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+        Foreground="{Binding Row.AugustButtonForegroundColor, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+        FontWeight="{Binding Row.AugustFontWeight, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+        TextAlignment="Center">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Row.AugustWeekend, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
+                                       VerticalAlignment="Center" Margin="0,10,5,0"/>
+                            <Grid Width="70" Height="30" VerticalAlignment="Center" Margin="0,5,0,0" Visibility="{Binding Row.AugustCircleVisibility}">
+                                <Ellipse Width="29" Height="29" Fill="{Binding Row.AugustFirstEllipseHtmlColor}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="22,0,0,0" Visibility="{Binding Row.AugustFirstEllipseVisibility}"/>
+                                <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center"  Margin="31,-2,0,0"  Visibility="{Binding Row.AugustFirstEllipseVisibility}"
+                                           FontSize="14" Foreground="White" FontWeight="Bold" Text="{Binding Row.AugustFirstEllipse}"/>
+                                <Ellipse Width="29" Height="29" Fill="{Binding Row.AugustSecondEllipseHtmlColor}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="39,0,0,0" Visibility="{Binding Row.AugustSecondEllipseVisibility}"/>
+                                <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Margin="49,-2,0,0"  Visibility="{Binding Row.AugustSecondEllipseVisibility}"
+                                           FontSize="14" Foreground="White" FontWeight="Bold" Text="{Binding Row.AugustSecondEllipse}"/>
+                            </Grid>
+                        </StackPanel>
+                    </TextBlock>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+
+                    <dxg:GridColumn FieldName="SeptemberData" Header="September" MinWidth="130" HeaderTemplate="{StaticResource MonthHeaderTemplate}">
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border BorderThickness="1" x:Name="CellBorder">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="BorderBrush" Value="Transparent"/>
+                                            <Style.Triggers>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsMouseOver}" Value="True"/>
+                                                        <Condition Binding="{Binding Row.SeptemberCircleVisibility}" Value="Visible"/>
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="BorderBrush" Value="Gray"/>
+                                                </MultiDataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <Grid Background="{Binding Row.SeptemberBackColor, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay, FallbackValue=gray}">
+                                        <TextBlock HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+        Visibility="{Binding Row.SeptemberShowButton, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+        Margin="0,0,0,0" Padding="0,0,0,0" FontSize="12"  Height="40"
+        Background="{Binding Row.SeptemberButtonBackgroundColor, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+        Foreground="{Binding Row.SeptemberButtonForegroundColor, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+        FontWeight="{Binding Row.SeptemberFontWeight, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+        TextAlignment="Center">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Row.SeptemberWeekend, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
+                                       VerticalAlignment="Center" Margin="0,10,5,0"/>
+                            <Grid Width="70" Height="30" VerticalAlignment="Center" Margin="0,5,0,0" Visibility="{Binding Row.SeptemberCircleVisibility}">
+                                <Ellipse Width="29" Height="29" Fill="{Binding Row.SeptemberFirstEllipseHtmlColor}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="22,0,0,0" Visibility="{Binding Row.SeptemberFirstEllipseVisibility}"/>
+                                <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center"  Margin="31,-2,0,0"  Visibility="{Binding Row.SeptemberFirstEllipseVisibility}"
+                                           FontSize="14" Foreground="White" FontWeight="Bold" Text="{Binding Row.SeptemberFirstEllipse}"/>
+                                <Ellipse Width="29" Height="29" Fill="{Binding Row.SeptemberSecondEllipseHtmlColor}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="39,0,0,0" Visibility="{Binding Row.SeptemberSecondEllipseVisibility}"/>
+                                <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Margin="49,-2,0,0"  Visibility="{Binding Row.SeptemberSecondEllipseVisibility}"
+                                           FontSize="14" Foreground="White" FontWeight="Bold" Text="{Binding Row.SeptemberSecondEllipse}"/>
+                            </Grid>
+                        </StackPanel>
+                    </TextBlock>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+
+                    <dxg:GridColumn FieldName="OctoberData" Header="October" MinWidth="130" HeaderTemplate="{StaticResource MonthHeaderTemplate}">
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border BorderThickness="1" x:Name="CellBorder">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="BorderBrush" Value="Transparent"/>
+                                            <Style.Triggers>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsMouseOver}" Value="True"/>
+                                                        <Condition Binding="{Binding Row.OctoberCircleVisibility}" Value="Visible"/>
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="BorderBrush" Value="Gray"/>
+                                                </MultiDataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <Grid Background="{Binding Row.OctoberBackColor, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay, FallbackValue=gray}">
+                                        <TextBlock HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+        Visibility="{Binding Row.OctoberShowButton, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+        Margin="0,0,0,0" Padding="0,0,0,0" FontSize="12"  Height="40"
+        Background="{Binding Row.OctoberButtonBackgroundColor, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+        Foreground="{Binding Row.OctoberButtonForegroundColor, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+        FontWeight="{Binding Row.OctoberFontWeight, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+        TextAlignment="Center">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Row.OctoberWeekend, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
+                                       VerticalAlignment="Center" Margin="0,10,5,0"/>
+                            <Grid Width="70" Height="30" VerticalAlignment="Center" Margin="0,5,0,0" Visibility="{Binding Row.OctoberCircleVisibility}">
+                                <Ellipse Width="29" Height="29" Fill="{Binding Row.OctoberFirstEllipseHtmlColor}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="22,0,0,0" Visibility="{Binding Row.OctoberFirstEllipseVisibility}"/>
+                                <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center"  Margin="31,-2,0,0"  Visibility="{Binding Row.OctoberFirstEllipseVisibility}"
+                                           FontSize="14" Foreground="White" FontWeight="Bold" Text="{Binding Row.OctoberFirstEllipse}"/>
+                                <Ellipse Width="29" Height="29" Fill="{Binding Row.OctoberSecondEllipseHtmlColor}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="39,0,0,0" Visibility="{Binding Row.OctoberSecondEllipseVisibility}"/>
+                                <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Margin="49,-2,0,0"  Visibility="{Binding Row.OctoberSecondEllipseVisibility}"
+                                           FontSize="14" Foreground="White" FontWeight="Bold" Text="{Binding Row.OctoberSecondEllipse}"/>
+                            </Grid>
+                        </StackPanel>
+                    </TextBlock>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+
+                    <dxg:GridColumn FieldName="NovemberData" Header="November" MinWidth="130" HeaderTemplate="{StaticResource MonthHeaderTemplate}">
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border BorderThickness="1" x:Name="CellBorder">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="BorderBrush" Value="Transparent"/>
+                                            <Style.Triggers>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsMouseOver}" Value="True"/>
+                                                        <Condition Binding="{Binding Row.NovemberCircleVisibility}" Value="Visible"/>
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="BorderBrush" Value="Gray"/>
+                                                </MultiDataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <Grid Background="{Binding Row.NovemberBackColor, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay, FallbackValue=gray}">
+                                        <TextBlock HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+        Visibility="{Binding Row.NovemberShowButton, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+        Margin="0,0,0,0" Padding="0,0,0,0" FontSize="12"  Height="40"
+        Background="{Binding Row.NovemberButtonBackgroundColor, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+        Foreground="{Binding Row.NovemberButtonForegroundColor, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+        FontWeight="{Binding Row.NovemberFontWeight, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+        TextAlignment="Center">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Row.NovemberWeekend, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
+                                       VerticalAlignment="Center" Margin="0,10,5,0"/>
+                            <Grid Width="70" Height="30" VerticalAlignment="Center" Margin="0,5,0,0" Visibility="{Binding Row.NovemberCircleVisibility}">
+                                <Ellipse Width="29" Height="29" Fill="{Binding Row.NovemberFirstEllipseHtmlColor}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="22,0,0,0" Visibility="{Binding Row.NovemberFirstEllipseVisibility}"/>
+                                <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center"  Margin="31,-2,0,0"  Visibility="{Binding Row.NovemberFirstEllipseVisibility}"
+                                           FontSize="14" Foreground="White" FontWeight="Bold" Text="{Binding Row.NovemberFirstEllipse}"/>
+                                <Ellipse Width="29" Height="29" Fill="{Binding Row.NovemberSecondEllipseHtmlColor}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="39,0,0,0" Visibility="{Binding Row.NovemberSecondEllipseVisibility}"/>
+                                <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Margin="49,-2,0,0"  Visibility="{Binding Row.NovemberSecondEllipseVisibility}"
+                                           FontSize="14" Foreground="White" FontWeight="Bold" Text="{Binding Row.NovemberSecondEllipse}"/>
+                            </Grid>
+                        </StackPanel>
+                    </TextBlock>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+
+                    <dxg:GridColumn FieldName="DecemberData" Header="December" MinWidth="130" HeaderTemplate="{StaticResource MonthHeaderTemplate}">
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border BorderThickness="1" x:Name="CellBorder">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="BorderBrush" Value="Transparent"/>
+                                            <Style.Triggers>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsMouseOver}" Value="True"/>
+                                                        <Condition Binding="{Binding Row.DecemberCircleVisibility}" Value="Visible"/>
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="BorderBrush" Value="Gray"/>
+                                                </MultiDataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <Grid Background="{Binding Row.DecemberBackColor, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay, FallbackValue=gray}">
+                                        <TextBlock HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+        Visibility="{Binding Row.DecemberShowButton, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+        Margin="0,0,0,0" Padding="0,0,0,0" FontSize="12"  Height="40"
+        Background="{Binding Row.DecemberButtonBackgroundColor, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+        Foreground="{Binding Row.DecemberButtonForegroundColor, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+        FontWeight="{Binding Row.DecemberFontWeight, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+        TextAlignment="Center">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Row.DecemberWeekend, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
+                                       VerticalAlignment="Center" Margin="0,10,5,0"/>
+                            <Grid Width="70" Height="30" VerticalAlignment="Center" Margin="0,5,0,0" Visibility="{Binding Row.DecemberCircleVisibility}">
+                                <Ellipse Width="29" Height="29" Fill="{Binding Row.DecemberFirstEllipseHtmlColor}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="22,0,0,0" Visibility="{Binding Row.DecemberFirstEllipseVisibility}"/>
+                                <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center"  Margin="31,-2,0,0"  Visibility="{Binding Row.DecemberFirstEllipseVisibility}"
+                                           FontSize="14" Foreground="White" FontWeight="Bold" Text="{Binding Row.DecemberFirstEllipse}"/>
+                                <Ellipse Width="29" Height="29" Fill="{Binding Row.DecemberSecondEllipseHtmlColor}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="39,0,0,0" Visibility="{Binding Row.DecemberSecondEllipseVisibility}"/>
+                                <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Margin="49,-2,0,0"  Visibility="{Binding Row.DecemberSecondEllipseVisibility}"
+                                           FontSize="14" Foreground="White" FontWeight="Bold" Text="{Binding Row.DecemberSecondEllipse}"/>
+                            </Grid>
+                        </StackPanel>
+                    </TextBlock>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+
+                    <dxg:GridColumn FieldName="Day" Header="" MinWidth="30">
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border Background="#EAEBEF">
+                                    <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding Row.Day, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                                </Border>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+                    <dxg:GridControl.View>
+                        <dxg:TableView  Name="ScheduleEventTableView" ShowAutoFilterRow ="False" AllowColumnFiltering="False" 
+            ShowGroupPanel="False" AutoWidth="True" AllowSorting="False"
+              ShowIndicator="False" ShowSelectionRectangle="False" CellStyle="{StaticResource SelectionStateCellStyle}" >
+                            <dxg:TableView.ColumnHeaderStyle>
+                                <Style TargetType="dxg:BaseGridHeader">
+                                    <Setter Property="dxg:BaseGridColumnHeader.ShowFilterButtonOnHover" Value="False" />
+                                    <Setter Property="Background" Value="#FFC973" />
+                                </Style>
+                            </dxg:TableView.ColumnHeaderStyle>
+
+                            <dxmvvm:Interaction.Behaviors>
+                                <dxmvvm:EventToCommand  Command="{Binding DataContext.GridDoubleClickCommand,RelativeSource={RelativeSource AncestorType=dxg:GridControl}}" EventName="MouseDoubleClick" CommandParameter="{Binding ElementName=ScheduleEventTableView}">
+                                    <dxmvvm:EventToCommand.EventArgsConverter>
+                                        <dx:EventArgsToDataRowConverter   />
+                                    </dxmvvm:EventToCommand.EventArgsConverter>
+                                </dxmvvm:EventToCommand>
+                            </dxmvvm:Interaction.Behaviors>
+                            <dxg:TableView.Resources>
+                                <DataTemplate x:Key="ScheduleEventsReportPrintHeaderTemplate">
+                                    <Grid Width="{Binding UsablePageWidth}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="50" />
+                                            <ColumnDefinition Width="130" />
+                                        </Grid.ColumnDefinitions>
+                                        <dxe:TextEdit Text=" " Width="{Binding UsablePageWidth}" Grid.ColumnSpan="3" IsPrintingMode="True" Background="#333E5E" HorizontalAlignment="Stretch" 
+                              VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" Height="50" />
+                                        <dxe:TextEdit Text="Schedule Event Report" IsPrintingMode="True" HorizontalAlignment="Stretch" 
+                              VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" />
+                                        <Image Source="/Emdep.Geos.Modules.Hrm;component/Assets/Images/GeosReportLogo.png" Height="50" Width="80"  dxp:ExportSettings.TargetType="Image" Grid.Column="2" />
+                                    </Grid>
+                                </DataTemplate>
+
+                                <DataTemplate x:Key="ScheduleReportPrintFooterTemplate">
+                                    <dxe:TextEdit HorizontalContentAlignment="Center" 
+                            Width="{Binding Path=UsablePageWidth, Mode=OneWay}" 
+                            dxp:ExportSettings.TargetType="PageNumber" 
+                            dxp:PageNumberExportSettings.Kind="NumberOfTotal" 
+                            dxp:PageNumberExportSettings.Format="Page {0} of {1}"/>
+                                </DataTemplate>
+                            </dxg:TableView.Resources>
+                        </dxg:TableView>
+
+                    </dxg:GridControl.View>
+                </dxg:GridControl>
+
+                <Grid Grid.Column="1" Margin="5,5,5,5">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="100"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="0"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Row="1" VerticalAlignment="Bottom" Margin="0,0,0,-32">
+                        <Label Margin="25,0,0,-25" Padding="0,0,0,0"  VerticalAlignment="Bottom" HorizontalAlignment="Left" Content="{DynamicResource Scheduleeventsview_Legend}" Style="{StaticResource LabelTitleStyle}" Grid.Row="0" Grid.Column="0"/>
+                        <StackPanel Orientation="Vertical" VerticalAlignment="Bottom">
+                            <dxnav:TileBar ItemsSource="{Binding LegendList}" Orientation="Vertical" ItemSpacing="0">
+                                <dxnav:TileBar.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" Margin="-12,-40,-30,-12">
+                                            <dxnav:TileBarItem Height="68" FontFamily="Verdana" FontSize="25"
+                                            Content="{Binding Value}" 
+                                            Background="{Binding HtmlColor}"
+                                            VerticalAlignment="Center" Margin="0"/>
+                                            <dxe:CheckEdit x:Name="PART_Editor" Command="{Binding DataContext.LegendItemCheckedCommand, RelativeSource={RelativeSource AncestorType=dxnav:TileBar}}"
+                              CommandParameter="{Binding}"  IsChecked="{Binding IsSelected}" VerticalAlignment="Center" Margin="2,0,0,0">
+                                                <dxe:CheckEdit.Style>
+                                                    <Style TargetType="dxe:CheckEdit">
+                                                        <Setter Property="Width" Value="50"/>
+                                                        <Setter Property="Height" Value="24"/>
+                                                    </Style>
+                                                </dxe:CheckEdit.Style>
+                                            </dxe:CheckEdit>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </dxnav:TileBar.ItemTemplate>
+                            </dxnav:TileBar>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </Border>
+        <!-- Popup -->
+            <Popup x:Name="detailPopup" Placement="Center" StaysOpen="{Binding IsPopupOpen}"
+               AllowsTransparency="True" PopupAnimation="Slide"
+               IsOpen="{Binding IsPopupOpen, Mode=TwoWay}"
+               Grid.Row="1" Grid.RowSpan="2">
+                <Border Style="{StaticResource PopupContentStyle}">
+                    <StackPanel Margin="5">
+                        <TextBlock Text="{Binding SelectedCell.ColumnName, StringFormat='{}Details for {0}'}" 
+                               FontWeight="Bold" FontSize="14" Margin="0,0,0,10"/>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                            <TextBlock Text="Value:" FontWeight="SemiBold" Width="60"/>
+                            <TextBlock Text="{Binding SelectedCell.Value}" TextWrapping="Wrap"/>
+                        </StackPanel>
+
+                        <TextBlock Text="Details:" FontWeight="SemiBold" Margin="0,10,0,5"/>
+                        <TextBox Text="{Binding SelectedCell.Details, Mode=TwoWay}" 
+                             TextWrapping="Wrap" Height="60" Width="250"
+                             AcceptsReturn="True" VerticalScrollBarVisibility="Auto"/>
+
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+                            <Button Content="Save" Style="{StaticResource PopupButtonStyle}"
+                                Command="{Binding SaveDetailsCommand}"/>
+                            <Button Content="Cancel" Style="{StaticResource PopupButtonStyle}"
+                                Command="{Binding ClosePopupCommand}"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </Popup>
+        </Grid>    
+</UserControl>

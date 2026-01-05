@@ -1,0 +1,1698 @@
+﻿<UserControl x:Class="Emdep.Geos.Modules.PCM.Views.AddCatalogueItemView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.PCM.Views"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:dxdo="http://schemas.devexpress.com/winfx/2008/xaml/docking"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:dxn="http://schemas.devexpress.com/winfx/2008/xaml/navbar"
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+             xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+             xmlns:ViewModel="clr-namespace:Emdep.Geos.Modules.PCM.ViewModels"
+             xmlns:Validation ="clr-namespace:Emdep.Geos.UI.Validations;assembly=Emdep.Geos.UI.Validations"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+
+    <Grid ShowGridLines="False">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="70"/>
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!--Label and Refresh-->
+        <Grid ShowGridLines="False" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Label Content="{DynamicResource NewCatalogueItem}" Style="{StaticResource LabelTitleStyle}" Grid.Row="0" Grid.ColumnSpan="2" />
+
+            <!--<dxwui:PageAdornerControl Header="New Catalogue Item" VerticalAlignment="Center" Grid.Row="0" FontSize="10" >
+                <dxwui:PageAdornerControl.HeaderTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <ContentPresenter Content="{Binding}"/>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Column="1">
+                                <dxwui:NavigationButton FontSize="12" Margin="10, 0, 0, 0" Content="" Visibility="Hidden" NavigateTo="AddCatalogueItemView"/>
+                            </StackPanel>
+                        </Grid>
+                    </DataTemplate>
+                </dxwui:PageAdornerControl.HeaderTemplate>
+            </dxwui:PageAdornerControl>-->
+
+            <DockPanel Grid.Row="0" Grid.Column="2">
+                <Grid ShowGridLines="False" HorizontalAlignment="Right" Width="Auto" Height="45" >
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="5"/>
+                        <RowDefinition Height="15"/>
+                        <RowDefinition Height="17"/>
+                        <RowDefinition Height="8"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- pcm period section -->
+                    <DockPanel Grid.Column="0" Height="30" Margin="0,3,0,7" Grid.RowSpan="3" Grid.Row="1">
+                        <Image Style="{DynamicResource PCMPeriodImageStyle}" Width="24" Height="24" Margin="10 0 0 0"/>
+                        <TextBlock Text="{DynamicResource PeriodWithColon}"  FontWeight="Bold" Margin="5,2,5,0" VerticalAlignment="Bottom" />
+                    </DockPanel>
+
+                    <dxe:ComboBoxEdit Name="CbePeriod" Style="{DynamicResource ComboBoxEditStyle}" Grid.Column="1" Width="150" Height="30"
+                                       Margin="5,0,5,5" VerticalAlignment="Bottom" IsTextEditable="False" Grid.RowSpan="3" Grid.Row="1">
+                    </dxe:ComboBoxEdit>
+
+                    <!-- Refresh Button -->
+                    <Button Content=" " Grid.Row="0" Grid.Column="2" Height="40" Width="40" HorizontalAlignment="Right"  Margin="0,0,5,5" Grid.RowSpan="4">
+                        <Button.ToolTip>
+                            <TextBlock Text="{DynamicResource ButtonRefresh}"/>
+                        </Button.ToolTip>
+                        <Button.ContentTemplate>
+                            <DataTemplate>
+                                <Image Style="{ DynamicResource PCMRefreshButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                            </DataTemplate>
+                        </Button.ContentTemplate>
+                    </Button>
+
+                    <!-- Print Button -->
+                    <Button Content=" " Grid.Row="0" Grid.Column="3" Height="40" Width="40" HorizontalAlignment="Right"  Margin="0,0,5,5" Grid.RowSpan="4">
+                        <Button.ToolTip>
+                            <TextBlock Text="{DynamicResource ButtonPrint}"/>
+                        </Button.ToolTip>
+                        <Button.ContentTemplate>
+                            <DataTemplate>
+                                <Image Style="{DynamicResource PCMPrintButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                            </DataTemplate>
+                        </Button.ContentTemplate>
+                    </Button>
+
+                    <!-- Export to Excel -->
+                    <Button Content=" " Grid.Row="0" Grid.Column="4" Height="40" Width="40" HorizontalAlignment="Right" Margin="0,0,5,5" Grid.RowSpan="4"
+                           >
+                        <Button.ToolTip>
+                            <TextBlock Text="{DynamicResource ButtonExportToExcel}"/>
+                        </Button.ToolTip>
+                        <Button.ContentTemplate>
+                            <DataTemplate>
+                                <Image Style="{DynamicResource PCMExportToExcelButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                            </DataTemplate>
+                        </Button.ContentTemplate>
+                    </Button>
+                </Grid>
+            </DockPanel>
+        </Grid>
+
+        <dxdo:DockLayoutManager Name="dockManager1" Grid.Row="1">
+            <dxdo:LayoutGroup Orientation="Horizontal">
+
+                <!--Product Type-->
+                <!--Style="{DynamicResource StyleDocumentPanel}"-->
+                <dxdo:LayoutPanel Caption="{DynamicResource CaptionProductType}" ItemWidth="200" >
+                    <dxdo:LayoutPanel.ControlBoxContentTemplate>
+                        <DataTemplate>
+                            <Button Content=" "                                    Background="Gray" 
+                                    HorizontalContentAlignment="Center"
+                                    Command="{Binding DataContext.AddNewProductCommand, RelativeSource={RelativeSource AncestorType=UserControl, Mode=FindAncestor}}">
+                                <Button.ToolTip>
+                                    <TextBlock Text="{DynamicResource ButtonAdd}"/>
+                                </Button.ToolTip>
+                                <Button.ContentTemplate>
+                                    <DataTemplate>
+                                        <Image Source="{DynamicResource AddButtonImage}" 
+                                               Height="14" Width="14" 
+                                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </DataTemplate>
+                                </Button.ContentTemplate>
+                            </Button>
+                        </DataTemplate>
+                    </dxdo:LayoutPanel.ControlBoxContentTemplate>
+
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="40"/>
+                            <RowDefinition Height="50"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <Grid Grid.Row="0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="{DynamicResource Template}" HorizontalAlignment="Left"  VerticalAlignment="Center" Style="{StaticResource TextBlock14Style}" />
+                            <dxe:ComboBoxEdit Grid.Row="0" Grid.Column="1" Margin="0 5 10 0" Height="30"
+                                                      HorizontalAlignment="Stretch"
+                                                      ItemsSource="{Binding TemplatesMenulist, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                      DisplayMember="Name" ValueMember="IdTemplate"
+                                                      AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True"
+                                                      SelectedItem="{Binding SelectedTemplate,Mode=TwoWay ,UpdateSourceTrigger=PropertyChanged}">
+                                <dxmvvm:Interaction.Behaviors>
+                                    <dxmvvm:EventToCommand 
+                                        EventName="SelectedIndexChanged" Command="{Binding ChangeProductTypeListByTemplateCommand}"/>
+                                </dxmvvm:Interaction.Behaviors>
+                            </dxe:ComboBoxEdit>
+                        </Grid>
+
+                        <dxe:SearchControl x:Name="searchControl" Grid.Row="1" Margin="10" Height="30"
+                                                    HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                                                    FilterCondition="Contains"
+                                                    FilterByColumnsMode="Custom">
+                            <dxe:SearchControl.ColumnProvider>
+                                <dxe:SelectorEditColumnProvider>
+                                    <dxe:SelectorEditColumnProvider.CustomColumns>
+                                        <sys:String>Name</sys:String>
+                                    </dxe:SelectorEditColumnProvider.CustomColumns>
+                                </dxe:SelectorEditColumnProvider>
+                            </dxe:SearchControl.ColumnProvider>
+                        </dxe:SearchControl>
+
+                        <dxe:ListBoxEdit Name="listBox" Grid.Row="2"  Margin="10" 
+                                            ItemsSource="{Binding ProductTypesMenulist, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                            SelectedItem="{Binding SelectedCpType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                            HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                            DisplayMember="Name" ValueMember="IdCPType"
+                                            FilterCriteria="{Binding FilterCriteria, ElementName=searchControl}"
+                                            dx:ListBoxDragDropBehavior.AllowDragDrop="True"
+                                             >
+
+                            <!--SelectedItem="{Binding SelectedProductType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            "{Binding DataContext.ProductTypeCancelCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"-->
+                            <dxmvvm:Interaction.Behaviors>
+                                <dxmvvm:EventToCommand Command="{Binding CommandOnDragRecordOverProductType}"
+                                                            Event="dx:ListBoxDragDropBehavior.DragRecordOver" 
+                                                            PassEventArgsToCommand="True"/>
+
+                                <dxmvvm:EventToCommand Command="{Binding EditProductTypeCommand}"
+                                                            EventName="MouseDoubleClick" 
+                                                            PassEventArgsToCommand="True"/>
+                              
+                            </dxmvvm:Interaction.Behaviors>
+                        </dxe:ListBoxEdit>
+                    </Grid>
+                </dxdo:LayoutPanel>
+
+                <dxdo:LayoutGroup x:Name="rootMainGroup" Orientation="Horizontal">
+                    <dxdo:LayoutPanel x:Name="documentGroup1" ShowCaption="False" ShowCloseButton="False">
+                        <Grid ShowGridLines="False" Grid.Column="1" Margin="5">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="150" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <Grid Grid.Row="0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="80*"/>
+                                    <ColumnDefinition Width="20*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Grid Grid.Column="0" ShowGridLines="False">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="30" />
+                                        <RowDefinition Height="10" />
+                                        <RowDefinition Height="30" />
+                                        <RowDefinition Height="5" />
+                                        <RowDefinition Height="30" />
+                                        <RowDefinition Height="5" />
+                                        <RowDefinition Height="30" />
+                                        <RowDefinition Height="5" />
+                                        <RowDefinition Height="30" />
+                                    </Grid.RowDefinitions>
+
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>    <!--Code-->
+                                        <ColumnDefinition Width="5"/>
+                                        <ColumnDefinition Width="75"/>      <!--cmbbox-->
+                                        <ColumnDefinition Width="5"/>
+                                        <ColumnDefinition Width="Auto"/>    <!--Product type-->
+                                        <ColumnDefinition Width="5"/>
+                                        <ColumnDefinition Width="2*"/>      <!--cmbbox-->
+                                        <ColumnDefinition Width="5"/>
+                                        <ColumnDefinition Width="Auto"/>    <!--created-->
+                                        <ColumnDefinition Width="5"/>
+                                        <ColumnDefinition Width="80"/>      <!--cmbbox-->
+                                        <ColumnDefinition Width="5"/>
+                                        <ColumnDefinition Width="Auto"/>    <!--Last update-->
+                                        <ColumnDefinition Width="5"/>
+                                        <ColumnDefinition Width="80"/>      <!--cmbbox-->
+                                        <ColumnDefinition Width="5"/>
+                                        <ColumnDefinition Width="Auto"/>    <!--Status-->
+                                        <ColumnDefinition Width="5"/>
+                                        <ColumnDefinition Width="70"/>      <!--cmbbox-->
+                                        <ColumnDefinition Width="5"/>
+                                        <ColumnDefinition Width="37"/>
+                                        <ColumnDefinition Width="5"/>
+                                    </Grid.ColumnDefinitions>
+                                   
+                                    <!--<Code>-->
+                                        <TextBlock Grid.Row="0" Grid.Column="0" 
+                                               VerticalAlignment="Center"
+                                               Text="{DynamicResource Code}" 
+                                               Style="{StaticResource TextBlock14Style}" />
+                                    <dxe:TextEdit Grid.Row="0" Grid.Column="2"
+                                              HorizontalAlignment="Stretch"
+                                              EditValue="{Binding Code, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  
+                                              ShowNullText="True"
+                                              ShowNullTextForEmptyValue="True"
+                                              IsReadOnly="True"
+                                              IsEnabled="False">
+                                    </dxe:TextEdit>
+                                    
+                                    <!--<ProductType>-->
+                                        <TextBlock Grid.Row="0" Grid.Column="4" Text="{DynamicResource CaptionProductType}" VerticalAlignment="Center"/>
+                                    <dxe:ListBoxEdit Grid.Row="0" Grid.Column="6" 
+                                                     VerticalContentAlignment="Top"
+                                                     Name="listBoxProductDragInMiddle"
+                                                     ItemsSource="{Binding ProductTypes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                                     dx:ListBoxDragDropBehavior.AllowDragDrop="True"
+                                                     ScrollViewer.HorizontalScrollBarVisibility="Hidden"
+                                                     ScrollViewer.VerticalScrollBarVisibility="Hidden">
+
+                                        <dxe:ListBoxEdit.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Background="{DynamicResource SelectedItemBackgroud}">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="5"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="5"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="2"/>
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <TextBlock Grid.Column="1"
+                                                               HorizontalAlignment="Stretch"
+                                                               VerticalAlignment="Center"
+                                                               Background="{DynamicResource SelectedItemBackgroud}"
+                                                               Style="{DynamicResource TextBlock14Style}"
+                                                               Text="{Binding Path=Name}" />
+
+                                                    <dxe:ButtonEdit Grid.Column="3" Margin="0 1 0 1"
+                                                                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                    HorizontalContentAlignment="Center" VerticalContentAlignment="Center" 
+                                                                    ShowText="False" ShowBorder="False"
+                                                                    AllowDefaultButton="False">
+                                                        <dxe:ButtonEdit.Buttons>
+                                                            <dxe:ButtonInfo GlyphKind="Cancel">
+                                                                <dxmvvm:Interaction.Behaviors>
+                                                                    <dxmvvm:EventToCommand Command="{Binding DataContext.ProductTypeCancelCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                                               EventName="Click"
+                                                                                               CommandParameter="{Binding Path=.}"  />
+                                                                </dxmvvm:Interaction.Behaviors>
+                                                            </dxe:ButtonInfo>
+                                                        </dxe:ButtonEdit.Buttons>
+                                                    </dxe:ButtonEdit>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </dxe:ListBoxEdit.ItemTemplate>
+                                        <dxe:ListBoxEdit.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <WrapPanel />
+                                            </ItemsPanelTemplate>
+                                        </dxe:ListBoxEdit.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel />
+                                        </ItemsPanelTemplate>
+
+                                        <dxmvvm:Interaction.Behaviors>
+                                            <dxmvvm:EventToCommand Command="{Binding CommandOnDragRecordOverProductType}"
+                                                            Event="dx:ListBoxDragDropBehavior.DragRecordOver" 
+                                                            PassEventArgsToCommand="True"/>
+                                        </dxmvvm:Interaction.Behaviors>
+                                    </dxe:ListBoxEdit>
+
+                                    <!--<Created>-->
+                                    <TextBlock Grid.Row="0" Grid.Column="8" 
+                                               VerticalAlignment="Center" HorizontalAlignment="Left"
+                                               Text="{DynamicResource Created}" 
+                                               Style="{StaticResource TextBlock14Style}" />
+                                    
+                                    <dxe:DateEdit Grid.Row="0" Grid.Column="10"
+                                              HorizontalAlignment="Stretch"
+                                              EditValue="{Binding SelectedCreated, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  
+                                              ShowNullText="True"
+                                              ShowNullTextForEmptyValue="True"
+                                              IsReadOnly="True"
+                                              IsEnabled="False"
+                                              ShowEditorButtons="False">
+                                    </dxe:DateEdit>
+
+                                    <!--LastUpdate-->
+                                    <TextBlock Grid.Row="0"  Grid.Column="12" Text="{DynamicResource LastUpdate}" HorizontalAlignment="Right" VerticalAlignment="Center" Style="{StaticResource TextBlock14Style}"/>
+                                    <dxe:DateEdit Grid.Row="0" Grid.Column="14"
+                                              HorizontalAlignment="Stretch"
+                                              EditValue="{Binding LastUpdate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  
+                                              ShowNullText="True"
+                                              ShowNullTextForEmptyValue="True"
+                                              IsReadOnly="True"
+                                              IsEnabled="False"
+                                              ShowEditorButtons="False">
+                                    </dxe:DateEdit>
+
+                                    <!--Status-->
+                                    <TextBlock Grid.Row="0" Grid.Column="16" Text="{DynamicResource Status}" HorizontalAlignment="Right" VerticalAlignment="Center" Style="{StaticResource TextBlock14Style}"/>
+                                    <dxe:ComboBoxEdit Grid.Row="0" Grid.Column="18" 
+                                                      HorizontalAlignment="Stretch"
+                                                      ItemsSource="{Binding StatusList,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged }"
+                                                      DisplayMember="Value" ValueMember="IdLookupValue"
+                                                      AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True"
+                                                      SelectedIndex="{Binding SelectedStatusIndex, Mode=TwoWay ,UpdateSourceTrigger=PropertyChanged }">
+                                    </dxe:ComboBoxEdit>
+
+                                    <!--Languages-->
+                                    <dxe:ListBoxEdit Name="listBoxLanguage" Grid.Row="0" Grid.Column="20" Grid.RowSpan="7"
+                                                     ItemsSource="{Binding Languages, Mode=TwoWay}"
+                                                     SelectedItem="{Binding LanguageSelected}" 
+                                                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                                     DisplayMember="TwoLetterISOLanguage" ValueMember="IdLanguage" 
+                                                     VerticalContentAlignment="Center"
+                                                     HorizontalContentAlignment="Center"
+                                                     ScrollViewer.VerticalScrollBarVisibility="Hidden">
+                                        <dxmvvm:Interaction.Behaviors>
+                                            <dxmvvm:EventToCommand 
+                                        EventName="SelectedIndexChanged" Command="{Binding ChangeLanguageCommand}"/>
+                                        </dxmvvm:Interaction.Behaviors>
+                                    </dxe:ListBoxEdit>
+
+                                    <!--Name-->
+                                    <!--<TextBlock Grid.Row="2" Grid.Column="0"  Text="{DynamicResource Name}" Style="{StaticResource TextBlock14Style}" VerticalAlignment="Center" />
+                                    <dxe:TextEdit Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="5"
+                                                  Text="{Binding Name}" VerticalContentAlignment="Top" >
+                                        <dxe:TextEdit.EditValue>
+                                            <Binding Path="Name" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                                                <Binding.ValidationRules>
+                                                    <Validation:CatalogueValidation FieldName="Name" ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True"/>
+                                                </Binding.ValidationRules>
+                                            </Binding>
+                                        </dxe:TextEdit.EditValue>
+                                    </dxe:TextEdit>-->
+
+                                    <!--Description-->
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="{DynamicResource Description}" Style="{StaticResource TextBlock14Style}" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                                    <dxe:TextEdit Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="11" Text="{Binding Description,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Top">
+                                        <dxmvvm:Interaction.Behaviors>
+                                            <dxmvvm:EventToCommand 
+                                        EventName="EditValueChanged" Command="{Binding ChangeCatalogueDescriptionCommand}"/>
+                                        </dxmvvm:Interaction.Behaviors>
+                                    </dxe:TextEdit>
+
+                                    <!--<CopyDescription>-->
+                                    <dxe:CheckEdit Grid.Row="2" Grid.Column="14" IsChecked="{Binding IsCheckedCopyDescription}" IsReadOnly="False" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                        <dxmvvm:Interaction.Behaviors>
+                                            <dxmvvm:EventToCommand 
+                                        EventName="Unchecked" Command="{Binding UncheckedCopyDescriptionCommand}"/>
+                                        </dxmvvm:Interaction.Behaviors>
+                                    </dxe:CheckEdit>
+                                    <TextBlock Grid.Row="2" Grid.Column="14" Margin="25 0 0 0" Grid.ColumnSpan="6" Text="{DynamicResource CopyDescription}" Style="{StaticResource TextBlock14Style}" VerticalAlignment="Center" />
+                                </Grid>
+
+                                <!--<dxwui:FlipView Grid.Column="1"
+                                                IsAnimationEnabled="True"
+                                                BorderThickness=".1" BorderBrush="Gray" 
+                                                VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                                    <Grid>
+                                        <dxe:ImageEdit Stretch="Uniform" Grid.Column="0"
+                                                       ShowBorder="False" VerticalAlignment="Center" ShowLoadDialogOnClickMode="Never" ShowMenu="False"
+                                                       Source="{Binding SelectedPicture.Image, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                                    </Grid>
+                                </dxwui:FlipView>-->
+
+                                <dxwui:FlipView Grid.Column="1" 
+                                                IsAnimationEnabled="True"
+                                                BorderThickness=".1" BorderBrush="Gray" 
+                                                VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                                                >
+
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="80*" />
+                                            <RowDefinition Height="20*" />
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="60*"/>
+                                            <ColumnDefinition Width="40*" />
+                                        </Grid.ColumnDefinitions>
+                                        <dxe:ImageEdit Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Name="ImagePlace" Stretch="Uniform"
+                                                       ShowBorder="False" VerticalAlignment="Center" ShowLoadDialogOnClickMode="Never" ShowMenu="False"
+                                                       Source="{Binding SelectedPicture.Image, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+
+                                            <dxmvvm:Interaction.Behaviors>
+                                                <dxmvvm:EventToCommand Command="{Binding GroupBoxPictureDoubleClickCommand}" 
+                                                                    EventName="MouseDoubleClick" 
+                                                                    CommandParameter="{Binding ElementName= ImagePlace}" >
+                                                    <dxmvvm:EventToCommand.EventArgsConverter>
+                                                        <dx:EventArgsToDataRowConverter/>
+                                                    </dxmvvm:EventToCommand.EventArgsConverter>
+                                                </dxmvvm:EventToCommand>
+                                            </dxmvvm:Interaction.Behaviors>
+                                        </dxe:ImageEdit>
+
+                                        <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left" >
+
+                                            <Button  Name="LeftPicture" ToolTip="{DynamicResource ButtonPrevious}"
+                                                                        Command="{Binding PreviousImageCommand}" Margin="5,0,5,0">
+                                                <Button.ContentTemplate>
+                                                    <DataTemplate >
+                                                        <Image Height="12" Width="12" Style="{DynamicResource LeftImage}" />
+                                                    </DataTemplate>
+                                                </Button.ContentTemplate>
+                                                <Button.Style>
+                                                    <Style TargetType="{x:Type Button}">
+                                                        <Style.Triggers>
+                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                <Setter Property="Cursor" Value="Hand"/>
+                                                            </Trigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                            </Button>
+
+                                            <TextBlock  HorizontalAlignment="Center" Margin="5,0,5,0" VerticalAlignment="Center">
+                                            <Run Text="{Binding SelectedPicture.Id, UpdateSourceTrigger=PropertyChanged}" />
+                                            <Run Text="|"/>
+                                            <Run Text="{Binding PictureList.Count, Mode=OneWay}"/>
+                                            </TextBlock>
+
+                                            <Button  Name="RightPicture" ToolTip="{DynamicResource ButtonNext}"
+                                                                        Command="{Binding NextImageCommand}" Margin="5,0,0,0">
+                                                <Button.ContentTemplate>
+                                                    <DataTemplate >
+                                                        <Image Height="12" Width="12" Style="{ DynamicResource RightImage}" />
+                                                    </DataTemplate>
+                                                </Button.ContentTemplate>
+                                                <Button.Style>
+                                                    <Style TargetType="{x:Type Button}">
+                                                        <Style.Triggers>
+                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                <Setter Property="Cursor" Value="Hand"/>
+                                                            </Trigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                            </Button>
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" >
+                                            <Button  Name="addRowItemPicture" ToolTip="{DynamicResource ButtonAdd}"
+                                                                        Command="{Binding CommandAddPictureInGrid}" Margin="0,0,5,0">
+                                                <Button.ContentTemplate>
+                                                    <DataTemplate >
+                                                        <Image Height="12" Width="12" Style="{ DynamicResource PCMAddButtonImageStyleForMenus}" />
+                                                    </DataTemplate>
+                                                </Button.ContentTemplate>
+                                                <Button.Style>
+                                                    <Style TargetType="{x:Type Button}">
+                                                        <Style.Triggers>
+                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                <Setter Property="Cursor" Value="Hand"/>
+                                                            </Trigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                            </Button>
+
+                                            <Button  Name="deleteRowItem" ToolTip="{DynamicResource Delete}">
+                                                <Button.ContentTemplate>
+                                                    <DataTemplate>
+                                                        <Image Height="16" Width="16" Style="{ DynamicResource DeleteStyle}" />
+                                                    </DataTemplate>
+                                                </Button.ContentTemplate>
+                                                <Button.Style>
+                                                    <Style TargetType="{x:Type Button}">
+                                                        <Style.Triggers>
+                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                <Setter Property="Cursor" Value="Hand"/>
+                                                            </Trigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                            </Button>
+                                        </StackPanel>
+                                    </Grid>
+                                </dxwui:FlipView>
+
+                            </Grid>
+
+                            <Grid Grid.Row="1">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="80*"/>
+                                    <ColumnDefinition Width="20*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Grid Grid.Row="0">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*"/>   <!--ways and spare part horizontal-->
+                                        <RowDefinition Height="5"/>
+                                        <RowDefinition Height="*"/>   <!--options and detections horizontal-->
+                                        <RowDefinition Height="5"/>
+                                        <RowDefinition Height="*"/>   <!--family-->
+                                        <RowDefinition Height="5"/>
+                                        <RowDefinition Height="35"/>  <!--buttons-->
+                                    </Grid.RowDefinitions>
+
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="5"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="5"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <!--Way-->
+                                    <dxdo:LayoutControlItem CaptionLocation="Top" Grid.Row="0" Grid.Column="0" >
+                                        <dxdo:LayoutControlItem.CaptionTemplate>
+                                            <DataTemplate>
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="{DynamicResource CaptionWay}"/>
+                                                    <TextBlock Grid.Column="1" VerticalAlignment="Center" Text=" : "/>
+                                                    <TextBlock Grid.Column="2" VerticalAlignment="Center" Text="{Binding Ways.Count, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </dxdo:LayoutControlItem.CaptionTemplate>
+                                        <dxe:ListBoxEdit Name="listBoxWaysDragInMiddle"
+                                                                ItemsSource="{Binding Ways, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                                                DisplayMember="Name" ValueMember="Id"
+                                                                dx:ListBoxDragDropBehavior.AllowDragDrop="True"
+                                                                ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                                                ScrollViewer.VerticalScrollBarVisibility="Auto">
+
+                                            <dxe:ListBoxEdit.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Grid Background="{DynamicResource SelectedItemBackgroud}">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="5"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="5"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="2"/>
+                                                        </Grid.ColumnDefinitions>
+
+                                                        <TextBlock Grid.Column="1"
+                                                                       HorizontalAlignment="Stretch"
+                                                                       VerticalAlignment="Center"
+                                                                       Background="{DynamicResource SelectedItemBackgroud}"
+                                                                       Style="{DynamicResource TextBlock14Style}"
+                                                                       Text="{Binding Path=Name}" />
+
+                                                        <dxe:ButtonEdit Grid.Column="3" Margin="0 1 0 1"
+                                                                            HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                            HorizontalContentAlignment="Center" VerticalContentAlignment="Center" 
+                                                                            ShowText="False" ShowBorder="False"
+                                                                            AllowDefaultButton="False">
+                                                            <dxe:ButtonEdit.Buttons>
+                                                                <dxe:ButtonInfo GlyphKind="Cancel">
+                                                                    <dxmvvm:Interaction.Behaviors>
+                                                                        <dxmvvm:EventToCommand Command="{Binding DataContext.WayCancelCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                                                   EventName="Click"
+                                                                                                   CommandParameter="{Binding Path=.}" />
+                                                                    </dxmvvm:Interaction.Behaviors>
+                                                                </dxe:ButtonInfo>
+                                                            </dxe:ButtonEdit.Buttons>
+                                                        </dxe:ButtonEdit>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </dxe:ListBoxEdit.ItemTemplate>
+                                            <dxe:ListBoxEdit.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <WrapPanel />
+                                                </ItemsPanelTemplate>
+                                            </dxe:ListBoxEdit.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <WrapPanel />
+                                            </ItemsPanelTemplate>
+
+                                            <dxmvvm:Interaction.Behaviors>
+                                                <dxmvvm:EventToCommand Command="{Binding CommandOnDragRecordOverWay}"
+                                                            Event="dx:ListBoxDragDropBehavior.DragRecordOver" 
+                                                            PassEventArgsToCommand="True"/>
+                                            </dxmvvm:Interaction.Behaviors>
+                                        </dxe:ListBoxEdit>
+                                    </dxdo:LayoutControlItem>
+
+                                    <!--Options-->
+                                    <dxdo:LayoutControlItem CaptionLocation="Top" Grid.Row="2" Grid.Column="0">
+                                        <dxdo:LayoutControlItem.CaptionTemplate>
+                                            <DataTemplate>
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="{DynamicResource CaptionOptions}"/>
+                                                    <TextBlock Grid.Column="1" VerticalAlignment="Center" Text=" : "/>
+                                                    <TextBlock Grid.Column="2" VerticalAlignment="Center" Text="{Binding Options.Count, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </dxdo:LayoutControlItem.CaptionTemplate>
+                                        <dxe:ListBoxEdit Name="listBoxOptionDragInMiddle" 
+                                                                ItemsSource="{Binding Options, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                                                DisplayMember="Name" ValueMember="Id"
+                                                                dx:ListBoxDragDropBehavior.AllowDragDrop="True"
+                                                                ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                                                ScrollViewer.VerticalScrollBarVisibility="Auto">
+
+                                            <dxe:ListBoxEdit.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Grid Background="{DynamicResource SelectedItemBackgroud}">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="5"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="5"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="2"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <TextBlock Grid.Column="1"
+                                                                       HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                                                                       Background="{DynamicResource SelectedItemBackgroud}"
+                                                                       Style="{DynamicResource TextBlock14Style}"
+                                                                       Text="{Binding Path=Name}" />
+
+                                                        <dxe:ButtonEdit Grid.Column="3" Margin="0 1 0 1"
+                                                                            HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                            HorizontalContentAlignment="Center" VerticalContentAlignment="Center" 
+                                                                            ShowText="False" ShowBorder="False"
+                                                                            AllowDefaultButton="False">
+                                                            <dxe:ButtonEdit.Buttons>
+                                                                <dxe:ButtonInfo GlyphKind="Cancel">
+                                                                    <dxmvvm:Interaction.Behaviors>
+                                                                        <dxmvvm:EventToCommand Command="{Binding DataContext.OptionsCancelCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                                               EventName="Click"
+                                                                                               CommandParameter="{Binding Path=.}" />
+                                                                    </dxmvvm:Interaction.Behaviors>
+                                                                </dxe:ButtonInfo>
+                                                            </dxe:ButtonEdit.Buttons>
+                                                        </dxe:ButtonEdit>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </dxe:ListBoxEdit.ItemTemplate>
+                                            <dxe:ListBoxEdit.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <WrapPanel />
+                                                </ItemsPanelTemplate>
+                                            </dxe:ListBoxEdit.ItemsPanel>
+
+                                            <dxmvvm:Interaction.Behaviors>
+                                                <dxmvvm:EventToCommand Command="{Binding CommandOnDragRecordOverOptions}"
+                                                            Event="dx:ListBoxDragDropBehavior.DragRecordOver" 
+                                                            PassEventArgsToCommand="True"/>
+                                            </dxmvvm:Interaction.Behaviors>
+                                        </dxe:ListBoxEdit>
+                                    </dxdo:LayoutControlItem>
+
+                                    <!--Detections-->
+                                    <dxdo:LayoutControlItem CaptionLocation="Top" Grid.Row="2" Grid.Column="2">
+                                        <dxdo:LayoutControlItem.CaptionTemplate>
+                                            <DataTemplate>
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="{DynamicResource CaptionDetections}"/>
+                                                    <TextBlock Grid.Column="1" VerticalAlignment="Center" Text=" : "/>
+                                                    <TextBlock Grid.Column="2" VerticalAlignment="Center" Text="{Binding Detections.Count, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </dxdo:LayoutControlItem.CaptionTemplate>
+                                        <dxe:ListBoxEdit Name="listBoxDetectionsDragInMiddle" 
+                                                            ItemsSource="{Binding Detections, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                            HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                                            DisplayMember="Name" ValueMember="Id"
+                                                            dx:ListBoxDragDropBehavior.AllowDragDrop="True"
+                                                            ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                                            ScrollViewer.VerticalScrollBarVisibility="Auto">
+
+                                            <dxe:ListBoxEdit.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Grid Background="{DynamicResource SelectedItemBackgroud}">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="5"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="5"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="2"/>
+                                                        </Grid.ColumnDefinitions>
+
+                                                        <TextBlock Grid.Column="1"
+                                                                       HorizontalAlignment="Stretch" VerticalAlignment="Center" 
+                                                                       Background="{DynamicResource SelectedItemBackgroud}"
+                                                                       Style="{DynamicResource TextBlock14Style}"
+                                                                       Text="{Binding Path=Name}" />
+
+                                                        <dxe:ButtonEdit Grid.Column="3" Margin="0 1 0 1"
+                                                                            HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                            HorizontalContentAlignment="Center" VerticalContentAlignment="Center" 
+                                                                            ShowText="False" ShowBorder="False"
+                                                                            AllowDefaultButton="False">
+                                                            <dxe:ButtonEdit.Buttons>
+                                                                <dxe:ButtonInfo GlyphKind="Cancel">
+                                                                    <dxmvvm:Interaction.Behaviors>
+                                                                        <dxmvvm:EventToCommand Command="{Binding DataContext.DetectionsCancelCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                                                   EventName="Click"
+                                                                                                   CommandParameter="{Binding Path=.}" />
+                                                                    </dxmvvm:Interaction.Behaviors>
+                                                                </dxe:ButtonInfo>
+                                                            </dxe:ButtonEdit.Buttons>
+                                                        </dxe:ButtonEdit>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </dxe:ListBoxEdit.ItemTemplate>
+                                            <dxe:ListBoxEdit.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <WrapPanel />
+                                                </ItemsPanelTemplate>
+                                            </dxe:ListBoxEdit.ItemsPanel>
+
+                                            <dxmvvm:Interaction.Behaviors>
+                                                <dxmvvm:EventToCommand Command="{Binding CommandOnDragRecordOverDetections}"
+                                                            Event="dx:ListBoxDragDropBehavior.DragRecordOver" 
+                                                            PassEventArgsToCommand="True"/>
+                                            </dxmvvm:Interaction.Behaviors>
+                                        </dxe:ListBoxEdit>
+                                    </dxdo:LayoutControlItem>
+
+                                    <!--Spare Parts-->
+                                    <dxdo:LayoutControlItem CaptionLocation="Top" Grid.Row="0" Grid.Column="2" >
+                                        <dxdo:LayoutControlItem.CaptionTemplate>
+                                            <DataTemplate>
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="{DynamicResource CaptionSpareParts}"/>
+                                                    <TextBlock Grid.Column="1" VerticalAlignment="Center" Text=" : "/>
+                                                    <TextBlock Grid.Column="2" VerticalAlignment="Center" Text="{Binding SpareParts.Count, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </dxdo:LayoutControlItem.CaptionTemplate>
+                                        <dxe:ListBoxEdit Name="listBoxSparePartsDragInMiddle" 
+                                                             ItemsSource="{Binding SpareParts, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                             HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                                             DisplayMember="Name" ValueMember="Id"
+                                                             dx:ListBoxDragDropBehavior.AllowDragDrop="True"
+                                                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                                             ScrollViewer.VerticalScrollBarVisibility="Auto">
+
+                                            <dxe:ListBoxEdit.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Grid Background="{DynamicResource SelectedItemBackgroud}">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="5"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="5"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="2"/>
+                                                        </Grid.ColumnDefinitions>
+
+                                                        <TextBlock Grid.Column="1"
+                                                                       HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                                                                       Background="{DynamicResource SelectedItemBackgroud}"
+                                                                       Style="{DynamicResource TextBlock14Style}"
+                                                                       Text="{Binding Path=Name}" />
+
+                                                        <dxe:ButtonEdit Grid.Column="3" Margin="0 1 0 1"
+                                                                            HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                            HorizontalContentAlignment="Center" VerticalContentAlignment="Center" 
+                                                                            ShowText="False" ShowBorder="False"
+                                                                            AllowDefaultButton="False">
+                                                            <dxe:ButtonEdit.Buttons>
+                                                                <dxe:ButtonInfo GlyphKind="Cancel">
+                                                                    <dxmvvm:Interaction.Behaviors>
+                                                                        <dxmvvm:EventToCommand Command="{Binding DataContext.SparePartsCancelCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                                               EventName="Click"
+                                                                                               CommandParameter="{Binding Path=.}" />
+                                                                    </dxmvvm:Interaction.Behaviors>
+                                                                </dxe:ButtonInfo>
+                                                            </dxe:ButtonEdit.Buttons>
+                                                        </dxe:ButtonEdit>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </dxe:ListBoxEdit.ItemTemplate>
+                                            <dxe:ListBoxEdit.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <WrapPanel />
+                                                </ItemsPanelTemplate>
+                                            </dxe:ListBoxEdit.ItemsPanel>
+
+                                            <dxmvvm:Interaction.Behaviors>
+                                                <dxmvvm:EventToCommand Command="{Binding CommandOnDragRecordOverSpareParts}"
+                                                            Event="dx:ListBoxDragDropBehavior.DragRecordOver" 
+                                                            PassEventArgsToCommand="True"/>
+                                            </dxmvvm:Interaction.Behaviors>
+                                        </dxe:ListBoxEdit>
+                                    </dxdo:LayoutControlItem>
+
+                                    <!--Family-->
+                                    <dxdo:LayoutControlItem CaptionLocation="Top" Grid.Row="4" Grid.ColumnSpan="3">
+                                        <dxdo:LayoutControlItem.CaptionTemplate>
+                                            <DataTemplate>
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="{DynamicResource CaptionFamily}"/>
+                                                    <TextBlock Grid.Column="1" VerticalAlignment="Center" Text=" : "/>
+                                                    <TextBlock Grid.Column="2" VerticalAlignment="Center" Text="{Binding Families.Count, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </dxdo:LayoutControlItem.CaptionTemplate>
+                                        <dxe:ListBoxEdit Name="listBoxFamilyDragInMiddle"
+                                                                ItemsSource="{Binding Families, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                                                DisplayMember="Name" ValueMember="Id"
+                                                                dx:ListBoxDragDropBehavior.AllowDragDrop="True"
+                                                                ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                                                ScrollViewer.VerticalScrollBarVisibility="Auto">
+
+                                            <dxe:ListBoxEdit.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Grid Background="{DynamicResource SelectedItemBackgroud}">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="5"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="5"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="2"/>
+                                                        </Grid.ColumnDefinitions>
+
+                                                        <TextBlock Grid.Column="1"
+                                                                       HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                                                                       Background="{DynamicResource SelectedItemBackgroud}"
+                                                                       Style="{DynamicResource TextBlock14Style}"
+                                                                       Text="{Binding Path=Name}" />
+
+                                                        <dxe:ButtonEdit Grid.Column="3" Margin="0 1 0 1"
+                                                                            HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                            HorizontalContentAlignment="Center" VerticalContentAlignment="Center" 
+                                                                            ShowText="False" ShowBorder="False"
+                                                                            AllowDefaultButton="False">
+                                                            <dxe:ButtonEdit.Buttons>
+                                                                <dxe:ButtonInfo GlyphKind="Cancel">
+                                                                    <dxmvvm:Interaction.Behaviors>
+                                                                        <dxmvvm:EventToCommand Command="{Binding DataContext.FamilyCancelCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                                               EventName="Click"
+                                                                                               CommandParameter="{Binding Path=.}" />
+                                                                    </dxmvvm:Interaction.Behaviors>
+                                                                </dxe:ButtonInfo>
+                                                            </dxe:ButtonEdit.Buttons>
+                                                        </dxe:ButtonEdit>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </dxe:ListBoxEdit.ItemTemplate>
+                                            <dxe:ListBoxEdit.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <WrapPanel />
+                                                </ItemsPanelTemplate>
+                                            </dxe:ListBoxEdit.ItemsPanel>
+
+                                            <dxmvvm:Interaction.Behaviors>
+                                                <dxmvvm:EventToCommand Command="{Binding CommandOnDragRecordOverFamily}"
+                                                            Event="dx:ListBoxDragDropBehavior.DragRecordOver" 
+                                                            PassEventArgsToCommand="True"/>
+                                            </dxmvvm:Interaction.Behaviors>
+                                        </dxe:ListBoxEdit>
+                                    </dxdo:LayoutControlItem>
+
+                                    <!--Customers-->
+                                    <!--<dxdo:LayoutControlItem Caption="{DynamicResource CaptionCustomers}" CaptionLocation="Top" >
+                                        <dxe:ListBoxEdit Name="listBoxCustomerDragInMiddle" Height="50"
+                                                         ItemsSource="{Binding Customers, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                            HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                            DisplayMember="Name" ValueMember="Id"
+                                            FilterCriteria="{Binding FilterCriteria, ElementName=searchControlWays}"
+                                            dx:ListBoxDragDropBehavior.AllowDragDrop="True">
+
+                                            <dxe:ListBoxEdit.ItemTemplate>
+                                                <DataTemplate>
+                                                    <StackPanel Orientation="Horizontal" Background="{DynamicResource SelectedItemBackgroud}">
+                                                        <TextBlock HorizontalAlignment="Stretch" Background="{DynamicResource SelectedItemBackgroud}"
+                                                                   Style="{DynamicResource TextBlock14Style}"
+                                                                   Text="{Binding Path=Name}" />
+                                                        <dxe:ButtonEdit HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                        HorizontalContentAlignment="Center" VerticalContentAlignment="Center" 
+                                                                        ShowText="False" ShowBorder="False"
+                                                                        AllowDefaultButton="False">
+                                                            <dxe:ButtonEdit.Buttons>
+                                                                <dxe:ButtonInfo GlyphKind="Cancel">
+                                                                    <dxmvvm:Interaction.Behaviors>
+                                                                        <dxmvvm:EventToCommand Command="{Binding DataContext.CustomersCancelCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                                               EventName="Click"
+                                                                                               CommandParameter="{Binding Path=.}" />
+                                                                    </dxmvvm:Interaction.Behaviors>
+                                                                </dxe:ButtonInfo>
+                                                            </dxe:ButtonEdit.Buttons>
+                                                        </dxe:ButtonEdit>
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </dxe:ListBoxEdit.ItemTemplate>
+                                            <dxe:ListBoxEdit.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <WrapPanel />
+                                                </ItemsPanelTemplate>
+                                            </dxe:ListBoxEdit.ItemsPanel>
+
+                                            <dxmvvm:Interaction.Behaviors>
+                                                <dxmvvm:EventToCommand Command="{Binding CommandOnDragRecordOverCustomers}"
+                                                            Event="dx:ListBoxDragDropBehavior.DragRecordOver" 
+                                                            PassEventArgsToCommand="True"/>
+                                            </dxmvvm:Interaction.Behaviors>
+                                        </dxe:ListBoxEdit>
+                                    </dxdo:LayoutControlItem>-->
+
+                                    <Grid Grid.Row="6" ShowGridLines="False" Grid.Column="0" Grid.ColumnSpan="3">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="50"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <Button Grid.Row="3" Grid.Column="0"
+                                                HorizontalAlignment="Right"
+                                                Content="{DynamicResource AddCatalogueAcceptButton}"
+                                                Command="{Binding AddCatelogueItemAcceptButtonCommand}"
+                                                Height="30"
+                                                Width="100" />
+
+                                        <Button Grid.Row="3" Grid.Column="2"
+                                                HorizontalAlignment="Left"
+                                                Content="{DynamicResource AddCatalogueCancelButton}"
+                                                Command="{Binding AddCatelogueItemCancelButtonCommand}"
+                                                Height="30"
+                                                Width="100" />
+                                    </Grid>
+                                </Grid>
+
+                                <Grid x:Name="ImagesGrid" Grid.Column="1" ShowGridLines="False"
+                                          VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                                    <dxlc:LayoutControl Grid.Row="0" x:Name="layoutControl1" Orientation="Vertical" Padding="0">
+
+                                       
+
+                                        <!--Files-->
+                                        <dxlc:LayoutGroup x:Name="GroupFiles" dxlc:LayoutControl.AllowHorizontalSizing="True"
+                                              Header="{DynamicResource Files}" View="GroupBox" 
+                                              Padding="-10"
+                                              IsCollapsible="True" IsCollapsed="False">
+                                            <dxg:GridControl x:Name="gridFiles" ShowBorder="True" MaxHeight="500" 
+                                             ItemsSource="{Binding CatalogueFilesList, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                             SelectedItem="{Binding SelectedCatalogueFile, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                             >
+
+                                                <dxg:GridControl.Columns>
+                                                    <dxg:GridColumn  Width="*" FixedWidth="True" ReadOnly="True" FieldName="Name" Header="{DynamicResource NamePicture}" >
+                                                        <dxg:GridColumn.CellTemplate>
+                                                            <DataTemplate>
+                                                                <Grid>
+                                                                    <Grid.ColumnDefinitions>
+                                                                        <ColumnDefinition Width="*"/>
+                                                                        <ColumnDefinition Width="Auto"/>
+                                                                    </Grid.ColumnDefinitions>
+
+                                                                    <TextBlock Grid.Column="0" Text="{Binding RowData.Row.SavedFileName}" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                                                                    <Button Grid.Column="1" HorizontalAlignment="Center"  Margin="5,0,0,0" 
+                                                                        CommandParameter="{Binding RowData.Row}" Command="{Binding DataContext.OpenPDFDocumentCommand,RelativeSource={RelativeSource AncestorType={x:Type dxlc:LayoutGroup}}}">
+                                                                        <Button.ContentTemplate>
+                                                                            <DataTemplate>
+                                                                        <Image Height="12" Width="12" Source="/Emdep.Geos.Modules.PCM;component/Assets/Images/pdf-icon.png" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                                                            </DataTemplate>
+                                                                        </Button.ContentTemplate>
+                                                                        <Button.Style>
+                                                                            <Style TargetType="{x:Type Button}">
+                                                                                <Style.Triggers>
+                                                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                                                        <Setter Property="Cursor" Value="Hand"/>
+                                                                                    </Trigger>
+                                                                                </Style.Triggers>
+                                                                            </Style>
+                                                                        </Button.Style>
+                                                                    </Button>
+                                                                </Grid>
+                                                            </DataTemplate>
+                                                        </dxg:GridColumn.CellTemplate>
+                                                    </dxg:GridColumn>
+                                                    <dxg:GridColumn Width="45" FieldName="" FixedWidth="True" AllowColumnFiltering="False">
+                                                        <dxg:GridColumn.HeaderTemplate>
+                                                            <DataTemplate>
+                                                                <Button Name="addRowItemFiles" ToolTip="{DynamicResource ButtonAdd}" Command="{Binding DataContext.AddRowItemFilesCommand,RelativeSource={RelativeSource AncestorType={x:Type dxlc:LayoutGroup}}}">
+                                                                    <Button.ContentTemplate>
+                                                                        <DataTemplate>
+                                                                            <Image Height="12" Width="12" Style="{DynamicResource PCMAddButtonImageStyleForMenus}" />
+                                                                        </DataTemplate>
+                                                                    </Button.ContentTemplate>
+                                                                    <Button.Style>
+                                                                        <Style TargetType="{x:Type Button}">
+                                                                            <Style.Triggers>
+                                                                                <Trigger Property="IsMouseOver" Value="True">
+                                                                                    <Setter Property="Cursor" Value="Hand"/>
+                                                                                    <Setter Property="BorderBrush" Value="White"/>
+                                                                                </Trigger>
+                                                                            </Style.Triggers>
+                                                                        </Style>
+                                                                    </Button.Style>
+                                                                </Button>
+                                                            </DataTemplate>
+                                                        </dxg:GridColumn.HeaderTemplate>
+                                                        <dxg:GridColumn.CellTemplate>
+                                                            <DataTemplate>
+                                                                <Button Name="deleteRowItem" ToolTip="{DynamicResource Delete}" Command="{Binding DataContext.DeleteRowItemFilesCommand,RelativeSource={RelativeSource AncestorType={x:Type dxlc:LayoutGroup}}}">
+                                                                    <Button.ContentTemplate>
+                                                                        <DataTemplate>
+                                                                            <Image Height="16" Width="16"  Style="{ DynamicResource DeleteStyle}" />
+                                                                        </DataTemplate>
+                                                                    </Button.ContentTemplate>
+                                                                    <Button.Style>
+                                                                        <Style TargetType="{x:Type Button}">
+                                                                            <Style.Triggers>
+                                                                                <Trigger Property="IsMouseOver" Value="True">
+                                                                                    <Setter Property="Cursor" Value="Hand"/>
+                                                                                </Trigger>
+                                                                            </Style.Triggers>
+                                                                        </Style>
+                                                                    </Button.Style>
+                                                                </Button>
+                                                            </DataTemplate>
+                                                        </dxg:GridColumn.CellTemplate>
+                                                    </dxg:GridColumn>
+                                                </dxg:GridControl.Columns>
+
+                                                <dxg:GridControl.View>
+                                                    <dxg:TableView x:Name="FilesTableView"
+                                                    ShowGroupedColumns="True"
+                                                    HorizontalScrollbarVisibility="Hidden"
+                                                    VerticalScrollbarVisibility="Hidden"
+                                                    ShowIndicator="False"
+                                                    ShowColumnHeaders="True"
+                                                    ShowGroupPanel="False" 
+                                                    AllowEditing="False"
+                                                    NavigationStyle="Row"
+                                                    ShowHorizontalLines="True" 
+                                                    ShowVerticalLines="True"
+                                                    FocusedRow="{Binding Path=SelectedCatalogueFile, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+
+                                                        <dxmvvm:Interaction.Behaviors>
+                                                            <dxmvvm:EventToCommand Command="{Binding DataContext.CatalogueFileDoubleClickCommand, RelativeSource={RelativeSource AncestorType={x:Type dxlc:LayoutGroup}}}"
+                                                             EventName="MouseDoubleClick"
+                                                             CommandParameter="{Binding ElementName=FilesTableView}">
+                                                                <dxmvvm:EventToCommand.EventArgsConverter>
+                                                                    <dx:EventArgsToDataRowConverter />
+                                                                </dxmvvm:EventToCommand.EventArgsConverter>
+                                                            </dxmvvm:EventToCommand>
+                                                        </dxmvvm:Interaction.Behaviors>
+
+                                                    </dxg:TableView>
+                                                </dxg:GridControl.View>
+                                            </dxg:GridControl>
+                                        </dxlc:LayoutGroup>
+
+                                        <!--Links-->
+                                        <dxlc:LayoutGroup x:Name="GroupLinks" dxlc:LayoutControl.AllowHorizontalSizing="True"
+                                              Header="{DynamicResource Links}" 
+                                              View="GroupBox" 
+                                              Padding="-10"
+                                              IsCollapsible="True" IsCollapsed="False">
+                                            <dxg:GridControl x:Name="gridLinks" ShowBorder="True" MaxHeight="500" 
+                                                 ItemsSource="{Binding CatalogueLinkList, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                 SelectedItem="{Binding SelectedCatalogueLink, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
+
+
+                                                <dxg:GridControl.Columns>
+                                                    <dxg:GridColumn FieldName="Address" Width="*" FixedWidth="True" ReadOnly="True" Header="{DynamicResource NamePicture}">
+                                                        <dxg:GridColumn.CellTemplate>
+                                                            <DataTemplate>
+                                                                <TextBlock  Margin="5,0,0,0" VerticalAlignment="Center">
+                                                                    <Hyperlink TargetName="_blank" 
+                                                                               Command="{Binding View.DataContext.HyperlinkForWebsite}" 
+                                                                               CommandParameter="{Binding Data.Address}"
+                                                                               Style="{DynamicResource hyperlinkGridStyle}">
+                                                                        <InlineUIContainer>
+                                                                            <TextBlock Text="{Binding Data.Address}" Style="{DynamicResource HyperlinkTextBlock}" TextDecorations="Underline"/>
+                                                                        </InlineUIContainer>
+                                                                    </Hyperlink>
+                                                                </TextBlock>
+                                                            </DataTemplate>
+                                                        </dxg:GridColumn.CellTemplate>
+                                                    </dxg:GridColumn>
+                                                    <dxg:GridColumn Width="45" FieldName="" FixedWidth="True" AllowColumnFiltering="False">
+                                                        <dxg:GridColumn.HeaderTemplate>
+                                                            <DataTemplate>
+                                                                <Button Name="addRowItemLinks" ToolTip="{DynamicResource ButtonAdd}"  Command="{Binding DataContext.AddRowItemInLinkCommand,RelativeSource={RelativeSource AncestorType={x:Type dxlc:LayoutGroup}}}">
+                                                                    <Button.ContentTemplate>
+                                                                        <DataTemplate>
+                                                                            <Image Height="12" Width="12" Style="{DynamicResource PCMAddButtonImageStyleForMenus}" />
+                                                                        </DataTemplate>
+                                                                    </Button.ContentTemplate>
+                                                                    <Button.Style>
+                                                                        <Style TargetType="{x:Type Button}">
+                                                                            <Style.Triggers>
+                                                                                <Trigger Property="IsMouseOver" Value="True">
+                                                                                    <Setter Property="Cursor" Value="Hand"/>
+                                                                                    <Setter Property="BorderBrush" Value="White"/>
+                                                                                </Trigger>
+                                                                            </Style.Triggers>
+                                                                        </Style>
+                                                                    </Button.Style>
+                                                                </Button>
+                                                            </DataTemplate>
+                                                        </dxg:GridColumn.HeaderTemplate>
+                                                        <dxg:GridColumn.CellTemplate>
+                                                            <DataTemplate>
+                                                                <Button Name="deleteRowItem" ToolTip="{DynamicResource Delete}" Command="{Binding DataContext.DeleteRowItemLinksCommand,RelativeSource={RelativeSource AncestorType={x:Type dxlc:LayoutGroup}}}" >
+                                                                    <Button.ContentTemplate>
+                                                                        <DataTemplate>
+                                                                            <Image Height="16" Width="16"  Style="{ DynamicResource DeleteStyle}" />
+                                                                        </DataTemplate>
+                                                                    </Button.ContentTemplate>
+                                                                    <Button.Style>
+                                                                        <Style TargetType="{x:Type Button}">
+                                                                            <Style.Triggers>
+                                                                                <Trigger Property="IsMouseOver" Value="True">
+                                                                                    <Setter Property="Cursor" Value="Hand"/>
+                                                                                </Trigger>
+                                                                            </Style.Triggers>
+                                                                        </Style>
+                                                                    </Button.Style>
+                                                                </Button>
+                                                            </DataTemplate>
+                                                        </dxg:GridColumn.CellTemplate>
+                                                    </dxg:GridColumn>
+                                                </dxg:GridControl.Columns>
+
+                                                <dxg:GridControl.View>
+                                                    <dxg:TableView x:Name="LinksTableView"
+                                                        ShowGroupedColumns="True"
+                                                        HorizontalScrollbarVisibility="Hidden"
+                                                        VerticalScrollbarVisibility="Hidden"
+                                                        ShowIndicator="False"
+                                                        ShowColumnHeaders="True"
+                                                        ShowGroupPanel="False" 
+                                                        AllowEditing="False"
+                                                        NavigationStyle="Row"
+                                                        ShowHorizontalLines="True" 
+                                                        ShowVerticalLines="True"
+                                                        FocusedRow="{Binding Path=SelectedCatalogueLink, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                                   >
+
+                                                        <dxmvvm:Interaction.Behaviors>
+                                                            <dxmvvm:EventToCommand Command="{Binding DataContext.CatalogueLinkMouseDoubleClickCommand, RelativeSource={RelativeSource AncestorType={x:Type dxlc:LayoutGroup}}}"
+                                                             EventName="MouseDoubleClick"
+                                                             CommandParameter="{Binding ElementName=LinksTableView}">
+                                                                <dxmvvm:EventToCommand.EventArgsConverter>
+                                                                    <dx:EventArgsToDataRowConverter />
+                                                                </dxmvvm:EventToCommand.EventArgsConverter>
+                                                            </dxmvvm:EventToCommand>
+                                                        </dxmvvm:Interaction.Behaviors>
+
+                                                    </dxg:TableView>
+                                                </dxg:GridControl.View>
+                                            </dxg:GridControl>
+                                        </dxlc:LayoutGroup>
+                                    </dxlc:LayoutControl>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                    </dxdo:LayoutPanel>
+                </dxdo:LayoutGroup>
+            </dxdo:LayoutGroup>
+            <!--region #1-->
+            <dxdo:DockLayoutManager.AutoHideGroups>
+
+                <!--Create one AutoHideGroup on the right-->
+
+                <!--Options-->
+                <dxdo:AutoHideGroup DockType="Right" AutoHideSize="300,200">
+                    <dxdo:LayoutPanel Caption="{DynamicResource CaptionOptions}" ItemWidth="200">
+                        <dxdo:LayoutPanel.ControlBoxContentTemplate>
+                            <DataTemplate>
+                                <Button Content=" " 
+                                    Background="Gray" 
+                                    HorizontalContentAlignment="Center"
+                                    Command="{Binding DataContext.AddNewOptionCommand, RelativeSource={RelativeSource AncestorType=UserControl, Mode=FindAncestor}}"
+                                        CommandParameter="{Binding ElementName=listBoxOptions}">
+                                    <Button.ToolTip>
+                                        <TextBlock Text="{DynamicResource ButtonAdd}"/>
+                                    </Button.ToolTip>
+                                    <Button.ContentTemplate>
+                                        <DataTemplate>
+                                            <Image Source="{DynamicResource AddButtonImage}" 
+                                               Height="14" Width="14" 
+                                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </DataTemplate>
+                                    </Button.ContentTemplate>
+                                </Button>
+                            </DataTemplate>
+                        </dxdo:LayoutPanel.ControlBoxContentTemplate>
+                        
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="45"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <dxe:SearchControl x:Name="searchControlOptions" Grid.Row="0" Margin="10"
+                                                HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                                                FilterCondition="Contains"
+                                                FilterByColumnsMode="Custom">
+                                <dxe:SearchControl.ColumnProvider>
+                                    <dxe:SelectorEditColumnProvider>
+                                        <dxe:SelectorEditColumnProvider.CustomColumns>
+                                            <sys:String>Name</sys:String>
+                                        </dxe:SelectorEditColumnProvider.CustomColumns>
+                                    </dxe:SelectorEditColumnProvider>
+                                </dxe:SearchControl.ColumnProvider>
+                            </dxe:SearchControl>
+
+                            <dxe:ListBoxEdit Name="listBoxOptions" Grid.Row="1"  Margin="10"
+                                            ItemsSource="{Binding OptionsMenulist, Mode=TwoWay}"
+                                            HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                            EditValue="{Binding SelectedOptionsType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                            DisplayMember="Name" 
+                                            FilterCriteria="{Binding FilterCriteria, ElementName=searchControlOptions}"
+                                            dx:ListBoxDragDropBehavior.AllowDragDrop="True"
+                                            SelectionMode="Multiple">
+
+                                <!--<dxe:ListBoxEdit.StyleSettings>
+                                    <dxe:CheckedListBoxEditStyleSettings />
+                                </dxe:ListBoxEdit.StyleSettings>-->
+
+                                <dxmvvm:Interaction.Behaviors>
+                                    <dxmvvm:EventToCommand Command="{Binding CommandOnDragRecordOverOptions}"
+                                                            Event="dx:ListBoxDragDropBehavior.DragRecordOver" 
+                                                            PassEventArgsToCommand="True"/>
+
+                                    <dxmvvm:EventToCommand Command="{Binding EditOptionCommand}"
+                                                            EventName="MouseDoubleClick" 
+                                                            PassEventArgsToCommand="True"/>
+
+                                </dxmvvm:Interaction.Behaviors>
+                            </dxe:ListBoxEdit>
+                        </Grid>
+                    </dxdo:LayoutPanel>
+                </dxdo:AutoHideGroup>
+
+                <!--Way-->
+                <dxdo:AutoHideGroup DockType="Right" AutoHideSize="300,200"  >
+                    <!--<dxdo:LayoutPanel Caption="{DynamicResource CaptionWay}" ItemWidth="200" Style="{DynamicResource LayoutAddButtonStyle}">-->
+                    <dxdo:LayoutPanel Caption="{DynamicResource CaptionWay}" ItemWidth="200" Style="{DynamicResource LayoutAddButtonStyle}">
+                        <dxdo:LayoutPanel.ControlBoxContentTemplate>
+                            <DataTemplate>
+                                <Button Content=" " 
+                                    Background="Gray" 
+                                    HorizontalContentAlignment="Center"
+                                    Command="{Binding DataContext.AddNewWayCommand, RelativeSource={RelativeSource AncestorType=UserControl, Mode=FindAncestor}}">
+                                    <Button.ToolTip>
+                                        <TextBlock Text="{DynamicResource ButtonAdd}"/>
+                                    </Button.ToolTip>
+                                    <Button.ContentTemplate>
+                                        <DataTemplate>
+                                            <Image Source="{DynamicResource AddButtonImage}" 
+                                               Height="14" Width="14" 
+                                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </DataTemplate>
+                                    </Button.ContentTemplate>
+                                </Button>
+                            </DataTemplate>
+                        </dxdo:LayoutPanel.ControlBoxContentTemplate>
+
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="45"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <dxe:SearchControl x:Name="searchControlWays" Grid.Row="0" Margin="10"
+                                                HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                                                FilterCondition="Contains"
+                                                FilterByColumnsMode="Custom">
+                                <dxe:SearchControl.ColumnProvider>
+                                    <dxe:SelectorEditColumnProvider>
+                                        <dxe:SelectorEditColumnProvider.CustomColumns>
+                                            <sys:String>Name</sys:String>
+                                        </dxe:SelectorEditColumnProvider.CustomColumns>
+                                    </dxe:SelectorEditColumnProvider>
+                                </dxe:SearchControl.ColumnProvider>
+                            </dxe:SearchControl>
+
+                            <dxe:ListBoxEdit Name="listBoxWays" Grid.Row="1"  Margin="10"
+                                            ItemsSource="{Binding WaysMenulist, Mode=TwoWay}"
+                                            EditValue="{Binding SelectedWaysType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                            HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                            DisplayMember="Name" 
+                                            FilterCriteria="{Binding FilterCriteria, ElementName=searchControlWays}"
+                                            dx:ListBoxDragDropBehavior.AllowDragDrop="True"
+                                            SelectionMode="Multiple">
+
+                                <!--<dxe:ListBoxEdit.StyleSettings>
+                                    <dxe:CheckedListBoxEditStyleSettings />
+                                </dxe:ListBoxEdit.StyleSettings>-->
+
+                                <dxmvvm:Interaction.Behaviors>
+                                    <dxmvvm:EventToCommand Command="{Binding CommandOnDragRecordOverWay}"
+                                                            Event="dx:ListBoxDragDropBehavior.DragRecordOver" 
+                                                            PassEventArgsToCommand="True"/>
+
+                                    <dxmvvm:EventToCommand Command="{Binding EditWayCommand}"
+                                                            EventName="MouseDoubleClick" 
+                                                            PassEventArgsToCommand="True"/>
+
+                                </dxmvvm:Interaction.Behaviors>
+                            </dxe:ListBoxEdit>
+                        </Grid>
+                    </dxdo:LayoutPanel>
+                </dxdo:AutoHideGroup>
+
+                <!--Detections-->
+                <dxdo:AutoHideGroup DockType="Right" AutoHideSize="300,200">
+                    <dxdo:LayoutPanel Caption="{DynamicResource CaptionDetections}" ItemWidth="200" >
+                        <dxdo:LayoutPanel.ControlBoxContentTemplate>
+                            <DataTemplate>
+                                <Button Content=" " 
+                                    Background="Gray" 
+                                    HorizontalContentAlignment="Center"
+                                    Command="{Binding DataContext.AddNewDetectionCommand, RelativeSource={RelativeSource AncestorType=UserControl, Mode=FindAncestor}}">
+                                    <Button.ToolTip>
+                                        <TextBlock Text="{DynamicResource ButtonAdd}"/>
+                                    </Button.ToolTip>
+                                    <Button.ContentTemplate>
+                                        <DataTemplate>
+                                            <Image Source="{DynamicResource AddButtonImage}" 
+                                               Height="14" Width="14" 
+                                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </DataTemplate>
+                                    </Button.ContentTemplate>
+                                </Button>
+                            </DataTemplate>
+                        </dxdo:LayoutPanel.ControlBoxContentTemplate>
+                        
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="45"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <dxe:SearchControl x:Name="searchControlDetections" Grid.Row="0" Margin="10"
+                                                HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                                                FilterCondition="Contains"
+                                                FilterByColumnsMode="Custom">
+                                <dxe:SearchControl.ColumnProvider>
+                                    <dxe:SelectorEditColumnProvider>
+                                        <dxe:SelectorEditColumnProvider.CustomColumns>
+                                            <sys:String>Name</sys:String>
+                                        </dxe:SelectorEditColumnProvider.CustomColumns>
+                                    </dxe:SelectorEditColumnProvider>
+                                </dxe:SearchControl.ColumnProvider>
+                            </dxe:SearchControl>
+
+                            <dxe:ListBoxEdit Name="listBoxDetections" Grid.Row="1"  Margin="10"
+                                            ItemsSource="{Binding DetectionsMenulist, Mode=TwoWay}"
+                                            EditValue="{Binding SelectedDetectionsType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                            HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                            DisplayMember="Name" 
+                                            FilterCriteria="{Binding FilterCriteria, ElementName=searchControlDetections}"
+                                            dx:ListBoxDragDropBehavior.AllowDragDrop="True"
+                                            SelectionMode="Multiple">
+
+                                <!--<dxe:ListBoxEdit.StyleSettings>
+                                    <dxe:CheckedListBoxEditStyleSettings />
+                                </dxe:ListBoxEdit.StyleSettings>-->
+
+                                <dxmvvm:Interaction.Behaviors>
+                                    <dxmvvm:EventToCommand Command="{Binding CommandOnDragRecordOverDetections}"
+                                                            Event="dx:ListBoxDragDropBehavior.DragRecordOver" 
+                                                            PassEventArgsToCommand="True"/>
+
+                                    <dxmvvm:EventToCommand Command="{Binding EditDetectionsCommand}"
+                                                            EventName="MouseDoubleClick" 
+                                                            PassEventArgsToCommand="True"/>
+
+                                </dxmvvm:Interaction.Behaviors>
+                            </dxe:ListBoxEdit>
+                        </Grid>
+                    </dxdo:LayoutPanel>
+                </dxdo:AutoHideGroup>
+
+                <!--Spare Parts-->
+                <dxdo:AutoHideGroup DockType="Right" AutoHideSize="300,200">
+                    <dxdo:LayoutPanel Caption="{DynamicResource CaptionSpareParts}" ItemWidth="200" >
+                        <dxdo:LayoutPanel.ControlBoxContentTemplate>
+                            <DataTemplate>
+                                <Button Content=" " 
+                                    Background="Gray" 
+                                    HorizontalContentAlignment="Center"
+                                    Command="{Binding DataContext.AddNewSparePartCommand, RelativeSource={RelativeSource AncestorType=UserControl, Mode=FindAncestor}}">
+                                    <Button.ToolTip>
+                                        <TextBlock Text="{DynamicResource ButtonAdd}"/>
+                                    </Button.ToolTip>
+                                    <Button.ContentTemplate>
+                                        <DataTemplate>
+                                            <Image Source="{DynamicResource AddButtonImage}" 
+                                               Height="14" Width="14" 
+                                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </DataTemplate>
+                                    </Button.ContentTemplate>
+                                </Button>
+                            </DataTemplate>
+                        </dxdo:LayoutPanel.ControlBoxContentTemplate>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="45"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <dxe:SearchControl x:Name="searchControlSpareParts" Grid.Row="0" Margin="10"
+                                                HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                                                FilterCondition="Contains"
+                                                FilterByColumnsMode="Custom">
+                                <dxe:SearchControl.ColumnProvider>
+                                    <dxe:SelectorEditColumnProvider>
+                                        <dxe:SelectorEditColumnProvider.CustomColumns>
+                                            <sys:String>Name</sys:String>
+                                        </dxe:SelectorEditColumnProvider.CustomColumns>
+                                    </dxe:SelectorEditColumnProvider>
+                                </dxe:SearchControl.ColumnProvider>
+                            </dxe:SearchControl>
+
+                            <dxe:ListBoxEdit Name="listBoxSpareParts" Grid.Row="1"  Margin="10"
+                                            ItemsSource="{Binding SparePartsMenulist, Mode=TwoWay}"
+                                            EditValue="{Binding SelectedSparePartsType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                            HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                            DisplayMember="Name"
+                                            FilterCriteria="{Binding FilterCriteria, ElementName=searchControlSpareParts}"
+                                            dx:ListBoxDragDropBehavior.AllowDragDrop="True"
+                                            SelectionMode="Multiple">
+
+                                <!--<dxe:ListBoxEdit.StyleSettings>
+                                    <dxe:CheckedListBoxEditStyleSettings />
+                                </dxe:ListBoxEdit.StyleSettings>-->
+
+                                <dxmvvm:Interaction.Behaviors>
+                                    <dxmvvm:EventToCommand Command="{Binding CommandOnDragRecordOverSpareParts}"
+                                                            Event="dx:ListBoxDragDropBehavior.DragRecordOver" 
+                                                            PassEventArgsToCommand="True"/>
+
+                                    <dxmvvm:EventToCommand Command="{Binding EditSparePartsCommand}"
+                                                            EventName="MouseDoubleClick" 
+                                                            PassEventArgsToCommand="True"/>
+
+                                </dxmvvm:Interaction.Behaviors>
+                            </dxe:ListBoxEdit>
+                        </Grid>
+                    </dxdo:LayoutPanel>
+                </dxdo:AutoHideGroup>
+
+                <!--<Family>-->
+                <dxdo:AutoHideGroup DockType="Right" AutoHideSize="300,200">
+                    <dxdo:LayoutPanel Caption="{DynamicResource CaptionFamily}" ItemWidth="200" >
+                        <dxdo:LayoutPanel.ControlBoxContentTemplate>
+                            <DataTemplate>
+                                <Button Content=" " 
+                                    Background="Gray" 
+                                    HorizontalContentAlignment="Center"
+                                    Command="{Binding DataContext.AddNewFamilyCommand, RelativeSource={RelativeSource AncestorType=UserControl, Mode=FindAncestor}}">
+                                    <Button.ToolTip>
+                                        <TextBlock Text="{DynamicResource ButtonAdd}"/>
+                                    </Button.ToolTip>
+                                    <Button.ContentTemplate>
+                                        <DataTemplate>
+                                            <Image Source="{DynamicResource AddButtonImage}" 
+                                               Height="14" Width="14" 
+                                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </DataTemplate>
+                                    </Button.ContentTemplate>
+                                </Button>
+                            </DataTemplate>
+                        </dxdo:LayoutPanel.ControlBoxContentTemplate>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="45"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <dxe:SearchControl x:Name="searchControlFamily" Grid.Row="0" Margin="10"
+                                                HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                                                FilterCondition="Contains"
+                                                FilterByColumnsMode="Custom">
+                                <dxe:SearchControl.ColumnProvider>
+                                    <dxe:SelectorEditColumnProvider>
+                                        <dxe:SelectorEditColumnProvider.CustomColumns>
+                                            <sys:String>Name</sys:String>
+                                        </dxe:SelectorEditColumnProvider.CustomColumns>
+                                    </dxe:SelectorEditColumnProvider>
+                                </dxe:SearchControl.ColumnProvider>
+                            </dxe:SearchControl>
+
+                            <dxe:ListBoxEdit Name="listBoxFamily" Grid.Row="1" Margin="10"
+                                            ItemsSource="{Binding FamilyMenulist, Mode=TwoWay}"
+                                            HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                            DisplayMember="Name" ValueMember="Id"
+                                            FilterCriteria="{Binding FilterCriteria, ElementName=searchControlFamily}"
+                                            dx:ListBoxDragDropBehavior.AllowDragDrop="True"
+                                            SelectionMode="Multiple">
+
+                                <!--<dxe:ListBoxEdit.StyleSettings>
+                                    <dxe:CheckedListBoxEditStyleSettings />
+                                </dxe:ListBoxEdit.StyleSettings>-->
+
+                                <dxmvvm:Interaction.Behaviors>
+                                    <dxmvvm:EventToCommand Command="{Binding CommandOnDragRecordOverFamily}"
+                                                            Event="dx:ListBoxDragDropBehavior.DragRecordOver" 
+                                                            PassEventArgsToCommand="True"/>
+                                </dxmvvm:Interaction.Behaviors>
+
+                            </dxe:ListBoxEdit>
+                        </Grid>
+
+                    </dxdo:LayoutPanel>
+                </dxdo:AutoHideGroup>
+
+                <!--Customers-->
+                <!--<dxdo:AutoHideGroup DockType="Right" AutoHideSize="300,200">
+                    <dxdo:LayoutPanel Caption="{DynamicResource CaptionCustomers}" ItemWidth="200" Style="{DynamicResource LayoutAddButtonStyle}" >
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="45"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <dxe:SearchControl x:Name="searchControlCustomers" Grid.Row="0" Margin="10"
+                                                HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                                                FilterCondition="Contains"
+                                                FilterByColumnsMode="Custom">
+                                <dxe:SearchControl.ColumnProvider>
+                                    <dxe:SelectorEditColumnProvider>
+                                        <dxe:SelectorEditColumnProvider.CustomColumns>
+                                            <sys:String>Name</sys:String>
+                                        </dxe:SelectorEditColumnProvider.CustomColumns>
+                                    </dxe:SelectorEditColumnProvider>
+                                </dxe:SearchControl.ColumnProvider>
+                            </dxe:SearchControl>
+
+                            <dxe:ListBoxEdit Name="listBoxCustomers" Grid.Row="1" Margin="10"
+                                            ItemsSource="{Binding CustomersMenulist, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                            HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                            DisplayMember="Name" ValueMember="Id"
+                                            FilterCriteria="{Binding FilterCriteria, ElementName=searchControlCustomers}"
+                                              dx:ListBoxDragDropBehavior.AllowDragDrop="True">
+
+                                <dxe:ListBoxEdit.StyleSettings>
+                                    <dxe:CheckedListBoxEditStyleSettings />
+                                </dxe:ListBoxEdit.StyleSettings>
+
+                                <dxmvvm:Interaction.Behaviors>
+                                    <dxmvvm:EventToCommand Command="{Binding CommandOnDragRecordOverCustomers}"
+                                                            Event="dx:ListBoxDragDropBehavior.DragRecordOver" 
+                                                            PassEventArgsToCommand="True"/>
+                                </dxmvvm:Interaction.Behaviors>
+
+                            </dxe:ListBoxEdit>
+                        </Grid>
+                    </dxdo:LayoutPanel>
+                </dxdo:AutoHideGroup>-->
+
+
+                <!--Change Log-->
+                <dxdo:AutoHideGroup DockType="Bottom" AutoHideSize="300,200">
+                    <dxdo:LayoutPanel Caption="{DynamicResource CaptionChangeLog}" ItemWidth="200" >
+                        <!--<StackPanel>
+                            <dxe:SearchControl x:Name="searchControlItemsChangeLog" Grid.Row="0" Margin="10"
+                                                HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                                                FilterCondition="Contains"
+                                                FilterByColumnsMode="Custom">
+                                <dxe:SearchControl.ColumnProvider>
+                                    <dxe:SelectorEditColumnProvider>
+                                        <dxe:SelectorEditColumnProvider.CustomColumns>
+                                            <sys:String>Name</sys:String>
+                                        </dxe:SelectorEditColumnProvider.CustomColumns>
+                                    </dxe:SelectorEditColumnProvider>
+                                </dxe:SearchControl.ColumnProvider>
+                            </dxe:SearchControl>
+
+                            <dxe:ListBoxEdit Name="listBoxItemsChangeLog" Grid.Row="1" Margin="10"
+                                            ItemsSource="{Binding ChangeLogsMenulist, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                            HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                            DisplayMember="Name" ValueMember="Id"
+                                            FilterCriteria="{Binding FilterCriteria, ElementName=searchControlItemsChangeLog}">
+                            </dxe:ListBoxEdit>
+                        grid cha paste kela ithe SelectedItem="{Binding Path=SelectedJobDescription,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                        </StackPanel>-->
+
+                        <dxg:GridControl VerticalAlignment="Center" HorizontalAlignment="Stretch" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
+                             ItemsSource="{Binding Path=ChangeLogsMenulist,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" SelectionMode="Row"
+                                ImplyNullLikeEmptyStringWhenFiltering="True">
+                            <dxg:GridColumn Header="{DynamicResource User}" FieldName="User" MinWidth="100" Width="180" ReadOnly="True" FixedWidth="True"/>
+                            <dxg:GridColumn Header="{DynamicResource DateUser}" FieldName="Date"  MinWidth="100" Width="250"  ReadOnly="True" FixedWidth="True"/>
+                            <dxg:GridColumn Header="{DynamicResource Action}" FieldName="Action"  MinWidth="100" Width="*" ReadOnly="True" FixedWidth="True"/>
+
+                            <dxg:GridControl.View>
+                                <dxg:TableView x:Name="ChangeLogTableView"
+                               NavigationStyle="Row"
+                               AllowHorizontalScrollingVirtualization="True" 
+                               RowDetailsVisibilityMode="Visible"
+                               ShowHorizontalLines="True"
+                               ShowSearchPanelMode="Always"
+                               ShowColumnHeaders="True"
+                               VerticalScrollbarVisibility="Auto" 
+                               HorizontalScrollbarVisibility="Auto"
+                               AllowFixedColumnMenu="False"
+                               AutoWidth="False"
+                               ShowFixedTotalSummary="True"
+                               ShowSearchPanelCloseButton="True"
+                               SearchPanelHorizontalAlignment="Stretch"
+                               ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly"
+                               AllowGrouping="True"
+                               ShowGroupPanel="False"
+                               ShowIndicator="False" >
+
+                                </dxg:TableView>
+                            </dxg:GridControl.View>
+                        </dxg:GridControl>
+
+                    </dxdo:LayoutPanel>
+                </dxdo:AutoHideGroup>
+                
+            </dxdo:DockLayoutManager.AutoHideGroups>
+            <!--endregion #1-->
+
+        </dxdo:DockLayoutManager>
+    </Grid>
+</UserControl>

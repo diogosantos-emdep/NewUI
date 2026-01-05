@@ -1,0 +1,86 @@
+﻿<dxwui:WinUIDialogWindow x:Class="Emdep.Geos.Modules.Crm.Views.EmdepSitesMapView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+              xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"                        
+       xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+       xmlns:dxm="http://schemas.devexpress.com/winfx/2008/xaml/map"
+                           xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+                         xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+                         xmlns:behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+
+    <!--<Window.Background>
+        <SolidColorBrush Color="#FF494848" Opacity="0"/>
+        -->
+    <!--<SolidColorBrush Color="#4d4d4d " Opacity="0.95"/>-->
+    <!--
+
+    </Window.Background>
+    <Window.Resources>
+        <DataTemplate x:Key="pushpin">
+            <StackPanel ToolTipService.ToolTip="{Binding Path=MapItem.Information}" Margin="-30 -60" >
+                <Image  Source="/Emdep.Geos.Modules.Crm;component/Assets/Images/Icon.ico"  />
+                <TextBlock 
+                    Margin="6"
+                    Foreground="Blue"
+                    Text="{Binding Path=MapItem.Text}" />
+            </StackPanel>
+        </DataTemplate>
+    </Window.Resources>-->
+    <Grid >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Image Source="/Emdep.Geos.Modules.Crm;component/Assets/Images/close.png" Name="imageclose"  VerticalAlignment="Top" HorizontalAlignment="Right" Grid.Row="0"  ></Image>
+        <Border Grid.Row="0">
+            <Border.Style>
+                <Style TargetType="{x:Type Border}" >
+                    <!--<Setter Property="Background" Value="Transparent" />-->
+                    <Setter Property="BorderThickness" Value="1" />
+                    <Setter Property="BorderBrush" Value="Transparent"></Setter>
+
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="BorderThickness" Value="1" />
+                            <Setter Property="BorderBrush" Value="#515151"></Setter>
+                        </Trigger>
+
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+        </Border>
+        <!--<Button Content="X" VerticalAlignment="Top" HorizontalAlignment="Right" Grid.Row="0"> </Button>-->
+        <dxm:MapControl ZoomLevel="12" BorderBrush="Black" CenterPoint="56.359034,43.870425" Grid.Row="1" x:Name="mapconrol1" Height="500" Width="700">
+            <dxm:ImageTilesLayer>
+                <dxm:ImageTilesLayer.DataProvider>
+                    <dxm:BingMapDataProvider Kind="Road" BingKey="AvDFbBPV8HPb4W8q69S960LXa9LCTGDZgo2k2tLQhe6YTchMVJTVaDLo899kViVr"></dxm:BingMapDataProvider>
+                    <!--<dxm:OpenStreetMapDataProvider Kind="Transport" />-->
+                </dxm:ImageTilesLayer.DataProvider>
+            </dxm:ImageTilesLayer>
+            <dxm:VectorLayer>
+                <dxm:MapItemStorage x:Name="mapItems" >
+                    <dxm:MapPushpin  Location="56.359034,43.870425" 
+                                     Text="Spain" 
+                                     Information="Test Spain Information"
+                                     />
+
+                </dxm:MapItemStorage>
+            </dxm:VectorLayer>
+            <dxm:MapControl.ScalePanelOptions>
+                <dxm:ScalePanelOptions HorizontalAlignment="Right" VerticalAlignment="Bottom" Visible="False" />
+            </dxm:MapControl.ScalePanelOptions>
+            <dxm:MapControl.CoordinatesPanelOptions>
+                <dxm:CoordinatesPanelOptions VerticalAlignment="Top" HorizontalAlignment="Right" Visible="False" />
+            </dxm:MapControl.CoordinatesPanelOptions>
+        </dxm:MapControl>
+    </Grid>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="KeyDown">
+            <behaviors:InvokeDelegateCommandAction Command="{Binding CommandTextInput}" CommandParameter="{Binding Path=InvokeParameter, RelativeSource={RelativeSource Self}}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+</dxwui:WinUIDialogWindow>

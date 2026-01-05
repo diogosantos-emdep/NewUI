@@ -1,0 +1,152 @@
+﻿<Window
+    x:Class="Emdep.Geos.Modules.OTM.Views.DocumentView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:RichEdit="http://schemas.devexpress.com/winfx/2008/xaml/richedit"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:dxb="http://schemas.devexpress.com/winfx/2008/xaml/bars"
+    xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+    xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+    xmlns:dxpdf="http://schemas.devexpress.com/winfx/2008/xaml/pdf"
+    xmlns:dxre="http://schemas.devexpress.com/winfx/2008/xaml/richedit"
+    xmlns:dxsps="http://schemas.devexpress.com/winfx/2008/xaml/spreadsheet"
+    xmlns:local="clr-namespace:Emdep.Geos.Modules.OTM.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="{Binding FileName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+    d:DesignHeight="300"
+    d:DesignWidth="300"
+    WindowState="Maximized"
+    mc:Ignorable="d">
+    <Grid>
+        <ContentControl>
+            <ContentControl.Style>
+                <Style TargetType="ContentControl">
+                    <!--  PdfDoc  -->
+                    <Setter Property="Content">
+                        <Setter.Value>
+                            <UIHelper:CustomPdfViewerControlHelper x:Name="pdfViewer" DocumentSource="{Binding PdfDoc}" 
+                                DefaultFileName="{Binding FileName}"  >
+                            </UIHelper:CustomPdfViewerControlHelper>
+                            <!--<dxpdf:PdfViewerControl
+                                x:Name="PdfViewer"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                                CommandBarStyle="Bars"
+                                DocumentSource="{Binding PdfDoc, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />-->
+                        </Setter.Value>
+                    </Setter>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsPdf}" Value="False">
+                            <Setter Property="Content">
+                                <Setter.Value>
+                                    <Image Source="{Binding ConnectorAttachedImage}" Stretch="Uniform" />
+                                </Setter.Value>
+                            </Setter>
+                        </DataTrigger>
+
+                        <!--  IsExcel  -->
+                        <!--  [pramod.misal][09.04.2025][GEOS2-7848]  -->
+                        <DataTrigger Binding="{Binding IsExcel}" Value="True">
+                            <Setter Property="Content">
+                                <Setter.Value>
+                                    <dxsps:SpreadsheetControl
+                                        x:Name="ExcelViewer"
+                                        HorizontalAlignment="Stretch"
+                                        VerticalAlignment="Stretch"
+                                        Background="White"
+                                        CommandBarStyle="Ribbon"
+                                        DocumentSource="{Binding ExcelDoc, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                        Foreground="Black">
+                                        <dxsps:SpreadsheetControl.RibbonActions>
+                                            <dxb:UpdateAction
+                                                ElementName="{x:Static dxsps:DefaultBarItemNames.RibbonCategory_Default}"
+                                                PropertyName="IsSelected"
+                                                Value="True" />
+                                        </dxsps:SpreadsheetControl.RibbonActions>
+                                    </dxsps:SpreadsheetControl>
+
+
+
+                                </Setter.Value>
+                            </Setter>
+                        </DataTrigger>
+                        <!--  [pramod.misal][09.04.2025][GEOS2-7848]  -->
+                        <!--  PNG  -->
+                        <DataTrigger Binding="{Binding IsPng}" Value="True">
+                            <Setter Property="Content">
+                                <Setter.Value>
+                                    <dxe:ImageEdit ShowMenu="True" Source="{Binding PngDoc, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+
+                                        <!--<dxe:ImageEdit.Style>
+                                            <Style>
+                                                <Style.Triggers >
+                                                    <DataTrigger Binding="{Binding DataContext.IsPhoto,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox},UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" Value="false">
+                                                        <Setter Property="dxe:ImageEdit.Stretch" Value="None" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </dxe:ImageEdit.Style>-->
+                                    </dxe:ImageEdit>
+
+
+                                </Setter.Value>
+                            </Setter>
+                        </DataTrigger>
+                        <!--  [pramod.misal][09.04.2025][GEOS2-7848]  -->
+                        <!--  IsWord  -->
+                        <DataTrigger Binding="{Binding IsWord}" Value="True">
+                            <Setter Property="Content">
+                                <Setter.Value>
+                                    <dxre:RichEditControl
+                                        x:Name="WordViewer"
+                                        HorizontalAlignment="Stretch"
+                                        VerticalAlignment="Stretch"
+                                        Background="White"
+                                        CommandBarStyle="Ribbon"
+                                        DocumentSource="{Binding WordDoc, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                        Foreground="Black">
+
+                                        <dxre:RichEditControl.RibbonActions>
+                                            <dxb:UpdateAction
+                                                ElementName="{x:Static dxre:DefaultBarItemNames.RibbonPage_Home}"
+                                                PropertyName="IsSelected"
+                                                Value="True" />
+
+                                        </dxre:RichEditControl.RibbonActions>
+
+                                    </dxre:RichEditControl>
+                                </Setter.Value>
+                            </Setter>
+                        </DataTrigger>
+
+
+
+                 
+
+                        <!--  [pramod.misal][GEOS2-8777][04.07.2025]  -->
+                        <DataTrigger Binding="{Binding IsPptFile}" Value="True">
+                            <Setter Property="Content">
+                                <Setter.Value>
+                                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                        <ItemsControl ItemsSource="{Binding PptFile}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Image
+                                                        Height="400"
+                                                        Margin="10"
+                                                        Source="{Binding}" />
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </ScrollViewer>
+                                </Setter.Value>
+                            </Setter>
+                        </DataTrigger>
+                      
+                    </Style.Triggers>
+
+                </Style>
+            </ContentControl.Style>
+        </ContentControl>
+    </Grid>
+</Window>

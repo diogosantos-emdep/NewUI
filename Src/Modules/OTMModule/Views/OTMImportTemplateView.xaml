@@ -1,0 +1,423 @@
+﻿<UserControl x:Class="Emdep.Geos.Modules.OTM.Views.OTMImportTemplateView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:Converters="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:dxp="http://schemas.devexpress.com/winfx/2008/xaml/printing"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+             xmlns:dxgt="http://schemas.devexpress.com/winfx/2008/xaml/grid/themekeys"
+             xmlns:sysglb="clr-namespace:System.Globalization;assembly=mscorlib"
+             xmlns:dxcn="http://schemas.devexpress.com/winfx/2008/xaml/core/internal"
+             xmlns:dxnav="http://schemas.devexpress.com/winfx/2008/xaml/navigation"
+             xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+             xmlns:dxb="http://schemas.devexpress.com/winfx/2008/xaml/bars"
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             mc:Ignorable="d" 
+             xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+
+    <Grid Background="{DynamicResource EmpDetailBackColor}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="42"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="350"/>
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!--<Label Content="{DynamicResource OTImportTemplate}" HorizontalAlignment="Left" Style="{StaticResource LabelTitleStyle}" Grid.Row="0" Grid.Column="0" />-->
+        <Grid HorizontalAlignment="Right" Grid.Row="0" Grid.Column="1" Margin="0,-5,0,0" >
+            <Grid.RowDefinitions>
+                <RowDefinition Height="AUTO"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="AUTO"/>
+                <ColumnDefinition Width="AUTO" />
+                <ColumnDefinition Width="AUTO" />
+                <ColumnDefinition Width="AUTO" />
+                <ColumnDefinition Width="AUTO" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Add New OtRequestTemplates -->
+            <!--[pramod.misal][GEOS2-6734][06-01-2025]-->
+            <Button Visibility="Visible" Grid.Row="0" Grid.Column="1" Height="40" Width="40" HorizontalAlignment="Right" 
+                    Command="{Binding DataContext.AddNewOtRequestTemplates,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=UserControl}}"
+                    IsEnabled="{Binding IsAddTemplatesButtunEnable}"
+                    CommandParameter="{Binding ElementName=JobDescriptionTableView}" Margin="5,0,5,5"
+                    >
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource AddNewOtRequestTemplates}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Image Style="{DynamicResource AddNewButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+
+            <!-- Refresh OtRequestTemplates Grid-->
+            <Button Visibility="Visible" Grid.Row="0" Grid.Column="2" Height="40" Width="40" HorizontalAlignment="Right" 
+                                Command="{Binding DataContext.RefreshButtonCommand,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                CommandParameter="{Binding ElementName=JobDescriptionTableView}"
+                                Margin="0,0,5,5">
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource ButtonRefresh}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Image Style="{DynamicResource RefreshButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+
+            <!-- Print  List-->
+            <Button Visibility="Visible" Grid.Row="0" Grid.Column="3" Height="40" Width="40" HorizontalAlignment="Right" 
+                        Command="{Binding DataContext.PrintButtonCommand,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=UserControl}}"
+                        CommandParameter="{Binding ElementName=JobDescriptionTableView}" Margin="0,0,5,5">
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource ButtonPrint}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Image Style="{DynamicResource PrinterButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+
+            <!-- Export  List-->
+            <Button Visibility="Visible" Grid.Row="0" Grid.Column="4" Height="40" Width="40" HorizontalAlignment="Right" 
+                    Command="{Binding DataContext.ExportButtonCommand,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=UserControl}}"
+                    CommandParameter="{Binding ElementName=JobDescriptionTableView}" Margin="0,0,5,5">
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource ButtonExportToExcel}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Image Style="{DynamicResource ExcelExportButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+        </Grid>
+
+        <dxg:GridControl VerticalAlignment="Stretch" HorizontalAlignment="Stretch"  Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" FilterString="[InUse] In ('1')"
+                         ItemsSource="{Binding DataContext.POTemplateList[0].OtRequestTemplatesList,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=UserControl}}" SelectionMode="Row"
+                         SelectedItem="{Binding DataContext.POTemplateList[0].SelectedOtRequestTemplates,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay,RelativeSource={RelativeSource AncestorType=UserControl}}"   ImplyNullLikeEmptyStringWhenFiltering="True">
+            <dxg:GridColumn Header="{DynamicResource OTImportTemplateCode}" FieldName="Code" FilterPopupMode="CheckedList" Width="*" ReadOnly="True"  AllowBestFit="true"/>
+            <dxg:GridColumn Header="{DynamicResource OTImportTemplatName}" FieldName="TemplateName"   Width="*" FilterPopupMode="CheckedList" ReadOnly="True" AllowBestFit="true"/>
+            <dxg:GridColumn Header="{DynamicResource OTImportTemplateGroup}" FieldName="Group"   Width="*" FilterPopupMode="CheckedList" ReadOnly="True"  AllowBestFit="true"/>
+            <dxg:GridColumn Header="{DynamicResource OTImportTemplateRegion}" FieldName="Region" Width="*" FilterPopupMode="CheckedList" ReadOnly="True"  AllowBestFit="true"/>
+            <dxg:GridColumn Header="{DynamicResource OTImportTemplateCountry}" FieldName="Country" FilterPopupMode="CheckedList"  Width="*" ReadOnly="True" AllowBestFit="true"/>
+            <dxg:GridColumn Header="{DynamicResource OTImportTemplatePlant}" FieldName="Plant" FilterPopupMode="CheckedList"  Width="*" ReadOnly="True"  AllowBestFit="true"/>
+            <dxg:GridColumn Header="{DynamicResource OTImportTemplateCreatedBy}" FieldName="CreatedBy" FilterPopupMode="CheckedList"  Width="*" ReadOnly="True"  AllowBestFit="true"/>
+            <dxg:GridColumn Header="{DynamicResource OTImportTemplateCreatedAt}" 
+                FieldName="CreatedAt" 
+                Width="*" 
+                ReadOnly="True" 
+                AllowBestFit="true">
+                <dxg:GridColumn.EditSettings>
+                    <dxe:TextEditSettings DisplayFormat="g" />
+                </dxg:GridColumn.EditSettings>
+                <dxg:GridColumn.CellTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding RowData.Row.CreatedAt, StringFormat={}{0:g}, ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}" />
+                    </DataTemplate>
+                </dxg:GridColumn.CellTemplate>
+            </dxg:GridColumn>
+
+            <dxg:GridColumn Header="{DynamicResource OTImportTemplateUpdatedBy}" FieldName="UpdatedBy" FilterPopupMode="CheckedList" Width="*" ReadOnly="True"  AllowBestFit="true"/>
+
+            <dxg:GridColumn Header="{DynamicResource OTImportTemplateUpdatedAt}" 
+                FieldName="UpdatedAt" 
+                Width="*" 
+                ReadOnly="True" 
+                AllowBestFit="true">
+                <!-- Apply consistent display formatting -->
+                <dxg:GridColumn.EditSettings>
+                    <dxe:TextEditSettings DisplayFormat="g" />
+                </dxg:GridColumn.EditSettings>
+
+                <dxg:GridColumn.CellTemplate>
+                    <DataTemplate>
+                        <!-- Bind and format the text for grid display -->
+                        <TextBlock Text="{Binding RowData.Row.UpdatedAt, 
+                                     StringFormat={}{0:g}, 
+                                     ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}" />
+                    </DataTemplate>
+                </dxg:GridColumn.CellTemplate>
+            </dxg:GridColumn>
+
+            <dxg:GridColumn Header="{DynamicResource OTImportTemplateInUse}" FieldName="InUse"  FilterPopupMode="CheckedList" Width="65" ReadOnly="True" AllowBestFit="true">
+                <dxg:GridColumn.CellTemplate>
+                    <DataTemplate>
+                        <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,0,5,0">
+                            <TextBlock.Style>
+                                <Style TargetType="{x:Type TextBlock}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Path=RowData.Row.InUse}" Value="1">
+                                            <Setter Property="TextBlock.Text" Value="Yes"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Path=RowData.Row.InUse}" Value="0">
+                                            <Setter Property="TextBlock.Text" Value="No"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </DataTemplate>
+                </dxg:GridColumn.CellTemplate>
+                <dxg:GridColumn.PrintCellStyle>
+                    <Style TargetType="dxe:TextEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                        <Setter Property="dxp:ExportSettings.TargetType" Value="Text"  />
+                        <Setter Property="dxp:TextExportSettings.Text" Value="{Binding Path=RowData.Row.InUse}" >
+                        </Setter>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Path=RowData.Row.InUse}" Value="1">
+                                <Setter Property="dxp:TextExportSettings.Text" Value="Yes"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Path=RowData.Row.InUse}" Value="0">
+                                <Setter Property="dxp:TextExportSettings.Text" Value="No"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </dxg:GridColumn.PrintCellStyle>
+                <dxg:GridColumn.EditSettings>
+                    <dxe:TextEditSettings>
+                        <dxe:TextEditSettings.DisplayTextConverter>
+                            <dxmvvm:ObjectToObjectConverter>
+                                <dxmvvm:MapItem Source="1" Target="Yes"/>
+                                <dxmvvm:MapItem Source="0" Target="No"/>
+                            </dxmvvm:ObjectToObjectConverter>
+                        </dxe:TextEditSettings.DisplayTextConverter>
+                    </dxe:TextEditSettings>
+                </dxg:GridColumn.EditSettings>
+            </dxg:GridColumn>
+
+            <dxg:GridColumn Header="{DynamicResource OTImportTemplatePlantFileName}" FieldName="fileExtension" AllowPrinting="False"  Width="65" FilterPopupMode="CheckedList" ReadOnly="True" AllowBestFit="true">
+                <dxg:GridColumn.CellTemplate>
+                    <DataTemplate>
+                        <Button Name="btnViewJobDescriptionFile" ToolTip="View Document" 
+                            Command="{Binding DataContext.DocumentViewCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                            CommandParameter="{Binding RowData.Row}">
+                            <Button.Content>
+                                <Image Height="16" Width="16">
+                                    <Image.Style>
+                                        <Style TargetType="{x:Type Image}">
+                                            <Style.Triggers>
+                                                <!--Check if the fileExtension is pdf-->
+                                                <DataTrigger Binding="{Binding RowData.Row.fileExtension}" Value=".pdf">
+                                                    <Setter Property="Source" Value="/Emdep.Geos.Modules.OTM;component/Assets/Images/pdf-icon.png" />
+                                                </DataTrigger>
+
+                                                <!--Check if the fileExtension is xls or xlsx-->
+                                                <DataTrigger Binding="{Binding RowData.Row.fileExtension}" Value=".xls">
+                                                    <Setter Property="Source" Value="/Emdep.Geos.Modules.OTM;component/Assets/Images/excel-icon.png" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding RowData.Row.fileExtension}" Value=".xlsx">
+                                                    <Setter Property="Source" Value="/Emdep.Geos.Modules.OTM;component/Assets/Images/excel-icon.png" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Image.Style>
+                                </Image>
+                            </Button.Content>
+                            <Button.Style>
+                                <Style TargetType="{x:Type Button}">
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Cursor" Value="Hand"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+
+                        <DataTemplate.Triggers>
+
+                            <DataTrigger Binding="{Binding RowData.Row.fileExtension}" Value="{x:Null}">
+                                <Setter TargetName="btnViewJobDescriptionFile" Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding RowData.Row.fileExtension}" Value="{x:Static sys:String.Empty}">
+                                <Setter TargetName="btnViewJobDescriptionFile" Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                        </DataTemplate.Triggers>
+                    </DataTemplate>
+                </dxg:GridColumn.CellTemplate>
+
+
+                <dxg:GridColumn.PrintCellStyle>
+                    <Style TargetType="dxe:TextEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                        <Setter Property="dxp:TextExportSettings.Text" Value="{Binding Path=RowData.Row.JobDescriptionCode}" >
+                        </Setter>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Path=RowData.Row.File}" Value="{x:Null}" >
+                                <Setter Property="dxp:TextExportSettings.Text" Value=""/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </dxg:GridColumn.PrintCellStyle>
+
+                <dxg:GridColumn.EditSettings>
+                    <dxe:TextEditSettings>
+                        <dxe:TextEditSettings.DisplayTextConverter>
+                            <dxmvvm:ObjectToObjectConverter>
+                                <dxmvvm:MapItem Source="JobDescriptionFileName" Target="JobDescriptionCode"/>
+                            </dxmvvm:ObjectToObjectConverter>
+                        </dxe:TextEditSettings.DisplayTextConverter>
+                    </dxe:TextEditSettings>
+                </dxg:GridColumn.EditSettings>
+            </dxg:GridColumn>
+
+
+            <!--<dxg:GridColumn Header="{DynamicResource OTImportTemplateAction}" FieldName="Action" FilterPopupMode="CheckedList" MinWidth="100" Width="120" ReadOnly="True" FixedWidth="True"/>-->
+            <dxg:GridColumn Header="{DynamicResource OTImportTemplateAction}"  
+                FieldName="Action"  
+                Width="65" 
+                ReadOnly="True"
+                            AllowPrinting="False"
+                AllowMoving="False" 
+                AllowBestFit="true"
+                AllowColumnFiltering="false">
+                <dxg:GridColumn.CellTemplate>
+                    <DataTemplate>
+                        <Button Name="deleteContactRow"
+        ToolTip="Delete"
+        Command="{Binding DataContext.DeleteTaskCommand, RelativeSource={RelativeSource AncestorType={x:Type dxg:GridControl}}}"
+        CommandParameter="{Binding RowData.Row}" IsEnabled="{Binding DataContext.IsEditTemplatesButtunEnable,RelativeSource={RelativeSource AncestorType={x:Type dxg:GridControl}}}">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <!-- Default state: hidden -->
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <!-- Show only if Action is "Yes" -->
+                                        <DataTrigger Binding="{Binding Path=RowData.Row.Action}" Value="Yes">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                            <Button.ContentTemplate>
+                                <DataTemplate>
+                                    <Image Height="16" Width="16">
+                                        <Image.Style>
+                                            <Style TargetType="Image">
+                                                <Style.Triggers>
+                                                    <MultiDataTrigger>
+                                                        <MultiDataTrigger.Conditions>
+                                                            <Condition Binding="{Binding Path=(dx:ThemeManager.TreeWalker).ThemeName, RelativeSource={RelativeSource Self}}" Value="BlackAndBlue" />
+                                                        </MultiDataTrigger.Conditions>
+                                                        <Setter Property="Source" Value="/Emdep.Geos.Modules.OTM;component/Assets/Images/wDelete.png" />
+                                                    </MultiDataTrigger>
+                                                    <MultiDataTrigger>
+                                                        <MultiDataTrigger.Conditions>
+                                                            <Condition Binding="{Binding Path=(dx:ThemeManager.TreeWalker).ThemeName, RelativeSource={RelativeSource Self}}" Value="WhiteAndBlue" />
+                                                        </MultiDataTrigger.Conditions>
+                                                        <Setter Property="Source" Value="/Emdep.Geos.Modules.OTM;component/Assets/Images/bDelete.png" />
+                                                    </MultiDataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Image.Style>
+                                    </Image>
+                                </DataTemplate>
+                            </Button.ContentTemplate>
+                        </Button>
+                    </DataTemplate>
+                </dxg:GridColumn.CellTemplate>
+            </dxg:GridColumn>
+
+
+
+
+            <dxmvvm:Interaction.Behaviors>
+                <UIHelper:GridSelectingBehavior />
+            </dxmvvm:Interaction.Behaviors>
+
+            <dxg:GridControl.TotalSummary>
+                <dxg:GridSummaryItem x:Name="summary" FieldName="Code" SummaryType="Count" DisplayFormat="Total Count: {0}" Visible="True" Alignment="Left"/>
+            </dxg:GridControl.TotalSummary>
+
+            <dxg:GridControl.View>
+                <dxg:TableView x:Name="JobDescriptionTableView"
+                               NavigationStyle="Row"
+                               AllowHorizontalScrollingVirtualization="True" 
+                               RowDetailsVisibilityMode="Visible"
+                               ShowHorizontalLines="True"
+                               ShowSearchPanelMode="Always"
+                               ShowColumnHeaders="True"
+                               VerticalScrollbarVisibility="Auto" 
+                               HorizontalScrollbarVisibility="Auto"
+                               AllowFixedColumnMenu="False"
+                               AutoWidth="False"
+                               ShowFixedTotalSummary="True"
+                               ShowSearchPanelCloseButton="True"
+                               SearchPanelHorizontalAlignment="Stretch"
+                               ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly"
+                               AllowGrouping="True"
+                               AllowBestFit="true"
+                               ShowGroupPanel="False"
+                               ImmediateUpdateRowPosition="True"
+                               AllowColumnFiltering="True"
+                               UseLegacyFilterEditor="True"
+                               EnableImmediatePosting="True"
+                               ShowIndicator="False"                                                                         
+                               ShowAutoFilterRow="False"
+                               IsColumnChooserVisible="{Binding DataContext.IsPOrequestsColumnChooserVisible,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=UserControl}}"
+                               AllowEditing="True"            
+                               FilterRowDelay="0"
+                               AllowColumnMoving="True"                                
+                               FilterEditorShowOperandTypeIcon="True"                              
+                               FocusedRow="{Binding Path=SelectedOtRequestTemplates,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+
+                    <dxg:TableView.Resources>
+                        <DataTemplate x:Key="JobDescriptionReportPrintHeaderTemplate">
+                            <Grid Width="{Binding UsablePageWidth}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="50" />
+                                    <ColumnDefinition Width="130" />
+                                </Grid.ColumnDefinitions>
+                                <dxe:TextEdit Text=" " Width="{Binding UsablePageWidth}" Grid.ColumnSpan="3" IsPrintingMode="True" Background="#333E5E" HorizontalAlignment="Stretch" 
+                                              VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" Height="50" />
+                                <dxe:TextEdit Text="PO Request Templates Report" IsPrintingMode="True" HorizontalAlignment="Stretch" 
+                                              VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" />
+                                <Image Source="/Emdep.Geos.Modules.OTM;component/Assets/Images/GeosReportLogo.png" Height="50" Width="80"  dxp:ExportSettings.TargetType="Image" Grid.Column="2" />
+                            </Grid>
+                        </DataTemplate>
+
+                        <DataTemplate x:Key="JobDescriptionReportPrintFooterTemplate">
+                            <dxe:TextEdit HorizontalContentAlignment="Center" 
+                                            Width="{Binding Path=UsablePageWidth, Mode=OneWay}" 
+                                            dxp:ExportSettings.TargetType="PageNumber" 
+                                            dxp:PageNumberExportSettings.Kind="NumberOfTotal" 
+                                            dxp:PageNumberExportSettings.Format="Page {0} of {1}"/>
+                        </DataTemplate>
+                    </dxg:TableView.Resources>
+                    <dxmvvm:Interaction.Behaviors>
+                        <!--<dxmvvm:EventToCommand Command="{Binding DataContext.FilterEditorPORegisteredCreatedCommand, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                   EventName="FilterEditorCreated"
+                                                   PassEventArgsToCommand="True"/>-->
+                        <dxmvvm:EventToCommand Command="{Binding DataContext.TableViewLoadedOTRequestTemplateCommand,RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                   EventName="Loaded"
+                                                   PassEventArgsToCommand="True" />
+
+                        <dxmvvm:EventToCommand  Command="{Binding DataContext.CommandImportTemplateDoubleClick,RelativeSource={RelativeSource AncestorType=UserControl}}" EventName="MouseDoubleClick" CommandParameter="{Binding ElementName=JobDescriptionTableView}">
+                            <dxmvvm:EventToCommand.EventArgsConverter>
+                                <dx:EventArgsToDataRowConverter   />
+                            </dxmvvm:EventToCommand.EventArgsConverter>
+                        </dxmvvm:EventToCommand>
+
+
+                    </dxmvvm:Interaction.Behaviors>
+                </dxg:TableView>
+            </dxg:GridControl.View>
+        </dxg:GridControl>
+
+    </Grid>
+
+
+</UserControl>

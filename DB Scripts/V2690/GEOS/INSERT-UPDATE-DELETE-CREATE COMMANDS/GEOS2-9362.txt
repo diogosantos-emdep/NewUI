@@ -1,0 +1,9 @@
+CREATE TABLE geos.frequencytransport (
+    Id INT AUTO_INCREMENT PRIMARY KEY,
+    TransportMethod smallint unsigned DEFAULT NULL,
+    IdSite smallint unsigned NOT NULL,
+    Frequency INT NOT NULL DEFAULT 0,    
+    FOREIGN KEY (transportMethod) REFERENCES emdep_geos.lookup_values(IdLookupValue),
+    FOREIGN KEY (idSite) REFERENCES geos.sites(idSite),    
+    UNIQUE KEY unique_transport_site (transportMethod, idSite)
+);

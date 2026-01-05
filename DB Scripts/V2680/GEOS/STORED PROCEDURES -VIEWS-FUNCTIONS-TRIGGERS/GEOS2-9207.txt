@@ -1,0 +1,36 @@
+DROP PROCEDURE IF EXISTS OTM_GetPODetailsbyAttachment_V2680;
+DELIMITER //
+CREATE PROCEDURE OTM_GetPODetailsbyAttachment_V2680(
+    IN _idAttachment INT(10) UNSIGNED
+)
+begin
+    -- [ashish.malkhede][GEOS2-9207][19/08/2025]
+    -- Step 1: Return PO Details directly
+    SELECT
+        pfr.PONumber AS PONumber,
+        pfr.PODate AS PODate,
+        e.SenderName AS Sender,
+        pfr.TransferAmount AS TransferAmount,
+        pfr.Currency AS Currency,
+        pfr.ShipAddress AS ShipAddress,
+        ea.IdAttachment AS IdAttachment,
+        ea.AttachmentName AS AttachmentName
+    FROM pofinalresult pfr
+    INNER JOIN emailattachment ea ON ea.IdAttachment = pfr.IdAttachment
+    INNER JOIN email e ON e.IdEmail = ea.IdEmail
+    INNER JOIN porequest pr ON e.IdEmail = pr.IdEmail
+    WHERE pfr.IdAttachment = _idAttachment
+    LIMIT 1;
+
+    -- Step 2: Use PO Code to get Customer PO (joins on same condition again)
+    SELECT cpo.*
+    FROM customerpurchaseorders cpo
+    WHERE cpo.Code = (
+        SELECT pfr.PONumber
+        FROM pofinalresult pfr
+        WHERE pfr.IdAttachment = _idAttachment
+        LIMIT 1
+    );
+END //
+DELIMITER ;
+

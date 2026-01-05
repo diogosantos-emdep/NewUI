@@ -1,0 +1,266 @@
+﻿<dx:DXWindow
+    x:Class="Emdep.Geos.Modules.Crm.Views.DXWindow1"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"    
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors" 
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:ViewModels="clr-namespace:Emdep.Geos.Modules.Crm.ViewModels"
+             xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+    Title="DXWindow1" Height="500" Width="700"
+    >
+
+    <Grid>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="25"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="60"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="70"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="120"/>
+            <ColumnDefinition Width="250"/>
+            <ColumnDefinition Width="30" />
+            <ColumnDefinition Width="110" />
+            <ColumnDefinition Width="200" />
+
+        </Grid.ColumnDefinitions>
+
+        <Label  Content="Code" 
+			Grid.Column="0" 
+			Grid.Row="1" />
+        <DockPanel Grid.Row="1" Grid.Column="1">
+            <dxe:ComboBoxEdit Width="50" Height="22" VerticalAlignment="Top" SelectedIndex="0">
+                <dxe:ComboBoxEdit.Items>
+                    <dxe:ComboBoxEditItem>OT</dxe:ComboBoxEditItem>
+                </dxe:ComboBoxEdit.Items>
+            </dxe:ComboBoxEdit>
+            <dxe:TextEdit   Text="2016/0011" Margin="5,0,0,0"
+			                      
+			 HorizontalAlignment="Stretch" VerticalAlignment="Top" />
+        </DockPanel>
+        <Label Content="Company"  
+			Grid.Column="0" Grid.Row="2" />
+        <dxe:ComboBoxEdit x:Name="editor"  Grid.Column="1" Grid.Row="2"   SelectedIndex="0"   HorizontalAlignment="Stretch"
+			VerticalAlignment="Top" ItemsSource="{Binding DataContext.CompanyList, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox} }" DisplayMember="CustomerName">
+            <dxe:ComboBoxEdit.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+
+                        <TextBlock Text="{Binding CustomerName}" HorizontalAlignment="Center"  ></TextBlock>
+
+                    </StackPanel>
+                </DataTemplate>
+            </dxe:ComboBoxEdit.ItemTemplate>
+
+        </dxe:ComboBoxEdit>
+
+        <Label Content= "Product &amp; Services"
+			Grid.Column="3" 
+			Grid.Row="1" 
+			Width="120"
+			HorizontalAlignment="Left" />
+        <dxg:GridControl ShowBorder="True" Height="300" ItemsSource="{Binding DataContext.LeadsList, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}"  Width="Auto" ScrollViewer.HorizontalScrollBarVisibility="Visible" Grid.Column="3" Grid.Row="2" Grid.ColumnSpan="2" Grid.RowSpan="9" VerticalAlignment="Top">
+            <dxg:GridControl.Columns >
+                <dxg:GridColumn ReadOnly="True"  Header="Name" FieldName="Code" Width="150" HorizontalHeaderContentAlignment="Center"  />
+
+                <dxg:GridColumn ReadOnly="True"  Header="Qty" FieldName="Country" HorizontalHeaderContentAlignment="Center" Width="80">
+                    <dxg:GridColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBox Text="{Binding Value}" HorizontalContentAlignment="Center" IsReadOnly="True"></TextBox>
+                        </DataTemplate>
+                    </dxg:GridColumn.CellTemplate>
+                </dxg:GridColumn>
+            </dxg:GridControl.Columns>
+            <dxg:GridControl.View>
+                <dxg:TableView  NavigationStyle="Row" ShowHorizontalLines="True" AllowPerPixelScrolling="False" 
+					AllowGrouping="False" ShowGroupPanel="False" ShowVerticalLines="True"
+					ShowColumnHeaders="True" 
+					ShowIndicator="False" AutoWidth="True" 
+                                HorizontalScrollbarVisibility="Hidden"
+					VerticalScrollbarVisibility="Auto" HorizontalContentAlignment="Center"                                
+                                       ShowAutoFilterRow="False"                                    
+                                       RowMinHeight="2"
+                                       BestFitMode="AllRows" 
+                                       AllowSorting="True" 
+                                       AllowScrollHeaders="False"                                     
+                                       AllowEditing="False"
+                                       AllowColumnMoving="False" 
+                                       AutoMoveRowFocus="False"                                 
+                                       AllowScrollAnimation="True" FocusedRow="{x:Null}" 
+                                       AllowBestFit="True" AllowResizing="False"
+                                       AllowConditionalFormattingMenu="True" >
+
+                </dxg:TableView>
+
+            </dxg:GridControl.View>
+        </dxg:GridControl>
+
+        <!--<Label Content= "Project"
+			Grid.Column="0" 
+			Grid.Row="3" 
+			Width="120"
+			HorizontalAlignment="Left" />
+        <dxe:TextEdit  Text="OPEL D2XX"
+			                         
+			Grid.Row="3" Grid.Column="1" HorizontalAlignment="Stretch"
+			VerticalAlignment="Top"  />-->
+
+        <Label Content= "Description"
+			Grid.Column="0" 
+			Grid.Row="3" 
+			Width="120"
+			HorizontalAlignment="Left" />
+
+        <dxe:TextEdit   Text="Engineering Changes Of current Project"
+			Height="50"                  
+			HorizontalAlignment="Right"
+			VerticalScrollBarVisibility="Visible"
+			VerticalContentAlignment="Top"
+			HorizontalContentAlignment="Left"
+			AcceptsReturn="True"
+			Grid.Row="3"
+			Grid.Column="1"
+			VerticalAlignment="Top"
+                    />
+
+        <Label Content= "Amount"
+			Grid.Column="0" 
+			Grid.Row="4" 
+			Width="120"
+			HorizontalAlignment="Left" />
+
+        <StackPanel Grid.Column="1"  Grid.Row="4" HorizontalAlignment="Stretch" >
+            <dxlc:LayoutControl Orientation="Vertical" Margin="0,0,0,0" Padding="0,0,0,0">
+                <StackPanel Orientation="Horizontal">
+                    <dxlc:LayoutItem >
+                        <dxe:TextEdit HorizontalAlignment="Stretch" Width="185"  Text="2222,000"  HorizontalContentAlignment="Right"></dxe:TextEdit>
+
+                    </dxlc:LayoutItem >
+                    <dxlc:LayoutItem >
+                        <dxe:ComboBoxEdit   Width="60" HorizontalAlignment="Right" SelectedIndex="0" Margin="5,0,0,0" 
+			                                      VerticalAlignment="Top" ItemsSource="{Binding DataContext.Currencies, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" DisplayMember="Name" ValueMember="IdCurrency"
+                                                  SelectedItem="{Binding Path=EditValue, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"/>
+
+                    </dxlc:LayoutItem>
+                </StackPanel>
+            </dxlc:LayoutControl>
+        </StackPanel>
+
+        <Label Content= "Close Date"
+			Grid.Column="0" 
+			Grid.Row="5" 
+			Width="120"
+			HorizontalAlignment="Left" />
+        <dxe:DateEdit Grid.Column="1" Grid.Row="5" Mask="{Binding CultureInfo.CurrentCulture.DateTimeFormat.YearMonthPattern}" MaskUseAsDisplayFormat="True"
+                      VerticalAlignment="Top"
+                      HorizontalContentAlignment="Right">
+            <dxe:DateEdit.StyleSettings>
+                <dxe:DateEditCalendarStyleSettings/>
+            </dxe:DateEdit.StyleSettings>
+        </dxe:DateEdit>
+
+        <TextBlock Text="Confidential Level" Grid.Row="6" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+
+        <StackPanel  Grid.Row="6" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left" >
+            <Image  >
+                <Image.Style>
+                    <Style>
+                        <Setter Property="Image.Source" Value="/Emdep.Geos.Modules.Crm;component/Assets/Images/star_Five.png"></Setter>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding DataContext.SelectedIndexPerformanse ,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" Value="0">
+                                <Setter Property="Image.Source" Value="/Emdep.Geos.Modules.Crm;component/Assets/Images/star_One.png"></Setter>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding DataContext.SelectedIndexPerformanse ,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" Value="1">
+                                <Setter Property="Image.Source" Value="/Emdep.Geos.Modules.Crm;component/Assets/Images/star_Two.png"></Setter>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding DataContext.SelectedIndexPerformanse ,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" Value="2">
+                                <Setter Property="Image.Source" Value="/Emdep.Geos.Modules.Crm;component/Assets/Images/star_Three.png"></Setter>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding DataContext.SelectedIndexPerformanse ,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" Value="3">
+                                <Setter Property="Image.Source" Value="/Emdep.Geos.Modules.Crm;component/Assets/Images/star_Four.png"></Setter>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding DataContext.SelectedIndexPerformanse ,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" Value="4">
+                                <Setter Property="Image.Source" Value="/Emdep.Geos.Modules.Crm;component/Assets/Images/star_Five.png"></Setter>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Image.Style>
+            </Image>
+            <!--<TextBox IsReadOnly="True" Margin="48,0,0,0" Text="20%" HorizontalAlignment="Right" Width="40" Height="30"></TextBox>-->
+            <dxe:ComboBoxEdit IsTextEditable="False" Margin="18,0,0,0" HorizontalAlignment="Right" Width="70" Height="30" SelectedIndex="{Binding DataContext.SelectedIndexPerformanse,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}">
+                <dxe:ComboBoxEdit.Items>
+                    <dxe:ComboBoxEditItem>20 %</dxe:ComboBoxEditItem>
+                    <dxe:ComboBoxEditItem>40 %</dxe:ComboBoxEditItem>
+                    <dxe:ComboBoxEditItem>60 %</dxe:ComboBoxEditItem>
+                    <dxe:ComboBoxEditItem>80 %</dxe:ComboBoxEditItem>
+                    <dxe:ComboBoxEditItem>100 %</dxe:ComboBoxEditItem>
+                </dxe:ComboBoxEdit.Items>
+            </dxe:ComboBoxEdit>
+
+        </StackPanel>
+
+        <Label Content= "Status"
+			Grid.Column="0" 
+			Grid.Row="7" 
+			Width="120"
+			HorizontalAlignment="Left" />
+
+
+
+        <dxe:ComboBoxEdit x:Name="editor1"  FontSize="25"  Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="8" HorizontalAlignment="Stretch" SelectedIndex="0"
+			VerticalAlignment="Top" ItemsSource="{Binding DataContext.GeosStatusList, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" DisplayMember="Status" ApplyItemTemplateToSelectedItem="True" IsTextEditable="False"
+                          SelectedItem="{Binding Path=EditValue, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" >
+
+            <dxe:ComboBoxEdit.ItemContainerStyle>
+                <Style TargetType="dxe:ComboBoxEditItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch"></Setter>
+                </Style>
+            </dxe:ComboBoxEdit.ItemContainerStyle>
+
+            <dxe:ComboBoxEdit.ItemTemplate>
+                <DataTemplate>
+                    <Border Background="{Binding HtmlColor}" BorderBrush="{Binding ColorName}"  >
+                        <TextBlock Text="{Binding Name}" HorizontalAlignment="Center"  ></TextBlock>
+                    </Border>
+                </DataTemplate>
+            </dxe:ComboBoxEdit.ItemTemplate>
+
+        </dxe:ComboBoxEdit>
+        <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="9" Grid.RowSpan="3" HorizontalAlignment="Stretch" Orientation="Vertical">
+            <TextBlock Text="La Oportunidad está abierta" FontSize="16" FontWeight="Bold"/>
+            <StackPanel>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="50*"></ColumnDefinition>
+                        <ColumnDefinition Width="50*"></ColumnDefinition>
+                        <ColumnDefinition Width="50*"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="30"></RowDefinition>
+                        <RowDefinition Height="30"></RowDefinition>
+                    </Grid.RowDefinitions>
+               
+                <TextBlock Text="Se creó el" FontSize="16" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Center"/>
+                    <TextBlock Text="10-6-2016" FontSize="16" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Se modificó el" FontSize="16" Grid.Column="1" Grid.Row="0" HorizontalAlignment="Center"/>
+                    <TextBlock Text="10-6-2016" FontSize="16" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Center"/>
+                    <Image Source="/Emdep.Geos.Modules.Crm;component/Assets/Images/INR.png" Grid.Column="2" Grid.Row="0" Grid.RowSpan="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"></Image>
+                </Grid>
+            </StackPanel>
+        </StackPanel>
+
+    </Grid>
+</dx:DXWindow>

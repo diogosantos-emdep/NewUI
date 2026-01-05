@@ -1,0 +1,36 @@
+
+drop procedure if exists emdep_geos.APM_GetPriorityDelayedSettingExceptionMailIDs_V2680; 
+DELIMITER $$
+CREATE  PROCEDURE emdep_geos.APM_GetPriorityDelayedSettingExceptionMailIDs_V2680(
+       IN _TO_CC_Ids   LONGTEXT)
+ BEGIN
+        -- call APM_GetPriorityDelayedSettingExceptionMailIDs_V2680("4567,4612");
+        -- [Shweta.Thube][GEOS2-9812][31-10-2025]
+        
+      SELECT emp.IdEmployee,
+           ejd.IdJobDescription,
+           empcont.CompanyEmail,
+           emp.FirstName,
+           emp.LastName,
+           emp.EmployeeCode,
+           ejd.IdCompany,
+           jd.JobDescriptionCode
+    FROM employees emp
+    INNER JOIN employee_job_descriptions ejd  ON emp.IdEmployee = ejd.IdEmployee
+    INNER JOIN (
+        SELECT ec.IdEmployee, ec.EmployeeContactValue  AS CompanyEmail
+        FROM employee_contacts ec
+        WHERE ec.EmployeeContactIdType = 88 AND ec.IsCompanyUse = 1 GROUP BY ec.IdEmployee
+    ) empcont ON empcont.IdEmployee = emp.IdEmployee
+    INNER JOIN job_descriptions jd ON jd.IdJobDescription = ejd.IdJobDescription
+    LEFT JOIN companies com ON com.IdCompany = ejd.IdCompany
+    LEFT JOIN geos.countries coun ON coun.idCountry=com.IdCountry
+    
+    WHERE
+        (DATE(CURDATE()) BETWEEN DATE(ejd.JobDescriptionStartDate)
+                             AND DATE(IFNULL(ejd.JobDescriptionEndDate, CURDATE())))
+        AND emp.IsEnabled
+        AND FIND_IN_SET(emp.IdEmployee, _TO_CC_Ids)
+        ;
+       END $$
+       DELIMITER ;

@@ -1,0 +1,571 @@
+﻿<UserControl x:Class="Emdep.Geos.Modules.Warehouse.Views.WorkOrderView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.Warehouse.Views"
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:dxwuin="http://schemas.devexpress.com/winfx/2008/xaml/windowsui/navigation" 
+             xmlns:dxb="http://schemas.devexpress.com/winfx/2008/xaml/bars"
+             xmlns:dxnav="http://schemas.devexpress.com/winfx/2008/xaml/navigation"
+             xmlns:Converters="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+             xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+             xmlns:ViewModels="clr-namespace:Emdep.Geos.Modules.Warehouse.ViewModels"
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:WarehouseCommon ="clr-namespace:Emdep.Geos.Modules.Warehouse"
+             xmlns:dxgt="http://schemas.devexpress.com/winfx/2008/xaml/grid/themekeys"
+             xmlns:dxp="http://schemas.devexpress.com/winfx/2008/xaml/printing" 
+             xmlns:WmsApplication="clr-namespace:Emdep.Geos.Modules.Warehouse"
+             xmlns:Interactive="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:Behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+             Style="{DynamicResource UserControlStyle}" 
+             mc:Ignorable="d" 
+             d:DesignHeight="500" d:DesignWidth="700">
+
+    <UserControl.Resources>
+        <Converters:ImageConverter x:Key="ImageConverter"/>
+        <Converters:CellColorConverterForPoDate x:Key="CellColorConverterForPoDate"/>
+        <Converters:CellBackroundColorOtTypeConvertor x:Key="CellBackroundColorOtTypeConvertor"/>
+
+        <Style x:Key="HideButtonStyle" TargetType="{x:Type ToggleButton}">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ToggleButton}">
+                        <Border BorderThickness="0" Background="{TemplateBinding Background}">
+                            <Grid>
+                                <Image Stretch="None" VerticalAlignment="Center" HorizontalAlignment="Center"
+                                   Source="/Emdep.Geos.Modules.Warehouse;component/Assets/Images/ArrowRight.png"
+                                   Visibility="{TemplateBinding IsChecked, Converter={dxmvvm:BooleanToVisibilityConverter Inverse=True}}"/>
+                                <Image Stretch="None" VerticalAlignment="Center" HorizontalAlignment="Center"
+                                   Source="/Emdep.Geos.Modules.Warehouse;component/Assets/Images/ArrowLeft.png"
+                                   Visibility="{TemplateBinding IsChecked, Converter={dxmvvm:BooleanToVisibilityConverter}}"/>
+                            </Grid>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="LeftPanelTileItemStyle" TargetType="{x:Type dxnav:TileBarItem}">
+            <Setter Property="Foreground" Value="{Binding BackColor,Converter={Converters:ForegroundColorConverter}}"/>
+            <Setter Property="BorderBrush" Value="#FFD6D6D6"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Background" Value="{Binding BackColor}"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+            <Setter Property="Height" Value="{Binding Height}"/>
+            <Setter Property="Width" Value="{Binding Width}"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="SelectionPadding" Value="0" />
+            <Setter Property="ContentTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                        <Grid>
+                            <TextBlock Text="{Binding EntitiesCount,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" FontSize="36" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-5,8,0" Opacity="0.6" Visibility="{Binding EntitiesCountVisibility}"/>
+                            <TextBlock HorizontalAlignment="Left" VerticalAlignment="Bottom" Text="{Binding Caption}" FontSize="13" Margin="6,0,0,3"/>
+                            <Image HorizontalAlignment="Left" VerticalAlignment="Top" Source="{Binding ImageUri, Converter={StaticResource ImageConverter}}" dxb:ImageColorizer.IsEnabled="True"
+                               dxb:ImageColorizer.Color="{Binding Path=(TextElement.Foreground).Color, RelativeSource={RelativeSource Self}}"
+                               Stretch="None" Margin="6,6,0,0"/>
+                        </Grid>
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="BorderThickness" Value="5"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource TileBarItemColorStyle}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="100*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Label Content="{DynamicResource WorkOrderHeader}" Style="{StaticResource LabelTitleStyle}" Grid.Row="0" />
+
+            <DockPanel Grid.Row="0" Grid.Column="1">
+
+                <Grid HorizontalAlignment="Right" Width="Auto" Height="45" >
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="45"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Warehouse combobox section -->
+                    <DockPanel Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Height="30" >
+                        <Image Style="{DynamicResource WarehouseImageStyle}" Width="24" Height="24" Margin="7,0,3,0" />
+                        <TextBlock Text="{DynamicResource Warehouse}"  FontWeight="Bold" Margin="5,2,5,0" VerticalAlignment="Bottom" />
+                    </DockPanel>
+
+                    <dxe:ComboBoxEdit Name="CbeWareHouse" Style="{DynamicResource ComboBoxEditStyle}" Grid.Column="1" Width="150" Height="30"
+                                      Margin="5,0,5,5" VerticalAlignment="Bottom" IsTextEditable="False"
+                                      ItemsSource ="{Binding Source={x:Static WarehouseCommon:WarehouseCommon.Instance}, Path=WarehouseList ,UpdateSourceTrigger=PropertyChanged , Mode=TwoWay}"
+                                      SelectedItem="{Binding Source={x:Static WarehouseCommon:WarehouseCommon.Instance}, Path=Selectedwarehouse,UpdateSourceTrigger=PropertyChanged}"
+                                      DisplayMember="Name" >
+                        <dxmvvm:Interaction.Triggers>
+                            <dxmvvm:EventToCommand EventName="EditValueChanged"
+                                                   Command="{Binding CommandWarehouseEditValueChanged}"
+                                                   CommandParameter="{Binding ElementName=CbeWareHouse,Path=SelectedItem}"/>
+                        </dxmvvm:Interaction.Triggers>
+                    </dxe:ComboBoxEdit>
+
+                    <!-- Refresh Button -->
+                    <Button Content=" " Grid.Row="0" Grid.Column="2" Height="40" Width="40" HorizontalAlignment="Right"
+                            Command="{Binding RefreshWorkOrderViewCommand}"
+                            CommandParameter="{Binding ElementName=PendingWorkOrderTableView}" Margin="0,0,5,5">
+                        <Button.ToolTip>
+                            <TextBlock Text="{DynamicResource ButtonRefresh}"/>
+                        </Button.ToolTip>
+                        <Button.ContentTemplate>
+                            <DataTemplate>
+                                <Image Style="{ DynamicResource WareHouseRefreshButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                            </DataTemplate>
+                        </Button.ContentTemplate>
+                    </Button>
+
+                    <!-- Print Button -->
+                    <Button Content=" " Grid.Row="0" Grid.Column="3" Height="40" Width="40" HorizontalAlignment="Right"
+                            Command="{Binding PrintWorkOrderViewCommand}"
+                            CommandParameter="{Binding ElementName=PendingWorkOrderTableView}" Margin="0,0,5,5">
+                        <Button.ToolTip>
+                            <TextBlock Text="{DynamicResource ButtonPrint}"/>
+                        </Button.ToolTip>
+                        <Button.ContentTemplate>
+                            <DataTemplate>
+                                <Image Style="{ DynamicResource PrinterButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                            </DataTemplate>
+                        </Button.ContentTemplate>
+                    </Button>
+
+                    <!-- Export Button -->
+
+                    <Button Content=" " Grid.Row="0" Grid.Column="4" Height="40" Width="40" HorizontalAlignment="Right"
+                            Command="{Binding ExportWorkOrderViewCommand}"
+                            CommandParameter="{Binding ElementName=PendingWorkOrderTableView}" Margin="0,0,5,5">
+                        <Button.ToolTip>
+                            <TextBlock Text="{DynamicResource ButtonExportToExcel}"/>
+                        </Button.ToolTip>
+                        <Button.ContentTemplate>
+                            <DataTemplate>
+                                <Image Style="{DynamicResource ExcelExportButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                            </DataTemplate>
+                        </Button.ContentTemplate>
+                    </Button>
+
+                    <!-- Picking -->
+                    <Button Content=" " Grid.Row="0" Grid.Column="5" Height="40" Width="40" HorizontalAlignment="Right"
+                            Command="{Binding ScanWorkOderCommand}" Margin="0,0,5,5"
+                            IsEnabled="{Binding Source={x:Static WmsApplication:WarehouseCommon.Instance}, Path=IsPermissionEnabled}"
+                            CommandParameter="{Binding ElementName=PendingWorkOrderTableView}">
+                        <Button.ToolTip>
+                            <TextBlock Text="{DynamicResource WorkOrderViewScan}"/>
+                        </Button.ToolTip>
+                        <Button.ContentTemplate>
+                            <DataTemplate>
+                                <Image Style="{DynamicResource PickingButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                            </DataTemplate>
+                        </Button.ContentTemplate>
+                    </Button>
+
+                    <!--Refund-->
+                    <Button Content=" " Grid.Row="0" Grid.Column="6" Height="40" Width="40" HorizontalAlignment="Right"
+                            Command="{Binding RefundWorkOrderCommand}" Margin="0,0,5,5"
+                            IsEnabled="{Binding Source={x:Static WmsApplication:WarehouseCommon.Instance}, Path=IsPermissionEnabled}"
+                            CommandParameter="{Binding ElementName=PendingWorkOrderTableView}">
+                        <Button.ToolTip>
+                            <TextBlock Text="{DynamicResource WorkOrderViewRefund}"/>
+                        </Button.ToolTip>
+                        <Button.ContentTemplate>
+                            <DataTemplate>
+                                <Image Style="{DynamicResource RefundButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                            </DataTemplate>
+                        </Button.ContentTemplate>
+                    </Button>
+                </Grid>
+            </DockPanel>
+        </Grid>
+
+        <DockPanel Grid.Row="1" >
+            <dxwui:NavigationFrame x:Name="Navigatedframe" AnimationType="None">
+                <dxmvvm:Interaction.Behaviors>
+                    <dxwuin:FrameNavigationService/>
+                </dxmvvm:Interaction.Behaviors>
+            </dxwui:NavigationFrame>
+            <UIHelper:DpiResizingPanel DockPanel.Dock="Left">
+                <dxnav:TileBar DockPanel.Dock="Left"
+                               Visibility="{Binding ElementName=expandButton, Path=IsChecked, Converter={dxmvvm:BooleanToVisibilityConverter}}"
+                               Margin="0,-20,0,0"
+                               SelectedItem="{Binding SelectedTileBarItem,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+                               Orientation="Vertical"
+                               Width="215"
+                               ItemSpacing="5"
+                               ItemsSource="{Binding ListOfFilterTile ,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                               ItemContainerStyle="{StaticResource LeftPanelTileItemStyle}"
+                               Focusable="True">
+
+                    <dxmvvm:Interaction.Behaviors>
+                        <dxmvvm:EventToCommand Command="{Binding CommandFilterTileClick}" EventName="SelectionChanged" PassEventArgsToCommand="True"/>
+                        <dxmvvm:EventToCommand Command="{Binding CommandTileBarDoubleClick}" EventName="MouseDoubleClick" CommandParameter="{Binding ElementName=PendingWorkOrderTableView}"/>
+                    </dxmvvm:Interaction.Behaviors>
+                </dxnav:TileBar>
+            </UIHelper:DpiResizingPanel>
+
+            <ToggleButton x:Name="expandButton" DockPanel.Dock="Left" Style="{StaticResource HideButtonStyle}" IsChecked="True" VerticalAlignment="Center"/>
+
+            <dxg:GridControl DockPanel.Dock="Right" Name="gridControl" FilterString="{Binding FilterString,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                             Margin="0,0,0,0" ShowBorder="True" VerticalAlignment="Stretch"
+                             ItemsSource="{Binding MainOtsList,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" 
+                             SelectionMode="Row" ImplyNullLikeEmptyStringWhenFiltering="True" AllowLiveDataShaping="True">
+
+                <!--colour Criteria-->
+                <dxg:GridColumn Header="{DynamicResource WMSPriority}" Binding="{Binding RowData.Row.Quotation.Offer.Priority}"  Width="40" MinWidth="60" FilterPopupMode="CheckedList" FixedWidth="True">
+                    <dxg:GridColumn.DisplayTemplate>
+                        <ControlTemplate>
+                            <TextBlock>
+                                <TextBlock.Background>
+                                    <MultiBinding Converter="{StaticResource CellBackroundColorOtTypeConvertor}">
+                                        <Binding Path="View.DataContext.GeosAppSettingList"/>
+                                        <Binding Path="RowData.Row"/>
+                                    </MultiBinding>
+                                </TextBlock.Background>
+                            </TextBlock>
+                        </ControlTemplate>
+                    </dxg:GridColumn.DisplayTemplate>
+                    <dxg:GridColumn.PrintCellStyle>
+                        <Style TargetType="dxe:BaseEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                            <Setter Property="dxp:ExportSettings.Background" Value="Orange"></Setter>
+                            <Setter Property="dxp:ExportSettings.TargetType" Value="Image" />
+                            <Setter Property="dxp:ImageExportSettings.ForceCenterImageMode" Value="True" />
+                            <Setter Property="dxp:ImageExportSettings.ImageRenderMode" Value="UseImageSource" />
+                            <Setter Property="dxp:ImageExportSettings.ImageSource">
+                                <Setter.Value>
+                                    <Image Source="{dx:DXImage Image={x:Null}}" Stretch="None" />
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Value}" Value="1">
+                                    <Setter Property="dxp:ImageExportSettings.ImageSource">
+                                        <Setter.Value>
+                                            <Image Source="{DynamicResource WareHousePendingWorkOrderIsCriticalImage}" Stretch="Fill" />
+                                        </Setter.Value>
+                                    </Setter>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </dxg:GridColumn.PrintCellStyle>
+                </dxg:GridColumn>
+
+                <!--show icon if offer is critical-->
+                <dxg:GridColumn Header="{DynamicResource WMSUrgent}"  Binding ="{Binding RowData.Row.Quotation.Offer.IsCritical}" MinWidth="70" Width="35" MaxWidth="40"
+                                FilterPopupMode="CheckedList" FixedWidth="False" AllowResizing="False">
+                    <dxg:GridColumn.DisplayTemplate>
+                        <ControlTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <Image Width="15" Height="15" Margin="5 0 0 0" HorizontalAlignment="Center">
+                                    <Image.Style>
+                                        <Style>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding RowData.Row.Quotation.Offer.IsCritical}" Value="1">
+                                                    <Setter Property="Image.Source" Value="/Emdep.Geos.Modules.Warehouse;component/Assets/Images/Critical.png"/>
+                                                    <Setter Property="Image.ToolTip" Value="IsCritical"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Image.Style>
+                                </Image>
+                            </StackPanel>
+                        </ControlTemplate>
+                    </dxg:GridColumn.DisplayTemplate>
+                    <dxg:GridColumn.EditSettings>
+                        <dxe:TextEditSettings MaxWidth="100">
+                            <dxe:TextEditSettings.DisplayTextConverter>
+                                <dxmvvm:ObjectToObjectConverter>
+                                    <dxmvvm:MapItem Source="1" Target="Is Critical" />
+                                    <dxmvvm:MapItem Source="0" Target="Not Critical" />
+                                </dxmvvm:ObjectToObjectConverter>
+                            </dxe:TextEditSettings.DisplayTextConverter>
+                        </dxe:TextEditSettings>
+                    </dxg:GridColumn.EditSettings>
+                    <dxg:GridColumn.PrintCellStyle>
+                        <Style TargetType="dxe:BaseEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                            <Setter Property="dxp:ExportSettings.TargetType" Value="1" />
+                            <Setter Property="dxp:ImageExportSettings.ForceCenterImageMode" Value="True" />
+                            <Setter Property="dxp:ImageExportSettings.ImageRenderMode" Value="UseImageSource" />
+                            <Setter Property="dxp:ImageExportSettings.ImageSource">
+                                <Setter.Value>
+                                    <Image Source="{dx:DXImage Image={x:Null}}" Stretch="None" />
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Value}" Value="1">
+                                    <Setter Property="dxp:ImageExportSettings.ImageSource">
+                                        <Setter.Value>
+                                            <Image Source="{DynamicResource WareHousePendingWorkOrderIsCriticalImage}" Stretch="Fill" />
+                                        </Setter.Value>
+                                    </Setter>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </dxg:GridColumn.PrintCellStyle>
+                </dxg:GridColumn>
+
+                <dxg:GridColumn Header="{DynamicResource GridColType}" FieldName="Quotation.Offer.OfferType.Name" MinWidth="100" FilterPopupMode="CheckedList"/>
+                <dxg:GridColumn Header="{DynamicResource GridColCode}" FieldName="MergeCode" MinWidth="150" FilterPopupMode="CheckedList"/>
+                <!--<dxg:GridColumn Header="{DynamicResource Number}" FieldName="NumOT" MinWidth="60" FilterPopupMode="CheckedList" />-->
+                <dxg:GridColumn Header="{DynamicResource LeadsLostDescription}" FieldName="Quotation.Offer.Description" MinWidth="250" FilterPopupMode="CheckedList"/>
+
+                <dxg:GridColumn Header="{DynamicResource WorkOrderProducer}" FieldName="CountryGroup.Name" MinWidth="80" FilterPopupMode="CheckedList" >
+                    <dxg:GridColumn.CellTemplate >
+                        <DataTemplate>
+                            <dxe:TextEdit x:Name="Producer" IsPrintingMode="True" HorizontalAlignment="Stretch" 
+                                          Background="{Binding RowData.Row.CountryGroup.HtmlColor}"
+                                          VerticalAlignment="Stretch"
+                                          Text="{Binding RowData.Row.CountryGroup.Name}"
+                                          Padding="5,0,0,0"
+                                          Foreground="{Binding RowData.Row.CountryGroup.HtmlColor, Converter={Converters:ForegroundColorConverter}}"/>
+                        </DataTemplate>
+                    </dxg:GridColumn.CellTemplate>
+                </dxg:GridColumn>
+
+                <dxg:GridColumn Header="{DynamicResource EditActivityGroup}" FieldName="Quotation.Site.Customer.CustomerName" MinWidth="80" FilterPopupMode="CheckedList" />
+                <dxg:GridColumn Header="{DynamicResource EditActivityPlant}" FieldName="Quotation.Site.Name" MinWidth="100" FilterPopupMode="CheckedList" />
+                <dxg:GridColumn Header="{DynamicResource GridColCountry}" FieldName="Quotation.Site.Country.Name" MinWidth="100" FilterPopupMode="CheckedList" >
+                    <dxg:GridColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" Height="24">
+                                <Image  
+                            Source="{Binding RowData.Row.Quotation.Site.Country.CountryIconImage,UpdateSourceTrigger=PropertyChanged}"  
+                            VerticalAlignment="Center" Height="24" Width="24" Margin="2,0,0,0" />
+
+                                <TextBlock Text ="{Binding RowData.Row.Quotation.Site.Country.Name,UpdateSourceTrigger=PropertyChanged}"  VerticalAlignment="Center" Margin="5,0,0,0" ></TextBlock>
+                            </StackPanel>
+                        </DataTemplate>
+                    </dxg:GridColumn.CellTemplate>
+                </dxg:GridColumn>
+
+                <!--<dxg:GridColumn Header="{DynamicResource GridColPOCloseDate}" FieldName="Quotation.Offer.DeliveryDate" MinWidth="100" FilterPopupMode="CheckedList" IsSmart="True" />-->
+
+                <dxg:GridColumn Header="{DynamicResource GridColPODate}" FieldName="PoDate" MinWidth="100" FilterPopupMode="CheckedList" >
+                    <dxg:GridColumn.CellTemplate>
+                        <DataTemplate>
+                            <UIHelper:CellDecorator>
+                                <Border x:Name="CloseDateBorder" Background="Transparent" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                                    <dxe:DateEdit Name="PART_Editor" Mask="dd/MM/yyyy" ShowClearButton="False" IsTextEditable="False"
+                                                  MaskUseAsDisplayFormat="True" ShowError="False" ShowErrorToolTip="False" InvalidValueBehavior="AllowLeaveEditor"
+                                                  MinValue="{Binding Data.ServerDate,ValidatesOnDataErrors=False}">
+                                        <dxe:DateEdit.Style>
+                                            <Style TargetType="{x:Type dxe:DateEdit}">
+                                                <Style.Triggers>
+                                                    <MultiDataTrigger>
+                                                        <MultiDataTrigger.Conditions>
+                                                            <Condition Value="True">
+                                                                <Condition.Binding>
+                                                                    <MultiBinding Converter="{Converters:CellColorConverterForPoDate}">
+                                                                        <Binding Path="RowData.Row.PoDate" />
+                                                                        <Binding Path="RowData.Row.Quotation.Offer.DeliveryDate" />
+                                                                    </MultiBinding>
+                                                                </Condition.Binding>
+                                                            </Condition>
+                                                        </MultiDataTrigger.Conditions>
+                                                        <Setter Property="Foreground" Value="Red" />
+                                                    </MultiDataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </dxe:DateEdit.Style>
+                                    </dxe:DateEdit>
+                                </Border>
+                            </UIHelper:CellDecorator>
+                        </DataTemplate>
+                    </dxg:GridColumn.CellTemplate>
+                </dxg:GridColumn>
+
+                <dxg:GridColumn Header="{DynamicResource CarriageMethod}" FieldName="Quotation.Offer.CarriageMethod.Value" MinWidth="100" FilterPopupMode="CheckedList" />
+
+                <dxg:GridColumn Header="{DynamicResource GridColOfferStatus}" FieldName="Quotation.Offer.GeosStatus.Name"  MinWidth="120" FilterPopupMode="CheckedList" IsSmart="True">
+                    <dxg:GridColumn.CellTemplate>
+                        <DataTemplate>
+                            <Border Background="{Binding RowData.Row.Quotation.Offer.GeosStatus.HtmlColor}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                                <TextBlock Text="{Binding RowData.Row.Quotation.Offer.GeosStatus.Name}" Foreground="Black" />
+                            </Border>
+                        </DataTemplate>
+                    </dxg:GridColumn.CellTemplate>
+                </dxg:GridColumn>
+
+                <dxg:GridColumn Header="{DynamicResource GridColDeliveryDate}" FieldName="DeliveryDate" MinWidth="100" FilterPopupMode="CheckedList" >
+                    <dxg:GridColumn.CellStyle>
+                        <Style TargetType="{x:Type dxg:LightweightCellEditor}" BasedOn="{StaticResource {dxgt:GridRowThemeKey ResourceKey=LightweightCellStyle}}" >
+                            <Setter Property="BorderBrush" Value="{DynamicResource GridColumnCellBorderBrushColorStyle}" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Data.DeliveryDate, Converter={Converters:CellColorConverter}}" Value="Red">
+                                    <Setter Property="Foreground" Value="Red" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </dxg:GridColumn.CellStyle>
+                </dxg:GridColumn>
+
+                <dxg:GridColumn Header="{DynamicResource WorkOrderItemsGridCol}" FieldName="OtItemCount" MinWidth="70" MaxWidth="80" FilterPopupMode="CheckedList"></dxg:GridColumn>
+
+                <dxg:GridColumn x:Name="OutOfStock" Header="{DynamicResource OutOfStock}" FieldName="OutOfStockItemCount" Width="110" FixedWidth="True" FilterPopupMode="CheckedList"></dxg:GridColumn>
+
+                <dxg:GridColumn Header="{DynamicResource GridColDelay}" FieldName="Delay" UnboundType="String" MinWidth="50" FilterPopupMode="CheckedList" >
+                    <dxg:GridColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Data.Delay}" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <TextBlock.Style>
+                                    <Style TargetType="{x:Type TextBlock}">
+                                        <Setter Property="TextBlock.FontWeight" Value="Bold" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Data.Delay, Converter={Converters:GridViewCellValueColorConvertor}}" Value="-1">
+                                                <Setter Property="TextBlock.Foreground" Value="Red" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Data.Delay, Converter={Converters:GridViewCellValueColorConvertor}}" Value="+1">
+                                                <Setter Property="TextBlock.Foreground" Value="Green" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Data.Delay, Converter={Converters:GridViewCellValueColorConvertor}}" Value="0">
+                                                <Setter Property="TextBlock.Foreground" Value="Transparent" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </DataTemplate>
+                    </dxg:GridColumn.CellTemplate>
+                </dxg:GridColumn>
+
+                <dxg:GridColumn Header="{DynamicResource GridColStatus}" FieldName="Status" MinWidth="80" FilterPopupMode="CheckedList" >
+                    <dxg:GridColumn.EditSettings>
+                        <dxe:ProgressBarEditSettings Maximum="100" Minimum="0" ContentDisplayMode="Value" DisplayFormat="{}{0}%"  />
+                    </dxg:GridColumn.EditSettings>
+                    <dxg:GridColumn.PrintCellStyle>
+                        <Style TargetType="dxe:ProgressBarEdit">
+                            <Setter Property="dxp:ExportSettings.TargetType" Value="Image" />
+                            <Setter Property="DisplayTemplate">
+                                <Setter.Value>
+                                    <ControlTemplate>
+                                        <Grid >
+                                            <ProgressBar Name="pbProgress" Value="{Binding RowData.Row.Status}" Foreground="#d3d3d3" Background="White" />
+                                            <dxe:TextEdit EditValue="{Binding ElementName=pbProgress, Path=Value}" DisplayFormatString="{Binding Column.ActualEditSettings.DisplayFormat}" IsReadOnly="True" IsPrintingMode="True" HorizontalAlignment="Center"/>
+                                        </Grid>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </dxg:GridColumn.PrintCellStyle>
+                </dxg:GridColumn>
+
+                <dxg:GridColumn Header="Type" FieldName="Quotation.Template.Name" Width="50" FilterPopupMode="CheckedList"></dxg:GridColumn>
+
+                <dxg:GridControl.TotalSummary>
+                    <dxg:GridSummaryItem x:Name="summary" FieldName="Name" SummaryType="Count" DisplayFormat="{DynamicResource GridSummary}" Visible="True"   Alignment="Left"/>
+                </dxg:GridControl.TotalSummary>
+
+                <dxmvvm:Interaction.Behaviors>
+                    <UIHelper:GridSelectingBehavior />
+                    <dxmvvm:DependencyPropertyBehavior Binding="{Binding VisibleRowCount, Mode=OneWayToSource}"
+                                                       EventName="FilterChanged"
+                                                       PropertyName="VisibleRowCount" />
+                </dxmvvm:Interaction.Behaviors>
+
+                <dxg:GridControl.View>
+                    <dxg:TableView x:Name="PendingWorkOrderTableView"
+                                   NavigationStyle="Row"
+                                   RowDetailsVisibilityMode="Visible"
+                                   ShowHorizontalLines="True"
+                                   ShowSearchPanelMode="Always"
+                                   ShowColumnHeaders="True"
+                                   IsColumnChooserVisible="{Binding IsWorkOrderColumnChooserVisible,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                   VerticalScrollbarVisibility="Visible"
+                                   AllowFixedColumnMenu="False"
+                                   ShowFixedTotalSummary="True" 
+                                   SearchPanelHorizontalAlignment="Stretch"
+                                   ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly"
+                                   FocusedRow="{Binding SelectedObject, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                   AllowGrouping="True"
+                                   ShowGroupPanel="False"
+                                   ShowIndicator="False" AutoWidth="True"
+                                   FilterEditorShowOperandTypeIcon="True"
+                                   AllowColumnFiltering="True">
+
+                        <dxg:TableView.Resources>
+                            <DataTemplate x:Key="PendingWorkOrderListReportPrintHeaderTemplate">
+                                <Grid Width="{Binding UsablePageWidth}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="50" />
+                                        <ColumnDefinition Width="130" />
+                                    </Grid.ColumnDefinitions>
+                                    <dxe:TextEdit Text=" " Width="{Binding UsablePageWidth}" Grid.ColumnSpan="3" IsPrintingMode="True" Background="#333E5E" HorizontalAlignment="Stretch" 
+                                                      VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" Height="50" />
+                                    <dxe:TextEdit Text="Pending Work Orders Report" IsPrintingMode="True" HorizontalAlignment="Stretch" 
+                                                      VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" />
+                                    <Image Source="/Emdep.Geos.Modules.Warehouse;component/Assets/Images/GeosReportLogo.png" Height="50" Width="80"  dxp:ExportSettings.TargetType="Image" Grid.Column="2" />
+                                </Grid>
+                            </DataTemplate>
+
+                            <DataTemplate x:Key="PendingWorkOrderListReportPrintFooterTemplate">
+                                <dxe:TextEdit HorizontalContentAlignment="Center" 
+                                                  Width="{Binding Path=UsablePageWidth, Mode=OneWay}" 
+                                                  dxp:ExportSettings.TargetType="PageNumber" 
+                                                  dxp:PageNumberExportSettings.Kind="NumberOfTotal" 
+                                                  dxp:PageNumberExportSettings.Format="Page {0} of {1}"/>
+                            </DataTemplate>
+                        </dxg:TableView.Resources>
+
+                        <!--<Interactive:Interaction.Triggers>
+                            <Interactive:EventTrigger EventName="Loaded">
+                                <Behaviors:InvokeDelegateCommandAction Command="{Binding CustomCellAppearanceCommand}" 
+                                                                       CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=InvokeParameter}" />
+                            </Interactive:EventTrigger>
+                        </Interactive:Interaction.Triggers>-->
+
+                        <dxmvvm:Interaction.Behaviors>
+                            <dxmvvm:EventToCommand Command="{Binding TableViewLoadedCommand}"
+                                                   EventName="Loaded"
+                                                   PassEventArgsToCommand="True" />
+
+                            <dxmvvm:EventToCommand Command="{Binding FilterEditorCreatedCommand}"
+                                                   EventName="FilterEditorCreated"
+                                                   PassEventArgsToCommand="True" />
+
+                            <dxmvvm:EventToCommand Command="{Binding CommandGridDoubleClick}"
+                                                   EventName="MouseDoubleClick"
+                                                   CommandParameter="{Binding ElementName=PendingWorkOrderTableView}" >
+                                <dxmvvm:EventToCommand.EventArgsConverter>
+                                    <dx:EventArgsToDataRowConverter/>
+                                </dxmvvm:EventToCommand.EventArgsConverter>
+                            </dxmvvm:EventToCommand>
+
+                            <dxmvvm:EventToCommand Command="{Binding CustomCellAppearanceCommand}"
+                                                   EventName="CustomCellAppearance"
+                                                   PassEventArgsToCommand="True" />
+
+                        </dxmvvm:Interaction.Behaviors>
+                    </dxg:TableView>
+                </dxg:GridControl.View>
+            </dxg:GridControl>
+        </DockPanel>
+    </Grid>
+</UserControl>

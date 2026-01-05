@@ -1,0 +1,107 @@
+﻿<dxwui:WinUIDialogWindow x:Class="Emdep.Geos.Modules.Crm.Views.LostOpportunityView"
+                         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                         xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"
+                         xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+                         xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+                         xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+                         xmlns:ViewModels="clr-namespace:Emdep.Geos.Modules.Crm.ViewModels"
+                         xmlns:behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+                         xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+                         xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+                         xmlns:UIConverter ="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+                         xmlns:Validation ="clr-namespace:Emdep.Geos.UI.Validations;assembly=Emdep.Geos.UI.Validations"
+                         xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+                         Height="300" Width="350"
+                         Title ="{DynamicResource LeadsLostOpportunity}"
+                         TitleStyle="{DynamicResource WinUIDialogWindowTitleStyle}"
+                         Style="{DynamicResource WinUIDialogWindowStyle}">
+
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape" Command="{Binding LostOpportunityViewCancelButtonCommand}"/>
+    </dxwui:WinUIDialogWindow.InputBindings>
+
+    <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Height="Auto " Width="350" Background="Transparent" >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="70" />
+            <RowDefinition Height="70" />
+            <RowDefinition Height="100" />
+            <RowDefinition Height="60" />
+            <RowDefinition Height="100" />
+        </Grid.RowDefinitions>
+       
+       <!--Offer  Lost Date-->
+        <!--[skale][30-09-2019][GEOS2-1756] Add the possibility to Edit the Offer LOST Date-->
+
+        <StackPanel Orientation="Vertical" Grid.Row="0" >
+            <Label Content="{DynamicResource LeadsLostDate}" FontWeight="Bold"/>
+
+            <dxe:DateEdit  VerticalAlignment="Stretch" Height="30" MaxValue="{Binding MaxLostDate,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+                <dxe:DateEdit.EditValue>
+
+                    <Binding Path="OfferLostDate" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay" ValidatesOnDataErrors="True" >
+                        <Binding.ValidationRules>
+                            <Validation:RequiredValidationRule FieldName="OfferLostDate" ValidationStep="UpdatedValue" />
+                        </Binding.ValidationRules>
+                    </Binding>
+                </dxe:DateEdit.EditValue>
+            </dxe:DateEdit>
+
+        </StackPanel>
+
+
+        <StackPanel Orientation="Vertical" Grid.Row="1" >
+            <Label Content="{DynamicResource LeadsLostReason}" FontWeight="Bold"/>
+            <dxe:ComboBoxEdit HorizontalAlignment="Stretch"
+                              VerticalAlignment="Top"
+                              ItemsSource="{Binding OfferLostReasons }"
+                              DisplayMember="Name" Height="30">
+                <dxe:ComboBoxEdit.EditValue>
+                    <Binding Path="DataContext.SelectedItems" RelativeSource="{RelativeSource AncestorType=dxwui:WinUIDialogWindow}" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                        <Binding.ValidationRules>
+                            <Validation:RequiredValidationRule FieldName="SelectedItems" ValidationStep="UpdatedValue" />
+                        </Binding.ValidationRules>
+                    </Binding>
+                </dxe:ComboBoxEdit.EditValue>
+                <dxe:ComboBoxEdit.StyleSettings>
+                    <dxe:CheckedComboBoxStyleSettings />
+                </dxe:ComboBoxEdit.StyleSettings>
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="EditValueChanging">
+                        <behaviors:InvokeDelegateCommandAction Command="{Binding SelectedReasonIndexChangedCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=InvokeParameter}" />
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </dxe:ComboBoxEdit>
+        </StackPanel>
+
+        <StackPanel  Orientation="Vertical" Grid.Row="2" >
+            <Label Content="{DynamicResource LeadsLostDescription}" FontWeight="Bold" />
+            <TextBox Height="72" Text="{Binding LostReasonDescription,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+        </StackPanel>
+
+        <StackPanel Orientation="Vertical" Grid.Row="3" >
+            <Label Content="{DynamicResource LeadsLostReasonCompetitor}" FontWeight="Bold"/>
+            <dxe:ComboBoxEdit HorizontalAlignment="Stretch"
+                              VerticalAlignment="Top" ValidateOnTextInput="True"
+                              ItemsSource="{Binding Competitors }" AutoComplete="True" IsTextEditable="False" ImmediatePopup="True" IncrementalFiltering="True"
+                              SelectedIndex="{Binding SelectedIndexCompetitors,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                              DisplayMember="Name" Height="30">
+
+            </dxe:ComboBoxEdit>
+
+        </StackPanel>
+
+        <DockPanel Grid.Row="4" HorizontalAlignment="Center" VerticalAlignment="Center" Width="250" Height="30">
+            <Button HorizontalAlignment="Left" Width="100" Command="{Binding LostOpportunityViewAcceptButtonCommand}">Accept</Button>
+            <Button HorizontalAlignment="Right" Width="100" Command="{Binding LostOpportunityViewCancelButtonCommand}">Cancel</Button>
+        </DockPanel>
+    </Grid>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="KeyDown">
+            <behaviors:InvokeDelegateCommandAction Command="{Binding CommandTextInput}" CommandParameter="{Binding Path=InvokeParameter, RelativeSource={RelativeSource Self}}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+</dxwui:WinUIDialogWindow>

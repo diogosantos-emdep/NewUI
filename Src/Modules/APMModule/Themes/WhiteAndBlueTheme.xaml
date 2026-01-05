@@ -1,0 +1,146 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+                    xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"
+                    xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+                    xmlns:dxc="http://schemas.devexpress.com/winfx/2008/xaml/core"
+                    xmlns:dxci="http://schemas.devexpress.com/winfx/2008/xaml/core/internal"
+                    xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+                    xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+                    xmlns:dxgt="http://schemas.devexpress.com/winfx/2008/xaml/grid/themekeys"
+                    xmlns:system="clr-namespace:System;assembly=mscorlib"
+                    xmlns:dxnav="http://schemas.devexpress.com/winfx/2008/xaml/navigation"
+                    xmlns:dxa="http://schemas.devexpress.com/winfx/2008/xaml/accordion"
+                    xmlns:dxat="http://schemas.devexpress.com/winfx/2008/xaml/accordion/themekeys"
+                    xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+                    xmlns:dxan="http://schemas.devexpress.com/winfx/2008/xaml/accordion/internal"
+                    xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm">
+
+    <!--#region Accordion-->
+    <!--Remove the left margin in child AccordionControl items when ChildrenSelector is used-->
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="/DevExpress.Xpf.Accordion.v19.2;component/Themes/Generic/Resources.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
+    <dxmvvm:ObjectToObjectConverter x:Key="collapseItemConverter" DefaultTarget="False">
+        <dxmvvm:MapItem Source="Container" Target="True" />
+    </dxmvvm:ObjectToObjectConverter>
+
+    <SolidColorBrush x:Key="APMColorMain" Color="White" />
+
+    <Style x:Key="FocusedHyperlinkCellStyle" TargetType="dxg:LightweightCellEditor" BasedOn="{StaticResource {dxgt:GridRowThemeKey ResourceKey=LightweightCellStyle}}">
+        <Setter Property="BorderBrush" Value="Gray"/>
+        <Style.Triggers>
+            <Trigger Property="dxg:DataViewBase.IsFocusedCell" Value="True">
+                <Setter Property="Background" Value="#FF083493" />
+                <Setter Property="Foreground" Value="White" />
+                <Setter Property="TextBlock.Foreground" Value="White"/>
+            </Trigger>
+            <Trigger Property="IsMouseOver" Value="true">
+                <Setter Property="Foreground" Value="OrangeRed" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style TargetType="Image" x:Key="APMRefreshButtonImageStyle">
+        <Setter Property="Source" Value="/Emdep.Geos.Modules.APM;component/Assets/Images/bRefresh_24x24.png" />
+    </Style>
+
+    <Style TargetType="Image" x:Key="APMPrinterButtonImageStyle">
+        <Setter Property="Source" Value="/Emdep.Geos.Modules.APM;component/Assets/Images/bPrinter.png" />
+    </Style>
+
+    <Style TargetType="Image" x:Key="APMCalendarImageStyle">
+        <Setter Property="Source" Value="/Emdep.Geos.Modules.APM;component/Assets/Images/bCalendar16x16.png" />
+    </Style>
+
+    <Style TargetType="Image" x:Key="APMAddButtonImageStyle">
+         <Setter Property="Source" Value="/Emdep.Geos.Modules.APM;component/Assets/Images/bAdd.png" />
+     </Style>
+
+     <Style TargetType="Image" x:Key="APMSwitchViewButtonImageStyle">
+         <Setter Property="Source" Value="/Emdep.Geos.Modules.APM;component/Assets/Images/bSwitchView_32x32.png" />
+     </Style>
+
+    <Style TargetType="Image" x:Key="APMExcelExportButtonImageStyle">
+        <Setter Property="Source" Value="/Emdep.Geos.Modules.APM;component/Assets/Images/bXlsx.png" />
+    </Style>
+
+    <SolidColorBrush x:Key="TileBarItemColorStyle" Color="#FF2F51A5" />
+
+    <Style TargetType="Image" x:Key="APMLowPriorityImageStyle">
+        <Setter Property="Source" Value="/Emdep.Geos.Modules.APM;component/Assets/Images/LowPriority.png" />
+    </Style>
+
+    <Style TargetType="Image" x:Key="APMMediumPriorityImageStyle">
+        <Setter Property="Source" Value="/Emdep.Geos.Modules.APM;component/Assets/Images/MediumPriority.png" />
+    </Style>
+
+    <Style TargetType="Image" x:Key="APMHighPriorityImageStyle">
+        <Setter Property="Source" Value="/Emdep.Geos.Modules.APM;component/Assets/Images/HighPriority.png" />
+    </Style>
+
+    <Style x:Key="WinUIDialogWindowTitleStyle" TargetType="ContentControl" BasedOn="{StaticResource WinUIDialogTitleStyle}">
+        <Setter Property="Foreground" Value="#373A3D" />
+    </Style>
+
+    <Style x:Key="WinUIDialogWindowTitleStyleWithLeftMargin" TargetType="ContentControl" BasedOn="{StaticResource WinUIDialogTitleStyle}">
+        <Setter Property="Foreground" Value="#373A3D" />
+        <Setter Property="Margin" Value="30,0,0,0"/>
+    </Style>
+
+    <Style TargetType="Image" x:Key="APMAddCommentButtonImageStyle">
+        <Setter Property="Source" Value="/Emdep.Geos.Modules.APM;component/Assets/Images/bComments.png" />
+    </Style>
+
+    <Style TargetType="Image" x:Key="CalenderCheckedImageStyle">
+        <Setter Property="Source" Value="/Emdep.Geos.Modules.APM;component/Assets/Images/bCalendarCheck.png" />
+    </Style>
+
+    <SolidColorBrush x:Key="TaskCommentBorderStyle" Color="Black" />
+
+    <Style TargetType="Image" x:Key="UploadAttachmentButtonImageStyle">
+        <Setter Property="Source" Value="/Emdep.Geos.Modules.APM;component/Assets/Images/upload.png" />
+    </Style>
+
+    <!--<Style TargetType="Image" x:Key="AttachmentImageStyle">
+        <Setter Property="Source" Value="/Emdep.Geos.Modules.Crm;component/Assets/Images/Attachment_Black_24x24.png" />
+    </Style>-->
+
+    <Style TargetType="Image" x:Key="APMDownloadAttachmentButtonImageStyle">
+        <Setter Property="Source" Value="/Emdep.Geos.Modules.APM;component/Assets/Images/download.png" />
+    </Style>
+
+    <Style TargetType="Image" x:Key="SaveButtonImageStyle">
+        <Setter Property="Source" Value="/Emdep.Geos.Modules.APM;component/Assets/Images/bSave.png" />
+    </Style>
+
+    <ImageSource x:Key="EmployeeDefaultImageFemale">/Emdep.Geos.Modules.Hrm;component/Assets/Images/FemaleUser_Blue.png</ImageSource>
+    <ImageSource x:Key="EmployeeDefaultImageMale">/Emdep.Geos.Modules.Hrm;component/Assets/Images/MaleUser_Blue.png</ImageSource>
+
+    <!--[Shweta.Thube][GEOS2-6453]-->
+    <ImageSource x:Key="SwitchActivityCardview" >/Emdep.Geos.Modules.APM;component/Assets/Images/bTaskCards_32x32.png</ImageSource>
+    <ImageSource x:Key="SwitchActivityCardviewMouseOver" >/Emdep.Geos.Modules.APM;component/Assets/Images/wTaskCards_32x32.png</ImageSource>
+
+    <ImageSource x:Key="SwitchActivityGridview" >/Emdep.Geos.Modules.APM;component/Assets/Images/bCalendar_32x32.png</ImageSource>
+    <ImageSource x:Key="SwitchActivityGridviewMouseOver" >/Emdep.Geos.Modules.APM;component/Assets/Images/wCalendar_32x32.png</ImageSource>
+    
+    <ImageSource x:Key="SwitchActivityCalendar" >/Emdep.Geos.Modules.APM;component/Assets/Images/bGridView_32x32.png</ImageSource>
+    <ImageSource x:Key="SwitchActivityCalendarMouseOver" >/Emdep.Geos.Modules.APM;component/Assets/Images/wGridView_32x32.png</ImageSource>
+
+    <ImageSource x:Key="APMCollapseButtonImage">/Emdep.Geos.Modules.APM;component/Assets/Images/bCollapse.png</ImageSource>
+    <ImageSource x:Key="APMExpandButtonImage">/Emdep.Geos.Modules.APM;component/Assets/Images/bExpand.png</ImageSource>
+
+    <Style TargetType="Image" x:Key="APMImportButtonImageStyle">
+        <Setter Property="Source" Value="/Emdep.Geos.Modules.APM;component/Assets/Images/bImport.png" />
+    </Style>
+
+    <Style TargetType="Image" x:Key="APMExportButtonImageStyle">
+        <Setter Property="Source" Value="/Emdep.Geos.Modules.APM;component/Assets/Images/bExport.png" />
+    </Style>
+
+    <!--[shweta.thube][GEOS2-8063][27/05/2025]-->
+    <Style TargetType="Image" x:Key="APMEmailButtonImageStyle">
+        <Setter Property="Source" Value="/Emdep.Geos.Modules.APM;component/Assets/Images/bEmail.png" />
+    </Style>
+</ResourceDictionary>

@@ -1,0 +1,533 @@
+﻿<UserControl x:Class="Emdep.Geos.Modules.Warehouse.Views.TransferMaterialUserControlView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.Warehouse.Views"
+             xmlns:dxi="http://schemas.devexpress.com/winfx/2008/xaml/core/internal"
+             xmlns:dxgt="http://schemas.devexpress.com/winfx/2008/xaml/grid/themekeys"
+             xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol" 
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm" 
+             xmlns:behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+             xmlns:UIConverter="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters" 
+             xmlns:dxwuin="http://schemas.devexpress.com/winfx/2008/xaml/windowsui/navigation" 
+             xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+             xmlns:dxet="http://schemas.devexpress.com/winfx/2008/xaml/editors/themekeys"
+             xmlns:dxeh="http://schemas.devexpress.com/winfx/2008/xaml/editors/internal"
+             xmlns:dxm="http://schemas.devexpress.com/winfx/2008/xaml/map"
+             xmlns:sysglb="clr-namespace:System.Globalization;assembly=mscorlib"
+             xmlns:system="clr-namespace:System;assembly=mscorlib"
+             Style="{DynamicResource UserControlStyle}" Focusable="True" IsTabStop="True"  
+             UIHelper:FocusExtension.IsFocused="{Binding FocusUserControl}"
+             mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <UIConverter:InvertedVisibilityConverter x:Key="invertedVisibilityConverter"/>
+        <Style TargetType="dxlc:GroupBox" >
+            <Setter Property="FontSize" Value="24"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Padding" Value="0"/>
+        </Style>
+
+        <DataTemplate x:Key="rowIndicatorContentTemplate">
+            <Border x:Name="errorIndicatorBorder" Background="Transparent">
+                <ContentControl Name="iconPresenter">
+                    <Border />
+                </ContentControl>
+            </Border>
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding Path=IndicatorState}" Value="Focused">
+                    <Setter Property="ContentTemplate" Value="{dxi:ThemeResource {dxgt:RowIndicatorThemeKey ResourceKey=FocusedIconTemplate}}" TargetName="iconPresenter" />
+                    <Setter Property="ContentTemplate" TargetName="iconPresenter">
+                        <Setter.Value>
+                            <DataTemplate>
+                                <Image Source="{DynamicResource IndicatorImageStyle}" Width="50" Height="50"/>
+                            </DataTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </DataTrigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
+
+        <ControlTemplate x:Key="{dxet:TrackBarEditThemeKey ResourceKey=PanelLeftSideTemplate, IsThemeIndependent=True}">
+            <Border Background="{Binding DataContext.TrackBarFgColor,UpdateSourceTrigger=PropertyChanged}" />
+        </ControlTemplate>
+
+        <ControlTemplate x:Key="{dxet:TrackBarEditThemeKey ResourceKey=PanelRightSideTemplate, IsThemeIndependent=True}">
+            <Border Background="Gray" />
+        </ControlTemplate>
+
+        <Style x:Key="{dxet:TrackBarEditThemeKey ResourceKey=PanelRightSideStyle}" TargetType="ContentControl">
+            <Setter Property="IsTabStop" Value="false" />
+            <Setter Property="Template" Value="{DynamicResource {dxet:TrackBarEditThemeKey ResourceKey=PanelRightSideTemplate}}" />
+            <Setter Property="Focusable" Value="false" />
+            <Setter Property="OverridesDefaultStyle" Value="true" />
+        </Style>
+
+        <Style x:Key="{dxet:TrackBarEditThemeKey ResourceKey=PanelLeftSideStyle}" TargetType="ContentControl">
+            <Setter Property="IsTabStop" Value="false" />
+            <Setter Property="Template" Value="{DynamicResource {dxet:TrackBarEditThemeKey ResourceKey=PanelLeftSideTemplate}}" />
+            <Setter Property="UseLayoutRounding" Value="{Binding Path=(dxe:BaseEdit.OwnerEdit).UseLayoutRounding}" />
+            <Setter Property="Focusable" Value="false" />
+            <Setter Property="OverridesDefaultStyle" Value="true" />
+        </Style>
+
+        <dxe:GridLengthConverter x:Key="GridLengthConverter" />
+
+        <ControlTemplate x:Key="{dxet:TrackBarEditThemeKey ResourceKey=PanelHorizontalTemplate,IsThemeIndependent=true}" TargetType="dxe:RangeEditBasePanel">
+
+            <Grid x:Name="root">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition x:Name="leftButton" Width="Auto" />
+                    <ColumnDefinition x:Name="leftColumn" Width="{Binding Path=(dxe:RangeEditBaseInfo.LayoutInfo).LeftSidePosition, Converter={StaticResource GridLengthConverter}}" />
+                    <ColumnDefinition x:Name="centerColumn" Width="Auto" />
+                    <ColumnDefinition x:Name="rightColumn" Width="{Binding Path=(dxe:RangeEditBaseInfo.LayoutInfo).RightSidePosition, Converter={StaticResource GridLengthConverter}}" />
+                    <ColumnDefinition x:Name="rightButton" Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <ContentControl x:Name="back" Grid.Row="1"  Height="15" Grid.Column="1" Grid.ColumnSpan="3" 
+                                Style="{DynamicResource {dxet:TrackBarEditThemeKey ResourceKey=HorizontalBackgroundStyle}}" 
+                                dxeh:ControlHelper.ShowFocusedState="{Binding Path=(dxe:BaseEdit.OwnerEdit).IsKeyboardFocusWithin}" />
+                <UIHelper:CustomTrackBar x:Name="PART_BottomTick"
+				Grid.Row="0"
+				Grid.Column="1"
+				Grid.ColumnSpan="3" Placement="Top"
+				Style="{DynamicResource {dxet:TrackBarEditThemeKey ResourceKey=TickBarStyle,IsThemeIndependent=True}}"/>
+                <RepeatButton x:Name="left" Grid.Column="1" Grid.Row="1" Height="5" 
+                              Style="{DynamicResource {dxet:TrackBarEditThemeKey ResourceKey=PanelLeftSideStyle}}" 
+                              Command="{Binding Path=(dxe:BaseEdit.OwnerEdit).DecrementLargeCommand}" />
+                <Thumb x:Name="PART_Thumb" Grid.Column="2" Grid.Row="1" >
+                    <Thumb.Style>
+                        <Style TargetType="Thumb">
+                            <Setter Property="SnapsToDevicePixels" Value="true" />
+                            <Setter Property="OverridesDefaultStyle" Value="true" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Thumb">
+                                        <Ellipse Height="20" Width="20">
+                                            <Ellipse.Fill>
+                                                <SolidColorBrush Color="{Binding DataContext.TrackBarFgColor,UpdateSourceTrigger=PropertyChanged}"/>
+                                            </Ellipse.Fill>
+                                        </Ellipse>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </Thumb.Style>
+                </Thumb>
+                <RepeatButton x:Name="right" Grid.Column="3" Grid.Row="1" Height="5" Margin="0,0,5,0"
+                              Style="{DynamicResource {dxet:TrackBarEditThemeKey ResourceKey=PanelRightSideStyle}}" 
+                              Command="{Binding Path=(dxe:BaseEdit.OwnerEdit).IncrementLargeCommand}" />
+            </Grid>
+        </ControlTemplate>
+
+        <system:Double x:Key="FontSize24">24</system:Double>
+        <system:Double x:Key="FontSize33">33</system:Double>
+        <system:Double x:Key="FontSize35">35</system:Double>
+        <system:Double x:Key="FontSize15">15</system:Double>
+        <system:Double x:Key="FontSize18">18</system:Double>
+        <system:Double x:Key="FontSize19">19</system:Double>
+    </UserControl.Resources>
+
+
+    <Grid ShowGridLines="False"  
+          Height="{Binding WindowHeight,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+          Width="{Binding WindowWidth,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="7*"/>
+            <RowDefinition Height="88*"/>
+            <RowDefinition Height="3"/>
+            <RowDefinition Height="6*"/>
+        </Grid.RowDefinitions>
+
+        <!--TrackBarEdit-->
+        <dxe:TrackBarEdit Minimum="0" Maximum="3" TickFrequency="1" IsReadOnly="True"
+                          SmallStep="1" LargeStep="1" Cursor="Arrow" Grid.Row="0"
+                          EditValue="{Binding TrackBarEditvalue,UpdateSourceTrigger=PropertyChanged}"  HorizontalAlignment="Stretch"/>
+
+        <Grid Grid.Row="1" HorizontalAlignment="Stretch">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="25*" />
+                <RowDefinition Height="25*" />
+                <RowDefinition Height="50*" />
+            </Grid.RowDefinitions>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="60*" />
+                <ColumnDefinition Width="3" />
+                <ColumnDefinition Width="40*" />
+            </Grid.ColumnDefinitions>
+
+            <!--From Location-->
+            <dxlc:LayoutGroup Grid.Row="0" View="GroupBox"
+                              HorizontalAlignment="Stretch" 
+                              VerticalAlignment="Stretch" 
+                              IsCollapsible="False" IsCollapsed="False">
+                <dxlc:LayoutGroup.HeaderTemplate>
+                    <DataTemplate>
+                        <Grid ShowGridLines="False">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="24"/>
+                                <ColumnDefinition Width="5"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0" 
+                                       Text="{DynamicResource FromLocation}" 
+                                       FontSize="{StaticResource FontSize24}" FontWeight="Bold" 
+                                       VerticalAlignment="Center"/>
+
+                            <Image Grid.Column="1" x:Name="errorImage" 
+                                   Height="24" Width="24" 
+                                   Source="/Emdep.Geos.Modules.Warehouse;component/Assets/Images/error.png"
+                                   Visibility="{Binding DataContext.IsWrongFromLocationErrorVisible, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" />
+
+                            <TextBlock Grid.Column="3" Name="errorText" 
+                                       Text="{Binding DataContext.WrongFromLocation, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}"
+                                       HorizontalAlignment="Right" 
+                                       VerticalAlignment="Center" 
+                                       FontWeight="Bold" 
+                                       Foreground="#FF0000" />
+                        </Grid>
+                    </DataTemplate>
+                </dxlc:LayoutGroup.HeaderTemplate>
+
+                <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                      Background="{Binding BgColorFromLocation, UpdateSourceTrigger=PropertyChanged}" >
+                    <Viewbox>
+                        <TextBlock HorizontalAlignment="Center" 
+                                   VerticalAlignment="Center" 
+                                   IsEnabled="False"
+                                   Text="{Binding FromLocationName, UpdateSourceTrigger=PropertyChanged}"
+                                   FontWeight="Bold"
+                                   Focusable="False"
+                                   Foreground="{Binding FgColorLocation,UpdateSourceTrigger=PropertyChanged}"
+                                   Background="{Binding BgColorFromLocation,UpdateSourceTrigger=PropertyChanged}"/>
+                    </Viewbox>
+                </Grid>
+
+            </dxlc:LayoutGroup>
+
+            <!--To Location-->
+            <dxlc:LayoutGroup Grid.Row="1" View="GroupBox"
+                              HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+                              Header="{DynamicResource ToLocation}" 
+                              IsCollapsible="False" IsCollapsed="False" >
+                <dxlc:LayoutGroup.HeaderTemplate>
+                    <DataTemplate>
+                        <Grid ShowGridLines="False">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="24"/>
+                                <ColumnDefinition Width="5"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="{DynamicResource ToLocation}" 
+                                       FontSize="{StaticResource FontSize24}" FontWeight="Bold" 
+                                       VerticalAlignment="Center"/>
+
+                            <Image Grid.Column="1" x:Name="errorImage" Height="24" Width="24" 
+                                   Source="/Emdep.Geos.Modules.Warehouse;component/Assets/Images/error.png" 
+                                   Visibility="{Binding DataContext.IsWrongToLocationErrorVisible,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}"/>
+
+                            <TextBlock Grid.Column="3" Name="errorText" 
+                                       Text="{Binding DataContext.WrongToLocation, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" 
+                                       HorizontalAlignment="Right" VerticalAlignment="Center"
+                                       FontWeight="Bold"  Foreground="#FF0000" />
+                        </Grid>
+                    </DataTemplate>
+                </dxlc:LayoutGroup.HeaderTemplate>
+
+                <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                      Background="{Binding BgColorToLocation, UpdateSourceTrigger=PropertyChanged}" >
+                    <Viewbox>
+                        <TextBlock HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   IsEnabled="False"
+                                   Text="{Binding ToLocationName,UpdateSourceTrigger=PropertyChanged}"
+                                   FontWeight="Bold"
+                                   Focusable="False"
+                                   Foreground="{Binding FgColorLocation, UpdateSourceTrigger=PropertyChanged}"
+                                   Background="{Binding BgColorToLocation, UpdateSourceTrigger=PropertyChanged}"/>
+                    </Viewbox>
+                </Grid>
+            </dxlc:LayoutGroup>
+
+            <!--Transfer Material Items-->
+            <dxlc:LayoutGroup Grid.Row="2"
+                              HorizontalAlignment="Stretch"  VerticalAlignment="Stretch"
+                              View="Group" IsCollapsible="False" IsCollapsed="False"  ScrollBars="Auto" >
+                <dxlc:LayoutGroup  View="GroupBox"  Header="{DynamicResource LocateMaterialItems}" Orientation="Vertical" VerticalAlignment="Stretch" >
+                    <dxlc:LayoutGroup.HeaderTemplate>
+                        <DataTemplate>
+                            <Grid ShowGridLines="False">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="24"/>
+                                    <ColumnDefinition Width="5"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0" Text="{DynamicResource LocateMaterialItems}" 
+                                           FontSize="{StaticResource FontSize24}" 
+                                           FontWeight="Bold" VerticalAlignment="Center"/>
+
+                                <Image Grid.Column="1" x:Name="errorImage" Height="24" Width="24" 
+                                       Source="/Emdep.Geos.Modules.Warehouse;component/Assets/Images/error.png" 
+                                       Visibility="{Binding DataContext.IsWrongItemErrorVisible,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}"/>
+
+                                <TextBlock Grid.Column="3" Name="errorText" 
+                                           Text="{Binding DataContext.WrongItem, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" 
+                                           HorizontalAlignment="Right" VerticalAlignment="Center" 
+                                           FontWeight="Bold" 
+                                           Foreground="#FF0000" />
+                            </Grid>
+                        </DataTemplate>
+                    </dxlc:LayoutGroup.HeaderTemplate>
+
+                    <UIHelper:GridControlWithoutClickEx MaxHeight="800" AllowLiveDataShaping ="True" 
+                                                        ItemsSource="{Binding  DataContext.TransferMaterialsList, RelativeSource={RelativeSource AncestorType=dxlc:LayoutGroup,Mode=FindAncestor}}"
+                                                        HorizontalAlignment="Stretch" 
+                                                        VerticalAlignment="Stretch" 
+                                                        SelectionMode="None" >
+
+                        <!--Reference-->
+                        <dxg:GridColumn Header="{DynamicResource ArticleReference}" FieldName="Reference" Width="50*" AllowColumnFiltering ="False" AllowSorting="False">
+                            <dxg:GridColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock VerticalAlignment="Center" Margin="5 0 0 0" x:Name="Hyperlink">
+                                        <Hyperlink x:Name="hyperlink"
+                                                   TargetName="_blank"
+                                                   Command="{Binding DataContext.HyperlinkClickCommand,RelativeSource={RelativeSource AncestorType=dxg:GridControl}}"
+                                                   CommandParameter="{Binding RowData.Row}" Style="{DynamicResource hyperlinkGridStyle}">
+                                            <InlineUIContainer>
+                                                <TextBlock Text="{Binding Data.Reference}" Style="{DynamicResource HyperlinkTextBlock}" TextDecorations="Underline" />
+                                            </InlineUIContainer>
+                                        </Hyperlink>
+                                     </TextBlock>
+                                </DataTemplate>
+                            </dxg:GridColumn.CellTemplate>
+                        </dxg:GridColumn>
+
+                        <!--Date/DN-->
+                        <dxg:GridColumn Header="{DynamicResource DateDN}" Width="30*" AllowColumnFiltering ="False" AllowSorting="False">
+                            <dxg:GridColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Grid ShowGridLines="False">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="*"/>
+                                            <RowDefinition Height="*"/>
+                                        </Grid.RowDefinitions>
+                                        <TextBlock Grid.Row="0" Text="{Binding RowData.Row.UploadedIn, StringFormat=d, ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}" HorizontalAlignment="Left"/>
+                                        <TextBlock Grid.Row="1" Text="{Binding RowData.Row.WarehouseDeliveryNote.Code}" HorizontalAlignment="Right" FontSize="{StaticResource FontSize18}" Margin="0 0 5 0"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </dxg:GridColumn.CellTemplate>
+                        </dxg:GridColumn>
+
+                        <!--Quantity-->
+                        <dxg:GridColumn Header="{DynamicResource Qty}" FieldName="Quantity" Width="20*" AllowColumnFiltering ="False" AllowSorting="False" />
+
+                        <UIHelper:GridControlWithoutClickEx.View>
+                            <dxg:TableView x:Name="ItemsTableView"
+                                           ShowGroupPanel="False"
+                                           NavigationStyle="Row"
+                                           ShowColumnHeaders="True"
+                                           ShowIndicator="False" 
+                                           AutoWidth="True" 
+                                           RowMinHeight="50" 
+                                           FontSize="{StaticResource FontSize33}" 
+                                           IsColumnMenuEnabled="False"
+                                           SearchColumns="False"
+                                           HorizontalScrollbarVisibility="Hidden"
+                                           VerticalScrollbarVisibility="Auto"
+                                           RowIndicatorContentTemplate="{StaticResource rowIndicatorContentTemplate}"
+                                           IndicatorWidth="50" IsEnabled="True"
+                                           FocusedRow="{Binding DataContext.SelectedTransferMaterials, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=dxlc:LayoutGroup,Mode=FindAncestor}}">
+
+                                <dxg:TableView.RowStyle>
+                                    <Style TargetType="dxg:RowControl">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Path=DataContext.Quantity}" Value="0">
+                                                <Setter Property="Background" Value="Green"/>
+                                                <Setter Property="Foreground" Value="#FFFFFFFF"/>
+                                            </DataTrigger>
+                                            <Trigger Property="dxg:DataViewBase.IsFocusedRow" Value="True">
+                                                <Setter Property="Background" Value="{Binding Path=View.DataContext.OnFocusBgColor,UpdateSourceTrigger=PropertyChanged}" />
+                                                <Setter Property="Foreground" Value="{Binding Path=View.DataContext.OnFocusFgColor,UpdateSourceTrigger=PropertyChanged}" />
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </dxg:TableView.RowStyle>
+                            </dxg:TableView>
+                        </UIHelper:GridControlWithoutClickEx.View>
+                    </UIHelper:GridControlWithoutClickEx>
+                </dxlc:LayoutGroup>
+            </dxlc:LayoutGroup>
+
+            <!--Information-->
+            <dxlc:LayoutGroup Grid.Row="0" Grid.RowSpan="3" Grid.Column="2"
+                              View="GroupBox"
+                              HorizontalAlignment="Stretch"  VerticalAlignment="Stretch"
+                              IsCollapsible="False" IsCollapsed="False" >
+                <dxlc:LayoutGroup.HeaderTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{DynamicResource TransferMaterialInformation}"
+                                   FontSize="{StaticResource FontSize24}" FontWeight="Bold" VerticalAlignment="Center"/>
+                    </DataTemplate>
+                </dxlc:LayoutGroup.HeaderTemplate>
+
+                <Grid ShowGridLines="False" 
+                      HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+                      Visibility="{Binding IsInformationVisible}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" TextWrapping="Wrap" TextAlignment="Center" 
+                               HorizontalAlignment="Stretch"
+                               Text="{Binding SelectedTransferMaterials.Description}"
+                               FontSize="{StaticResource FontSize24}" FontWeight="Bold" />
+
+                    <Image Grid.Row="1"
+                           Source="{Binding ArticleImage,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+                           VerticalAlignment="Center" />
+
+                    <Grid Grid.Row="2" ShowGridLines="False" VerticalAlignment="Center">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="3"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="3"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="3"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="175"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="175"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Row="1" Grid.Column="1"
+                                Background="{Binding TotalStockBgColor,UpdateSourceTrigger=PropertyChanged}"
+                                BorderThickness="1" BorderBrush="Gray" >
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock Text="{DynamicResource LocateMaterialTotalStock}" 
+                                           TextBlock.Foreground="{Binding TotalStockFgColor}" 
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           FontSize="{StaticResource FontSize19}"/>
+                                <TextBlock Text="{Binding TotalCurrentItemStock,UpdateSourceTrigger=PropertyChanged}"
+                                           TextBlock.Foreground="{Binding TotalStockFgColor}" 
+                                           HorizontalAlignment="Center" 
+                                           VerticalAlignment="Center"
+                                           FontSize="{StaticResource FontSize35}" FontWeight="Bold" />
+                            </StackPanel>
+                        </Border>
+
+                        <dxe:ProgressBarEdit Grid.Row="3" Grid.Column="1" 
+                                             Minimum="0"
+                                             Maximum="{Binding ProgressbarArticleStock.ArticleStockForAllLocation,Mode=OneWay}" 
+                                             Value="{Binding ProgressbarArticleStock.AvgStock,Mode=OneWay}" 
+                                             ShowBorder="False" IsPercent="True" 
+                                             DisplayFormatString="p0" FontWeight="SemiBold" 
+                                             FontSize="{StaticResource FontSize15}" ContentDisplayMode="Value"/>
+
+
+                        <Border Grid.Row="1" Grid.Column="3" 
+                                Background="{Binding LocationStockBgColor, UpdateSourceTrigger=PropertyChanged}" 
+                                BorderThickness="1" BorderBrush="Gray">
+                            <StackPanel Orientation="Vertical">
+
+                                <TextBlock Text="{DynamicResource TransferMaterialLocationStock}"
+                                           HorizontalAlignment="Center" 
+                                           VerticalAlignment="Center"
+                                           TextBlock.Foreground="{Binding LocationStockFgColor}"
+                                           FontSize="{StaticResource FontSize19}"/>
+
+                                <TextBlock Text="{Binding ProgressbarLocationStock.LocationStock,UpdateSourceTrigger=PropertyChanged}"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           FontSize="{StaticResource FontSize35}" FontWeight="Bold" 
+                                           TextBlock.Foreground="{Binding LocationStockFgColor}" />
+                            </StackPanel>
+                        </Border>
+
+                        <dxe:ProgressBarEdit Grid.Row="3" Grid.Column="3"
+                                             ShowBorder="False" 
+                                             Value="{Binding LocationStockValue,Mode=TwoWay}"
+                                             Minimum="0" 
+                                             Maximum="{Binding ProgressbarLocationStock.MaximumStock,Mode=TwoWay}"
+                                             IsPercent="True" DisplayFormatString="p0" FontWeight="SemiBold"
+                                             FontSize="{StaticResource FontSize15}" 
+                                             ContentDisplayMode="Value"/>
+                    </Grid>
+                </Grid>
+
+                <dxm:MapControl Name="mapControl"
+                                HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+                                Visibility="{Binding IsInformationVisible, Converter={StaticResource invertedVisibilityConverter}}">
+                    <dxm:MapControl.ScalePanelOptions>
+                        <dxm:ScalePanelOptions Visible="False" />
+                    </dxm:MapControl.ScalePanelOptions>
+                    <dxm:MapControl.ZoomTrackbarOptions>
+                        <dxm:ZoomTrackbarOptions Visible="False" />
+                    </dxm:MapControl.ZoomTrackbarOptions>
+                    <dxm:MapControl.ScrollButtonsOptions>
+                        <dxm:ScrollButtonsOptions Visible="False" />
+                    </dxm:MapControl.ScrollButtonsOptions>
+                    <dxm:MapControl.CoordinatesPanelOptions>
+                        <dxm:CoordinatesPanelOptions Visible="False" />
+                    </dxm:MapControl.CoordinatesPanelOptions>
+
+                    <dxm:VectorLayer x:Name="DataLayer" EnableSelection="false">
+                        <dxm:SvgFileDataAdapter FileUri="{Binding SvgUri, Mode=OneWay , UpdateSourceTrigger=PropertyChanged}" 
+                                                BoundaryPoint1="3.0549583994941538,-176.15739521873573" 
+                                                BoundaryPoint2="84.893298751861167,4.9498408125624227"/>
+                        <dxmvvm:Interaction.Behaviors>
+                            <dxmvvm:EventToCommand EventName="DataLoaded" Command="{Binding VectorLayerDataLoadedCommand}"
+                                                   CommandParameter="{Binding ElementName=mapControl}" />
+                        </dxmvvm:Interaction.Behaviors>
+                    </dxm:VectorLayer>
+
+                    <dxm:VectorLayer x:Name="vectorLayer">
+
+                        <dxm:ListSourceDataAdapter DataSource="{Binding MapItems, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                            <dxmvvm:Interaction.Behaviors>
+                                <dxmvvm:EventToCommand EventName="CustomizeMapItem" Command="{Binding CustomizeMapItemCommand}" PassEventArgsToCommand="True" />
+                            </dxmvvm:Interaction.Behaviors>
+
+                            <dxm:ListSourceDataAdapter.Mappings>
+                                <dxm:MapItemMappingInfo Latitude="Latitude" Longitude="Longitude" />
+                            </dxm:ListSourceDataAdapter.Mappings>
+
+                            <dxm:ListSourceDataAdapter.ItemSettings>
+                                <dxm:MapRectangleSettings />
+                            </dxm:ListSourceDataAdapter.ItemSettings>
+                        </dxm:ListSourceDataAdapter>
+                    </dxm:VectorLayer>
+
+                </dxm:MapControl>
+            </dxlc:LayoutGroup>
+        </Grid>
+
+        <!--Cancel Button-->
+        <Button Grid.Row="3" Width="150" 
+                    HorizontalAlignment="Center" VerticalContentAlignment="Center"
+                    Command="{Binding CommandCancelButton}" 
+                    FontSize="{StaticResource FontSize24}" FontWeight="Bold" Focusable="False" 
+                    Content="{DynamicResource Cancel}"/>
+
+    </Grid>
+</UserControl>

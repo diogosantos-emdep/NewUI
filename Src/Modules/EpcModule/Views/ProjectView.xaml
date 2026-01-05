@@ -1,0 +1,929 @@
+﻿<UserControl xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:dxn="http://schemas.devexpress.com/winfx/2008/xaml/navbar"
+             xmlns:behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+             xmlns:dxgt="http://schemas.devexpress.com/winfx/2008/xaml/grid/themekeys"
+             xmlns:converter="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+             xmlns:ViewModel="clr-namespace:Emdep.Geos.Modules.Epc.ViewModels" 
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+             xmlns:Serialization="clr-namespace:DevExpress.Xpf.LayoutControl.Serialization;assembly=DevExpress.Xpf.LayoutControl.v19.2"
+             x:Class="Emdep.Geos.Modules.Epc.Views.ProjectView"
+             mc:Ignorable="d" 
+             d:DesignHeight="500" d:DesignWidth="800">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Emdep.Geos.Modules.Epc;component/Resources/EpcCommonResource.xaml">
+                </ResourceDictionary>
+            </ResourceDictionary.MergedDictionaries>
+            
+            <DataTemplate x:Key="headerTemplate">
+                <StackPanel Orientation="Vertical">
+                    <TextBlock Text="{Binding}" FontWeight="Bold" TextDecorations="Underline" />
+                </StackPanel>
+            </DataTemplate>
+            <converter:FloatToTimeStringConverter x:Key="timeConverter" />
+
+            <dxmvvm:ObjectToObjectConverter x:Key="TrendToImageConverter">
+                <dxmvvm:MapItem Source="1">
+                    <dxmvvm:MapItem.Target>
+                        <BitmapImage UriSource="/Emdep.Geos.Modules.Epc;component/Images/Task/DownArrow.png" />
+                    </dxmvvm:MapItem.Target>
+                </dxmvvm:MapItem>
+                <dxmvvm:MapItem Source="2">
+                    <dxmvvm:MapItem.Target>
+                        <BitmapImage UriSource="/Emdep.Geos.Modules.Epc;component/Images/Task/SideArrow.png" />
+                    </dxmvvm:MapItem.Target>
+                </dxmvvm:MapItem>
+                <dxmvvm:MapItem Source="3">
+                    <dxmvvm:MapItem.Target>
+                        <BitmapImage UriSource="/Emdep.Geos.Modules.Epc;component/Images/Task/UpArrow.png" />
+                    </dxmvvm:MapItem.Target>
+                </dxmvvm:MapItem>
+            </dxmvvm:ObjectToObjectConverter>
+
+            <Style x:Key="ListItemContainerStyle" TargetType="{x:Type dxe:ListBoxEditItem}">
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type dxe:ListBoxEditItem}">
+                            <StackPanel>
+                                <Separator x:Name="Separator" />
+                                <ContentPresenter />
+                            </StackPanel>
+                            <ControlTemplate.Triggers>
+                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource PreviousData}}" Value="{x:Null}">
+                                    <Setter Property="Visibility" TargetName="Separator" Value="Collapsed" />
+                                    <Setter Property="Height" Value="20" />
+                                </DataTrigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <dxlc:LayoutControl Orientation="Vertical">
+        <dxlc:LayoutGroup Header="LayoutGroup" View="Tabs">
+            <dxlc:LayoutGroup Header="Definition" Orientation="Vertical">
+                <dxlc:LayoutGroup View="Group">
+                    <dxlc:LayoutGroup Orientation="Vertical">
+                        <dxlc:LayoutGroup>
+                            <dxlc:LayoutItem Label="Product">
+                                <dxe:ComboBoxEdit x:Name="rcmbProductList" IsTextEditable="False" 
+									ShowSizeGrip="False" DisplayMember="ProductName" 
+                                                  ItemsSource="{ Binding DataContext.GroupProduct, RelativeSource={RelativeSource AncestorType={x:Type UserControl}, Mode=FindAncestor}}" AllowCollectionView="True"
+                                                  SelectedItem="{Binding SelectedProduct, RelativeSource={RelativeSource Self}}"
+                                                  EditValue="{Binding DataContext.SelectedProduct,RelativeSource={RelativeSource Self},Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+
+                                    <dxe:ComboBoxEdit.GroupStyle>
+                                        <GroupStyle HidesIfEmpty="True">
+                                            <GroupStyle.ContainerStyle>
+                                                <Style TargetType="{x:Type GroupItem}">
+                                                    <Setter Property="Template">
+                                                        <Setter.Value>
+                                                            <ControlTemplate>
+                                                                <Expander Header="{Binding Path=Name}" IsExpanded="True"
+                                                                          HorizontalContentAlignment="Stretch" Margin="3,3,3,0">
+                                                                    <ItemsPresenter />
+                                                                </Expander>
+                                                            </ControlTemplate>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                </Style>
+                                            </GroupStyle.ContainerStyle>
+                                            <GroupStyle.Panel>
+                                                <ItemsPanelTemplate>
+                                                    <dx:DXVirtualizingStackPanel />
+                                                </ItemsPanelTemplate>
+                                            </GroupStyle.Panel>
+                                        </GroupStyle>
+                                    </dxe:ComboBoxEdit.GroupStyle>
+                                    <dxe:ComboBoxEdit.StyleSettings>
+                                        <dxe:RadioComboBoxStyleSettings />
+                                    </dxe:ComboBoxEdit.StyleSettings>
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="EditValueChanged">
+                                            <i:InvokeCommandAction Command="{Binding DataContext.SelectedProductChangedCommand, RelativeSource={ RelativeSource AncestorType=UserControl, Mode=FindAncestor} }" />
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
+                                </dxe:ComboBoxEdit>
+
+                                <!--<dxe:ComboBoxEdit x:Name="rcmbProductList" IsTextEditable="False" ShowSizeGrip="False" DisplayMember="ProductName" 
+                                                  ItemsSource="{ Binding ProductList}"  SelectedItem="{Binding SelectedProduct, RelativeSource={RelativeSource Self}}"
+                                                  EditValue="{Binding DataContext.SelectedProduct,RelativeSource={RelativeSource Self},Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" >
+                                    <dxe:ComboBoxEdit.StyleSettings>
+                                        <dxe:RadioComboBoxStyleSettings />
+                                    </dxe:ComboBoxEdit.StyleSettings>
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="EditValueChanged" >
+                                            <i:InvokeCommandAction Command="{Binding DataContext.SelectedProductChangedCommand, RelativeSource={ RelativeSource AncestorType=UserControl, Mode=FindAncestor} }" />
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
+                                </dxe:ComboBoxEdit>-->
+                            </dxlc:LayoutItem>
+                            <dxlc:LayoutItem></dxlc:LayoutItem>
+                        </dxlc:LayoutGroup>
+                        <dxlc:LayoutGroup>
+                            <dxlc:LayoutItem Label="Project Name">
+                                <dxe:TextEdit Text="{Binding ProjectData.ProjectName}" />
+                            </dxlc:LayoutItem>
+                            <dxlc:LayoutItem Label="Working Order">
+                                <dxe:TextEdit Text="{Binding ProjectData.Offer.Code}" />
+                            </dxlc:LayoutItem>
+                        </dxlc:LayoutGroup>
+                        <dxlc:LayoutGroup>
+                            <dxlc:LayoutItem Label="Project Category">
+                                <dxe:ComboBoxEdit IsTextEditable="False" 
+									ApplyItemTemplateToSelectedItem="True"                            
+									ItemsSource="{Binding ProjectCategoryList}" 
+									DisplayMember="Value"
+                           ValueMember="IdLookupValue"                                                 
+									EditValue="{Binding ProjectData.IdCategory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                    <dxe:ComboBoxEdit.ItemTemplate>
+                                        <DataTemplate>
+                                            <DockPanel>
+                                                <Rectangle Width="15" Height="15" Margin="3" Fill="{Binding HtmlColor}" />
+                                                <TextBlock Text="{Binding Value}" Margin="5,0,0,0" Padding="3" />
+                                            </DockPanel>
+                                        </DataTemplate>
+                                    </dxe:ComboBoxEdit.ItemTemplate>
+                                </dxe:ComboBoxEdit>
+                            </dxlc:LayoutItem>
+                            <dxlc:LayoutItem Label="Project Owner">
+                                <dxe:ComboBoxEdit IsTextEditable="False" 
+									ItemsSource="{Binding ProjectOwnerList}" 
+									EditValue="{Binding ProjectData.IdOwner, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+									DisplayMember="FullName" ValueMember="IdUser" />
+                            </dxlc:LayoutItem>
+                        </dxlc:LayoutGroup>
+                        <dxlc:LayoutGroup>
+                            <dxlc:LayoutItem Label="Department">
+                                <dxe:ComboBoxEdit ItemsSource="{Binding GroupTeam}" AllowCollectionView="True"
+                                                  Name="comboBoxEdit1" VerticalAlignment="Center" DisplayMember="ParentChildName"
+                                                  EditValue="{Binding DataContext.SelectedTeamList, RelativeSource={RelativeSource AncestorType={x:Type dxlc:LayoutGroup}, Mode=FindAncestor}}">
+                                    <dxe:ComboBoxEdit.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Name}" FontWeight="Bold" TextDecorations="Underline" />
+                                        </DataTemplate>
+                                    </dxe:ComboBoxEdit.ItemTemplate>
+                                    <dxe:ComboBoxEdit.GroupStyle>
+                                        <GroupStyle HidesIfEmpty="True">
+                                            <GroupStyle.ContainerStyle>
+                                                <Style TargetType="{x:Type GroupItem}">
+                                                    <Setter Property="Template">
+                                                        <Setter.Value>
+                                                            <ControlTemplate>
+                                                                <Expander Header="{Binding Path=Name}" HeaderTemplate="{StaticResource headerTemplate}" IsExpanded="True"
+                                                                          HorizontalContentAlignment="Stretch" Margin="3,3,3,0">
+                                                                    <ItemsPresenter />
+                                                                </Expander>
+                                                            </ControlTemplate>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                </Style>
+                                            </GroupStyle.ContainerStyle>
+                                        </GroupStyle>
+                                    </dxe:ComboBoxEdit.GroupStyle>
+                                    <dxe:ComboBoxEdit.StyleSettings>
+                                        <dxe:CheckedComboBoxStyleSettings />
+                                    </dxe:ComboBoxEdit.StyleSettings>
+                                </dxe:ComboBoxEdit>
+                                <!--<dxe:ComboBoxEdit ItemsSource="{ Binding DataContext.GroupTeam, RelativeSource={RelativeSource AncestorType={x:Type dxlc:LayoutGroup}, Mode=FindAncestor}}"
+                                                  AllowCollectionView="True" DisplayMember="ParentChildName"
+                                                  EditValue="{Binding DataContext.SelectedTeamList, RelativeSource={RelativeSource AncestorType={x:Type dxlc:LayoutGroup}, Mode=FindAncestor},Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+                                        <dxe:ComboBoxEdit.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Name}" FontWeight="Bold" TextDecorations="Underline"/>
+                                            </DataTemplate>
+                                        </dxe:ComboBoxEdit.ItemTemplate>
+                                        <dxe:ComboBoxEdit.GroupStyle>
+                                            <GroupStyle HidesIfEmpty="True">
+                                                <GroupStyle.ContainerStyle>
+                                                    <Style TargetType="{x:Type GroupItem}">
+                                                        <Setter Property="Template">
+                                                            <Setter.Value>
+                                                                <ControlTemplate>
+                                                                    <Expander Header="{Binding Path=Name}" 
+                                                                          HeaderTemplate="{StaticResource  headerTemplate}" IsExpanded="True"
+                                                                          HorizontalContentAlignment="Stretch" Margin="3,3,3,0">
+                                                                        <ItemsPresenter />
+                                                                    </Expander>
+                                                                </ControlTemplate>
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </Style>
+                                                </GroupStyle.ContainerStyle>
+                                            </GroupStyle>
+                                        </dxe:ComboBoxEdit.GroupStyle>
+                                        <dxe:ComboBoxEdit.StyleSettings>
+                                            <dxe:CheckedComboBoxStyleSettings/>
+                                        </dxe:ComboBoxEdit.StyleSettings>
+                                    </dxe:ComboBoxEdit>-->
+                                </dxlc:LayoutItem>
+                            <dxlc:LayoutItem Label="Customer">
+                                <dxe:ComboBoxEdit IsTextEditable="False" 
+									ItemsSource="{Binding ProjectCustomerList}" 
+									DisplayMember="CustomerName" ValueMember="IdCustomer" 
+									EditValue="{Binding ProjectData.IdCustomer,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            </dxlc:LayoutItem>
+                        </dxlc:LayoutGroup>
+                        <dxlc:LayoutGroup>
+                            <dxlc:LayoutItem Label="Engineering Status">
+                                <dxe:ComboBoxEdit IsTextEditable="False" 
+									ItemsSource="{Binding ProjectStatusList}" 
+									DisplayMember="Value"
+                           ValueMember="IdLookupValue"                                                 
+									EditValue="{Binding ProjectData.IdProjectStatus, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            </dxlc:LayoutItem>
+                            <dxlc:LayoutGroup Orientation="Vertical">
+                                <dxlc:LayoutItem Label="Geos Status">
+                                    <dxe:ComboBoxEdit IsTextEditable="False" 
+										ItemsSource="{Binding ProjectGeosStatusList}" 
+										DisplayMember="Name" ValueMember="IdOfferStatusType"
+										EditValue="{Binding ProjectData.IdGeosStatus, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                </dxlc:LayoutItem>
+                            </dxlc:LayoutGroup>
+                        </dxlc:LayoutGroup>
+                        <dxlc:LayoutGroup>
+                            <dxlc:LayoutItem Label="Priority">
+                                <dxe:ComboBoxEdit IsTextEditable="False" 
+									ItemsSource="{Binding ProjectPriorityList}"
+                           Style="{StaticResource ProjectPriorityComboBoxEditStyle}"
+                           DisplayMember="Value"
+                           EditValue="{Binding ProjectData.IdProjectPriority,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                           IsSynchronizedWithCurrentItem="True"
+                           ValueMember="IdLookupValue"                                                 
+									>
+                                </dxe:ComboBoxEdit>
+                            </dxlc:LayoutItem>
+                            <dxlc:LayoutItem Label="Due Date">
+                                <dxe:DateEdit Text="{Binding ProjectData.DueDate, StringFormat=dd-MM-yyyy}" />
+                            </dxlc:LayoutItem>
+                        </dxlc:LayoutGroup>
+                    </dxlc:LayoutGroup>
+                    <dxlc:LayoutItem Label="Description" LabelPosition="Top">
+                        <dxe:TextEdit Height="135" AcceptsReturn="True" VerticalScrollBarVisibility="Visible" VerticalContentAlignment="Top" Text="{Binding ProjectData.Description}" />
+                    </dxlc:LayoutItem>
+                </dxlc:LayoutGroup>
+                <dxlc:LayoutGroup>
+                    <dxlc:LayoutGroup Orientation="Vertical">
+                        <dxlc:LayoutGroup Header="Emdep Contact" View="GroupBox" Orientation="Vertical">
+                            <dxlc:LayoutItem Label="Contact Name">
+                                <dxe:TextEdit />
+                            </dxlc:LayoutItem>
+                            <dxlc:LayoutItem Label="E-Mail">
+                                <dxe:TextEdit />
+                            </dxlc:LayoutItem>
+                            <dxlc:LayoutItem>
+                                <dx:SimpleButton Content="Send Mail" HorizontalAlignment="Right" Height="30" VerticalAlignment="Top" />
+                            </dxlc:LayoutItem>
+                        </dxlc:LayoutGroup>
+                        <dxlc:LayoutItem Label="Project Path">
+                            <DockPanel>
+                                <Button Command="{Binding DataContext.OpenFolderCommand, RelativeSource={RelativeSource AncestorType={x:Type dxlc:LayoutControl}, Mode=FindAncestor}}"
+                                        CommandParameter="{Binding  ProjectData.ProjectPath}" DockPanel.Dock="Right" Height="24" Width="30">
+                                    <Image Source="/Emdep.Geos.Modules.Epc;component/Images/Common/Openfolder.png" Margin="-10" Height="24" Width="24" />
+                                </Button>
+                                <dxe:TextEdit Text="{Binding ProjectData.ProjectPath}" Width="Auto" />
+                            </DockPanel>
+                        </dxlc:LayoutItem>
+                    </dxlc:LayoutGroup>
+                    <dxlc:LayoutGroup Orientation="Vertical">
+                        <dxlc:LayoutGroup Header="Customer Contact" View="GroupBox" Orientation="Vertical">
+                            <dxlc:LayoutItem Label="Contact Name">
+                                <dxe:TextEdit />
+                            </dxlc:LayoutItem>
+                            <dxlc:LayoutItem Label="E-Mail">
+                                <dxe:TextEdit />
+                            </dxlc:LayoutItem>
+                            <dxlc:LayoutItem>
+                                <dx:SimpleButton Content="Send Mail" HorizontalAlignment="Right" Height="30" VerticalAlignment="Top" />
+                            </dxlc:LayoutItem>
+                        </dxlc:LayoutGroup>
+                        <dxlc:LayoutItem Label="Geos Path">
+                            <DockPanel>
+                                <Button DockPanel.Dock="Right" Height="24" Width="30">
+                                    <Image Source="/Emdep.Geos.Modules.Epc;component/Images/Common/Openfolder.png" Margin="-10" Height="24" Width="24" />
+                                </Button>
+                                <dxe:TextEdit Width="Auto" />
+                            </DockPanel>
+                        </dxlc:LayoutItem>
+                    </dxlc:LayoutGroup>
+                </dxlc:LayoutGroup>
+            </dxlc:LayoutGroup>
+
+            <dxlc:LayoutGroup Header="Analysis" Orientation="Vertical">
+                <dxlc:LayoutGroup View="Group">
+                    <dxlc:LayoutGroup Orientation="Vertical">
+                        <!--<dxlc:LayoutItem Label="Type">
+                        <dxe:ComboBoxEdit/>
+                    </dxlc:LayoutItem>-->
+                        <dxlc:LayoutItem Label="Priority">
+                            <dxe:ComboBoxEdit IsTextEditable="False" ItemsSource="{Binding ProjectAnalysisPriorityList}" DisplayMember="Value" ValueMember="IdLookupValue"
+                                              EditValue="{Binding ProjectData.ProjectAnalysis[0].IdAnalysisPriority,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                              Style="{StaticResource ProjectAnalysisPriorityComboBoxEditStyle}" IsSynchronizedWithCurrentItem="True" />
+                        </dxlc:LayoutItem>
+                        <dxlc:LayoutItem Label="Status">
+                            <dxe:ComboBoxEdit IsTextEditable="False" ItemsSource="{Binding ProjectAnalysisStatusList}" DisplayMember="Value" ValueMember="IdLookupValue"
+                                              EditValue="{Binding ProjectData.ProjectAnalysis[0].IdAnalysisStatus,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                              IsSynchronizedWithCurrentItem="True" />
+                        </dxlc:LayoutItem>
+                        <dxlc:LayoutGroup>
+                            <dxlc:LayoutItem>
+                                <dxe:CheckEdit x:Name="chkIsValidated" Content="Validated" HorizontalAlignment="Left" />
+                            </dxlc:LayoutItem>
+                            <dxlc:LayoutItem>
+                                <dxe:DateEdit IsEnabled="{Binding IsChecked, ElementName=chkIsValidated}" />
+                            </dxlc:LayoutItem>
+                        </dxlc:LayoutGroup>
+                    </dxlc:LayoutGroup>
+                    <dxlc:LayoutGroup Orientation="Vertical">
+                        <dxlc:LayoutItem Label="Start Date">
+                            <dxe:DateEdit ValidateOnTextInput="False" ValidateOnEnterKeyPressed="True" Mask="dd-MM-yyyy" MaskUseAsDisplayFormat="True"
+                                          Text="{Binding ProjectData.ProjectAnalysis[0].AnalysisStartDate}" />
+                        </dxlc:LayoutItem>
+                        <dxlc:LayoutItem Label="End Date">
+                            <dxe:DateEdit ValidateOnTextInput="False" ValidateOnEnterKeyPressed="True" Mask="dd-MM-yyyy" MaskUseAsDisplayFormat="True"
+                                          Text="{Binding ProjectData.ProjectAnalysis[0].EngDeliveryDate}" />
+                        </dxlc:LayoutItem>
+                        <dxlc:LayoutItem Label="Geos Request Date">
+                            <dxe:DateEdit ValidateOnTextInput="False" ValidateOnEnterKeyPressed="True" Mask="dd-MM-yyyy" MaskUseAsDisplayFormat="True"
+                                          Text="{Binding ProjectData.ProjectAnalysis[0].GeosRequestDate}" />
+                        </dxlc:LayoutItem>
+                        <dxlc:LayoutItem Label="Geos Delivery Date">
+                            <dxe:DateEdit ValidateOnTextInput="False" ValidateOnEnterKeyPressed="True" Mask="dd-MM-yyyy" MaskUseAsDisplayFormat="True"
+                                          Text="{Binding ProjectData.ProjectAnalysis[0].GeosDeliveryDate}" />
+                        </dxlc:LayoutItem>
+                    </dxlc:LayoutGroup>
+                    <dxlc:LayoutItem>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="AUTO" />
+                                <RowDefinition Height="5" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <dxe:CheckEdit x:Name="chkScope" Content="Scope" IsChecked="{Binding ProjectData.ProjectAnalysis[0].IsScope}" Grid.Row="0" Grid.Column="0" />
+                            <dxe:CheckEdit x:Name="chkWbs" Content="WBS" IsChecked="{Binding ProjectData.ProjectAnalysis[0].IsWBS}" Grid.Row="2" Grid.Column="0" />
+                            <dx:SimpleButton x:Name="btnEditScope" Width="50" Content="{Binding BtnScopeContent}" HorizontalAlignment="Right" IsEnabled="{Binding IsChecked, ElementName=chkScope}" Grid.Row="0" Grid.Column="1">
+                                <dxmvvm:Interaction.Behaviors>
+                                    <dxmvvm:EventToCommand EventName="Click"
+										PassEventArgsToCommand="True" 
+										Command="{Binding EditScopeButtonCommand}" />
+                                </dxmvvm:Interaction.Behaviors>
+                            </dx:SimpleButton>
+                            <dx:SimpleButton x:Name="btnEditWbs" Content="{Binding BtnWBSContent}" Width="50" HorizontalAlignment="Right" IsEnabled="{Binding IsChecked, ElementName=chkWbs}" Grid.Row="2" Grid.Column="1">
+                                <dxmvvm:Interaction.Behaviors>
+                                    <dxmvvm:EventToCommand EventName="Click"
+										PassEventArgsToCommand="True" 
+										Command="{Binding EditWbsButtonCommand}" />
+                                </dxmvvm:Interaction.Behaviors>
+                            </dx:SimpleButton>
+                        </Grid>
+                    </dxlc:LayoutItem>
+                </dxlc:LayoutGroup>
+                <dxlc:LayoutGroup Header="Team" View="GroupBox" VerticalAlignment="Stretch" Orientation="Vertical" HorizontalAlignment="Stretch">
+                    <DockPanel LastChildFill="True">
+                        <dx:SimpleButton x:Name="btnAddUser" Content="Add User" DockPanel.Dock="Top" HorizontalAlignment="Right" Margin="-10,-5,-10,5" Height="30" />
+                        <dxg:GridControl x:Name="gridTeam" DockPanel.Dock="Bottom" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="-10,0,-10,-10">
+                            <dxg:GridControl.Columns>
+                                <dxg:GridColumn FieldName="Name" Header="Name" />
+                                <dxg:GridColumn FieldName="Role" Header="Role" />
+                                <dxg:GridColumn FieldName="Delete" FixedWidth="True" Width="50">
+                                    <dxg:GridColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button Content="" Command="{x:Static dxg:GridCommands.DeleteFocusedRow}">
+                                                <Button.ContentTemplate>
+                                                    <DataTemplate>
+                                                        <Grid>
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="Auto" />
+                                                                <ColumnDefinition Width="*" />
+                                                            </Grid.ColumnDefinitions>
+                                                            <Image Style="{DynamicResource DeleteRowImageStyle}" Grid.Column="0" Height="16" Width="16" />
+                                                            <TextBlock Text="{Binding}" Grid.Column="1" VerticalAlignment="Center" />
+                                                        </Grid>
+                                                    </DataTemplate>
+                                                </Button.ContentTemplate>
+                                            </Button>
+                                        </DataTemplate>
+                                    </dxg:GridColumn.CellTemplate>
+                                </dxg:GridColumn>
+                            </dxg:GridControl.Columns>
+                            <dxg:GridControl.View>
+                                <dxg:TableView x:Name="teamTableView" ShowGroupPanel="False" AutoWidth="True" AllowBestFit="True" AllowSorting="False" AllowColumnFiltering="False" VerticalScrollbarVisibility="Hidden" />
+                            </dxg:GridControl.View>
+                        </dxg:GridControl>
+                    </DockPanel>
+                </dxlc:LayoutGroup>
+            </dxlc:LayoutGroup>
+
+            <dxlc:LayoutGroup Header="Kick-Off" Orientation="Vertical">
+                <dxlc:LayoutGroup View="GroupBox" Header="Meeting Details" Orientation="Vertical">
+                    <dxlc:LayoutGroup>
+                        <dxlc:LayoutItem Label="Date">
+                            <dxe:DateEdit />
+                        </dxlc:LayoutItem>
+                        <dxlc:LayoutItem Label="Start Time">
+                            <dxe:SpinEdit />
+                        </dxlc:LayoutItem>
+                    </dxlc:LayoutGroup>
+                    <dxlc:LayoutGroup>
+                        <dxlc:LayoutItem Label="Attendants">
+                            <dxe:ComboBoxEdit />
+                        </dxlc:LayoutItem>
+                        <dxlc:LayoutItem Label="End Time">
+                            <dxe:SpinEdit />
+                        </dxlc:LayoutItem>
+                    </dxlc:LayoutGroup>
+                </dxlc:LayoutGroup>
+                <dxlc:LayoutGroup Header="Analysis Abstract" View="GroupBox">
+                    <dxlc:LayoutGroup Orientation="Vertical">
+                        <dxlc:LayoutItem Label="Offered Development Hours">
+                            <dxe:TextEdit />
+                        </dxlc:LayoutItem>
+                        <dxlc:LayoutItem Label="Offered Validation Hours">
+                            <dxe:TextEdit />
+                        </dxlc:LayoutItem>
+                    </dxlc:LayoutGroup>
+                    <dxlc:LayoutItem>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="AUTO" />
+                                <RowDefinition Height="5" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <dxe:CheckEdit x:Name="chkEngAssist" Content="Engineering Assistance" Grid.Row="0" Grid.Column="1" />
+                            <dxe:CheckEdit x:Name="chkTechAssit" Content="Technician Assistance" Grid.Row="2" Grid.Column="1" />
+                        </Grid>
+                    </dxlc:LayoutItem>
+                    <dxlc:LayoutGroup Orientation="Vertical">
+                        <dxlc:LayoutItem Label="Required Hours">
+                            <dxe:TextEdit IsEnabled="{Binding IsChecked, ElementName=chkEngAssist}" />
+                        </dxlc:LayoutItem>
+                        <dxlc:LayoutItem Label="Required Hours">
+                            <dxe:TextEdit IsEnabled="{Binding IsChecked, ElementName=chkTechAssit}" />
+                        </dxlc:LayoutItem>
+                    </dxlc:LayoutGroup>
+                </dxlc:LayoutGroup>
+                <dxlc:LayoutGroup Header="Project Consideration" View="GroupBox" Orientation="Vertical">
+                    <dxlc:LayoutItem Label="Project Type">
+                        <dxe:ComboBoxEdit />
+                    </dxlc:LayoutItem>
+                    <dxlc:LayoutItem />
+                    <dxlc:LayoutItem Label="Project Criteria" LabelPosition="Left">
+                        <StackPanel HorizontalAlignment="Stretch">
+                            <dxe:CheckEdit Content="Is Technological Solution Available" />
+                            <dxe:CheckEdit Content="Is Complicated" />
+                            <dxe:CheckEdit Content="Is Developed Internally" />
+                            <dxe:CheckEdit Content="Is Delivery Date Fixed By Emdep" />
+                        </StackPanel>
+                    </dxlc:LayoutItem>
+                </dxlc:LayoutGroup>
+                <dxlc:LayoutGroup View="GroupBox" Header="Functional Areas" VerticalAlignment="Stretch">
+                    <dxlc:LayoutItem>
+                        <dxe:CheckEdit x:Name="chkKickoffSwArea" Content="Software Area" />
+                    </dxlc:LayoutItem>
+                    <dxlc:LayoutItem>
+                        <dx:SimpleButton Width="50" Content="Edit" IsEnabled="{Binding IsChecked, ElementName=chkKickoffSwArea}">
+                            <dxmvvm:Interaction.Behaviors>
+                                <dxmvvm:EventToCommand EventName="Click"
+									PassEventArgsToCommand="True" 
+									Command="{Binding EditKickoffSoftwareAreaButtonCommand}" />
+                            </dxmvvm:Interaction.Behaviors>
+                        </dx:SimpleButton>
+                    </dxlc:LayoutItem>
+                    <dxlc:LayoutItem>
+                        <dxe:CheckEdit x:Name="chkKickoffElecArea" Content="Electronics Area" />
+                    </dxlc:LayoutItem>
+                    <dxlc:LayoutItem>
+                        <dx:SimpleButton Width="50" Content="Edit" IsEnabled="{Binding IsChecked, ElementName=chkKickoffElecArea}">
+                            <dxmvvm:Interaction.Behaviors>
+                                <dxmvvm:EventToCommand EventName="Click"
+									PassEventArgsToCommand="True" 
+									Command="{Binding EditKickoffElectronicAreaButtonCommand}" />
+                            </dxmvvm:Interaction.Behaviors>
+                        </dx:SimpleButton>
+                    </dxlc:LayoutItem>
+                    <dxlc:LayoutItem>
+                        <dxe:CheckEdit x:Name="chkKickoffSupportArea" Content="Support Area" />
+                    </dxlc:LayoutItem>
+                    <dxlc:LayoutItem>
+                        <dx:SimpleButton Width="50" Content="Edit" IsEnabled="{Binding IsChecked, ElementName=chkKickoffSupportArea}">
+                            <dxmvvm:Interaction.Behaviors>
+                                <dxmvvm:EventToCommand EventName="Click"
+									PassEventArgsToCommand="True" 
+									Command="{Binding EditKickoffSupportAreaButtonCommand}" />
+                            </dxmvvm:Interaction.Behaviors>
+                        </dx:SimpleButton>
+                    </dxlc:LayoutItem>
+
+                </dxlc:LayoutGroup>
+            </dxlc:LayoutGroup>
+
+            <dxlc:LayoutGroup Header="Development">
+                <dxg:GridControl x:Name="gcDevelopmentTask" EnableSmartColumnsGeneration="True" SelectionMode="Row" Margin="-10" ItemsSource="{Binding ProjectTaskList}">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="MouseLeftButtonUp">
+                            <behaviors:InvokeDelegateCommandAction Command="{Binding SetWatcherCommand}" CommandParameter="{Binding InvokeParameter, RelativeSource={RelativeSource Self}}" />
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                    <dxg:GridControl.Columns>
+                        <dxg:GridColumn FieldName="TaskTitle" Header="Task Name" ReadOnly="True" Width="*" />
+                        <dxg:GridColumn Header="Duration" ReadOnly="True" FixedWidth="True" Width="80">
+                            <dxg:GridColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Data.PlannedHours, Converter={StaticResource timeConverter}}" />
+                                </DataTemplate>
+                            </dxg:GridColumn.CellTemplate>
+                        </dxg:GridColumn>
+                        <dxg:GridColumn Header="Worked" ReadOnly="True" FixedWidth="True" Width="80">
+                            <dxg:GridColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Data.WorkedHours, Converter={StaticResource timeConverter}}" />
+                                </DataTemplate>
+                            </dxg:GridColumn.CellTemplate>
+                        </dxg:GridColumn>
+                        <dxg:GridColumn Header="Efficiency" ReadOnly="True" FixedWidth="True" Width="80">
+                            <dxg:GridColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Data.Efficiency, StringFormat={}{0}%, TargetNullValue='0.0%'}" />
+                                </DataTemplate>
+                            </dxg:GridColumn.CellTemplate>
+                        </dxg:GridColumn>
+                        <dxg:GridColumn FieldName="DueDate" Header="Delivery Date" ReadOnly="True" FixedWidth="True" Width="90" />
+                        <dxg:GridColumn FieldName="Progress" ReadOnly="True" FixedWidth="True" Width="70">
+                            <dxg:GridColumn.EditSettings>
+                                <dxe:ProgressBarEditSettings Maximum="100" Minimum="0" ContentDisplayMode="Value" DisplayFormat="{}{0}%" />
+                            </dxg:GridColumn.EditSettings>
+                        </dxg:GridColumn>
+
+                    </dxg:GridControl.Columns>
+                    <dxg:GridControl.View>
+                        <dxg:TreeListView AllowPerPixelScrolling="True" IndicatorWidth="25"
+							TreeDerivationMode="Selfreference"
+							KeyFieldName="IdTask"
+							ParentFieldName="IdParentTask" AllowBestFit="True" AllowSorting="False" AutoWidth="True" BestFitMode="Smart" NavigationStyle="Row">
+                            <dxg:TreeListView.RowIndicatorContentTemplate>
+                                <DataTemplate>
+                                    <!--<TextBlock Text="{Binding Row}"></TextBlock>-->
+                                    <Image Source="/Emdep.Geos.Modules.Epc;component/Images/Menu/cEye.png" x:Name="PART_Image" Visibility="Collapsed" Height="24" Width="24" />
+                                    <DataTemplate.Triggers>
+                                        <DataTrigger Binding="{Binding Row.TaskWatchers.Count}" Value="1">
+                                            <Setter TargetName="PART_Image" Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Row.TaskWatchers.Count}" Value="0">
+                                            <Setter TargetName="PART_Image" Property="Opacity" Value="0.5" />
+                                        </DataTrigger>
+                                    </DataTemplate.Triggers>
+                                </DataTemplate>
+                            </dxg:TreeListView.RowIndicatorContentTemplate>
+                        </dxg:TreeListView>
+                    </dxg:GridControl.View>
+
+                </dxg:GridControl>
+                <Border Margin="10,-10,-10,0" VerticalAlignment="Stretch" HorizontalAlignment="Left">
+                    <dxn:NavBarControl x:Name="navBarControlTaskTracker">
+                        <dxn:NavBarControl.View>
+                            <dxn:NavigationPaneView x:Name="navigationPaneView" IsOverflowPanelVisible="False" IsExpanded="False" MaxVisibleGroupCount="1" ShowBorder="False" />
+                        </dxn:NavBarControl.View>
+                        <dxn:NavBarGroup Header="Summary" DisplaySource="Content">
+                            <dxn:NavBarGroup.Content>
+                                <dxlc:LayoutControl Orientation="Vertical">
+                                    <dxlc:LayoutGroup Header="User Worked Hours" View="GroupBox" IsCollapsible="True" Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-10,-10,-10,0" Padding="2" Width="350">
+                                        <dxlc:LayoutItem>
+                                            <dxg:GridControl HorizontalAlignment="Stretch" VerticalAlignment="Top" ItemsSource="{Binding UserWorkedHours}" SelectionMode="Row" Margin="-12" Padding="2" MaxHeight="150" ScrollViewer.VerticalScrollBarVisibility="Visible">
+                                                <dxg:GridControl.Columns>
+                                                    <dxg:GridColumn FieldName="User.FullName" Header="Name" />
+                                                    <dxg:GridColumn Header="Worked Hours" FixedWidth="True" Width="90">
+                                                        <dxg:GridColumn.CellTemplate>
+                                                            <DataTemplate>
+                                                                <TextBlock Text="{Binding Data.WorkingTimeInHours, Converter={StaticResource timeConverter}}" HorizontalAlignment="Stretch" />
+                                                            </DataTemplate>
+                                                        </dxg:GridColumn.CellTemplate>
+                                                    </dxg:GridColumn>
+                                                </dxg:GridControl.Columns>
+                                                <dxg:GridControl.View>
+                                                    <dxg:TableView ShowGroupPanel="False" NavigationStyle="Row" AllowEditing="False" AutoWidth="True" VerticalScrollbarVisibility="Visible" />
+                                                </dxg:GridControl.View>
+                                            </dxg:GridControl>
+                                        </dxlc:LayoutItem>
+                                    </dxlc:LayoutGroup>
+                                    <dxlc:LayoutGroup Header="Department Worked Hours" View="GroupBox" IsCollapsible="True" Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-10,0,-10,-10" Padding="2" Width="350">
+                                        <!--<dxlc:LayoutItem>
+                                            <TextBlock Text="Department Worked Hours" Grid.Row="2"/>
+                                        </dxlc:LayoutItem>-->
+                                        <dxlc:LayoutItem>
+                                            <dxg:GridControl ItemsSource="{Binding DepartmentHoursList}" HorizontalAlignment="Stretch" VerticalAlignment="Top" SelectionMode="Row" Margin="-12" MaxHeight="200" ScrollViewer.VerticalScrollBarVisibility="Visible">
+                                                <dxg:GridControl.Columns>
+                                                    <dxg:GridColumn FieldName="Name" Header="Department" />
+                                                    <dxg:GridColumn Header="Assigned Hrs" FixedWidth="True" Width="70">
+                                                        <dxg:GridColumn.CellTemplate>
+                                                            <DataTemplate>
+                                                                <TextBlock Text="{Binding Data.FloatValue1, Converter={StaticResource timeConverter}}" />
+                                                            </DataTemplate>
+                                                        </dxg:GridColumn.CellTemplate>
+                                                    </dxg:GridColumn>
+                                                    <dxg:GridColumn Header="Worked Hrs" FixedWidth="True" Width="70">
+                                                        <dxg:GridColumn.CellTemplate>
+                                                            <DataTemplate>
+                                                                <TextBlock Text="{Binding Data.FloatValue2, Converter={StaticResource timeConverter}}" />
+                                                            </DataTemplate>
+                                                        </dxg:GridColumn.CellTemplate>
+                                                    </dxg:GridColumn>
+
+                                                    <dxg:GridColumn FieldName="FloatValue3" Header="Efficiency" FixedWidth="True" Width="70">
+                                                        <dxg:GridColumn.CellTemplate>
+                                                            <DataTemplate>
+                                                                <DockPanel LastChildFill="True">
+                                                                    <Image DockPanel.Dock="Right" Margin="0,0,3,0" Width="16" Height="16" Source="{Binding Data.ByteValue, Converter={StaticResource TrendToImageConverter}}" />
+                                                                    <TextBlock Text="{Binding Data.FloatValue3, StringFormat=\{0\}%, TargetNullValue='0.0%'}" TextAlignment="Right" Margin="2" />
+                                                                </DockPanel>
+                                                            </DataTemplate>
+                                                        </dxg:GridColumn.CellTemplate>
+                                                    </dxg:GridColumn>
+                                                </dxg:GridControl.Columns>
+                                                <dxg:GridControl.View>
+                                                    <dxg:TableView ShowGroupPanel="False" NavigationStyle="Row" AllowEditing="False" AutoWidth="True" VerticalScrollbarVisibility="Visible" />
+                                                </dxg:GridControl.View>
+                                            </dxg:GridControl>
+                                        </dxlc:LayoutItem>
+                                    </dxlc:LayoutGroup>
+                                    <!--</Grid>-->
+                                </dxlc:LayoutControl>
+                            </dxn:NavBarGroup.Content>
+                        </dxn:NavBarGroup>
+                    </dxn:NavBarControl>
+                </Border>
+            </dxlc:LayoutGroup>
+
+            <dxlc:LayoutGroup Header="Milestones">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="30" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" Margin="-10, -10, -10, 0">
+                        <Button Name="btnAddNewMilestone" 
+                                Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}},
+                                Path = DataContext.AddNewMilestoneCommand}"  
+                                Height="30" Width="30" VerticalAlignment="Top" HorizontalAlignment="Stretch" FontWeight="Bold">
+                            <Button.ContentTemplate>
+                                <DataTemplate>
+                                    <Image Style="{DynamicResource AddButtonImageStyle}" Height="24" Width="24" Margin="-10" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" />
+                                </DataTemplate>
+                            </Button.ContentTemplate>
+                        </Button>
+                    </StackPanel>
+
+                    <dxg:GridControl EnableSmartColumnsGeneration="True" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" MaxHeight="800" Margin="-10" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" ItemsSource="{Binding ProjectData.ProjectMilestones}">
+                        <dxg:GridControl.Columns>
+                            <dxg:GridColumn Header="Name" FieldName="MilestoneTitle" Width="100" />
+                            <dxg:GridColumn Header="Description" FieldName="Description" MinWidth="100" Width="*" />
+
+                            <dxg:GridColumn Header="Milestone Date" FixedWidth="True" Width="100">
+                                <dxg:GridColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <dxe:ListBoxEdit Name="PART_Editor" ItemsSource="{Binding Path=RowData.Row.ProjectMilestoneDates, RelativeSource={RelativeSource TemplatedParent}}" 
+                                                         ItemContainerStyle="{StaticResource ListItemContainerStyle}">
+                                            <dxe:ListBoxEdit.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding TargetDate, StringFormat=dd-MM-yyyy}" />
+                                                </DataTemplate>
+                                            </dxe:ListBoxEdit.ItemTemplate>
+                                        </dxe:ListBoxEdit>
+                                    </DataTemplate>
+                                </dxg:GridColumn.CellTemplate>
+                            </dxg:GridColumn>
+
+                            <dxg:GridColumn Header="Status" FixedWidth="True" Width="50">
+                                <dxg:GridColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <dxe:ListBoxEdit Name="PART_Editor" ItemsSource="{Binding Path=RowData.Row.ProjectMilestoneDates, RelativeSource={RelativeSource TemplatedParent}}" 
+                                                         DisplayMember="Result">
+                                            <dxe:ListBoxEdit.ItemContainerStyle>
+                                                <Style TargetType="{x:Type dxe:ListBoxEditItem}">
+                                                    <Setter Property="Template">
+                                                        <Setter.Value>
+                                                            <ControlTemplate TargetType="{x:Type dxe:ListBoxEditItem}">
+                                                                <StackPanel>
+                                                                    <Separator x:Name="Separator" />
+                                                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                                                        <ContentPresenter />
+                                                                        <Image Height="16" Width="16" Source="/Emdep.Geos.Modules.Epc;component/Images/Menu/OnTime.png" Name="image" />
+                                                                    </StackPanel>
+                                                                </StackPanel>
+                                                                <ControlTemplate.Triggers>
+                                                                    <DataTrigger Binding="{Binding ProjectMilestoneStatus.IdLookupValue}" Value="90">
+                                                                        <Setter TargetName="image" Property="Source" Value="/Emdep.Geos.Modules.Epc;component/Images/Menu/Achieved.png" />
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding ProjectMilestoneStatus.IdLookupValue}" Value="91">
+                                                                        <Setter TargetName="image" Property="Source" Value="/Emdep.Geos.Modules.Epc;component/Images/Menu/Failed.png" />
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource PreviousData}}" Value="{x:Null}">
+                                                                        <Setter Property="Visibility" TargetName="Separator" Value="Collapsed" />
+                                                                        <Setter Property="Height" Value="20" />
+                                                                    </DataTrigger>
+                                                                </ControlTemplate.Triggers>
+                                                            </ControlTemplate>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                </Style>
+                                            </dxe:ListBoxEdit.ItemContainerStyle>
+                                        </dxe:ListBoxEdit>
+                                    </DataTemplate>
+                                </dxg:GridColumn.CellTemplate>
+                            </dxg:GridColumn>
+
+                            <dxg:GridColumn Header="Comments" FieldName="Comments" MinWidth="100" Width="*" />
+
+                            <dxg:GridColumn Header="Delete" Width="50" FixedWidth="True">
+                                <dxg:GridColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <dxe:ListBoxEdit DisplayMember="None" ItemsSource="{Binding Path=RowData.Row.ProjectMilestoneDates, RelativeSource={RelativeSource TemplatedParent}}" 
+                                                         ItemContainerStyle="{StaticResource ListItemContainerStyle}">
+                                            <i:Interaction.Triggers>
+                                                <i:EventTrigger EventName="MouseLeftButtonUp">
+                                                    <behaviors:InvokeDelegateCommandAction Command="{Binding DataContext.DeleteMilestoneAttemptCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}} }"
+                                                                                           CommandParameter="{Binding InvokeParameter, RelativeSource={RelativeSource Self}}" />
+                                                </i:EventTrigger>
+                                            </i:Interaction.Triggers>
+                                            <dxe:ListBoxEdit.ItemTemplate>
+                                                <DataTemplate>
+                                                    <StackPanel>
+                                                        <Image Style="{DynamicResource DeleteButtonImageStyle}" Height="16" Width="16" />
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </dxe:ListBoxEdit.ItemTemplate>
+                                        </dxe:ListBoxEdit>
+                                    </DataTemplate>
+                                </dxg:GridColumn.CellTemplate>
+                            </dxg:GridColumn>
+
+                        </dxg:GridControl.Columns>
+
+                        <dxg:GridControl.View>
+                            <dxg:TableView Name="gridMilestone" AllowPerPixelScrolling="True" NavigationStyle="Row" VerticalScrollbarVisibility="Auto"
+                                           AutoWidth="True" ShowTotalSummary="false" ShowGroupPanel="False" />
+                        </dxg:GridControl.View>
+                    </dxg:GridControl>
+                </Grid>
+            </dxlc:LayoutGroup>
+
+            <dxlc:LayoutGroup Header="Follow-Up">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="30" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="30" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="1" Margin="0,-5,-3,0">
+                        <Button Name="btnAddNewFollowup" 
+                                Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}, Path = DataContext.AddNewFollowupCommand}"
+                                Height="30" Width="30" VerticalAlignment="Top" HorizontalAlignment="Stretch" FontWeight="Bold">
+                            <Button.ContentTemplate>
+                                <DataTemplate>
+                                    <Image Style="{DynamicResource AddButtonImageStyle}" Height="24" Width="24" Margin="-10" />
+                                </DataTemplate>
+                            </Button.ContentTemplate>
+                        </Button>
+                    </StackPanel>
+
+                    <dxg:GridControl x:Name="gridFollowUp" DockPanel.Dock="Bottom" ItemsSource="{Binding DataContext.ProjectData.ProjectFollowups, RelativeSource={RelativeSource AncestorType=dxlc:LayoutControl,Mode=FindAncestor}, Mode=TwoWay}"
+                                      HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="2" Grid.Column="0"
+                                      Grid.ColumnSpan="2" Margin="-10,0,-10,-10">
+                        <dxg:GridControl.Columns>
+                            <dxg:GridColumn Header="Date" FieldName="FollowupDate" />
+                            <dxg:GridColumn Header="User" FieldName="User.FullName" />
+                            <dxg:GridColumn FieldName="Description" />
+                            <dxg:GridColumn FixedWidth="True" Width="40">
+                                <dxg:GridColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Name="deleteRowFollowUp" Content="Delete" 
+                                                Command="{Binding View.Grid.DataContext.DeleteFollowupRowCommand}" CommandParameter="{Binding RowData.Row}">
+                                            <Button.ContentTemplate>
+                                                <DataTemplate>
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto" />
+                                                            <ColumnDefinition Width="*" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <Image Style="{DynamicResource DeleteButtonImageStyle}" Grid.Column="0" Height="16" Width="16" />
+                                                        <TextBlock Text="{Binding}" Grid.Column="1" VerticalAlignment="Center" />
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </Button.ContentTemplate>
+                                        </Button>
+                                    </DataTemplate>
+                                </dxg:GridColumn.CellTemplate>
+                            </dxg:GridColumn>
+                        </dxg:GridControl.Columns>
+                        <dxg:GridControl.View>
+                            <dxg:TableView x:Name="followUpTableView" NavigationStyle="Row" ShowGroupPanel="False" AutoWidth="True" AllowBestFit="True" AllowSorting="False" AllowColumnFiltering="False" VerticalScrollbarVisibility="Hidden" />
+                        </dxg:GridControl.View>
+                    </dxg:GridControl>
+                    <GridSplitter Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" />
+                </Grid>
+            </dxlc:LayoutGroup>
+            <!--<dxlc:LayoutGroup Header="Statistics"/>-->
+            <dxlc:LayoutGroup Header="Close" Orientation="Vertical">
+                <dxlc:LayoutGroup View="GroupBox" Header="Closing Up Details" Orientation="Vertical">
+                    <dxlc:LayoutGroup>
+                        <dxlc:LayoutItem Label="Total Time Scheduled">
+                            <dxe:TextEdit />
+                        </dxlc:LayoutItem>
+                        <dxlc:LayoutItem Label="Total Time Spent">
+                            <dxe:TextEdit />
+                        </dxlc:LayoutItem>
+                        <dxlc:LayoutItem Label="Cost Efficiency">
+                            <dxe:TextEdit />
+                        </dxlc:LayoutItem>
+                    </dxlc:LayoutGroup>
+                    <dxlc:LayoutGroup>
+                        <dxlc:LayoutItem Label="Delivery Scheduled">
+                            <dxe:TextEdit />
+                        </dxlc:LayoutItem>
+                        <dxlc:LayoutItem Label="Real Delivery Date">
+                            <dxe:TextEdit />
+                        </dxlc:LayoutItem>
+                        <dxlc:LayoutGroup Orientation="Vertical">
+                            <dxlc:LayoutItem Label="Delevery Efficiency">
+                                <dxe:TextEdit />
+                            </dxlc:LayoutItem>
+                            <dxlc:LayoutItem Label="Final Score">
+                                <dxe:TextEdit />
+                            </dxlc:LayoutItem>
+                        </dxlc:LayoutGroup>
+                    </dxlc:LayoutGroup>
+                </dxlc:LayoutGroup>
+                <dxlc:LayoutGroup View="GroupBox" Header="Functional Areas" VerticalAlignment="Stretch">
+                    <dxlc:LayoutItem>
+                        <dxe:CheckEdit x:Name="chkCloseSwArea" Content="Software Area Lessons" />
+                    </dxlc:LayoutItem>
+                    <dxlc:LayoutItem>
+                        <dx:SimpleButton Width="50" Content="Edit" IsEnabled="{Binding IsChecked, ElementName=chkCloseSwArea}">
+                            <dxmvvm:Interaction.Behaviors>
+                                <dxmvvm:EventToCommand EventName="Click"
+									PassEventArgsToCommand="True" 
+									Command="{Binding EditCloseSoftwareAreaButtonCommand}" />
+                            </dxmvvm:Interaction.Behaviors>
+                        </dx:SimpleButton>
+                    </dxlc:LayoutItem>
+                    <dxlc:LayoutItem>
+                        <dxe:CheckEdit x:Name="chkCloseElecArea" Content="Electronics Area Lessons" />
+                    </dxlc:LayoutItem>
+                    <dxlc:LayoutItem>
+                        <dx:SimpleButton Width="50" Content="Edit" IsEnabled="{Binding IsChecked, ElementName=chkCloseElecArea}">
+                            <dxmvvm:Interaction.Behaviors>
+                                <dxmvvm:EventToCommand EventName="Click"
+									PassEventArgsToCommand="True" 
+									Command="{Binding EditCloseElectronicAreaButtonCommand}" />
+                            </dxmvvm:Interaction.Behaviors>
+                        </dx:SimpleButton>
+                    </dxlc:LayoutItem>
+                    <dxlc:LayoutItem>
+                        <dxe:CheckEdit x:Name="chkCloseSupportArea" Content="Support Area Lessons" />
+                    </dxlc:LayoutItem>
+
+                    <dxlc:LayoutItem>
+                        <dx:SimpleButton Width="50" Content="Edit" IsEnabled="{Binding IsChecked, ElementName=chkCloseSupportArea}">
+                            <dxmvvm:Interaction.Behaviors>
+                                <dxmvvm:EventToCommand EventName="Click"
+									PassEventArgsToCommand="True" 
+									Command="{Binding EditCloseSupportAreaButtonCommand}" />
+                            </dxmvvm:Interaction.Behaviors>
+                        </dx:SimpleButton>
+                    </dxlc:LayoutItem>
+                </dxlc:LayoutGroup>
+            </dxlc:LayoutGroup>
+        </dxlc:LayoutGroup>
+    </dxlc:LayoutControl>
+
+</UserControl>

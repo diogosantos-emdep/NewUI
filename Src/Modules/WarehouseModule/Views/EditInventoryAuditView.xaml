@@ -1,0 +1,1336 @@
+﻿<dxwui:WinUIDialogWindow x:Class="Emdep.Geos.Modules.Warehouse.Views.EditInventoryAuditView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.Warehouse.Views"
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:WarehouseCommon ="clr-namespace:Emdep.Geos.Modules.Warehouse"
+             xmlns:Validation ="clr-namespace:Emdep.Geos.UI.Validations;assembly=Emdep.Geos.UI.Validations"
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+             xmlns:dxp="http://schemas.devexpress.com/winfx/2008/xaml/printing"
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+             xmlns:Converters="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+             xmlns:dxgt="http://schemas.devexpress.com/winfx/2008/xaml/grid/themekeys"
+             xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+             xmlns:dxdo="http://schemas.devexpress.com/winfx/2008/xaml/docking"
+             mc:Ignorable="d"
+             d:DesignHeight="300" d:DesignWidth="300"
+             Width="{Binding SystemParameters.PrimaryScreenWidth}"
+             HorizontalAlignment="Stretch"
+             Height="{Binding SystemParameters.PrimaryScreenHeight}"
+             HorizontalContentAlignment="Stretch"            
+             VerticalContentAlignment="Stretch"
+             VerticalAlignment="Stretch"
+            TitleStyle="{DynamicResource WinUIDialogWindowTitleStyle}"
+             Style="{DynamicResource WinUIDialogWindowStyle}">
+    <!--[rdixit][02.12.2022][GEOS2-3962] Added Column Templates for tab control-->
+    <dxwui:WinUIDialogWindow.Resources>
+        
+        <DataTemplate x:Key="CheckBoxColumnTemplate">
+            <ContentControl>
+                <dxg:GridColumn Header="{Binding HeaderText,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                FieldName="{Binding ColumnFieldName,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                Width="{Binding Width}"
+                                Visible="{Binding Visible,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                FixedWidth="True" 
+                                AllowBestFit="true" 
+                                AllowCellMerge="False"
+                                AllowMoving="false"
+                                AllowAutoFilter="False"
+                                ShowInColumnChooser="False" 
+                                HorizontalHeaderContentAlignment="Center" 
+                                FilterPopupMode="Default"
+                                ShowCheckBoxInHeader="True"
+                                MinWidth="{Binding Width}"
+                                >
+                    <!--<dxg:GridColumn.HeaderTemplate>
+                        <DataTemplate>
+                            <dxe:CheckEdit x:Name="PART_Editor"  >
+                            </dxe:CheckEdit>
+                        </DataTemplate>
+                    </dxg:GridColumn.HeaderTemplate>-->
+                    <dxg:GridColumn.CellTemplate>
+                        <DataTemplate>
+                            <dxe:CheckEdit x:Name="PART_Editor"  >
+                            </dxe:CheckEdit>
+                        </DataTemplate>
+                    </dxg:GridColumn.CellTemplate>
+                </dxg:GridColumn>
+            </ContentControl>
+        </DataTemplate>
+
+        <DataTemplate x:Key="DefaultColumnTemplate">
+            <ContentControl>
+                <dxg:GridColumn FieldName="{Binding ColumnFieldName,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                Header="{Binding HeaderText,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                Width="{Binding Width}"
+                                Visible="{Binding Visible,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                AllowCellMerge="False"
+                                AllowBestFit="true" 
+                                AllowEditing="False" 
+                                AllowAutoFilter="False"
+                                ShowInColumnChooser="True" 
+                                FilterPopupMode="Default"
+                                ReadOnly="True"
+                                IsSmart="True"
+                                MinWidth="{Binding  Width}"
+                                >
+                    <dxg:GridColumn.HeaderTemplate>
+                        <DataTemplate>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="{Binding}" HorizontalAlignment="Stretch" VerticalAlignment="Top" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </dxg:GridColumn.HeaderTemplate>
+                </dxg:GridColumn>
+            </ContentControl>
+        </DataTemplate>
+
+        <DataTemplate x:Key="DeleteColumnTemplate">
+            <ContentControl>
+                <dxg:GridColumn Header="{Binding HeaderText,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                FieldName="{Binding ColumnFieldName,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                ShowInColumnChooser="False" AllowMoving="False"
+                                Width="{Binding Width}"
+                                MinWidth="{Binding Width}"
+                                Visible="{Binding Visible,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ReadOnly="True" FixedWidth="True" FilterPopupMode="Default">
+                    <dxg:GridColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Name="deleteRowItem" ToolTip="{DynamicResource Delete}" Command="{Binding DataContext.DeleteRowCommand,RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}"
+                                    CommandParameter="{Binding RowData.Row}">
+                                <Button.ContentTemplate>
+                                    <DataTemplate>
+                                        <Image Height="16" Width="16" Style="{ DynamicResource DeleteStyle}" />
+                                    </DataTemplate>
+                                </Button.ContentTemplate>
+                                <Button.Style>
+                                    <Style TargetType="{x:Type Button}">
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Cursor" Value="Hand"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                        </DataTemplate>
+                    </dxg:GridColumn.CellTemplate>
+                </dxg:GridColumn>
+            </ContentControl>
+        </DataTemplate>
+
+        <DataTemplate x:Key="CheckBoxArticleColumnTemplate">
+            <ContentControl>
+                <dxg:GridColumn Header="{Binding HeaderText,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                FieldName="{Binding ColumnFieldName,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                Width="{Binding Width}"
+                                Visible="{Binding Visible,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                FixedWidth="True" 
+                                AllowBestFit="true" 
+                                AllowCellMerge="False"
+                                AllowMoving="false"
+                                AllowAutoFilter="False"
+                                ShowInColumnChooser="False" 
+                                HorizontalHeaderContentAlignment="Center" 
+                                FilterPopupMode="Default"
+                                ShowCheckBoxInHeader="True"
+                                MinWidth="{Binding Width}"
+                                >
+                    <dxg:GridColumn.CellTemplate>
+                        <DataTemplate>
+                            <dxe:CheckEdit x:Name="PART_Editor"  >
+                            </dxe:CheckEdit>
+                        </DataTemplate>
+                    </dxg:GridColumn.CellTemplate>
+                </dxg:GridColumn>
+            </ContentControl>
+        </DataTemplate>
+
+        <DataTemplate x:Key="DefaultArticleColumnTemplate">
+            <ContentControl>
+                <dxg:GridColumn FieldName="{Binding ColumnFieldName,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                Header="{Binding HeaderText,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                Width="{Binding Width}"
+                                Visible="{Binding Visible,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                AllowCellMerge="False"
+                                AllowBestFit="true" 
+                                AllowEditing="False" 
+                                AllowAutoFilter="False"
+                                ShowInColumnChooser="True" 
+                                FilterPopupMode="Default"
+                                ReadOnly="True"
+                                IsSmart="True"
+                                MinWidth="{Binding  Width}"
+                                >
+                    <dxg:GridColumn.HeaderTemplate>
+                        <DataTemplate>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="{Binding}" HorizontalAlignment="Stretch" VerticalAlignment="Top" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </dxg:GridColumn.HeaderTemplate>
+                </dxg:GridColumn>
+            </ContentControl>
+        </DataTemplate>
+
+        <DataTemplate x:Key="DeleteArticleColumnTemplate">
+            <ContentControl>
+                <dxg:GridColumn Header="{Binding HeaderText,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                FieldName="{Binding ColumnFieldName,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                ShowInColumnChooser="False" AllowMoving="False"
+                                Width="{Binding Width}"
+                                MinWidth="{Binding Width}"
+                                Visible="{Binding Visible,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ReadOnly="True" FixedWidth="True" FilterPopupMode="Default">
+                    <dxg:GridColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Name="deleteRowItem" ToolTip="{DynamicResource Delete}" Command="{Binding DataContext.DeleteRowCommand,RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}"
+                                    CommandParameter="{Binding RowData.Row}">
+                                <Button.ContentTemplate>
+                                    <DataTemplate>
+                                        <Image Height="16" Width="16" Style="{ DynamicResource DeleteStyle}" />
+                                    </DataTemplate>
+                                </Button.ContentTemplate>
+                                <Button.Style>
+                                    <Style TargetType="{x:Type Button}">
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Cursor" Value="Hand"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                        </DataTemplate>
+                    </dxg:GridColumn.CellTemplate>
+                </dxg:GridColumn>
+            </ContentControl>
+        </DataTemplate>
+
+        <UIHelper:InventoryAuditScopeLocationColumnTemplate x:Key="newColumnTemplateSelector" 
+                                                   Default="{StaticResource DefaultColumnTemplate}" 
+                                                   IsChecked="{StaticResource CheckBoxColumnTemplate}"                                               
+                                                   Delete= "{StaticResource DeleteColumnTemplate}"/>
+        <DataTemplate x:Key="BandTemplate">
+            <ContentControl>
+                <dxg:GridControlBand UIHelper:NameBinder.Name="{Binding BandName,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  Header="{Binding BandHeader,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                                    HorizontalHeaderContentAlignment="Center" Visible="True"
+                                                    ColumnsSource="{Binding Columns,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                                    AllowMoving="{Binding AllowMoving,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                    Fixed="{Binding FixedStyle,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                    ColumnGeneratorTemplateSelector="{StaticResource newColumnTemplateSelector}" OverlayHeaderByChildren="False">
+
+                    <dxg:GridControlBand.HeaderTemplate>
+                        <DataTemplate>
+                            <Button Name="deleteRowItem" ToolTip="{DynamicResource Delete}" Command="{Binding DataContext.DeleteSelectedRowCommand,RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}" VerticalAlignment="Center" HorizontalAlignment="Right" Grid.Column="1">
+                                <Button.ContentTemplate>
+                                    <DataTemplate>
+                                        <Image Height="16" Width="16" Style="{ DynamicResource DeleteStyle}" />
+                                    </DataTemplate>
+                                </Button.ContentTemplate>
+                                <Button.Style>
+                                    <Style TargetType="{x:Type Button}">
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Cursor" Value="Hand"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                        </DataTemplate>
+                    </dxg:GridControlBand.HeaderTemplate>
+                </dxg:GridControlBand>
+
+
+            </ContentControl>
+        </DataTemplate>
+        <UIHelper:InventoryAuditArticleColumnTemplate x:Key="newArticleColumnTemplateSelector" 
+                                                   Default="{StaticResource DefaultArticleColumnTemplate}" 
+                                                   IsChecked="{StaticResource CheckBoxArticleColumnTemplate}"                                               
+                                                   Delete= "{StaticResource DeleteArticleColumnTemplate}"/>
+        <DataTemplate x:Key="ArticleBandTemplate">
+            <ContentControl>
+                <dxg:GridControlBand 
+            UIHelper:NameBinder.Name="{Binding BandName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+            Header="{Binding BandHeader, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+            HorizontalHeaderContentAlignment="Stretch" Visible="True"
+            ColumnsSource="{Binding Columns, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+            AllowMoving="{Binding AllowMoving, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+            Fixed="{Binding FixedStyle, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+            ColumnGeneratorTemplateSelector="{StaticResource newArticleColumnTemplateSelector}" 
+            OverlayHeaderByChildren="False">
+
+                    <dxg:GridControlBand.HeaderTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Header Content -->
+                                <TextBlock Text="Inventory Audit Articles" VerticalAlignment="Center" Grid.Column="0" Margin="5,0,0,0"/>
+
+                                <!-- Delete Button -->
+                                <Button Name="deleteRowItem"
+                                ToolTip="{DynamicResource Delete}" 
+                                Command="{Binding DataContext.DeleteSelectedRowsCommand, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged,  RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}" 
+                                CommandParameter="ArticleAuditGrid"
+                                VerticalAlignment="Center" 
+                                HorizontalAlignment="Center" 
+                                Grid.Column="1"
+                                Margin="5">
+                                    <Button.ContentTemplate>
+                                        <DataTemplate>
+                                            <Image Height="16" Width="16" Style="{DynamicResource DeleteStyle}" />
+                                        </DataTemplate>
+                                    </Button.ContentTemplate>
+                                    <Button.Style>
+                                        <Style TargetType="{x:Type Button}">
+                                            <Style.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Cursor" Value="Hand" />
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+                            </Grid>
+                        </DataTemplate>
+                    </dxg:GridControlBand.HeaderTemplate>
+                </dxg:GridControlBand>
+            </ContentControl>
+        </DataTemplate>
+        <Converters:ValidatedCellBackgroundConverter x:Key="ValidatedCellBackgroundConverter"/>
+        <!--[nsatpute][12-12-2024][GEOS2-6382]-->
+        <Style x:Key="ValidatedCellStyle" TargetType="dxg:LightweightCellEditor">
+            <Setter Property="Background">
+                <Setter.Value>
+                    <MultiBinding Converter="{StaticResource ValidatedCellBackgroundConverter}">
+                        <!-- Pass the required bindings to the converter -->
+                        <Binding Path="RowData.Row" />
+                        <Binding Path="Column.FieldName" />
+                    </MultiBinding>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </dxwui:WinUIDialogWindow.Resources>
+
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape"  Command="{Binding EditInventoryAuditViewCancelCommand}"/>
+    </dxwui:WinUIDialogWindow.InputBindings>
+
+        <DockPanel  HorizontalAlignment="Stretch" VerticalAlignment="Stretch"> 
+
+        <Grid Margin="10,-60,10,10" DockPanel.Dock="Top"
+                ShowGridLines="False" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="55"/>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="20"/>
+                <!--Empty Space-->
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <!--<ColumnDefinition Width="120"/>
+            <ColumnDefinition Width="300"/>
+            <ColumnDefinition Width="300"/>
+            <ColumnDefinition Width="200"/>-->
+            </Grid.ColumnDefinitions>
+
+            <Label Content="{Binding WindowHeader}" HorizontalAlignment="Left" Style="{StaticResource LabelTitleStyle}" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="10" />
+
+            <!--Name-->
+            <Label Grid.Row="1" Grid.Column="0" Content="{DynamicResource EditInventoryAuditName}" Height="Auto" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="2"/>
+
+            <Label Grid.Row="1" Grid.Column="1" Content="{DynamicResource ColonSymbol}" Height="Auto" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="2"/>
+
+            <dxe:TextEdit Grid.Row="1" Grid.Column="2" Grid.RowSpan="2"  Margin="10,2,2,2" Width="320"
+                      Text="{Binding Name,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" 
+                       TextWrapping="Wrap" 
+                 VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                 HorizontalContentAlignment="Left" VerticalContentAlignment="Top">
+                <dxe:TextEdit.EditValue>
+                    <Binding Path="Name"  ValidatesOnDataErrors="True">
+                        <Binding.ValidationRules>
+                            <Validation:WarehouseInventoryAuditValidation FieldName="Name" ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True"/>
+                        </Binding.ValidationRules>
+                    </Binding>
+                </dxe:TextEdit.EditValue>
+            </dxe:TextEdit>
+
+            <!--Start Date-->
+
+            <Label Grid.Row="1" Grid.Column="3" Content="{DynamicResource EditInventoryAuditStartDate}" Height="Auto" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="20,2,2,2"/>
+
+            <Label Grid.Row="1" Grid.Column="4" Content="{DynamicResource ColonSymbol}" Height="Auto" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="2"/>
+
+            <dxe:DateEdit  Margin="10,2,2,2" Grid.Row="1" Grid.Column="5" Width="120" Height="Auto" HorizontalAlignment="Left" VerticalAlignment="Center" 
+                           Mask="dd/MM/yyyy" MaskType="DateTimeAdvancingCaret" MaskUseAsDisplayFormat="True">
+                <dxe:DateEdit.EditValue>
+                    <Binding Path="StartDate" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay" ValidatesOnDataErrors="True">
+                        <Binding.ValidationRules>
+                            <Validation:WarehouseInventoryAuditValidation FieldName="StartDate" ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True"/>
+                        </Binding.ValidationRules>
+                    </Binding>
+                </dxe:DateEdit.EditValue>
+                <dxmvvm:Interaction.Behaviors>
+                    <dxmvvm:EventToCommand EventName="EditValueChanging" Command="{Binding DataContext.OnDateEditValueChangingCommand,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" PassEventArgsToCommand="True"/>
+                </dxmvvm:Interaction.Behaviors>
+            </dxe:DateEdit>
+
+            <!--End Date-->
+            <Label Grid.Row="2" Grid.Column="3" Content="{DynamicResource EditInventoryAuditEndDate}" Height="Auto" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center"  Margin="20,2,2,2"  />
+
+            <Label Grid.Row="2" Grid.Column="4" Content="{DynamicResource ColonSymbol}" Height="Auto" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="2"/>
+
+            <dxe:DateEdit  Margin="10,2,2,2" Grid.Row="2" Grid.Column="5" Width="120" Height="Auto" HorizontalAlignment="Left" VerticalAlignment="Center" MinValue="{Binding MinEndDate}"
+                           Mask="dd/MM/yyyy" MaskType="DateTimeAdvancingCaret" MaskUseAsDisplayFormat="True">
+                <dxe:DateEdit.EditValue>
+                    <Binding Path="EndDate" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay" ValidatesOnDataErrors="True">
+                    </Binding>
+                </dxe:DateEdit.EditValue>
+            </dxe:DateEdit>
+
+            <!--Success Rate-->
+            <Label Grid.Row="1" Grid.Column="6" Content="{DynamicResource EditInventoryAuditSuccessRate}" Height="Auto" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center"  Margin="20,2,2,2"/>
+
+            <Label Grid.Row="2" Grid.Column="6" 
+                       Content="{Binding SelectedInventoryAudit.SuccessRate,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" 
+                       FontSize="20" FontWeight="Bold"  Width="120"
+                       Background="{Binding SuccessRateBackground,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" 
+                       Foreground="{Binding SuccessRateForeground,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" 
+                       ContentStringFormat="{}{0}%"
+                       HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                       HorizontalAlignment="Stretch" VerticalAlignment="Stretch"  Margin="20,2,2,2"/>
+
+            <!--Balance-->
+            <Label Grid.Row="1" Grid.Column="7" Content="{DynamicResource EditInventoryAuditBalance}" Height="Auto"  Width="Auto" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center"  Margin="20,2,2,2"/>
+
+            <StackPanel Margin="20,2,2,2" Grid.Row="2" Grid.Column="7"  Orientation="Horizontal">
+                <StackPanel MinWidth="40"  Orientation="Horizontal">
+                    <Polygon Points="0,32,32,32,16,0" VerticalAlignment="Center" Margin="5 0 0 0" HorizontalAlignment="Left">
+                        <Polygon.Style>
+                            <Style TargetType="{x:Type Polygon}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SelectedInventoryAudit.BalanceAmount, Converter={Converters:BalanceAmountForeColorConverter}}" Value="-1">
+                                        <Setter Property="Polygon.Fill" Value="Red" />
+                                        <Setter Property="Polygon.Stroke" Value="Red" />
+                                        <Setter Property="Polygon.Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding SelectedInventoryAudit.BalanceAmount, Converter={Converters:BalanceAmountForeColorConverter}}" Value="+1">
+                                        <Setter Property="Polygon.Fill" Value="Green" />
+                                        <Setter Property="Polygon.Stroke" Value="Green" />
+                                        <Setter Property="Polygon.Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding SelectedInventoryAudit.BalanceAmount, Converter={Converters:BalanceAmountForeColorConverter}}" Value="0">
+                                        <Setter Property="Polygon.Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Polygon.Style>
+                    </Polygon>
+
+                    <Polygon Points="0,0 16,32, 32,0" Stroke="Red" Fill="Red" Margin="5 5 0 0" HorizontalAlignment="Right" >
+                        <Polygon.Style>
+                            <Style TargetType="{x:Type Polygon}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SelectedInventoryAudit.BalanceAmount, Converter={Converters:BalanceAmountForeColorConverter}}" Value="-1">
+                                        <Setter Property="Polygon.Fill" Value="Red" />
+                                        <Setter Property="Polygon.Stroke" Value="Red" />
+                                        <Setter Property="Polygon.Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding SelectedInventoryAudit.BalanceAmount, Converter={Converters:BalanceAmountForeColorConverter}}" Value="+1">
+                                        <Setter Property="Polygon.Fill" Value="Green" />
+                                        <Setter Property="Polygon.Stroke" Value="Green" />
+                                        <Setter Property="Polygon.Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding SelectedInventoryAudit.BalanceAmount, Converter={Converters:BalanceAmountForeColorConverter}}" Value="0">
+                                        <Setter Property="Polygon.Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Polygon.Style>
+                    </Polygon>
+
+                    <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+                        <Line Name="Zero1" Stroke="Gray" X1="0" Y1="4" X2="30" Y2="4" SnapsToDevicePixels="True" RenderOptions.EdgeMode="Aliased" Margin="5 0 0 0" StrokeThickness="6" >
+                            <Line.Style>
+                                <Style TargetType="{x:Type Line}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SelectedInventoryAudit.BalanceAmount, Converter={Converters:BalanceAmountForeColorConverter}}" Value="-1">
+                                            <Setter Property="Line.Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding SelectedInventoryAudit.BalanceAmount, Converter={Converters:BalanceAmountForeColorConverter}}" Value="+1">
+                                            <Setter Property="Line.Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding SelectedInventoryAudit.BalanceAmount, Converter={Converters:BalanceAmountForeColorConverter}}" Value="0">
+                                            <Setter Property="Line.Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Line.Style>
+                        </Line>
+
+                        <Line Name="Zero2" Stroke="Gray" X1="0" Y1="8" X2="30" Y2="8" SnapsToDevicePixels="True" RenderOptions.EdgeMode="Aliased" Margin="5 0 0 0" StrokeThickness="6" >
+                            <Line.Style>
+                                <Style TargetType="{x:Type Line}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SelectedInventoryAudit.BalanceAmount, Converter={Converters:BalanceAmountForeColorConverter}}" Value="-1">
+                                            <Setter Property="Line.Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding SelectedInventoryAudit.BalanceAmount, Converter={Converters:BalanceAmountForeColorConverter}}" Value="+1">
+                                            <Setter Property="Line.Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding SelectedInventoryAudit.BalanceAmount, Converter={Converters:BalanceAmountForeColorConverter}}" Value="0">
+                                            <Setter Property="Line.Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Line.Style>
+                        </Line>
+                    </StackPanel>
+
+                </StackPanel>
+
+                <!--<dxe:TextEdit
+                                    MaskType="Numeric" Mask="N2" MaskUseAsDisplayFormat="True"
+                                    Margin="20,0,0,0"
+                                    ShowBorder="False"
+                                    HorizontalAlignment="Right"
+                                    IsPrintingMode="True"
+                                    Text="{Binding Path= Row.BalanceAmount}" />-->
+
+
+
+                <!--<TextBlock Text="{Binding Path= Row.BalanceAmount}" Margin="20,0,0,0" >
+                            <TextBlock.Style>
+                                    <Style TargetType="{x:Type TextBlock}">
+                                        <Setter Property="TextBlock.FontWeight" Value="Bold" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Data.BalanceAmount, Converter={Converters:BalanceAmountForeColorConverter}}" Value="-1">
+                                                <Setter Property="TextBlock.Foreground" Value="Red" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Data.BalanceAmount, Converter={Converters:BalanceAmountForeColorConverter}}" Value="+1">
+                                                <Setter Property="TextBlock.Foreground" Value="Green" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>-->
+
+                <!--, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}-->
+                <TextBlock Text="{Binding SelectedInventoryAudit.BalanceAmountwithCurrentSymbol, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
+                        Margin="1" VerticalAlignment="Center" HorizontalAlignment="Left" 
+                        TextAlignment="Left"
+                        FontSize="20" FontWeight="Bold">
+                    <!--<TextBlock.Style>
+                        <Style TargetType="{x:Type TextBlock}">
+                            --><!--<Setter Property="TextBlock.FontWeight" Value="Bold" />--><!--
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding SelectedInventoryAudit.BalanceAmount, Converter={Converters:BalanceAmountForeColorConverter}}" Value="-1">
+                                    <Setter Property="TextBlock.Foreground" Value="Red" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding SelectedInventoryAudit.BalanceAmount, Converter={Converters:BalanceAmountForeColorConverter}}" Value="+1">
+                                    <Setter Property="TextBlock.Foreground" Value="Green" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>-->
+                </TextBlock>
+
+            </StackPanel>
+
+            <!--Created-->
+            <Label Margin="20,2,2,2" Grid.Row="1" Grid.Column="8" Grid.ColumnSpan="1" 
+                       Content="{DynamicResource EditInventoryAuditCreated}" Height="Auto" FontSize="16"
+                       HorizontalAlignment="Left" VerticalAlignment="Center"/>
+
+            <Label Grid.Row="1" Grid.Column="9" Content="{DynamicResource ColonSymbol}" Height="Auto" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="2"/>
+
+            <Label Margin="10,2,2,2" Grid.Row="1" Grid.Column="10" 
+                       Content="{Binding SelectedInventoryAudit.Creator.FullName,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" 
+                       Height="Auto" FontSize="16"
+                       HorizontalAlignment="Left" VerticalAlignment="Center" />
+
+            <!--Modified-->
+            <Label Margin="20,2,2,2" Grid.Row="2" Grid.Column="8" Grid.ColumnSpan="1" 
+                       Content="{DynamicResource EditInventoryAuditModified}" Height="Auto" FontSize="16"
+                       HorizontalAlignment="Left" VerticalAlignment="Center" />
+
+            <Label Grid.Row="2" Grid.Column="9" Content="{DynamicResource ColonSymbol}" Height="Auto" FontSize="16"
+                       HorizontalAlignment="Left" VerticalAlignment="Center" Margin="2"/>
+
+            <Label Margin="10,2,2,2" Grid.Row="2" Grid.Column="10" Grid.ColumnSpan="1" 
+                       Content="{Binding SelectedInventoryAudit.Modifier.FullName,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" 
+                       Height="Auto" FontSize="16"
+                       HorizontalAlignment="Left" VerticalAlignment="Center" />
+
+            <!-- Export Button -->
+
+            <Button Content=" " Grid.Row="0" Grid.Column="10" Grid.ColumnSpan="2"
+                        Height="40" Width="40" HorizontalAlignment="Right"  VerticalAlignment="Center"
+                        Command="{Binding ExportInventoryAuditViewCommand}" 
+                        CommandParameter="{Binding ElementName=InventoryAuditsTableView}" 
+                        Margin="0,0,5,5">
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource ButtonExportToExcel}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Image Style="{ DynamicResource ExcelExportButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+
+            <!-- Print Button -->
+
+            <Button Content=" " Grid.Row="0" Grid.Column="10" Grid.ColumnSpan="2"
+                        Height="40" Width="40" HorizontalAlignment="Right"  VerticalAlignment="Center"
+                        Command="{Binding PrintInventoryAuditViewCommand}" Visibility="Visible"                       
+                        Margin="0,0,50,5">
+                <!--CommandParameter="{Binding ElementName=InventoryAuditsTableView}"-->
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource ButtonPrint}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Image Style="{ DynamicResource PrinterButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+
+            <!-- GEOS2-3265 -->
+            <!--[rdixit][02.12.2022][GEOS2-3962] Added scope grid in to first tab and Result grid into second tab-->
+
+            <dxdo:DockLayoutManager Name="dockManager1" Margin="0,0,0,0" HorizontalAlignment="Stretch" Grid.ColumnSpan="15" Height="{Binding WindowHeight}" Grid.Row="5" DockPanel.Dock="Bottom" ScrollViewer.HorizontalScrollBarVisibility="Auto" >
+                
+                <dxdo:DockLayoutManager.AutoHideGroups>
+                    
+                    <!--Article-->
+                    <dxdo:AutoHideGroup Name="ArticleAutoHide" DockType="Left" AutoHideSize="300,200" ItemWidth="290" Margin="0,100,0,0" 
+                                               ItemHeight="{Binding DataContext.TabHeight, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" >
+                        <dxdo:LayoutPanel Caption="{DynamicResource Article}" ItemWidth="290" AllowClose="False">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <dxg:TreeListControl x:Name="GridArticleMenuList" Grid.Row="0" MaxHeight="{Binding DataContext.TabHeight, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"
+                                                 HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                                 SelectionMode="Row"
+                                                 ItemsSource="{Binding DataContext.ArticleMenuList, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"
+                                                 SelectedItem="{Binding DataContext.SelectedArticle,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" >
+
+                                    <dxg:TreeListControl.Columns>
+                                        <dxg:TreeListColumn Width="*" FieldName="Name" FixedWidth="True" ReadOnly="True">
+                                        </dxg:TreeListColumn>
+
+                                    </dxg:TreeListControl.Columns>
+                                    <dxg:TreeListControl.View>
+                                        <dxg:TreeListView Name="ArticleCategoryTreeListView" 
+                                                            ShowTotalSummary="False"                                                           
+                                                            AllowRecursiveNodeChecking="False"
+                                                            ShowSearchPanelMode="Always"
+                                                            ShowColumnHeaders="False"
+                                                            ShowHorizontalLines="False"
+                                                            ShowVerticalLines="False"
+                                                            ShowIndicator="False"
+                                                            VerticalScrollbarVisibility="Visible"
+                                                            ParentFieldName="ParentName" 
+                                                            KeyFieldName="KeyName"
+                                                            FilterMode="Extended"
+                                                            SearchPanelHorizontalAlignment="Stretch"
+                                                            AutoExpandAllNodes="False"
+                                                            AllowDragDrop="True"
+                                                            NavigationStyle="Row" 
+                                                            ShowDragDropHint="True" 
+                                                            CompleteRecordDragDrop="ArticleMenutreeListView_CompleteRecordDragDrop">
+
+                                            <dxg:TreeListView.DragDropHintTemplate>
+                                                <DataTemplate>
+                                                    <dxe:ListBoxEdit ItemsSource="{Binding DataContext.Articlerecord,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" DisplayMember="Name"/>
+                                                </DataTemplate>
+                                            </dxg:TreeListView.DragDropHintTemplate>
+                                            <dxg:TreeListView.RowStyle>
+                                                <Style TargetType="dxg:RowControl">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Row.IsChecked}" Value="true">
+                                                            <Setter Property="Foreground" Value="Gray"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </dxg:TreeListView.RowStyle>
+                                            <dxmvvm:Interaction.Behaviors>
+
+                                            </dxmvvm:Interaction.Behaviors>
+                                        </dxg:TreeListView>
+                                    </dxg:TreeListControl.View>
+                                </dxg:TreeListControl>
+                            </Grid>
+                        </dxdo:LayoutPanel>
+                    </dxdo:AutoHideGroup>
+
+                    <!--Location-->
+                    <dxdo:AutoHideGroup DockType="Left" AutoHideSize="300,200" ItemWidth="290" 
+                                                ItemHeight="{Binding DataContext.TabHeight, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" FloatOnDoubleClick="False">
+                        <dxdo:LayoutPanel Caption="{DynamicResource LocationAutoHide}" ItemWidth="290" AllowClose="False">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+
+                                <dxg:TreeListControl x:Name="GridLocationMenuList" Grid.Row="0"  Width="auto" 
+                                                             MaxHeight="{Binding DataContext.TabHeight, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"
+                                                             HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+                                                             ItemsSource="{Binding DataContext.WarehouseLocationList, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" 
+                                                             SelectedItem="{Binding DataContext.SelectedWarehouseLocation,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"  SelectionMode="Row"><!--[nsatpute][26-11-2024][GEOS2-6379]-->
+
+                                    <dxg:TreeListControl.Columns>
+                                        <dxg:TreeListColumn Header="{DynamicResource LocationGridColFullName}" FieldName="FullName" Width="150" MinWidth="150" ReadOnly="True"/>
+                                    </dxg:TreeListControl.Columns>
+                                    <dxg:TreeListControl.View>
+                                        <dxg:TreeListView Name="LocationtreeListView"                                                                                                
+                                                                      AllowRecursiveNodeChecking="False"
+                                                                      ParentFieldName="Parent" 
+                                                                      KeyFieldName="IdWarehouseLocation"
+                                                                      ShowTotalSummary="False"                                                                                    
+                                                                      ShowSearchPanelMode="Always"
+                                                                      ShowColumnHeaders="False"
+                                                                      ShowIndicator="False"
+                                                                      ShowHorizontalLines="False"
+                                                                      ShowVerticalLines="False"
+                                                                      VerticalScrollbarVisibility="Visible"                                                                                    
+                                                                      FilterMode="Extended"
+                                                                      HorizontalScrollbarVisibility="Auto"
+                                                                      SearchPanelHorizontalAlignment="Stretch"
+                                                                      AutoExpandAllNodes="False"                                                              
+                                                                      NavigationStyle="Row" 
+                                                                      AllowDragDrop="True"    
+                                                                      ShowDragDropHint="True" 
+                                                                      FixedLineWidth="300"
+                                                                      CompleteRecordDragDrop="LocationMenutreeListView_CompleteRecordDragDrop" 
+                                                                      >
+                                            <dxg:TreeListView.DragDropHintTemplate>
+                                                <DataTemplate>
+                                                    <dxe:ListBoxEdit ItemsSource="{Binding DataContext.Warehouserecord,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" DisplayMember="FullName"/>
+                                                </DataTemplate>
+                                            </dxg:TreeListView.DragDropHintTemplate>
+
+                                            <dxg:TreeListView.RowStyle>
+                                                <Style TargetType="dxg:RowControl">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Row.IsChecked}" Value="true">
+                                                            <Setter Property="Foreground" Value="Gray"/>
+                                                            <Setter Property="IsEnabled" Value="False"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </dxg:TreeListView.RowStyle>
+                                        </dxg:TreeListView>
+                                    </dxg:TreeListControl.View>
+                                </dxg:TreeListControl>
+                            </Grid>
+                        </dxdo:LayoutPanel>
+                    </dxdo:AutoHideGroup>
+
+                </dxdo:DockLayoutManager.AutoHideGroups>
+          
+                <dxdo:LayoutGroup>
+                    <dxdo:LayoutPanel x:Name="documentGroup1" ShowCaption="False" ShowCloseButton="False" ShowBorder="False">
+                        <dxlc:FlowLayoutControl x:Name="flowLayoutControl"                              
+                                AllowLayerSizing="False"
+                                AllowMaximizedElementMoving="False"
+                                Background="Transparent"
+                                Height="{Binding WindowHeight}"
+                                Orientation="Vertical" ScrollBars="Auto"
+                                Padding="5"
+                                ItemSpace="5" 
+                                LayerSpace="5">
+                            <dxlc:LayoutControl>
+
+                                <dx:DXTabControl AllowMerging="True" Height="{Binding TabHeight}" Width= "{Binding WindowWidth}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" SelectedIndex="0">
+                                    <dx:DXTabItem Header="{DynamicResource AuditScopeTabHeader}"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" >
+                                        <Grid ShowGridLines="False" HorizontalAlignment="Stretch"  VerticalAlignment="Stretch">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="450"/>
+                                                <ColumnDefinition Width="5"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="*"/>
+                                            </Grid.RowDefinitions>
+                                            <!--[nsatpute][05-12-2024][GEOS2-6381]-->
+                                            <dxg:TreeListControl x:Name="GridLocationMenuList1" Grid.Row="0"  Width="auto" Margin="0,3,5,3"
+                                                 MaxHeight="{Binding DataContext.TabHeight, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"
+                                                 HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+                                                 ItemsSource="{Binding DataContext.DtLocation, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" 
+                                                 SelectionMode="Row" 
+                                                                 UIHelper:TreeListControlBehaviors.BindableSummaryFromDataTable="{Binding DtLocation}" >
+                                              
+                                                <dxg:TreeListControl.Bands>
+                                                    <dxg:TreeListControlBand>
+                                                        <dxg:TreeListControlBand.HeaderTemplate>
+                                                            <DataTemplate>
+                                                                <Grid>
+                                                                    <!-- Define two columns: one to take up the available space and another for the button -->
+                                                                    <Grid.ColumnDefinitions>
+                                                                        <ColumnDefinition Width="*" />
+                                                                        <!-- Expands to fill space -->
+                                                                        <ColumnDefinition Width="Auto" />
+                                                                        <!-- Button takes required space -->
+                                                                    </Grid.ColumnDefinitions>
+
+                                                                    <!-- Placeholder for header text or other content -->
+                                                                    <TextBlock Text="Inventory Audit Locations" Padding="0,0,500,0" VerticalAlignment="Center" Grid.Column="0" Margin="5" />
+
+                                                                    <!-- Delete Button (Aligned to the right using Grid) -->
+                                                                    <Button Name="deleteRowItem" 
+                                                                            ToolTip="{DynamicResource Delete}" 
+                                                                            Command="{Binding DataContext.DeleteSelectedRowsCommand, RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}" 
+                                                                            VerticalAlignment="Center" 
+                                                                            HorizontalAlignment="Right" 
+                                                                            Grid.Column="1"
+                                                                            Margin="5">
+                                                                        <Button.ContentTemplate>
+                                                                            <DataTemplate>
+                                                                                <Image Height="16" Width="16" Style="{DynamicResource DeleteStyle}" />
+                                                                            </DataTemplate>
+                                                                        </Button.ContentTemplate>
+                                                                        <Button.Style>
+                                                                            <Style TargetType="{x:Type Button}">
+                                                                                <Style.Triggers>
+                                                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                                                        <Setter Property="Cursor" Value="Hand" />
+                                                                                    </Trigger>
+                                                                                </Style.Triggers>
+                                                                            </Style>
+                                                                        </Button.Style>
+                                                                    </Button>
+                                                                </Grid>
+                                                            </DataTemplate>
+                                                        </dxg:TreeListControlBand.HeaderTemplate>
+
+
+                                                        <!--[nsatpute][05-12-2024][GEOS2-6380]-->                                               
+                                                        <dxg:TreeListColumn Header="{DynamicResource Editinventoryauditview_Name}" FieldName="FullName"  Width="150" MinWidth="200" MaxWidth ="300" ReadOnly="True" ShowCheckBoxInHeader="True">
+                                                    <dxg:TreeListColumn.HeaderTemplate>
+                                                        <DataTemplate>
+                                                            <TextBlock Text="{DynamicResource Editinventoryauditview_Name}" Margin="10,0,0,0"/>
+                                                        </DataTemplate>
+                                                    </dxg:TreeListColumn.HeaderTemplate>
+                                                </dxg:TreeListColumn>
+                                                        <dxg:TreeListColumn Header="{DynamicResource Editinventoryauditview_Status}" FieldName="Status" Width="100" MaxWidth="100" MinWidth="100" ReadOnly="True" AllowResizing="False">                                                           
+                                                        </dxg:TreeListColumn>
+                                                        <dxg:TreeListColumn Width="50"  FieldName="" FixedWidth="True" Header="{DynamicResource Editinventoryauditview_Delete}">
+                                                            <dxg:TreeListColumn.CellTemplate>
+                                                                <DataTemplate>
+                                                                    <Button Name="deleteRowItem" ToolTip="{DynamicResource Delete}" Command="{Binding DataContext.DeleteRowCommand,RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}" CommandParameter="{Binding}">
+                                                                        <Button.ContentTemplate>
+                                                                            <DataTemplate>
+                                                                                <Image Height="16" Width="16"  Style="{ DynamicResource DeleteStyle}" />
+                                                                            </DataTemplate>
+                                                                        </Button.ContentTemplate>
+                                                                        <Button.Style>
+                                                                            <Style TargetType="{x:Type Button}">
+                                                                                <Style.Triggers>
+                                                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                                                        <Setter Property="Cursor" Value="Hand"/>
+                                                                                    </Trigger>
+                                                                                </Style.Triggers>
+                                                                            </Style>
+                                                                        </Button.Style>
+                                                                    </Button>
+                                                                </DataTemplate>
+                                                            </dxg:TreeListColumn.CellTemplate>
+                                                        </dxg:TreeListColumn>
+                                                    </dxg:TreeListControlBand>
+                                                </dxg:TreeListControl.Bands>
+
+                                                <dxg:TreeListControl.View>                                                
+                                                <dxg:TreeListView Name="LocationtreeListView2"                                                                                                
+                                                      AllowRecursiveNodeChecking="True"
+                                                      ParentFieldName="IdParent" 
+                                                      KeyFieldName="IdWarehouseLocation"
+                                                      ShowTotalSummary="True"                                                                                    
+                                                      ShowSearchPanelMode="Always"
+                                                      ShowColumnHeaders="True"
+                                                      ShowIndicator="False"
+                                                      ShowHorizontalLines="True"
+                                                      ShowVerticalLines="True"
+                                                      VerticalScrollbarVisibility="Visible" 
+                                                      ShowCheckboxes="True"                                                                  
+                                                      CheckBoxFieldName="CheckBox"                                                                  
+                                                      FilteringMode="EntireBranch"
+                                                      HorizontalScrollbarVisibility="Auto"
+                                                      SearchPanelHorizontalAlignment="Stretch"
+                                                      AutoExpandAllNodes="False"     
+                                                      NavigationStyle="Row" 
+                                                      AllowDragDrop="True"    
+                                                      ShowDragDropHint="False"  
+                                                      FixedLineWidth="300"     
+                                                      SearchString="{Binding DataContext.SearchString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}"            
+                                                      CompleteRecordDragDrop="LocationMenutreeListView_CompleteRecordDragDrop"
+                                                      CellStyle="{DynamicResource ValidatedCellStyle}"> 
+                                                        <dxmvvm:Interaction.Behaviors>
+                                                            <dxmvvm:EventToCommand Command="{Binding DataContext.CommandOnDragRecordOverLocationGrid, RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}"
+                                                            EventName="DragRecordOver" PassEventArgsToCommand="True">
+                                                            </dxmvvm:EventToCommand>
+                                                            
+                                                            <dxmvvm:EventToCommand Command="{Binding DataContext.CommandDropRecordLocationGrid, RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}"
+                                                            EventName="DropRecord" PassEventArgsToCommand="True">
+                                                            </dxmvvm:EventToCommand>
+
+                                                            <dxmvvm:EventToCommand Command="{Binding DataContext.CommandCompleteRecordDragDropLocationGrid, RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}"
+                                                            EventName="CompleteRecordDragDrop" PassEventArgsToCommand="True">
+                                                            </dxmvvm:EventToCommand>
+
+                                                        </dxmvvm:Interaction.Behaviors>
+                                                        <dxg:TreeListView.RowStyle>
+                                                            <Style TargetType="dxg:RowControl">
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding Row.IsChecked}" Value="true">
+                                                                        <Setter Property="Foreground" Value="Gray"/>
+                                                                        <Setter Property="IsEnabled" Value="False"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </dxg:TreeListView.RowStyle>
+                                                        <dxg:TreeListView.FooterTemplate>
+                                                            <DataTemplate>
+                                                                <StackPanel >
+                                                                    <!-- Horizontal Line -->
+                                                                    <Border Height="1" Background="DimGray" Margin="0,0,0,5" />
+                                                                    <!-- Footer Content -->
+                                                                    <Border BorderThickness="2" Background="Transparent" Margin="15,5,0,10">
+                                                                        <StackPanel Orientation="Horizontal">
+                                                                            <TextBlock Text="{Binding DataContext.TotalLocationSummaryItems, RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}" />
+                                                                        </StackPanel>
+                                                                    </Border>
+                                                                </StackPanel>
+                                                            </DataTemplate>
+                                                        </dxg:TreeListView.FooterTemplate>
+
+                                                    </dxg:TreeListView>
+                                                </dxg:TreeListControl.View>                                               
+                                            </dxg:TreeListControl>
+
+                                            <UIHelper:MyGridControl x:Name="Articlegrid" Grid.Row="0" DockPanel.Dock="Top" Grid.Column="2"
+                                                                         AutoGenerateColumns="None"
+                                                                    MaxHeight="{Binding DataContext.GridHeight,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"
+                                                                    Height="{Binding DataContext.GridHeight,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"
+                                                                    Width="Auto" Margin="0,0,26,0"
+                                                                         HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                                                         ItemsSource="{Binding DataContext.DtArticle,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" 
+                                                                         BandsSource="{Binding DataContext.ArticleBand,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"
+                                                                         BandTemplate="{StaticResource ArticleBandTemplate}" 
+                                                                         SelectionMode="Cell" ImplyNullLikeEmptyStringWhenFiltering="True" >
+                                                <dxmvvm:Interaction.Behaviors>
+                                                    <UIHelper:GridSelectingBehavior />
+                                                </dxmvvm:Interaction.Behaviors>
+
+                                                <dxg:GridControl.TotalSummary>
+                                                    <dxg:GridSummaryItem x:Name="summery1" FieldName="" SummaryType="Count" DisplayFormat="Total Count : {0}" Visible="True" Alignment="Left"/>
+                                                </dxg:GridControl.TotalSummary>
+
+                                                <dxg:GridControl.View>
+                                                    <dxg:TableView x:Name="ArticleTableView" 
+                                                                                   NavigationStyle="Cell"                                                                                 
+                                                                                   RowDetailsVisibilityMode="Visible"
+                                                                                   ShowHorizontalLines="True"
+                                                                                   ShowColumnHeaders="True"
+                                                                                   ShowSearchPanelMode="Always"
+                                                                                   VerticalScrollbarVisibility="Visible" 
+                                                                                   VerticalAlignment="Stretch"
+                                                                                   AllowFixedColumnMenu="False"
+                                                                                   VerticalContentAlignment="Stretch"
+                                                                                   HorizontalAlignment="Stretch"                                                                                                                                                                    
+                                                                                   ShowSearchPanelCloseButton="True"
+                                                                                   SearchPanelHorizontalAlignment="Stretch"                                                                                   
+                                                                                   ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly"
+                                                                                   AllowGrouping="True"
+                                                                                   ShowGroupPanel="False"
+                                                                                   ShowIndicator="False" 
+                                                                                   AllowColumnFiltering="True"
+                                                                                   FilterEditorShowOperandTypeIcon="False"
+                                                                                   AllowDragDrop="True"
+                                                                                   AllowEditing="True"
+                                                                                   AllowColumnMoving="True"
+                                                                                   EnableImmediatePosting="True"
+                                                                                   GroupRowCheckBoxFieldName="IsChecked"  
+                                                                                   EditorShowMode="MouseDown"
+                                                                                   AllowPaging="False"
+                                                                                   ShowFixedTotalSummary="True"
+                                                                                   ImmediateUpdateRowPosition="True" 
+                                                                                   AllowConditionalFormattingMenu="True"                                                                    
+                                                                                   ContinueRecordDrag="ArticleTableView_ContinueRecordDrag">
+                                                        <dxg:TableView.FormatConditions>
+                                                            <dxg:FormatCondition FieldName="IsArticleChecked" ValueRule="Equal" Value1="True" ApplyToRow="True">
+                                                                <dxg:FormatCondition.Format>
+                                                                    <dx:Format Foreground="Gray"/>
+                                                                </dxg:FormatCondition.Format>
+                                                            </dxg:FormatCondition>
+                                                            
+                                                            <dxg:FormatCondition FieldName="Status" ValueRule="Equal" Value1="Audited" >
+                                                                <dxg:FormatCondition.Format>
+                                                                    <dx:Format Background="Green" Foreground="White"/>
+                                                                </dxg:FormatCondition.Format>
+                                                            </dxg:FormatCondition>
+                                                        </dxg:TableView.FormatConditions>
+                                                        <dxmvvm:Interaction.Behaviors>
+
+                                                            <dxmvvm:EventToCommand Command="{Binding DataContext.CommandOnDragRecordOverArticleGrid, RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}"
+                                                                                       EventName="DragRecordOver" PassEventArgsToCommand="True">
+                                                            </dxmvvm:EventToCommand>
+                                                            <dxmvvm:EventToCommand Command="{Binding DataContext.CommandDropRecordArticleGrid, RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}"
+                                                                                       EventName="DropRecord" PassEventArgsToCommand="True">
+                                                            </dxmvvm:EventToCommand>
+
+                                                            <dxmvvm:EventToCommand Command="{Binding DataContext.CommandCompleteRecordDragDropArticleGrid, RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}"
+                                                                                                   EventName="CompleteRecordDragDrop" PassEventArgsToCommand="True">
+                                                            </dxmvvm:EventToCommand>
+
+                                                        </dxmvvm:Interaction.Behaviors>
+
+                                                    </dxg:TableView>
+                                                </dxg:GridControl.View>
+                                            </UIHelper:MyGridControl>
+                                            <dxmvvm:Interaction.Behaviors>
+                                                <dxmvvm:EventToCommand Command="{Binding AuditResulViewLoadedCommand}"
+                                                           EventName="Loaded"
+                                                           PassEventArgsToCommand="True" />
+                                                <!--<dxmvvm:EventToCommand Command="{Binding TableViewLoadedCommand}"
+                                                           EventName="Unloaded"
+                                                           CommandParameter="{Binding ElementName=InventoryAuditsTableView}" />-->
+                                            </dxmvvm:Interaction.Behaviors>
+                                        </Grid>
+                                    </dx:DXTabItem>
+                                    <dx:DXTabItem Header="{DynamicResource AuditResultsTabHeader}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                                        <dxg:GridControl   Name="InventoryAuditsTableView1"                         
+                                VerticalAlignment="Stretch" VerticalContentAlignment="Stretch"
+                                HorizontalAlignment="Center"
+                                 ItemsSource="{Binding WarehouseInventoryAuditItemsList,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" 
+                                 AllowLiveDataShaping="True" 
+                                 SelectedItem="{Binding SelectedInventoryAuditItem,Mode=TwoWay ,UpdateSourceTrigger=PropertyChanged}"
+                                 SelectionMode="Row" ImplyNullLikeEmptyStringWhenFiltering="True"
+                                 AutoGenerateColumns="None"  >
+                                            <dxg:GridColumn Header="{DynamicResource EditInventoryAuditLocation}" FieldName="WarehouseLocation.FullName" FilterPopupMode="CheckedList"  ReadOnly="True" MinWidth="90"/>
+                                            <dxg:GridColumn Header="{DynamicResource EditInventoryArticle}" FieldName="Article.Reference" FilterPopupMode="CheckedList"  ReadOnly="True" MinWidth="100">
+                                                <dxg:GridColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock VerticalAlignment="Center" Margin="10 0 0 0">
+                                     <Hyperlink x:Name="hyperlink" 
+                                                       TargetName="_blank"
+                                                       Command="{Binding DataContext.WarehouseViewReferenceHyperlinkClickCommand,RelativeSource={RelativeSource AncestorType=dxg:GridControl}}"
+                                                       CommandParameter="{Binding ElementName=InventoryAuditsTableView}" Style="{DynamicResource hyperlinkGridStyle}">
+                                                <InlineUIContainer>
+                                                    <TextBlock Text="{Binding Data.Article.Reference}"  Style="{DynamicResource HyperlinkTextBlock}" TextDecorations="Underline"/>
+                                                </InlineUIContainer>
+                                            </Hyperlink>
+                                </TextBlock>
+                                                    </DataTemplate>
+                                                </dxg:GridColumn.CellTemplate>
+                                            </dxg:GridColumn>
+                                            <dxg:GridColumn Header="{DynamicResource EditInventoryAuditDescription}" FieldName="Article.Description" FilterPopupMode="CheckedList"  ReadOnly="True" MinWidth="300" MaxWidth="500"/>
+                                            <dxg:GridColumn Header="{DynamicResource EditInventoryAuditDNCode}" FieldName="WarehouseDeliveryNoteItem.WarehouseDeliveryNote.Code" FilterPopupMode="CheckedList"  ReadOnly="True" MinWidth="100">
+                                                <dxg:GridColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Margin="4 0 0 0">
+                                                                <Hyperlink x:Name="hyperlink"
+                                                                            TargetName="_blank"
+                                                                            Command="{Binding DataContext.ArticleDetailsViewDNHyperlinkClickCommand, RelativeSource={RelativeSource AncestorType=dxg:GridControl}}"
+                                                                            CommandParameter="{Binding ElementName=InventoryAuditsTableView}">
+                                                                        <InlineUIContainer>
+                                                                            <TextBlock Text="{Binding Data.WarehouseDeliveryNoteItem.WarehouseDeliveryNote.Code}" VerticalAlignment="Center" />
+                                                                        </InlineUIContainer>
+                                                                </Hyperlink>
+                                                            </TextBlock>
+                                                        <DataTemplate.Triggers>
+                                                            <Trigger Property="dxg:DataViewBase.IsFocusedRow" Value="True">
+                                                                <Setter TargetName="hyperlink" Property="Foreground" Value="{DynamicResource ColorMain}"/>
+                                                            </Trigger>
+                                                            <DataTrigger Binding="{Binding RowData.SelectionState}" Value="Selected">
+                                                                <Setter TargetName="hyperlink" Property="Foreground" Value="{DynamicResource ColorMain}"/>
+                                                            </DataTrigger>
+                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                <Setter TargetName="hyperlink" Property="Foreground" Value="OrangeRed" />
+                                                            </Trigger>
+                                                        </DataTemplate.Triggers>
+                                                    </DataTemplate>
+                                                </dxg:GridColumn.CellTemplate>
+                                            </dxg:GridColumn>
+                                            <dxg:GridColumn Header="{DynamicResource EditInventoryAuditExpectedQuantity}" FieldName="ExpectedQuantity" FilterPopupMode="CheckedList"  ReadOnly="True" MinWidth="100"/>
+                                            <dxg:GridColumn Header="{DynamicResource EditInventoryAuditRealQuantity}" FieldName="CurrentQuantity" FilterPopupMode="CheckedList"  ReadOnly="True" MinWidth="100"/>
+                                            <dxg:GridColumn Header="{DynamicResource EditInventoryAuditDifference}" FieldName="Difference" 
+                                UnboundType="Decimal"  UnboundExpression="[CurrentQuantity] - [ExpectedQuantity]" 
+                                FilterPopupMode="CheckedList"  ReadOnly="True" MinWidth="100" AllowUnboundExpressionEditor="False">
+
+                                                <dxg:GridColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <StackPanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0" Orientation="Vertical"
+                                                    Background="{Binding Path=Data.DifferenceBackgoundColor,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
+                                                            <TextBlock Text="{Binding Path=Data.Difference,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"                                                       
+                                                       VerticalAlignment="Center" HorizontalAlignment="Right" Margin="2,0,2,0">
+                                                            </TextBlock>
+                                                        </StackPanel>
+                                                    </DataTemplate>
+                                                </dxg:GridColumn.CellTemplate>
+                                            </dxg:GridColumn>
+                                            <dxg:GridColumn Header="{DynamicResource EditInventoryAuditBalanceAmount}" FieldName="BalanceAmount" 
+                                            FilterPopupMode="CheckedList" ReadOnly="True" MinWidth="120">
+                                                <dxg:GridColumn.EditSettings>
+                                                    <dxe:TextEditSettings HorizontalContentAlignment="Left"/>
+                                                </dxg:GridColumn.EditSettings>
+                                                <dxg:GridColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <StackPanel MinWidth="120" Orientation="Horizontal">
+                                                            <StackPanel Orientation="Vertical" MinWidth="20" VerticalAlignment="Center">
+                                                                <Polygon Points="0,16,16,16,7,0" VerticalAlignment="Center" Margin="5 0 0 0" HorizontalAlignment="Left">
+                                                                    <Polygon.Style>
+                                                                        <Style TargetType="{x:Type Polygon}">
+                                                                            <Style.Triggers>
+                                                                                <DataTrigger Binding="{Binding Data.BalanceAmount, Converter={Converters:BalanceAmountForeColorConverter}}" Value="-1">
+                                                                                    <Setter Property="Polygon.Fill" Value="Red" />
+                                                                                    <Setter Property="Polygon.Stroke" Value="Red" />
+                                                                                    <Setter Property="Polygon.Visibility" Value="Collapsed" />
+                                                                                </DataTrigger>
+                                                                                <DataTrigger Binding="{Binding Data.BalanceAmount, Converter={Converters:BalanceAmountForeColorConverter}}" Value="+1">
+                                                                                    <Setter Property="Polygon.Fill" Value="Green" />
+                                                                                    <Setter Property="Polygon.Stroke" Value="Green" />
+                                                                                    <Setter Property="Polygon.Visibility" Value="Visible" />
+                                                                                </DataTrigger>
+                                                                                <DataTrigger Binding="{Binding Data.BalanceAmount, Converter={Converters:BalanceAmountForeColorConverter}}" Value="0">
+                                                                                    <Setter Property="Polygon.Visibility" Value="Collapsed" />
+                                                                                </DataTrigger>
+                                                                            </Style.Triggers>
+                                                                        </Style>
+                                                                    </Polygon.Style>
+                                                                </Polygon>
+
+                                                                <Polygon Points="0,0 8,16, 16,0" Stroke="Red" Fill="Red" Margin="5 5 0 0" HorizontalAlignment="Right" >
+                                                                    <Polygon.Style>
+                                                                        <Style TargetType="{x:Type Polygon}">
+                                                                            <Style.Triggers>
+                                                                                <DataTrigger Binding="{Binding Data.BalanceAmount, Converter={Converters:BalanceAmountForeColorConverter}}" Value="-1">
+                                                                                    <Setter Property="Polygon.Fill" Value="Red" />
+                                                                                    <Setter Property="Polygon.Stroke" Value="Red" />
+                                                                                    <Setter Property="Polygon.Visibility" Value="Visible" />
+                                                                                </DataTrigger>
+                                                                                <DataTrigger Binding="{Binding Data.BalanceAmount, Converter={Converters:BalanceAmountForeColorConverter}}" Value="+1">
+                                                                                    <Setter Property="Polygon.Fill" Value="Green" />
+                                                                                    <Setter Property="Polygon.Stroke" Value="Green" />
+                                                                                    <Setter Property="Polygon.Visibility" Value="Collapsed" />
+                                                                                </DataTrigger>
+                                                                                <DataTrigger Binding="{Binding Data.BalanceAmount, Converter={Converters:BalanceAmountForeColorConverter}}" Value="0">
+                                                                                    <Setter Property="Polygon.Visibility" Value="Collapsed" />
+                                                                                </DataTrigger>
+                                                                            </Style.Triggers>
+                                                                        </Style>
+                                                                    </Polygon.Style>
+                                                                </Polygon>
+
+                                                                <Line Name="Zero1" Stroke="Gray" X1="0" Y1="2" X2="15" Y2="2" SnapsToDevicePixels="True" RenderOptions.EdgeMode="Aliased" Margin="5 0 0 0" StrokeThickness="3" >
+                                                                    <Line.Style>
+                                                                        <Style TargetType="{x:Type Line}">
+                                                                            <Style.Triggers>
+                                                                                <DataTrigger Binding="{Binding Data.BalanceAmount, Converter={Converters:BalanceAmountForeColorConverter}}" Value="-1">
+                                                                                    <Setter Property="Line.Visibility" Value="Collapsed" />
+                                                                                </DataTrigger>
+                                                                                <DataTrigger Binding="{Binding Data.BalanceAmount, Converter={Converters:BalanceAmountForeColorConverter}}" Value="+1">
+                                                                                    <Setter Property="Line.Visibility" Value="Collapsed" />
+                                                                                </DataTrigger>
+                                                                                <DataTrigger Binding="{Binding Data.BalanceAmount, Converter={Converters:BalanceAmountForeColorConverter}}" Value="0">
+                                                                                    <Setter Property="Line.Visibility" Value="Visible" />
+                                                                                </DataTrigger>
+                                                                            </Style.Triggers>
+                                                                        </Style>
+                                                                    </Line.Style>
+                                                                </Line>
+
+                                                                <Line Name="Zero2" Stroke="Gray" X1="0" Y1="4" X2="15" Y2="4" SnapsToDevicePixels="True" RenderOptions.EdgeMode="Aliased" Margin="5 0 0 0" StrokeThickness="3" >
+                                                                    <Line.Style>
+                                                                        <Style TargetType="{x:Type Line}">
+                                                                            <Style.Triggers>
+                                                                                <DataTrigger Binding="{Binding Data.BalanceAmount, Converter={Converters:BalanceAmountForeColorConverter}}" Value="-1">
+                                                                                    <Setter Property="Line.Visibility" Value="Collapsed" />
+                                                                                </DataTrigger>
+                                                                                <DataTrigger Binding="{Binding Data.BalanceAmount, Converter={Converters:BalanceAmountForeColorConverter}}" Value="+1">
+                                                                                    <Setter Property="Line.Visibility" Value="Collapsed" />
+                                                                                </DataTrigger>
+                                                                                <DataTrigger Binding="{Binding Data.BalanceAmount, Converter={Converters:BalanceAmountForeColorConverter}}" Value="0">
+                                                                                    <Setter Property="Line.Visibility" Value="Visible" />
+                                                                                </DataTrigger>
+                                                                            </Style.Triggers>
+                                                                        </Style>
+                                                                    </Line.Style>
+                                                                </Line>
+                                                            </StackPanel>
+
+                                                            <TextBlock Text="{Binding Row.BalanceAmountwithCurrentSymbol, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
+                                    Margin="4,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left" 
+                                    TextAlignment="Left">
+
+                                                            </TextBlock>
+                                                        </StackPanel>
+                                                    </DataTemplate>
+                                                </dxg:GridColumn.CellTemplate>
+                                            </dxg:GridColumn>
+                                            <dxg:GridColumn Header="{DynamicResource EditInventoryAuditAuditor}" FieldName="Reporter.FullName" FilterPopupMode="CheckedList" MinWidth="100"/>
+                                            <dxg:GridColumn Header="{DynamicResource EditInventoryAuditAuditDate}" FieldName="CreationDate" FilterPopupMode="CheckedList" MinWidth="100"
+                                    EditSettings="{dxe:TextSettings Mask='dd/MM/yyyy' ,
+                                       MaskUseAsDisplayFormat=True, MaskType=DateTime,
+                                       HorizontalContentAlignment=Right}" />
+                                            <dxg:GridColumn Header="{DynamicResource EditInventoryAuditApprover}" FieldName="Approver.FullName" FilterPopupMode="CheckedList"  MinWidth="100"/>
+                                            <dxg:GridColumn Header="{DynamicResource EditInventoryAuditApprovalDate}" FieldName="ModificationDate" FilterPopupMode="CheckedList" MinWidth="100"
+                                    EditSettings="{dxe:TextSettings Mask='dd/MM/yyyy' ,
+                                       MaskUseAsDisplayFormat=True, MaskType=DateTime,
+                                       HorizontalContentAlignment=Right}" />
+                                            <dxg:GridColumn AllowPrinting="False" Width="*" AllowDrop="False" AllowResizing="False" ReadOnly="True" IsEnabled="False" AllowColumnFiltering="False" ShowInColumnChooser="False" />
+                                            <dxg:GridControl.TotalSummary>
+                                                <dxg:GridSummaryItem x:Name="summary" FieldName="Name" SummaryType="Count" DisplayFormat="Total Count: {0}" Visible="True"   Alignment="Left"/>
+                                            </dxg:GridControl.TotalSummary>
+
+                                            <dxg:GridControl.View>
+                                                <dxg:TableView x:Name="InventoryAuditsTableView"   
+                                       NavigationStyle="Row"                                                               
+                                       RowDetailsVisibilityMode="Visible"
+                                       ShowHorizontalLines="True"
+                                       ShowSearchPanelMode="Always"
+                                       ShowColumnHeaders="True"
+                                       VerticalScrollbarVisibility="Visible"
+                                       AllowFixedColumnMenu="False"
+                                       ShowFixedTotalSummary="True" 
+                                       SearchPanelHorizontalAlignment="Stretch"
+                                       ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly"
+                                       HorizontalScrollbarVisibility="Visible"
+                                       AllowGrouping="True"
+                                       ShowGroupPanel="False" 
+                                       ShowIndicator="False"
+                                       FilterEditorShowOperandTypeIcon="True" 
+                                       AllowColumnFiltering="True"
+                                       FocusedRow="{Binding SelectedInventoryAuditItem,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" 
+                                       SearchString="{Binding SearchString,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                       AllowBestFit="True" BestFitArea="Rows" BestFitMode="Default" AllowResizing="True" AllowBandResizing="True"
+                                       AllowConditionalFormattingMenu="True"
+                                       VerticalAlignment="Stretch"
+                                       VerticalContentAlignment="Stretch"
+                                       Visibility="Hidden">
+
+                                                    <dxg:TableView.Resources>
+                                                        <DataTemplate x:Key="InventoryAuditReportPrintHeaderTemplate">
+                                                            <Grid Width="{Binding UsablePageWidth}">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="*" />
+                                                                    <ColumnDefinition Width="50" />
+                                                                    <ColumnDefinition Width="130" />
+                                                                </Grid.ColumnDefinitions>
+                                                                <dxe:TextEdit Text=" " Width="{Binding UsablePageWidth}" Grid.ColumnSpan="3" IsPrintingMode="True" Background="#333E5E" HorizontalAlignment="Stretch" 
+                                                              VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" Height="50" />
+                                                                <dxe:TextEdit Text="Warehouse Inventory Audit Report" IsPrintingMode="True" HorizontalAlignment="Stretch" 
+                                                              VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" />
+                                                                <Image Source="/Emdep.Geos.Modules.Warehouse;component/Assets/Images/GeosReportLogo.png" Height="50" Width="80"  dxp:ExportSettings.TargetType="Image" Grid.Column="2" />
+                                                            </Grid>
+                                                        </DataTemplate>
+
+                                                        <DataTemplate x:Key="InventoryAuditReportPrintFooterTemplate">
+                                                            <dxe:TextEdit HorizontalContentAlignment="Center" 
+                                                          Width="{Binding Path=UsablePageWidth, Mode=OneWay}" 
+                                                          dxp:ExportSettings.TargetType="PageNumber" 
+                                                          dxp:PageNumberExportSettings.Kind="NumberOfTotal" 
+                                                          dxp:PageNumberExportSettings.Format="Page {0} of {1}"/>
+                                                        </DataTemplate>
+                                                    </dxg:TableView.Resources>
+                                                    <dxmvvm:Interaction.Behaviors>
+                                                        <dxmvvm:EventToCommand EventName="MouseDoubleClick"
+                                                       Command="{Binding CommandGridDoubleClick}"
+                                                       CommandParameter="{Binding ElementName=InventoryAuditsTableView}" >
+                                                            <dxmvvm:EventToCommand.EventArgsConverter>
+                                                                <dx:EventArgsToDataRowConverter/>
+                                                            </dxmvvm:EventToCommand.EventArgsConverter>
+                                                        </dxmvvm:EventToCommand>
+
+                                                        <dxmvvm:EventToCommand Command="{Binding TableViewLoadedCommand}"
+                                                           EventName="Loaded"
+                                                           PassEventArgsToCommand="True" />
+
+                                                        <dxmvvm:EventToCommand Command="{Binding TableViewUnLoadedCommand}"
+                                                           EventName="Unloaded"
+                                                           PassEventArgsToCommand="True" />
+
+                                                    </dxmvvm:Interaction.Behaviors>
+
+                                                </dxg:TableView>
+                                            </dxg:GridControl.View>
+                                        </dxg:GridControl>
+                                    </dx:DXTabItem>
+                                 
+                                    </dx:DXTabControl>
+                              
+                            </dxlc:LayoutControl>
+
+                        </dxlc:FlowLayoutControl>
+                    </dxdo:LayoutPanel>
+                </dxdo:LayoutGroup>
+
+            </dxdo:DockLayoutManager>
+            <!--</Grid>-->
+           
+        </Grid>
+            
+        <StackPanel Grid.Row="6" Grid.ColumnSpan="12"
+                            HorizontalAlignment="Center" 
+                            VerticalAlignment="Stretch"                    
+                            Orientation="Horizontal"
+                            Margin="5,5,5,5"
+                            Width="Auto">
+            <Button Content="Accept"
+                            Command="{Binding EditInventoryAuditViewAcceptButtonCommand}"
+                            Height="30"
+                            Width="100"
+                            Margin="0,0,10,0"
+                            Style="{DynamicResource Button16Style}"
+                            VerticalAlignment="Center" 
+                            IsEnabled="{Binding Source={x:Static GeosApplication:GeosApplication.Instance},Path=IsEditInventoryAuditPermissionForWMS}"
+                            />
+
+                <Button Content="Cancel"
+                            Command="{Binding EditInventoryAuditViewCancelCommand}" 
+                            Height="30"
+                            Width="100"
+                            Margin="10,0,0,0"
+                            Style="{DynamicResource Button16Style}"
+                            VerticalAlignment="Center" />
+            </StackPanel>
+    </DockPanel>
+    <!--</ScrollViewer>-->
+</dxwui:WinUIDialogWindow>

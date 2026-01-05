@@ -1,0 +1,329 @@
+﻿<UserControl x:Class="Emdep.Geos.Modules.Epc.Views.ProjectBoardView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+        xmlns:local="clr-namespace:Emdep.Geos.Modules.Epc.Views"
+        xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+        xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+        xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+        xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+        xmlns:Helper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+        xmlns:dxgext="clr-namespace:DevExpress.Xpf.Grid;assembly=DevExpress.Xpf.Grid.v19.2.Extensions"
+        xmlns:viewModel="clr-namespace:Emdep.Geos.Modules.Epc.ViewModels"          
+        xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"  
+        xmlns:Behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:UIConverter="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+        mc:Ignorable="d" 
+        d:DesignHeight="300" d:DesignWidth="800">
+
+    <UserControl.DataContext>
+        <viewModel:ProjectBoardViewModel />
+    </UserControl.DataContext>
+
+    <UserControl.Resources>
+        <UIConverter:DateTimeIsNullOrMinValueVisibility x:Key="IsDateTimeIsNullOrMinValueConverter" />
+        <DataTemplate x:Key="rowInfoTemplate">
+            <dxgext:NameTextControl NameValue="Project # " TextValue="{Binding ProjectCode}" />
+        </DataTemplate>
+        <DataTemplate x:Key="dragInfoTemplate">
+            <Border Padding="12,8,24,10">
+                <StackPanel>
+                    <TextBlock Name="oneRowTextBlock" Foreground="#FF949494" FontWeight="Bold" Text="Moving 1 Project">
+                        <TextBlock.Visibility>
+                            <Binding Path="DraggingRows.Count">
+                                <Binding.Converter>
+                                    <dxgext:CountToVisibilityConverter Invert="True" />
+                                </Binding.Converter>
+                            </Binding>
+                        </TextBlock.Visibility>
+                    </TextBlock>
+                    <ContentPresenter Name="rowInfoDragPresenter" Content="{Binding FirstDraggingObject}" ContentTemplate="{StaticResource rowInfoTemplate}">
+                        <ContentPresenter.Visibility>
+                            <Binding Path="DataContext.DraggingRows.Count" RelativeSource="{RelativeSource TemplatedParent}">
+                                <Binding.Converter>
+                                    <dxgext:CountToVisibilityConverter Invert="True" />
+                                </Binding.Converter>
+                            </Binding>
+                        </ContentPresenter.Visibility>
+                    </ContentPresenter>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+    </UserControl.Resources>
+    <DockPanel LastChildFill="True">
+        <Label Style="{StaticResource LabelStyle}" DockPanel.Dock="Top">Project Board</Label>
+        <Helper:MyLayoutControl Margin="0" Padding="0" ItemLabelsAlignment="Local">
+            <Helper:MyLayoutControl.Resources>
+                <Style x:Key="maximizableGroupBoxStyle" TargetType="dxlc:GroupBox">
+                    <Setter Property="MaximizeElementVisibility" Value="Visible" />
+                    <Setter Property="FontSize" Value="13" />
+                    <Setter Property="ContentTemplate">
+                        <Setter.Value>
+                            <DataTemplate>
+                                <dxlc:LayoutControl Orientation="Vertical" Padding="0,0,0,0" Margin="0,0,0,0">
+                                    <dxlc:LayoutItem>
+                                        <TextBlock Text="{Binding DataContext.ProjectName, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox,Mode=FindAncestor}}" HorizontalAlignment="Left" Width="150" />
+                                    </dxlc:LayoutItem>
+                                    <dxlc:LayoutItem>
+                                        <TextBlock Text="{Binding DataContext.Customer.CustomerName, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox,Mode=FindAncestor}}" HorizontalAlignment="Left" Width="150" />
+                                    </dxlc:LayoutItem>
+                                    <dxlc:LayoutItem HorizontalAlignment="Right">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Image Style="{DynamicResource CalendarButtonImageStyle}" Visibility="{Binding DataContext.DueDate, Converter={StaticResource IsDateTimeIsNullOrMinValueConverter},RelativeSource={RelativeSource AncestorType=dxlc:GroupBox,Mode=FindAncestor}}" Width="16" Height="16" Margin="0,0,5,0" />
+                                            <!--<TextBlock  Text="{Binding  ElementName=a, Path=FontSize}" x:Name="a" HorizontalAlignment="Right" />-->
+                                            <TextBlock Text="{Binding DataContext.DueDate, StringFormat=dd-MM-yyyy,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox,Mode=FindAncestor}}" HorizontalAlignment="Right">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="{x:Type TextBlock}">
+                                                        <Style.Triggers>
+                                                            <MultiDataTrigger>
+                                                                <MultiDataTrigger.Conditions>
+                                                                    <Condition Binding="{Binding DataContext.DueDate, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox,Mode=FindAncestor}}" Value="{x:Static sys:DateTime.MinValue}" />
+                                                                </MultiDataTrigger.Conditions>
+                                                                <Setter Property="Visibility" Value="Hidden" />
+                                                            </MultiDataTrigger>
+                                                            <MultiDataTrigger>
+                                                                <MultiDataTrigger.Conditions>
+                                                                    <Condition Binding="{Binding DataContext.DueDate, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox,Mode=FindAncestor}}" Value="{x:Null}" />
+                                                                </MultiDataTrigger.Conditions>
+                                                                <Setter Property="Visibility" Value="Hidden" />
+                                                            </MultiDataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </dxlc:LayoutItem>
+                                </dxlc:LayoutControl>
+                            </DataTemplate>
+                        </Setter.Value>
+                    </Setter>
+                    <Setter Property="MaximizedContentTemplate">
+                        <Setter.Value>
+                            <DataTemplate>
+                                <dxlc:LayoutControl Orientation="Vertical" Padding="0">
+                                    <dxlc:LayoutItem Label="Project : " HorizontalAlignment="Left">
+                                        <TextBlock Text="{Binding DataContext.ProjectName, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox,Mode=FindAncestor}}" HorizontalAlignment="Right" Width="100" />
+                                    </dxlc:LayoutItem>
+                                    <dxlc:LayoutItem Label="Customer : " HorizontalAlignment="Left">
+                                        <TextBlock Text="{Binding DataContext.Customer.CustomerName, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox,Mode=FindAncestor}}" HorizontalAlignment="Right" />
+                                    </dxlc:LayoutItem>
+                                    <dxlc:LayoutItem Label="Owner : " HorizontalAlignment="Left">
+                                        <TextBlock Text="{Binding DataContext.Owner.Login, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox,Mode=FindAncestor}}" HorizontalAlignment="Right" />
+                                    </dxlc:LayoutItem>
+                                    <dxlc:LayoutItem Label="Start Date : " HorizontalAlignment="Left">
+                                        <TextBlock Text="{Binding DataContext.StartDate,StringFormat=dd-MM-yyyy, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox,Mode=FindAncestor}}" HorizontalAlignment="Right" />
+                                    </dxlc:LayoutItem>
+                                    <dxlc:LayoutItem Label="End Date : " HorizontalAlignment="Left">
+                                        <TextBlock Text="{Binding DataContext.DueDate, StringFormat=dd-MM-yyyy, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox,Mode=FindAncestor}}" HorizontalAlignment="Right" />
+                                    </dxlc:LayoutItem>
+                                    <!--<dxlc:LayoutItem Label="Estimated Time : " HorizontalAlignment="Left" >
+                                        <TextBlock Text="{Binding DataContext.EstimatedTime, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox,Mode=FindAncestor}}" HorizontalAlignment="Right" />
+                                    </dxlc:LayoutItem>-->
+                                </dxlc:LayoutControl>
+                            </DataTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+                <DataTemplate x:Key="ProjectListBoxTemplete">
+                    <Helper:MyLayoutControl Margin="0" Padding="0" ItemLabelsAlignment="Local">
+                        <dxlc:GroupBox Header="Project" Padding="5,2,2,2" Style="{StaticResource maximizableGroupBoxStyle}" MaximizeElementVisibility="Visible" Background="{Binding Category.HtmlColor}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                            <dxlc:GroupBox.HeaderTemplate>
+                                <DataTemplate>
+                                    <WrapPanel>
+                                        <TextBlock Text="#" />
+                                        <TextBlock Text="{Binding DataContext.ProjectCode, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}"></TextBlock>
+                                    </WrapPanel>
+                                </DataTemplate>
+                            </dxlc:GroupBox.HeaderTemplate>
+                        </dxlc:GroupBox>
+                    </Helper:MyLayoutControl>
+                </DataTemplate>
+            </Helper:MyLayoutControl.Resources>
+            <dxlc:LayoutControl Margin="0" Padding="0">
+                <dxlc:GroupBox Padding="0,0,0,0">
+                    <dxlc:GroupBox.HeaderTemplate>
+                        <DataTemplate>
+                            <WrapPanel>
+                                <TextBlock Text="Under Study : " FontSize="16"></TextBlock>
+                                <TextBlock Text="{Binding DataContext.UnderStudyProjectList.Count , RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" Padding="0,0,0,0" TextAlignment="Right" FontSize="16" />
+                            </WrapPanel>
+                        </DataTemplate>
+                    </dxlc:GroupBox.HeaderTemplate>
+                    <dxe:ListBoxEdit HorizontalContentAlignment="Stretch" Tag="6" DisplayMember="ProjectName" ItemsSource="{Binding UnderStudyProjectList}" ItemTemplate="{StaticResource ProjectListBoxTemplete}">
+                        <dxmvvm:Interaction.Behaviors>
+                            <dxg:ListBoxDragDropManager AllowDrag="True" AllowDrop="True">
+                                <dxg:ListBoxDragDropManager.DragElementTemplate>
+                                    <DataTemplate>
+                                        <dxgext:HintControl>
+                                            <StackPanel>
+                                                <ContentPresenter Name="dragInfo" Content="{Binding}" ContentTemplate="{StaticResource dragInfoTemplate}" />
+                                                <!--<ContentPresenter Name="dropInfo" Content="{Binding}" ContentTemplate="{StaticResource dropInfoTemplate}" />-->
+                                            </StackPanel>
+                                        </dxgext:HintControl>
+                                    </DataTemplate>
+                                </dxg:ListBoxDragDropManager.DragElementTemplate>
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="Drop">
+                                        <Behaviors:InvokeDelegateCommandAction Command="{Binding UpdateProjectStatusCommand }" CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=InvokeParameter}" />
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </dxg:ListBoxDragDropManager>
+                        </dxmvvm:Interaction.Behaviors>
+                    </dxe:ListBoxEdit>
+                </dxlc:GroupBox>
+                <dxlc:GroupBox Padding="0,0,0,0">
+                    <dxlc:GroupBox.HeaderTemplate>
+                        <DataTemplate>
+                            <WrapPanel>
+                                <TextBlock Text="Analysis Ready : " FontSize="16"></TextBlock>
+                                <TextBlock Text="{Binding DataContext.AnalysisReadyProjectList.Count , RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" Padding="0,0,0,0" TextAlignment="Right" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" FontSize="16"></TextBlock>
+                            </WrapPanel>
+                        </DataTemplate>
+                    </dxlc:GroupBox.HeaderTemplate>
+                    <dxe:ListBoxEdit HorizontalContentAlignment="Stretch" Tag="7" AllowLiveDataShaping="True" DisplayMember="ProjectName" ItemsSource="{Binding AnalysisReadyProjectList}" ItemTemplate="{StaticResource ProjectListBoxTemplete}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                        <dxmvvm:Interaction.Behaviors>
+                            <dxg:ListBoxDragDropManager AllowDrag="True" AllowDrop="True">
+                                <!--<dxg:ListBoxDragDropManager.DragElementTemplate>
+                                    <DataTemplate>
+                                        <dxgext:HintControl>
+                                            <StackPanel>
+                                                <ContentPresenter Name="dragInfo" Content="{Binding}" ContentTemplate="{StaticResource dragInfoTemplate}" />
+                                            </StackPanel>
+                                        </dxgext:HintControl>
+                                    </DataTemplate>
+                                </dxg:ListBoxDragDropManager.DragElementTemplate>-->
+                                <!--<i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="Drop">
+                                        <Behaviors:InvokeDelegateCommandAction Command="{Binding UpdateProjectStatusCommand }" CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=InvokeParameter}" />
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>-->
+                            </dxg:ListBoxDragDropManager>
+                        </dxmvvm:Interaction.Behaviors>
+                    </dxe:ListBoxEdit>
+                </dxlc:GroupBox>
+                <!--<dxlc:GroupBox Padding="0,0,0,0">
+                    <dxlc:GroupBox.HeaderTemplate>
+                        <DataTemplate>
+                            <WrapPanel>
+                                <TextBlock Text="Development : " FontSize="16"></TextBlock>
+                                <TextBlock Text="{Binding DataContext.DevelopmentProjectList.Count , RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" Padding="0,0,0,0" TextAlignment="Right" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" FontSize="16"></TextBlock>
+                            </WrapPanel>
+                        </DataTemplate>
+                    </dxlc:GroupBox.HeaderTemplate>
+                    <dxe:ListBoxEdit HorizontalContentAlignment="Stretch" Tag="8" AllowLiveDataShaping="True" DisplayMember="ProjectName" ItemsSource="{Binding DevelopmentProjectList}" ItemTemplate="{StaticResource ProjectListBoxTemplete}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                        <dxmvvm:Interaction.Behaviors>
+                            <dxg:ListBoxDragDropManager AllowDrag="True" AllowDrop="True">
+                                <dxg:ListBoxDragDropManager.DragElementTemplate>
+                                    <DataTemplate>
+                                        <dxgext:HintControl>
+                                            <StackPanel>
+                                                <ContentPresenter Name="dragInfo" Content="{Binding}" ContentTemplate="{StaticResource dragInfoTemplate}" />
+                                            </StackPanel>
+                                        </dxgext:HintControl>
+                                    </DataTemplate>
+                                </dxg:ListBoxDragDropManager.DragElementTemplate>
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="Drop">
+                                        <Behaviors:InvokeDelegateCommandAction Command="{Binding UpdateProjectStatusCommand }" CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=InvokeParameter}" />
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </dxg:ListBoxDragDropManager>
+                        </dxmvvm:Interaction.Behaviors>
+                    </dxe:ListBoxEdit>
+                </dxlc:GroupBox>
+                <dxlc:GroupBox Padding="0,0,0,0">
+                    <dxlc:GroupBox.HeaderTemplate>
+                        <DataTemplate>
+                            <WrapPanel>
+                                <TextBlock Text="Develpoment On Hold : " FontSize="16"></TextBlock>
+                                <TextBlock Text="{Binding DataContext.DevelopmentOnHoldProjectList.Count, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" Padding="0,0,0,0" TextAlignment="Right" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" FontSize="16"></TextBlock>
+                            </WrapPanel>
+                        </DataTemplate>
+                    </dxlc:GroupBox.HeaderTemplate>
+                    <dxe:ListBoxEdit HorizontalContentAlignment="Stretch" Tag="9" AllowLiveDataShaping="True" DisplayMember="ProjectName" ItemsSource="{Binding DevelopmentOnHoldProjectList}" ItemTemplate="{StaticResource ProjectListBoxTemplete}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                        <dxmvvm:Interaction.Behaviors>
+                            <dxg:ListBoxDragDropManager AllowDrag="True" AllowDrop="True">
+                                <dxg:ListBoxDragDropManager.DragElementTemplate>
+                                    <DataTemplate>
+                                        <dxgext:HintControl>
+                                            <StackPanel>
+                                                <ContentPresenter Name="dragInfo" Content="{Binding}" ContentTemplate="{StaticResource dragInfoTemplate}" />
+                                            </StackPanel>
+                                        </dxgext:HintControl>
+                                    </DataTemplate>
+                                </dxg:ListBoxDragDropManager.DragElementTemplate>
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="Drop">
+                                        <Behaviors:InvokeDelegateCommandAction Command="{Binding UpdateProjectStatusCommand }" CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=InvokeParameter}" />
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </dxg:ListBoxDragDropManager>
+                        </dxmvvm:Interaction.Behaviors>
+                    </dxe:ListBoxEdit>
+                </dxlc:GroupBox>
+                <dxlc:GroupBox Padding="0,0,0,0">
+                    <dxlc:GroupBox.HeaderTemplate>
+                        <DataTemplate>
+                            <WrapPanel>
+                                <TextBlock Text="Validation : " FontSize="16"></TextBlock>
+                                <TextBlock Text="{Binding DataContext.validationProjectList.Count , RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" Padding="0,0,0,0" TextAlignment="Right" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" FontSize="16"></TextBlock>
+                            </WrapPanel>
+                        </DataTemplate>
+                    </dxlc:GroupBox.HeaderTemplate>
+                    <dxe:ListBoxEdit HorizontalContentAlignment="Stretch" Tag="10" AllowLiveDataShaping="True" DisplayMember="ProjectName" ItemsSource="{Binding validationProjectList}" ItemTemplate="{StaticResource ProjectListBoxTemplete}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                        <dxmvvm:Interaction.Behaviors>
+                            <dxg:ListBoxDragDropManager AllowDrag="True" AllowDrop="True">
+                                <dxg:ListBoxDragDropManager.DragElementTemplate>
+                                    <DataTemplate>
+                                        <dxgext:HintControl>
+                                            <StackPanel>
+                                                <ContentPresenter Name="dragInfo" Content="{Binding}" ContentTemplate="{StaticResource dragInfoTemplate}" />
+                                            </StackPanel>
+                                        </dxgext:HintControl>
+                                    </DataTemplate>
+                                </dxg:ListBoxDragDropManager.DragElementTemplate>
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="Drop">
+                                        <Behaviors:InvokeDelegateCommandAction Command="{Binding UpdateProjectStatusCommand }" CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=InvokeParameter}" />
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </dxg:ListBoxDragDropManager>
+                        </dxmvvm:Interaction.Behaviors>
+                    </dxe:ListBoxEdit>
+                </dxlc:GroupBox>
+                <dxlc:GroupBox Padding="0,0,0,0">
+                    <dxlc:GroupBox.HeaderTemplate>
+                        <DataTemplate>
+                            <WrapPanel>
+                                <TextBlock Text="Delivery : " FontSize="16"></TextBlock>
+                                <TextBlock Text="{Binding DataContext.DeliveredProjectList.Count , RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" Padding="0,0,0,0" TextAlignment="Right" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" FontSize="16"></TextBlock>
+                            </WrapPanel>
+                        </DataTemplate>
+                    </dxlc:GroupBox.HeaderTemplate>
+                    <dxe:ListBoxEdit HorizontalContentAlignment="Stretch" Tag="11" AllowLiveDataShaping="True" DisplayMember="ProjectName" ItemsSource="{Binding DeliveredProjectList}" ItemTemplate="{StaticResource ProjectListBoxTemplete}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                        <dxmvvm:Interaction.Behaviors>
+                            <dxg:ListBoxDragDropManager AllowDrag="True" AllowDrop="True">
+                                <dxg:ListBoxDragDropManager.DragElementTemplate>
+                                    <DataTemplate>
+                                        <dxgext:HintControl>
+                                            <StackPanel>
+                                                <ContentPresenter Name="dragInfo" Content="{Binding}" ContentTemplate="{StaticResource dragInfoTemplate}" />
+                                            </StackPanel>
+                                        </dxgext:HintControl>
+                                    </DataTemplate>
+                                </dxg:ListBoxDragDropManager.DragElementTemplate>
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="Drop">
+                                        <Behaviors:InvokeDelegateCommandAction Command="{Binding UpdateProjectStatusCommand }" CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=InvokeParameter}" />
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </dxg:ListBoxDragDropManager>
+                        </dxmvvm:Interaction.Behaviors>
+                    </dxe:ListBoxEdit>
+                </dxlc:GroupBox>-->
+            </dxlc:LayoutControl>
+        </Helper:MyLayoutControl>
+    </DockPanel>
+</UserControl>

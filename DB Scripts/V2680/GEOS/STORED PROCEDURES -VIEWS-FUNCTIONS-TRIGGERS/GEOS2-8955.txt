@@ -1,0 +1,415 @@
+drop procedure if exists geos.people_GetContactsByIdPermission_V2680;
+delimiter $$
+CREATE  PROCEDURE `geos`.`people_GetContactsByIdPermission_V2680`(
+    IN _idactiveuser   smallint(5) UNSIGNED,
+    IN _iduser         longtext,
+    IN _idsite         longtext,
+    IN _idpermission   smallint(5) UNSIGNED)
+BEGIN
+       -- [pallavi.kale][08.10.2025][GEOS2-8955]
+       -- call people_GetContactsByIdPermission_V2680(1,1,23,22)
+        -- call people_GetContactsByIdPermission_V2680(1,1,18,22)
+	    -- CALL people_GetContactsByIdPermission_V2680(1, NULL, 18, 22);
+      -- call people_GetContactsByIdPermission_V2680(28,37,18,20)    
+       IF _idpermission = 20  THEN
+ DROP TEMPORARY TABLE IF EXISTS temp;CREATE TEMPORARY TABLE IF NOT EXISTS temp
+    AS
+       (
+          SELECT p.idperson,
+                 trim(p.name) AS firstname,
+                 trim(ifnull(p.surname, '')) AS lastname,
+                 trim(ifnull(p.phone, '')) AS telephone,
+                 trim(ifnull(p.email, '')) AS email,
+                 trim(ifnull(egu.idusergender, p.idpersongender))
+                    AS idpersongender,
+                 p.observations,
+                 pt.idpersontype,
+                 pt.name AS persontypename,
+                 p.createdin,
+                 si.idsite AS idcompany,
+                 c.idcustomer AS idcustomer,
+                 upper(c.name) AS customergroup,
+                 co.idcountry AS idcountry,
+                 co.name AS country,
+                 zo.name AS zone,
+                 replace(si.name, concat('(', co.name, ')'), '')
+                    AS customerplant,
+                 si.address AS siteaddress,
+                 si.city AS sitecity,
+                 si.cif AS sitecif,
+                 si.telephone AS sitetelephone,
+                 si.fax AS sitefax,
+                 si.postcode AS sitepostcode,
+                 si.region AS siteregion,
+                 si.registeredname AS siteregisteredname,
+                 si.website AS sitewebsite,
+                 p.idcompanydepartment,
+                 p.jobtitle,
+                 lv.value,
+                 lv.htmlcolor,
+                 lv.idimage,
+ 
+                 lv.inuse,
+                 p.image,
+                 p.idcontactinfluencelevel,
+                 p.idcontactemdepaffinity,
+                 p.idcontactproductinvolved,
+                 p.idcompetitor,
+                 lvinfluencelevel.value AS influencelevel,
+                 lvinfluencelevel.htmlcolor AS influencelevelhtmlcolor,
+                 lvinfluencelevel.idimage AS influencelevelidimage,
+                 lvinfluencelevel.inuse AS influencelevelinuse,
+                 lvemdepaffinity.value AS emdepaffinity,
+                 lvemdepaffinity.htmlcolor AS emdepaffinityhtmlcolor,
+                 lvemdepaffinity.idimage AS emdepaffinityidimage,
+                 lvemdepaffinity.inuse AS emdepaffinityinuse,
+                 lvproductioninvolved.value AS productinvolved,
+                 lvproductioninvolved.htmlcolor
+                    AS productinvolvedlevelhtmlcolor,
+                 lvproductioninvolved.idimage AS productinvolvedlevelidimage,
+                 lvproductioninvolved.inuse AS productinvolvedinuse,
+                 comp.name AS competitor,
+                 p.idcreator,
+                 trim(ifnull(createdbypeople.name, '')) AS createdbyfirstname,
+                 trim(ifnull(createdbypeople.surname, ''))
+                    AS createdbylastname,
+                 co.iso,
+                  p.ModifiedInPeople,
+                 p.ModifiedByPeople,
+                trim(ifnull(modifiedByPeople.name, '')) AS modifiedByfirstname,
+                trim(ifnull(modifiedByPeople.surname, ''))
+                   AS modifiedBylastname
+            FROM people p
+                 LEFT JOIN emdep_geos.users egu ON p.idperson = egu.iduser
+                 INNER JOIN peopletypes pt ON pt.idpersontype = p.idpersontype
+                 INNER JOIN sites si ON si.idsite = p.idsite
+                 INNER JOIN countries co ON co.idcountry = si.idcountry
+                 INNER JOIN zones zo ON zo.idzone = co.idzone
+                 INNER JOIN customers c ON c.idcustomer = si.idcustomer
+                 LEFT JOIN emdep_geos.lookup_values lv  ON lv.idlookupvalue = p.idcompanydepartment
+                 LEFT JOIN emdep_geos.lookup_values lvinfluencelevel  ON lvinfluencelevel.idlookupvalue =  p.idcontactinfluencelevel
+                 LEFT JOIN emdep_geos.lookup_values lvemdepaffinity  ON lvemdepaffinity.idlookupvalue =  p.idcontactemdepaffinity
+                 LEFT JOIN emdep_geos.lookup_values lvproductioninvolved ON lvproductioninvolved.idlookupvalue =  p.idcontactproductinvolved
+                 LEFT JOIN competitors comp  ON comp.idcompetitor = p.idcompetitor
+                 LEFT JOIN people createdbypeople   ON createdbypeople.idperson = p.idcreator
+                 LEFT JOIN people modifiedByPeople   ON modifiedByPeople.idperson = p.modifiedByPeople
+                 INNER JOIN   site_sales_owners ssw ON ssw.IdSite = si.IdSite
+           WHERE p.isstillactive = TRUE
+                 AND si.idcustomer NOT IN (8, 10)
+                 AND ((SELECT s.IdSiteSalesOwner FROM site_sales_owners s
+                  INNER JOIN sales_users su ON s.IdSalesOwner = su.IdSalesUser
+                  LEFT JOIN people p ON s.IdSalesOwner = p.IdPerson
+              WHERE su.IsEnabled = 1 AND s.IdSite=si.IdSite AND p.IsStillActive = 1 AND FIND_IN_SET(s.IdSalesOwner,  _idactiveuser)
+              group by s.IdSite ) AND (FIND_IN_SET(ssw.IdSalesOwner, _idactiveuser) OR ssw.IdSalesOwner IS NULL))
+          ORDER BY p.name,
+                   p.surname,
+                   c.name,
+                   si.name)         ;
+  ELSEIF _idpermission = 21  THEN
+    DROP TEMPORARY TABLE IF EXISTS temp;CREATE TEMPORARY TABLE IF NOT EXISTS temp
+    AS
+       (
+          SELECT p.idperson,
+                 trim(p.name) AS firstname,
+                 trim(ifnull(p.surname, '')) AS lastname,
+                 trim(ifnull(p.phone, '')) AS telephone,
+                 trim(ifnull(p.email, '')) AS email,
+                 trim(ifnull(egu.idusergender, p.idpersongender))
+                    AS idpersongender,
+                 p.observations,
+                 pt.idpersontype,
+                 pt.name AS persontypename,
+                 p.createdin,
+                 si.idsite AS idcompany,
+                 c.idcustomer AS idcustomer,
+                 upper(c.name) AS customergroup,
+                 co.idcountry AS idcountry,
+                 co.name AS country,
+                 zo.name AS zone,
+                 replace(si.name, concat('(', co.name, ')'), '')
+                    AS customerplant,
+                 si.idsalesresponsible,
+                 si.address AS siteaddress,
+                 si.city AS sitecity,
+                 si.cif AS sitecif,
+                 si.telephone AS sitetelephone,
+                 si.fax AS sitefax,
+                 si.postcode AS sitepostcode,
+                 si.region AS siteregion,
+                 si.registeredname AS siteregisteredname,
+                 si.website AS sitewebsite,
+                 p.idcompanydepartment,
+                 p.jobtitle,
+ 
+                 lv.htmlcolor,
+                 lv.idimage,
+                 lv.value,
+                 lv.inuse,
+                 p.image,
+                 p.idcontactinfluencelevel,
+                 p.idcontactemdepaffinity,
+                 p.idcontactproductinvolved,
+                 p.idcompetitor,
+                 lvinfluencelevel.value AS influencelevel,
+                 lvinfluencelevel.htmlcolor AS influencelevelhtmlcolor,
+                 lvinfluencelevel.idimage AS influencelevelidimage,
+                 lvinfluencelevel.inuse AS influencelevelinuse,
+                 lvemdepaffinity.value AS emdepaffinity,
+                 lvemdepaffinity.htmlcolor AS emdepaffinityhtmlcolor,
+                 lvemdepaffinity.idimage AS emdepaffinityidimage,
+                 lvemdepaffinity.inuse AS emdepaffinityinuse,
+                 lvproductioninvolved.value AS productinvolved,
+                 lvproductioninvolved.htmlcolor
+                    AS productinvolvedlevelhtmlcolor,
+                 lvproductioninvolved.idimage AS productinvolvedlevelidimage,
+                 lvproductioninvolved.inuse AS productinvolvedinuse,
+                 comp.name AS competitor,
+                 p.idcreator,
+                 trim(ifnull(createdbypeople.name, '')) AS createdbyfirstname,
+                 trim(ifnull(createdbypeople.surname, ''))
+                    AS createdbylastname,
+                 co.iso,
+                 p.ModifiedInPeople,
+                 p.ModifiedByPeople,
+                trim(ifnull(modifiedByPeople.name, '')) AS modifiedByfirstname,
+                trim(ifnull(modifiedByPeople.surname, ''))
+                   AS modifiedBylastname
+            FROM people p
+                 LEFT JOIN emdep_geos.users egu ON p.idperson = egu.iduser
+                 INNER JOIN sites si ON si.idsite = p.idsite
+                 INNER JOIN countries co ON co.idcountry = si.idcountry
+                 INNER JOIN zones zo ON zo.idzone = co.idzone
+                 INNER JOIN customers c ON c.idcustomer = si.idcustomer
+                 INNER JOIN peopletypes pt ON pt.idpersontype = p.idpersontype
+                 LEFT JOIN emdep_geos.lookup_values lv   ON lv.idlookupvalue = p.idcompanydepartment
+                 LEFT JOIN emdep_geos.lookup_values lvinfluencelevel  ON lvinfluencelevel.idlookupvalue =   p.idcontactinfluencelevel
+                 LEFT JOIN emdep_geos.lookup_values lvemdepaffinity  ON lvemdepaffinity.idlookupvalue =   p.idcontactemdepaffinity
+                 LEFT JOIN emdep_geos.lookup_values lvproductioninvolved   ON lvproductioninvolved.idlookupvalue =   p.idcontactproductinvolved
+                 LEFT JOIN competitors comp  ON comp.idcompetitor = p.idcompetitor
+                 LEFT JOIN people createdbypeople  ON createdbypeople.idperson = p.idcreator
+                 LEFT JOIN people modifiedByPeople   ON modifiedByPeople.idperson = p.modifiedByPeople    
+                INNER JOIN   site_sales_owners ssw ON ssw.IdSite = si.IdSite
+           WHERE     si.idcustomer NOT IN (8, 10)
+              AND ((SELECT s.IdSiteSalesOwner FROM site_sales_owners s
+                  INNER JOIN sales_users su ON s.IdSalesOwner = su.IdSalesUser
+                  LEFT JOIN people p ON s.IdSalesOwner = p.IdPerson
+              WHERE su.IsEnabled = 1 AND s.IdSite=si.IdSite AND p.IsStillActive = 1 AND FIND_IN_SET(s.IdSalesOwner,  _iduser)
+              group by s.IdSite ) AND (FIND_IN_SET(ssw.IdSalesOwner, _iduser) OR ssw.IdSalesOwner IS NULL))
+              
+                 AND p.isstillactive = TRUE
+          ORDER BY p.name,
+                   p.surname,
+                   c.name,
+                   si.name)         ;
+  ELSEIF _idpermission = 22 THEN
+  DROP TEMPORARY TABLE IF EXISTS temp;CREATE TEMPORARY TABLE IF NOT EXISTS temp
+    AS
+       (
+          SELECT p.idperson,
+                 trim(p.name) AS firstname,
+                 trim(ifnull(p.surname, '')) AS lastname,
+                 trim(ifnull(p.phone, '')) AS telephone,
+                 trim(ifnull(p.email, '')) AS email,
+                 trim(ifnull(egu.idusergender, p.idpersongender))
+                    AS idpersongender,
+                 pt.idpersontype,
+                 pt.name AS persontypename,
+                 p.observations,
+                 p.createdin,
+                 si.idsite AS idcompany,
+                 c.idcustomer AS idcustomer,
+                 upper(c.name) AS customergroup,
+                 co.idcountry AS idcountry,
+                 co.name AS country,
+                 zo.name AS zone,
+                 replace(si.name, concat('(', co.name, ')'), '')
+                    AS customerplant,
+                 si.idsalesresponsible,
+                 si.address AS siteaddress,
+                 si.city AS sitecity,
+                 si.cif AS sitecif,
+                 si.telephone AS sitetelephone,
+                 si.fax AS sitefax,
+                 si.postcode AS sitepostcode,
+                 si.region AS siteregion,
+                 si.registeredname AS siteregisteredname,
+                 si.website AS sitewebsite,
+                 p.idcompanydepartment,
+                 p.jobtitle,
+ 
+                 lv.htmlcolor,
+                 lv.idimage,
+                 lv.value,
+                 lv.inuse,
+                 p.image,
+                 p.idcontactinfluencelevel,
+                 p.idcontactemdepaffinity,
+                 p.idcontactproductinvolved,
+                 p.idcompetitor,
+                 lvinfluencelevel.value AS influencelevel,
+                 lvinfluencelevel.htmlcolor AS influencelevelhtmlcolor,
+                 lvinfluencelevel.idimage AS influencelevelidimage,
+                 lvinfluencelevel.inuse AS influencelevelinuse,
+                 lvemdepaffinity.value AS emdepaffinity,
+                 lvemdepaffinity.htmlcolor AS emdepaffinityhtmlcolor,
+                 lvemdepaffinity.idimage AS emdepaffinityidimage,
+                 lvemdepaffinity.inuse AS emdepaffinityinuse,
+                 lvproductioninvolved.value AS productinvolved,
+                 lvproductioninvolved.htmlcolor
+                    AS productinvolvedlevelhtmlcolor,
+                 lvproductioninvolved.idimage AS productinvolvedlevelidimage,
+                 lvproductioninvolved.inuse AS productinvolvedinuse,
+                 comp.name AS competitor,
+                 p.idcreator,
+                 trim(ifnull(createdbypeople.name, '')) AS createdbyfirstname,
+                 trim(ifnull(createdbypeople.surname, ''))
+                    AS createdbylastname,
+                 co.iso,
+                  p.ModifiedInPeople,
+                p.ModifiedByPeople,
+                trim(ifnull(modifiedByPeople.name, '')) AS modifiedByfirstname,
+                trim(ifnull(modifiedByPeople.surname, ''))
+                   AS modifiedBylastname
+            FROM people p
+                 LEFT JOIN emdep_geos.users egu ON p.idperson = egu.iduser
+                 INNER JOIN sites si ON si.idsite = p.idsite
+                 INNER JOIN countries co ON co.idcountry = si.idcountry
+                 INNER JOIN zones zo ON zo.idzone = co.idzone
+                 INNER JOIN customers c ON c.idcustomer = si.idcustomer
+                 INNER JOIN peopletypes pt ON pt.idpersontype = p.idpersontype
+                 LEFT JOIN emdep_geos.lookup_values lv ON lv.idlookupvalue = p.idcompanydepartment
+                 LEFT JOIN emdep_geos.lookup_values lvinfluencelevel  ON lvinfluencelevel.idlookupvalue =   p.idcontactinfluencelevel
+                 LEFT JOIN emdep_geos.lookup_values lvemdepaffinity ON lvemdepaffinity.idlookupvalue =   p.idcontactemdepaffinity
+                 LEFT JOIN emdep_geos.lookup_values lvproductioninvolved   ON lvproductioninvolved.idlookupvalue =   p.idcontactproductinvolved
+                 LEFT JOIN competitors comp  ON comp.idcompetitor = p.idcompetitor
+                 LEFT JOIN people createdbypeople   ON createdbypeople.idperson = p.idcreator
+                  LEFT JOIN people modifiedByPeople   ON modifiedByPeople.idperson = p.modifiedByPeople
+                  INNER JOIN customersitesbyemdepsite cs
+                 ON cs.idCustomerSite = si.IdSite
+           WHERE si.idcustomer NOT IN (8, 10) AND p.isstillactive = TRUE  AND FIND_IN_SET(cs.IdEmdepSite, _idSite)
+                    
+          GROUP BY p.idperson
+          ORDER BY p.name,
+                   p.surname,
+                   c.name,
+                   si.name);
+ END IF;
+                   
+       SELECT * FROM temp;
+                   
+         SELECT p1.IdPerson,
+              s.IdSiteSalesOwner,
+              s.IdSite,
+              s.IdSalesOwner,
+              s.IsMainSalesOwner,
+              concat(ifnull(p.name, ''), ' ', ifnull(p.surname, ''))
+                 AS salesresponsiblename,
+                 e.idemployee,
+              e.EmployeeCode ,
+              ec.EmployeeContactValue AS Email,
+              jd.IdJobDescription,
+              jd.JobDescriptionCode,
+              jd.JobDescriptionTitle
+         FROM sites si
+              INNER JOIN site_sales_owners s ON si.IdSite = s.IdSite
+              LEFT JOIN people p ON s.IdSalesOwner = p.idperson
+              LEFT JOIN people p1 ON p1.IdSite = si.IdSite
+              LEFT JOIN emdep_geos.employees e on e.iduser=p.idperson
+              INNER JOIN emdep_geos.employee_job_descriptions ejd on ejd.IdEmployee=e.IdEmployee and ejd.IsMainJobDescription = 1 
+              INNER JOIN emdep_geos.job_descriptions jd on ejd.IdJobDescription = jd.IdJobDescription
+              LEFT JOIN emdep_geos.employee_contacts ec on ec.IdEmployee=e.IdEmployee  AND EmployeeContactIdType = 88 
+              WHERE  -- ejd.IsMainJobDescription = 1  AND (ejd.JobDescriptionEndDate IS NULL OR DATE(ejd.JobDescriptionEndDate) >= DATE(NOW())) AND
+				 p1.idperson IN (SELECT idperson FROM temp)
+        group by p1.IdPerson,
+              s.IdSiteSalesOwner;
+ end $$
+delimiter ;
+
+
+
+
+
+
+
+
+drop procedure if exists people_UpdateContact_V2680
+delimiter $$
+CREATE  PROCEDURE `geos`.`people_UpdateContact_V2680`(
+   IN _IdPerson                   smallint(5) UNSIGNED,
+   IN _Name                       varchar(20),
+   IN _Surname                    varchar(50),
+   IN _Email                      varchar(50),
+   IN _IdSite                     smallint(5) UNSIGNED,
+   IN _Phone                      varchar(30),
+   IN _Observations               varchar(100),
+   IN _IdPersonGender             tinyint(3) UNSIGNED,
+   IN _IdCompany                  smallint(5) UNSIGNED,
+   IN _IdCountry                  int(10) UNSIGNED,
+   IN _Address                    varchar(100),
+   IN _Telephone                  varchar(30),
+   IN _CompanyEmail               varchar(50),
+   IN _Region                     varchar(255),
+   IN _City                       varchar(50),
+   IN _PostCode                   varchar(100),
+   IN _ModifiedBy                 smallint(5) UNSIGNED,
+   IN _ModifiedIn                 datetime,
+   IN _IdCompanyDepartment        smallint(3) UNSIGNED,
+   IN _JobTitle                   varchar(100),
+   IN _Image                      Text,
+   IN _IdContactInfluenceLevel    smallint(3) UNSIGNED,
+   IN _IdContactEmdepAffinity     smallint(3) UNSIGNED,
+   IN _IdContactProductInvolved   smallint(3) UNSIGNED,
+   IN _IdCompetitor               smallint(5) UNSIGNED)
+begin
+	/*
+      [Pallavi.Kale][15/10/2025][GEOS2-8955]
+     
+       */
+	
+   UPDATE people
+      SET Name = _Name,
+          Surname = _Surname,
+          Email = _Email,
+          IdSite = _IdSite,
+          Phone = _Phone,
+          Observations = _Observations,
+          IdPersonGender = _IdPersonGender,
+          IdCompanyDepartment = _IdCompanyDepartment,
+          JobTitle = _JobTitle,
+          Image = _Image,
+          IdContactInfluenceLevel = _IdContactInfluenceLevel,
+          IdContactEmdepAffinity = _IdContactEmdepAffinity,
+          IdContactProductInvolved = _IdContactProductInvolved,
+          IdCompetitor = _IdCompetitor,
+          ModifiedByPeople =_ModifiedBy,
+          ModifiedInPeople = _ModifiedIn    
+    WHERE IdPerson = _IdPerson;
+
+end $$
+delimiter ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

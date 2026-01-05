@@ -1,0 +1,112 @@
+﻿<dxwui:WinUIDialogWindow x:Class="Emdep.Geos.Modules.Crm.Views.AddCustomerNameView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                        xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"
+                        xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+                        xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+                        xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+                        xmlns:ViewModels="clr-namespace:Emdep.Geos.Modules.Crm.ViewModels"
+                        xmlns:behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+                        xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+                        xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+                        xmlns:UIConverter ="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+                        xmlns:Validation ="clr-namespace:Emdep.Geos.UI.Validations;assembly=Emdep.Geos.UI.Validations"
+                        Height="200" Width="350"
+                        Title ="{DynamicResource AddCustomerNameViewTitle}"
+                        TitleStyle="{DynamicResource WinUIDialogWindowTitleStyle}"
+                        Style="{DynamicResource WinUIDialogWindowStyle}">
+
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape" Command="{Binding AddCustomerNameViewCancelButtonCommand}"/>
+    </dxwui:WinUIDialogWindow.InputBindings>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="10"/>
+            <RowDefinition Height="100"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="130"/>
+            <ColumnDefinition Width="180"/>
+            <ColumnDefinition Width="20"/>
+        </Grid.ColumnDefinitions>
+
+        <Label Content="{DynamicResource AddCustomerNameViewName}" HorizontalAlignment="Left"
+               VerticalAlignment="Top" Grid.Row="1" Grid.Column="0" Margin="0,5,0,0">
+        </Label>
+
+        <!-- Customer -->
+              <dxe:ComboBoxEdit Grid.Row="1" Grid.Column="1" 
+                                HorizontalAlignment="Left" VerticalAlignment="Top" Width="170" Margin="0,5,0,0"
+                                AllowDefaultButton="False"                               
+                                ItemsSource="{Binding CustomerNameStrList, UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"                            
+                                AutoComplete="False" 
+                                IsTextEditable="True"
+                                ImmediatePopup="True"
+                                Style="{DynamicResource ComboBoxEditStyle}"
+                                EditValue="{Binding CustomerName,ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+            <dxe:ComboBoxEdit.PopupContentTemplate>
+                <ControlTemplate>
+                    <dxg:GridControl Name="PART_GridControl" Height="Auto" ItemsSource="{Binding CustomerGroupNameList, UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" >
+                        <dxg:GridControl.Columns>
+                            <dxg:GridColumn FieldName="CustomerName" Width="160" ReadOnly="True"/>
+                        </dxg:GridControl.Columns>
+                        <dxg:GridControl.View>
+                            <dxg:TableView AutoWidth="True" ShowColumnHeaders="False" ShowIndicator="False" ShowGroupPanel="False"
+                                           ShowSearchPanelMode="Never" ShowHorizontalLines="False" ShowVerticalLines="False" 
+                                           ScrollViewer.HorizontalScrollBarVisibility="Auto" ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly"
+                                           ScrollViewer.VerticalScrollBarVisibility="Visible" SearchPanelHorizontalAlignment="Stretch"/>
+                        </dxg:GridControl.View>
+                    </dxg:GridControl>
+                </ControlTemplate>
+            </dxe:ComboBoxEdit.PopupContentTemplate>
+        </dxe:ComboBoxEdit>
+        <!-- Customer -->
+
+        <!-- Warning Image -->
+        <Border  Margin="0,5,0,0" HorizontalAlignment="Center" Grid.Column="2" Grid.Row="1" Width="18" Height="18" VerticalAlignment="Top"  BorderBrush="Transparent"                 
+			 Visibility="{Binding AlertVisibility, UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
+            <Image  HorizontalAlignment="Left" Source="/Emdep.Geos.Modules.Crm;component/Assets/Images/Warning_32x32.png" >
+                <Image.ToolTip>
+                    <TextBlock HorizontalAlignment="Stretch" Text="{DynamicResource AddCustomerNameViewToolTip}" />
+                </Image.ToolTip>
+            </Image>
+        </Border>
+        <!-- Warning Image -->
+
+        <!--<Image Margin="0,5,0,0" HorizontalAlignment="Left" Grid.Column="2" Grid.Row="1" Width="18" Height="18" VerticalAlignment="Top" 
+               Source="/Emdep.Geos.Modules.Crm;component/Assets/Images/Warning_32x32.png" Visibility="{Binding AlertVisibility, UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
+            <Image.ToolTip>
+                <TextBlock HorizontalAlignment="Stretch" Text="{DynamicResource AddCustomerNameViewToolTip}" />
+            </Image.ToolTip>
+        </Image>-->
+
+        <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" 
+                    HorizontalAlignment="Center" 
+                    Orientation="Horizontal" 
+                    Margin="0,5,0,0" Width="300">
+
+            <Button Content="{DynamicResource AddCustomerViewAccept}"
+        		Command="{Binding AddCustomerNameViewAcceptButtonCommand}"
+        		Height="30"
+        		Width="100"
+        		Margin="0,0,30,0"
+        		VerticalAlignment="Bottom" />
+            <Button Content="{DynamicResource AddCustomerViewCancel}"
+            	Command="{Binding AddCustomerNameViewCancelButtonCommand}" 
+            	Height="30"
+            	Width="100"
+            	Margin="30,0,0,0"
+            	VerticalAlignment="Bottom"  />
+
+        </StackPanel>
+
+    </Grid>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="KeyDown">
+            <behaviors:InvokeDelegateCommandAction Command="{Binding CommandTextInput}" CommandParameter="{Binding Path=InvokeParameter, RelativeSource={RelativeSource Self}}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+</dxwui:WinUIDialogWindow>

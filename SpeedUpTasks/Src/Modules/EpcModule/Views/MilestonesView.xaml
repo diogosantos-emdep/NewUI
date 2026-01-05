@@ -1,0 +1,65 @@
+﻿<UserControl x:Class="Emdep.Geos.Modules.Epc.Views.MilestonesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:viewModel="clr-namespace:Emdep.Geos.Modules.Epc.ViewModels"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+    <UserControl.DataContext>
+        <viewModel:MilestonesViewModel/>
+    </UserControl.DataContext>
+    <dxmvvm:Interaction.Behaviors>
+        <dxwui:WinUIDialogService/>
+    </dxmvvm:Interaction.Behaviors>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <RowDefinition />
+            <RowDefinition Height="40"/>
+        </Grid.RowDefinitions>
+        <!--<Label Style="{StaticResource LabelStyle}" DockPanel.Dock="Top" Margin="10" Padding="0" Grid.Row="0">Milestones</Label>-->
+        <Label Style="{StaticResource LabelStyle}"  Content="Milestones" Margin="0" Padding="5"/>
+        <dxg:GridControl ItemsSource="{Binding Source}" ShowLoadingPanel="false" Name="milestoneGrid" SelectedItems="{Binding Selection}" Grid.Row="1" Margin="0,0,0,-15" EnableSmartColumnsGeneration="True">
+            <dxg:GridControl.View>
+                <dxg:TableView x:Name="dxgMilestone"  NavigationStyle="Row"  AllowPerPixelScrolling="False" 
+                                 AllowGrouping="False" ShowGroupPanel="False" ScrollViewer.VerticalScrollBarVisibility="Hidden" 
+                                 ShowIndicator="False" AutoWidth="True" ShowSearchPanelMode="Never" Margin="0,0,0,0" Padding="0"  />
+            </dxg:GridControl.View>
+            <dxg:GridControl.Columns>
+                <dxg:GridColumn FieldName="WorkingOrder" AllowEditing="False"/>
+                <dxg:GridColumn FieldName="ProjectCode" AllowEditing="False"/>
+                <dxg:GridColumn FieldName="ProjectName" AllowEditing="False"/>
+                <dxg:GridColumn FieldName="ProjectType" AllowEditing="False" IsSmart="True"/>
+                <dxg:GridColumn FieldName="Owner" AllowEditing="False"/>
+                <dxg:GridColumn FieldName="MilestoneName" AllowEditing="False"/>
+                <dxg:GridColumn FieldName="MilestoneDate" AllowEditing="False"/>
+                <dxg:GridColumn FieldName="Attempts" Header="#Attempts" AllowEditing="False"  FixedWidth="True" Width="70" />
+                <dxg:GridColumn FixedWidth="True" Width="50">
+                    <dxg:GridColumn.CellTemplate>
+                        <DataTemplate>
+                            <Border>
+                                <ContentControl>
+                                    <dxmvvm:Interaction.Behaviors>
+                                        <dxmvvm:EventToCommand EventName="MouseDown"
+                                                               PassEventArgsToCommand="True" 
+                                                               Command="{Binding View.DataContext. MilestoneMailButtonClickCommand}" />
+                                    </dxmvvm:Interaction.Behaviors>
+                                    <Image  Style="{DynamicResource SendMailButtonImageStyle}" Width="20" Height="20" HorizontalAlignment="Center" ></Image>
+                                </ContentControl>
+                            </Border>
+                        </DataTemplate>
+                    </dxg:GridColumn.CellTemplate>
+                </dxg:GridColumn>
+            </dxg:GridControl.Columns>
+        </dxg:GridControl>
+        <dxwui:AppBar Grid.Row="3" IsOpen="True" IsSticky="True" Background="Transparent">
+            <dxe:SearchControl SearchText="{Binding ElementName=dxgMilestone, Path=SearchString, Mode=TwoWay}"  Margin="0,0,0,0" MinWidth="150" HorizontalAlignment="Right" />
+        </dxwui:AppBar>
+    </Grid>
+</UserControl>

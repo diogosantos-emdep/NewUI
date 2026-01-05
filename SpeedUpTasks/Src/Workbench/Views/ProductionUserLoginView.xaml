@@ -1,0 +1,96 @@
+﻿<UserControl 
+            x:Class="Workbench.Views.ProductionUserLoginView"
+            xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+            xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+            xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+            xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"
+            xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+            xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+            xmlns:Validation="clr-namespace:Emdep.Geos.UI.Validations;assembly=Emdep.Geos.UI.Validations"
+            xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol" 
+            Padding="0,0,0,0" Margin="0,0,0,0"
+            mc:Ignorable="d"  
+            d:DesignHeight="350" d:DesignWidth="380" 
+            Style="{DynamicResource UserControlBackgroundStyle}">
+
+    <!--<UserControl.Resources>
+        <ResourceDictionary Source="/GeosWorkbench;component/Resources/Language.xaml" />
+    </UserControl.Resources>-->
+
+    <Grid Background="Transparent" Height="450" Width="380" >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="120"/>
+            <RowDefinition Height="70"/>
+            <RowDefinition Height="5"/>
+            <RowDefinition Height="70"/>
+            <RowDefinition Height="5"/>
+            <RowDefinition Height="70"/>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" 
+                    Grid.ColumnSpan="2"
+                    Grid.Column="0"
+                    Orientation="Horizontal" 
+                    VerticalAlignment="Stretch"
+                    HorizontalAlignment="Center" >
+            <Ellipse Style="{DynamicResource EllipseUserLoginImageStyle}" 
+                     StrokeThickness="1"
+                     Height="100" Width="100"
+                     HorizontalAlignment="Center">
+                <!--<Ellipse.Fill>
+                    <ImageBrush ImageSource="/GeosWorkbench;component/Assets/Images/LoginUser.png" Stretch="Fill" />
+                </Ellipse.Fill>-->
+            </Ellipse>
+        </StackPanel>
+        <StackPanel Grid.Row="3"
+                    Grid.ColumnSpan="2"
+                    Grid.Column="0"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Left" >
+            <Label Width="60" Style="{DynamicResource LabelBackgroundImageBrush}" >
+            </Label>
+            
+            <!--Text="{Binding ProductionUserLoginCode,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"-->
+            <dxe:PasswordBoxEdit HorizontalAlignment="Right"
+                                Width="265"
+                                AllowUpdateTwoWayBoundPropertiesOnSynchronization="False"
+                                InvalidValueBehavior="AllowLeaveEditor" 
+                                Style="{DynamicResource PasswordBoxEditProduction}"
+                                HorizontalContentAlignment="Center"
+                                MaxLength="14"
+                                VerticalContentAlignment="Center"
+                                AcceptsReturn="True"
+                                Grid.Row="3" 
+                                FocusManager.FocusedElement="{Binding ElementName=PasswordBoxEdit}" x:Name="PasswordBoxEdit"  >
+                <dxmvvm:Interaction.Triggers>
+                    <!--<dxmvvm:EventToCommand EventName="EditValueChanged" 
+                                           Command="{Binding ProductionUserLoginCodeCommand }" 
+                                           PassEventArgsToCommand="True" >
+                    </dxmvvm:EventToCommand>-->
+                    <dxmvvm:EventToCommand EventName="KeyDown" 
+                                           Command="{Binding ProductionUserLoginCodeCommand }" 
+                                           PassEventArgsToCommand="True" >
+                    </dxmvvm:EventToCommand>
+                </dxmvvm:Interaction.Triggers>
+                <dxe:PasswordBoxEdit.EditValue>
+                    <Binding Path="ProductionUserLoginCode" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                        <Binding.ValidationRules>
+                            <Validation:WorkbenchLoginValidation FieldName="ProductionUserLoginCode" />
+                        </Binding.ValidationRules>
+                    </Binding>
+                </dxe:PasswordBoxEdit.EditValue>
+            </dxe:PasswordBoxEdit>
+        </StackPanel>
+        <Label  Grid.Row="5" 
+                Content="{DynamicResource ProductionUserLoginViewWatingForScan}" 
+                VerticalAlignment="Stretch" 
+                HorizontalAlignment="Center" 
+                Style="{DynamicResource LabelProductionUserLogin}"/>
+        <Label  Grid.Row="1" 
+                Content="{DynamicResource ProductionUserLoginViewOperatorId}"
+                VerticalAlignment="Stretch"
+                HorizontalAlignment="Center"
+                Style="{DynamicResource LabelProductionUserLogin}"   />
+    </Grid>
+
+</UserControl>

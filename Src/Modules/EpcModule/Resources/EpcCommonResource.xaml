@@ -1,0 +1,430 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+                    xmlns:UIConverter="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+                    xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+                    xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"      
+                    xmlns:dxp="http://schemas.devexpress.com/winfx/2008/xaml/printing"
+                    xmlns:dxgt="clr-namespace:DevExpress.Xpf.Grid.Themes;assembly=DevExpress.Xpf.Grid.v19.2"
+                    xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid">
+    
+    <UIConverter:StringToImageConverter x:Key="Converters" />
+    <UIConverter:IntToDoubleConverter x:Key="IntToDoubleConverters" />
+    <UIConverter:FloatToTimeStringConverter x:Key="TimeConverter" />
+    <UIConverter:FileToIconConverter x:Key="FileIconConverter" />
+    <UIConverter:BytesToKilobytesConverter x:Key="BytesToKilobytesConverter" />
+    <!--<UIConverter:FloatToTimeSpanConverter x:Key="TimespanConverter"/>-->
+
+    <dxmvvm:ObjectToObjectConverter x:Key="TaskPriorityToImageConverter">
+        <dxmvvm:MapItem Source="0">
+            <dxmvvm:MapItem.Target>
+                <BitmapImage UriSource="/Emdep.Geos.Modules.Epc;component/Images/Priority/UrgentPriority.png" />
+            </dxmvvm:MapItem.Target>
+        </dxmvvm:MapItem>
+        <dxmvvm:MapItem Source="1">
+            <dxmvvm:MapItem.Target>
+                <BitmapImage UriSource="/Emdep.Geos.Modules.Epc;component/Images/Priority/LowPriority.png" />
+            </dxmvvm:MapItem.Target>
+        </dxmvvm:MapItem>
+        <dxmvvm:MapItem Source="2">
+            <dxmvvm:MapItem.Target>
+                <BitmapImage UriSource="/Emdep.Geos.Modules.Epc;component/Images/Priority/MediumPriority.png" />
+            </dxmvvm:MapItem.Target>
+        </dxmvvm:MapItem>
+        <dxmvvm:MapItem Source="3">
+            <dxmvvm:MapItem.Target>
+                <BitmapImage UriSource="/Emdep.Geos.Modules.Epc;component/Images/Priority/HighPriority.png" />
+            </dxmvvm:MapItem.Target>
+        </dxmvvm:MapItem>
+        <dxmvvm:MapItem Source="4">
+            <dxmvvm:MapItem.Target>
+                <BitmapImage UriSource="/Emdep.Geos.Modules.Epc;component/Images/Priority/UrgentPriority.png" />
+            </dxmvvm:MapItem.Target>
+        </dxmvvm:MapItem>
+    </dxmvvm:ObjectToObjectConverter>
+
+    <ControlTemplate x:Key="TaskPriorityColumnDisplayTemplate">
+        <Image Margin="2,2,2,2" Width="24" Height="24" RenderOptions.BitmapScalingMode="NearestNeighbor" Source="{Binding Path=Data.TaskPriority.IdImage, Converter={StaticResource TaskPriorityToImageConverter}}"></Image>
+    </ControlTemplate>
+
+    <dxmvvm:ObjectToObjectConverter x:Key="TaskStatusToImageConverter">
+        <dxmvvm:MapItem Source="0">
+            <dxmvvm:MapItem.Target>
+                <BitmapImage UriSource="/Emdep.Geos.Modules.Epc;component/Images/TaskStatus/NotStarted.png" />
+            </dxmvvm:MapItem.Target>
+        </dxmvvm:MapItem>
+        <dxmvvm:MapItem Source="1">
+            <dxmvvm:MapItem.Target>
+                <BitmapImage UriSource="/Emdep.Geos.Modules.Epc;component/Images/TaskStatus/NotStarted.png" />
+            </dxmvvm:MapItem.Target>
+        </dxmvvm:MapItem>
+        <dxmvvm:MapItem Source="2">
+            <dxmvvm:MapItem.Target>
+                <BitmapImage UriSource="/Emdep.Geos.Modules.Epc;component/Images/TaskStatus/NeedAssistance.png" />
+            </dxmvvm:MapItem.Target>
+        </dxmvvm:MapItem>
+        <dxmvvm:MapItem Source="3">
+            <dxmvvm:MapItem.Target>
+                <BitmapImage UriSource="/Emdep.Geos.Modules.Epc;component/Images/TaskStatus/InProgress.png" />
+            </dxmvvm:MapItem.Target>
+        </dxmvvm:MapItem>
+        <dxmvvm:MapItem Source="4">
+            <dxmvvm:MapItem.Target>
+                <BitmapImage UriSource="/Emdep.Geos.Modules.Epc;component/Images/TaskStatus/Deferred.png" />
+            </dxmvvm:MapItem.Target>
+        </dxmvvm:MapItem>
+        <dxmvvm:MapItem Source="5">
+            <dxmvvm:MapItem.Target>
+                <BitmapImage UriSource="/Emdep.Geos.Modules.Epc;component/Images/TaskStatus/Completed.png" />
+            </dxmvvm:MapItem.Target>
+        </dxmvvm:MapItem>
+    </dxmvvm:ObjectToObjectConverter>
+      
+    <ControlTemplate x:Key="TaskStatusColumnDisplayTemplate">
+        <StackPanel Orientation="Horizontal">
+            <Image Margin="2,2,2,2" Width="24" Height="24" RenderOptions.BitmapScalingMode="NearestNeighbor" Source="{Binding Path=Data.Status.IdImage, Converter={StaticResource TaskStatusToImageConverter}}"></Image>
+            <TextBlock Height="24" Margin="0,3,0,0" Text="{Binding Data.Status.Value}"></TextBlock>
+        </StackPanel>
+        <!--<Image  Width="24" Height="24" RenderOptions.BitmapScalingMode="NearestNeighbor"  Source="{Binding Path=Data.Status.IdImage, Converter={StaticResource TaskStatusToImageConverter}}"></Image>-->
+    </ControlTemplate>
+
+    <dxmvvm:ObjectToObjectConverter x:Key="ProjectPriorityToImageConverter">
+        <dxmvvm:MapItem Source="0">
+            <dxmvvm:MapItem.Target>
+                <BitmapImage UriSource="/Emdep.Geos.Modules.Epc;component/Images/Priority/UrgentPriority.png" />
+            </dxmvvm:MapItem.Target>
+        </dxmvvm:MapItem>
+        <dxmvvm:MapItem Source="1">
+            <dxmvvm:MapItem.Target>
+                <BitmapImage UriSource="/Emdep.Geos.Modules.Epc;component/Images/Priority/LowPriority.png" />
+            </dxmvvm:MapItem.Target>
+        </dxmvvm:MapItem>
+        <dxmvvm:MapItem Source="2">
+            <dxmvvm:MapItem.Target>
+                <BitmapImage UriSource="/Emdep.Geos.Modules.Epc;component/Images/Priority/MediumPriority.png" />
+            </dxmvvm:MapItem.Target>
+        </dxmvvm:MapItem>
+        <dxmvvm:MapItem Source="3">
+            <dxmvvm:MapItem.Target>
+                <BitmapImage UriSource="/Emdep.Geos.Modules.Epc;component/Images/Priority/HighPriority.png" />
+            </dxmvvm:MapItem.Target>
+        </dxmvvm:MapItem>
+        <dxmvvm:MapItem Source="4">
+            <dxmvvm:MapItem.Target>
+                <BitmapImage UriSource="/Emdep.Geos.Modules.Epc;component/Images/Priority/UrgentPriority.png" />
+            </dxmvvm:MapItem.Target>
+        </dxmvvm:MapItem>
+    </dxmvvm:ObjectToObjectConverter>
+    <ControlTemplate x:Key="ProjectPriorityColumnDisplayTemplate">
+        <Image Margin="2,2,2,2" Width="24" Height="24" RenderOptions.BitmapScalingMode="NearestNeighbor" Source="{Binding Path=Data.ProjectPriority.IdImage, Converter={StaticResource ProjectPriorityToImageConverter}}"></Image>
+    </ControlTemplate>
+
+    <dxmvvm:ObjectToObjectConverter x:Key="ProjectStatusToImageConverter">
+        <dxmvvm:MapItem Source="0">
+            <dxmvvm:MapItem.Target>
+                <BitmapImage UriSource="/Emdep.Geos.Modules.Epc;component/Images/TaskStatus/NotStarted.png" />
+            </dxmvvm:MapItem.Target>
+        </dxmvvm:MapItem>
+        <dxmvvm:MapItem Source="1">
+            <dxmvvm:MapItem.Target>
+                <BitmapImage UriSource="/Emdep.Geos.Modules.Epc;component/Images/TaskStatus/NotStarted.png" />
+            </dxmvvm:MapItem.Target>
+        </dxmvvm:MapItem>
+        <dxmvvm:MapItem Source="2">
+            <dxmvvm:MapItem.Target>
+                <BitmapImage UriSource="/Emdep.Geos.Modules.Epc;component/Images/TaskStatus/NeedAssistance.png" />
+            </dxmvvm:MapItem.Target>
+        </dxmvvm:MapItem>
+        <dxmvvm:MapItem Source="3">
+            <dxmvvm:MapItem.Target>
+                <BitmapImage UriSource="/Emdep.Geos.Modules.Epc;component/Images/TaskStatus/InProgress.png" />
+            </dxmvvm:MapItem.Target>
+        </dxmvvm:MapItem>
+        <dxmvvm:MapItem Source="4">
+            <dxmvvm:MapItem.Target>
+                <BitmapImage UriSource="/Emdep.Geos.Modules.Epc;component/Images/TaskStatus/Deferred.png" />
+            </dxmvvm:MapItem.Target>
+        </dxmvvm:MapItem>
+        <dxmvvm:MapItem Source="5">
+            <dxmvvm:MapItem.Target>
+                <BitmapImage UriSource="/Emdep.Geos.Modules.Epc;component/Images/TaskStatus/Completed.png" />
+            </dxmvvm:MapItem.Target>
+        </dxmvvm:MapItem>
+    </dxmvvm:ObjectToObjectConverter>
+
+    <ControlTemplate x:Key="ProjectStatusColumnDisplayTemplate">
+        <StackPanel Orientation="Horizontal">
+            <Image Width="24" Height="24" RenderOptions.BitmapScalingMode="NearestNeighbor" Source="{Binding Path=Data.Status.IdImage, Converter={StaticResource ProjectStatusToImageConverter}}"></Image>
+        </StackPanel>
+    </ControlTemplate>
+
+    <dxmvvm:ObjectToObjectConverter x:Key="RoadmapPriorityToImageConverter">
+        <dxmvvm:MapItem Source="0">
+            <dxmvvm:MapItem.Target>
+                <BitmapImage UriSource="/Emdep.Geos.Modules.Epc;component/Images/Priority/UrgentPriority.png" />
+            </dxmvvm:MapItem.Target>
+        </dxmvvm:MapItem>
+        <dxmvvm:MapItem Source="1">
+            <dxmvvm:MapItem.Target>
+                <BitmapImage UriSource="/Emdep.Geos.Modules.Epc;component/Images/Priority/LowPriority.png" />
+            </dxmvvm:MapItem.Target>
+        </dxmvvm:MapItem>
+        <dxmvvm:MapItem Source="2">
+            <dxmvvm:MapItem.Target>
+                <BitmapImage UriSource="/Emdep.Geos.Modules.Epc;component/Images/Priority/MediumPriority.png" />
+            </dxmvvm:MapItem.Target>
+        </dxmvvm:MapItem>
+        <dxmvvm:MapItem Source="3">
+            <dxmvvm:MapItem.Target>
+                <BitmapImage UriSource="/Emdep.Geos.Modules.Epc;component/Images/Priority/HighPriority.png" />
+            </dxmvvm:MapItem.Target>
+        </dxmvvm:MapItem>
+        <dxmvvm:MapItem Source="4">
+            <dxmvvm:MapItem.Target>
+                <BitmapImage UriSource="/Emdep.Geos.Modules.Epc;component/Images/Priority/UrgentPriority.png" />
+            </dxmvvm:MapItem.Target>
+        </dxmvvm:MapItem>
+    </dxmvvm:ObjectToObjectConverter>
+    <ControlTemplate x:Key="RoadmapPriorityColumnDisplayTemplate">
+        <Image Margin="2,2,2,2" Width="24" Height="24" RenderOptions.BitmapScalingMode="NearestNeighbor" Source="{Binding Path=Data.RoadmapPriority.IdImage, Converter={StaticResource RoadmapPriorityToImageConverter}}"></Image>
+    </ControlTemplate>
+
+    <dxmvvm:ObjectToObjectConverter x:Key="RoadmapStatusToImageConverter">
+        <dxmvvm:MapItem Source="0">
+            <dxmvvm:MapItem.Target>
+                <BitmapImage UriSource="/Emdep.Geos.Modules.Epc;component/Images/Common/RoadmapStatus/pending.png" />
+            </dxmvvm:MapItem.Target>
+        </dxmvvm:MapItem>
+        <dxmvvm:MapItem Source="1">
+            <dxmvvm:MapItem.Target>
+                <BitmapImage UriSource="/Emdep.Geos.Modules.Epc;component/Images/Common/RoadmapStatus/RoadMapAccept.png" />
+            </dxmvvm:MapItem.Target>
+        </dxmvvm:MapItem>
+        <dxmvvm:MapItem Source="2">
+            <dxmvvm:MapItem.Target>
+                <BitmapImage UriSource="/Emdep.Geos.Modules.Epc;component/Images/Common/RoadmapStatus/RoadMapReject.png" />
+            </dxmvvm:MapItem.Target>
+        </dxmvvm:MapItem>
+        <dxmvvm:MapItem Source="3">
+            <dxmvvm:MapItem.Target>
+                <BitmapImage UriSource="/Emdep.Geos.Modules.Epc;component/Images/Common/RoadmapStatus/pending.png" />
+            </dxmvvm:MapItem.Target>
+        </dxmvvm:MapItem>
+    </dxmvvm:ObjectToObjectConverter>
+
+    <dxmvvm:ObjectToObjectConverter x:Key="TaskCategoryToImageConverter">
+        <dxmvvm:MapItem Source="1">
+            <dxmvvm:MapItem.Target>
+                <BitmapImage UriSource="/Emdep.Geos.Modules.Epc;component/Images/Common/RoadmapTypes/FeatureViolet.png" />
+            </dxmvvm:MapItem.Target>
+        </dxmvvm:MapItem>
+        <dxmvvm:MapItem Source="2">
+            <dxmvvm:MapItem.Target>
+                <BitmapImage UriSource="/Emdep.Geos.Modules.Epc;component/Images/Common/RoadmapTypes/Bug.png" />
+            </dxmvvm:MapItem.Target>
+        </dxmvvm:MapItem>
+    </dxmvvm:ObjectToObjectConverter>
+    
+    <ControlTemplate x:Key="RoadmapStatusColumnDisplayTemplate">
+        <Image Margin="2,2,2,2" Width="16" Height="16" RenderOptions.BitmapScalingMode="NearestNeighbor" Source="{Binding Path=Data.RoadmapStatus.IdImage, Converter={StaticResource RoadmapStatusToImageConverter}}"></Image>
+    </ControlTemplate> 
+
+    <dxmvvm:ObjectToObjectConverter x:Key="BlockedToImageConverter">
+        <dxmvvm:MapItem Source="True">
+            <dxmvvm:MapItem.Target>
+                <BitmapImage UriSource="/Emdep.Geos.Modules.Epc;component/Images/Menu/PhoneBlocked.png" />
+            </dxmvvm:MapItem.Target>
+        </dxmvvm:MapItem>
+    </dxmvvm:ObjectToObjectConverter>
+
+    <dxmvvm:ObjectToObjectConverter x:Key="WatchedImageConverter">
+        <dxmvvm:MapItem Source="True">
+            <dxmvvm:MapItem.Target>
+                <BitmapImage UriSource="/Emdep.Geos.Modules.Epc;component/Images/Menu/cEye.png" />
+            </dxmvvm:MapItem.Target>
+        </dxmvvm:MapItem>
+    </dxmvvm:ObjectToObjectConverter>
+    <!--<ControlTemplate x:Key="BlockedColumnDisplayTemplate">
+        <Image  Width="16" Height="16" RenderOptions.BitmapScalingMode="NearestNeighbor"  Source="{Binding Path=Data.IsBlock, Converter={StaticResource BlockedToImageConverter}}" ToolTip="Task Blocked"></Image>
+    </ControlTemplate>-->
+
+    <ControlTemplate x:Key="WatchedColumnDisplayTemplate">
+        <Image Width="16" Height="16" RenderOptions.BitmapScalingMode="NearestNeighbor" Source="{Binding Path=Data.IsWatched, Converter={StaticResource WatchedImageConverter}}"></Image>
+    </ControlTemplate>
+
+
+
+    <Style x:Key="TaskCategoryComboBoxEditStyle" TargetType="dxe:ComboBoxEdit">
+        <Setter Property="EditNonEditableTemplate">
+            <Setter.Value>
+                <ControlTemplate>
+                    <StackPanel HorizontalAlignment="Left" VerticalAlignment="Center" Orientation="Horizontal">
+                        <!--<Image Width="24" Height="24" Source="{Binding SelectedItem.IdImage, Converter={StaticResource TaskCategoryToImageConverter}}"  Margin="2,1,2,1"/>-->
+                        <TextBlock Text="{Binding SelectedItem.Value}" Margin="2,1,2,1" VerticalAlignment="Center" />
+                    </StackPanel>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="ItemTemplate">
+            <Setter.Value>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <!--<Image  Width="24" Height="24"  Source="{Binding IdImage, Converter={StaticResource TaskCategoryToImageConverter}}"  Margin="2,1,2,1"/>-->
+                        <TextBlock Text="{Binding Value}" Margin="2,1,2,1" VerticalAlignment="Center" />
+                    </StackPanel>
+                </DataTemplate>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="IsTextEditable" Value="False" />
+    </Style>
+
+
+    <Style x:Key="ProjectPriorityComboBoxEditStyle" TargetType="dxe:ComboBoxEdit">
+        <Setter Property="EditNonEditableTemplate">
+            <Setter.Value>
+                <ControlTemplate>
+                    <StackPanel HorizontalAlignment="Left" VerticalAlignment="Center" Orientation="Horizontal">
+                        <Image Width="24" Height="24" Source="{Binding SelectedItem.IdImage, Converter={StaticResource ProjectPriorityToImageConverter}}" Margin="2,1,2,1" />
+                        <TextBlock Text="{Binding SelectedItem.Value}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="ItemTemplate">
+            <Setter.Value>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <Image Width="24" Height="24" Source="{Binding IdImage, Converter={StaticResource ProjectPriorityToImageConverter}}" Margin="2,1,2,1" />
+                        <TextBlock Text="{Binding Value}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </DataTemplate>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="IsTextEditable" Value="False" />
+    </Style>
+
+    <Style x:Key="ProjectAnalysisPriorityComboBoxEditStyle" TargetType="dxe:ComboBoxEdit">
+        <Setter Property="EditNonEditableTemplate">
+            <Setter.Value>
+                <ControlTemplate>
+                    <StackPanel HorizontalAlignment="Left" VerticalAlignment="Center" Orientation="Horizontal">
+                        <Image Width="20" Height="20" Source="{Binding SelectedItem.IdImage, Converter={StaticResource ProjectPriorityToImageConverter}}" Margin="2,1,2,1" />
+                        <TextBlock Text="{Binding SelectedItem.Value}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="ItemTemplate">
+            <Setter.Value>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <Image Width="20" Height="20" Source="{Binding IdImage, Converter={StaticResource ProjectPriorityToImageConverter}}" Margin="2,1,2,1" />
+                        <TextBlock Text="{Binding Value}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </DataTemplate>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="IsTextEditable" Value="False" />
+    </Style>
+
+    <Style x:Key="TaskPriorityComboBoxEditStyle" TargetType="dxe:ComboBoxEdit">
+        <Setter Property="EditNonEditableTemplate">
+            <Setter.Value>
+                <ControlTemplate>
+                    <StackPanel HorizontalAlignment="Left" VerticalAlignment="Center" Orientation="Horizontal">
+                        <Image Width="24" Height="24" Source="{Binding SelectedItem.IdImage, Converter={StaticResource TaskPriorityToImageConverter}}" Margin="2,1,2,1" />
+                        <TextBlock Text="{Binding SelectedItem.Value}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="ItemTemplate">
+            <Setter.Value>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <Image Width="24" Height="24" Source="{Binding IdImage, Converter={StaticResource TaskPriorityToImageConverter}}" Margin="2,1,2,1" />
+                        <TextBlock Text="{Binding Value}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </DataTemplate>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="IsTextEditable" Value="False" />
+    </Style>
+
+
+    <Style x:Key="ImageColumnPrintingStyle" 
+           TargetType="{x:Type dxe:TextEdit}"
+           BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+        <Setter Property="dxp:ExportSettings.TargetType" Value="Image" />
+        <Setter Property="DisplayTemplate">
+            <Setter.Value>
+                <ControlTemplate>
+                    <!--<Image Width="16" Height="16" Source="{Binding Path=RowData.Row.IdImage, Converter={StaticResource TaskPriorityToImageConverter}}"/>-->
+                    <Image Margin="2,2,2,2" Width="16" Height="16" RenderOptions.BitmapScalingMode="NearestNeighbor" Source="{Binding Path=Data.TaskPriority.IdImage, Converter={StaticResource TaskPriorityToImageConverter}}"></Image>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+
+    <!--<dxmvvm:ObjectToObjectConverter x:Key="TaskAssistanceImageConverter">
+        <dxmvvm:MapItem Source="1">
+            <dxmvvm:MapItem.Target>
+                <BitmapImage UriSource="/Emdep.Geos.Modules.Epc;component/Images/Menu/rNeedAssistance.png"/>
+            </dxmvvm:MapItem.Target>
+        </dxmvvm:MapItem>
+    </dxmvvm:ObjectToObjectConverter>
+    
+    <ControlTemplate x:Key="TaskAssistanceColumnDisplayTemplate">
+        <Image Margin="2,2,2,2"  Width="24" Height="24" RenderOptions.BitmapScalingMode="NearestNeighbor"  Source="{Binding Path=RowData.Row.IdImage, Converter={StaticResource TaskAssistanceImageConverter}}"></Image>
+    </ControlTemplate>-->
+
+
+    <dxmvvm:ObjectToObjectConverter x:Key="WbsResourcesToImageConverter">
+        <dxmvvm:MapItem Source="1">
+            <dxmvvm:MapItem.Target>
+                <BitmapImage UriSource="/Emdep.Geos.Modules.Epc;component/Images/WBSResources/Management.png" />
+            </dxmvvm:MapItem.Target>
+        </dxmvvm:MapItem>
+        <dxmvvm:MapItem Source="2">
+            <dxmvvm:MapItem.Target>
+                <BitmapImage UriSource="/Emdep.Geos.Modules.Epc;component/Images/WBSResources/Analysis.png" />
+            </dxmvvm:MapItem.Target>
+        </dxmvvm:MapItem>
+        <dxmvvm:MapItem Source="3">
+            <dxmvvm:MapItem.Target>
+                <BitmapImage UriSource="/Emdep.Geos.Modules.Epc;component/Images/WBSResources/SwEngineer.png" />
+            </dxmvvm:MapItem.Target>
+        </dxmvvm:MapItem>
+        <dxmvvm:MapItem Source="4">
+            <dxmvvm:MapItem.Target>
+                <BitmapImage UriSource="/Emdep.Geos.Modules.Epc;component/Images/WBSResources/HwEngineer.png" />
+            </dxmvvm:MapItem.Target>
+        </dxmvvm:MapItem>
+        <dxmvvm:MapItem Source="5">
+            <dxmvvm:MapItem.Target>
+                <BitmapImage UriSource="/Emdep.Geos.Modules.Epc;component/Images/WBSResources/SupportEngineer.png" />
+            </dxmvvm:MapItem.Target>
+        </dxmvvm:MapItem>
+        <dxmvvm:MapItem Source="6">
+            <dxmvvm:MapItem.Target>
+                <BitmapImage UriSource="/Emdep.Geos.Modules.Epc;component/Images/WBSResources/ITEngineer.png" />
+            </dxmvvm:MapItem.Target>
+        </dxmvvm:MapItem>
+        <dxmvvm:MapItem Source="7">
+            <dxmvvm:MapItem.Target>
+                <BitmapImage UriSource="/Emdep.Geos.Modules.Epc;component/Images/WBSResources/ITTechnician.png" />
+            </dxmvvm:MapItem.Target>
+        </dxmvvm:MapItem>
+        <dxmvvm:MapItem Source="8">
+            <dxmvvm:MapItem.Target>
+                <BitmapImage UriSource="/Emdep.Geos.Modules.Epc;component/Images/WBSResources/IndiaEngineer.png" />
+            </dxmvvm:MapItem.Target>
+        </dxmvvm:MapItem>
+    </dxmvvm:ObjectToObjectConverter>
+
+    <ControlTemplate x:Key="WbsResourcesColumnDisplayTemplate">
+        <Image Margin="2,2,2,2" Width="24" Height="24" RenderOptions.BitmapScalingMode="NearestNeighbor" Source="{Binding Path=Data.WbsResourcesType.IdImage, Converter={StaticResource WbsResourcesToImageConverter}}"></Image>
+    </ControlTemplate>
+
+</ResourceDictionary>

@@ -1,0 +1,177 @@
+﻿<dxwui:WinUIDialogWindow x:Class="Emdep.Geos.Modules.Crm.Views.AddMatrixView"
+                         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                         xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                         xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+                         xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"
+                         xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+                         xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+                         xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+                         xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+                         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+                         xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+                         xmlns:UIConverter ="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+                         xmlns:Validation ="clr-namespace:Emdep.Geos.UI.Validations;assembly=Emdep.Geos.UI.Validations"
+                         xmlns:behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+                         mc:Ignorable="d" 
+                         d:DesignHeight="500" Width="800"
+                         Title="{Binding WindowTitle,UpdateSourceTrigger=PropertyChanged}"
+                         TitleStyle="{DynamicResource WinUIDialogWindowTitleStyleWithLeftMargin}"                         
+                         Style="{DynamicResource WinUIDialogWindowStyle}">
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape" Command="{Binding AddMatrixCancelButtonCommand}"/>
+    </dxwui:WinUIDialogWindow.InputBindings>
+    <dxwui:WinUIDialogWindow.Resources>
+    </dxwui:WinUIDialogWindow.Resources>
+    <Grid Margin="0" ShowGridLines="False">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="40"/>
+        </Grid.RowDefinitions>
+        <Grid ShowGridLines="False" DataContext="{Binding Contact,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow},Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+            <ScrollViewer ScrollViewer.VerticalScrollBarVisibility="Auto">
+                <dxlc:LayoutControl Orientation="Vertical" Background="Transparent" Margin="0" 
+                                    Width="600">
+                    <dxlc:LayoutGroup View="Group" Header="{DynamicResource AddMatrixInformation}" Orientation="Vertical" 
+                                      Height="300" >
+                        <dxlc:LayoutControl Orientation="Vertical">
+                            <dxlc:LayoutGroup Orientation="Horizontal">
+                                <dxlc:LayoutItem Label="{DynamicResource AddMatrixLabelName}">
+                                    <dxe:TextEdit  Width="Auto" MaxLength="255"
+                                                   Text="{Binding DataContext.Name,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow},Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+                                        <dxe:TextEdit.EditValue>
+                                            <Binding Path="DataContext.Name" 
+                                                     RelativeSource="{RelativeSource AncestorType=dxwui:WinUIDialogWindow}" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                                                <!--<Binding.ValidationRules>
+                                                    <Validation:UserValidation FieldName="Name" 
+                                                                               ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True"/>
+                                                </Binding.ValidationRules>-->
+                                            </Binding>
+                                        </dxe:TextEdit.EditValue>
+                                    </dxe:TextEdit>
+                                </dxlc:LayoutItem>
+                            </dxlc:LayoutGroup>
+                            <dxlc:LayoutGroup Orientation="Horizontal">
+                                <dxlc:LayoutItem Label="{DynamicResource AddMatrixLabelDescription}">
+                                    <dxe:TextEdit  Width="Auto" Height="100" MaxLength="21000"
+                                                   HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                                   VerticalScrollBarVisibility="Visible"
+                                                   VerticalContentAlignment="Top"
+                                                   HorizontalContentAlignment="Stretch"                                             
+                                                   AcceptsReturn="True" TextWrapping="Wrap"
+                                                   Text="{Binding DataContext.Description,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow},Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+                                        <dxe:TextEdit.EditValue>
+                                            <Binding Path="DataContext.Description" 
+                                                     RelativeSource="{RelativeSource AncestorType=dxwui:WinUIDialogWindow}" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                                                <!--<Binding.ValidationRules>
+                                                    <Validation:UserValidation FieldName="Description" 
+                                                                               ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True"/>
+                                                </Binding.ValidationRules>-->
+                                            </Binding>
+                                        </dxe:TextEdit.EditValue>
+                                    </dxe:TextEdit>
+                                </dxlc:LayoutItem>
+                            </dxlc:LayoutGroup>
+                            <dxlc:LayoutGroup Orientation="Horizontal">
+                                <dxlc:LayoutItem Label="{DynamicResource AddMatrixLabelRegion}">
+                                    <dxe:ComboBoxEdit HorizontalAlignment="Stretch" VerticalAlignment="Stretch" DisplayMember="Value" 
+                                                      IsSynchronizedWithCurrentItem="True"  ValueMember="IdLookupValue"
+                                                      ItemsSource="{Binding DataContext.RegionLookupValuesCollection,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow},Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                                      SelectedItem="{Binding Path=EditValue, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                                      SelectedIndex="{Binding DataContext.SelectedIndexRegionLookupValue, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow} ,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,ValidatesOnDataErrors=True}"
+                                                      IsTextEditable="False" ValidateOnTextInput="True" AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True">
+                                        <dxe:ComboBoxEdit.ItemContainerStyle>
+                                            <Style TargetType="dxe:ComboBoxEditItem">
+                                                <Setter Property="IsEnabled" Value="{Binding InUse}" />
+                                            </Style>
+                                        </dxe:ComboBoxEdit.ItemContainerStyle>
+                                    </dxe:ComboBoxEdit>
+                                </dxlc:LayoutItem>
+                            </dxlc:LayoutGroup>
+
+                            <dxlc:LayoutGroup Orientation="Horizontal">
+                                <dxlc:LayoutItem Label="{DynamicResource AddMatrixLabelGroup}">
+                                    <dxe:ComboBoxEdit HorizontalAlignment="Stretch" VerticalAlignment="Stretch" DisplayMember="CustomerName" 
+                                                      IsSynchronizedWithCurrentItem="True"  ValueMember="IdCustomer"
+                                                      ItemsSource="{Binding DataContext.CustomersCollection,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow},Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                                      SelectedItem="{Binding Path=EditValue, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                                      SelectedIndex="{Binding DataContext.SelectedIndexCustomer, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow} ,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,ValidatesOnDataErrors=True}"
+                                                      IsTextEditable="False" ValidateOnTextInput="True" AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True">
+                                    </dxe:ComboBoxEdit>
+                                </dxlc:LayoutItem>
+                            </dxlc:LayoutGroup>
+                            <dxlc:LayoutGroup Orientation="Horizontal">
+                                <dxlc:LayoutItem Label="{DynamicResource AddMatrixLabelCategory1}">
+                                    <dxe:ComboBoxEdit HorizontalAlignment="Stretch" VerticalAlignment="Stretch" DisplayMember="Name" 
+                                                      IsSynchronizedWithCurrentItem="True"  ValueMember="IdProductCategory"
+                                                      ItemsSource="{Binding DataContext.ProductCategoriesCollection,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow},Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                                      SelectedItem="{Binding Path=EditValue, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                                      SelectedIndex="{Binding DataContext.SelectedIndexProductCategory, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow} ,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,ValidatesOnDataErrors=True}"
+                                                      IsTextEditable="False" ValidateOnTextInput="True" AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True">
+                                        <dxe:ComboBoxEdit.ItemContainerStyle>
+                                            <Style TargetType="dxe:ComboBoxEditItem">
+                                                <Setter Property="IsEnabled" Value="{Binding InUse}" />
+                                            </Style>
+                                        </dxe:ComboBoxEdit.ItemContainerStyle>
+                                    </dxe:ComboBoxEdit>
+                                </dxlc:LayoutItem>
+                            </dxlc:LayoutGroup>
+                            <dxlc:LayoutGroup Orientation="Horizontal">
+                                <dxlc:LayoutItem Label="{DynamicResource AddMatrixLabelURL}">
+                                    <dxe:TextEdit  Width="Auto" 
+                                                   Text="{Binding DataContext.Url,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow},Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+                                        <dxe:TextEdit.EditValue>
+                                            <Binding Path="DataContext.Url" 
+                                                     RelativeSource="{RelativeSource AncestorType=dxwui:WinUIDialogWindow}" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                                                <!--<Binding.ValidationRules>
+                                                    <Validation:UserValidation FieldName="Url" 
+                                                                               ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True"/>
+                                                </Binding.ValidationRules>-->
+                                            </Binding>
+                                        </dxe:TextEdit.EditValue>
+                                    </dxe:TextEdit>
+                                </dxlc:LayoutItem>
+                            </dxlc:LayoutGroup>
+                            <dxlc:LayoutGroup Orientation="Horizontal">
+                                <dxlc:LayoutItem Label="{DynamicResource AddMatrixLabelInUse}">
+                                    <dxe:ToggleSwitch x:Name="chkInUse" 
+                                                      HorizontalAlignment="Left" VerticalAlignment="Center" ContentPlacement="Inside"
+                                                      CheckedStateContent="Yes" UncheckedStateContent="No" 
+                                                      ToggleSwitchWidth="60" ToggleSwitchHeight="22" 
+                                                      IsThreeState="False"      
+                                                      IsChecked="{Binding DataContext.InUse,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow},Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                                                      IsEnabled="True"  
+                                                      IsReadOnly="False"  >
+                                    </dxe:ToggleSwitch>
+                                </dxlc:LayoutItem>
+                            </dxlc:LayoutGroup>
+                        </dxlc:LayoutControl>
+                    </dxlc:LayoutGroup>
+                </dxlc:LayoutControl>
+            </ScrollViewer>
+        </Grid>
+        <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                    HorizontalAlignment="Center" 
+                    Orientation="Horizontal"
+                    Margin="20,5,0,0"
+                    Width="290">
+
+            <Button Content="{DynamicResource AddContactViewAccept}"
+                    Command="{Binding AddMatrixAcceptButtonCommand}"
+                    Height="30"
+                    Width="100"
+                    Margin="0,0,30,0"
+                    VerticalAlignment="Bottom" />
+
+            <Button Content="{DynamicResource AddContactViewCancel}"
+                    Command="{Binding AddMatrixCancelButtonCommand}" 
+                    Height="30"
+                    Width="100"
+                    Margin="30,0,0,0"
+                    VerticalAlignment="Bottom"  />
+        </StackPanel>
+    </Grid>
+    <i:Interaction.Triggers>
+    </i:Interaction.Triggers>
+</dxwui:WinUIDialogWindow>

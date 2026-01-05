@@ -1,0 +1,209 @@
+﻿<UserControl x:Class="Emdep.Geos.Modules.Hrm.Views.EmployeeConfigurationView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"            
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+             xmlns:Converters="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+             xmlns:dxwuin="http://schemas.devexpress.com/winfx/2008/xaml/windowsui/navigation"
+             xmlns:dxnav="http://schemas.devexpress.com/winfx/2008/xaml/navigation" 
+             xmlns:dxp="http://schemas.devexpress.com/winfx/2008/xaml/printing" 
+             xmlns:dxdb="http://schemas.devexpress.com/winfx/2008/xaml/demobase"
+             xmlns:sysglb="clr-namespace:System.Globalization;assembly=mscorlib"
+             xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+             xmlns:HrmApplication="clr-namespace:Emdep.Geos.Modules.Hrm"     
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.Hrm.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+
+  
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"  />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions >
+            <ColumnDefinition Width="600"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+           
+        </Grid.ColumnDefinitions>
+
+        <Label Content="{DynamicResource EntityConfiguration}" Grid.Row="0" Grid.Column="0" Style="{StaticResource LabelTitleStyle}" HorizontalAlignment="Left" />
+        <Grid Grid.Column=" 1" Grid.Row="0" HorizontalAlignment="Right" >
+            <Grid.RowDefinitions>
+                <RowDefinition Height="60"/>
+               
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions >
+                <ColumnDefinition Width="44"></ColumnDefinition>
+                <ColumnDefinition Width="44"></ColumnDefinition>
+                <ColumnDefinition Width="44"></ColumnDefinition>
+                
+            </Grid.ColumnDefinitions>
+            <!--Refresh Button-->
+            <Button Visibility="Visible" Grid.Row="0" Grid.Column="0" Height="40" Width="40" HorizontalAlignment="Right" 
+                                Command="{Binding RefreshButtonCommand}"
+                                CommandParameter="{Binding ElementName=CompanyTableView}" Margin="0 0 0 0">
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource ButtonRefresh}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Image Style="{DynamicResource RefreshButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+
+            <!--Print Button-->
+            <Button Visibility="Visible" Grid.Row="0" Grid.Column="1" Height="40" Width="40" HorizontalAlignment="Right" 
+                                Command="{Binding PrintButtonCommand}"
+                    CommandParameter="{Binding ElementName=CompanyTableView}" Margin="0 0 0 0">
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource ButtonPrint}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Image Style="{DynamicResource PrinterButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+
+            <!--Export Button-->
+            <Button Visibility="Visible" Grid.Row="0" Grid.Column="2" Height="40" Width="40" HorizontalAlignment="Right" 
+                                Command="{Binding ExportButtonCommand}"
+                    CommandParameter="{Binding ElementName=CompanyTableView}" Margin="0 0 0 0">
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource ButtonExportToExcel}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Image Style="{DynamicResource ExcelExportButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+
+        </Grid>
+        <dxg:GridControl x:Name="CompanyGridView" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" 
+                        ItemsSource="{Binding Path=CompanyList,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" SelectionMode="Row"      
+                        ImplyNullLikeEmptyStringWhenFiltering="True" SelectedItem="{Binding Path=SelectedCompany,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+
+            <dxg:GridColumn Header="{DynamicResource CompanyAbbreviation}"   FieldName="Alias" ReadOnly="True" Width=" 100" FilterPopupMode="CheckedList" />
+            <dxg:GridColumn Header="{DynamicResource CompanyName}" FieldName="Name"  ReadOnly="True" Width="120" FilterPopupMode="CheckedList" />
+            <dxg:GridColumn Header="{DynamicResource RegisteredName}" FieldName="RegisteredName"  ReadOnly="True" Width="150" FilterPopupMode="CheckedList" />
+            <dxg:GridColumn Header="{DynamicResource CompanyAddress}" FieldName="Address" ReadOnly="True" Width=" 300" FilterPopupMode="CheckedList" />
+            <dxg:GridColumn Header="{DynamicResource CompanyCity}"   FieldName="City" ReadOnly="True" Width=" 150" FilterPopupMode="CheckedList" />
+            <dxg:GridColumn Header="{DynamicResource CompanyState}" FieldName="Region" ReadOnly="True" Width=" 150" FilterPopupMode="CheckedList"/>
+            <dxg:GridColumn Header="{DynamicResource CompanyZipCode}" FieldName="ZipCode" ReadOnly="True" Width=" 150" FilterPopupMode="CheckedList" />
+            <dxg:GridColumn Header="{DynamicResource CountryDescription}" FieldName="Country.Name"  ReadOnly="True" Width=" 140" FilterPopupMode="CheckedList" />
+            <dxg:GridColumn Header="{DynamicResource CompanyPhone}" FieldName="Telephone"  ReadOnly="True" Width="150" FilterPopupMode="CheckedList" />
+            <dxg:GridColumn Header="{DynamicResource CompanyFax}"  FieldName="Fax" ReadOnly="True" Width="120" FilterPopupMode="CheckedList" />
+            <dxg:GridColumn Header="{DynamicResource CompanyEmail}"  FieldName="Email" ReadOnly="True"  Width=" 140" FilterPopupMode="CheckedList" >
+                <dxg:GridColumn.CellTemplate>
+                    <DataTemplate>
+                        <TextBlock  Margin="5,0,0,0" VerticalAlignment="Center">
+                                    <Hyperlink TargetName="_blank" 
+                                               Command="{Binding View.DataContext.HyperlinkForEmail}" 
+                                               CommandParameter="{Binding Data.Email}"
+                                               Style="{DynamicResource hyperlinkGridStyle}">
+                                        <InlineUIContainer>
+                                            <TextBlock Text="{Binding Data.Email}" Style="{DynamicResource HyperlinkTextBlock}" TextDecorations="Underline"/>
+                                        </InlineUIContainer>
+                                    </Hyperlink>
+                                </TextBlock>
+                    </DataTemplate>
+                </dxg:GridColumn.CellTemplate>
+            </dxg:GridColumn>
+            <dxg:GridColumn Header="{DynamicResource CompanyURL}"  FieldName="Website" ReadOnly="True" Width=" 150" FilterPopupMode="CheckedList" >
+                <dxg:GridColumn.CellTemplate>
+                    <DataTemplate>
+                        <TextBlock  Margin="5,0,0,0" VerticalAlignment="Center">
+                                    <Hyperlink TargetName="_blank" 
+                                               Command="{Binding View.DataContext.HyperlinkForWebsite}" 
+                                               CommandParameter="{Binding Data.Website}"
+                                               Style="{DynamicResource hyperlinkGridStyle}">
+                                        <InlineUIContainer>
+                                            <TextBlock Text="{Binding Data.Website}" Style="{DynamicResource HyperlinkTextBlock}" TextDecorations="Underline"/>
+                                        </InlineUIContainer>
+                                    </Hyperlink>
+                                </TextBlock>
+                    </DataTemplate>
+                </dxg:GridColumn.CellTemplate>
+            </dxg:GridColumn>
+            <dxg:GridColumn Header="{DynamicResource FiscalNumber}"   FieldName="CIF" ReadOnly="True" Width="150" FilterPopupMode="CheckedList" />
+            <dxg:GridColumn Header="{DynamicResource CompanyGPSCoordinates}" FieldName="Coordinates"
+                            ReadOnly="True" Width=" 200" FilterPopupMode="CheckedList"></dxg:GridColumn>
+
+            <dxmvvm:Interaction.Behaviors>
+                <UIHelper:GridSelectingBehavior />
+            </dxmvvm:Interaction.Behaviors>
+
+            <dxg:GridControl.TotalSummary>
+                <dxg:GridSummaryItem x:Name="summary" FieldName="CompanyName" SummaryType="Count" DisplayFormat="Total Count: {0}" Visible="True" Alignment="Left"/>
+            </dxg:GridControl.TotalSummary>
+
+
+            <dxg:GridControl.View>
+
+                <dxg:TableView x:Name="CompanyTableView"
+                                      NavigationStyle="Row"
+                                   RowDetailsVisibilityMode="Visible"
+                                   ShowHorizontalLines="True"
+                                   ShowSearchPanelMode="Always"
+                                   ShowColumnHeaders="True"
+                                   VerticalScrollbarVisibility="Auto" 
+                                   HorizontalScrollbarVisibility="Auto"
+                                   AllowFixedColumnMenu="False"
+                                   ShowFixedTotalSummary="True" 
+                                   SearchPanelHorizontalAlignment="Stretch"
+                                   ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly"
+                                   AllowGrouping="True"
+                                   ShowGroupPanel="False"     
+                                   FocusedRow="{Binding Path=SelectedCompany,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                   ShowIndicator="False" AutoWidth="True">
+
+                    <dxg:TableView.Resources>
+                        <DataTemplate x:Key="CompaniesReportPrintHeaderTemplate">
+                            <Grid Width="{Binding UsablePageWidth}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="50" />
+                                    <ColumnDefinition Width="130" />
+                                </Grid.ColumnDefinitions>
+                                <dxe:TextEdit Text=" " Width="{Binding UsablePageWidth}" Grid.ColumnSpan="3" IsPrintingMode="True" Background="#333E5E" HorizontalAlignment="Stretch" 
+                                                      VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" Height="50" />
+                                <dxe:TextEdit Text="Entities Report" IsPrintingMode="True" HorizontalAlignment="Stretch" 
+                                                      VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" />
+                                <Image Source="/Emdep.Geos.Modules.Hrm;component/Assets/Images/GeosReportLogo.png" Height="50" Width="80"  dxp:ExportSettings.TargetType="Image" Grid.Column="2" />
+                            </Grid>
+                        </DataTemplate>
+
+                        <DataTemplate x:Key="CompaniesReportPrintFooterTemplate">
+                            <dxe:TextEdit HorizontalContentAlignment="Center" 
+                                                  Width="{Binding Path=UsablePageWidth, Mode=OneWay}" 
+                                                  dxp:ExportSettings.TargetType="PageNumber" 
+                                                  dxp:PageNumberExportSettings.Kind="NumberOfTotal" 
+                                                  dxp:PageNumberExportSettings.Format="Page {0} of {1}"/>
+                        </DataTemplate>
+
+                    </dxg:TableView.Resources>
+                    <dxmvvm:Interaction.Behaviors>
+                        <dxmvvm:EventToCommand EventName="MouseDoubleClick"
+                                               Command="{Binding CommandGridDoubleClick}"
+                                               CommandParameter="{Binding ElementName=CompanyTableView}" >
+                            <dxmvvm:EventToCommand.EventArgsConverter>
+                                <dx:EventArgsToDataRowConverter/>
+                            </dxmvvm:EventToCommand.EventArgsConverter>
+                        </dxmvvm:EventToCommand>
+                    </dxmvvm:Interaction.Behaviors>
+
+                </dxg:TableView>
+            </dxg:GridControl.View>
+        </dxg:GridControl>
+    </Grid>
+    
+</UserControl>

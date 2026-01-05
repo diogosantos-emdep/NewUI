@@ -1,0 +1,1223 @@
+﻿<UserControl x:Class="Emdep.Geos.Modules.Hrm.Views.EmployeeProfileView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.Hrm.Views"
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+             xmlns:Converters="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+             xmlns:dxwuin="http://schemas.devexpress.com/winfx/2008/xaml/windowsui/navigation"
+             xmlns:dxnav="http://schemas.devexpress.com/winfx/2008/xaml/navigation" 
+             xmlns:dxp="http://schemas.devexpress.com/winfx/2008/xaml/printing" 
+             xmlns:dxdb="http://schemas.devexpress.com/winfx/2008/xaml/demobase"
+             xmlns:sysglb="clr-namespace:System.Globalization;assembly=mscorlib"
+             xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+             xmlns:HrmApplication="clr-namespace:Emdep.Geos.Modules.Hrm"
+             xmlns:ViewModel="clr-namespace:Emdep.Geos.Modules.Hrm.ViewModels"
+             xmlns:Interactive="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:dxgt="http://schemas.devexpress.com/winfx/2008/xaml/grid/themekeys"
+             xmlns:Behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <Converters:ImageUrlToByteArrayConverter x:Key="ImageUrlToByteArrayConverter" />
+            <!--#region Shared templates-->
+            <DataTemplate x:Key="EmployeeDetailTemplate">
+                <dx:MeasurePixelSnapper>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="20"/>
+                            <RowDefinition Height="20"/>
+                            <RowDefinition Height="20"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="20"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <!--<ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="135"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="135"/>
+                            <ColumnDefinition Width="135"/>
+                            <ColumnDefinition Width="135"/>
+                            <ColumnDefinition Width="135"/>
+                            <ColumnDefinition Width="135"/>
+                            <ColumnDefinition Width="135"/>-->
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="135"/>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="130"/>
+                            <ColumnDefinition Width="130"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <dxe:ImageEdit Width="150" Height="150" HorizontalAlignment="Left" VerticalAlignment="Top"  
+                                      Grid.Row="0" Grid.RowSpan="8" Grid.Column="0" ShowMenu="False" IsReadOnly="True">
+                            <dxe:ImageEdit.Style>
+                                <Style TargetType="{x:Type dxe:ImageEdit}">
+                                    <Style.Triggers>
+                                        <MultiDataTrigger>
+                                            <MultiDataTrigger.Conditions>
+                                                <Condition Binding="{Binding Row.ProfileImagePath,Converter={StaticResource ImageUrlToByteArrayConverter},UpdateSourceTrigger=PropertyChanged ,ConverterParameter='image/png'}" Value="{x:Null}" />
+                                                <Condition Binding="{Binding Row.Gender.IdLookupValue}" Value="1" />
+                                            </MultiDataTrigger.Conditions>
+                                            <Setter Property="Source" Value="{DynamicResource EmployeeDefaultImageFemale}" />
+                                        </MultiDataTrigger>
+                                        <MultiDataTrigger>
+                                            <MultiDataTrigger.Conditions>
+                                                <Condition Binding="{Binding Row.ProfileImagePath,Converter={StaticResource ImageUrlToByteArrayConverter},UpdateSourceTrigger=PropertyChanged ,ConverterParameter='image/png'}" Value="{x:Null}" />
+                                                <Condition Binding="{Binding Row.Gender.IdLookupValue}" Value="2" />
+                                            </MultiDataTrigger.Conditions>
+                                            <Setter Property="Source" Value="{DynamicResource EmployeeDefaultImageMale}" />
+                                        </MultiDataTrigger>
+                                    </Style.Triggers>
+                                    <Setter Property="Source" Value="{Binding Row.ProfileImagePath,Converter={StaticResource ImageUrlToByteArrayConverter},UpdateSourceTrigger=PropertyChanged ,ConverterParameter='image/png'}" />
+                                </Style>
+                            </dxe:ImageEdit.Style>
+                        </dxe:ImageEdit>
+
+                        <TextBlock Grid.Row="0" Grid.Column="1" Margin="5,0,0,0" Text="Name:" FontWeight="Bold"/>
+                        <TextBlock Grid.Row="0" Grid.Column="2"  Margin="0,0,0,0" TextWrapping="Wrap" > 
+                          <Run Text="{Binding Row.FirstName}" />
+                          <Run Text=""/> 
+                          <Run Text="{Binding Row.LastName}" />
+                        </TextBlock>
+
+                        <TextBlock Grid.Row="0" Grid.Column="3"  Margin="5,0,0,0" Text="Native Name:" FontWeight="Bold"/>
+                        <TextBlock Grid.Row="0" Grid.Column="4"  Margin="5,0,0,0" Text="{Binding Row.NativeName}" TextWrapping="Wrap"  />
+
+                        <TextBlock Grid.Row="1" Grid.Column="1"  Margin="5,0,0,0" Text="Job Description:" FontWeight="Bold"/>
+
+                        <StackPanel Orientation="Horizontal"  Grid.Column=" 2" Grid.Row="1" Grid.ColumnSpan=" 3">
+
+                            <ItemsControl ItemsSource="{Binding Row.EmployeeJobCodes}" Grid.Column ="0">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock HorizontalAlignment="Left"  VerticalAlignment="Center" FontWeight="Normal"  
+                                                   TextWrapping="Wrap" > 
+                                        <Hyperlink Name="hyperlink" NavigateUri="#" > 
+                                       <dxmvvm:Interaction.Behaviors>
+                                        <dxmvvm:EventToCommand EventName="Click" PassEventArgsToCommand="True" 
+                                                               CommandParameter="{Binding}"
+                                                               Command="{Binding DataContext.DocumentViewCommand, 
+                                            RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                       </dxmvvm:Interaction.Behaviors>
+                                        <InlineUIContainer>
+                                            <TextBlock Text="{Binding}" />
+                                        </InlineUIContainer>
+                                             <Hyperlink.Style>
+                                <Style TargetType="Hyperlink">
+                                    <Setter Property="Foreground" Value="{DynamicResource HyperlinkColor}"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Foreground" Value="OrangeRed" />
+                                        </Trigger>
+                                        <Trigger Property="dxg:DataViewBase.IsFocusedRow" Value="True">
+                                            <Setter Property="Foreground" Value="{DynamicResource ColorMain}"/>
+                                        </Trigger>
+                                        <DataTrigger Binding="{Binding RowData.SelectionState}" Value="Selected">
+                                            <Setter  Property="Foreground" Value="{DynamicResource ColorMain}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Hyperlink.Style>
+                                           </Hyperlink>
+                                    </TextBlock>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl >
+
+                            <TextBlock TextWrapping="Wrap" Text="{Binding Row.EmployeeJobTitles,Converter={Converters:StringConverterForJobTitle}}" Grid.Column="2"/>
+                        </StackPanel>
+
+                        <TextBlock Grid.Row="2" Grid.Column="1"  Margin="5,0,0,0" Text="Hire Date:" FontWeight="Bold" />
+                        <TextBlock Grid.Row="2" Grid.Column="2"  Margin="0,0,0,0"  Text="{Binding Row.EmployeeJobDescription.JobDescriptionStartDate,Mode=TwoWay,StringFormat=d,ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}" />
+                        <TextBlock Grid.Row="2" Grid.Column="3"  Margin="5,0,0,0" Text="Length of Service:" FontWeight="Bold" />
+                        <TextBlock Grid.Row="2" Grid.Column="4"  Margin="5,0,0,0" Text="{Binding Row.LengthOfServiceString}">
+                        </TextBlock>
+                        <TextBlock Grid.Row="3" Grid.Column="1"  Margin="5,0,0,0" Text="Email:" FontWeight="Bold" />
+                         <TextBlock Grid.Row="3" Grid.ColumnSpan="5" Grid.Column="2"  Margin="0,0,0,0" HorizontalAlignment="Left" TextWrapping="Wrap"  >
+                            <Hyperlink Name="hyperlinks" NavigateUri="#"
+                                        Command="{Binding View.DataContext.HyperlinkForEmail}" 
+                                        CommandParameter="{Binding Row.EmployeeContactEmail}">    
+                              <InlineUIContainer>
+                                         <TextBlock  Text="{Binding Row.EmployeeContactEmail,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"  />
+                            </InlineUIContainer>
+                                
+                            <Hyperlink.Style>
+                                <Style TargetType="Hyperlink">
+                                    <Setter Property="Foreground" Value="{DynamicResource HyperlinkColor}"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Foreground" Value="OrangeRed" />
+                                        </Trigger>
+                                        <Trigger Property="dxg:DataViewBase.IsFocusedRow" Value="True">
+                                            <Setter Property="Foreground" Value="{DynamicResource ColorMain}"/>
+                                        </Trigger>
+                                        <DataTrigger Binding="{Binding RowData.SelectionState}" Value="Selected">
+                                            <Setter  Property="Foreground" Value="{DynamicResource ColorMain}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Hyperlink.Style>
+                         </Hyperlink> 
+                        </TextBlock>
+
+                        <TextBlock Grid.Row="4" Grid.Column="1"  Margin="5,0,0,0" Text="Mobile Phone:" FontWeight="Bold" />
+                        <TextBlock Grid.Row="4" Grid.Column="2"  Margin="0,0,0,0" Text="{Binding Row.EmployeeContactMobile}" />
+                        <TextBlock Grid.Row="5" Grid.Column="1"  Margin="5,0,0,0" Text="Contract Situation:" FontWeight="Bold" />
+                        <TextBlock Grid.Row="5" Grid.Column="2" Grid.ColumnSpan="2" Margin="0,0,0,0" Text="{Binding Row.ContractSituation.Name}" />
+
+                    </Grid>
+                </dx:MeasurePixelSnapper>
+
+            </DataTemplate>
+            <!--#endregion-->
+
+            <DataTemplate x:Key="EmployeeDetailTooltipTemplate">
+                <dx:MeasurePixelSnapper>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="20"/>
+                            <RowDefinition Height="20"/>
+                            <RowDefinition Height="20"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="20"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="135"/>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="130"/>
+                            <ColumnDefinition Width="130"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <dxe:ImageEdit Width="150" Height="150" HorizontalAlignment="Left" VerticalAlignment="Top"  
+                                      Grid.Row="0" Grid.RowSpan="8" Grid.Column="0" ShowMenu="False" IsReadOnly="True">
+                            <dxe:ImageEdit.Style>
+                                <Style TargetType="{x:Type dxe:ImageEdit}">
+                                    <Style.Triggers>
+                                        <MultiDataTrigger>
+                                            <MultiDataTrigger.Conditions>
+                                                <Condition Binding="{Binding Row.ProfileImagePath,Converter={StaticResource ImageUrlToByteArrayConverter},UpdateSourceTrigger=PropertyChanged ,ConverterParameter='image/png'}" Value="{x:Null}" />
+                                                <Condition Binding="{Binding Row.Gender.IdLookupValue}" Value="1" />
+                                            </MultiDataTrigger.Conditions>
+                                            <Setter Property="Source" Value="{DynamicResource EmployeeDefaultImageFemale}" />
+                                        </MultiDataTrigger>
+                                        <MultiDataTrigger>
+                                            <MultiDataTrigger.Conditions>
+                                                <Condition Binding="{Binding Row.ProfileImagePath,Converter={StaticResource ImageUrlToByteArrayConverter},UpdateSourceTrigger=PropertyChanged ,ConverterParameter='image/png'}" Value="{x:Null}" />
+                                                <Condition Binding="{Binding Row.Gender.IdLookupValue}" Value="2" />
+                                            </MultiDataTrigger.Conditions>
+                                            <Setter Property="Source" Value="{DynamicResource EmployeeDefaultImageMale}" />
+                                        </MultiDataTrigger>
+                                    </Style.Triggers>
+                                    <Setter Property="Source" Value="{Binding Row.ProfileImagePath,Converter={StaticResource ImageUrlToByteArrayConverter},UpdateSourceTrigger=PropertyChanged ,ConverterParameter='image/png'}" />
+                                </Style>
+                            </dxe:ImageEdit.Style>
+                        </dxe:ImageEdit>
+
+                        <TextBlock Grid.Row="0" Grid.Column="1" Margin="5,0,0,0" Text="Name:" FontWeight="Bold"/>
+                        <!--<TextBlock Text="{Binding Row.FullName}" TextWrapping="Wrap"  Grid.Row="0" Grid.Column="2" Margin="0,0,0,0"></TextBlock>-->
+                        <TextBlock Grid.Row="0" Grid.Column="2"  Margin="0,0,0,0" TextWrapping="Wrap" >
+                          <Run Text="{Binding Row.FirstName}" />
+                          <Run Text=""/> 
+                          <Run Text="{Binding Row.LastName}" />
+                        </TextBlock>
+                        <TextBlock Grid.Row="0" Grid.Column="3"  Margin="5,0,0,0" Text="Native Name:" FontWeight="Bold"/>
+                        <TextBlock Grid.Row="0" Grid.Column="4"  Margin="-8,0,0,0" Text="{Binding Row.NativeName}" TextWrapping="Wrap"  />
+                        <TextBlock Grid.Row="1" Grid.Column="1"  Margin="5,0,0,0" Text="Job Description:" FontWeight="Bold"/>
+
+                        <StackPanel Orientation="Horizontal"  Grid.Column=" 2" Grid.Row="1" Grid.ColumnSpan="3">
+                            <ItemsControl ItemsSource="{Binding Row.EmployeeJobCodes}" Grid.Column ="0">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock HorizontalAlignment="Left"  VerticalAlignment="Center" FontWeight="Normal"  
+                                                 TextWrapping="Wrap"> 
+                                             <Hyperlink Name="hyperlink" Style="{DynamicResource hyperlinkGridStyle}" > 
+                                                 <Hyperlink.Inlines>
+                                                    <TextBlock Text="{Binding }" />
+                                                </Hyperlink.Inlines> 
+                                             </Hyperlink>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <TextBlock   TextWrapping="Wrap" Text="{Binding Row.EmployeeJobTitles,Converter={Converters:StringConverterForJobTitle}}" />
+                        </StackPanel>
+
+                        <TextBlock Grid.Row="2" Grid.Column="1"  Margin="5,0,0,0" Text="Hire Date:" FontWeight="Bold" />
+                        <TextBlock Grid.Row="2" Grid.Column="2"  Margin="0,0,0,0" Text="{Binding Row.EmployeeJobDescription.JobDescriptionStartDate,Mode=TwoWay,StringFormat=d,ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}" />
+                        <TextBlock Grid.Row="2" Grid.Column="3"  Margin="5,0,0,0" Text="Length of Service:" FontWeight="Bold" />
+                        <TextBlock Grid.Row="2" Grid.Column="4"  Margin="-8,0,0,0" Text="{Binding Row.LengthOfServiceString}">
+                        </TextBlock>
+                        <TextBlock Grid.Row="3" Grid.Column="1"  Margin="5,0,0,0" Text="Email:" FontWeight="Bold" />
+                        <TextBlock Grid.Row="3" Grid.Column="2"  Grid.ColumnSpan="5" Margin="0,0,0,0" >
+                            <Hyperlink Name="hyperlink" NavigateUri="#">
+                                   <Run Text="{Binding Row.EmployeeContactEmail}"/> 
+                            <Hyperlink.Style>
+                                <Style TargetType="Hyperlink">
+                                    <Setter Property="Foreground" Value="{DynamicResource HyperlinkColor}"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Foreground" Value="OrangeRed" />
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Hyperlink.Style>
+                         </Hyperlink>
+                        </TextBlock>
+
+                        <TextBlock Grid.Row="4" Grid.Column="1"  Margin="5,0,0,0" Text="Mobile Phone:" FontWeight="Bold" />
+                        <TextBlock Grid.Row="4" Grid.Column="2"  Margin="0,0,0,0" Text="{Binding Row.EmployeeContactMobile}" />
+
+                        <!--<TextBlock Grid.Row="5" Grid.Column="2" Margin="0,0,0,0" Grid.ColumnSpan="5" Grid.RowSpan="5" 
+                                 Text="{Binding Row.FullAddress}" TextWrapping="Wrap" >
+                            -->
+                        <!--<TextBlock.Text>
+                                <MultiBinding  StringFormat="{}{0} {1} {2} {3} {4} ">
+                                    <Binding Path="Row.AddressStreet" />
+                                    
+                                    <Binding Path="Row.AddressZipCode" />
+                                    <Binding Path="Row.AddressCity"/>
+                                    <Binding Path="Row.AddressRegion" />
+                                    <Binding Path="Row.AddressCountry.Name"/>
+                                </MultiBinding>
+                            </TextBlock.Text>-->
+                        <!--
+                        </TextBlock>-->
+
+                        <TextBlock Grid.Row="5" Grid.Column="1"  Margin="5,0,0,0" Text="Contract Situation:" FontWeight="Bold" />
+                        <TextBlock Grid.Row="5" Grid.Column="2"  Margin="0,0,0,0" Text="{Binding Row.ContractSituation.Name}" Grid.ColumnSpan="2" />
+
+                    </Grid>
+                </dx:MeasurePixelSnapper>
+            </DataTemplate>
+
+            <!--#region rowDetailTemplate-->
+            <DataTemplate x:Key="EmployeerowDetailTemplate">
+                <ContentControl Content="{Binding}" ContentTemplate="{StaticResource EmployeeDetailTemplate}" HorizontalAlignment="Left"/>
+            </DataTemplate>
+            <!--#endregion-->
+
+            <!--#region expandableRowDetailTemplate-->
+            <DataTemplate x:Key="EmployeeexpandableRowDetailTemplate">
+                <dx:DXExpander IsExpanded="{Binding Path=IsSelected}" HorizontalExpand="None" VerticalExpand="FromTopToBottom">
+                    <ContentControl Content="{Binding}" ContentTemplate="{StaticResource EmployeeDetailTemplate}" HorizontalAlignment="Left"/>
+                </dx:DXExpander>
+            </DataTemplate>
+            <!--#endregion-->
+
+            <!--#region rowToolTipStyle-->
+            <Style x:Key="EmployeerowToolTipStyle">
+                <Style.Setters>
+                    <Setter Property="ToolTipService.InitialShowDelay" Value="10"/>
+                    <Setter Property="ToolTipService.HasDropShadow" Value="False"/>
+                    <Setter Property="ToolTipService.ToolTip">
+                        <Setter.Value>
+                            <ContentControl Content="{Binding}" ContentTemplate="{StaticResource EmployeeDetailTooltipTemplate}" Tag="Transparent" MaxWidth="1000"/>
+                        </Setter.Value>
+                    </Setter>
+                </Style.Setters>
+            </Style>
+            <!--#endregion-->
+
+            <!--[Sprint-64][4/06/2019][skale]-Search by e-mail in employees grid-->
+
+            <Style TargetType="dxg:GridColumn" x:Key="gridColumnStyle">
+                <Setter Property="EditSettings">
+                    <Setter.Value>
+                        <dxe:TextEditSettings DisplayTextConverter="{Converters:SearchConverters}"/>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="ColumnFilterMode" Value="Value" />
+                <Setter Property="SortMode" Value="DisplayText" />
+                <Setter Property="AllowSorting" Value="True" />
+            </Style> 
+           
+            <!--end-->
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <Grid Background="{DynamicResource EmpDetailBackColor}">
+
+        <Grid.RowDefinitions>
+            <RowDefinition>
+                <RowDefinition.Style>
+                    <Style TargetType="RowDefinition">
+                        <Setter Property="RowDefinition.Height" Value="0" />
+                        <Style.Triggers>
+                            <DataTrigger Value="True" Binding="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsButtonRowVisible}">
+                                <Setter Property="RowDefinition.Height" Value="55" />
+                            </DataTrigger>
+                            <DataTrigger Value="False" Binding="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsButtonRowVisible}">
+                                <Setter Property="RowDefinition.Height" Value="0" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </RowDefinition.Style>
+            </RowDefinition>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="250"/>
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Label Content="{DynamicResource EmployeesProfileHeader}" HorizontalAlignment="Left" Style="{StaticResource LabelTitleStyle}" Grid.Row="0" Grid.Column="0" />
+        <Grid HorizontalAlignment="Right" Grid.Row="0" Grid.Column="1" Margin="0,5,0,0" >
+            <Grid.RowDefinitions>
+                <RowDefinition Height="AUTO"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="AUTO"/>
+                <ColumnDefinition Width="AUTO" />
+                <ColumnDefinition Width="AUTO" />
+                <ColumnDefinition Width="AUTO" />
+                <ColumnDefinition Width="AUTO" />
+                <ColumnDefinition Width="AUTO" />
+                <ColumnDefinition Width="AUTO" />
+            </Grid.ColumnDefinitions>
+
+            <Grid HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Column="1" Margin="0,0,5,5">
+                <Grid.ColumnDefinitions >
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!--Plant-->
+                <TextBlock Grid.Column="0" Text="{DynamicResource CommonPlant}"  FontWeight="Bold" Margin="10,2,5,0" Grid.Row="0" HorizontalAlignment="Right" Height="25" IsEnabled="True"  />
+
+                <dxe:ComboBoxEdit Style="{DynamicResource ComboBoxEditStyle}" Grid.Column="1"  Width="150" Height="30"                        
+                                      ItemsSource="{Binding Source={x:Static HrmApplication:HrmCommon.Instance}, Path=CombineIslocationIsorganizationIscompanyList}" Margin="5,0,5,0"
+                                      DisplayMember="ShortName"
+                                      EditValue="{Binding Source={x:Static HrmApplication:HrmCommon.Instance}, Path=SelectedAuthorizedPlantsList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                    <dxe:ComboBoxEdit.StyleSettings>
+                        <dxe:CheckedComboBoxStyleSettings />
+                    </dxe:ComboBoxEdit.StyleSettings>
+                    <dxmvvm:Interaction.Triggers>
+                        <dxmvvm:EventToCommand EventName="PopupClosed"
+                                               Command="{Binding DataContext.PlantOwnerPopupClosedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                               PassEventArgsToCommand="True"/>
+                    </dxmvvm:Interaction.Triggers>
+                </dxe:ComboBoxEdit>
+
+                <!-- Period -->
+                <DockPanel Grid.Column="2" Grid.Row="0" HorizontalAlignment="Right"   VerticalAlignment="Center" Margin="5,0,0,0" >
+                    <Image Style="{DynamicResource CalendarImageStyle}" Width="30" Height="20" Margin="2,0,3,0" />
+                    <TextBlock Text="{DynamicResource AnnualSalesPerformanceViewPeriod}"  FontWeight="Bold" Margin="0,0,0,0" IsEnabled="True" />
+                </DockPanel>
+
+                <dxe:ComboBoxEdit Grid.Row="0" Grid.Column="3" 
+                                  IsTextEditable="False" Margin="5,0,0,0"
+                                  HorizontalAlignment="Left"
+                                  Height="30"
+                                  Width="100"
+                                  MaxLength="4" 
+                                  VerticalAlignment="Center" 
+                                  ItemsSource="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=FinancialYearLst, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  SelectedItem="{Binding Source={x:Static HrmApplication:HrmCommon.Instance}, Path=SelectedPeriod,UpdateSourceTrigger=PropertyChanged}">
+                    <dxe:ComboBoxEdit.StyleSettings>
+                        <dxe:ComboBoxStyleSettings />
+                    </dxe:ComboBoxEdit.StyleSettings>
+                    <dxmvvm:Interaction.Triggers>
+                        <dxmvvm:EventToCommand EventName="EditValueChanged"
+                                               Command="{Binding DataContext.SelectedYearChangedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                               PassEventArgsToCommand="True"/>
+                    </dxmvvm:Interaction.Triggers>
+                </dxe:ComboBoxEdit>
+            </Grid>
+
+
+            <Button Visibility="Visible" Grid.Row="0" Grid.Column="2" Height="40" Width="40" HorizontalAlignment="Right" 
+                                Command="{Binding ButtonAddNewEmployee}"
+                    CommandParameter="{Binding ElementName=EmployeeProfileTableView}" Margin="0,0,5,5"
+                             IsEnabled="{Binding AddShiftEnabled}">
+                <!--IsEnabled="{Binding Source={x:Static HrmApplication:HrmCommon.Instance}, Path=IsPermissionEnabled,Mode=OneTime}"-->
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource AddEmployeeProfile}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Image Style="{DynamicResource AddNewButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+
+            <Button Visibility="Visible" Grid.Row="0" Grid.Column="3" Height="40" Width="40" HorizontalAlignment="Right" 
+                                Command="{Binding RefreshButtonCommand}"
+                                CommandParameter="{Binding ElementName=EmployeeProfileTableView}" Margin="0,0,5,5">
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource ButtonRefresh}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Image Style="{DynamicResource RefreshButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+
+            <Button Visibility="Visible" Grid.Row="0" Grid.Column="4" Height="40" Width="40" HorizontalAlignment="Right" 
+                    Command="{Binding PrintButtonCommand}"
+                    CommandParameter="{Binding ElementName=EmployeeProfileTableView}" Margin="0,0,5,5">
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource ButtonPrint}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Image Style="{DynamicResource PrinterButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+
+            <Button Visibility="Visible" Grid.Row="0" Grid.Column="5" Height="40" Width="40" HorizontalAlignment="Right" 
+                    Command="{Binding ExportButtonCommand}"
+                    CommandParameter="{Binding ElementName=EmployeeProfileTableView}" Margin="0,0,5,5">
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource ButtonExportToExcel}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Image Style="{DynamicResource ExcelExportButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+
+            <dx:DropDownButton x:Name="dropdownButton" Content="Dropdown button" 
+                               HorizontalAlignment="Right" Height="40" Width="40" Grid.Column="6"  Margin="0,0,5,5"  VerticalAlignment="Center">
+                <dx:DropDownButton.Style>
+                    <Style>
+                        <Setter Property="dx:DropDownButtonBase.ArrowAlignment" Value="Right"/>
+                        <Setter Property="dx:DropDownButtonBase.ArrowPadding" Value="0"/>
+                    </Style>
+                </dx:DropDownButton.Style>
+                <Button.ToolTip>
+                    <TextBlock Text="Switch View"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Image Style="{DynamicResource SwitchActivityGrid}" Grid.Column="0" Height="24" Width="24" Margin="-20"/>
+                        </Grid>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+                <dx:DropDownButton.PopupContent>
+                    <dxe:ListBoxEdit Background="{x:Null}" Grid.Row="0" Margin="0,0,0,0" ShowBorder="False" DisplayMember="DisplayName" SelectedIndex="2" x:Name="rowTemplateComboBox">
+                        <dxe:ListBoxEdit.StyleSettings>
+                            <dxe:RadioListBoxEditStyleSettings />
+                        </dxe:ListBoxEdit.StyleSettings>
+                        <dxe:ListBoxEdit.Items>
+                            <UIHelper:GridRowTemplateSelector DisplayName="Animated Details" DetailTemplate="{StaticResource EmployeeexpandableRowDetailTemplate}"/>
+                            <UIHelper:GridRowTemplateSelector DisplayName="Expanded Details" DetailTemplate="{StaticResource EmployeerowDetailTemplate}"/>
+                            <UIHelper:GridRowTemplateSelector DisplayName="Tooltip" RowStyle="{StaticResource EmployeerowToolTipStyle}"/>
+                        </dxe:ListBoxEdit.Items>
+                    </dxe:ListBoxEdit>
+                </dx:DropDownButton.PopupContent>
+            </dx:DropDownButton>
+
+        </Grid>
+
+
+        <dxg:GridControl x:Name="GridControlEmpolyeeDetails" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                         ItemsSource="{Binding FinalEmployeeList,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" SelectionMode="Row" Width="Auto" Height="Auto"
+                         SelectedItem="{Binding Path=SelectedGridRow,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                         ImplyNullLikeEmptyStringWhenFiltering="True" AllowLiveDataShaping="True">
+            
+            <dxg:GridColumn Header="{DynamicResource EmployeeCode}" FieldName="EmployeeCode" FilterPopupMode="CheckedList"  MaxWidth="90" ReadOnly="True" FixedWidth="True" />
+            <dxg:GridColumn Header="{DynamicResource EmployeeFirstName}" FieldName="FirstName" MinWidth="100" FilterPopupMode="CheckedList" ReadOnly="True"/>
+            <dxg:GridColumn Header="{DynamicResource EmployeeLastName}" FieldName="LastName" FilterPopupMode="CheckedList" MinWidth="100" MaxWidth="150" ReadOnly="True"/>
+
+            <dxg:GridColumn Header="{DynamicResource EmployeeBirthDate}" FieldName="DateOfBirth" FilterPopupMode="CheckedList" MinWidth="80" MaxWidth="150" ReadOnly="True" FixedWidth="True">
+                <dxg:GridColumn.HeaderTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{DynamicResource EmployeeBirthDate}" TextWrapping="Wrap" />
+                    </DataTemplate>
+                </dxg:GridColumn.HeaderTemplate>
+            </dxg:GridColumn>
+
+            <dxg:GridColumn Header="{DynamicResource EmployeeGender}" FieldName="Gender.Value" FilterPopupMode="CheckedList" MinWidth="60" MaxWidth="80" FixedWidth="True" ReadOnly="True"/>
+            <dxg:GridColumn Header="{DynamicResource EmployeeMaritalStatus}" FieldName="MaritalStatus.Value" FilterPopupMode="CheckedList" MinWidth="100" MaxWidth="120" ReadOnly="True" FixedWidth="True"/>
+            <!--<dxg:GridColumn Header="{DynamicResource EmployeeCountry}" FieldName="AddressCountry.Name" FilterPopupMode="CheckedList" MinWidth="100" MaxWidth="150" ReadOnly="True"/>-->
+            <!--//Shubham[skadam] GEOS2-5137 Add flag in country column loaded through url service 19 12 2023-->
+            <dxg:GridColumn Header="{DynamicResource EmployeeCountry}" FieldName="AddressCountry.Name" FilterPopupMode="CheckedList" MinWidth="120" MaxWidth="250" ReadOnly="True">
+                <dxg:GridColumn.CellTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal" Height="24">
+                            <!--<Image  
+                            Source="{Binding RowData.Row.AddressCountry.CountryIconBytes,UpdateSourceTrigger=PropertyChanged}"  
+                            VerticalAlignment="Center" Height="24" Width="24" Margin="2,0,0,0" />-->
+                            <Image Source="{Binding RowData.Row.AddressCountry.CountryIconUrl,Converter={StaticResource ImageUrlToByteArrayConverter},UpdateSourceTrigger=PropertyChanged ,ConverterParameter='image/png'}"
+                                       VerticalAlignment="Stretch" HorizontalAlignment="Stretch" MaxHeight="142" Margin="2" >
+                                <!--<Image.ToolTip>
+                                    <Image Source="{Binding RowData.Row.AddressCountry.CountryIconUrl,Converter={StaticResource ImageUrlToByteArrayConverter},UpdateSourceTrigger=PropertyChanged ,ConverterParameter='image/png'}"                             
+                                       VerticalAlignment="Center" Height="200" Width="300" Margin="2,0,0,0" />
+                                </Image.ToolTip>-->
+                            </Image>
+                            <TextBlock Text ="{Binding RowData.Row.AddressCountry.Name,UpdateSourceTrigger=PropertyChanged}"  VerticalAlignment="Center" Margin="5,0,0,0" ></TextBlock>
+                        </StackPanel>
+                    </DataTemplate>
+                </dxg:GridColumn.CellTemplate>
+            </dxg:GridColumn>
+            
+            
+            <dxg:GridColumn Header="{DynamicResource EmployeeCity}" FieldName="AddressCity" FilterPopupMode="CheckedList" MinWidth="100" MaxWidth="150" ReadOnly="True"/>
+            <dxg:GridColumn Header="{DynamicResource EmployeeStreet}" FieldName="AddressStreet" FilterPopupMode="CheckedList" MinWidth="100" MaxWidth="150" ReadOnly="True"/>
+            <dxg:GridColumn Header="{DynamicResource EmployeeZipCode}" FieldName="AddressZipCode" FilterPopupMode="CheckedList" MinWidth="70" ReadOnly="True"/>
+            <dxg:GridColumn Header="{DynamicResource EmployeeDisplayName}" FieldName="DisplayName" FilterPopupMode="CheckedList" MinWidth="70" ReadOnly="True"/>
+            <dxg:GridColumn Header="{DynamicResource EmployeeRegion}" FieldName="AddressRegion" FilterPopupMode="CheckedList" MinWidth="70" ReadOnly="True" ShowInColumnChooser="True" Visible="False"/>
+            <dxg:GridColumn Header="{DynamicResource EmployeeContract}" FieldName="ContractSituation.Name" FilterPopupMode="CheckedList" MinWidth="70"  MaxWidth="150" ReadOnly="True" ShowInColumnChooser="True" Visible="False"/>
+
+            <dxg:GridColumn Binding="{Binding EmployeeContactCompanyEmailList}" Style="{StaticResource gridColumnStyle}" Header="{DynamicResource EmployeeEmail}"
+                            MinWidth="100"  MaxWidth="150" ReadOnly="True" ShowInColumnChooser="True" Visible="False" FilterPopupMode="CheckedList" FieldName="EmployeeContactEmailUnbound">
+                <dxg:GridColumn.CellTemplate>
+                    <DataTemplate>
+                        <ItemsControl ItemsSource="{Binding RowData.Row.EmployeeContactCompanyEmailList}" VerticalAlignment="Center">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock HorizontalAlignment="Left"  VerticalAlignment="Center" FontWeight="Normal"  
+                                               TextWrapping="Wrap"> 
+                                        <Hyperlink Name="hyperlink" NavigateUri="#"
+                                                   Command="{Binding View.DataContext.HyperlinkForEmail,RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=dxg:GridControl}}" 
+                                                   CommandParameter="{Binding}"> 
+                                            <InlineUIContainer>
+                                                <TextBlock Text="{Binding}" TextTrimming="CharacterEllipsis" />
+                                            </InlineUIContainer>
+                                        </Hyperlink>
+                                    </TextBlock>
+                                    <DataTemplate.Triggers>
+                                        <Trigger Property="dxg:DataViewBase.IsFocusedRow" Value="True">
+                                            <Setter TargetName="hyperlink" Property="Foreground" Value="{DynamicResource ColorMain}"/>
+                                        </Trigger>
+                                        <DataTrigger Binding="{Binding RowData.SelectionState}" Value="Selected">
+                                            <Setter TargetName="hyperlink" Property="Foreground" Value="{DynamicResource ColorMain}"/>
+                                        </DataTrigger>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="hyperlink" Property="Foreground" Value="OrangeRed" />
+                                        </Trigger>
+                                    </DataTemplate.Triggers>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </DataTemplate>
+                </dxg:GridColumn.CellTemplate>
+                <dxg:GridColumn.PrintCellStyle>
+                    <Style TargetType="dxe:BaseEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                        <Setter Property="dxp:ExportSettings.TargetType" Value="Panel" />
+                        <Setter Property="DisplayTemplate">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="dxe:BaseEdit">
+                                    <dxe:TextEdit Text="{Binding RowData.Row.EmployeeContactCompanyEmailList, Converter={Converters:ListToStringConverter}}"
+                                                           IsPrintingMode="True" TextWrapping="Wrap"/>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </dxg:GridColumn.PrintCellStyle>
+            </dxg:GridColumn>
+
+            <dxg:GridColumn Header="{DynamicResource EmployeePhoneNumber}" FieldName="EmployeeContactCompanyMobiles"   ColumnFilterMode="DisplayText"   FilterPopupMode="CheckedList" MinWidth="100"  MaxWidth="180" ReadOnly="True" ShowInColumnChooser="True" Visible="False">
+                <dxg:GridColumn.PrintCellStyle>
+                    <Style TargetType="dxe:BaseEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                        <Setter Property="dxp:ExportSettings.TargetType" Value="Panel" />
+                        <Setter Property="DisplayTemplate">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="dxe:BaseEdit">
+                                    <dxe:TextEdit 
+                                                 Text="{Binding RowData.Row.EmployeeContactCompanyMobiles}"
+                                                 TextWrapping="Wrap"
+                                                 IsPrintingMode="True" />
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </dxg:GridColumn.PrintCellStyle>
+            </dxg:GridColumn>
+            <dxg:GridColumn Header="{DynamicResource EmployeeCompanySkype}" FieldName="EmployeeContactCompanySkypes"   ColumnFilterMode="DisplayText"   FilterPopupMode="CheckedList" MinWidth="100"  MaxWidth="150" ReadOnly="True" ShowInColumnChooser="True" Visible="False" >
+                <dxg:GridColumn.PrintCellStyle>
+                    <Style TargetType="dxe:BaseEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                        <Setter Property="dxp:ExportSettings.TargetType" Value="Panel" />
+                        <Setter Property="DisplayTemplate">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="dxe:BaseEdit">
+                                    <dxe:TextEdit 
+                                                 Text="{Binding RowData.Row.EmployeeContactCompanySkypes}"
+                                                 TextWrapping="Wrap"
+                                                 IsPrintingMode="True" />
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </dxg:GridColumn.PrintCellStyle>
+            </dxg:GridColumn>
+            <dxg:GridColumn Header="{DynamicResource EmployeeLandline}" FieldName="EmployeeContactCompanyLandlines"   ColumnFilterMode="DisplayText"   FilterPopupMode="CheckedList" MinWidth="100"  MaxWidth="180" ReadOnly="True" ShowInColumnChooser="True" Visible="False" >
+                <dxg:GridColumn.PrintCellStyle>
+                    <Style TargetType="dxe:BaseEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                        <Setter Property="dxp:ExportSettings.TargetType" Value="Panel" />
+                        <Setter Property="DisplayTemplate">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="dxe:BaseEdit">
+                                    <dxe:TextEdit 
+                                                 Text="{Binding RowData.Row.EmployeeContactCompanyLandlines}"
+                                                 TextWrapping="Wrap"
+                                                 IsPrintingMode="True" />
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </dxg:GridColumn.PrintCellStyle>
+            </dxg:GridColumn>
+            <dxg:GridColumn Header="{DynamicResource EmployeeTraning}" FieldName="EmployeeContactTranings"   ColumnFilterMode="DisplayText"   FilterPopupMode="CheckedList" MinWidth="100"  ReadOnly="True" ShowInColumnChooser="True" Visible="False" >
+                <dxg:GridColumn.PrintCellStyle>
+                    <Style TargetType="dxe:BaseEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                        <Setter Property="dxp:ExportSettings.TargetType" Value="Panel" />
+                        <Setter Property="DisplayTemplate">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="dxe:BaseEdit">
+                                    <dxe:TextEdit 
+                                                 Text="{Binding RowData.Row.EmployeeContactTranings}"
+                                                 TextWrapping="Wrap"
+                                                 IsPrintingMode="True" />
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </dxg:GridColumn.PrintCellStyle>
+            </dxg:GridColumn>
+            <!--[rdixit][GEOS2-4001][06.06.2023]-->
+            <dxg:GridColumn Header="{DynamicResource EmployeeJobTitle}" FieldName="EmployeeJobTitles" Name="EmployeeJobTitles"  FilterPopupMode="CheckedList" MinWidth="100" MaxWidth="200" ReadOnly="True" ShowInColumnChooser="True" Visible="False">
+                <dxg:GridColumn.PrintCellStyle>
+                    <Style TargetType="dxe:BaseEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                        <Setter Property="dxp:ExportSettings.TargetType" Value="Panel" />
+                        <Setter Property="DisplayTemplate">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="dxe:BaseEdit">
+                                    <dxe:TextEdit 
+                                                 Text="{Binding RowData.Row.EmployeeJobTitles}"
+                                                 TextWrapping="Wrap"
+                                                 IsPrintingMode="True" />
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </dxg:GridColumn.PrintCellStyle>
+            </dxg:GridColumn>
+            <!--[rdixit][GEOS2-4001][06.06.2023]-->
+            <dxg:GridColumn Header="{DynamicResource EmployeePolyvalence}" FieldName="EmployeePolyvalence" Name="EmployeePolyvalence"  FilterPopupMode="CheckedList" MinWidth="100" MaxWidth="200" ReadOnly="True" ShowInColumnChooser="True" Visible="False">
+                <dxg:GridColumn.PrintCellStyle>
+                    <Style TargetType="dxe:BaseEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                        <Setter Property="dxp:ExportSettings.TargetType" Value="Panel" />
+                        <Setter Property="DisplayTemplate">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="dxe:BaseEdit">
+                                    <dxe:TextEdit 
+                                                Text="{Binding RowData.Row.EmployeePolyvalence}"
+                                                 TextWrapping="Wrap"
+                                                 IsPrintingMode="True" />
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </dxg:GridColumn.PrintCellStyle>
+            </dxg:GridColumn>
+
+            <dxg:GridColumn Header="{DynamicResource EmployeeHireDate}" FieldName="EmployeeJobDescription.JobDescriptionStartDate" FilterPopupMode="CheckedList" MinWidth="70" MaxWidth="100"  ReadOnly="True" ShowInColumnChooser="True" Visible="False"/>
+            <dxg:GridColumn Header="{DynamicResource EmployeeNativeName}" FieldName="NativeName" FilterPopupMode="CheckedList" MinWidth="70"  MaxWidth="120" ReadOnly="True" ShowInColumnChooser="True" Visible="False"/>
+            <dxg:GridColumn Header="{DynamicResource EmployeeNationality}" FieldName="Nationality.Name" FilterPopupMode="CheckedList" MinWidth="70"   MaxWidth="120" ReadOnly="True" ShowInColumnChooser="True" Visible="False"/>
+
+            <dxg:GridColumn Header="{DynamicResource EmployeeLengthOfService}" FieldName="LengthOfServiceString" SortMode="Custom" FilterPopupMode="CheckedList" MinWidth="70" MaxWidth="100" ReadOnly="True" ShowInColumnChooser="True" Visible="False" >
+                <dxg:GridColumn.HeaderTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{DynamicResource EmployeeLengthOfService}" TextWrapping="Wrap" />
+                    </DataTemplate>
+                </dxg:GridColumn.HeaderTemplate>
+            </dxg:GridColumn>
+
+            
+            <dxg:GridColumn Header="{DynamicResource EmployeeAge}" Name="EmployeeAge" FieldName="BirthDateUnbound"  FilterPopupMode="CheckedList"  UnboundType="String"    MinWidth="70" MaxWidth="100"  ReadOnly="True" ShowInColumnChooser="True" Visible="False"/>
+            <dxg:GridColumn Header="{DynamicResource EmployeeDepartment}" FieldName="EmployeeDepartments" FilterPopupMode="CheckedList" MinWidth="150" MaxWidth="280" ReadOnly="True" ShowInColumnChooser="True" Visible="False"/>
+            <dxg:GridColumn Header="{DynamicResource EmployeePersonalPhone}"  FieldName="EmployeeContactPrivateMobiles" ColumnFilterMode="DisplayText"  FilterPopupMode="CheckedList" MinWidth="100"  MaxWidth="120" ReadOnly="True" ShowInColumnChooser="True" Visible="False">
+                <dxg:GridColumn.PrintCellStyle>
+                    <Style TargetType="dxe:BaseEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                        <Setter Property="dxp:ExportSettings.TargetType" Value="Panel" />
+                        <Setter Property="DisplayTemplate">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="dxe:BaseEdit">
+                                    <dxe:TextEdit  Width="200"
+                                                           Text="{Binding RowData.Row.EmployeeContactPrivateMobiles}"
+                                                           TextWrapping="Wrap"
+                                                           IsPrintingMode="True" />
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </dxg:GridColumn.PrintCellStyle>
+            </dxg:GridColumn>
+
+            <dxg:GridColumn Binding="{Binding EmployeeContactPrivateEmailList}" Style="{StaticResource gridColumnStyle}" Header="{DynamicResource EmployeePersonalEmail}"
+                            MinWidth="100"  MaxWidth="150" ReadOnly="True" ShowInColumnChooser="True" Visible="False" FilterPopupMode="CheckedList" FieldName="EmployeeContactPrivateEmailUnbound">
+                <dxg:GridColumn.CellTemplate>
+                    <DataTemplate>
+                        <ItemsControl ItemsSource="{Binding RowData.Row.EmployeeContactPrivateEmailList}" VerticalAlignment="Center">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock   HorizontalAlignment="Left"  VerticalAlignment="Center" FontWeight="Normal"  
+                                                 TextWrapping="Wrap"> 
+                                        <Hyperlink Name="hyperlink" NavigateUri="#"
+                                        Command="{Binding View.DataContext.HyperlinkForEmail,RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=dxg:GridControl}}" 
+                                        CommandParameter="{Binding}">
+                                        <InlineUIContainer>
+                                            <TextBlock Text="{Binding}" />
+                                        </InlineUIContainer>   
+                                           </Hyperlink>
+                                    </TextBlock>
+                                    <DataTemplate.Triggers>
+                                        <Trigger Property="dxg:DataViewBase.IsFocusedRow" Value="True">
+                                            <Setter TargetName="hyperlink" Property="Foreground" Value="{DynamicResource ColorMain}"/>
+                                        </Trigger>
+                                        <DataTrigger Binding="{Binding RowData.SelectionState}" Value="Selected">
+                                            <Setter TargetName="hyperlink" Property="Foreground" Value="{DynamicResource ColorMain}"/>
+                                        </DataTrigger>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="hyperlink" Property="Foreground" Value="OrangeRed" />
+                                        </Trigger>
+                                    </DataTemplate.Triggers>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </DataTemplate>
+                </dxg:GridColumn.CellTemplate>
+                <dxg:GridColumn.PrintCellStyle>
+                    <Style TargetType="dxe:BaseEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                        <Setter Property="dxp:ExportSettings.TargetType" Value="Panel" />
+                        <Setter Property="DisplayTemplate">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="dxe:BaseEdit">
+                                    <dxe:TextEdit Text="{Binding RowData.Row.EmployeeContactPrivateEmailList, Converter={Converters:ListToStringConverter}}"
+                                                           IsPrintingMode="True" TextWrapping="Wrap"/>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </dxg:GridColumn.PrintCellStyle>
+            </dxg:GridColumn>
+            <dxg:GridColumn Header="{DynamicResource EmployeeStatus}"  FieldName="EmployeeStatus.Value" FilterPopupMode="CheckedList" MinWidth="70" MaxWidth="100"  ReadOnly="True" ShowInColumnChooser="True" Visible="False"/>
+            <dxg:GridColumn Header="{DynamicResource EmployeeDisability}"  FieldName="Disability"  FilterPopupMode="CheckedList" MinWidth="100" MaxWidth="120"  ReadOnly="True" ShowInColumnChooser="True" Visible="False"/>
+            <dxg:GridColumn Header="{DynamicResource EmployeeRemark}"  FieldName="Remarks"  FilterPopupMode="CheckedList" MinWidth="150" MaxWidth="200"  ReadOnly="True" ShowInColumnChooser="True" Visible="False"/>
+            <dxg:GridColumn Header="{DynamicResource ExitDate}"  FieldName="ExitDate"  FilterPopupMode="CheckedList" MinWidth="70" MaxWidth="100" ReadOnly="True" ShowInColumnChooser="True" Visible="False"/>
+            <dxg:GridColumn Header="{DynamicResource ExitReason}"  FieldName="ExitReason.Value"  FilterPopupMode="CheckedList" MinWidth="150" MaxWidth="280"  ReadOnly="True" ShowInColumnChooser="True" Visible="False"/>
+            <dxg:GridColumn Header="{DynamicResource ExitRemark}"  FieldName="ExitRemarks"  FilterPopupMode="CheckedList" MinWidth="150" MaxWidth="200"  ReadOnly="True" ShowInColumnChooser="True" Visible="False"/>
+            <dxg:GridColumn Header="{DynamicResource NationalId}"  FieldName="EmployeeDocNationalId"  FilterPopupMode="CheckedList" MinWidth="80" MaxWidth="100" ReadOnly="True" ShowInColumnChooser="True" Visible="False">
+                <dxg:GridColumn.PrintCellStyle>
+                    <Style TargetType="dxe:BaseEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                        <Setter Property="dxp:ExportSettings.TargetType" Value="Panel" />
+                        <Setter Property="DisplayTemplate">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="dxe:BaseEdit">
+                                    <dxe:TextEdit Text="{Binding RowData.Row.EmployeeDocNationalId}"
+                                                           TextWrapping="Wrap"
+                                                           IsPrintingMode="True" />
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </dxg:GridColumn.PrintCellStyle>
+            </dxg:GridColumn> 
+            <dxg:GridColumn Header="{DynamicResource EmployeeLanguages}" FieldName="Languages" ColumnFilterMode="DisplayText"  FilterPopupMode="CheckedList" MinWidth="100" MaxWidth="180" ReadOnly="True" ShowInColumnChooser="True" Visible="False">
+                <dxg:GridColumn.PrintCellStyle>
+                    <Style TargetType="dxe:BaseEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                        <Setter Property="dxp:ExportSettings.TargetType" Value="Panel" />
+                        <Setter Property="DisplayTemplate">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="dxe:BaseEdit">
+                                    <dxe:TextEdit Text="{Binding RowData.Row.Languages}"
+                                                           TextWrapping="Wrap"
+                                                           IsPrintingMode="True" />
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </dxg:GridColumn.PrintCellStyle>
+            </dxg:GridColumn>             
+            <!--<dxg:GridColumn Header="{DynamicResource EmployeeWorkSchedule}" FieldName="CompanyShift.CompanySchedule.Name"  ColumnFilterMode="DisplayText"  FilterPopupMode="CheckedList" MinWidth="100" MaxWidth="180" ReadOnly="True" ShowInColumnChooser="True" Visible="False"/>-->
+            <!--<dxg:GridColumn Header="{DynamicResource EmployeeShiftName}" FieldName="CompanyShift.Name"  ColumnFilterMode="DisplayText"  FilterPopupMode="CheckedList" MinWidth="100" MaxWidth="180" ReadOnly="True" ShowInColumnChooser="True" Visible="False"/>-->             
+            <!--swapnil-->
+            <dxg:GridColumn Header="{DynamicResource EmployeeWorkSchedule}" FieldName="EmployeeShiftScheduleNames" Name="EmployeeShiftScheduleNames" ColumnFilterMode="DisplayText"  FilterPopupMode="CheckedList" MinWidth="100" MaxWidth="180" ReadOnly="True" ShowInColumnChooser="True" Visible="False">
+                <dxg:GridColumn.PrintCellStyle>
+                    <Style TargetType="dxe:BaseEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                        <Setter Property="dxp:ExportSettings.TargetType" Value="Panel" />
+                        <Setter Property="DisplayTemplate">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="dxe:BaseEdit">
+                                    <dxe:TextEdit 
+                                                 Text="{Binding RowData.Row.EmployeeShiftScheduleNames}"
+                                                 TextWrapping="Wrap"
+                                                 IsPrintingMode="True" />
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </dxg:GridColumn.PrintCellStyle>
+            </dxg:GridColumn>
+            <dxg:GridColumn Header="{DynamicResource EmployeeShiftName}" FieldName="EmployeeShiftNames" Name="EmployeeShiftNames" ColumnFilterMode="DisplayText"  FilterPopupMode="CheckedList" MinWidth="100" MaxWidth="200" ReadOnly="True" ShowInColumnChooser="True" Visible="False">
+                <dxg:GridColumn.PrintCellStyle>
+                    <Style TargetType="dxe:BaseEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                        <Setter Property="dxp:ExportSettings.TargetType" Value="Panel" />
+                        <Setter Property="DisplayTemplate">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="dxe:BaseEdit">
+                                    <dxe:TextEdit 
+                                                 Text="{Binding RowData.Row.EmployeeShiftNames}"
+                                                 TextWrapping="Wrap"
+                                                 IsPrintingMode="True" />
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </dxg:GridColumn.PrintCellStyle>
+            </dxg:GridColumn>
+            <!--<dxg:GridColumn Header="{DynamicResource EmployeeWorkStartTime}" FieldName="CompanyShift.StartTime1"  ColumnFilterMode="DisplayText"  FilterPopupMode="CheckedList" MinWidth="100" MaxWidth="180" ReadOnly="True" ShowInColumnChooser="True" Visible="False">
+                <dxg:GridColumn.CellTemplate>
+                    <DataTemplate>
+                        <dxe:TextEdit x:Name="textEdit1" IsPrintingMode="True" HorizontalAlignment="Stretch"  Background="Transparent" Padding="0"
+                                                      VerticalAlignment="Stretch" Text="{Binding RowData.Row.CompanyShift.StartTime1}" MaskType="DateTimeAdvancingCaret" Mask="HH:mm" MaskUseAsDisplayFormat="True" BorderThickness="0"  BorderBrush="Transparent" IsReadOnly="True"/>
+                    </DataTemplate>
+                </dxg:GridColumn.CellTemplate>
+
+                <dxg:GridColumn.EditSettings>
+                    <dxe:TextEditSettings  MaskType="DateTimeAdvancingCaret" Mask="HH:mm" MaskUseAsDisplayFormat="True"  >
+                    </dxe:TextEditSettings>
+                </dxg:GridColumn.EditSettings>
+
+                <dxg:GridColumn.PrintCellStyle>
+                    <Style TargetType="dxe:BaseEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                        <Setter Property="dxp:ExportSettings.TargetType" Value="Panel" />
+                        <Setter Property="DisplayTemplate">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="dxe:BaseEdit">
+                                    <dxe:TextEdit dxp:ExportSettings.BorderThickness="1" 
+                                                   HorizontalAlignment="Stretch"  
+                                                   VerticalAlignment="Stretch" Text="{Binding RowData.Row.CompanyShift.StartTime1}" MaskType="DateTimeAdvancingCaret" Mask="HH:mm" MaskUseAsDisplayFormat="True"  IsReadOnly="True"
+                                                  IsPrintingMode="True" />
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </dxg:GridColumn.PrintCellStyle>
+            </dxg:GridColumn>
+            
+            <dxg:GridColumn Header="{DynamicResource EmployeeWorkEndTime}" FieldName="CompanyShift.EndTime1"  ColumnFilterMode="DisplayText"  FilterPopupMode="CheckedList" MinWidth="100" MaxWidth="180" ReadOnly="True" ShowInColumnChooser="True" Visible="False">
+                <dxg:GridColumn.CellTemplate>
+                    <DataTemplate>
+                        <dxe:TextEdit x:Name="textEdit1" IsPrintingMode="True" HorizontalAlignment="Stretch"  Background="Transparent" Padding="0"
+                                                      VerticalAlignment="Stretch" Text="{Binding RowData.Row.CompanyShift.EndTime1}" MaskType="DateTimeAdvancingCaret" Mask="HH:mm" MaskUseAsDisplayFormat="True" BorderThickness="0"  BorderBrush="Transparent" IsReadOnly="True"/>
+                    </DataTemplate>
+                </dxg:GridColumn.CellTemplate>
+                
+                <dxg:GridColumn.EditSettings>
+                    <dxe:TextEditSettings  MaskType="DateTimeAdvancingCaret" Mask="HH:mm" MaskUseAsDisplayFormat="True"  >
+                    </dxe:TextEditSettings>
+                </dxg:GridColumn.EditSettings>
+
+                <dxg:GridColumn.PrintCellStyle>
+                    <Style TargetType="dxe:BaseEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                        <Setter Property="dxp:ExportSettings.TargetType" Value="Panel" />
+                        <Setter Property="DisplayTemplate">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="dxe:BaseEdit">
+                                    <dxe:TextEdit dxp:ExportSettings.BorderThickness="1" 
+                                                   HorizontalAlignment="Stretch" 
+                                                   VerticalAlignment="Stretch" Text="{Binding RowData.Row.CompanyShift.EndTime1}" MaskType="DateTimeAdvancingCaret" Mask="HH:mm" MaskUseAsDisplayFormat="True" IsReadOnly="True"
+                                                  IsPrintingMode="True" />
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </dxg:GridColumn.PrintCellStyle>
+
+            </dxg:GridColumn>
+            
+            <dxg:GridColumn Header="{DynamicResource EmployeeWorkBreakTime}" FieldName="CompanyShift.BreakTime.TotalMinutes"  ColumnFilterMode="DisplayText"  FilterPopupMode="CheckedList" MinWidth="100" MaxWidth="180" ReadOnly="True" ShowInColumnChooser="True" Visible="False"/>-->            
+            <dxg:GridColumn Header="{DynamicResource EmployeeJobCode}" FieldName="EmpJobCodes"  ColumnFilterMode="DisplayText"  FilterPopupMode="CheckedList" MinWidth="100" MaxWidth="120" ReadOnly="True" ShowInColumnChooser="True" Visible="False"/>
+            <dxg:GridColumn Header="{DynamicResource Passport}" FieldName="EmployeeDocPassport" FilterPopupMode="CheckedList" MinWidth="80" MaxWidth="100" ReadOnly="True" ShowInColumnChooser="True" Visible="False">
+                <dxg:GridColumn.PrintCellStyle>
+                    <Style TargetType="dxe:BaseEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                        <Setter Property="dxp:ExportSettings.TargetType" Value="Panel" />
+                        <Setter Property="DisplayTemplate">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="dxe:BaseEdit">
+                                    <dxe:TextEdit Text="{Binding RowData.Row.EmployeeDocPassport}"
+                                                           TextWrapping="Wrap"
+                                                           IsPrintingMode="True" />
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </dxg:GridColumn.PrintCellStyle>
+            </dxg:GridColumn> 
+            <dxg:GridColumn Header="{DynamicResource DrivingLicence}" FieldName="EmployeeDocDrLicense"  FilterPopupMode="CheckedList" MinWidth="100" MaxWidth="120" ReadOnly="True" ShowInColumnChooser="True" Visible="False">
+                <dxg:GridColumn.PrintCellStyle>
+                    <Style TargetType="dxe:BaseEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                        <Setter Property="dxp:ExportSettings.TargetType" Value="Panel" />
+                        <Setter Property="DisplayTemplate">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="dxe:BaseEdit">
+                                    <dxe:TextEdit Text="{Binding RowData.Row.EmployeeDocDrLicense}"
+                                                           TextWrapping="Wrap"
+                                                           IsPrintingMode="True" />
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </dxg:GridColumn.PrintCellStyle>
+            </dxg:GridColumn> 
+            <dxg:GridColumn Header="{DynamicResource ClockTimeId}" FieldName="EmployeeDocClockId"  FilterPopupMode="CheckedList" MinWidth="80" MaxWidth="100" ReadOnly="True" ShowInColumnChooser="True" Visible="False">
+                <dxg:GridColumn.PrintCellStyle>
+                    <Style TargetType="dxe:BaseEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                        <Setter Property="dxp:ExportSettings.TargetType" Value="Panel" />
+                        <Setter Property="DisplayTemplate">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="dxe:BaseEdit">
+                                    <dxe:TextEdit Text="{Binding RowData.Row.EmployeeDocClockId}"
+                                                           TextWrapping="Wrap"
+                                                           IsPrintingMode="True" />
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </dxg:GridColumn.PrintCellStyle>
+            </dxg:GridColumn> 
+            <dxg:GridColumn Header="{DynamicResource PublicInsurance}" FieldName="EmployeeDocPubIns" FilterPopupMode="CheckedList" MinWidth="100" MaxWidth="120" ReadOnly="True" ShowInColumnChooser="True" Visible="False">
+                <dxg:GridColumn.PrintCellStyle>
+                    <Style TargetType="dxe:BaseEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                        <Setter Property="dxp:ExportSettings.TargetType" Value="Panel" />
+                        <Setter Property="DisplayTemplate">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="dxe:BaseEdit">
+                                    <dxe:TextEdit Text="{Binding RowData.Row.EmployeeDocPubIns}"
+                                                           TextWrapping="Wrap"
+                                                           IsPrintingMode="True" />
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </dxg:GridColumn.PrintCellStyle>
+            </dxg:GridColumn> 
+            <dxg:GridColumn Header="{DynamicResource PrivateInsurance}" FieldName="EmployeeDocPriIns" FilterPopupMode="CheckedList" MinWidth="110" MaxWidth="120" ReadOnly="True" ShowInColumnChooser="True" Visible="False">
+                <dxg:GridColumn.PrintCellStyle>
+                    <Style TargetType="dxe:BaseEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                        <Setter Property="dxp:ExportSettings.TargetType" Value="Panel" />
+                        <Setter Property="DisplayTemplate">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="dxe:BaseEdit">
+                                    <dxe:TextEdit Text="{Binding RowData.Row.EmployeeDocPriIns}"
+                                                           TextWrapping="Wrap"
+                                                           IsPrintingMode="True" />
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </dxg:GridColumn.PrintCellStyle>
+            </dxg:GridColumn>
+            <dxg:GridColumn Header="{DynamicResource Visa}" FieldName="EmployeeDocVisa"  FilterPopupMode="CheckedList" MinWidth="80" MaxWidth="100" ReadOnly="True" ShowInColumnChooser="True" Visible="False">
+                <dxg:GridColumn.PrintCellStyle>
+                    <Style TargetType="dxe:BaseEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                        <Setter Property="dxp:ExportSettings.TargetType" Value="Panel" />
+                        <Setter Property="DisplayTemplate">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="dxe:BaseEdit">
+                                    <dxe:TextEdit Text="{Binding RowData.Row.EmployeeDocVisa}"
+                                                           TextWrapping="Wrap"
+                                                           IsPrintingMode="True" />
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </dxg:GridColumn.PrintCellStyle>
+            </dxg:GridColumn>
+            <dxg:GridColumn Header="{DynamicResource EmployeeLongTermAbsent}" FieldName="IsLongTermAbsentYesNo" Name="EmployeeLongTermAbsent" ColumnFilterMode="DisplayText"  FilterPopupMode="CheckedList" MinWidth="100" MaxWidth="200" ReadOnly="True" ShowInColumnChooser="True" Visible="False">
+                <dxg:GridColumn.PrintCellStyle>
+                    <Style TargetType="dxe:BaseEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                        <Setter Property="dxp:ExportSettings.TargetType" Value="Panel" />
+                        <Setter Property="DisplayTemplate">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="dxe:BaseEdit">
+                                    <dxe:TextEdit 
+                                                Text="{Binding RowData.Row.IsLongTermAbsentYesNo}"
+                                                 TextWrapping="Wrap"
+                                                 IsPrintingMode="True" />
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </dxg:GridColumn.PrintCellStyle>
+            </dxg:GridColumn>
+            <dxg:GridColumn Header="{DynamicResource Other}" FieldName="EmployeeDocOther" FilterPopupMode="CheckedList" MinWidth="80" MaxWidth="100" ReadOnly="True" ShowInColumnChooser="True" Visible="False">
+                <dxg:GridColumn.PrintCellStyle>
+                    <Style TargetType="dxe:BaseEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                        <Setter Property="dxp:ExportSettings.TargetType" Value="Panel" />
+                        <Setter Property="DisplayTemplate">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="dxe:BaseEdit">
+                                    <dxe:TextEdit 
+                                                           Text="{Binding RowData.Row.EmployeeDocOther}"
+                                                           TextWrapping="Wrap"
+                                                           IsPrintingMode="True" />
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </dxg:GridColumn.PrintCellStyle>
+            </dxg:GridColumn> 
+            <dxg:GridColumn Header="{DynamicResource EmployeeProfileEmployeeJobDescriptionCode}" FieldName="EmpJobCodeAbbreviations"  ColumnFilterMode="DisplayText"  FilterPopupMode="CheckedList" MinWidth="100" MaxWidth="120" ReadOnly="True" ShowInColumnChooser="True" Visible="False"/>
+            <!--[Sprint-62][09/05/2019][sdesai]-Add new fields Company, Organization, Location in employees grid-->
+            <dxg:GridColumn Header="{DynamicResource Company}" FieldName="Company"  ColumnFilterMode="DisplayText"  FilterPopupMode="CheckedList" MinWidth="100" MaxWidth="120" ReadOnly="True" ShowInColumnChooser="True" Visible="False">
+                <dxg:GridColumn.PrintCellStyle>
+                    <Style TargetType="dxe:BaseEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                        <Setter Property="dxp:ExportSettings.TargetType" Value="Panel" />
+                        <Setter Property="DisplayTemplate">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="dxe:BaseEdit">
+                                    <dxe:TextEdit 
+                                                           Text="{Binding RowData.Row.Company}"
+                                                           TextWrapping="Wrap"
+                                                           IsPrintingMode="True" />
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </dxg:GridColumn.PrintCellStyle>
+            </dxg:GridColumn> 
+            <dxg:GridColumn Header="{DynamicResource Organization}" FieldName="Organization"  ColumnFilterMode="DisplayText"  FilterPopupMode="CheckedList" MinWidth="110" MaxWidth="120" ReadOnly="True" ShowInColumnChooser="True" Visible="False">
+                <dxg:GridColumn.PrintCellStyle>
+                    <Style TargetType="dxe:BaseEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                        <Setter Property="dxp:ExportSettings.TargetType" Value="Panel" />
+                        <Setter Property="DisplayTemplate">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="dxe:BaseEdit">
+                                    <dxe:TextEdit 
+                                                           Text="{Binding RowData.Row.Organization}"
+                                                           TextWrapping="Wrap"
+                                                           IsPrintingMode="True" />
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </dxg:GridColumn.PrintCellStyle>
+            </dxg:GridColumn>
+            <dxg:GridColumn Header="{DynamicResource Location}" FieldName="CompanyLocation.Alias"  ColumnFilterMode="DisplayText"  FilterPopupMode="CheckedList" MinWidth="100" MaxWidth="120" ReadOnly="True" ShowInColumnChooser="True" Visible="False"/>
+            <dxmvvm:Interaction.Behaviors>
+                <UIHelper:GridSelectingBehavior />
+
+                <dxmvvm:EventToCommand EventName="CustomUnboundColumnData"
+                                       Command="{Binding CustomUnboundColumnDataCommand}"
+                                       PassEventArgsToCommand="True"/>
+
+                <dxmvvm:EventToCommand EventName="CustomColumnSort"
+                                       Command="{Binding CustomSortColumnDataCommand}"
+                                       PassEventArgsToCommand="True"/>
+            </dxmvvm:Interaction.Behaviors>
+            <dxg:GridControl.TotalSummary>
+                <dxg:GridSummaryItem x:Name="summary" FieldName="FirstName" SummaryType="Count" DisplayFormat="Total Count: {0}" Visible="True" Alignment="Left"/>
+                <dxg:GridSummaryItem x:Name="summary1" FieldName="LengthOfService" SummaryType="Average" DisplayFormat="Avg: {0:N0}" Visible="True" />
+                <dxg:GridSummaryItem x:Name="summary2" FieldName="BirthDateUnbound" SummaryType="Average" DisplayFormat="Avg: {0:N0}" Visible="True" />
+            </dxg:GridControl.TotalSummary>
+
+            <dxg:GridControl.View>
+                <dxg:TableView x:Name="EmployeeProfileTableView"
+                                   NavigationStyle="Row"
+                                   RowDetailsVisibilityMode="Visible"
+                                   ShowHorizontalLines="True"
+                                   ShowSearchPanelMode="Always"
+                                   ShowColumnHeaders="True"
+                                   VerticalScrollbarVisibility="Auto" 
+                                   HorizontalScrollbarVisibility="Auto"
+                                   AllowFixedColumnMenu="False"
+                                   ShowTotalSummary="True"
+                                   ShowFixedTotalSummary="True"
+                                   SearchPanelHorizontalAlignment="Stretch"
+                                   IsColumnChooserVisible="{Binding IsEmployeeProfileViewColumnChooserVisible,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                   ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly"
+                                   AllowGrouping="True"
+                                   ShowGroupPanel="False"
+                                   ShowIndicator="False" 
+                                   SearchString="{Binding MyFilterString,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                   FocusedRow="{Binding Path=SelectedGridRow,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                   RowDetailsTemplate="{Binding SelectedItem.DetailTemplate,ElementName=rowTemplateComboBox}"
+                                   RowStyle="{Binding SelectedItem.RowStyle,ElementName=rowTemplateComboBox}">
+                          <!--  RowStyle="{StaticResource EmployeerowToolTipStyle}"-->
+                   
+                    <dxg:TableView.Resources>
+                        <DataTemplate x:Key="EmployeeReportPrintHeaderTemplate">
+                            <Grid Width="{Binding UsablePageWidth}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="50" />
+                                    <ColumnDefinition Width="130" />
+                                </Grid.ColumnDefinitions>
+                                <dxe:TextEdit Text=" " Width="{Binding UsablePageWidth}" Grid.ColumnSpan="3" IsPrintingMode="True" Background="#333E5E" HorizontalAlignment="Stretch" 
+                                                      VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" Height="50" />
+                                <dxe:TextEdit Text="Employee Report" IsPrintingMode="True" HorizontalAlignment="Stretch" 
+                                                      VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" />
+                                <Image Source="/Emdep.Geos.Modules.Hrm;component/Assets/Images/GeosReportLogo.png" Height="50" Width="80"  dxp:ExportSettings.TargetType="Image" Grid.Column="2" />
+                            </Grid>
+                        </DataTemplate>
+
+                        <DataTemplate x:Key="EmployeeReportPrintFooterTemplate">
+                            <dxe:TextEdit HorizontalContentAlignment="Center" 
+                                            Width="{Binding Path=UsablePageWidth, Mode=OneWay}" 
+                                            dxp:ExportSettings.TargetType="PageNumber" 
+                                            dxp:PageNumberExportSettings.Kind="NumberOfTotal" 
+                                            dxp:PageNumberExportSettings.Format="Page {0} of {1}"/>
+                        </DataTemplate>
+
+                    </dxg:TableView.Resources>
+                    <Interactive:Interaction.Triggers>
+                        <Interactive:EventTrigger  EventName="Loaded">
+                            <Behaviors:InvokeDelegateCommandAction Command="{Binding CustomCellAppearanceCommand}" 
+                                                                   CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=InvokeParameter}" />
+                        </Interactive:EventTrigger>
+                    </Interactive:Interaction.Triggers>
+
+                    <dxmvvm:Interaction.Behaviors>
+                        <dxmvvm:EventToCommand EventName="MouseDoubleClick"
+                                               Command="{Binding CommandGridDoubleClick}"
+                                               CommandParameter="{Binding ElementName=EmployeeProfileTableView}" >
+                            <dxmvvm:EventToCommand.EventArgsConverter>
+                                <dx:EventArgsToDataRowConverter/>
+                            </dxmvvm:EventToCommand.EventArgsConverter>
+                        </dxmvvm:EventToCommand>
+
+                        <dxmvvm:EventToCommand EventName="ShowFilterPopup"
+                                               Command="{Binding CustomShowFilterPopupCommand}"
+                                               PassEventArgsToCommand="True"/>
+                    </dxmvvm:Interaction.Behaviors>
+
+                </dxg:TableView>
+                
+            </dxg:GridControl.View>
+        </dxg:GridControl>
+
+    </Grid>
+
+</UserControl>

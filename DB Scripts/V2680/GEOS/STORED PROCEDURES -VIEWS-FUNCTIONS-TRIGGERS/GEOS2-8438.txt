@@ -1,0 +1,65 @@
+DROP PROCEDURE IF EXISTS CRM_GetEngineeringAnalysisTypesByQuotationAndIdOT_V2680;
+DELIMITER $$
+CREATE PROCEDURE CRM_GetEngineeringAnalysisTypesByQuotationAndIdOT_V2680(
+   IN _IdQuotation   int(10) UNSIGNED,
+   IN _IdOT          int(10) UNSIGNED)
+BEGIN
+-- [cpatil][01-06-2021][GEOS2-2398]
+    -- [rahul.gadhave][16-10-2025][GEOS2-8438]
+    -- call CRM_GetEngineeringAnalysisTypesByQuotationAndIdOT_V2680();
+   SELECT wp.IdArticle,
+          ri.Quantity,
+          ri.IdRevisionItemStatus,
+          rev.IdRevision,
+          ri.IdRevisionItem
+     FROM revisions rev
+          INNER JOIN revisionitems ri ON rev.IdRevision = ri.IdRevision
+          INNER JOIN otitems oti ON oti.IdRevisionItem = ri.IdRevisionItem
+          INNER JOIN warehouseproduct wp
+             ON ri.IdProduct = wp.IdWarehouseProduct
+    WHERE     ri.Quantity > 0
+          AND rev.IdQuotation = _IdQuotation
+          AND oti.IdOT = _IdOT
+   GROUP BY wp.IdWarehouseProduct;
+   END$$
+DELIMITER ;
+
+
+DROP PROCEDURE IF EXISTS CRM_GetAssignedToFromOtitems_V2680;
+DELIMITER $$
+CREATE PROCEDURE CRM_GetAssignedToFromOtitems_V2680(
+   IN _IdRevisionItem   int(10) UNSIGNED)
+BEGIN
+-- [cpatil][01-06-2021][GEOS2-2398]
+    -- [rahul.gadhave][16-10-2025][GEOS2-8438]
+    -- call CRM_GetAssignedToFromOtitems_V2680(1705746);
+   SELECT wp.IdArticle,
+          ri.Quantity,
+          ri.IdRevisionItemStatus,
+          rev.IdRevision,
+          ri.IdRevisionItem,
+          oti.AssignedTo
+     FROM revisions rev
+          INNER JOIN revisionitems ri ON rev.IdRevision = ri.IdRevision
+          INNER JOIN otitems oti ON oti.IdRevisionItem = ri.IdRevisionItem
+          INNER JOIN warehouseproduct wp
+             ON ri.IdProduct = wp.IdWarehouseProduct
+    WHERE     ri.Quantity > 0
+          AND ri.IdRevisionItem= _IdRevisionItem
+   GROUP BY wp.IdWarehouseProduct;
+   END$$
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS CRM_otitems_Update_AssignedUser_V2680;
+DELIMITER $$
+CREATE PROCEDURE CRM_otitems_Update_AssignedUser_V2680(
+   IN _IdUser          int(10) UNSIGNED,
+   IN _IdRevisionItem   int(10) UNSIGNED
+   )
+BEGIN
+-- Call CRM_otitems_Update_AssignedUser_V2680(2,1705748)
+      UPDATE otitems
+         SET AssignedTo = _IdUser
+       WHERE IdRevisionItem = _IdRevisionItem;
+       END$$
+DELIMITER ;

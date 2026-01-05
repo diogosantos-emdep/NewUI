@@ -1,0 +1,25 @@
+INSERT INTO `geos_app_settings` 
+(`AppSettingName`, `IsUserModify`, `DefaultValue`) 
+VALUES 
+(
+  'PO_Code_Regex', 
+  0,   
+'(^|[^A-Za-z0-9./\\-])(
+  (?:[0-9]{6,10}_)?[0-9]{3,6}[A-Z]?/[0-9]{2,3}/[0-9]{2}(?:[-_][0-9]{3,6}[A-Z]?/[0-9]{2,3}/[0-9]{2})+
+| 20[0-9]{2}(?:[A-Z]{2})?-[0-9]{3,6}
+| [A-Z]{2}[0-9]{2}[A-Z]{2}[0-9]{4}
+| [A-Z]{1,4}(?:[ _]+[A-Z]{1,4})+/[0-9]{1,6}
+| [A-Z]{1,3}[0-9]{6,10}(?:/(?:[0-9]{1,5}|[A-Z]{1,3}[0-9]{6,10}))+
+| [A-Z]{1,3}[0-9]{6,10}
+)(?![A-Za-z0-9._/\\-])'
+
+);
+
+INSERT INTO `geos_app_settings` 
+(`AppSettingName`, `IsUserModify`, `DefaultValue`) 
+VALUES 
+(
+  'PO_Amount_Regex', 
+  0, 
+  '(?xi)(?<!\\w)(?:₹|\\$|€|£|¥)?\\s*\\d+(?:[.,]\\d+)?(?:[.,]\\d+)?(?:\\s*(?:USD|EUR|GBP|INR|JPY|AUD|CAD|CHF|CNY|HKD|SGD|NZD|SEK|NOK|DKK|ZAR|MXN|BRL|RUB|TRY|AED|SAR|PLN|HUF|CZK|RON))?(?:\\s*(?:₹|\\$|€|£|¥))?(?!\\w)'
+);

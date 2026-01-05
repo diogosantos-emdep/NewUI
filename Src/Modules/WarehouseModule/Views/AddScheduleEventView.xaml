@@ -1,0 +1,246 @@
+﻿<dxwui:WinUIDialogWindow x:Class="Emdep.Geos.Modules.Warehouse.Views.AddScheduleEventView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.Warehouse.Views"
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"                          
+             xmlns:UIConverter="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+             xmlns:Validation="clr-namespace:Emdep.Geos.UI.Validations;assembly=Emdep.Geos.UI.Validations"
+             xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+             xmlns:behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+             mc:Ignorable="d" 
+            
+             Title="{DynamicResource Addscheduleeventview_Addnewevent}" TitleStyle="{DynamicResource WinUIDialogWindowTitleStyle}"
+             Style="{DynamicResource WinUIDialogWindowStyle}">
+
+    <!--[nsatpute][22.09.2025][GEOS2-8795]-->
+
+    <dxwui:WinUIDialogWindow.Resources>
+        <UIConverter:DateFormatConverter x:Key="DateFormatConverter" />
+        <sys:String x:Key="ShortDateTimeFormat">dd/MM/yyyy hh:mm tt</sys:String>
+        <sys:String x:Key="ShortTimeFormat">hh:mm tt</sys:String>
+        <sys:String x:Key="ShortDateFormat">dd/MM/yyyy</sys:String>
+    </dxwui:WinUIDialogWindow.Resources>
+
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape"  Command="{Binding CancelButtonCommand}"/>
+    </dxwui:WinUIDialogWindow.InputBindings>
+
+    <Grid >
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="55"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="110"/>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="40"/>
+
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="120"/>
+            <ColumnDefinition Width="150"/>
+            <ColumnDefinition Width="120"/>
+            <ColumnDefinition Width="120"/>
+        </Grid.ColumnDefinitions>
+
+
+        <!--Type-->
+        <Label Grid.Row="0" Grid.Column="0" Content="{DynamicResource Addscheduleeventview_Type}" Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,5,5,5"/>
+        <dxe:ComboBoxEdit Style="{DynamicResource ComboBoxEditStyle}"  Grid.Column="1" 
+                          Grid.Row="0" Grid.ColumnSpan="2" Height="30"  Margin="5,5,5,5" 
+                          ItemsSource="{Binding EventTypeList,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged }" 
+                          IsEnabled="{Binding IsNew,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" 
+                          DisplayMember="Value" ValueMember="IdLookupValue"  IsTextEditable="False" ValidateOnTextInput="False"
+                          AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True" >
+            <dxe:ComboBoxEdit.SelectedIndex>
+
+                <Binding Path="SelectedIndexForEventType" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                    <Binding.ValidationRules >
+                        <Validation:AddScheduleEventValidation FieldName="SelectedIndexForEventType" ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True"/>
+                    </Binding.ValidationRules>
+                </Binding>
+            </dxe:ComboBoxEdit.SelectedIndex>
+
+            <dxmvvm:Interaction.Behaviors>
+                <dxmvvm:EventToCommand EventName="SelectedIndexChanged"
+                                       Command="{Binding DataContext.SelectedIndexChangedCommand, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"
+                                       PassEventArgsToCommand="True"/>
+            </dxmvvm:Interaction.Behaviors>
+        </dxe:ComboBoxEdit>
+
+        <!--Logistic-->
+        <Label Grid.Row="1" Grid.Column="0" Content="{DynamicResource Addscheduleeventview_Logistic}" Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,5,5,5"/>
+        <dxe:ComboBoxEdit Style="{DynamicResource ComboBoxEditStyle}"  Grid.Column="1" 
+                          Grid.Row="1" Grid.ColumnSpan="2" Height="30"  Margin="5,5,5,5" 
+                          ItemsSource="{Binding LogisticList,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged }" 
+                          IsEnabled="{Binding IsLogisticEnable,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" 
+                          DisplayMember="Value" ValueMember="IdLookupValue"  IsTextEditable="False" ValidateOnTextInput="False"
+                          AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True" >
+            <dxe:ComboBoxEdit.SelectedIndex>
+
+                <Binding Path="SelectedIndexForLogistic" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                    <Binding.ValidationRules >
+                        <Validation:AddScheduleEventValidation FieldName="SelectedIndexForLogistic" ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True"/>
+                    </Binding.ValidationRules>
+                </Binding>
+            </dxe:ComboBoxEdit.SelectedIndex>
+
+            <dxmvvm:Interaction.Behaviors>
+                <dxmvvm:EventToCommand EventName="SelectedIndexChanged"
+                                       Command="{Binding DataContext.SelectedIndexChangedCommand, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"
+                                       PassEventArgsToCommand="True"/>
+            </dxmvvm:Interaction.Behaviors>
+        </dxe:ComboBoxEdit>
+
+        <!--Start Time-->
+        <Label Content= "{DynamicResource Addscheduleeventview_Starttime}" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="5 5 5 5" HorizontalAlignment="Left" Height="30" FontSize="16" />
+
+        <dxe:DateEdit  Grid.Row="2" Grid.Column="1" Margin="5 5 5 5" HorizontalAlignment="Stretch" VerticalAlignment="Center" AllowNullInput="True" 
+                       >
+            <dxe:DateEdit.EditValue>
+                <Binding Path="StartDate" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay"
+                                                  ValidatesOnDataErrors="True">
+                    <Binding.ValidationRules>
+                        <Validation:AddScheduleEventValidation FieldName="StartDate" ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True"/>
+                    </Binding.ValidationRules>
+                </Binding>
+            </dxe:DateEdit.EditValue>
+
+            <dxmvvm:Interaction.Behaviors>
+                <dxmvvm:EventToCommand EventName="EditValueChanging" Command="{Binding DataContext.OnDateEditValueChangingCommand,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" PassEventArgsToCommand="True"/>
+            </dxmvvm:Interaction.Behaviors>
+        </dxe:DateEdit>
+
+
+        <dxe:TextEdit Width="110" Mask="HH:mm" Margin="5"
+                      Grid.Row="2" Grid.Column="2" Height="25" 
+                      MaskType="DateTimeAdvancingCaret" DisplayFormatString="HH:mm"  >
+            <dxe:TextEdit.EditValue>
+                <Binding Path="DataContext.StartTime" RelativeSource="{RelativeSource AncestorType=dxwui:WinUIDialogWindow}" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                    <Binding.ValidationRules>
+                        <Validation:AddScheduleEventValidation FieldName="StartTime" ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True"/>
+                    </Binding.ValidationRules>
+                </Binding>
+            </dxe:TextEdit.EditValue>
+            <dxmvvm:Interaction.Behaviors>
+                <dxmvvm:EventToCommand EventName="EditValueChanging" Command="{Binding DataContext.OnTextEditValueChangingCommand,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" PassEventArgsToCommand="True"/>
+            </dxmvvm:Interaction.Behaviors>
+        </dxe:TextEdit>
+
+
+        <!--End Time-->
+        <Label Content= "{DynamicResource Addscheduleeventview_Endtime}" Grid.Row="3" Grid.Column="0"  HorizontalAlignment="Left" Margin="5 5 5 5" Height="30" FontSize="16" />
+
+        <dxe:DateEdit Grid.Row="3" Grid.Column="1"  ValidateOnEnterKeyPressed="True" Margin="5 5 5 5" HorizontalAlignment="Stretch" VerticalAlignment="Center" IsEnabled="{Binding IsEndDateTimeEnable,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged }"
+                     AllowNullInput="True" >
+            <dxe:DateEdit.EditValue>
+                <Binding Path="EndDate" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay" ValidatesOnDataErrors="True">
+                    <Binding.ValidationRules>
+                        <Validation:AddScheduleEventValidation FieldName="EndDate" ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True"/>
+                    </Binding.ValidationRules>
+                </Binding>
+            </dxe:DateEdit.EditValue>
+            <dxmvvm:Interaction.Behaviors>
+                <dxmvvm:EventToCommand EventName="EditValueChanging" Command="{Binding DataContext.OnDateEditValueChangingCommand,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" PassEventArgsToCommand="True"/>
+            </dxmvvm:Interaction.Behaviors>
+
+        </dxe:DateEdit>
+
+
+        <dxe:TextEdit Width="110" Mask="HH:mm" Margin="5" IsEnabled="{Binding IsEndDateTimeEnable,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged }"
+                     Grid.Row="3" Grid.Column="2" Height="25" 
+                      MaskType="DateTimeAdvancingCaret" DisplayFormatString="HH:mm" >
+            <dxe:TextEdit.EditValue>
+                <Binding Path="DataContext.EndTime" RelativeSource="{RelativeSource AncestorType=dxwui:WinUIDialogWindow}" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                    <Binding.ValidationRules>
+                        <Validation:AddScheduleEventValidation FieldName="EndTime" ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True"/>
+                    </Binding.ValidationRules>
+                </Binding>
+            </dxe:TextEdit.EditValue>
+            <dxmvvm:Interaction.Behaviors>
+                <dxmvvm:EventToCommand EventName="EditValueChanging" Command="{Binding DataContext.OnTextEditValueChangingCommand,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" PassEventArgsToCommand="True"/>
+            </dxmvvm:Interaction.Behaviors>
+        </dxe:TextEdit>
+
+        <dxe:CheckEdit Grid.Row="3" Grid.Column="3" Content="{DynamicResource Addscheduleeventview_Alldayevent}" x:Name="PART_Editor" 
+                IsChecked="{Binding AllDayEventChecked}" VerticalAlignment="Center" Margin="5,0,0,0">
+            <dxe:CheckEdit.Style>
+                <Style TargetType="dxe:CheckEdit">
+                    <Setter Property="Width" Value="120"/>
+                    <Setter Property="Height" Value="24"/>
+                </Style>
+            </dxe:CheckEdit.Style>
+            <dxmvvm:Interaction.Behaviors>
+                <dxmvvm:EventToCommand EventName="EditValueChanged" Command="{Binding DataContext.CheckChangedCommand,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" PassEventArgsToCommand="True"/>
+            </dxmvvm:Interaction.Behaviors>
+        </dxe:CheckEdit>
+
+        <Label Grid.Row="4" Grid.Column="0" Content="{DynamicResource Addscheduleeventview_Observations}" Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5,5,5,5"/>
+
+
+        <dxe:TextEdit HorizontalAlignment="Stretch" 
+              VerticalAlignment="Stretch" 
+              Grid.Row="4" 
+              Grid.Column="1"  
+              Grid.ColumnSpan="2" 
+              TextWrapping="Wrap" 
+              VerticalContentAlignment="Top"
+              AcceptsReturn="True"
+              AcceptsTab="True"
+              Height="Auto"
+              MaxHeight="200"
+              Margin="5,5,5,5"
+              ScrollViewer.VerticalScrollBarVisibility="Auto"
+              ValidateOnEnterKeyPressed="True">
+            <dxe:TextEdit.EditValue>
+                <Binding Path="Observations" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay" ValidatesOnDataErrors="True">
+                    <Binding.ValidationRules>
+                        <Validation:AddScheduleEventValidation FieldName="Observations" ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True"/>
+                    </Binding.ValidationRules>
+                </Binding>
+            </dxe:TextEdit.EditValue>
+            <dxmvvm:Interaction.Behaviors>
+                <dxmvvm:EventToCommand EventName="EditValueChanging" Command="{Binding DataContext.OnTextEditValueChangingCommand,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" PassEventArgsToCommand="True"/>
+            </dxmvvm:Interaction.Behaviors>
+        </dxe:TextEdit>
+
+
+
+        <StackPanel Orientation="Horizontal" Grid.Column="1" Grid.Row="6" Grid.ColumnSpan="2">
+            <Button Content="{DynamicResource Addscheduleeventview_Accept}"
+                Command="{Binding AcceptButtonCommand}"
+                   FontSize="16"
+                    Height="30"
+                    Width="100"
+                    Margin="5,5,15,5"
+                    Style="{DynamicResource Button16Style}"
+                    VerticalAlignment="Bottom" 
+                    IsEnabled="{Binding AddShiftEnabled}"/>
+
+
+            <Button Content="{DynamicResource Addscheduleeventview_Cancel}"
+                Command="{Binding CancelButtonCommand}" 
+                   FontSize="16"
+                    Height="30"
+                    Width="100"
+                    Margin="5,5,5,5"
+                    Style="{DynamicResource Button16Style}"
+                    VerticalAlignment="Bottom" HorizontalAlignment="Right" />
+        </StackPanel>
+    </Grid>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="KeyDown">
+            <behaviors:InvokeDelegateCommandAction Command="{Binding CommandTextInput}" CommandParameter="{Binding Path=InvokeParameter, RelativeSource={RelativeSource Self}}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+</dxwui:WinUIDialogWindow> 

@@ -1,0 +1,78 @@
+﻿<dxwui:WinUIDialogWindow  x:Class="Emdep.Geos.Modules.PCM.Views.DuplicateModulesAdditionalInformationView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors" 
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.PCM.Views"
+             xmlns:ViewModels="clr-namespace:Emdep.Geos.Modules.PCM.ViewModels"
+             mc:Ignorable="d"
+             Title="{DynamicResource DublicateTitle}" TitleStyle="{DynamicResource WinUIDialogWindowTitleStyle}">
+
+    <Grid>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="10"/>
+                <RowDefinition Height="auto"/>
+            </Grid.RowDefinitions>
+            <Grid >
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="5"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="5"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="5"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="5"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="5"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="5"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="5"/>
+                </Grid.RowDefinitions>
+
+                <!--Checkbox-->
+                <CheckBox Content="{DynamicResource DublicateIamges}" IsChecked="{Binding IsCheckedImages}" VerticalContentAlignment="Center" Margin="30,0,0,0" Grid.Row="2"/>
+                <CheckBox Content="{DynamicResource DublicateAttachment}" IsChecked="{Binding IsCheckedAttachment}" VerticalContentAlignment="Center" Margin="30,0,0,0" Grid.Row="4"/>
+                <CheckBox Content="{DynamicResource Links}" IsChecked="{Binding IsCheckedLinks}" VerticalContentAlignment="Center" Margin="30,0,0,0" Grid.Row="6"/>
+                <CheckBox Content="{DynamicResource DublicateCustomers}" IsChecked="{Binding IsCheckedCustomers}" VerticalContentAlignment="Center" Margin="30,0,0,0" Grid.Row="8"/>
+                <CheckBox Content="{DynamicResource DublicateRelatedModules}" IsChecked="{Binding IsCheckedRelatedModules}" VerticalContentAlignment="Center" Margin="30,0,0,0" Grid.Row="10"/><!--[Sudhir.Jangra][GEOS2-4468][31/05/2023]-->
+                <!--[rdixit][29.03.2023][GEOS2-4262]-->
+                <CheckBox Content="{DynamicResource DublicateCompatibility}" IsChecked="{Binding IsCheckedCompatibility}" VerticalContentAlignment="Center" Margin="30,0,0,0" Grid.Row="12" Visibility="{Binding IsDuplicateModuleButtonVisible}"/>
+                <CheckBox Content="{DynamicResource DublicatePrices}" IsChecked="{Binding IsCheckedPrice}" VerticalContentAlignment="Center" Margin="30,0,0,0" Grid.Row="12" Visibility="{Binding IsDuplicateDetectionButtonVisible}"/>
+            </Grid>
+
+            <!--Accept and Cancel Button-->
+            <Grid Grid.Row="2" ShowGridLines="False" VerticalAlignment="Center" HorizontalAlignment="Center" >
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="50"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Button Grid.Row="3" Grid.Column="0"
+                    Style="{DynamicResource Button16Style}"
+                    HorizontalAlignment="Right"
+                    Content="{DynamicResource AddCatalogueAcceptButton}"
+                    Command="{Binding DuplicateAcceptButtonCommand}"
+                    Height="30"
+                    Width="100" 
+                    CommandParameter="{Binding ElementName=Compatibility}"
+                    />
+
+                <Button Grid.Row="3" Grid.Column="2"
+                    Style="{DynamicResource Button16Style}"
+                    HorizontalAlignment="Left"
+                    Content="{DynamicResource AddCatalogueCancelButton}"
+                    Command="{Binding DuplicateCancelButtonCommand}"
+                    Height="30"
+                    Width="100" />
+            </Grid>
+        </Grid>
+    </Grid>
+</dxwui:WinUIDialogWindow>

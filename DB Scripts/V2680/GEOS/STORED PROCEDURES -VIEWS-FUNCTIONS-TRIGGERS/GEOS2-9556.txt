@@ -1,0 +1,406 @@
+DROP PROCEDURE IF EXISTS SCM_Delete_Connector_V2680;
+DELIMITER $$
+CREATE PROCEDURE SCM_Delete_Connector_V2680(
+    IN _IdConnector int unsigned ,
+    IN _DeleteUser smallint
+)
+BEGIN
+-- [Rahul.Gadhave][GEOS2-9556][Date:04/11/2025]
+    UPDATE geos.connectors
+    SET 
+        Deleted = 1,
+        DeleteUser = _DeleteUser,
+        DeleteDate = NOW()
+    WHERE IdConnector = _IdConnector;
+END$$
+DELIMITER ;
+
+
+DROP PROCEDURE IF EXISTS SCM_GetConnectorCreator_V2680;
+DELIMITER $$
+CREATE PROCEDURE SCM_GetConnectorCreator_V2680(
+    IN _IdConnector int unsigned 
+)
+BEGIN
+-- [Rahul.Gadhave][GEOS2-9556][Date:04/11/2025]
+-- call SCM_GetConnectorCreator_V2680(33);
+  Select p.Email
+  from  connectors c
+  INNER JOIN People p ON p.IdPerson=c.CreatedBy
+    WHERE c.IdConnector = _IdConnector;
+END$$
+DELIMITER ;
+
+
+
+DROP PROCEDURE IF EXISTS SCM_GetAllConnectors_V2680;
+DELIMITER $$
+CREATE PROCEDURE `SCM_GetAllConnectors_V2680`(
+    IN _Ref                    VARCHAR(1000),
+   IN _idCompany              VARCHAR(9000),
+   IN _idFamily               VARCHAR(100),
+   IN _idConnectorSubFamily   VARCHAR(100),
+   IN _idColor                VARCHAR(100),
+   IN _idGender               VARCHAR(100),
+   IN _idShape                INT(10) UNSIGNED,
+   IN _CavitiesMin            SMALLINT(5),
+   IN _CavitiesMax            SMALLINT(5),
+   IN _diameterIntMin         SMALLINT(5),
+   IN _diameterIntMax         SMALLINT(5),
+   IN _diameterExtMin         SMALLINT(5),
+   IN _diameterExtMax         SMALLINT(5),
+   IN _heightMin              SMALLINT(5),
+   IN _heightMax              SMALLINT(5),
+   IN _lengthMin              SMALLINT(5),
+   IN _lengthMax              SMALLINT(5),
+   IN _widthMin               SMALLINT(5),
+   IN _widthMax               SMALLINT(5),
+   IN _Sealed                 TINYINT(1) UNSIGNED,
+   IN _connectorType          VARCHAR(100),
+   IN _ComponentQuery         LONGTEXT,
+   IN _GetAllRecords          TINYINT(1) UNSIGNED,
+   IN _idDeleted              TINYINT(1)
+   )
+BEGIN
+      -- [rdixit][19.06.2025][GEOS2-6645]
+      -- call SCM_GetAllConnectors_V2670(null,null,3,null,3,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'1900','',1)
+      DECLARE ref_conditions   TEXT;
+      SET SESSION tmp_table_size = 512000000;
+      SET SESSION max_heap_table_size = 512000000;
+
+       IF _Ref IS NOT NULL AND _Ref != ''
+      THEN
+         CALL BuildRefConditions_V2670(_Ref, ',', @ref_string);
+         SET ref_conditions = @ref_string;
+      ELSE
+         SET ref_conditions = '1=1';
+      END IF;
+
+
+      -- Create optimized temp table structure with indexes
+
+
+
+      DROP TEMPORARY TABLE IF EXISTS temp_connectors;
+    CREATE TEMPORARY TABLE temp_connectors (
+        IdConnector INT,
+        Ref VARCHAR(255),
+        numWays SMALLINT,
+        Family VARCHAR(255),
+        IdFamily INT,
+        SubFamily VARCHAR(255),
+        Color VARCHAR(255),
+        Terminal VARCHAR(255),
+        FileName VARCHAR(255),
+        Location VARCHAR(255),
+        Description TEXT,
+        Duplicated TINYINT,
+        IdType INT,
+        INDEX idx_ref (Ref),
+        INDEX idx_family (IdFamily),
+        INDEX idx_type (IdType)
+    )      ;
+
+      -- Build the base query with only essential joins and filters
+      SET @sql =
+             CONCAT(
+                '
+    INSERT INTO temp_connectors
+    SELECT DISTINCT
+        c.IdConnector,
+        c.Ref,
+        c.numWays,
+        fam.Name AS Family,
+        fam.IdFamily,
+        sfam.Name AS SubFamily,
+        col.Name AS Color,
+        ter.Name AS Terminal,
+        im.FileName,
+        (Select loc.Location from locationsbyconnector loc Where c.IdConnector = loc.IdConnector Limit 1) AS Location,
+        c.Description,
+        c.Duplicated,
+        fam.IdType
+    FROM connectors c    
+    INNER JOIN connectorfamilies fam ON c.Family = fam.idfamily');
+
+      -- Add conditional joins only when needed
+      IF _idColor IS NOT NULL AND _idColor != ''
+      THEN
+         SET @sql =
+                CONCAT(@sql,
+                       ' INNER JOIN colours col ON c.Color = col.idcolor');
+      ELSE
+         SET @sql =
+                CONCAT(@sql,
+                       ' LEFT JOIN colours col ON c.Color = col.idcolor');
+      END IF;
+
+      IF _idGender IS NOT NULL AND _idGender != ''
+      THEN
+         SET @sql =
+                CONCAT(
+                   @sql,
+                   ' INNER JOIN connectorterminals ter ON c.Terminal = ter.idterminal')
+;
+      ELSE
+         SET @sql =
+                CONCAT(
+                   @sql,
+                   ' LEFT JOIN connectorterminals ter ON c.Terminal = ter.idterminal')
+;
+      END IF;
+
+      IF _idConnectorSubFamily IS NOT NULL AND _idConnectorSubFamily != ''
+      THEN
+         SET @sql =
+                CONCAT(
+                   @sql,
+                   ' INNER JOIN connectorsubfamilies sfam ON c.SubFamily = sfam.idConnectorSubFamily')
+;
+      ELSE
+         SET @sql =
+                CONCAT(
+                   @sql,
+                   ' LEFT JOIN connectorsubfamilies sfam ON c.SubFamily = sfam.idConnectorSubFamily')
+;
+      END IF;
+
+      -- Always include these joins as they're needed for the result
+      SET @sql =
+             CONCAT(
+                @sql,
+                '
+    LEFT JOIN (
+        SELECT im.IdConnector, im.FileName
+        FROM connectorimages im
+        WHERE im.IdPictureType = 0 AND im.Position = 1
+    ) im ON c.IdConnector = im.IdConnector
+     
+    LEFT JOIN refconclients cref ON c.IdConnector = cref.IdConnector 
+LEFT JOIN componentsbyconnector cb ON c.IdConnector = cb.IdConnector
+    WHERE c.Duplicated = 0 AND (',
+                ref_conditions,
+                ')');
+	SET @sql = CONCAT(@sql, ' AND c.Deleted = ', _idDeleted) ; -- [shubham.nikam][05-11-2025][GEOS2-9556]
+
+      IF _idFamily IS NOT NULL AND _idFamily != ''
+      THEN
+         SET @sql =
+                CONCAT(@sql,
+                       ' AND fam.idfamily IN (',
+                       _idFamily,
+                       ')');
+      END IF;
+
+      IF _idColor IS NOT NULL AND _idColor != ''
+      THEN
+         SET @sql =
+                CONCAT(@sql,
+                       ' AND col.IdColor IN (',
+                       _idColor,
+                       ')');
+      END IF;
+
+      IF _idGender IS NOT NULL AND _idGender != ''
+      THEN
+         SET @sql =
+                CONCAT(@sql,
+                       ' AND ter.IdTerminal IN (',
+                       _idGender,
+                       ')');
+      END IF;
+
+      IF _idCompany IS NOT NULL AND _idCompany != ''
+      THEN
+         SET @sql =
+                CONCAT(@sql,
+                       ' AND cref.IdCustomer IN (',
+                       _idCompany,
+                       ')');
+      END IF;
+
+      IF _idConnectorSubFamily IS NOT NULL AND _idConnectorSubFamily != ''
+      THEN
+         SET @sql =
+                CONCAT(@sql,
+                       ' AND sfam.idConnectorSubfamily IN (',
+                       _idConnectorSubFamily,
+                       ')')  ;
+      END IF;
+
+      IF _Sealed IS NOT NULL
+      THEN
+         SET @sql = CONCAT(@sql, ' AND c.Sealed = ', _Sealed);
+      END IF;
+
+      IF _connectorType IS NOT NULL AND _connectorType != ''
+      THEN
+         SET @sql =
+                CONCAT(@sql,
+                       ' AND fam.IdType IN (',
+                       _connectorType,
+                       ')');
+      END IF;
+
+      -- Add range filters with simplified logic
+      IF _CavitiesMin IS NOT NULL OR _CavitiesMax IS NOT NULL
+      THEN
+         IF _CavitiesMin IS NOT NULL AND _CavitiesMax IS NOT NULL
+         THEN
+            SET @sql =
+                   CONCAT(@sql,
+                          ' AND c.NumWays BETWEEN ',
+                          _CavitiesMin,
+                          ' AND ',
+                          _CavitiesMax);
+         ELSEIF _CavitiesMin IS NOT NULL
+         THEN
+            SET @sql = CONCAT(@sql, ' AND c.NumWays >= ', _CavitiesMin);
+         ELSE
+            SET @sql = CONCAT(@sql, ' AND c.NumWays <= ', _CavitiesMax);
+         END IF;
+      END IF;
+
+      -- Height range filter
+      IF _heightMin IS NOT NULL OR _heightMax IS NOT NULL
+      THEN
+         IF _heightMin IS NOT NULL AND _heightMax IS NOT NULL
+         THEN
+            SET @sql =
+                   CONCAT(@sql,
+                          ' AND c.Height BETWEEN ',
+                          _heightMin,
+                          ' AND ',
+                          _heightMax);
+         ELSEIF _heightMin IS NOT NULL
+         THEN
+            SET @sql = CONCAT(@sql, ' AND c.Height >= ', _heightMin);
+         ELSE
+            SET @sql = CONCAT(@sql, ' AND c.Height <= ', _heightMax);
+         END IF;
+      END IF;
+
+      -- Length range filter
+      IF _lengthMin IS NOT NULL OR _lengthMax IS NOT NULL
+      THEN
+         IF _lengthMin IS NOT NULL AND _lengthMax IS NOT NULL
+         THEN
+            SET @sql =
+                   CONCAT(@sql,
+                          ' AND c.Length BETWEEN ',
+                          _lengthMin,
+                          ' AND ',
+                          _lengthMax);
+         ELSEIF _lengthMin IS NOT NULL
+         THEN
+            SET @sql = CONCAT(@sql, ' AND c.Length >= ', _lengthMin);
+         ELSE
+            SET @sql = CONCAT(@sql, ' AND c.Length <= ', _lengthMax);
+         END IF;
+      END IF;
+
+      -- Width range filter
+      IF _widthMin IS NOT NULL OR _widthMax IS NOT NULL
+      THEN
+         IF _widthMin IS NOT NULL AND _widthMax IS NOT NULL
+         THEN
+            SET @sql =
+                   CONCAT(@sql,
+                          ' AND c.Width BETWEEN ',
+                          _widthMin,
+                          ' AND ',
+                          _widthMax);
+         ELSEIF _widthMin IS NOT NULL
+         THEN
+            SET @sql = CONCAT(@sql, ' AND c.Width >= ', _widthMin);
+         ELSE
+            SET @sql = CONCAT(@sql, ' AND c.Width <= ', _widthMax);
+         END IF;
+      END IF;
+
+      -- Internal Diameter range filter
+      IF _diameterIntMin IS NOT NULL OR _diameterIntMax IS NOT NULL
+      THEN
+         IF _diameterIntMin IS NOT NULL AND _diameterIntMax IS NOT NULL
+         THEN
+            SET @sql =
+                   CONCAT(@sql,
+                          ' AND c.InternalDiameter BETWEEN ',
+                          _diameterIntMin,
+                          ' AND ',
+                          _diameterIntMax);
+         ELSEIF _diameterIntMin IS NOT NULL
+         THEN
+            SET @sql =
+                   CONCAT(@sql,
+                          ' AND c.InternalDiameter >= ',
+                          _diameterIntMin);
+         ELSE
+            SET @sql =
+                   CONCAT(@sql,
+                          ' AND c.InternalDiameter <= ',
+                          _diameterIntMax);
+         END IF;
+      END IF;
+
+      -- External Diameter range filter
+      IF _diameterExtMin IS NOT NULL OR _diameterExtMax IS NOT NULL
+      THEN
+         IF _diameterExtMin IS NOT NULL AND _diameterExtMax IS NOT NULL
+         THEN
+            SET @sql =
+                   CONCAT(@sql,
+                          ' AND c.ExternalDiameter BETWEEN ',
+                          _diameterExtMin,
+                          ' AND ',
+                          _diameterExtMax);
+         ELSEIF _diameterExtMin IS NOT NULL
+         THEN
+            SET @sql =
+                   CONCAT(@sql,
+                          ' AND c.ExternalDiameter >= ',
+                          _diameterExtMin);
+         ELSE
+            SET @sql = CONCAT(@sql, ' AND c.ExternalDiameter <= ', _diameterExtMax) ;
+            END IF;
+      END IF;
+
+      -- Add pagination by first filtering then applying LIMIT
+      IF (_GetAllRecords = 1)
+      THEN
+         SET @sql = CONCAT(@sql, ' GROUP BY c.Ref ORDER BY c.Ref ');
+      ELSE
+         SET @sql =
+                CONCAT(@sql,
+                       ' GROUP BY c.Ref ORDER BY c.Ref LIMIT ',
+                       0,
+                       ', ',
+                       100);
+      END IF;
+
+    -- Execute the main query
+    -- select @sql;
+    
+    PREPARE stmt FROM @sql      ;
+    EXECUTE stmt      ;
+    DEALLOCATE PREPARE stmt      ;
+
+      -- Handle component query if provided
+      IF _ComponentQuery IS NULL OR _ComponentQuery = ''
+      THEN
+         SELECT * FROM temp_connectors;
+      ELSE
+         SET @final_query =
+                CONCAT('SELECT * FROM temp_connectors ', _ComponentQuery);
+        PREPARE stmt FROM @final_query;
+        EXECUTE stmt;
+        
+        
+        
+        DEALLOCATE PREPARE stmt;
+      END IF;
+
+      -- Clean up
+      DROP TEMPORARY TABLE IF EXISTS temp_connectors;
+   END$$
+DELIMITER ;

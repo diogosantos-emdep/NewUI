@@ -1,0 +1,49 @@
+
+DROP PROCEDURE IF EXISTS geos.OTM_GetIdCustomerPurchaseOrders_V2680;
+DELIMITER $$ 
+CREATE PROCEDURE geos.OTM_GetIdCustomerPurchaseOrders_V2680(IN _POCode varchar(45))
+BEGIN
+      -- [pramod.misal][GEOS2-9601][29-10-2025]
+  -- call OTM_GetIdCustomerPurchaseOrders_V2680('N120090T');
+      
+      SELECT idCustomerPurchaseOrders
+        FROM customerpurchaseorders
+       WHERE Code = _POCode;
+ END
+$$
+DELIMITER ;
+
+
+
+
+DROP PROCEDURE IF EXISTS geos.OTM_GetIdOffersByCustomerPurchaseOrder;
+DELIMITER $$ 
+CREATE PROCEDURE geos.OTM_GetIdOffersByCustomerPurchaseOrder(IN _idCustomerPurchaseOrder INT)
+BEGIN
+      -- [pramod.misal][GEOS2-9601][29-10-2025]
+  -- call OTM_GetIdOffersByCustomerPurchaseOrder(21);
+      
+	SELECT idOffer
+    FROM customerpurchaseordersbyoffer
+    WHERE idCustomerPurchaseOrder = _idCustomerPurchaseOrder;
+ END
+$$
+DELIMITER ;
+
+
+DROP PROCEDURE IF EXISTS geos.OTM_GetOffersDetaislByIdCustomerIdplant_V2680;
+DELIMITER $$ 
+CREATE PROCEDURE geos.OTM_GetOffersDetaislByIdCustomerIdplant_V2680(IN _idCustomer smallint,IN _idplant smallint,IN _amount double)
+BEGIN
+      -- [pramod.misal][GEOS2-9601][29-10-2025]
+  -- call OTM_GetOffersDetaislByIdCustomerIdplant_V2680(9663,38,"787");
+      
+	SELECT o.IdOffer,o.Code as OfferCode,st. IdCustomer, st.IdSite,o.Value as Amount  FROM offers o
+    LEFT JOIN sites st ON o.IdCustomer = st.IdSite
+    WHERE o.IdCustomer = _idplant And st. IdCustomer=_idCustomer And o.Value=_amount;
+ END
+$$
+DELIMITER ;
+
+
+

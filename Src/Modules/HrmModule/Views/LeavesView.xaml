@@ -1,0 +1,836 @@
+﻿<UserControl x:Class="Emdep.Geos.Modules.Hrm.Views.LeavesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.Hrm.Views"
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"            
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+             xmlns:Converters="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+             xmlns:dxwuin="http://schemas.devexpress.com/winfx/2008/xaml/windowsui/navigation"
+             xmlns:dxnav="http://schemas.devexpress.com/winfx/2008/xaml/navigation" 
+             xmlns:dxp="http://schemas.devexpress.com/winfx/2008/xaml/printing" 
+             xmlns:dxdb="http://schemas.devexpress.com/winfx/2008/xaml/demobase"
+             xmlns:sysglb="clr-namespace:System.Globalization;assembly=mscorlib"
+             xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+             xmlns:HrmApplication="clr-namespace:Emdep.Geos.Modules.Hrm" 
+             xmlns:dxgt="http://schemas.devexpress.com/winfx/2008/xaml/grid/themekeys"
+             xmlns:ViewModel="clr-namespace:Emdep.Geos.Modules.Hrm.ViewModels"
+             xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+             xmlns:dxci="http://schemas.devexpress.com/winfx/2008/xaml/core/internal"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+
+    <UserControl.Resources>
+        <DataTemplate x:Key="SummaryTemplate">
+            <ContentControl>
+                <dxg:GridSummaryItem FieldName="{Binding Path=(dxci:DependencyObjectExtensions.DataContext).FieldName, RelativeSource={RelativeSource Self}}"
+                                     SummaryType="{Binding Path=(dxci:DependencyObjectExtensions.DataContext).Type, RelativeSource={RelativeSource Self}}"
+                                     DisplayFormat= "{Binding Path=(dxci:DependencyObjectExtensions.DataContext).DisplayFormat, RelativeSource={RelativeSource Self}}" />
+            </ContentControl>
+        </DataTemplate>
+        <Style x:Key="leaveGroupBoxStyle" TargetType="{x:Type dxlc:GroupBox}">
+            <Setter Property="MaximizeElementVisibility" Value="Visible" />
+            <Setter Property="Width" Value="280" />
+            <Setter Property="Height" Value="27" />
+        </Style>
+        <Style x:Key="ColumnStyle" TargetType="dxg:GridColumn">
+            <Setter Property="FilterPopupMode" Value="Default"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsVertical}" Value="true">
+                    <Setter Property="HeaderTemplate">
+                        <Setter.Value>
+                            <DataTemplate>
+                                <ContentControl Content="{Binding}">
+                                    <ContentControl.LayoutTransform>
+                                        <RotateTransform Angle="-90"/>
+                                    </ContentControl.LayoutTransform>
+                                </ContentControl>
+                            </DataTemplate>
+                        </Setter.Value>
+                    </Setter>
+                    <Setter Property="FilterEditorHeaderTemplate">
+                        <Setter.Value>
+                            <DataTemplate>
+                                <ContentControl Content="{Binding}">
+                                    <ContentControl.LayoutTransform>
+                                        <RotateTransform Angle="0"/>
+                                    </ContentControl.LayoutTransform>
+                                </ContentControl>
+                            </DataTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+  
+<!--[rdixit][GEOS2-6571][14.12.2024]-->
+        <DataTemplate x:Key="NameColumnTemplate">
+            <ContentControl>
+                <dxg:GridColumn FieldName="{Binding FieldName}" Header="{Binding HeaderText}" AllowCellMerge="{Binding AllowCellMerge}"  FixedWidth="{Binding FixedWidth}"   
+                                AllowBestFit="true" MinWidth="{Binding Width}" Width="*" AllowEditing="false" AllowAutoFilter="False" Visible="True" AllowMoving="True"/>
+            </ContentControl>
+        </DataTemplate>
+        <DataTemplate x:Key="HexColorColumnTemplate">
+            <ContentControl>
+                <dxg:GridColumn FieldName="{Binding FieldName}" Tag="{Binding}" Header="{Binding HeaderText}" AllowCellMerge="{Binding AllowCellMerge}" HorizontalHeaderContentAlignment="Center" 
+                                FixedWidth="{Binding FixedWidth}" AllowBestFit="true" Width="{Binding Width}" Visible="True" AllowMoving="False" ShowInColumnChooser="False" AllowEditing="True" BestFitArea="All" >
+                    <dxg:GridColumn.CellTemplate>
+                        <DataTemplate>
+                            <DockPanel>
+                                <Rectangle Width="15" Height="15" Margin="3,3,6,3" Fill="{Binding Data.HtmlColor}" />
+                                <TextBlock Text="{Binding Data.HtmlColor}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="2,0,5,0"/>
+                            </DockPanel>
+                        </DataTemplate>
+                    </dxg:GridColumn.CellTemplate>
+                </dxg:GridColumn>
+            </ContentControl>
+        </DataTemplate>
+        <UIHelper:ColumnTemplateSelector x:Key="LeaveColumnTemplateSelector"/>
+        <DataTemplate x:Key="HiddenColumnTemplate">
+            <ContentControl>
+                <dxg:GridColumn FieldName="{Binding ColumnFieldName,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                Header="{Binding HeaderText,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                Width="{Binding Width,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                AllowCellMerge="False"                                
+                                AllowBestFit="True"                                
+                                AllowEditing="False" 
+                                AllowAutoFilter="True"
+                                Visible="{Binding Visible,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  
+                                ShowInColumnChooser="False"
+                                MinWidth="{Binding Width}"/>
+            </ContentControl>
+        </DataTemplate>
+        <DataTemplate x:Key="YearsOfServiceColumnTemplate">
+            <ContentControl>
+                <dxg:GridColumn FieldName="{Binding ColumnFieldName,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                Header="{Binding HeaderText,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                Width="{Binding Width,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                ReadOnly ="True"                                
+                                Visible="{Binding Visible,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"                               
+                                HeaderToolTip="{Binding HeaderText,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"                               
+                                Style="{StaticResource ColumnStyle}"
+                                AllowCellMerge="False"
+                                AllowBestFit="true"
+                                AllowEditing="False"
+                                AllowAutoFilter="True"
+                                MinWidth="{Binding Width}">
+                    <dxg:GridColumn.CellStyle>
+                        <Style TargetType="{x:Type  dxg:LightweightCellEditor}">
+                            <Setter Property="Foreground" Value="{DynamicResource HardlockLicensesForeground}" />
+                        </Style>
+                    </dxg:GridColumn.CellStyle>
+                </dxg:GridColumn>
+            </ContentControl>
+        </DataTemplate>
+        <DataTemplate x:Key="SiteColumnTemplate">
+            <ContentControl>
+                <dxg:GridColumn FieldName="{Binding ColumnFieldName,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                Header="{Binding HeaderText,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                Width="80"
+                                ReadOnly ="{Binding ReadOnly,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"                                
+                                Visible="{Binding Visible,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"                               
+                                HeaderToolTip="{Binding HeaderText,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"                               
+                                Style="{StaticResource ColumnStyle}"
+                                AllowCellMerge="False"
+                                AllowBestFit="true"
+                                AllowEditing="True"
+                                AllowAutoFilter="True"
+                                MinWidth="{Binding Width}">
+                    <!-- Center-align the column header -->
+                    <dxg:GridColumn.HeaderStyle>
+                        <Style TargetType="{x:Type dxg:BaseGridHeader}">
+                            <Setter Property="HorizontalContentAlignment" Value="Center" />
+                        </Style>
+                    </dxg:GridColumn.HeaderStyle>
+                    <dxg:GridColumn.EditSettings>
+                        <dxe:TextEditSettings Mask="f2" MaskType="Numeric" />
+                    </dxg:GridColumn.EditSettings>
+                    <dxg:GridColumn.CellStyle>
+                        <Style TargetType="{x:Type  dxg:LightweightCellEditor}">
+                            <Setter Property="Foreground" Value="{DynamicResource HardlockLicensesForeground}" />
+                            <Setter Property="IsEnabled" Value="{Binding RowData.Row.IsReadOnly}"/>
+                        </Style>
+                    </dxg:GridColumn.CellStyle>
+                </dxg:GridColumn>
+            </ContentControl>
+        </DataTemplate>
+        <UIHelper:SiteTypeColumnTemplateSelector x:Key="ColumnTemplateSelector"  YearsOfServiceTemplate ="{StaticResource YearsOfServiceColumnTemplate}" SitesTemplate ="{StaticResource SiteColumnTemplate}"/>
+        <DataTemplate x:Key="BandTemplate">
+            <ContentControl>
+                <dxg:GridControlBand UIHelper:NameBinder.Name="{Binding BandName,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  
+                                     Header="{Binding BandHeader,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"                                                     
+                                     HorizontalHeaderContentAlignment="Left" Visible="True"                                                   
+                                     ColumnsSource="{Binding Columns,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                     AllowMoving="{Binding AllowMoving,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"                                                    
+                                     Fixed="{Binding FixedStyle,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"                                                    
+                                     ColumnGeneratorTemplateSelector="{StaticResource ColumnTemplateSelector}" OverlayHeaderByChildren="False"/>
+            </ContentControl>
+        </DataTemplate>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="55"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="250"/>
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Label Content="{DynamicResource Leaves}" HorizontalAlignment="Left" Style="{StaticResource LabelTitleStyle}" Grid.Row="0" Grid.Column="0" />
+           
+            <!--Save Button-->
+            <Button Content=" " Height="40" Width="40" Grid.Column="1" Command="{Binding AcceptButtonCommand}" 
+                    HorizontalAlignment="Right" Margin="0,0,5,5" 
+                    IsEnabled="{Binding DataContext.IsAcceptEnabled,RelativeSource={RelativeSource AncestorType=UserControl},UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource ButtonSave}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Image Style="{ DynamicResource SaveButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+        </Grid>
+
+        <dxlc:FlowLayoutControl x:Name="flowLayoutControl"
+                               Grid.Row="1"
+                               BreakFlowToFit="False"
+                               AllowMaximizedElementMoving="False"
+                               Background="Transparent"
+                               MaximizedElementPosition="{Binding MaximizedElementPosition}"
+                               Orientation="Horizontal"
+                               Padding="5"
+                               ItemSpace="5"
+                               LayerSpace="5">
+            <dxmvvm:Interaction.Behaviors>
+                <UIHelper:FlowLayoutControlForMinimiseMaximise/>
+            </dxmvvm:Interaction.Behaviors>
+
+            <!--Leaves-->
+            <dxlc:GroupBox x:Name="Leaves" Style="{StaticResource leaveGroupBoxStyle}" MaximizeElementVisibility="Visible" StateChanged="Leaves_StateChanged">
+
+                <dxlc:GroupBox.HeaderTemplate>
+                    <DataTemplate>
+                        <Grid MaxHeight="30">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="250"/>
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Label Content="{DynamicResource HRMLeaves}" HorizontalAlignment="Left" FontSize="13" FontWeight="Bold" Grid.Column="0" />
+                            <Grid HorizontalAlignment="Right" Grid.Row="0" Grid.Column="1" >
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="AUTO"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="AUTO"/>
+                                    <ColumnDefinition Width="AUTO" />
+                                    <ColumnDefinition Width="AUTO" />
+                                    <ColumnDefinition Width="AUTO" />
+
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Refresh Leaves Grid-->
+
+                                <Button Visibility="Visible" Grid.Row="0" Grid.Column="1" Height="24" Width="24" HorizontalAlignment="Right" 
+                                Command="{Binding DataContext.RefreshButtonCommand,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox},UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+                                CommandParameter="{Binding Path=(UIHelper:GroupBoxHelper.InnerTableView), RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}"
+                                Margin="0,0,5,0">
+                                    <Button.ToolTip>
+                                        <TextBlock Text="{DynamicResource ButtonRefresh}"/>
+                                    </Button.ToolTip>
+                                    <Button.ContentTemplate>
+                                        <DataTemplate>
+                                            <Image Style="{DynamicResource RefreshButtonImageStyle}" Margin="-8"/>
+                                        </DataTemplate>
+                                    </Button.ContentTemplate>
+                                </Button>
+
+                                <!-- Print Leaves List-->
+                                <Button Visibility="Visible" Grid.Row="0" Grid.Column="2" Height="24" Width="24" HorizontalAlignment="Right"                                                             
+                                        Command="{Binding DataContext.PrintButtonCommand,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox},UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"                                
+                                        CommandParameter="{Binding Path=(UIHelper:GroupBoxHelper.InnerTableView), RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}"
+                                        Margin="0,0,5,0">
+                                    <Button.ToolTip>
+                                        <TextBlock Text="{DynamicResource ButtonPrint}"/>
+                                    </Button.ToolTip>
+                                    <Button.ContentTemplate>
+                                        <DataTemplate>
+                                            <Image Style="{DynamicResource PrinterButtonImageStyle}" Margin="-8"/>
+                                        </DataTemplate>
+                                    </Button.ContentTemplate>
+                                </Button>
+
+                                <!-- Export Leaves List-->
+
+                                <Button Visibility="Visible" Grid.Row="0" Grid.Column="3" Height="24" Width="24" HorizontalAlignment="Right"                     
+                                        Command="{Binding DataContext.ExportButtonCommand,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox},UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"                    
+                                        CommandParameter="{Binding Path=(UIHelper:GroupBoxHelper.InnerTableView), RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" Margin="0,0,5,0">
+                                    <Button.ToolTip>
+                                        <TextBlock Text="{DynamicResource ButtonExportToExcel}"/>
+                                    </Button.ToolTip>
+                                    <Button.ContentTemplate>
+                                        <DataTemplate>
+                                            <Image Style="{DynamicResource ExcelExportButtonImageStyle}" Margin="-8"/>
+                                        </DataTemplate>
+                                    </Button.ContentTemplate>
+                                </Button>
+                            </Grid>
+
+                        </Grid>
+                    </DataTemplate>
+                </dxlc:GroupBox.HeaderTemplate>
+
+                <dxlc:GroupBox.ContentTemplate>
+                    <DataTemplate>
+                        <Grid Height="0" Margin="0">
+                        </Grid>
+                    </DataTemplate>
+                </dxlc:GroupBox.ContentTemplate>
+
+                <dxlc:GroupBox.MaximizedContentTemplate>
+                    <DataTemplate>
+                        <!--[rdixit][GEOS2-6571][14.12.2024]-->
+                        <dxg:GridControl x:Name="LeavesGrid1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"                         
+                                         ItemsSource="{Binding DataContext.Dttable,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox},UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" SelectionMode="Row"                         
+                                         ImplyNullLikeEmptyStringWhenFiltering="True" FocusManager.IsFocusScope="False" AllowLiveDataShaping="True"                                                      
+                                         ScrollViewer.HorizontalScrollBarVisibility="Auto"                             
+                                         ColumnsSource="{Binding DataContext.LeavesColumns,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox},UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"                              
+                                         ColumnGeneratorStyle="{StaticResource ColumnStyle}"                             
+                                         ColumnGeneratorTemplateSelector="{StaticResource LeaveColumnTemplateSelector}"                             
+                                         TotalSummarySource="{Binding TotalSummary}" Loaded="LeavesGrid_Loaded">
+                       
+                            <dxg:GridControl.TotalSummary>
+                                <dxg:GridSummaryItem x:Name="summary" FieldName="Name" SummaryType="Count" DisplayFormat="Total Count: {0}" Visible="True" Alignment="Left"/>
+                            </dxg:GridControl.TotalSummary>
+
+                            <dxg:GridControl.View>
+                                <dxg:TableView x:Name="LeavesTableView1"
+                                   NavigationStyle="Row"
+                                   AllowHorizontalScrollingVirtualization="True" 
+                                   RowDetailsVisibilityMode="Visible"
+                                   ShowHorizontalLines="True"
+                                   ShowSearchPanelMode="Always"
+                                   ShowColumnHeaders="True"                                  
+                                   VerticalScrollbarVisibility="Auto" 
+                                   HorizontalScrollbarVisibility="Auto"
+                                   AllowFixedColumnMenu="False"
+                                   AutoWidth="False" 
+                                   ShowFixedTotalSummary="True"   
+                                   ShowSearchPanelCloseButton="True" 
+                                   SearchPanelHorizontalAlignment="Stretch"   
+                                   ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly"                             
+                                   AllowGrouping="True"
+                                   ShowGroupPanel="False"                             
+                                   ShowIndicator="False"              
+                                   FocusedRow="{Binding Path=SelectedLeave,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                  >
+                                    <dxg:TableView.Resources>
+                                        <DataTemplate x:Key="LeavesReportPrintHeaderTemplate">
+                                            <Grid Width="{Binding UsablePageWidth}">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="50" />
+                                                    <ColumnDefinition Width="130" />
+                                                </Grid.ColumnDefinitions>
+                                                <dxe:TextEdit Text=" " Width="{Binding UsablePageWidth}" Grid.ColumnSpan="3" IsPrintingMode="True" Background="#333E5E" HorizontalAlignment="Stretch" 
+                                                      VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" Height="50" />
+                                                <dxe:TextEdit Text="Leaves Report" IsPrintingMode="True" HorizontalAlignment="Stretch" 
+                                                      VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" />
+                                                <Image Source="/Emdep.Geos.Modules.Hrm;component/Assets/Images/GeosReportLogo.png" Height="50" Width="80"  dxp:ExportSettings.TargetType="Image" Grid.Column="2" />
+                                            </Grid>
+                                        </DataTemplate>
+
+                                        <DataTemplate x:Key="LeavesReportPrintFooterTemplate">
+                                            <dxe:TextEdit HorizontalContentAlignment="Center" 
+                                                  Width="{Binding Path=UsablePageWidth, Mode=OneWay}" 
+                                                  dxp:ExportSettings.TargetType="PageNumber" 
+                                                  dxp:PageNumberExportSettings.Kind="NumberOfTotal" 
+                                                  dxp:PageNumberExportSettings.Format="Page {0} of {1}"/>
+                                        </DataTemplate>
+                                    </dxg:TableView.Resources>
+                                </dxg:TableView>
+                            </dxg:GridControl.View>
+                        </dxg:GridControl>
+                    </DataTemplate>
+                </dxlc:GroupBox.MaximizedContentTemplate>
+            </dxlc:GroupBox>
+
+            <!--Plants-->
+            <dxlc:GroupBox x:Name="Plants" Style="{StaticResource leaveGroupBoxStyle}" MaximizeElementVisibility="Visible" StateChanged="Plants_StateChanged">
+
+                <dxlc:GroupBox.HeaderTemplate>
+                    <DataTemplate>
+                        <Grid MaxHeight="30">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="250"/>
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Label Content="{DynamicResource Plants}" HorizontalAlignment="Left" FontSize="13" FontWeight="Bold" Grid.Column="0" />
+                            <Grid HorizontalAlignment="Right" Grid.Row="0" Grid.Column="1" >
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="AUTO"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="AUTO"/>
+                                    <ColumnDefinition Width="AUTO" />
+                                    <ColumnDefinition Width="AUTO" />
+                                    <ColumnDefinition Width="AUTO" />
+
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Refresh Leaves Grid-->
+
+                                <Button Visibility="Visible" Grid.Row="0" Grid.Column="1" Height="24" Width="24" HorizontalAlignment="Right"                                
+                                        Command="{Binding DataContext.PlantRefreshButtonCommand,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox},UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"                                
+                                        CommandParameter="{Binding Path=(UIHelper:GroupBoxHelper.InnerTableView), RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}"                              
+                                        Margin="0,0,5,0">
+                                    <Button.ToolTip>
+                                        <TextBlock Text="{DynamicResource ButtonRefresh}"/>
+                                    </Button.ToolTip>
+                                    <Button.ContentTemplate>
+                                        <DataTemplate>
+                                            <Image Style="{DynamicResource RefreshButtonImageStyle}"  Margin="-8"/>
+                                        </DataTemplate>
+                                    </Button.ContentTemplate>
+                                </Button>
+
+                                <!-- Print Leaves List-->
+                                <Button Visibility="Visible" Grid.Row="0" Grid.Column="2" Height="24" Width="24" HorizontalAlignment="Right"                         
+                                        Command="{Binding DataContext.PlantPrintButtonCommand,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox},UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"                        
+                                        CommandParameter="{Binding Path=(UIHelper:GroupBoxHelper.InnerTableView), RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}"
+                                        Margin="0,0,5,0">
+                                    <Button.ToolTip>
+                                        <TextBlock Text="{DynamicResource ButtonPrint}"/>
+                                    </Button.ToolTip>
+                                    <Button.ContentTemplate>
+                                        <DataTemplate>
+                                            <Image Style="{DynamicResource PrinterButtonImageStyle}"  Margin="-8"/>
+                                        </DataTemplate>
+                                    </Button.ContentTemplate>
+                                </Button>
+
+                                <!-- Export Leaves List-->
+
+                                <Button Visibility="Visible" Grid.Row="0" Grid.Column="3" Height="24" Width="24" HorizontalAlignment="Right"                     
+                                        Command="{Binding DataContext.PlantExportButtonCommand,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox},UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"                    
+                                        CommandParameter="{Binding Path=(UIHelper:GroupBoxHelper.InnerTableView), RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}"
+                                        Margin="0,0,5,0">
+                                    <Button.ToolTip>
+                                        <TextBlock Text="{DynamicResource ButtonExportToExcel}"/>
+                                    </Button.ToolTip>
+                                    <Button.ContentTemplate>
+                                        <DataTemplate>
+                                            <Image Style="{DynamicResource ExcelExportButtonImageStyle}"  Margin="-8"/>
+                                        </DataTemplate>
+                                    </Button.ContentTemplate>
+                                </Button>
+                            </Grid>
+
+                        </Grid>
+                    </DataTemplate>
+                </dxlc:GroupBox.HeaderTemplate>
+
+                <dxlc:GroupBox.ContentTemplate>
+                    <DataTemplate>
+                        <Grid Height="0" Margin="0">
+                        </Grid>
+                    </DataTemplate>
+                </dxlc:GroupBox.ContentTemplate>
+                <dxlc:GroupBox.MaximizedContentTemplate>
+                    <DataTemplate>
+                        <dxg:GridControl VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                         ItemsSource="{Binding DataContext.CompanyHolidaySettingList,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox},UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" SelectionMode="Row"
+                         SelectedItem="{Binding DataContext.SelectedCompanyHolidaySetting,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox},UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                         ImplyNullLikeEmptyStringWhenFiltering="True">
+                            <dxg:GridColumn Header="{DynamicResource LeavePlantHeader}" FieldName="Company.Alias" FilterPopupMode="CheckedList" Width="80" ReadOnly="True" FixedWidth="True" />
+                            <dxg:GridColumn Header="{DynamicResource LeaveNameHeader}" FieldName="Company.Name" FilterPopupMode="CheckedList" Width="200" ReadOnly="True" FixedWidth="True" />
+                            <dxg:GridColumn Header="{DynamicResource LeaveHolidayHeader}" FieldName="HolidaySetting.Value" FilterPopupMode="CheckedList" Width="150" FixedWidth="True" >
+                                <dxg:GridColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <dxe:ComboBoxEdit ItemsSource="{Binding RowData.Row.HolidaySettingList,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" AllowDefaultButton="True"                                                                                                                                                                                                                                                                  
+                                                          ShowTooltipForTrimmedText="True" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"                                                                                                      
+                                                          AutoComplete="True" ImmediatePopup="True" AllowUpdateTwoWayBoundPropertiesOnSynchronization="False"  ValueMember="IdLookupValue" DisplayMember="Value"                                                                                                      
+                                                          IncrementalFiltering="True" IsTextEditable="False"  ApplyItemTemplateToSelectedItem="True"
+                                                          IsEnabled="{Binding DataContext.IsAcceptEnabled,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox},UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+                                                          SelectedItem="{Binding RowData.Row.HolidaySetting,UpdateSourceTrigger=PropertyChanged , Mode=TwoWay}">
+                                            <dxmvvm:Interaction.Behaviors>
+                                                <dxmvvm:EventToCommand EventName="EditValueChanged"
+                                                           Command="{Binding DataContext.SelectedItemChangedCommand, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}"
+                                                           PassEventArgsToCommand="True"/>
+                                            </dxmvvm:Interaction.Behaviors>
+                                        </dxe:ComboBoxEdit>
+                                    </DataTemplate>
+                                </dxg:GridColumn.CellTemplate>
+                            </dxg:GridColumn>
+                            <dxmvvm:Interaction.Behaviors>
+                                <UIHelper:GridSelectingBehavior />
+                            </dxmvvm:Interaction.Behaviors>
+                            <dxg:GridControl.TotalSummary>
+                                <dxg:GridSummaryItem x:Name="summary" FieldName="Company.Alias" SummaryType="Count" DisplayFormat="Total Count: {0}" Visible="True" Alignment="Left"/>
+                            </dxg:GridControl.TotalSummary>
+                            <dxg:GridControl.View>
+                                <dxg:TableView 
+                                   NavigationStyle="Row"
+                                   AllowHorizontalScrollingVirtualization="True" 
+                                   RowDetailsVisibilityMode="Visible"
+                                   ShowHorizontalLines="True"
+                                   ShowSearchPanelMode="Always"
+                                   ShowColumnHeaders="True"                                  
+                                   VerticalScrollbarVisibility="Auto" 
+                                   HorizontalScrollbarVisibility="Auto"
+                                   AllowFixedColumnMenu="False"
+                                   AutoWidth="False" 
+                                   ShowFixedTotalSummary="True"   
+                                   ShowSearchPanelCloseButton="True" 
+                                   SearchPanelHorizontalAlignment="Stretch"   
+                                   ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly"                             
+                                   AllowGrouping="True"
+                                   ShowGroupPanel="False"  
+                                   EditorButtonShowMode="ShowAlways"
+                                   ShowIndicator="False"              
+                                   FocusedRow="{Binding Path=SelectedCompanyHolidaySetting,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                  >
+                                    <dxg:TableView.Resources>
+                                        <DataTemplate x:Key="PlantReportPrintHeaderTemplate">
+                                            <Grid Width="{Binding UsablePageWidth}">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="50" />
+                                                    <ColumnDefinition Width="130" />
+                                                </Grid.ColumnDefinitions>
+                                                <dxe:TextEdit Text=" " Width="{Binding UsablePageWidth}" Grid.ColumnSpan="3" IsPrintingMode="True" Background="#333E5E" HorizontalAlignment="Stretch" 
+                                                      VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" Height="50" />
+                                                <dxe:TextEdit Text="Plant Report" IsPrintingMode="True" HorizontalAlignment="Stretch" 
+                                                      VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" />
+                                                <Image Source="/Emdep.Geos.Modules.Hrm;component/Assets/Images/GeosReportLogo.png" Height="50" Width="80"  dxp:ExportSettings.TargetType="Image" Grid.Column="2" />
+                                            </Grid>
+                                        </DataTemplate>
+
+                                        <DataTemplate x:Key="PlantReportPrintFooterTemplate">
+                                            <dxe:TextEdit HorizontalContentAlignment="Center" 
+                                                  Width="{Binding Path=UsablePageWidth, Mode=OneWay}" 
+                                                  dxp:ExportSettings.TargetType="PageNumber" 
+                                                  dxp:PageNumberExportSettings.Kind="NumberOfTotal" 
+                                                  dxp:PageNumberExportSettings.Format="Page {0} of {1}"/>
+                                        </DataTemplate>
+                                    </dxg:TableView.Resources>
+                                </dxg:TableView>
+                            </dxg:GridControl.View>
+                        </dxg:GridControl>
+                    </DataTemplate>
+                </dxlc:GroupBox.MaximizedContentTemplate>
+            </dxlc:GroupBox>
+            <!--Length Of Service-->
+            <dxlc:GroupBox x:Name="LengthOfService" Style="{StaticResource leaveGroupBoxStyle}" MaximizeElementVisibility="Visible" StateChanged="LengthOfService_StateChanged">
+
+                <dxlc:GroupBox.HeaderTemplate>
+                    <DataTemplate>
+                        <Grid MaxHeight="30">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="250"/>
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Label Content="{DynamicResource LengthOfService}" HorizontalAlignment="Left" FontSize="13" FontWeight="Bold" Grid.Column="0" />
+                            <Grid HorizontalAlignment="Right" Grid.Row="0" Grid.Column="1" >
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="AUTO"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="AUTO"/>
+                                    <ColumnDefinition Width="AUTO" />
+                                    <ColumnDefinition Width="AUTO" />
+                                    <ColumnDefinition Width="AUTO" />
+
+                                </Grid.ColumnDefinitions>
+                                <!-- Refresh Length Of Service Grid-->
+
+                                <Button Visibility="Visible" Grid.Row="0" Grid.Column="1" Height="24" Width="24" HorizontalAlignment="Right" 
+                                Command="{Binding DataContext.LengthOfServioceRefreshButtonCommand,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox},UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"  
+                                CommandParameter="{Binding ElementName=LengthOfServiceListTableView}"
+                                Margin="0,0,5,0">
+                                    <Button.ToolTip>
+                                        <TextBlock Text="{DynamicResource ButtonRefresh}"/>
+                                    </Button.ToolTip>
+                                    <Button.ContentTemplate>
+                                        <DataTemplate>
+                                            <Image Style="{DynamicResource RefreshButtonImageStyle}"  Margin="-8"/>
+                                        </DataTemplate>
+                                    </Button.ContentTemplate>
+                                </Button>
+                                <!-- Print Length Of Service List-->
+                                <Button Visibility="Visible" Grid.Row="0" Grid.Column="2" Height="24" Width="24" HorizontalAlignment="Right" 
+                        Command="{Binding DataContext.LengthOfServiocePrintButtonCommand,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox},UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" 
+                        CommandParameter="{Binding Path=(UIHelper:GroupBoxHelper.InnerTableView), RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" Margin="0,0,5,0">
+                                    <Button.ToolTip>
+                                        <TextBlock Text="{DynamicResource ButtonPrint}"/>
+                                    </Button.ToolTip>
+                                    <Button.ContentTemplate>
+                                        <DataTemplate>
+                                            <Image Style="{DynamicResource PrinterButtonImageStyle}"  Margin="-8"/>
+                                        </DataTemplate>
+                                    </Button.ContentTemplate>
+                                </Button>
+                                <!-- Export Length Of Service List-->
+
+                                <Button Visibility="Visible" Grid.Row="0" Grid.Column="3" Height="24" Width="24" HorizontalAlignment="Right" 
+                    Command="{Binding DataContext.LengthOfServioceExportButtonCommand,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox},UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"  
+                    CommandParameter="{Binding Path=(UIHelper:GroupBoxHelper.InnerTableView), RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" Margin="0,0,5,0">
+                                    <Button.ToolTip>
+                                        <TextBlock Text="{DynamicResource ButtonExportToExcel}"/>
+                                    </Button.ToolTip>
+                                    <Button.ContentTemplate>
+                                        <DataTemplate>
+                                            <Image Style="{DynamicResource ExcelExportButtonImageStyle}"  Margin="-8"/>
+                                        </DataTemplate>
+                                    </Button.ContentTemplate>
+                                </Button>
+                            </Grid>
+
+                        </Grid>
+                    </DataTemplate>
+                </dxlc:GroupBox.HeaderTemplate>
+
+                <dxlc:GroupBox.MaximizedContentTemplate>
+                    <DataTemplate>
+                        <UIHelper:MyGridControl x:Name="rootGridControl"
+                             ItemsSource="{Binding DataContext.DataTable,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox},UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+                             ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                             BandsSource="{Binding DataContext.Bands,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox},UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+                             BandTemplate="{StaticResource BandTemplate}"
+                             TotalSummarySource="{Binding DataContext.TotalSummary,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox},UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+                             TotalSummaryGeneratorTemplate="{StaticResource SummaryTemplate}"
+                             ImplyNullLikeEmptyStringWhenFiltering="True"
+                             SelectionMode="Cell">
+                            <dxmvvm:Interaction.Behaviors>
+                                <UIHelper:GridSelectingBehavior />
+                            </dxmvvm:Interaction.Behaviors>
+                            <dxg:GridControl.View>
+                                <dxg:TableView x:Name="LengthOfServiceListTableView"
+                                 ShowSearchPanelMode="Never"
+                                 HorizontalScrollbarVisibility="Auto"
+                                 NavigationStyle="Cell"
+                                 ShowTotalSummary="True"
+                                 IsTotalSummaryMenuEnabled ="False"
+                                 ShowHorizontalLines="True"
+                                 AllowPerPixelScrolling="True"
+                                 AllowEditing="True"
+                                 AllowGrouping="True"
+                                 ShowGroupPanel="False"
+                                 AllowColumnMoving="True"
+                                 AutoMoveRowFocus="False"
+                                 AllowScrollAnimation="True"
+                                 ShowColumnHeaders="True"
+                                 ShowVerticalLines="True"
+                                 ShowIndicator="True"
+                                 AllowResizing="False"
+                                 AllowConditionalFormattingMenu="True"
+                                 VerticalScrollbarVisibility="Auto"
+                                 HorizontalContentAlignment="Center"
+                                 RowMinHeight="25"
+                                 AllowSorting="True"
+                                 AllowScrollHeaders="False"
+                                 AllowBestFit="True" 
+                                 ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly"
+                                 SearchPanelHorizontalAlignment="Stretch"
+                                 ShowFilterPopup="{DXEvent Handler='@args.PopupBaseEdit.PopupWidth=200'}">
+                                    <dxmvvm:Interaction.Behaviors>
+                                        <dxmvvm:EventToCommand EventName="CellValueChanged" 
+                                               Command="{Binding DataContext.SiteValueChangedCommand,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" 
+                                               CommandParameter="{Binding RowData.Row,ElementName=LengthOfServiceListTableView}"
+                                               PassEventArgsToCommand="True"/>
+                                    </dxmvvm:Interaction.Behaviors>
+                                    <dxg:TableView.Resources>
+                                        <DataTemplate x:Key="ServiceOfLengthPrintHeaderTemplate">
+                                            <Grid Width="{Binding UsablePageWidth}">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="50" />
+                                                    <ColumnDefinition Width="130" />
+                                                </Grid.ColumnDefinitions>
+                                                <dxe:TextEdit Text=" " Width="{Binding UsablePageWidth}" Grid.ColumnSpan="3" IsPrintingMode="True" Background="#333E5E" HorizontalAlignment="Stretch" 
+                                                      VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" Height="50" />
+                                                <dxe:TextEdit Text="Length of Service Report" IsPrintingMode="True" HorizontalAlignment="Stretch" 
+                                                      VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" />
+                                                <Image Source="/Emdep.Geos.Modules.Hrm;component/Assets/Images/GeosReportLogo.png" Height="50" Width="80"  dxp:ExportSettings.TargetType="Image" Grid.Column="2" />
+                                            </Grid>
+                                        </DataTemplate>
+                                        <DataTemplate x:Key="ServiceOfLengthPrintFooterTemplate">
+                                            <dxe:TextEdit HorizontalContentAlignment="Center" 
+                                                  Width="{Binding Path=UsablePageWidth, Mode=OneWay}" 
+                                                  dxp:ExportSettings.TargetType="PageNumber" 
+                                                  dxp:PageNumberExportSettings.Kind="NumberOfTotal" 
+                                                  dxp:PageNumberExportSettings.Format="Page {0} of {1}"/>
+                                        </DataTemplate>
+                                    </dxg:TableView.Resources>
+                                </dxg:TableView>
+                            </dxg:GridControl.View>
+                        </UIHelper:MyGridControl>
+                    </DataTemplate>
+                </dxlc:GroupBox.MaximizedContentTemplate>
+
+            </dxlc:GroupBox>
+
+            <!--ChangeLog-->
+            <dxlc:GroupBox x:Name="ChangeLog" Style="{StaticResource leaveGroupBoxStyle}" MaximizeElementVisibility="Visible" StateChanged="ChangeLog_StateChanged">
+
+                <dxlc:GroupBox.HeaderTemplate>
+                    <DataTemplate>
+                        <Grid MaxHeight="30">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="250"/>
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Label Content="{DynamicResource LeaveChangeLog}" HorizontalAlignment="Left" FontSize="13" FontWeight="Bold" Grid.Column="0" />
+                            <Grid HorizontalAlignment="Right" Grid.Row="0" Grid.Column="1" >
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="AUTO"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="AUTO"/>
+                                    <ColumnDefinition Width="AUTO" />
+                                    <ColumnDefinition Width="AUTO" />
+                                    <ColumnDefinition Width="AUTO" />
+
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Refresh Leaves Grid-->
+
+                                <Button Visibility="Hidden" Grid.Row="0" Grid.Column="1" Height="24" Width="24" HorizontalAlignment="Right" 
+                                Command="{Binding DataContext.ChangeLogRefreshButtonCommand,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox},UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+                                CommandParameter="{Binding Path=(UIHelper:GroupBoxHelper.InnerTableView), RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}"
+                                Margin="0,0,5,0">
+                                    <Button.ToolTip>
+                                        <TextBlock Text="{DynamicResource ButtonRefresh}"/>
+                                    </Button.ToolTip>
+                                    <Button.ContentTemplate>
+                                        <DataTemplate>
+                                            <Image Style="{DynamicResource RefreshButtonImageStyle}" Margin="-8"/>
+                                        </DataTemplate>
+                                    </Button.ContentTemplate>
+                                </Button>
+
+                                <!-- Print Leaves List-->
+                                <Button Visibility="Hidden" Grid.Row="0" Grid.Column="2" Height="24" Width="24" HorizontalAlignment="Right"                                                             
+                                        Command="{Binding DataContext.ChangeLogPrintButtonCommand,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox},UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"                                
+                                        CommandParameter="{Binding Path=(UIHelper:GroupBoxHelper.InnerTableView), RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}"
+                                        Margin="0,0,5,0">
+                                    <Button.ToolTip>
+                                        <TextBlock Text="{DynamicResource ButtonPrint}"/>
+                                    </Button.ToolTip>
+                                    <Button.ContentTemplate>
+                                        <DataTemplate>
+                                            <Image Style="{DynamicResource PrinterButtonImageStyle}" Margin="-8"/>
+                                        </DataTemplate>
+                                    </Button.ContentTemplate>
+                                </Button>
+
+                                <!-- Export Leaves List-->
+
+                                <Button Visibility="Hidden" Grid.Row="0" Grid.Column="3" Height="24" Width="24" HorizontalAlignment="Right"                     
+                                        Command="{Binding DataContext.ChangeLogExportButtonCommand,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox},UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"                    
+                                        CommandParameter="{Binding Path=(UIHelper:GroupBoxHelper.InnerTableView), RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" Margin="0,0,5,0">
+                                    <Button.ToolTip>
+                                        <TextBlock Text="{DynamicResource ButtonExportToExcel}"/>
+                                    </Button.ToolTip>
+                                    <Button.ContentTemplate>
+                                        <DataTemplate>
+                                            <Image Style="{DynamicResource ExcelExportButtonImageStyle}" Margin="-8"/>
+                                        </DataTemplate>
+                                    </Button.ContentTemplate>
+                                </Button>
+                            </Grid>
+                        </Grid>
+                    </DataTemplate>
+                </dxlc:GroupBox.HeaderTemplate>
+
+                <dxlc:GroupBox.ContentTemplate>
+                    <DataTemplate>
+                        <Grid Height="0" Margin="0">
+                        </Grid>
+                    </DataTemplate>
+                </dxlc:GroupBox.ContentTemplate>
+
+                <dxlc:GroupBox.MaximizedContentTemplate>
+                    <DataTemplate>
+                        <dxg:GridControl VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" 
+                                         ItemsSource="{Binding DataContext.ChangeLogList,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType={x:Type dxlc:GroupBox}}}" 
+                                          SelectedItem="{Binding DataContext.SelectedChangeLog,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox},UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                         SelectionMode="Row" ImplyNullLikeEmptyStringWhenFiltering="True">
+                            <dxg:GridColumn Header="{DynamicResource User}" FieldName="UserName" MinWidth="100" Width="180" ReadOnly="True" FixedWidth="True" UnboundType="String" FilterPopupMode="CheckedList" />
+                            <dxg:GridColumn Header="{DynamicResource DateUser}" FieldName="ChangeLogDatetime" MinWidth="100" Width="250" ReadOnly="True" FixedWidth="True" FilterPopupMode="CheckedList">
+                                <dxg:GridColumn.EditSettings>
+                                    <dxe:DateEditSettings DisplayFormat="g" Name="changeLogTime" />
+                                </dxg:GridColumn.EditSettings>
+                            </dxg:GridColumn>
+                            <dxg:GridColumn Header="{DynamicResource Action}" FieldName="ChangeLogChange" MinWidth="100" Width="*" ReadOnly="True" FixedWidth="True" FilterPopupMode="CheckedList" />
+                            <dxmvvm:Interaction.Behaviors>
+                                <UIHelper:GridSelectingBehavior />
+                            </dxmvvm:Interaction.Behaviors>
+
+                            <dxg:GridControl.TotalSummary>
+                                <dxg:GridSummaryItem x:Name="summary" FieldName="" SummaryType="Count" DisplayFormat="Total Count: {0}" Visible="True" Alignment="Left"/>
+                            </dxg:GridControl.TotalSummary>
+
+                            <dxg:GridControl.View>
+                                <dxg:TableView x:Name="ChangeLogTableView"
+                                   NavigationStyle="Row"
+                                   AllowHorizontalScrollingVirtualization="True" 
+                                   RowDetailsVisibilityMode="Visible"
+                                   ShowHorizontalLines="True"
+                                   ShowSearchPanelMode="Always"
+                                   ShowColumnHeaders="True"                                  
+                                   VerticalScrollbarVisibility="Auto" 
+                                   HorizontalScrollbarVisibility="Auto"
+                                   AllowFixedColumnMenu="False"
+                                   AutoWidth="False" 
+                                   ShowFixedTotalSummary="True"   
+                                   ShowSearchPanelCloseButton="True" 
+                                   SearchPanelHorizontalAlignment="Stretch"   
+                                   ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly"                             
+                                   AllowGrouping="True"
+                                   ShowGroupPanel="False"                             
+                                   ShowIndicator="False"              
+                                   FocusedRow="{Binding Path=SelectedChangeLog,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                  >
+                                    <dxg:TableView.Resources>
+                                        <DataTemplate x:Key="ChangeLogPrintHeaderTemplate">
+                                            <Grid Width="{Binding UsablePageWidth}">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="50" />
+                                                    <ColumnDefinition Width="130" />
+                                                </Grid.ColumnDefinitions>
+                                                <dxe:TextEdit Text=" " Width="{Binding UsablePageWidth}" Grid.ColumnSpan="3" IsPrintingMode="True" Background="#333E5E" HorizontalAlignment="Stretch" 
+                                                      VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" Height="50" />
+                                                <dxe:TextEdit Text="Change Log Report" IsPrintingMode="True" HorizontalAlignment="Stretch" 
+                                                      VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" />
+                                                <Image Source="/Emdep.Geos.Modules.Hrm;component/Assets/Images/GeosReportLogo.png" Height="50" Width="80"  dxp:ExportSettings.TargetType="Image" Grid.Column="2" />
+                                            </Grid>
+                                        </DataTemplate>
+
+                                        <DataTemplate x:Key="ChangeLogPrintFooterTemplate">
+                                            <dxe:TextEdit HorizontalContentAlignment="Center" 
+                                                  Width="{Binding Path=UsablePageWidth, Mode=OneWay}" 
+                                                  dxp:ExportSettings.TargetType="PageNumber" 
+                                                  dxp:PageNumberExportSettings.Kind="NumberOfTotal" 
+                                                  dxp:PageNumberExportSettings.Format="Page {0} of {1}"/>
+                                        </DataTemplate>
+                                    </dxg:TableView.Resources>
+                                </dxg:TableView>
+                            </dxg:GridControl.View>
+                        </dxg:GridControl>
+                    </DataTemplate>
+                </dxlc:GroupBox.MaximizedContentTemplate>
+
+            </dxlc:GroupBox>
+        </dxlc:FlowLayoutControl>
+    </Grid>
+</UserControl>

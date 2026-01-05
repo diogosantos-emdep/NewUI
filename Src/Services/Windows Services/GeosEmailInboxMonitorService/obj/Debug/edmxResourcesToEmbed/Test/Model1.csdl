@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Schema Namespace="geosModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+  <EntityType Name="email">
+    <Key>
+      <PropertyRef Name="IdEmail" />
+    </Key>
+    <Property Name="IdEmail" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="SenderName" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="SenderEmail" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="RecipientName" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="RecipientEmail" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="Subject" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+    <Property Name="Body" Type="String" MaxLength="65535" FixedLength="false" Unicode="false" />
+    <Property Name="CreatedIn" Type="DateTime" />
+    <Property Name="ModifiedIn" Type="DateTime" />
+    <Property Name="IsDeleted" Type="Boolean" Nullable="false" />
+    <Property Name="CreatedBy" Type="Int32" Nullable="false" />
+    <Property Name="ModifiedBy" Type="Int32" />
+    <NavigationProperty Name="emailattachments" Relationship="Self.FK_EmailAttachment_IdEmail" FromRole="email" ToRole="emailattachment" />
+  </EntityType>
+  <EntityType Name="emailattachment">
+    <Key>
+      <PropertyRef Name="IdAttachment" />
+    </Key>
+    <Property Name="IdAttachment" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="IdEmail" Type="Int64" Nullable="false" />
+    <Property Name="AttachmentName" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+    <Property Name="AttachmentPath" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+    <Property Name="CreatedIn" Type="DateTime" Nullable="false" />
+    <Property Name="ModifiedIn" Type="DateTime" />
+    <Property Name="CreatedBy" Type="Int32" Nullable="false" />
+    <Property Name="ModifiedBy" Type="Int32" />
+    <Property Name="IsDeleted" Type="Boolean" Nullable="false" />
+    <Property Name="AttachmentExtension" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+    <NavigationProperty Name="email" Relationship="Self.FK_EmailAttachment_IdEmail" FromRole="emailattachment" ToRole="email" />
+  </EntityType>
+  <Association Name="FK_EmailAttachment_IdEmail">
+    <End Role="email" Type="Self.email" Multiplicity="1" />
+    <End Role="emailattachment" Type="Self.emailattachment" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="email">
+        <PropertyRef Name="IdEmail" />
+      </Principal>
+      <Dependent Role="emailattachment">
+        <PropertyRef Name="IdEmail" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <EntityContainer Name="geosEntities2" annotation:LazyLoadingEnabled="true">
+    <EntitySet Name="emails" EntityType="Self.email" />
+    <EntitySet Name="emailattachments" EntityType="Self.emailattachment" />
+    <AssociationSet Name="FK_EmailAttachment_IdEmail" Association="Self.FK_EmailAttachment_IdEmail">
+      <End Role="email" EntitySet="emails" />
+      <End Role="emailattachment" EntitySet="emailattachments" />
+    </AssociationSet>
+  </EntityContainer>
+</Schema>

@@ -1,0 +1,698 @@
+﻿<UserControl x:Class="Emdep.Geos.Modules.Crm.Views.LeadsPipelineView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Emdep.Geos.Modules.Crm.Views"
+    xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+    xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+    xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+    xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+    xmlns:Helper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+    xmlns:dxgext="clr-namespace:DevExpress.Xpf.Grid;assembly=DevExpress.Xpf.Grid.v19.2.Extensions"
+    xmlns:viewModel="clr-namespace:Emdep.Geos.Modules.Crm.ViewModels"
+    xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+    xmlns:Behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+    xmlns:UIConverter="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+    xmlns:Interactive="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+    xmlns:sysglb="clr-namespace:System.Globalization;assembly=mscorlib"
+    xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+    xmlns:gif="http://wpfanimatedgif.codeplex.com"
+    mc:Ignorable="d"
+    d:DesignHeight="300"
+    d:DesignWidth="800"
+    Style="{DynamicResource UserControlStyle}">
+
+    <!--<UserControl.DataContext>
+        <viewModel:LeadsPipelineViewModel />
+    </UserControl.DataContext>-->
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <UIConverter:DateTimeIsNullOrMinValueVisibility x:Key="IsDateTimeIsNullOrMinValueConverter" />
+        <DataTemplate x:Key="rowInfoTemplate">
+            <dxgext:NameTextControl NameValue="Code # " TextValue="{Binding Code}" />
+        </DataTemplate>
+        <DataTemplate x:Key="dragInfoTemplate">
+            <Border Padding="12,8,24,10">
+                <StackPanel>
+                    <TextBlock FontWeight="Bold"
+                        Foreground="#FF949494"
+                        Name="oneRowTextBlock"
+                        Text="Moving Offer:">
+                        <TextBlock.Visibility>
+                            <Binding Path="DraggingRows.Count">
+                                <Binding.Converter>
+                                    <dxgext:CountToVisibilityConverter Invert="True" />
+                                </Binding.Converter>
+                            </Binding>
+                        </TextBlock.Visibility>
+                    </TextBlock>
+                    <ContentPresenter Content="{Binding FirstDraggingObject}"
+                        ContentTemplate="{StaticResource rowInfoTemplate}"
+                        Name="rowInfoDragPresenter">
+                        <ContentPresenter.Visibility>
+                            <Binding Path="DataContext.DraggingRows.Count" RelativeSource="{RelativeSource TemplatedParent}">
+                                <Binding.Converter>
+                                    <dxgext:CountToVisibilityConverter Invert="True" />
+                                </Binding.Converter>
+                            </Binding>
+                        </ContentPresenter.Visibility>
+                    </ContentPresenter>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <Grid>
+        <DockPanel LastChildFill="True">
+            <Grid Margin="0,0,0,0" DockPanel.Dock="Top">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="10*" />
+                </Grid.ColumnDefinitions>
+                <Label Grid.Column="0"
+                    Margin="10,0,0,0"
+                    VerticalAlignment="Bottom"
+                    Content="{DynamicResource CrmMainViewModelPipeline}"
+                    Style="{DynamicResource LabelTitleStyle}" />
+                <Image gif:ImageBehavior.RepeatBehavior="Forever" gif:ImageBehavior.AnimatedSource="/Emdep.Geos.Modules.Crm;component/Assets/Images/animatedWarning.gif" Visibility="{Binding IsShowFailedPlantWarning,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,Converter={StaticResource BoolToVis}}" Grid.Column="1" Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,2,5,0" Height="30" Width="30">
+                    <Image.ToolTip>
+                        <TextBlock Text="{Binding WarningFailedPlants}" />
+                    </Image.ToolTip>
+                </Image>
+                <DockPanel Grid.Column="2"
+                    Grid.Row="0"
+                    Margin="0,5,0,0"
+                    Height="45"
+                    HorizontalAlignment="Stretch">
+                    <Grid Width="Auto" Height="30" HorizontalAlignment="Right">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="30" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="30" />
+                            <ColumnDefinition Width="auto" />
+                            <ColumnDefinition Width="120" />
+                            <ColumnDefinition Width="30" />
+                            <ColumnDefinition Width="{Binding WidthSalesOwnerImg, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            <ColumnDefinition Width="{Binding WidthSalesOwnerCombobox, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            <ColumnDefinition Width="{Binding WidthSpaceAfterSalesOwner, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            <ColumnDefinition Width="70*" />
+                            <ColumnDefinition Width="50*" />
+                            <ColumnDefinition Width="10" />
+                            <ColumnDefinition Width="50*" />
+                            <ColumnDefinition Width="30" />
+                            <ColumnDefinition Width="80*" />
+                            <ColumnDefinition Width="80*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <!--Search Control-->
+                        <dxe:ImageEdit Grid.Column="0" Height="24" Width="24"
+                                       ShowMenu="False" ShowBorder="False"
+                                       ShowLoadDialogOnClickMode="Never" 
+                                       Style="{DynamicResource SearchImageStyle}" />
+                        <TextBlock Grid.Column="1" Text="{DynamicResource QuickSearch}" FontWeight="Bold"
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Left"
+                            />
+                        <dxe:SearchControl x:Name="searchControl"
+                                           Grid.Column="2"
+                                           Margin="5 0 0 0"
+                                           Height="30"
+                                           HorizontalAlignment="Stretch"  
+                                           VerticalAlignment="Stretch" ShowMRUButton="False" 
+                                           SearchText="{Binding PipelineFilterCriteria, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <!-- Plant Owner -->
+                        <DockPanel Grid.Column="4"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Visibility="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=CmbPlantOwnerUsers}">
+                            <Image Style="{DynamicResource PlantOwnerImageStyle}" Width="24"
+                                Height="24"
+                                Margin="7,0,3,0"
+                                />
+                            <TextBlock Text="{DynamicResource CommonPlantOwner}" FontWeight="Bold"
+                                Margin="5,2,5,0"
+                                />
+                        </DockPanel>
+
+                        <dxe:ComboBoxEdit Style="{DynamicResource ComboBoxEditStyle}"
+                            Grid.Column="5" 
+                                      Visibility="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=CmbPlantOwnerUsers}"
+                                      ItemsSource="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=PlantOwnerUsersList}" Margin="5,0,5,0"
+                                      DisplayMember="ShortName"
+                                      EditValue="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=SelectedPlantOwnerUsersList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                            <dxe:ComboBoxEdit.StyleSettings>
+                                <dxe:CheckedComboBoxStyleSettings />
+                            </dxe:ComboBoxEdit.StyleSettings>
+                            <dxmvvm:Interaction.Triggers>
+                                <dxmvvm:EventToCommand EventName="PopupClosed"
+                                               Command="{Binding DataContext.SalesOwnerPopupClosedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                               PassEventArgsToCommand="True" />
+                            </dxmvvm:Interaction.Triggers>
+                        </dxe:ComboBoxEdit>
+
+                        <!-- Sales Owner -->
+                        <DockPanel Grid.Column="4"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Visibility="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=CmbSalesOwnerUsers}">
+                            <Image Width="24"
+                                Height="24"
+                                Margin="7,0,3,0"
+                                Style="{DynamicResource OwnerGroupImageStyle}" />
+                            <TextBlock Margin="5,2,5,0"
+                                FontWeight="Bold"
+                                Text="{DynamicResource CommonSalesOwner}" />
+                        </DockPanel>
+                        <dxe:ComboBoxEdit Grid.Column="5" 
+                                      Margin="5,0,0,0"
+                            DisplayMember="User.FullName"
+                            EditValue="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=SelectedSalesOwnerUsersList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            ItemsSource="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=SalesOwnerUsersList}"
+                            Style="{DynamicResource ComboBoxEditStyle}"
+                            Visibility="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=CmbSalesOwnerUsers}">
+                            <dxe:ComboBoxEdit.StyleSettings>
+                                <dxe:CheckedComboBoxStyleSettings />
+                            </dxe:ComboBoxEdit.StyleSettings>
+                            <dxmvvm:Interaction.Triggers>
+                                <dxmvvm:EventToCommand Command="{Binding DataContext.SalesOwnerPopupClosedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                               EventName="PopupClosed"
+                                               PassEventArgsToCommand="True" />
+                            </dxmvvm:Interaction.Triggers>
+                        </dxe:ComboBoxEdit>
+                        <!-- Period -->
+                        <DockPanel Grid.Column="7"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            >
+                            <Image Width="16"
+                                Height="16"
+                                Margin="7,0,3,0"
+                                Style="{DynamicResource CalendarImageStyle}" />
+                            <TextBlock Margin="5,0,0,0"
+                                FontWeight="Bold"
+                                Text="{DynamicResource AnnualSalesPerformanceViewPeriod}" />
+                        </DockPanel>
+                        <TextBlock Grid.Column="8"
+                            Margin="3,0,0,0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            Text="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=SelectedyearStarDate, StringFormat=d, ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}" />
+                        <TextBlock Grid.Column="9"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            FontWeight="Bold"
+                            Text=" - " />
+                        <TextBlock Grid.Column="10"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            Text="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=SelectedyearEndDate, StringFormat=d, ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}" />
+                        <!-- Remaining -->
+                        <DockPanel Grid.Column="12"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            >
+                            <Image Width="16"
+                                Height="16"
+                                Margin="3,0,3,0"
+                                Style="{DynamicResource WatchImageStyle}" />
+                            <TextBlock Margin="5,0,0,0"
+                                FontWeight="Bold"
+                                Text="{DynamicResource AnnualSalesPerformanceViewRemaining}" />
+                        </DockPanel>
+                        <DockPanel Grid.Column="13"
+                            Margin="5,0,0,0"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            >
+                            <TextBlock Text="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=RemainingDays}" />
+                            <TextBlock Margin="3,0,5,0" Text="{DynamicResource AnnualSalesPerformanceViewDays}" />
+                        </DockPanel>
+                        <Button Grid.Column="14"
+                            Height="37.9"
+                            Width="38"
+                            Margin="0,-7.7,5,0"
+                            HorizontalAlignment="Right"
+                            Command="{Binding RefreshPipelineViewCommand}"
+                            Content=" ">
+                            <Button.ToolTip>
+                                <TextBlock Text="{DynamicResource ButtonRefresh}" />
+                            </Button.ToolTip>
+                            <Button.ContentTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Image Grid.Column="0"
+                                            Height="24"
+                                            Width="24"
+                                            Margin="-10"
+                                            Style="{ DynamicResource RefreshButtonImageStyle}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </Button.ContentTemplate>
+                        </Button>
+                    </Grid>
+                </DockPanel>
+            </Grid>
+            <Grid>
+                <Helper:MyLayoutControl Grid.Row="1"
+                    Grid.Column="0"
+                    Margin="0"
+                    DockPanel.Dock="Bottom"
+                    ItemLabelsAlignment="Local"
+                    Orientation="Vertical"
+                    Padding="0">
+                    <Helper:MyLayoutControl.Resources>
+                        <Style x:Key="ApplyForeColorTextBlock"
+                            BasedOn="{StaticResource TextBlockStyle}"
+                            TargetType="TextBlock">
+                            <Setter Property="Helper:AutoForeGroundExtension.AutoForeGround" Value="True" />
+                        </Style>
+                        <Style x:Key="ApplyForeColorTextEdit"
+                            BasedOn="{StaticResource TextEditStyle}"
+                            TargetType="dxe:TextEdit">
+                            <Setter Property="Helper:AutoForeGroundExtension.AutoForeGround" Value="True" />
+                        </Style>
+                        <Style x:Key="ApplyForeColorLabel"
+                            BasedOn="{StaticResource LabelStyle}"
+                            TargetType="Label">
+                            <Setter Property="Helper:AutoForeGroundExtension.AutoForeGround" Value="True" />
+                        </Style>
+                        <Style x:Key="maximizableGroupBoxStyle" TargetType="dxlc:GroupBox">
+                            <Setter Property="MaximizeElementVisibility" Value="Visible" />
+                            <Setter Property="FontSize" Value="13" />
+                            <Setter Property="ContentTemplate">
+                                <Setter.Value>
+                                    <DataTemplate>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="5" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+                                            <TextBlock Grid.Row="0"
+                                                Grid.Column="0"
+                                                Grid.ColumnSpan="3"
+                                                HorizontalAlignment="Left"
+                                                VerticalAlignment="Center"
+                                                Background="{Binding GeosStatus.SalesStatusType.HtmlColor}"
+                                                Style="{StaticResource ApplyForeColorTextBlock}"
+                                                Text="{Binding DataContext.Description, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox,Mode=FindAncestor}}"
+                                                TextWrapping="WrapWithOverflow" />
+                                            <WrapPanel Grid.Row="1"
+                                                Grid.Column="0"
+                                                Grid.ColumnSpan="3"
+                                                HorizontalAlignment="Left"
+                                                VerticalAlignment="Center"
+                                                Orientation="Horizontal">
+                                                <TextBlock HorizontalAlignment="Left"
+                                                    Background="{Binding GeosStatus.SalesStatusType.HtmlColor}"
+                                                    Style="{StaticResource ApplyForeColorTextBlock}"
+                                                    Text="{Binding DataContext.Site.Customers[0].CustomerName, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox,Mode=FindAncestor}}" />
+                                                <TextBlock HorizontalAlignment="Left"
+                                                    Background="{Binding GeosStatus.SalesStatusType.HtmlColor}"
+                                                    Style="{StaticResource ApplyForeColorTextBlock}"
+                                                    Text=" - " />
+                                                <TextBlock HorizontalAlignment="Left"
+                                                    Background="{Binding GeosStatus.SalesStatusType.HtmlColor}"
+                                                    Style="{StaticResource ApplyForeColorTextBlock}"
+                                                    Text="{Binding DataContext.Site.Name, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox,Mode=FindAncestor}}" />
+                                            </WrapPanel>
+                                            <StackPanel Grid.Row="2"
+                                                Grid.ColumnSpan="3"
+                                                HorizontalAlignment="Right"
+                                                Orientation="Horizontal">
+                                                <Image Width="16"
+                                                    Height="16"
+                                                    Margin="0,0,5,0"
+                                                    Style="{DynamicResource CalendarButtonImageStyle}"
+                                                    Visibility="{Binding DataContext.DeliveryDate, Converter={StaticResource IsDateTimeIsNullOrMinValueConverter},RelativeSource={RelativeSource AncestorType=dxlc:GroupBox,Mode=FindAncestor}}" />
+                                                <TextBlock HorizontalAlignment="Right" Text="{Binding DataContext.DeliveryDate,StringFormat=d,ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture} , RelativeSource={RelativeSource AncestorType=dxlc:GroupBox,Mode=FindAncestor}}">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="{x:Type TextBlock}">
+                                                            <Setter Property="Background" Value="{Binding GeosStatus.SalesStatusType.HtmlColor}" />
+                                                            <Style.Triggers>
+                                                                <MultiDataTrigger>
+                                                                    <MultiDataTrigger.Conditions>
+                                                                        <Condition Value="{x:Static sys:DateTime.MinValue}" Binding="{Binding DataContext.DeliveryDate, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox,Mode=FindAncestor}}" />
+                                                                    </MultiDataTrigger.Conditions>
+                                                                    <Setter Property="Visibility" Value="Hidden" />
+                                                                </MultiDataTrigger>
+                                                                <MultiDataTrigger>
+                                                                    <MultiDataTrigger.Conditions>
+                                                                        <Condition Value="{x:Null}" Binding="{Binding DataContext.DeliveryDate, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox,Mode=FindAncestor}}" />
+                                                                    </MultiDataTrigger.Conditions>
+                                                                    <Setter Property="Visibility" Value="Hidden" />
+                                                                </MultiDataTrigger>
+                                                                <MultiDataTrigger>
+                                                                    <MultiDataTrigger.Conditions>
+                                                                        <Condition Value="true" Binding="{Binding DataContext.IsCloseDateExceed,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox,Mode=FindAncestor}}" />
+                                                                    </MultiDataTrigger.Conditions>
+                                                                    <Setter Property="Foreground" Value="Red" />
+                                                                </MultiDataTrigger>
+                                                                <MultiDataTrigger>
+                                                                    <MultiDataTrigger.Conditions>
+                                                                        <Condition Value="false" Binding="{Binding DataContext.IsCloseDateExceed,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox,Mode=FindAncestor}}" />
+                                                                    </MultiDataTrigger.Conditions>
+                                                                    <Setter Property="Helper:AutoForeGroundExtension.AutoForeGround" Value="True" />
+                                                                </MultiDataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </StackPanel>
+                                        </Grid>
+                                    </DataTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Setter Property="MaximizedContentTemplate">
+                                <Setter.Value>
+                                    <DataTemplate>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="65" />
+                                                <ColumnDefinition Width="5" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+                                            <Label Grid.Row="0"
+                                                Grid.Column="0"
+                                                HorizontalAlignment="Left"
+                                                VerticalAlignment="Top"
+                                                Background="{Binding GeosStatus.SalesStatusType.HtmlColor}"
+                                                Content="Title"
+                                                Style="{StaticResource ApplyForeColorLabel}" />
+                                            <Label Grid.Row="0"
+                                                Grid.Column="1"
+                                                HorizontalAlignment="Left"
+                                                VerticalAlignment="Top"
+                                                Background="{Binding GeosStatus.SalesStatusType.HtmlColor}"
+                                                Content=":"
+                                                Style="{StaticResource ApplyForeColorLabel}" />
+                                            <TextBlock Grid.Row="0"
+                                                Grid.Column="2"
+                                                HorizontalAlignment="Left"
+                                                VerticalAlignment="Center"
+                                                Background="{Binding GeosStatus.SalesStatusType.HtmlColor}"
+                                                Style="{StaticResource ApplyForeColorTextBlock}"
+                                                Text="{Binding DataContext.Description, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox,Mode=FindAncestor}}"
+                                                TextWrapping="WrapWithOverflow" />
+                                            <Label Grid.Row="1"
+                                                Grid.Column="0"
+                                                HorizontalAlignment="Left"
+                                                VerticalAlignment="Top"
+                                                Background="{Binding GeosStatus.SalesStatusType.HtmlColor}"
+                                                Content="Customer"
+                                                Style="{StaticResource ApplyForeColorLabel}" />
+                                            <Label Grid.Row="1"
+                                                Grid.Column="1"
+                                                HorizontalAlignment="Left"
+                                                VerticalAlignment="Top"
+                                                Background="{Binding GeosStatus.SalesStatusType.HtmlColor}"
+                                                Content=":"
+                                                Style="{StaticResource ApplyForeColorLabel}" />
+                                            <WrapPanel Grid.Row="1"
+                                                Grid.Column="2"
+                                                HorizontalAlignment="Left"
+                                                VerticalAlignment="Center"
+                                                Orientation="Horizontal">
+                                                <TextBlock Background="{Binding GeosStatus.SalesStatusType.HtmlColor}"
+                                                    Style="{StaticResource ApplyForeColorTextBlock}"
+                                                    Text="{Binding DataContext.Site.Customers[0].CustomerName, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox,Mode=FindAncestor}}" />
+                                                <TextBlock Background="{Binding GeosStatus.SalesStatusType.HtmlColor}"
+                                                    Style="{StaticResource ApplyForeColorTextBlock}"
+                                                    Text="-" />
+                                                <TextBlock Background="{Binding GeosStatus.SalesStatusType.HtmlColor}"
+                                                    Style="{StaticResource ApplyForeColorTextBlock}"
+                                                    Text="{Binding DataContext.Site.Name, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox,Mode=FindAncestor}}" />
+                                            </WrapPanel>
+                                            <Label Grid.Row="2"
+                                                Grid.Column="0"
+                                                HorizontalAlignment="Left"
+                                                VerticalAlignment="Top"
+                                                Background="{Binding GeosStatus.SalesStatusType.HtmlColor}"
+                                                Content="Owner"
+                                                Style="{StaticResource ApplyForeColorLabel}" />
+                                            <Label Grid.Row="2"
+                                                Grid.Column="1"
+                                                HorizontalAlignment="Left"
+                                                VerticalAlignment="Top"
+                                                Background="{Binding GeosStatus.SalesStatusType.HtmlColor}"
+                                                Content=":"
+                                                Style="{StaticResource ApplyForeColorLabel}" />
+                                            <TextBlock Grid.Row="2"
+                                                Grid.Column="2"
+                                                HorizontalAlignment="Left"
+                                                VerticalAlignment="Center"
+                                                Background="{Binding GeosStatus.SalesStatusType.HtmlColor}"
+                                                Style="{StaticResource ApplyForeColorTextBlock}"
+                                                Text="{Binding DataContext.SalesOwner.FullName, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox,Mode=FindAncestor}}" />
+                                            <Label>
+                                                <Label.Resources>
+                                                    <Style TargetType="{x:Type Label}">
+                                                        <Setter Property="Content" Value="Close Date" />
+                                                        <Setter Property="Grid.Row" Value="3" />
+                                                        <Setter Property="Grid.Column" Value="0" />
+                                                        <Setter Property="HorizontalAlignment" Value="Left" />
+                                                        <Setter Property="VerticalAlignment" Value="Top" />
+                                                        <Setter Property="Background" Value="{Binding GeosStatus.SalesStatusType.HtmlColor}" />
+                                                        <Setter Property="Helper:AutoForeGroundExtension.AutoForeGround" Value="True" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Value="4" Binding="{Binding GeosStatus.SalesStatusType.IdSalesStatusType}">
+                                                                <Setter Property="Content" Value="PO Date" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Label.Resources>
+                                            </Label>
+                                            <Label Grid.Row="3"
+                                                Grid.Column="1"
+                                                HorizontalAlignment="Left"
+                                                VerticalAlignment="Top"
+                                                Background="{Binding GeosStatus.SalesStatusType.HtmlColor}"
+                                                Content=":"
+                                                Style="{StaticResource ApplyForeColorLabel}" />
+                                            <TextBlock x:Name="CloseDateText"
+                                                Grid.Row="3"
+                                                Grid.Column="2"
+                                                HorizontalAlignment="Left"
+                                                VerticalAlignment="Center"
+                                                Text="{Binding DataContext.DeliveryDate,StringFormat=d,ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox,Mode=FindAncestor}}">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="{x:Type TextBlock}">
+                                                        <Setter Property="Background" Value="{Binding GeosStatus.SalesStatusType.HtmlColor}" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Value="true" Binding="{Binding DataContext.IsCloseDateExceed,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox,Mode=FindAncestor}}">
+                                                                <Setter Property="Foreground" Value="Red" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Value="false" Binding="{Binding DataContext.IsCloseDateExceed,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox,Mode=FindAncestor}}">
+                                                                <Setter Property="Helper:AutoForeGroundExtension.AutoForeGround" Value="True" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                            <Label Grid.Row="4"
+                                                Grid.Column="0"
+                                                HorizontalAlignment="Left"
+                                                VerticalAlignment="Top"
+                                                Background="{Binding GeosStatus.SalesStatusType.HtmlColor}"
+                                                Content="Amount"
+                                                Style="{StaticResource ApplyForeColorLabel}" />
+                                            <Label Grid.Row="4"
+                                                Grid.Column="1"
+                                                HorizontalAlignment="Left"
+                                                VerticalAlignment="Top"
+                                                Background="{Binding GeosStatus.SalesStatusType.HtmlColor}"
+                                                Content=":"
+                                                Style="{StaticResource ApplyForeColorLabel}" />
+                                            <dxe:TextEdit Grid.Row="4"
+                                                Grid.Column="2"
+                                                HorizontalAlignment="Left"
+                                                VerticalAlignment="Center"
+                                                Background="{Binding GeosStatus.SalesStatusType.HtmlColor}"
+                                                IsReadOnly="True"
+                                                Mask="c"
+                                                MaskType="Numeric"
+                                                MaskUseAsDisplayFormat="True"
+                                                ShowBorder="False"
+                                                Style="{StaticResource ApplyForeColorTextEdit}"
+                                                Text="{Binding DataContext.Value,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox,Mode=FindAncestor}}" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                        <DataTemplate x:Key="OffersListBoxTemplete">
+                            <Helper:MyLayoutControl Margin="0"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                                ItemLabelsAlignment="Local"
+                                Orientation="Vertical"
+                                Padding="0">
+                                <dxlc:GroupBox HorizontalAlignment="Stretch"
+                                    VerticalAlignment="Stretch"
+                                    Background="{Binding GeosStatus.SalesStatusType.HtmlColor}"
+                                    Content="{Binding}"
+                                    Header="Project"
+                                    MaximizeElementVisibility="Visible"
+                                    Style="{StaticResource maximizableGroupBoxStyle}">
+                                    <dxlc:GroupBox.HeaderTemplate>
+                                        <DataTemplate>
+                                            <DockPanel Margin="-10,0,0,0">
+                                                <WrapPanel>
+                                                    <TextBlock Text="#" Style="{DynamicResource TextBlockControlStyle}" />
+                                                    <TextBlock Text="{Binding DataContext.Code, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" Style="{DynamicResource TextBlockControlStyle}" />
+                                                </WrapPanel>
+                                                <DockPanel HorizontalAlignment="Right">
+                                                    <dxe:RatingEdit x:Name="Ratingeditor"
+                                                        HorizontalAlignment="Right"
+                                                        VerticalAlignment="Center"
+                                                        Value="{Binding DataContext.ProbabilityOfSuccess,Converter={UIConverter:RateIntegerToStarConverter},UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}"
+                                                        IsReadOnly="True">
+                                                        <dxe:RatingEdit.ItemStyle>
+                                                            <Style TargetType="dxe:RatingItem">
+                                                                <Setter Property="SelectedBackground" Value="{Binding DataContext.ProbabilityOfSuccess, Converter={UIConverter:ColorToBrushConverterNew}, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" />
+                                                            </Style>
+                                                        </dxe:RatingEdit.ItemStyle>
+                                                    </dxe:RatingEdit>
+                                                </DockPanel>
+                                            </DockPanel>
+                                        </DataTemplate>
+                                    </dxlc:GroupBox.HeaderTemplate>
+                                </dxlc:GroupBox>
+                            </Helper:MyLayoutControl>
+                        </DataTemplate>
+                        <DataTemplate x:Key="itemTemplate">
+                            <dxlc:GroupBox x:Name="groupsamplename"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                                Content="{Binding}"
+                                FlowDirection="LeftToRight"
+                                MaximizeElementVisibility="Hidden">
+                                <dxlc:GroupBox.HeaderTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,0,-28,0"
+                                            HorizontalAlignment="Stretch"
+                                            VerticalAlignment="Stretch">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock x:Name="txtHeader"
+                                                Grid.Column="0"
+                                                Margin="-10,0,0,0"
+                                                HorizontalAlignment="Left"
+                                                Style="{DynamicResource TextBlock14Style}"
+                                                Text="{Binding DataContext.Name,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" />
+                                            <Label Grid.Column="1"
+                                                Margin="2,0,0,0"
+                                                HorizontalAlignment="Left"
+                                                Content=":"
+                                                Padding="-2" />
+                                            <TextBlock Grid.Column="2"
+                                                Margin="2,0,0,0"
+                                                HorizontalAlignment="Left"
+                                                Style="{DynamicResource TextBlock14Style}"
+                                                Text="{Binding DataContext.OffersInObject.Count , RelativeSource={RelativeSource AncestorType=dxlc:GroupBox},UpdateSourceTrigger=PropertyChanged}" />
+                                            <dxe:TextEdit Grid.Column="3"
+                                                Margin="2,0,0,0"
+                                                HorizontalAlignment="Right"
+                                                IsReadOnly="True"
+                                                Mask="c"
+                                                MaskCulture="{Binding Path=CurrentCultureCurrencySymbol, Source={x:Static GeosApplication:GeosApplication.Instance}}"
+                                                MaskType="Numeric"
+                                                MaskUseAsDisplayFormat="True"
+                                                ShowBorder="False"
+                                                Style="{StaticResource ApplyForeColorTextEdit}"
+                                                Text="{Binding DataContext.TotalAmount,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox,Mode=FindAncestor}}" />
+                                            <!--<dxe:TextEdit  Grid.Column="3" MaskType="Numeric" Mask="C" MaskUseAsDisplayFormat="True" Text="{Binding DataContext.TotalAmount,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox,Mode=FindAncestor}}" HorizontalAlignment="Right"  Style="{DynamicResource TextEditBackgroundStyle}"  Margin="2,0,0,0" />-->
+                                        </Grid>
+                                    </DataTemplate>
+                                </dxlc:GroupBox.HeaderTemplate>
+                                <dxlc:GroupBox.ContentTemplate>
+                                    <DataTemplate>
+                                        <dxe:ListBoxEdit x:Name="PART_Editor"
+                                            Margin="-10"
+                                            HorizontalContentAlignment="Stretch"
+                                            VerticalAlignment="Stretch"
+                                            DisplayMember="Code"
+                                            EditValue="{Binding CurrentItem}"
+                                            ItemsSource="{Binding OffersInObject, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                            ItemTemplate="{StaticResource OffersListBoxTemplete}"
+                                            ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                            Tag="{Binding}">
+                                            <dxmvvm:Interaction.Behaviors>
+                                                <dxmvvm:EventToCommand Command="{Binding DataContext.MouseDoubleClickActionCommand,RelativeSource={RelativeSource AncestorType=UserControl,Mode=FindAncestor}}"
+                                                    EventName="MouseDoubleClick"
+                                                    PassEventArgsToCommand="True" />
+                                                <dxg:ListBoxDragDropManager AllowDrag="True" AllowDrop="True">
+                                                    <dxg:ListBoxDragDropManager.DragElementTemplate>
+                                                        <DataTemplate>
+                                                            <dxgext:HintControl>
+                                                                <StackPanel>
+                                                                    <ContentPresenter Content="{Binding}"
+                                                                        ContentTemplate="{StaticResource dragInfoTemplate}"
+                                                                        Name="dragInfo" />
+                                                                </StackPanel>
+                                                            </dxgext:HintControl>
+                                                        </DataTemplate>
+                                                    </dxg:ListBoxDragDropManager.DragElementTemplate>
+                                                    <dxmvvm:Interaction.Behaviors>
+                                                        <dxmvvm:EventToCommand Command="{Binding DataContext.UpdateLeadStatusCommand,RelativeSource={RelativeSource AncestorType=UserControl,Mode=FindAncestor}}"
+                                                            EventName="Drop"
+                                                            PassEventArgsToCommand="True" />
+                                                        <dxmvvm:EventToCommand Command="{Binding DataContext.OnDroppedCommand,RelativeSource={RelativeSource AncestorType=UserControl,Mode=FindAncestor}}"
+                                                            EventName="Dropped"
+                                                            PassEventArgsToCommand="True" />
+                                                    </dxmvvm:Interaction.Behaviors>
+                                                </dxg:ListBoxDragDropManager>
+                                            </dxmvvm:Interaction.Behaviors>
+                                        </dxe:ListBoxEdit>
+                                    </DataTemplate>
+                                </dxlc:GroupBox.ContentTemplate>
+                            </dxlc:GroupBox>
+                        </DataTemplate>
+                    </Helper:MyLayoutControl.Resources>
+                    <Helper:MyFlowLayoutControl Margin="-10"
+                        AllowItemMoving="False"
+                        AllowMaximizedElementMoving="False"
+                        AnimateItemMoving="True"
+                        BreakFlowToFit="False"
+                        DragScrolling="False"
+                        ItemsSource="{Binding ListSalesStatusType,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                        ItemTemplate="{StaticResource itemTemplate}"
+                        MaximizedElementPosition="Left"
+                        Orientation="Horizontal"
+                        ScrollViewer.HorizontalScrollBarVisibility="Visible"
+                        ScrollViewer.VerticalScrollBarVisibility="Hidden"
+                        ShowLayerSeparators="True"
+                        StretchContent="True" />
+                </Helper:MyLayoutControl>
+            </Grid>
+        </DockPanel>
+    </Grid>
+
+</UserControl>

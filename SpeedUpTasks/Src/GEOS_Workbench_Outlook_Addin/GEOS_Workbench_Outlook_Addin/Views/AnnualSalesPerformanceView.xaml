@@ -1,0 +1,986 @@
+﻿<UserControl xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:dxga="http://schemas.devexpress.com/winfx/2008/xaml/gauges"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors" 
+             xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+             xmlns:ViewModels="clr-namespace:Emdep.Geos.Modules.Crm.ViewModels"
+             xmlns:dxc="http://schemas.devexpress.com/winfx/2008/xaml/charts" 
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:sysglb="clr-namespace:System.Globalization;assembly=mscorlib"
+             xmlns:dxsch="http://schemas.devexpress.com/winfx/2008/xaml/scheduler"
+             xmlns:Scheduler="clr-namespace:DevExpress.Xpf.Scheduler.UI;assembly=DevExpress.Xpf.Scheduler.v19.2"
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:dxschcore="clr-namespace:DevExpress.XtraScheduler;assembly=DevExpress.XtraScheduler.v19.2.Core"
+             xmlns:behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:dxci="http://schemas.devexpress.com/winfx/2008/xaml/core/internal"
+             xmlns:UIConverter="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+             xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+             xmlns:dxschint="http://schemas.devexpress.com/winfx/2008/xaml/scheduler/internal"
+             xmlns:dxscht="http://schemas.devexpress.com/winfx/2008/xaml/scheduler/themekeys"
+             xmlns:Serialization="clr-namespace:DevExpress.Xpf.LayoutControl.Serialization;assembly=DevExpress.Xpf.LayoutControl.v19.2"
+             xmlns:dxb="http://schemas.devexpress.com/winfx/2008/xaml/bars"
+             xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+             x:Class="Emdep.Geos.Modules.Crm.Views.AnnualSalesPerformanceView"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:gif="http://wpfanimatedgif.codeplex.com"
+             mc:Ignorable="d"
+             d:DesignHeight="500" d:DesignWidth="1000"
+             IsEnabled="True"
+             Style="{DynamicResource UserControlStyle}">
+
+    <UserControl.Resources>
+
+        <ResourceDictionary>
+            <UIConverter:CircularGaugeRangeValueConverter x:Key="CircularGaugeRangeValueConverter" />
+            <UIConverter:AppointmentForeColorConverter x:Key="appointmentForeColorConverter" />
+            <UIConverter:ObjectToIntConverter x:Key="ObjectToIntConverter" />
+            <BooleanToVisibilityConverter x:Key="BoolToVis" />
+            <sys:Boolean x:Key="False">False</sys:Boolean>
+
+            <Style TargetType="{x:Type dxga:ArcScale}" x:Key="arcScaleStyle">
+                <Setter Property="LayoutMode" Value="Circle" />
+                <Setter Property="ShowLabels" Value="False" />
+                <Setter Property="ShowLine" Value="False" />
+                <Setter Property="ShowMajorTickmarks" Value="True" />
+                <Setter Property="ShowMinorTickmarks" Value="False" />
+                <Setter Property="StartAngle" Value="-180" />
+                <Setter Property="EndAngle" Value="0" />
+                <Setter Property="StartValue" Value="0" />
+                <Setter Property="MajorIntervalCount" Value="3" />
+                <Setter Property="LabelOptions">
+                    <Setter.Value>
+                        <dxga:ArcScaleLabelOptions FormatString="{}{0:$0,,M}" Offset="-6" />
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <dxmvvm:ObjectToObjectConverter x:Key="SalesStatusToImageConverter"
+                                            DefaultTarget="/Emdep.Geos.Modules.Crm;component/Assets/Images/NotAvailable.png">
+                <dxmvvm:MapItem Source="0">
+                    <dxmvvm:MapItem.Target>
+                        <BitmapImage UriSource="/Emdep.Geos.Modules.Crm;component/Assets/Images/Target.png" />
+                    </dxmvvm:MapItem.Target>
+                </dxmvvm:MapItem>
+                <dxmvvm:MapItem Source="1">
+                    <dxmvvm:MapItem.Target>
+                        <BitmapImage UriSource="/Emdep.Geos.Modules.Crm;component/Assets/Images/Forecast.png" />
+                    </dxmvvm:MapItem.Target>
+                </dxmvvm:MapItem>
+                <dxmvvm:MapItem Source="2">
+                    <dxmvvm:MapItem.Target>
+                        <BitmapImage UriSource="/Emdep.Geos.Modules.Crm;component/Assets/Images/Qualified.png" />
+                    </dxmvvm:MapItem.Target>
+                </dxmvvm:MapItem>
+                <dxmvvm:MapItem Source="3">
+                    <dxmvvm:MapItem.Target>
+                        <BitmapImage UriSource="/Emdep.Geos.Modules.Crm;component/Assets/Images/Quoted.png" />
+                    </dxmvvm:MapItem.Target>
+                </dxmvvm:MapItem>
+                <dxmvvm:MapItem Source="4">
+                    <dxmvvm:MapItem.Target>
+                        <BitmapImage UriSource="/Emdep.Geos.Modules.Crm;component/Assets/Images/Won.png" />
+                    </dxmvvm:MapItem.Target>
+                </dxmvvm:MapItem>
+                <dxmvvm:MapItem Source="5">
+                    <dxmvvm:MapItem.Target>
+                        <BitmapImage UriSource="/Emdep.Geos.Modules.Crm;component/Assets/Images/Lost.png" />
+                    </dxmvvm:MapItem.Target>
+                </dxmvvm:MapItem>
+                <dxmvvm:MapItem Source="6">
+                    <dxmvvm:MapItem.Target>
+                        <BitmapImage UriSource="/Emdep.Geos.Modules.Crm;component/Assets/Images/Rfq.png" />
+                    </dxmvvm:MapItem.Target>
+                </dxmvvm:MapItem>
+                <dxmvvm:MapItem Source="">
+                    <dxmvvm:MapItem.Target>
+                        <BitmapImage UriSource="/Emdep.Geos.Modules.Crm;component/Assets/Images/NotAvailable.png" />
+                    </dxmvvm:MapItem.Target>
+                </dxmvvm:MapItem>
+            </dxmvvm:ObjectToObjectConverter>
+
+            <DataTemplate x:Key="AppointmentToolTipContentTemplate">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="2" Text="{Binding Description}" />
+                </Grid>
+            </DataTemplate>
+
+            <!-- Display image as per following description.
+                1. Only quoted = 1;
+                2. Waiting for quote = 2;
+                3. CloseDate=3;
+                4. DeliveryDate=4;
+                5. PODate=5 GoAhead; 
+                6. PODate=6 () GoAhead Not;-->
+            <DataTemplate x:Key="AppointmentContentTemplate">
+                <StackPanel Orientation="Horizontal">
+                    <Image Height="16" Width="16" Margin="0,0,5,-2" Stretch="Fill">
+                        <Image.Style>
+                            <Style>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Location}" Value="(Quote Sent Date)">
+                                        <Setter Property="Image.Source" Value="/Emdep.Geos.Modules.Crm;component/Assets/Images/QuoteSent.png" />
+                                        <Setter Property="Image.ToolTip" Value="{DynamicResource AnnualSalesPerformanceViewQuoteSent}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Location}" Value="(RFQ Date)">
+                                        <Setter Property="Image.Source" Value="/Emdep.Geos.Modules.Crm;component/Assets/Images/RFQDate.png" />
+                                        <Setter Property="Image.ToolTip" Value="{DynamicResource AnnualSalesPerformanceViewRFQReception}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Location, Converter={StaticResource ObjectToIntConverter}}" Value="3">
+                                        <Setter Property="Image.Source" Value="/Emdep.Geos.Modules.Crm;component/Assets/Images/CloseDate.png" />
+                                        <Setter Property="Image.ToolTip" Value="{DynamicResource AnnualSalesPerformanceViewCloseDate}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Location, Converter={StaticResource ObjectToIntConverter}}" Value="4">
+                                        <Setter Property="Image.Source" Value="/Emdep.Geos.Modules.Crm;component/Assets/Images/DeliveryDate.png" />
+                                        <Setter Property="Image.ToolTip" Value="{DynamicResource AnnualSalesPerformanceViewDeliveryDate}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Location, Converter={StaticResource ObjectToIntConverter}}" Value="5">
+                                        <Setter Property="Image.Source" Value="/Emdep.Geos.Modules.Crm;component/Assets/Images/PODate_Black.png" />
+                                        <Setter Property="Image.ToolTip" Value="{DynamicResource AnnualSalesPerformanceViewPOyDate}" />
+                                    </DataTrigger>
+
+                                    <DataTrigger Binding="{Binding Location, Converter={StaticResource ObjectToIntConverter}}" Value="6">
+                                        <Setter Property="Image.Source" Value="/Emdep.Geos.Modules.Crm;component/Assets/Images/PODate_Black.png" />
+                                        <Setter Property="Image.ToolTip" Value="{DynamicResource AnnualSalesPerformanceViewPOyDate}" />
+                                    </DataTrigger>
+
+                                    <DataTrigger Binding="{Binding Label.Id}" Value="37">
+                                        <Setter Property="Image.Source" Value="/Emdep.Geos.Modules.Crm;component/Assets/Images/Meeting.png" />
+                                        <Setter Property="Image.ToolTip" Value="Appointment" />
+                                    </DataTrigger>
+
+                                    <DataTrigger Binding="{Binding Label.Id}" Value="38">
+                                        <Setter Property="Image.Source" Value="/Emdep.Geos.Modules.Crm;component/Assets/Images/Call.png" />
+                                        <Setter Property="Image.ToolTip" Value="Call" />
+                                    </DataTrigger>
+
+                                    <DataTrigger Binding="{Binding Label.Id}" Value="39">
+                                        <Setter Property="Image.Source" Value="/Emdep.Geos.Modules.Crm;component/Assets/Images/At.png" />
+                                        <Setter Property="Image.ToolTip" Value="Email" />
+                                    </DataTrigger>
+
+                                    <DataTrigger Binding="{Binding Label.Id}" Value="40">
+                                        <Setter Property="Image.Source" Value="/Emdep.Geos.Modules.Crm;component/Assets/Images/Task.png" />
+                                        <Setter Property="Image.ToolTip" Value="Task" />
+                                    </DataTrigger>
+
+                                    <DataTrigger Binding="{Binding Location}" Value="(Tour)">
+                                        <Setter Property="Image.Source" Value="/Emdep.Geos.Modules.Crm;component/Assets/Images/Tour.png" />
+                                        <Setter Property="Image.ToolTip" Value="Tour" />
+                                    </DataTrigger>
+
+                                    <DataTrigger Binding="{Binding Label.Id}" Value="91">
+                                        <Setter Property="Image.Source" Value="/Emdep.Geos.Modules.Crm;component/Assets/Images/info.png" />
+                                        <Setter Property="Image.ToolTip" Value="Information" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Label.Id}" Value="96">
+                                        <Setter Property="Image.Source" Value="/Emdep.Geos.Modules.Crm;component/Assets/Images/PlannedAppointment.png" />
+                                        <Setter Property="Image.ToolTip" Value="Planned Appointment" />
+                                    </DataTrigger>
+
+                                </Style.Triggers>
+                            </Style>
+                        </Image.Style>
+                    </Image>
+                    <TextBlock TextAlignment="Center" Text="{Binding Description}" Foreground="{Binding Label, Converter={StaticResource appointmentForeColorConverter}}" />
+                </StackPanel>
+            </DataTemplate>
+
+            <Style x:Key="{dxscht:TimelineViewThemeKey ResourceKey=DateHeaderStyle, IsThemeIndependent=True}" TargetType="{x:Type dxschint:VisualTimeScaleHeader}">
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type dxschint:VisualTimeScaleHeader}">
+                            <dxschint:HeaderControl SnapsToDevicePixels="True" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Content="{TemplateBinding Content}" IsAlternate="{Binding Content.IsAlternate, RelativeSource={RelativeSource TemplatedParent}}" DisableResourceColor="true" dxschint:SchedulerItemsControl.ElementPosition="{Binding Path=(dxschint:SchedulerItemsControl.ElementPosition), RelativeSource={RelativeSource TemplatedParent}}">
+                                <dxschint:HeaderControl.ContentTemplate>
+                                    <DataTemplate>
+                                        <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <Grid.Resources>
+                                                <UIConverter:CaptionConverter x:Key="CaptionConverter" />
+                                            </Grid.Resources>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="*" />
+                                            </Grid.RowDefinitions>
+                                            <TextBlock SnapsToDevicePixels="True" HorizontalAlignment="Center">
+                                                <TextBlock.Text>
+                                                    <MultiBinding Converter="{StaticResource CaptionConverter}">
+                                                        <Binding Path="IntervalStart" />
+                                                        <Binding Path="IntervalEnd" />
+                                                        <Binding Path="Caption" />
+                                                    </MultiBinding>
+                                                </TextBlock.Text>
+                                                <TextBlock.TextTrimming>
+                                                    <TextTrimming>CharacterEllipsis</TextTrimming>
+                                                </TextBlock.TextTrimming>
+                                            </TextBlock>
+                                        </Grid>
+                                    </DataTemplate>
+                                </dxschint:HeaderControl.ContentTemplate>
+                            </dxschint:HeaderControl>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </ResourceDictionary>
+        
+    </UserControl.Resources>
+
+   
+    <!--<UserControl.DataContext>
+        <ViewModels:AnnualSalesPerformanceViewModel/>
+    </UserControl.DataContext>-->
+
+    <Grid Margin="0,5,0,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Label Content="{DynamicResource AnnualSalesPerformanceViewHeader}" VerticalAlignment="Top" Margin="10,-5,0,0" Style="{DynamicResource LabelTitleStyle}" HorizontalAlignment="Left" Grid.Column="0" Grid.Row="0" />
+        <!--<Image Grid.Column="1" Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,2,5,0" Height="24" Width="24" SnapsToDevicePixels="True" Stretch="UniformToFill" Source="/Emdep.Geos.Modules.Crm;component/Assets/Images/warning.png" Visibility="{Binding IsShowFailedPlantWarning,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,Converter={StaticResource BoolToVis}}">-->
+        <Image gif:ImageBehavior.RepeatBehavior="Forever" gif:ImageBehavior.AnimatedSource="/Emdep.Geos.Modules.Crm;component/Assets/Images/animatedWarning.gif" Visibility="{Binding IsShowFailedPlantWarning,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,Converter={StaticResource BoolToVis}}" Grid.Column="1" Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,2,5,0" Height="30" Width="30">
+            <Image.ToolTip>
+                <TextBlock Text="{Binding WarningFailedPlants}" />
+            </Image.ToolTip>
+        </Image>
+        <DockPanel Grid.Column="2" Grid.Row="0" HorizontalAlignment="Stretch" Margin="0,0,5,0" Height="45">
+            <Grid HorizontalAlignment="Right" Width="Auto" Height="40" Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="40" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="70*" />
+                    <ColumnDefinition Width="150" />
+                    <ColumnDefinition Width="30" />
+
+                    <ColumnDefinition Width="70*" />
+                    <ColumnDefinition Width="50*" />
+                    <ColumnDefinition Width="10" />
+
+                    <ColumnDefinition Width="50*" />
+                    <ColumnDefinition Width="30" />
+                    <ColumnDefinition Width="80*" />
+                    <ColumnDefinition Width="80*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <!-- Plant Owner -->
+                <DockPanel Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=CmbPlantOwnerUsers}">
+                    <Image Style="{DynamicResource PlantOwnerImageStyle}" Width="24" Height="24" Margin="7,0,3,0" />
+                    <TextBlock Text="{DynamicResource CommonPlantOwner}" FontWeight="Bold" Margin="5,2,5,0" />
+                </DockPanel>
+
+                <dxe:ComboBoxEdit Style="{DynamicResource ComboBoxEditStyle}" Grid.Column="1"
+                              Height="30"
+                                      Visibility="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=CmbPlantOwnerUsers}"
+                                      ItemsSource="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=PlantOwnerUsersList}" Margin="5,0,5,0"
+                                      DisplayMember="ShortName"
+                    EditValue="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=SelectedPlantOwnerUsersList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                    <dxe:ComboBoxEdit.StyleSettings>
+                        <dxe:CheckedComboBoxStyleSettings />
+                    </dxe:ComboBoxEdit.StyleSettings>
+                    <dxmvvm:Interaction.Triggers>
+                        <dxmvvm:EventToCommand EventName="PopupClosed"
+                                               Command="{Binding DataContext.PlantOwnerPopupClosedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                               PassEventArgsToCommand="True" />
+                    </dxmvvm:Interaction.Triggers>
+                </dxe:ComboBoxEdit>
+
+                <!-- Sales Owner -->
+                <DockPanel Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=CmbSalesOwnerUsers}">
+                    <Image Style="{DynamicResource OwnerGroupImageStyle}" Width="24" Height="24" Margin="7,0,3,0" />
+                    <TextBlock Text="{DynamicResource CommonSalesOwner}" FontWeight="Bold" Margin="5,2,5,0" />
+                </DockPanel>
+
+                <dxe:ComboBoxEdit Style="{DynamicResource ComboBoxEditStyle}" Grid.Column="1"
+                              Visibility="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=CmbSalesOwnerUsers}"
+                              ItemsSource="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=SalesOwnerUsersList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="5,0,0,0"
+                              DisplayMember="User.FullName" Height="30"
+                                      EditValue="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=SelectedSalesOwnerUsersList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                    <dxe:ComboBoxEdit.StyleSettings>
+                        <dxe:CheckedComboBoxStyleSettings />
+                    </dxe:ComboBoxEdit.StyleSettings>
+                    <dxmvvm:Interaction.Triggers>
+                        <dxmvvm:EventToCommand EventName="PopupClosed"
+                                               Command="{Binding DataContext.SalesOwnerPopupClosedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                               PassEventArgsToCommand="True" />
+                    </dxmvvm:Interaction.Triggers>
+                </dxe:ComboBoxEdit>
+
+                <!-- Period -->
+                <DockPanel Grid.Column="3" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Image Style="{DynamicResource CalendarImageStyle}" Width="16" Height="16" Margin="7,0,3,0" />
+                    <TextBlock Text="{DynamicResource AnnualSalesPerformanceViewPeriod}" FontWeight="Bold" Margin="5,0,0,0" />
+                </DockPanel>
+
+                <TextBlock Text="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=SelectedyearStarDate, StringFormat=d, ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture},IsAsync=True}" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="4" Margin="3,0,0,0" />
+                <TextBlock Text=" - " HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="5" FontWeight="Bold" />
+                <TextBlock Text="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=SelectedyearEndDate, StringFormat=d, ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="6" />
+
+                <!-- Remaining -->
+                <DockPanel Grid.Column="8" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Image Style="{DynamicResource WatchImageStyle}" Width="16" Height="16" Margin="3,0,3,0" />
+                    <TextBlock Text="{DynamicResource AnnualSalesPerformanceViewRemaining}" FontWeight="Bold" Margin="5,0,0,0" />
+                </DockPanel>
+                <DockPanel Grid.Column="9" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0,0,0">
+                    <TextBlock Text="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=RemainingDays}" />
+                    <TextBlock Text="{DynamicResource AnnualSalesPerformanceViewDays}" Margin="3,0,5,0" />
+                </DockPanel>
+
+                <Button Content=" " Height="38" Width="38" Grid.Column="10" Command="{Binding RefreshAnnualSalesPerformanceViewCommand}" HorizontalAlignment="Right" Margin="0,-7,0,0">
+                    <Button.ToolTip>
+                        <TextBlock Text="{DynamicResource ButtonRefresh}" />
+                    </Button.ToolTip>
+                    <Button.ContentTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Image Style="{ DynamicResource RefreshButtonImageStyle}" Grid.Column="0" Height="24" Width="24" Margin="-10" />
+                            </Grid>
+                        </DataTemplate>
+                    </Button.ContentTemplate>
+                </Button>
+            </Grid>
+        </DockPanel>
+        <dxlc:LayoutControl VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="0" Padding="0" Grid.Row="1" 
+                            Grid.Column="0" Grid.ColumnSpan="3" Orientation="Vertical" Style="{DynamicResource LayoutControlStyle}"
+                            DragScrolling="False">
+
+
+            <dxlc:LayoutControl VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="0" Padding="0" Grid.Row="1" 
+                            Grid.Column="0" Grid.ColumnSpan="3" Orientation="Vertical" Style="{DynamicResource LayoutControlStyle}"
+                            DragScrolling="False">
+
+                <dxlc:LayoutGroup>
+                    <dxlc:LayoutGroup Width="350" Orientation="Vertical">
+                        <!--Sales Status-->
+
+                        <dxlc:LayoutGroup Width="350" UseLayoutRounding="True" x:Name="LayoutGroupSalesStatus" VerticalAlignment="Stretch" Header="{DynamicResource AnnualSalesPerformanceViewSalesStatus}" View="GroupBox" Orientation="Vertical" IsCollapsible="False" HorizontalAlignment="Stretch">
+                            <dxg:GridControl ShowBorder="False" Margin="-10" SelectionMode="None" Height="450" ItemsSource="{Binding ListAllSalesStatusType,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" MinHeight="100">
+                                <dxg:GridControl.Columns>
+                                    <dxg:GridColumn FieldName="Name" Width="75" FixedWidth="True" ReadOnly="True">
+                                        <dxg:GridColumn.EditSettings>
+                                            <dxe:TextEditSettings DisplayFormat="c" />
+                                        </dxg:GridColumn.EditSettings>
+                                        <dxg:GridColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <dxe:TextEdit Name="PART_Editor" Margin="2,2,2,2" Text="{Binding Data.Name}" FontSize="10" HorizontalAlignment="Left" VerticalAlignment="Top">
+                                                    <dxe:TextEdit>
+                                                        <TextBlock Text="{Binding Data.Name}" />
+                                                    </dxe:TextEdit>
+                                                </dxe:TextEdit>
+                                                <DataTemplate.Triggers>
+                                                    <DataTrigger Binding="{Binding Data.Name}" Value="TARGET">
+                                                        <Setter TargetName="PART_Editor" Property="Foreground" Value="{Binding Converter={UIConverter:ForegroundColorConverter}, Path=RowData.Row.HtmlColor }"></Setter>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Data.Name}" Value="REMAINING">
+                                                        <Setter TargetName="PART_Editor" Property="Foreground" Value="{Binding Converter={UIConverter:ForegroundColorConverter}, Path=RowData.Row.HtmlColor }"></Setter>
+                                                    </DataTrigger>
+                                                </DataTemplate.Triggers>
+                                            </DataTemplate>
+                                        </dxg:GridColumn.CellTemplate>
+                                    </dxg:GridColumn>
+                                    <dxg:GridColumn ReadOnly="True" HorizontalHeaderContentAlignment="Left">
+                                        <dxg:GridColumn.EditSettings>
+                                            <dxe:TextEditSettings DisplayFormat="c" />
+                                        </dxg:GridColumn.EditSettings>
+                                        <dxg:GridColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <dxe:TextEdit Name="PART_Editor" DisplayFormatString="c" FontSize="30" ShowBorder="False" HorizontalAlignment="Right" Margin="0,0,10,0" IsPrintingMode="True">
+                                                    <dxe:TextEdit.EditValue>
+                                                        <MultiBinding Converter="{UIConverter:TotalAmountValueConvertor}">
+                                                            <Binding Path="RowData.Row.TotalAmount" />
+                                                            <Binding Path="RowData.Row.Name" />
+                                                            <Binding Path="DataContext.IsMyValueNegative" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType={x:Type UserControl}}" />
+                                                        </MultiBinding>
+                                                    </dxe:TextEdit.EditValue>
+                                                </dxe:TextEdit>
+                                                <DataTemplate.Triggers>
+                                                    <DataTrigger Binding="{Binding Data.Name}" Value="TARGET">
+                                                        <Setter TargetName="PART_Editor" Property="FontSize" Value="40" />
+                                                        <Setter TargetName="PART_Editor" Property="Foreground" Value="{Binding Converter={UIConverter:ForegroundColorConverter}, Path=RowData.Row.HtmlColor }"></Setter>
+                                                    </DataTrigger>
+                                                    <MultiDataTrigger>
+                                                        <MultiDataTrigger.Conditions>
+                                                            <Condition Binding="{Binding Data.Name}" Value="REMAINING" />
+                                                            <Condition Binding="{Binding Path=DataContext.IsMyValueNegative,RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" Value="True" />
+                                                        </MultiDataTrigger.Conditions>
+                                                        <Setter TargetName="PART_Editor" Property="Foreground" Value="Red"></Setter>
+                                                    </MultiDataTrigger>
+                                                    <MultiDataTrigger>
+                                                        <MultiDataTrigger.Conditions>
+                                                            <Condition Binding="{Binding Data.Name}" Value="REMAINING" />
+                                                            <Condition Binding="{Binding Path=DataContext.IsMyValueNegative,RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" Value="False" />
+                                                        </MultiDataTrigger.Conditions>
+                                                        <Setter TargetName="PART_Editor" Property="Foreground" Value="Green"></Setter>
+                                                    </MultiDataTrigger>
+                                                </DataTemplate.Triggers>
+                                            </DataTemplate>
+                                        </dxg:GridColumn.CellTemplate>
+                                    </dxg:GridColumn>
+                                </dxg:GridControl.Columns>
+                                <dxg:GridControl.View>
+                                    <dxg:TableView NavigationStyle="None"
+                                               ShowHorizontalLines="True"  
+                                                 AllowPerPixelScrolling="False"
+                                                   AllowGrouping="False" 
+                                                   ShowGroupPanel="False"
+                                                   ShowColumnHeaders="False"
+                                                   ShowVerticalLines="False"
+                                                   ShowIndicator="False" 
+                                                   AutoWidth="True"
+                                                   Name="SalesStatusTypeView"
+                                                   VerticalScrollbarVisibility="Auto"
+                                                   ShowSearchPanelMode="Never" 
+                                                   SearchPanelHorizontalAlignment="Stretch"
+                                                   ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly"
+                                                  >
+
+                                        <dxg:TableView.RowStyle>
+                                            <Style TargetType="dxg:RowControl">
+                                                <Setter Property="Background" Value="{Binding Path=Row.HtmlColor}"></Setter>
+                                                <Setter Property="Foreground" Value="{Binding Path=Row.HtmlColor,Converter={UIConverter:ForegroundColorConverter}}"></Setter>
+                                            </Style>
+                                        </dxg:TableView.RowStyle>
+
+                                    </dxg:TableView>
+
+                                </dxg:GridControl.View>
+                                <dxmvvm:Interaction.Behaviors>
+                                    <dxmvvm:EventToCommand EventName="ItemsSourceChanged" PassEventArgsToCommand="True" CommandParameter="{Binding ElementName=SalesStatusTypeView}" Command="{Binding ListAllSalesStatusTypeItemsSourceChangedCommand}">
+
+
+                                    </dxmvvm:EventToCommand>
+                                    <dxmvvm:EventToCommand EventName="SelectionChanged" PassEventArgsToCommand="True" CommandParameter="{Binding ElementName=SalesStatusTypeView}" Command="{Binding ListAllSalesStatusTypeItemsSourceChangedCommand}" />
+                                </dxmvvm:Interaction.Behaviors>
+                            </dxg:GridControl>
+
+                        </dxlc:LayoutGroup>
+                        <!--Planned Visits-->
+                        <dxlc:LayoutGroup Width="350" Height="305" VerticalAlignment="Bottom" Visibility="Visible" Header="{DynamicResource AnnualSalesPerformanceHeaderPlannedVisits}" View="GroupBox" Orientation="Vertical" IsCollapsible="False" HorizontalAlignment="Stretch">
+
+                            <dxc:ChartControl DataSource="{Binding PlannedVisitsSeries}" ToolTipEnabled="False" AnimationMode="OnLoad">
+                                <dxc:ChartControl.IsManipulationEnabled>True</dxc:ChartControl.IsManipulationEnabled>
+                                <dxc:SimpleDiagram2D SeriesDataMember="Level">
+                                    <dxc:SimpleDiagram2D.SeriesTemplate>
+                                        <dxc:NestedDonutSeries2D SweepDirection="Clockwise" Rotation="90" ColorDataMember="HtmlColor" ArgumentDataMember="Argument" ValueDataMember="Value" HoleRadiusPercent="60" InnerIndent="5">
+                                            <dxc:NestedDonutSeries2D.TotalLabel>
+                                                <dxc:PieTotalLabel>
+                                                    <dxc:PieTotalLabel.ContentTemplate>
+                                                        <DataTemplate>
+                                                            <StackPanel>
+                                                                <TextBlock FontSize="15" Text="{Binding RelativeSource={RelativeSource AncestorType=dxc:ChartControl,Mode=FindAncestor},Path=DataContext.YTD ,StringFormat={}YTD : {0}% }" Foreground="{Binding RelativeSource={RelativeSource AncestorType=dxc:ChartControl,Mode=FindAncestor},Path=DataContext.YIDForeground}"></TextBlock>
+                                                                <TextBlock FontSize="15" Text="{Binding RelativeSource={RelativeSource AncestorType=dxc:ChartControl,Mode=FindAncestor},Path=DataContext.Period,StringFormat={}Period : {0}% }" Foreground="#696969"></TextBlock>
+                                                            </StackPanel>
+                                                        </DataTemplate>
+                                                    </dxc:PieTotalLabel.ContentTemplate>
+                                                </dxc:PieTotalLabel>
+                                            </dxc:NestedDonutSeries2D.TotalLabel>
+                                            <dxc:PieSeries2D.PointAnimation>
+                                                <dxc:Pie2DGrowUpAnimation Duration="0:0:1.5" PointOrder="Inverted" />
+                                            </dxc:PieSeries2D.PointAnimation>
+                                        </dxc:NestedDonutSeries2D>
+                                    </dxc:SimpleDiagram2D.SeriesTemplate>
+
+
+                                </dxc:SimpleDiagram2D>
+                            </dxc:ChartControl>
+                        </dxlc:LayoutGroup>
+                        
+                        
+                    </dxlc:LayoutGroup>
+
+                    <dxlc:LayoutGroup Orientation="Vertical">
+                        <dxlc:LayoutGroup Orientation="Horizontal">
+                            <dxlc:LayoutGroup Width="200" Orientation="Vertical">
+                                <dxlc:LayoutGroup MinHeight="247" Header="{DynamicResource AnnualSalesPerformanceHeaderWONVSTARGET}" View="GroupBox" Orientation="Vertical" IsCollapsible="False" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                                    <dxga:CircularGaugeControl x:Name="gaugeSalesPerformance" EnableAnimation="True">
+                                        <dxga:CircularGaugeControl.Model>
+                                            <dxga:CircularFlatLightModel />
+                                        </dxga:CircularGaugeControl.Model>
+                                        <dxga:CircularGaugeControl.Scales>
+                                            <dxga:ArcScale HorizontalAlignment="Center" StartAngle="180" EndAngle="360" MajorIntervalCount="5" StartValue="0" EndValue="100">
+                                                <dxga:ArcScale.Needles>
+                                                    <dxga:ArcScaleNeedle Value="{Binding TargetAchieved}">
+                                                        <dxga:ArcScaleNeedle.Presentation>
+                                                            <dxga:DefaultArcScaleNeedlePresentation Fill="{DynamicResource GaugesArcScaleNeedleFillColor}" />
+                                                        </dxga:ArcScaleNeedle.Presentation>
+                                                        <dxga:ArcScaleNeedle.Animation>
+                                                            <dxga:IndicatorAnimation Duration="00:00:02.0000000">
+                                                                <dxga:IndicatorAnimation.EasingFunction>
+                                                                    <BounceEase />
+                                                                </dxga:IndicatorAnimation.EasingFunction>
+                                                            </dxga:IndicatorAnimation>
+                                                        </dxga:ArcScaleNeedle.Animation>
+                                                    </dxga:ArcScaleNeedle>
+                                                </dxga:ArcScale.Needles>
+
+                                                <dxga:ArcScale.CustomLabels>
+
+                                                    <dxga:ScaleCustomLabel VerticalAlignment="Bottom" Offset="15" Value="-10">
+                                                        <Grid>
+                                                            <TextBlock Width="195" FontSize="25" TextTrimming="CharacterEllipsis" HorizontalAlignment="Stretch" TextAlignment="Center" FontWeight="SemiBold" TextWrapping="WrapWithOverflow"
+                                                    Text="{Binding RelativeSource={RelativeSource AncestorType=dxga:CircularGaugeControl,Mode=FindAncestor},Path=DataContext.StrTargetAchieved}" ToolTip="{Binding RelativeSource={RelativeSource AncestorType=dxga:CircularGaugeControl,Mode=FindAncestor},Path=DataContext.StrTargetAchieved}" />
+                                                        </Grid>
+                                                    </dxga:ScaleCustomLabel>
+                                                </dxga:ArcScale.CustomLabels>
+
+                                                <!--<dxga:ArcScale.CustomElements>
+                                                    <dxga:ScaleCustomElement  FontWeight="SemiBold" VerticalAlignment="Bottom" HorizontalAlignment="Center">
+                                                        <Grid Margin="42">
+                                                            <Grid.RowDefinitions>
+                                                                <RowDefinition />
+                                                                <RowDefinition />
+                                                            </Grid.RowDefinitions>
+                                                            <TextBlock Grid.Row="1"  Width="Auto" Margin="0,0,0,-85" FontSize="25" TextTrimming="CharacterEllipsis"  HorizontalAlignment="Center" VerticalAlignment="Bottom" FontWeight="SemiBold" TextWrapping="WrapWithOverflow"
+                                                    Text=""/>
+                                                        </Grid>
+
+                                                    </dxga:ScaleCustomElement>-->
+                                                <!--</dxga:ArcScale.CustomElements>-->
+                                                <dxga:ArcScale.Ranges>
+                                                    <dxga:ArcScaleRange StartValue="67%" EndValue="100%" />
+                                                    <dxga:ArcScaleRange StartValue="33%" EndValue="67%" />
+                                                    <dxga:ArcScaleRange StartValue="0%" EndValue="33%" />
+                                                </dxga:ArcScale.Ranges>
+                                            </dxga:ArcScale>
+                                        </dxga:CircularGaugeControl.Scales>
+
+
+                                    </dxga:CircularGaugeControl>
+                                </dxlc:LayoutGroup>
+                                <dxlc:LayoutGroup Header="{DynamicResource AnnualSalesPerformanceViewSuccessRate}" View="GroupBox" Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                                    <dxga:CircularGaugeControl EnableAnimation="True">
+                                        <dxga:CircularGaugeControl.Model>
+                                            <dxga:CircularFlatLightModel />
+                                        </dxga:CircularGaugeControl.Model>
+                                        <dxga:CircularGaugeControl.Scales>
+                                            <dxga:ArcScale HorizontalAlignment="Center" StartAngle="180" EndAngle="360" MajorIntervalCount="5" StartValue="0" EndValue="100">
+                                                <dxga:ArcScale.Needles>
+                                                    <dxga:ArcScaleNeedle Value="{Binding SuccessRate}">
+                                                        <dxga:ArcScaleNeedle.Presentation>
+                                                            <dxga:DefaultArcScaleNeedlePresentation Fill="{DynamicResource GaugesArcScaleNeedleFillColor}" />
+                                                        </dxga:ArcScaleNeedle.Presentation>
+                                                        <dxga:ArcScaleNeedle.Animation>
+                                                            <dxga:IndicatorAnimation Duration="00:00:02.0000000">
+                                                                <dxga:IndicatorAnimation.EasingFunction>
+                                                                    <BounceEase />
+                                                                </dxga:IndicatorAnimation.EasingFunction>
+                                                            </dxga:IndicatorAnimation>
+                                                        </dxga:ArcScaleNeedle.Animation>
+                                                    </dxga:ArcScaleNeedle>
+                                                    <!--<dxga:ArcScaleNeedle Value="{Binding TargetAchieved}"/>-->
+                                                </dxga:ArcScale.Needles>
+                                                <dxga:ArcScale.CustomLabels>
+
+                                                    <dxga:ScaleCustomLabel FontSize="25" FontWeight="SemiBold" HorizontalAlignment="Center" Offset="15" Value="-10">
+                                                        <Grid>
+                                                            <TextBlock Width="195" FontSize="25" TextTrimming="CharacterEllipsis" HorizontalAlignment="Stretch" VerticalAlignment="Center" TextAlignment="Center" FontWeight="SemiBold" TextWrapping="WrapWithOverflow"
+                                                    Text="{Binding RelativeSource={RelativeSource AncestorType=dxga:CircularGaugeControl,Mode=FindAncestor},Path=DataContext.StrSuccessRate}" ToolTip="{Binding RelativeSource={RelativeSource AncestorType=dxga:CircularGaugeControl,Mode=FindAncestor},Path=DataContext.StrSuccessRate}" />
+                                                        </Grid>
+
+                                                    </dxga:ScaleCustomLabel>
+                                                </dxga:ArcScale.CustomLabels>
+                                                <!--<dxga:ArcScale.CustomElements>
+
+                                                    <dxga:ScaleCustomElement  FontWeight="SemiBold" VerticalAlignment="Bottom" HorizontalAlignment="Center">
+                                                        <Grid Margin="42">
+                                                            <Grid.RowDefinitions>
+                                                                <RowDefinition />
+                                                                <RowDefinition />
+                                                            </Grid.RowDefinitions>
+                                                            <TextBlock Grid.Row="1" Width="Auto" TextTrimming="CharacterEllipsis" TextWrapping="WrapWithOverflow" Margin="0,0,0,-85" FontSize="25"  HorizontalAlignment="Center" VerticalAlignment="Bottom" FontWeight="SemiBold"
+                                                   Text="{Binding RelativeSource={RelativeSource AncestorType=dxga:CircularGaugeControl,Mode=FindAncestor},Path=DataContext.SuccessRate ,StringFormat={}{0}%}"/>
+                                                        </Grid>
+
+                                                    </dxga:ScaleCustomElement>-->
+                                                <!--</dxga:ArcScale.CustomElements>-->
+                                                <dxga:ArcScale.Ranges>
+                                                    <dxga:ArcScaleRange StartValue="67%" EndValue="100%" />
+                                                    <dxga:ArcScaleRange StartValue="33%" EndValue="67%" />
+                                                    <dxga:ArcScaleRange StartValue="0%" EndValue="33%" />
+                                                </dxga:ArcScale.Ranges>
+                                            </dxga:ArcScale>
+                                        </dxga:CircularGaugeControl.Scales>
+                                    </dxga:CircularGaugeControl>
+                                </dxlc:LayoutGroup>
+
+
+                            </dxlc:LayoutGroup>
+                            <dxlc:LayoutGroup Header="{Binding TopOfferNumber}" View="GroupBox" Orientation="Vertical" IsCollapsible="False" Margin="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="2">
+
+                                <!--<dxlc:LayoutGroup.HeaderTemplate>
+                                    <DataTemplate>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="{Binding}" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Stretch" />
+
+                                            <dxe:TextEdit EditValue="Total = " HorizontalContentAlignment="Right" Grid.Column="1"
+                                              Style="{DynamicResource TextEdit20Style}" FontWeight="Bold"
+                                              HorizontalAlignment="Right" IsPrintingMode="True" />
+                                            <dxe:TextEdit EditValue="{Binding DataContext.OfferTotal, RelativeSource={RelativeSource AncestorType={x:Type dxlc:LayoutGroup}, Mode=FindAncestor}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                              Style="{DynamicResource TextEdit20Style}" FontWeight="Bold"
+                                              ShowBorder="False"
+                                              Grid.Column="2" DisplayFormatString="C" HorizontalAlignment="Right" IsReadOnly="True" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </dxlc:LayoutGroup.HeaderTemplate>-->
+
+                                <dxg:TreeListControl ItemsSource="{Binding DataTableTopProjects, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="-9.5" ImplyNullLikeEmptyStringWhenFiltering="True">
+                                    <!--FilterString="{Binding MyFilterString,Mode=TwoWay ,UpdateSourceTrigger=PropertyChanged}">-->
+                                    <dxg:TreeListControl.Resources>
+                                        <Style x:Key="UnboundColumnAlignment" TargetType="dxg:TreeListColumn">
+                                            <Setter Property="EditSettings">
+                                                <Setter.Value>
+                                                    <dxe:TextEditSettings HorizontalContentAlignment="Left" />
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </dxg:TreeListControl.Resources>
+
+                                    <dxg:TreeListControl.Columns>
+                                        <dxg:TreeListColumn ReadOnly="True" Header=" " FieldName="_SrNo" Width="125" FixedWidth="True" HorizontalHeaderContentAlignment="Center" AllowSorting="False" AllowBestFit="True" UnboundType="Integer" Style="{StaticResource UnboundColumnAlignment}" />
+                                        <dxg:TreeListColumn ReadOnly="True" Header="{DynamicResource AnnualSalesPerformanceViewCarOEM}" FieldName="CarOEM" Width="105" FixedWidth="True" AllowSorting="False" HorizontalHeaderContentAlignment="Center" FilterPopupMode="CheckedList" />
+                                        <dxg:TreeListColumn ReadOnly="True" Header="{DynamicResource AnnualSalesPerformanceViewOT}" FieldName="OfferCode" Width="120" FixedWidth="True" AllowSorting="False" HorizontalHeaderContentAlignment="Center" FilterPopupMode="CheckedList" />
+                                        <dxg:TreeListColumn ReadOnly="True" Header="{DynamicResource AnnualSalesPerformanceViewGroup}" FieldName="Group" Width="80" AllowSorting="False" HorizontalHeaderContentAlignment="Center" FilterPopupMode="CheckedList" />
+                                        <dxg:TreeListColumn ReadOnly="True" Header="{DynamicResource AnnualSalesPerformanceViewPlant}" FieldName="Plant" Width="80" AllowSorting="False" HorizontalHeaderContentAlignment="Center" FilterPopupMode="CheckedList" />
+                                        <dxg:TreeListColumn ReadOnly="True" Header="{DynamicResource AnnualSalesPerformanceViewCountry}" FieldName="Country" Width="90" FixedWidth="True" AllowSorting="False" HorizontalHeaderContentAlignment="Center" FilterPopupMode="CheckedList" />
+                                        <dxg:TreeListColumn ReadOnly="True" Header="{DynamicResource AnnualSalesPerformanceViewTitle}" FieldName="Title" Width="200" AllowSorting="False" HorizontalHeaderContentAlignment="Center" FilterPopupMode="CheckedList" />
+                                        <dxg:TreeListColumn ReadOnly="True" Header="{DynamicResource AnnualSalesPerformanceViewAmount}" FieldName="Amount" Width="100" SortMode="Custom" SortOrder="Descending" HorizontalHeaderContentAlignment="Center" FilterPopupMode="CheckedList">
+                                            <dxg:TreeListColumn.EditSettings>
+                                                <dxe:TextEditSettings DisplayFormat="c" />
+                                            </dxg:TreeListColumn.EditSettings>
+                                        </dxg:TreeListColumn>
+                                        <dxg:TreeListColumn ReadOnly="True" Header="{DynamicResource AnnualSalesPerformanceViewDate}" FieldName="Date" Width="100" FixedWidth="True" AllowSorting="False" HorizontalHeaderContentAlignment="Center" FilterPopupMode="CheckedList" />
+                                    </dxg:TreeListControl.Columns>
+                                    <!--<dxmvvm:Interaction.Behaviors>
+                            <UIHelper:GridSelectingBehavior />
+                        </dxmvvm:Interaction.Behaviors>-->
+
+                                    <dxg:TreeListControl.View>
+                                        <dxg:TreeListView x:Name="tableView1"
+                                              KeyFieldName="ChildId" ParentFieldName="ParentId"
+                                              NavigationStyle="Row" ShowHorizontalLines="True" AllowPerPixelScrolling="False"
+                                              AutoWidth="True" ShowTotalSummary="True"
+                                              HorizontalScrollbarVisibility="Visible" VerticalScrollbarVisibility="Visible" 
+                                              ShowIndicator="False" ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly"
+                                              ShowColumnHeaders="True" ShowVerticalLines="False" SearchPanelHorizontalAlignment="Stretch">
+                                            <!--<dxmvvm:Interaction.Triggers>
+                                    <dxmvvm:EventToCommand EventName="Loaded" Command="{Binding Commands.BestFitColumns, ElementName=tableView1}" />
+                                </dxmvvm:Interaction.Triggers>-->
+                                            <dxmvvm:Interaction.Behaviors>
+                                                <dxmvvm:EventToCommand Command="{Binding CommandGridDoubleClick}" EventName="MouseDoubleClick">
+                                                    <dxmvvm:EventToCommand.EventArgsConverter>
+                                                        <dx:EventArgsToDataRowConverter />
+                                                    </dxmvvm:EventToCommand.EventArgsConverter>
+                                                </dxmvvm:EventToCommand>
+                                                <dxmvvm:EventToCommand Command="{Binding CustomColumnSortCommand}" EventName="CustomColumnSort" PassEventArgsToCommand="True" />
+                                                <dxmvvm:EventToCommand Command="{Binding CustomNumberUnboundColumnDataCommand}" EventName="CustomUnboundColumnData" PassEventArgsToCommand="True" />
+                                            </dxmvvm:Interaction.Behaviors>
+                                            <dxg:TreeListView.FooterTemplate>
+                                                <DataTemplate>
+                                                    <dxe:TextEdit EditValue="{Binding DataContext.OfferTotal,RelativeSource={RelativeSource AncestorType={x:Type dxlc:LayoutGroup}, Mode=FindAncestor}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                                ShowBorder="False" FontWeight="Bold" Padding="0,0,30,0"
+                                              Grid.Column="2" DisplayFormatString="Total : {0:C}" HorizontalAlignment="Right" IsReadOnly="True" />
+
+                                                </DataTemplate>
+                                            </dxg:TreeListView.FooterTemplate>
+                                            <!--<dxg:TreeListView.TotalSummaryItemTemplate>
+                                                <DataTemplate>
+                                                    <dxe:TextEdit EditValue="{Binding DataContext.OfferTotal,RelativeSource={RelativeSource AncestorType={x:Type dxlc:LayoutGroup}, Mode=FindAncestor}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                                ShowBorder="False" FontWeight="Bold"
+                                              Grid.Column="2" DisplayFormatString="Total : {0:C}" HorizontalAlignment="Right" IsReadOnly="True" />
+                                                   
+                                                </DataTemplate>
+                                            </dxg:TreeListView.TotalSummaryItemTemplate>-->
+                                        </dxg:TreeListView>
+
+                                    </dxg:TreeListControl.View>
+
+                                    <dxg:TreeListControl.TotalSummary>
+                                        <dxg:TreeListSummaryItem FieldName="Amount" ShowInColumn="Amount" SummaryType="Custom" Visible="True" />
+                                        <!--<dxg:TreeListSummaryItem FieldName="Amount" SummaryType="Sum"  ShowInColumn="Title" DisplayFormat="Total: {0:C}" Visible="True" />-->
+                                    </dxg:TreeListControl.TotalSummary>
+                                </dxg:TreeListControl>
+
+                            </dxlc:LayoutGroup>
+
+                        </dxlc:LayoutGroup>
+                    <dxlc:LayoutGroup Orientation="Vertical">
+
+                        <dxlc:LayoutGroup Orientation="Horizontal">
+                            <!--actions-->
+                                <dxlc:LayoutGroup Header="ACTIONS" Width="200" Margin="0" Padding="0" VerticalAlignment="Center" View="GroupBox" Orientation="Vertical" HorizontalAlignment="Stretch">
+                                    <dxlc:LayoutGroup Orientation="Horizontal">
+
+                                        <dxc:ChartControl x:Name="ChartActions" 
+                                  VerticalAlignment="Center" Width="100" Height="258" CrosshairEnabled="True" BorderThickness="0" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                            <dxc:XYDiagram2D SeriesItemsSource="{Binding MainStatusList,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
+                                                <dxc:XYDiagram2D.SeriesItemTemplate>
+                                                    <DataTemplate>
+                                                        <dxc:BarFullStackedSeries2D 
+                                                    DisplayName="{Binding Name,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+                                                    DataSource="{Binding CountValues,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+                                                    ArgumentDataMember="Value"
+                                                    ValueDataMember="Count"
+                                                            Brush="{Binding Color,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+                                                            >
+                                                        </dxc:BarFullStackedSeries2D>
+                                                    </DataTemplate>
+                                                </dxc:XYDiagram2D.SeriesItemTemplate>
+                                                <dxc:XYDiagram2D.AxisY>
+                                                    <dxc:AxisY2D Visibility="Hidden">
+                                                        <dxc:AxisY2D.Label>
+                                                            <dxc:AxisLabel Visible="False" />
+                                                        </dxc:AxisY2D.Label>
+                                                    </dxc:AxisY2D>
+                                                </dxc:XYDiagram2D.AxisY>
+                                                <dxc:XYDiagram2D.AxisX>
+                                                    <dxc:AxisX2D Visibility="Hidden">
+                                                        <dxc:AxisX2D.Label>
+                                                            <dxc:AxisLabel Visible="False" />
+                                                        </dxc:AxisX2D.Label>
+                                                    </dxc:AxisX2D>
+                                                </dxc:XYDiagram2D.AxisX>
+                                            </dxc:XYDiagram2D>
+                                        </dxc:ChartControl>
+
+                                        <dxlc:LayoutGroup Orientation="Vertical" Width="70" Height="258" VerticalAlignment="Center" HorizontalAlignment="Right" >
+                                            <dxg:GridControl ShowBorder="False" Width="70" Height="258" VerticalAlignment="Center" ItemsSource="{Binding StatusList,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
+                                                <dxg:GridControl.Columns>
+                                                    <dxg:GridColumn Width="70" FixedWidth="True" ReadOnly="True">
+                                                            <dxg:GridColumn.CellTemplate>
+                                                            <DataTemplate>
+                                                                <StackPanel Orientation="Vertical" Margin="0,15,0,0" VerticalAlignment="Center" HorizontalAlignment="Stretch"> 
+                                                                    <TextBlock Text="{Binding Data.Value}" Style="{DynamicResource TextBlock14Style}" HorizontalAlignment="Right" />
+                                                                    <TextBlock Text="{Binding Data.Count}" Style="{DynamicResource TextBlock30Style}"  FontWeight="Bold" HorizontalAlignment="Right" Foreground="{Binding Data.HtmlColor}"/>
+                                                                </StackPanel>
+                                                            </DataTemplate>
+                                                            </dxg:GridColumn.CellTemplate>
+                                                        </dxg:GridColumn>
+                                                </dxg:GridControl.Columns>
+                                                <dxg:GridControl.View>
+                                                    <dxg:TableView NavigationStyle="None"
+                                               ShowHorizontalLines="False"  
+                                                 AllowPerPixelScrolling="False"
+                                                   AllowGrouping="False" 
+                                                   ShowGroupPanel="False"
+                                                   ShowColumnHeaders="False"
+                                                   ShowVerticalLines="False"
+                                                   ShowIndicator="False" 
+                                                   AutoWidth="True"
+                                                   Name="ActionsStatusView"
+                                                   VerticalScrollbarVisibility="Auto"
+                                                   ShowSearchPanelMode="Never" 
+                                                   SearchPanelHorizontalAlignment="Stretch"
+                                                   ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly"
+                                                                   BorderThickness="0"
+                                                  >
+
+                                                    </dxg:TableView>
+
+                                                </dxg:GridControl.View>
+                                            </dxg:GridControl>
+                                            
+                                        </dxlc:LayoutGroup>
+                                    </dxlc:LayoutGroup>
+                                </dxlc:LayoutGroup>
+
+                            <dxlc:LayoutGroup Header="{DynamicResource AnnualSalesPerformanceViewSalesStatusByMonth}" Margin="0" Padding="0" VerticalAlignment="Top" IsCollapsible="True" View="GroupBox" Orientation="Vertical" HorizontalAlignment="Stretch">
+                                <dxc:ChartControl x:Name="ChartSalesStatusByMonths"
+                                  DataSource="{Binding GraphDataTable, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  VerticalAlignment="Stretch" Height="280" Margin="-12" CrosshairEnabled="True" BorderThickness="1" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                    <dxc:ChartControl.Legend>
+                                        <dxc:Legend HorizontalPosition="RightOutside" />
+                                    </dxc:ChartControl.Legend>
+                                    <dxmvvm:Interaction.Triggers>
+                                        <dxmvvm:EventToCommand EventName="Loaded" Command="{Binding ChartLoadCommand}" CommandParameter="{Binding ElementName=ChartSalesStatusByMonths}" />
+                                        <dxmvvm:EventToCommand EventName="CustomDrawCrosshair" Command="{Binding ChartDashboardSaleCustomDrawCrosshairCommand}" PassEventArgsToCommand="True" />
+                                    </dxmvvm:Interaction.Triggers>
+                                </dxc:ChartControl>
+
+                            </dxlc:LayoutGroup>
+
+                        </dxlc:LayoutGroup>
+                    </dxlc:LayoutGroup>
+                    </dxlc:LayoutGroup>
+                </dxlc:LayoutGroup>
+                <dxlc:LayoutGroup x:Name="DailyEvent" Header="DAY EVENTS " View="GroupBox" IsCollapsed="True" IsCollapsible="True" Margin="0" Padding="0,0,0,0">
+                    <dxmvvm:Interaction.Behaviors>
+                        <dxmvvm:EventToCommand Command="{Binding DataContext.GroupBoxExpandedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                               EventName="Expanded" CommandParameter="{Binding ElementName=DailyEvent}"
+                                                               PassEventArgsToCommand="True">
+                        </dxmvvm:EventToCommand>
+                    </dxmvvm:Interaction.Behaviors>
+                    <dxlc:LayoutGroup.HeaderTemplate>
+                        <DataTemplate>
+                            <DockPanel>
+                                <TextBlock Text="{DynamicResource AnnualSalesPerformanceViewDailyEvents}" VerticalAlignment="Center" />
+                                <Grid Margin="10,0,0,0" Height="20" Width="30" Visibility="{Binding DataContext.TodaysTotalAppointmentVisibility, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}">
+                                    <Ellipse Height="20" Fill="Red" Width="30" Stroke="White" StrokeThickness="1" />
+                                    <TextBlock Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           FontWeight="Bold" TextAlignment="Center" TextWrapping="Wrap">
+                                        <TextBlock.Style>
+                                            <Style TargetType="{x:Type TextBlock}">
+                                                <Setter Property="Foreground" Value="White" />
+                                                <Setter Property="FontSize" Value="10" />
+                                                <Setter Property="Text" Value="{Binding DataContext.TodaysTotalAppointment, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}}" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding DataContext.TodaysTotalAppointment,RelativeSource={RelativeSource AncestorType=dxlc:GroupBox},Converter={UIConverter:RangeToBooleanConverter}}" Value="True">
+                                                        <Setter Property="Text" Value="99+" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </Grid>
+
+                                <!-- Appointment Filter -->
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <DockPanel VerticalAlignment="Center">
+                                        <Image Style="{DynamicResource AppointmentFilterImageStyle}" Width="24" Height="24" Margin="7,0,3,0">
+                                            <!--<Image.ToolTip>Filter</Image.ToolTip>-->
+                                        </Image>
+                                        <TextBlock Text="Filter :" FontWeight="Bold" Margin="5,2,5,0" />
+                                    </DockPanel>
+
+                                    <dxe:ComboBoxEdit Style="{DynamicResource ComboBoxEditStyle}" Grid.Column="1"
+                              ItemsSource="{Binding DataContext.AppointmentType, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="5,0,0,0"
+                              Height="30" Width="200" VerticalAlignment="Center"
+                              EditValue="{Binding DataContext.SelectedAppointmentType, RelativeSource={RelativeSource AncestorType=dxlc:GroupBox}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                        <dxe:ComboBoxEdit.StyleSettings>
+                                            <dxe:CheckedComboBoxStyleSettings />
+                                        </dxe:ComboBoxEdit.StyleSettings>
+                                        <dxmvvm:Interaction.Triggers>
+                                            <dxmvvm:EventToCommand EventName="PopupClosed"
+                                               Command="{Binding DataContext.AppointmentFilterPopupClosedCommandAction, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                               PassEventArgsToCommand="True" />
+                                        </dxmvvm:Interaction.Triggers>
+                                    </dxe:ComboBoxEdit>
+                                </StackPanel>
+                                <!-- Appointment Filter -->
+
+                            </DockPanel>
+                        </DataTemplate>
+                    </dxlc:LayoutGroup.HeaderTemplate>
+
+                    <dxsch:SchedulerControl ActiveViewType="Timeline" x:Name="SchedulerControlTimelineView" Height="200" Margin="-10">
+
+                        <dxsch:SchedulerControl.DayView>
+                            <dxsch:DayView AppointmentToolTipVisibility="Standard" AppointmentToolTipContentTemplate="{StaticResource AppointmentToolTipContentTemplate}" 
+                                       VerticalAppointmentContentTemplate="{StaticResource AppointmentContentTemplate}">
+                                <dxsch:DayView.AppointmentDisplayOptions>
+                                    <dxsch:SchedulerDayViewAppointmentDisplayOptions StartTimeVisibility="Never" EndTimeVisibility="Never" ShowRecurrence="False" ShowReminder="False" />
+                                </dxsch:DayView.AppointmentDisplayOptions>
+                            </dxsch:DayView>
+                        </dxsch:SchedulerControl.DayView>
+
+                        <dxsch:SchedulerControl.TimelineView>
+                            <dxsch:TimelineView AppointmentToolTipVisibility="Standard" AppointmentToolTipContentTemplate="{StaticResource AppointmentToolTipContentTemplate}" 
+                                            HorizontalAppointmentContentTemplate="{StaticResource AppointmentContentTemplate}">
+                                <dxsch:TimelineView.AppointmentDisplayOptions>
+                                    <dxsch:SchedulerTimelineViewAppointmentDisplayOptions AppointmentAutoHeight="True" StartTimeVisibility="Never" EndTimeVisibility="Never" ShowReminder="False" ShowRecurrence="False" />
+                                </dxsch:TimelineView.AppointmentDisplayOptions>
+                            </dxsch:TimelineView>
+
+                        </dxsch:SchedulerControl.TimelineView>
+                        <dxsch:SchedulerControl.TimeRulerMenuCustomizations>
+                            <dxsch:SwitchTimeScalesCaptionBarSubItem IsVisible="False" />
+                        </dxsch:SchedulerControl.TimeRulerMenuCustomizations>
+
+                        <dxsch:SchedulerControl.DefaultMenuCustomizations>
+                            <dxb:RemoveBarItemAndLinkAction ItemName="{x:Static dxsch:SchedulerMenuItemName.NewAppointment}" />
+                            <dxb:RemoveBarItemAndLinkAction ItemName="{x:Static dxsch:SchedulerMenuItemName.NewRecurringAppointment}" />
+                            <dxb:RemoveBarItemAndLinkAction ItemName="{x:Static dxsch:SchedulerMenuItemName.SwitchToWeekView}" />
+                            <dxb:RemoveBarItemAndLinkAction ItemName="{x:Static dxsch:SchedulerMenuItemName.SwitchTimeScale}" />
+                            <dxb:RemoveBarItemAndLinkAction ItemName="{x:Static dxsch:SchedulerMenuItemName.SwitchToFullWeekView}" />
+                            <dxb:RemoveBarItemAndLinkAction ItemName="{x:Static dxsch:SchedulerMenuItemName.NewRecurringAppointment}" />
+                            <dxb:RemoveBarItemAndLinkAction ItemName="{x:Static dxsch:SchedulerMenuItemName.NewRecurringEvent}" />
+                            <dxb:RemoveBarItemAndLinkAction ItemName="{x:Static dxsch:SchedulerMenuItemName.GotoThisDay}" />
+                            <dxb:RemoveBarItemAndLinkAction ItemName="{x:Static dxsch:SchedulerMenuItemName.NewAllDayEvent}" />
+                            <dxb:RemoveBarItemAndLinkAction ItemName="{x:Static dxsch:SchedulerMenuItemName.GotoDate}" />
+                            <dxb:RemoveBarItemAndLinkAction ItemName="TimeScaleVisible" />
+                            <dxb:RemoveBarItemAndLinkAction ItemName="TimeScaleEnable" />
+
+                            <dxb:UpdateAction ElementName="{x:Static dxsch:SchedulerMenuItemName.SwitchToMonthView}" PropertyName="IsVisible" Value="{StaticResource False}" />
+                            <dxb:UpdateAction ElementName="{x:Static dxsch:SchedulerMenuItemName.SwitchToWeekView}" PropertyName="IsVisible" Value="{StaticResource False}" />
+                            <dxb:UpdateAction ElementName="{x:Static dxsch:SchedulerMenuItemName.SwitchToWorkWeekView}" PropertyName="IsVisible" Value="{StaticResource False}" />
+                            <dxb:UpdateAction ElementName="{x:Static dxsch:SchedulerMenuItemName.SwitchTimeScale}" PropertyName="IsVisible" Value="{StaticResource False}" />
+                        </dxsch:SchedulerControl.DefaultMenuCustomizations>
+
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="Loaded">
+                                <i:InvokeCommandAction Command="{Binding LoadCommand}" CommandParameter="{Binding ElementName=SchedulerControlTimelineView}" />
+                            </i:EventTrigger>
+                            <i:EventTrigger EventName="EditAppointmentFormShowing">
+                                <behaviors:InvokeDelegateCommandAction Command="{Binding AllowEditAppointmentCommand}" CommandParameter="{Binding InvokeParameter, RelativeSource={RelativeSource Self}}" />
+                            </i:EventTrigger>
+                            <i:EventTrigger EventName="PopupMenuShowing">
+                                <behaviors:InvokeDelegateCommandAction Command="{Binding PopupMenuShowingCommand }" CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=InvokeParameter}" />
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+
+                        <dxsch:SchedulerControl.Storage>
+                            <dxsch:SchedulerStorage>
+                                <dxsch:SchedulerStorage.AppointmentStorage>
+                                    <dxsch:AppointmentStorage DataSource="{Binding FilterAppointments, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Labels="{Binding Labels,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
+                                        <dxsch:AppointmentStorage.Mappings>
+                                            <dxsch:AppointmentMapping Start="StartTime"
+                                                                  End="EndTime"
+                                                                  Subject="ConnectPlantId"
+                                                                  Description="Description"
+                                                                  Location="Tag"
+                                                                  AllDay="AllDay"
+                                                                  Label="Label"
+                                                                  Status="Status"
+                                                                  AppointmentId="IdOffer"
+                                                                  Type="EventType"
+                                                                  RecurrenceInfo="RecurrenceInfo"
+                                                                  ReminderInfo="ReminderInfo"
+                                                                  ResourceId="ResourceId"
+                                                                  Tag="ConnectPlantId" />
+                                        </dxsch:AppointmentStorage.Mappings>
+                                    </dxsch:AppointmentStorage>
+                                </dxsch:SchedulerStorage.AppointmentStorage>
+                            </dxsch:SchedulerStorage>
+                        </dxsch:SchedulerControl.Storage>
+                    </dxsch:SchedulerControl>
+                </dxlc:LayoutGroup>
+
+
+            </dxlc:LayoutControl>
+
+
+
+
+
+        </dxlc:LayoutControl>
+
+
+        
+
+
+        <!--</Grid>-->
+    </Grid>
+    
+    
+</UserControl>

@@ -1,0 +1,32 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Prism.Logging;
+using System.IO;
+
+namespace GeosEmailInboxMonitorService.Logger
+{
+    public class LoggerFactory
+    {
+        public static ILoggerFacade CreateLogger(LogType logtype, params object[] parameter)
+        {
+            if (parameter.Length > 0)
+            {
+                if (logtype == LogType.Log4Net)
+                {
+                    if (parameter[0].GetType().Name == "FileInfo")
+                    {
+                        return new CustomTextLoggerAdapter((FileInfo)parameter[0]);
+                    }
+                }
+                else if (logtype == LogType.Window)
+                {
+                }
+            }
+
+            return null;
+        }
+    }
+}

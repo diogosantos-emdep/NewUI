@@ -1,0 +1,72 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:dxsch="http://schemas.devexpress.com/winfx/2008/xaml/scheduler" xmlns:dxscht="http://schemas.devexpress.com/winfx/2008/xaml/scheduler/themekeys" xmlns:dxschd="http://schemas.devexpress.com/winfx/2008/xaml/scheduler/internal" xmlns:dxdst="http://schemas.devexpress.com/winfx/2008/xaml/core/themekeys" xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:cs="colorscheme_ignorable_uri" mc:Ignorable="cs">
+    <dxsch:SchedulerStringIdConverter x:Key="SchedulerStringIdConverter" />
+    <ControlTemplate TargetType="{x:Type dxschd:VisualNavigationButton}" x:Key="NavigationButtonTemplate">
+        <Grid x:Name="Root" Background="Transparent" Width="26" Height="26" Margin="2" SnapsToDevicePixels="True" cs:Name="Grid_0001" IsHitTestVisible="True" dxsch:SchedulerControl.HitTestType="NavigationButton">
+            <VisualStateManager.VisualStateGroups>
+                <VisualStateGroup x:Name="CommonStates">
+                    <VisualState x:Name="Normal" />
+                    <VisualState x:Name="MouseOver">
+                        <Storyboard>
+                            <ColorAnimation Storyboard.TargetName="BackwardElement" Storyboard.TargetProperty="(Path.Fill).(SolidColorBrush.Color)" Duration="0" To="#FFFFFFFF" cs:Name="ColorAnimation_0001" />
+                            <ColorAnimation Storyboard.TargetName="ForwardElement" Storyboard.TargetProperty="(Path.Fill).(SolidColorBrush.Color)" Duration="0" To="#FFFFFFFF" cs:Name="ColorAnimation_0002" />
+                        </Storyboard>
+                    </VisualState>
+                    <VisualState x:Name="Pressed">
+                        <Storyboard>
+                            <ColorAnimation Storyboard.TargetName="BackwardElement" Storyboard.TargetProperty="(Path.Fill).(SolidColorBrush.Color)" Duration="0" To="#FF7C7C7C" cs:Name="ColorAnimation_0003" />
+                            <ColorAnimation Storyboard.TargetName="ForwardElement" Storyboard.TargetProperty="(Path.Fill).(SolidColorBrush.Color)" Duration="0" To="#FF7C7C7C" cs:Name="ColorAnimation_0004" />
+                        </Storyboard>
+                    </VisualState>
+                    <VisualState x:Name="Disabled">
+                        <Storyboard>
+                            <DoubleAnimation Storyboard.TargetName="Root" Storyboard.TargetProperty="Opacity" Duration="0" To="0.35" />
+                        </Storyboard>
+                    </VisualState>
+                </VisualStateGroup>
+                <VisualStateGroup x:Name="DirectionStates">
+                    <VisualState x:Name="Backward" />
+                    <VisualState x:Name="Forward">
+                        <Storyboard>
+                            <DoubleAnimation Storyboard.TargetName="BackwardElement" Storyboard.TargetProperty="Opacity" Duration="0" To="0" />
+                            <DoubleAnimation Storyboard.TargetName="ForwardElement" Storyboard.TargetProperty="Opacity" Duration="0" To="1" />
+                        </Storyboard>
+                    </VisualState>
+                </VisualStateGroup>
+            </VisualStateManager.VisualStateGroups>
+            <Grid Margin="2">
+                <Path x:Name="BackwardElement" Stretch="Fill" Fill="#BFFFFFFF" Data="F1 M 290,272C 282.82,272 277,277.82 277,285C 277,292.18 282.82,298 290,298C 297.18,298 303,292.18 303,285C 303,277.82 297.18,272 290,272 Z M 290,274C 296.075,274 301,278.925 301,285C 301,291.075 296.075,296 290,296C 283.925,296 279,291.075 279,285C 279,278.925 283.925,274 290,274 Z M 298,284L 285,284L 291,278L 288,278L 282,284L 282,286L 288.019,292L 291,292L 285,286L 298,286L 298,284 Z " cs:Name="Path_0001" />
+                <Path x:Name="ForwardElement" Stretch="Fill" Fill="#BFFFFFFF" Data="F1 M 296,234C 303.18,234 309,239.82 309,247C 309,254.18 303.18,260 296,260C 288.82,260 283,254.18 283,247C 283,239.82 288.82,234 296,234 Z M 296,236C 289.925,236 285,240.925 285,247C 285,253.075 289.925,258 296,258C 302.075,258 307,253.075 307,247C 307,240.925 302.075,236 296,236 Z M 288,246L 301,246L 295,240L 298,240L 304,246L 304,248L 297.981,254L 295,254L 301,248L 288,248L 288,246 Z " Opacity="0" cs:Name="Path_0002" />
+            </Grid>
+        </Grid>
+    </ControlTemplate>
+    <Style TargetType="{x:Type dxschd:VisualNavigationButton}" x:Key="{dxscht:SchedulerViewThemeKey ResourceKey=NavigationButtonPrevStyle}">
+        <Setter Property="Template" Value="{StaticResource NavigationButtonTemplate}" />
+        <Setter Property="Direction" Value="Backward" />
+        <Setter Property="Content" Value="{Binding Source={StaticResource SchedulerStringIdConverter}, ConverterParameter=Caption_PrevAppointment, Converter={StaticResource SchedulerStringIdConverter}}" />
+    </Style>
+    <Style TargetType="{x:Type dxschd:VisualNavigationButton}" x:Key="{dxscht:SchedulerViewThemeKey ResourceKey=NavigationButtonNextStyle}">
+        <Setter Property="Template" Value="{StaticResource NavigationButtonTemplate}" />
+        <Setter Property="Direction" Value="Forward" />
+        <Setter Property="Content" Value="{Binding Source={StaticResource SchedulerStringIdConverter}, ConverterParameter=Caption_NextAppointment, Converter={StaticResource SchedulerStringIdConverter}}" />
+    </Style>
+    <DataTemplate x:Key="{dxscht:SchedulerViewThemeKey ResourceKey=NavigationButtonsPair}">
+        <Grid HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="0,0,0,0">
+            <dxschd:VisualNavigationButton HorizontalAlignment="Left" VerticalAlignment="Stretch" Style="{Binding Path=View.NavigationButtonPrevStyle}" ButtonInfo="{Binding PrevNavButtonInfo}" />
+            <dxschd:VisualNavigationButton HorizontalAlignment="Right" VerticalAlignment="Stretch" Style="{Binding Path=View.NavigationButtonNextStyle}" ButtonInfo="{Binding NextNavButtonInfo}" />
+        </Grid>
+    </DataTemplate>
+    <DataTemplate x:Key="{dxscht:WeekViewThemeKey ResourceKey=NavigationButtonsPairGroupByResource}">
+        <Grid HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="-1,0,1,0">
+            <dxschd:VisualNavigationButton HorizontalAlignment="Left" VerticalAlignment="Stretch" Style="{Binding Path=View.NavigationButtonPrevStyle}" ButtonInfo="{Binding PrevNavButtonInfo}" />
+            <dxschd:VisualNavigationButton HorizontalAlignment="Right" VerticalAlignment="Stretch" Style="{Binding Path=View.NavigationButtonNextStyle}" ButtonInfo="{Binding NextNavButtonInfo}" />
+        </Grid>
+    </DataTemplate>
+    <!--<DataTemplate x:Key="{dxscht:SchedulerViewThemeKey ResourceKey=NavigationButtonsPair}">
+        <Grid HorizontalAlignment="Center">
+            <dxschd:VisualNavigationButton Margin="2,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Stretch"
+                                           Style="{Binding Path=View.NavigationButtonPrevStyle}" ButtonInfo="{Binding PrevNavButtonInfo}"/>
+            <dxschd:VisualNavigationButton Margin="0,0,1,0" HorizontalAlignment="Right" VerticalAlignment="Stretch"
+                                           Style="{Binding Path=View.NavigationButtonNextStyle}" ButtonInfo="{Binding NextNavButtonInfo}"/>
+        </Grid>
+    </DataTemplate>-->
+</ResourceDictionary>

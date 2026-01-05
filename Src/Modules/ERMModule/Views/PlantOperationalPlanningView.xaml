@@ -1,0 +1,1223 @@
+﻿<UserControl x:Class="Emdep.Geos.Modules.ERM.Views.PlantOperationalPlanningView"
+                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+        xmlns:Converters="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+       xmlns:UIConverter="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+        xmlns:dxp="http://schemas.devexpress.com/winfx/2008/xaml/printing"
+        xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+        xmlns:dxgt="http://schemas.devexpress.com/winfx/2008/xaml/grid/themekeys"
+       xmlns:dxet="http://schemas.devexpress.com/winfx/2008/xaml/editors/themekeys"
+        xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+        xmlns:dxci="http://schemas.devexpress.com/winfx/2008/xaml/core/internal"
+        xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+        xmlns:dxa="http://schemas.devexpress.com/winfx/2008/xaml/accordion"
+        xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+        xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+          xmlns:dxb="http://schemas.devexpress.com/winfx/2008/xaml/bars"
+             xmlns:dxr="http://schemas.devexpress.com/winfx/2008/xaml/ribbon"
+         xmlns:ERMApplication="clr-namespace:Emdep.Geos.Modules.ERM.CommonClasses" 
+         xmlns:ERMApplication2="clr-namespace:Emdep.Geos.Modules.ERM.ViewModels"
+        xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+        xmlns:local="clr-namespace:Emdep.Geos.Modules.ERM.Views"
+        xmlns:sysglb="clr-namespace:System.Globalization;assembly=mscorlib"
+       xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
+       xmlns:gif="http://wpfanimatedgif.codeplex.com"
+      xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity" 
+      xmlns:Interactive="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+      xmlns:Behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+       xmlns:dxdo="http://schemas.devexpress.com/winfx/2008/xaml/docking"
+        mc:Ignorable="d"
+       Height="{Binding SystemParameters.PrimaryScreenHeight}" 
+       Width="{Binding SystemParameters.PrimaryScreenWidth}"
+        Style="{DynamicResource UserControlStyle}">
+    <UserControl.Resources>
+        <!--<ResourceDictionary>-->
+
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <Style x:Key="HideButtonStyleLeft" TargetType="{x:Type ToggleButton}">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ToggleButton}">
+                        <Border BorderThickness="0" Background="{TemplateBinding Background}">
+                            <Grid>
+                                <Image Stretch="None" VerticalAlignment="Center" HorizontalAlignment="Center"
+                                   Source="/Emdep.Geos.Modules.PCM;component/Assets/Images/ArrowRight.png"
+                                   Visibility="{TemplateBinding IsChecked, Converter={dxmvvm:BooleanToVisibilityConverter Inverse=True}}"/>
+                                <Image Stretch="None" VerticalAlignment="Center" HorizontalAlignment="Center"
+                                   Source="/Emdep.Geos.Modules.PCM;component/Assets/Images/ArrowLeft.png"
+                                   Visibility="{TemplateBinding IsChecked, Converter={dxmvvm:BooleanToVisibilityConverter}}"/>
+                            </Grid>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <CollectionViewSource x:Key="SortedApplications" Source="{Binding DataContext.TemplateWithPlantAccordion, Mode=TwoWay, 
+                                                                                            UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=UserControl}}">
+            <!--<CollectionViewSource.SortDescriptions>
+                <scm:SortDescription PropertyName="copyDeliwaryWeek" Direction="Ascending"/>
+            </CollectionViewSource.SortDescriptions>-->
+        </CollectionViewSource>
+
+        <!--Start Create All Template For Grid-->
+        <DataTemplate x:Key="DefaultColunmTemplate">
+            <ContentControl>
+                <dxg:GridColumn Header="{Binding HeaderText,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                FieldName="{Binding ColumnFieldName,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                HorizontalHeaderContentAlignment="Left"
+                                Width="{Binding Width}"
+                                MinWidth="{Binding Width}"
+                                Visible="{Binding Visible,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ReadOnly="True" FixedWidth="True" FilterPopupMode="Default">
+                    <dxg:GridColumn.EditSettings>
+                        <dxe:TextEditSettings HorizontalContentAlignment="Left"/>
+                    </dxg:GridColumn.EditSettings>
+                </dxg:GridColumn>
+            </ContentControl>
+        </DataTemplate>
+
+        <DataTemplate x:Key="CalenderWeekTemplate">
+            <ContentControl>
+                <dxg:GridColumn Header="{Binding HeaderText,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                FieldName="{Binding ColumnFieldName,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                Width="{Binding Width}"
+                                MinWidth="{Binding Width}"
+                                HorizontalHeaderContentAlignment="Left"
+                                Visible="{Binding Visible,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ReadOnly="True" FixedWidth="True"
+                               FilterPopupMode="Default"
+                                AllowMoving="True"  AllowResizing="True" Fixed="None" GroupIndex="0"
+                                >
+
+                    <dxg:GridColumn.CellTemplate>
+                        <DataTemplate>
+                            <dxe:TextEdit Name="PART_Editor"   MaskShowPlaceHolders="False" ValidateOnTextInput="True" HorizontalAlignment="Left"  ShowBorder="False" >
+
+                            </dxe:TextEdit>
+                        </DataTemplate>
+                    </dxg:GridColumn.CellTemplate>
+                    <dxg:GridColumn.EditSettings>
+                        <dxe:TextEditSettings HorizontalContentAlignment="Left"/>
+                    </dxg:GridColumn.EditSettings>
+                </dxg:GridColumn>
+            </ContentControl>
+        </DataTemplate>
+        <DataTemplate x:Key="EmployeeTemplate">
+            <ContentControl>
+                <dxg:GridColumn Header="{Binding HeaderText,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                FieldName="{Binding ColumnFieldName,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                
+                                Width="{Binding Width}"
+                                MinWidth="{Binding Width}"
+                                HorizontalHeaderContentAlignment="Left"
+                                Visible="{Binding Visible,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ReadOnly="True" FixedWidth="True">
+                    <dxg:GridColumn.EditSettings>
+                        <dxe:TextEditSettings HorizontalContentAlignment="Left"/>
+                    </dxg:GridColumn.EditSettings>
+
+
+                  
+                </dxg:GridColumn>
+             
+            </ContentControl>
+         
+        </DataTemplate>
+      
+
+      
+        <DataTemplate x:Key="HRExpectedTemplate">
+            <ContentControl>
+                <dxg:GridColumn Header="{Binding HeaderText,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                FieldName="{Binding ColumnFieldName,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                
+                                Width="{Binding Width}"
+                                MinWidth="{Binding Width}"
+                                HorizontalHeaderContentAlignment="Left"
+                                Visible="{Binding Visible,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ReadOnly="True" FixedWidth="True" FilterPopupMode="Default">
+                    <dxg:GridColumn.EditSettings>
+                        <dxe:TextEditSettings HorizontalContentAlignment="Right"/>
+                    </dxg:GridColumn.EditSettings>
+                </dxg:GridColumn>
+            </ContentControl>
+        </DataTemplate>
+        <DataTemplate x:Key="HRPlanTemplate">
+            <ContentControl>
+                <dxg:GridColumn FieldName="{Binding ColumnFieldName,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                Header="{Binding HeaderText,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                Width="{Binding  Width}"
+                                AllowBestFit="true" 
+                                AllowCellMerge="False"
+                                AllowMoving="true"
+                                AllowAutoFilter="False"
+                                HorizontalHeaderContentAlignment="Left" 
+                                IsSmart="True"
+                                MinWidth="{Binding  Width}"
+                                FilterPopupMode="Default"
+                                 Visible="{Binding Visible,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ReadOnly="True" FixedWidth="True">
+
+                    <dxg:GridColumn.EditSettings>
+                        <dxe:TextEditSettings HorizontalContentAlignment="Right" DisplayFormat=" {0:N}"/>
+                    </dxg:GridColumn.EditSettings>
+                </dxg:GridColumn>
+            </ContentControl>
+        </DataTemplate>
+        <DataTemplate x:Key="JobDescriptionTemplate">
+            <ContentControl>
+                <dxg:GridColumn FieldName="{Binding ColumnFieldName,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                Header="{Binding HeaderText,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                Width="{Binding  Width}"
+                               Visible="{Binding Visible,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ReadOnly="True" FixedWidth="True"
+                                AllowBestFit="true" 
+                                AllowCellMerge="False"
+                                AllowMoving="true"
+                                AllowAutoFilter="False"
+                                
+                                HorizontalHeaderContentAlignment="Left" 
+                                IsSmart="True"
+                                MinWidth="{Binding  Width}"
+                                FilterPopupMode="Default">
+
+                    <dxg:GridColumn.EditSettings>
+                        <dxe:TextEditSettings HorizontalContentAlignment="Right" DisplayFormat=" {0:N}"/>
+                    </dxg:GridColumn.EditSettings>
+                </dxg:GridColumn>
+            </ContentControl>
+        </DataTemplate>
+
+        <DataTemplate x:Key="RealTemplate">
+            <ContentControl>
+                <dxg:GridColumn FieldName="{Binding ColumnFieldName,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                Header="{Binding HeaderText,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                Width="{Binding  Width}"
+                                AllowBestFit="true" 
+                                AllowCellMerge="False"
+                                AllowMoving="true"
+                                AllowAutoFilter="False"
+                                HorizontalHeaderContentAlignment="Left" 
+                                IsSmart="True"
+                                MinWidth="{Binding  Width}"
+                                FilterPopupMode="Default"
+                                 Visible="{Binding Visible,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ReadOnly="True" FixedWidth="True">
+
+                    <dxg:GridColumn.EditSettings>
+                        <dxe:TextEditSettings HorizontalContentAlignment="Right" DisplayFormat=" {0:N}"/>
+                    </dxg:GridColumn.EditSettings>
+                </dxg:GridColumn>
+            </ContentControl>
+        </DataTemplate>
+
+
+        <DataTemplate x:Key="TimeTypeTemplate">
+
+            <ContentControl>
+
+                <dxg:GridColumn Header="{Binding HeaderText,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                FieldName="{Binding ColumnFieldName,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                             
+                                Width="{Binding Width}"
+                                MinWidth="{Binding Width}"
+                                HorizontalHeaderContentAlignment="Left"
+                                Visible="{Binding Visible,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ReadOnly="True" FixedWidth="True">
+
+                    <dxg:GridColumn.CellTemplate>
+                        <DataTemplate>
+
+                            <!--<Button FontWeight="Bold" Content="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  HorizontalContentAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Top" Foreground="{DynamicResource AppointmentHeaderForeground}" BorderBrush="{DynamicResource AppointmentHeaderForeground}" BorderThickness="1" Padding="0"  Height="25" Width="20"   HorizontalAlignment="Center" Visibility="{Binding DataContext.IsButtonVisible,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=UserControl}}" Command="{Binding DataContext.PlantOperationalTimeTypeRealCommand,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding ElementName=PlantOperationTableView}" >
+
+                               
+                            </Button>-->
+
+
+                            <Button FontWeight="Bold" Content="+" ToolTip="Time Type"  HorizontalContentAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Top" Foreground="{DynamicResource AppointmentHeaderForeground}" BorderBrush="{DynamicResource AppointmentHeaderForeground}" BorderThickness="1" Padding="0"  Height="25" Width="20"   HorizontalAlignment="Center">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Visibility" Value="Hidden" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Value="TimeType">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                                <Button.Command>
+                                    <Binding Path="DataContext.PlantOperationalTimeTypeRealCommand" RelativeSource="{RelativeSource AncestorType=UserControl}" Mode="TwoWay"/>
+                                </Button.Command>
+                                <Button.CommandParameter>
+                                    <Binding ElementName="PlantOperationTableView"></Binding>
+                                </Button.CommandParameter>
+                            </Button>
+
+
+
+
+                        </DataTemplate>
+                    </dxg:GridColumn.CellTemplate>
+
+                </dxg:GridColumn>
+
+            </ContentControl>
+        </DataTemplate>
+
+        <DataTemplate x:Key="HiddenColumnTemplate">
+            <ContentControl>
+                <dxg:GridColumn FieldName="{Binding Path=(dxci:DependencyObjectExtensions.DataContext).ColumnFieldName, RelativeSource={RelativeSource Self}}"
+                                Header="{Binding Path=(dxci:DependencyObjectExtensions.DataContext).HeaderText, RelativeSource={RelativeSource Self}}"
+                                AllowCellMerge="False"
+                                FixedWidth="{Binding Path=(dxci:DependencyObjectExtensions.DataContext).FixedWidth, RelativeSource={RelativeSource Self}}"
+                                AllowBestFit="True"
+                                Width="{Binding Path=(dxci:DependencyObjectExtensions.DataContext).Width, RelativeSource={RelativeSource Self}}"
+                                AllowEditing="False" 
+                                AllowAutoFilter="True"
+                                Visible="{Binding Path=(dxci:DependencyObjectExtensions.DataContext).Visible, RelativeSource={RelativeSource Self}, Mode=TwoWay}"
+                                ShowInColumnChooser="False"
+                                MinWidth="{Binding Width}"/>
+            </ContentControl>
+        </DataTemplate>
+
+        <!--//[GEOS2-4839][gulab lakade][18 09 2023]-->
+        <DataTemplate x:Key="PlantTemplate">
+            <ContentControl>
+                <dxg:GridColumn Header="{Binding HeaderText,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                FieldName="{Binding ColumnFieldName,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                Width="{Binding Width}"
+                                MinWidth="{Binding Width}"
+                                HorizontalHeaderContentAlignment="Left"
+                                Visible="{Binding Visible,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ReadOnly="True" FixedWidth="True"
+                               FilterPopupMode="Default"
+                                AllowMoving="True"  AllowResizing="True" Fixed="None" GroupIndex="0"
+                                >
+
+                    <dxg:GridColumn.CellTemplate>
+                        <DataTemplate>
+                            <dxe:TextEdit Name="PART_Editor"   MaskShowPlaceHolders="False" ValidateOnTextInput="True" HorizontalAlignment="Left"  ShowBorder="False" >
+
+                            </dxe:TextEdit>
+                        </DataTemplate>
+                    </dxg:GridColumn.CellTemplate>
+                    <dxg:GridColumn.EditSettings>
+                        <dxe:TextEditSettings HorizontalContentAlignment="Left"/>
+                    </dxg:GridColumn.EditSettings>
+                </dxg:GridColumn>
+            </ContentControl>
+        </DataTemplate>
+
+        <!-- end [GEOS2-4839][gulab lakade][18 09 2023]-->
+        <!--<DataTemplate x:Key="TimeTypeTemplate">
+            <ContentControl>
+                <dxg:GridColumn Header="{Binding HeaderText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                        FieldName="{Binding ColumnFieldName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                        Width="{Binding Width}"
+                        MinWidth="{Binding Width}"
+                        HorizontalHeaderContentAlignment="Left"
+                        Visible="{Binding Visible, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        ReadOnly="True"
+                        FixedWidth="True">
+
+                    <dxg:GridColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button FontWeight="Bold" Content="+" Foreground="White" BorderBrush="White" BorderThickness="1" Padding="5" Height="25" Width="20" HorizontalAlignment="Left">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding DataContext.DtPlantOperation.Rows[11][Employee_], RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                                <Button.Command>
+                                    <Binding Path="DataContext.PlantOperationalTimeTypeRealCommand" RelativeSource="{RelativeSource AncestorType=UserControl}" Mode="OneWay" />
+                                </Button.Command>
+                            </Button>
+                        </DataTemplate>
+                    </dxg:GridColumn.CellTemplate>
+
+                </dxg:GridColumn>
+            </ContentControl>
+        </DataTemplate>-->
+
+
+        <!--<DataTemplate x:Key="TimeTypeTemplate">
+            <ContentControl>
+                <dxg:GridColumn Header="{Binding HeaderText,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                FieldName="{Binding ColumnFieldName,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                             
+                                Width="{Binding Width}"
+                                MinWidth="{Binding Width}"
+                                HorizontalHeaderContentAlignment="Left"
+                                Visible="{Binding Visible,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ReadOnly="True" FixedWidth="True">
+                    <dxg:GridColumn.EditSettings>
+                        <dxe:TextEditSettings HorizontalContentAlignment="Left"/>
+                    </dxg:GridColumn.EditSettings>
+                </dxg:GridColumn>
+            </ContentControl>
+        </DataTemplate>-->
+        <!--</ResourceDictionary>-->
+        <!--End Template-->
+        <UIHelper:PlantOperationPlanningColumnTemplateSelector x:Key="newColumnTemplateSelector"
+                                                                    DefaultTemplate="{StaticResource DefaultColunmTemplate}"
+                                                                    CalenderWeek="{StaticResource CalenderWeekTemplate}"
+                                                                    Employee="{StaticResource EmployeeTemplate}"
+                                                                    HRExpected="{StaticResource HRExpectedTemplate}"
+                                                                    HRPlan="{StaticResource HRPlanTemplate}"
+                                                                    JobDescription="{StaticResource JobDescriptionTemplate}"
+                                                                    Real="{StaticResource RealTemplate}"
+                                                                    TimeType="{StaticResource TimeTypeTemplate}"
+                                                                    HiddenTemplate="{StaticResource HiddenColumnTemplate}"
+                                                               Plant="{StaticResource PlantTemplate}"
+                                                                   />
+        <!--JobDescription="{StaticResource JobDescriptionTemplate}"-->
+        <DataTemplate x:Key="BandTemplate">
+            <ContentControl>
+                <dxg:GridControlBand UIHelper:NameBinder.Name="{Binding BandName,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  Header="{Binding BandHeader,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                                    HorizontalHeaderContentAlignment="Center" Visible="True"
+                                                    ColumnsSource="{Binding Columns,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                     AllowMoving="{Binding AllowMoving,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                    Fixed="{Binding FixedStyle,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                    ColumnGeneratorTemplateSelector="{StaticResource newColumnTemplateSelector}" OverlayHeaderByChildren="False"/>
+
+            </ContentControl>
+        </DataTemplate>
+        <!--<DataTemplate x:Key="BandTemplate">
+            <ContentControl>
+                <dxg:GridControlBand UIHelper:NameBinder.Name="{Binding Path=(dxci:DependencyObjectExtensions.DataContext).BandName, RelativeSource={RelativeSource Self}}" 
+                                    Header="{Binding Path=(dxci:DependencyObjectExtensions.DataContext).BandHeader, RelativeSource={RelativeSource Self}}" 
+                                    Fixed="{Binding Path=(dxci:DependencyObjectExtensions.DataContext).FixedStyle, RelativeSource={RelativeSource Self}}" 
+                                    OverlayHeaderByChildren="{Binding Path=(dxci:DependencyObjectExtensions.DataContext).OverlayHeaderByChildren, RelativeSource={RelativeSource Self}}" 
+                                    HorizontalHeaderContentAlignment="Center"
+                                    ColumnsSource="{Binding Path=(dxci:DependencyObjectExtensions.DataContext).Columns, RelativeSource={RelativeSource Self}}"
+                                    ColumnGeneratorTemplateSelector="{StaticResource newColumnTemplateSelector}"
+                                    />
+            </ContentControl>
+        </DataTemplate>-->
+        <!--<DataTemplate x:Key="RootBandTemplate">
+            <ContentControl>
+                <UIHelper:ParentBandItem
+                    Header="{Binding Header}"
+                    AllowBestFit="True"
+                    Visible="True"
+                    BandsSource="{Binding Bands}"
+                    BandTemplate="{StaticResource BandTemplate}"
+                    HorizontalHeaderContentAlignment="Center"
+                    >
+                </UIHelper:ParentBandItem>
+            </ContentControl>
+        </DataTemplate>-->
+        <Style TargetType="dxg:GridColumnHeader">
+            <Setter Property="FontWeight" Value="Bold"/>
+        </Style>
+        <Style TargetType="dxg:GridControlBand">
+            <Setter Property="HeaderStyle">
+                <Setter.Value>
+                    <Style TargetType="dxg:BaseGridHeader">
+                        <Setter Property="FontWeight" Value="Bold"/>
+                    </Style>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <!--Start [GEOS2-4708][gulab lakade][25 07 2023]-->
+        <Style x:Key="ImageStyle" TargetType="Image">
+            <Style.Triggers>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding DataContext.ID,RelativeSource={RelativeSource AncestorType=UserControl}}" Value="2" />
+                        <Condition Binding="{Binding Path=(dx:ThemeManager.TreeWalker).ThemeName, RelativeSource={RelativeSource Self}}" Value="BlackAndBlue" />
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="Source" Value="/Emdep.Geos.Modules.ERM;component/Assets/Images/bwFilter.png" />
+                </MultiDataTrigger>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding DataContext.ID,RelativeSource={RelativeSource AncestorType=UserControl}}" Value="2" />
+                        <Condition Binding="{Binding Path=(dx:ThemeManager.TreeWalker).ThemeName, RelativeSource={RelativeSource Self}}" Value="WhiteAndBlue" />
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="Source" Value="/Emdep.Geos.Modules.ERM;component/Assets/Images/bwFilter.png " />
+                </MultiDataTrigger>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding DataContext.ID,RelativeSource={RelativeSource AncestorType=UserControl}}" Value="1" />
+                        <Condition Binding="{Binding Path=(dx:ThemeManager.TreeWalker).ThemeName, RelativeSource={RelativeSource Self}}" Value="BlackAndBlue" />
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="Source" Value="/Emdep.Geos.Modules.ERM;component/Assets/Images/bFilter_24x24.png " />
+                </MultiDataTrigger>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding DataContext.ID,RelativeSource={RelativeSource AncestorType=UserControl}}" Value="1" />
+                        <Condition Binding="{Binding Path=(dx:ThemeManager.TreeWalker).ThemeName, RelativeSource={RelativeSource Self}}" Value="WhiteAndBlue" />
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="Source" Value="/Emdep.Geos.Modules.ERM;component/Assets/Images/wFilter_24x24.png" />
+                </MultiDataTrigger>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding DataContext.ID,RelativeSource={RelativeSource AncestorType=UserControl}}" Value="3" />
+                        <Condition Binding="{Binding Path=(dx:ThemeManager.TreeWalker).ThemeName, RelativeSource={RelativeSource Self}}" Value="BlackAndBlue" />
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="Source" Value="/Emdep.Geos.Modules.ERM;component/Assets/Images/wSFilter.png" />
+                </MultiDataTrigger>
+
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding DataContext.ID,RelativeSource={RelativeSource AncestorType=UserControl}}" Value="3" />
+                        <Condition Binding="{Binding Path=(dx:ThemeManager.TreeWalker).ThemeName, RelativeSource={RelativeSource Self}}" Value="WhiteAndBlue" />
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="Source" Value="/Emdep.Geos.Modules.ERM;component/Assets/Images/bSFilter.png" />
+                </MultiDataTrigger>
+            </Style.Triggers>
+        </Style>
+        <!--End [GEOS2-4708][gulab lakade][25 07 2023]-->
+        <DataTemplate x:Key="RootBandTemplate">
+            <ContentControl>
+                <UIHelper:ParentBandItem
+                    Header="{Binding Path=(dxci:DependencyObjectExtensions.DataContext).Header, RelativeSource={RelativeSource Self}}"
+                    AllowBestFit="True"
+                    Visible="True"
+                    BandsSource="{Binding Path=(dxci:DependencyObjectExtensions.DataContext).Bands, RelativeSource={RelativeSource Self}}"
+                    BandTemplate="{Binding Path=(dxci:DependencyObjectExtensions.DataContext).BandTemplate, RelativeSource={RelativeSource Self}}"
+                    HorizontalHeaderContentAlignment="Center"
+                    >
+                </UIHelper:ParentBandItem>
+            </ContentControl>
+        </DataTemplate>
+        <DataTemplate x:Key="SummaryTemplate">
+            <ContentControl>
+                <dxg:GridSummaryItem FieldName="{Binding Path=(dxci:DependencyObjectExtensions.DataContext).FieldName, RelativeSource={RelativeSource Self}}"
+                                     SummaryType="{Binding Path=(dxci:DependencyObjectExtensions.DataContext).Type, RelativeSource={RelativeSource Self}}"
+                                     DisplayFormat="{Binding Path=(dxci:DependencyObjectExtensions.DataContext).DisplayFormat, RelativeSource={RelativeSource Self}}" />
+            </ContentControl>
+        </DataTemplate>
+    </UserControl.Resources>
+    <DockPanel LastChildFill="True">
+        <Grid DockPanel.Dock="Top" Margin="0,10,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="5" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="5" />
+                <!-- <ColumnDefinition Width="70*" />
+                <ColumnDefinition Width="5" />
+                <ColumnDefinition Width="70*" />
+                <ColumnDefinition Width="Auto" />-->
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Label Content="{DynamicResource PlantOperationPlanning}" Style="{StaticResource LabelTitleStyle}" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center"/>
+
+            <Image gif:ImageBehavior.RepeatBehavior="Forever" gif:ImageBehavior.AnimatedSource="/Emdep.Geos.Modules.ERM;component/Assets/Images/animatedWarning.gif" Visibility="{Binding Source={x:Static ERMApplication:ERMCommon.Instance}, Path=IsShowFailedPlantWarning,Mode=TwoWay,Converter={StaticResource BoolToVis}}" Grid.Row="0" Grid.Column="2"  HorizontalAlignment="Left" VerticalAlignment="Center"  Height="30" Width="30">
+                <Image.ToolTip>
+                    <TextBlock Text="{Binding Source={x:Static ERMApplication:ERMCommon.Instance}, Path=WarningFailedPlants}"/>
+
+                </Image.ToolTip>
+            </Image>
+            <Grid Grid.Row="0" Grid.Column="4" HorizontalAlignment="Stretch" >
+                <Grid HorizontalAlignment="Right" Width="Auto" Height="45">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="45"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!--Add Button-->
+
+                    <!-- Plant -->
+
+                    <DockPanel Grid.Column="1" Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,5,5">
+                        <Image  Style="{DynamicResource WarehouseImageStyle}" Width="24" Height="24" Margin="0,0,3,5"></Image>
+                        <TextBlock  Margin="3,0,7,0" Text="{DynamicResource GridColPlant}"
+                               HorizontalAlignment="Left" VerticalAlignment="Center" Style="{StaticResource TextBlock14Style}"/>
+                    </DockPanel>
+                    <dxe:ComboBoxEdit Grid.Row="0" Grid.Column="2"   Margin="0,0,-20,5"
+                                   MinWidth="120"   Width="120" Name="CbePlant" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+                                      ScrollViewer.VerticalScrollBarVisibility="Auto"  TextTrimming="CharacterEllipsis" 
+                                      TextWrapping="Wrap"  Style="{DynamicResource ComboBoxEditStyle}" 
+                                      IsTextEditable="False"  DisplayMember="Name" 
+                                         ItemsSource ="{Binding Source={x:Static ERMApplication:ERMCommon.Instance}, Path=UserAuthorizedPlantsList ,UpdateSourceTrigger=PropertyChanged , Mode=TwoWay}"
+                                     
+                        EditValue="{Binding Source={x:Static ERMApplication:ERMCommon.Instance}, Path=SelectedAuthorizedPlantsList,UpdateSourceTrigger=PropertyChanged}"
+                                      >
+                        <!--SelectedItem="{Binding DataContext.SelectedPlant, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay, RelativeSource={RelativeSource AncestorType=UserControl}}"-->
+
+
+                        <dxe:ComboBoxEdit.StyleSettings>
+                            <dxe:CheckedComboBoxStyleSettings />
+                        </dxe:ComboBoxEdit.StyleSettings>
+                        <dxmvvm:Interaction.Triggers>
+                            <dxmvvm:EventToCommand 
+                                                            EventName="PopupClosed" Command="{Binding DataContext.ChangePlantCommand,RelativeSource={RelativeSource AncestorType=UserControl}}"  PassEventArgsToCommand="True"/>
+                        </dxmvvm:Interaction.Triggers>
+
+                    </dxe:ComboBoxEdit>
+
+                    <!--Period-->
+                    <DockPanel Grid.Column="5" Grid.Row="0" HorizontalAlignment="Right"   VerticalAlignment="Center" Margin="0,0,0,0" >
+                        <TextBlock Text="{DynamicResource Period}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,-10,10,0"/>
+                        <TextBlock Text="{Binding FromDate,StringFormat=d,ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,-10,5,0"/>
+                        <TextBlock Text=" - " HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold" Margin="0,-10,5,0"/>
+                        <TextBlock Text="{Binding ToDate,StringFormat=d,ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,-10,25,0"/>
+                    </DockPanel>
+                    <!--Calender Icon-->
+                    <dxwui:AppBar x:Name="Appbar" HideMode="AlwaysVisible" Background="Transparent" Grid.Column="4"
+                                  IsSticky="True" HorizontalAlignment="Stretch"
+                                  VerticalAlignment="Stretch"
+                                  IsOpen="True" IsExitButtonEnabled="False" Margin="10,-18,5,0">
+
+                        <dxwui:AppBarButton x:Name="appbarbutton" ToolTip="{DynamicResource PeriodSelect}"
+                                        GlyphHeight="24" GlyphWidth="24"
+                                        Style="{DynamicResource ERMCalendarImageGlyphStyle}"
+                                        GlyphStretch="Fill" IsEllipseEnabled="False" >
+                            <dxwui:AppBarButton.Flyout>
+                                <dxwui:MenuFlyout ShowIndicator="True" x:Name="MenuLayout">
+                                    <dxwui:MenuFlyoutItem StaysOpenOnClick="True">
+                                        <Grid Width="Auto" Height="Auto">
+                                            <DockPanel>
+                                                <StackPanel Orientation="Vertical" x:Name="PeriodCategories">
+                                                    <!--This Year-->
+                                                    <Button x:Name="ThisYear" Content="This Year" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                            Height="30" Width="110"
+                                                            Command="{Binding PeriodCommand}"
+                                                        CommandParameter="{Binding ElementName=ThisYear}">
+                                                    </Button>
+
+                                                    <!--Last Year-->
+                                                    <Button x:Name="LastYear" Content="Last Year" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                            Height="30" Width="110"
+                                                            Command="{Binding PeriodCommand}"
+                                                            CommandParameter="{Binding ElementName=LastYear}">
+                                                    </Button>
+
+                                                    <!--This Month-->
+                                                    <Button x:Name="ThisMonth" Content="{DynamicResource SAMThisMonth}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                            Height="30" Width="110"
+                                                            Command="{Binding PeriodCommand}"
+                                                            CommandParameter="{Binding ElementName=ThisMonth}">
+                                                    </Button>
+
+                                                    <!--Last one month-->
+                                                    <Button x:Name="LastOneMonth" Content="{DynamicResource SAMLastOneMonth}" HorizontalAlignment="Center" VerticalAlignment="Center" 
+                                                            Height="30" Width="110"
+                                                            Command="{Binding PeriodCommand}"
+                                                            CommandParameter="{Binding ElementName=LastOneMonth}">
+                                                    </Button>
+
+                                                    <!--Last month-->
+                                                    <Button x:Name="LastMonth" Content="{DynamicResource SAMLastMonth}" HorizontalAlignment="Center" VerticalAlignment="Center" 
+                                                            Height="30" Width="110"
+                                                            Command="{Binding PeriodCommand}"
+                                                            CommandParameter="{Binding ElementName=LastMonth}">
+                                                    </Button>
+
+                                                    <!--This week-->
+                                                    <Button x:Name="ThisWeek" Content="{DynamicResource SAMThisWeek}" HorizontalAlignment="Center" VerticalAlignment="Center" 
+                                                            Height="30" Width="110"
+                                                            Command="{Binding PeriodCommand}"
+                                                            CommandParameter="{Binding ElementName=ThisWeek}">
+                                                    </Button>
+
+                                                    <!--Last one week-->
+                                                    <Button x:Name="LastOneWeek" Content="{DynamicResource SAMLastOneWeek}" HorizontalAlignment="Center" VerticalAlignment="Center" 
+                                                            Height="30" Width="110"
+                                                            Command="{Binding PeriodCommand}"
+                                                            CommandParameter="{Binding ElementName=LastOneWeek}">
+                                                    </Button>
+
+                                                    <!--Last week-->
+                                                    <Button x:Name="LastWeek" Content="{DynamicResource SAMLastWeek}" HorizontalAlignment="Center" VerticalAlignment="Center" 
+                                                            Height="30" Width="110"
+                                                            Command="{Binding PeriodCommand}"
+                                                            CommandParameter="{Binding ElementName=LastWeek}">
+                                                    </Button>
+                                                    <!--Last 12 month-->
+                                                    <Button x:Name="Last12Months" Content="Last 12 Months" HorizontalAlignment="Center" VerticalAlignment="Center" 
+                                                            Height="30" Width="110"
+                                                            Command="{Binding PeriodCommand}"
+                                                            CommandParameter="{Binding ElementName=Last12Months}">
+                                                    </Button>
+                                                    <!--Custom Range-->
+                                                    <Button x:Name="CustomRange" Content="{DynamicResource PeriodCustomRange}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                            Height="30" Width="110"
+                                                            Command="{Binding PeriodCustomRangeCommand}"
+                                                            CommandParameter="{Binding ElementName=CustomRange}">
+                                                    </Button>
+                                                    <StackPanel Orientation="Horizontal" Margin="0,50,0,0">
+                                                        <Button Content="{DynamicResource SAMApply}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                            Height="30" Width="60" Background="Yellow" 
+                                                            Command="{Binding ApplyCommand}" CommandParameter="{Binding ElementName=MenuLayout}">
+                                                        </Button>
+                                                        <Button Content="{DynamicResource SAMCancel}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                            Height="30" Width="60" 
+                                                            Command="{Binding CancelCommand}" CommandParameter="{Binding ElementName=MenuLayout}">
+                                                        </Button>
+                                                    </StackPanel>
+                                                </StackPanel>
+
+                                                <StackPanel Visibility="{Binding DataContext.IsCalendarVisible, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" Orientation="Horizontal">
+                                                    <StackPanel Orientation="Vertical">
+                                                        <dxe:TextEdit Text="{Binding DataContext.StartDate, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
+                                                  Height="30" TextWrapping="Wrap" Mask="dd/MM/yyyy"  
+                                                  MaskType="DateTimeAdvancingCaret"  
+                                                  MaskUseAsDisplayFormat="True"
+                                                  HorizontalAlignment="Stretch" IsReadOnly="True"  Margin="2,2,2,2">
+                                                        </dxe:TextEdit>
+                                                        <!--Calendar-->
+                                                        <dxe:DateEditCalendar DateTime="{Binding DataContext.StartDate, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                                      VerticalAlignment="Center"
+                                                                      ShowToday="False"
+                                                                      ShowClearButton="False"/>
+                                                    </StackPanel>
+                                                    <StackPanel Orientation="Vertical">
+                                                        <dxe:TextEdit Text="{Binding DataContext.EndDate, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
+                                                  Height="30" TextWrapping="Wrap" Mask="dd/MM/yyyy"  
+                                                  MaskType="DateTimeAdvancingCaret"  
+                                                  MaskUseAsDisplayFormat="True"
+                                                  HorizontalAlignment="Stretch" IsReadOnly="True"  Margin="2,2,2,2">
+                                                        </dxe:TextEdit>
+                                                        <!--Calendar-->
+                                                        <dxe:DateEditCalendar DateTime="{Binding DataContext.EndDate, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                                      VerticalAlignment="Center"
+                                                                      ShowToday="False"
+                                                                      ShowClearButton="False"/>
+                                                    </StackPanel>
+                                                </StackPanel>
+                                            </DockPanel>
+                                        </Grid>
+                                    </dxwui:MenuFlyoutItem>
+                                </dxwui:MenuFlyout>
+                            </dxwui:AppBarButton.Flyout>
+                        </dxwui:AppBarButton>
+                    </dxwui:AppBar>
+
+
+                    <!-- Refresh Button -->
+                    <Button Content=" " Grid.Row="0" Grid.Column="7" Height="40" Width="40" HorizontalAlignment="Right"
+                             Command="{Binding RefreshPlantOperationalPlanningCommand}" CommandParameter="{Binding ElementName=PlanningDateReviewTableView}"  Margin="0,0,5,5">
+                        <Button.ToolTip>
+                            <TextBlock Text="{DynamicResource ButtonRefresh}"/>
+                        </Button.ToolTip>
+                        <Button.ContentTemplate>
+                            <DataTemplate>
+                                <Image Style="{ DynamicResource PCMRefreshButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                            </DataTemplate>
+                        </Button.ContentTemplate>
+                    </Button>
+
+                    <!--Print Button-->
+                    <Button Content=" " Grid.Row="0" Grid.Column="8" Height="40" Width="40" HorizontalAlignment="Right"
+                            Command="{Binding PrintPlantOperationalPlanningCommand}" CommandParameter="{Binding ElementName=PlantOperationTableView}"  Margin="0,0,5,5">
+                        <Button.ToolTip>
+                            <TextBlock Text="{DynamicResource ButtonPrint}"/>
+                        </Button.ToolTip>
+                        <Button.ContentTemplate>
+                            <DataTemplate>
+                                <Image Style="{DynamicResource PCMPrintButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                            </DataTemplate>
+                        </Button.ContentTemplate>
+                    </Button>
+
+                    <!-- Export to Excel -->
+                    <Button Content=" " Grid.Row="0" Grid.Column="9" Height="40" Width="40" HorizontalAlignment="Right"
+                             Command="{Binding ExportPlantOperationalPlanningCommand}" CommandParameter="{Binding ElementName=PlantOperationTableView}"  Margin="0,0,5,5">
+                        <Button.ToolTip>
+                            <TextBlock Text="{DynamicResource ButtonExportToExcel}"/>
+                        </Button.ToolTip>
+                        <Button.ContentTemplate>
+                            <DataTemplate>
+                                <Image Style="{DynamicResource PCMExportToExcelButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                            </DataTemplate>
+                        </Button.ContentTemplate>
+                    </Button>
+
+
+                    <!--Save Button-->
+
+                    <!--<Button Content=" " Height="40" Width="40" Grid.Row="0" Grid.Column="11" Command="{Binding SavePlanningDateCommand}" CommandParameter="{Binding ElementName=scheduler}" HorizontalAlignment="Right" Margin="0,0,5,5" 
+                    IsEnabled="{Binding IsSaveEnabled}" Visibility="{Binding IsSchedulerViewVisible}">
+                        <Button.ToolTip>
+                            <TextBlock Text="{DynamicResource ButtonSave}"/>
+                        </Button.ToolTip>
+                        <Button.ContentTemplate>
+                            <DataTemplate>
+                                <Image Style="{ DynamicResource SaveButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                            </DataTemplate>
+                        </Button.ContentTemplate>
+
+
+                    </Button>
+                    <Button Content=" " Height="40" Width="40" Grid.Row="0" Grid.Column="11" Command="{Binding SaveGridPlanningDateCommand}" CommandParameter="{Binding ElementName=PlanningDateReviewTableView}" HorizontalAlignment="Right" Margin="0,0,5,5" 
+                   IsEnabled="{Binding Path=(UIHelper:PlanningDateReviewCellEditHelper.IsValueChanged),Mode=TwoWay, ElementName=PlanningDateReviewTableView}"  Visibility="{Binding IsGridViewVisible}">
+                        <Button.ToolTip>
+                            <TextBlock Text="{DynamicResource ButtonSave}"/>
+                        </Button.ToolTip>
+                        <Button.ContentTemplate>
+                            <DataTemplate>
+                                <Image Style="{ DynamicResource SaveButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                            </DataTemplate>
+                        </Button.ContentTemplate>
+
+
+                    </Button>-->
+                    <!--Start[GEOS2-4708][gulab lakade][25 07 2023]-->
+                    <dxe:ComboBoxEdit  
+                             ItemsSource="{Binding  DataContext.PlantOperationStagesList,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=UserControl}}"
+                             
+                              Style="{DynamicResource ComboBoxEditStyle}"  DisplayMember="StageCode" Name="filter" Grid.Column="13" Grid.Row="0" Width="50"  VerticalAlignment="Top" HorizontalAlignment="Stretch" Height="40"                             
+                                >
+                        <dxe:ComboBoxEdit.StyleSettings>
+                            <dxe:CheckedComboBoxStyleSettings/>
+                        </dxe:ComboBoxEdit.StyleSettings>
+
+                        <dxe:ComboBoxEdit.Buttons>
+                            <dxe:ButtonInfo IsLeft="True" GlyphKind="Custom" ButtonKind="Simple" IsDefaultButton="True" >
+                                <dxe:ButtonInfo.ToolTip>
+                                    <TextBlock Text="{DynamicResource PlantOprationPlanningFilterToolTip}"></TextBlock>
+                                </dxe:ButtonInfo.ToolTip>
+                                <dxe:ButtonInfo.ContentTemplate>
+                                    <DataTemplate>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+
+
+
+                                            <Image Style="{StaticResource ImageStyle}" Grid.Column="0" Height="28" Width="36"/>
+                                            <!--<Image Style="{DynamicResource PlanningDateReviewFilterSomeImageForDashboardStyle}" Grid.Column="0" Height="28" Width="36" Visibility="{Binding IsFilterSomeVisiblity}" />
+                                            <Image Style="{DynamicResource PlanningDateReviewFilterImageForDashboardStyle}" Grid.Column="0" Height="28" Width="36" Visibility="{Binding IsFilterNotSelectedVisiblity}" />-->
+
+                                        </Grid>
+                                    </DataTemplate>
+                                </dxe:ButtonInfo.ContentTemplate>
+                            </dxe:ButtonInfo>
+                        </dxe:ComboBoxEdit.Buttons>
+                        <dxmvvm:Interaction.Triggers>
+                            <dxmvvm:EventToCommand EventName="EditValueChanged" 
+                                           Command="{Binding DataContext.FilterOptionEditValueChangedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                                <dxmvvm:EventToCommand.CommandParameter>
+                                    <Binding ElementName="filter"></Binding>
+                                </dxmvvm:EventToCommand.CommandParameter>
+
+                            </dxmvvm:EventToCommand>
+                            <dxmvvm:EventToCommand EventName="Loaded" Command="{Binding DataContext.FilterOptionLoadedCommand, Mode=OneTime, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                                <dxmvvm:EventToCommand.CommandParameter>
+                                    <Binding ElementName="filter"></Binding>
+                                </dxmvvm:EventToCommand.CommandParameter>
+                            </dxmvvm:EventToCommand>
+                        </dxmvvm:Interaction.Triggers>
+                    </dxe:ComboBoxEdit>
+                    <!--end[GEOS2-4708][gulab lakade][25 07 2023]-->
+                </Grid>
+            </Grid>
+
+        </Grid>
+
+        <Grid ShowGridLines="False" Grid.Column="0" Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <!--<ColumnDefinition Width="300"/>-->
+                <ColumnDefinition>
+                    <ColumnDefinition.Style>
+                        <Style TargetType="ColumnDefinition">
+                            <Setter Property="Width" Value="170" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding DataContext.IsAccordionControlVisible,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=UserControl}}" Value="Collapsed">
+                                    <Setter Property="Width" Value="0" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ColumnDefinition.Style>
+                </ColumnDefinition>
+                <ColumnDefinition Width="40"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <dxa:AccordionControl   x:Name="TemplateDetailsView" Grid.Row="0" Grid.Column="0" 
+                                                                                             SelectionUnit="SubItemOrRootItem" ShowSearchControl="True"
+                                                                                             ExpandMode="SingleOrNone" 
+                                                                                              SearchControlFilterCondition="Contains" 
+                                                                                            ItemsSource="{Binding Source={StaticResource SortedApplications}}"
+                                                                                             SelectedItem="{Binding DataContext.SelectedItem,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                                            ChildrenPath="CalendarWeekList">
+                <!--ChildrenPath="TimeTracking" SearchControlFilterCondition="Contains"  -->
+
+                <dxmvvm:Interaction.Triggers>
+                    <!--<dxmvvm:EventToCommand Command="{Binding DataContext.CommandAccordionControl_Drop, RelativeSource={RelativeSource AncestorType=UserControl}}}" EventName="Drop" PassEventArgsToCommand="True"></dxmvvm:EventToCommand>-->
+                </dxmvvm:Interaction.Triggers>
+
+            </dxa:AccordionControl>
+            <!--toggle Button-->
+            <ToggleButton Grid.Row="0" Grid.Column="1"  x:Name="expandButtonLeft" 
+               Command="{Binding  DataContext.HidePanelCommand,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=UserControl}}" Style="{StaticResource HideButtonStyleLeft}" IsChecked="True" >
+            </ToggleButton>
+            <Grid Grid.Row="0" Grid.Column="2" >
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+
+                <!--<UIHelper:MyGridControl x:Name="rootGridControl" DockPanel.Dock="Top" Grid.Row="2" Height="Auto" 
+                                                                         AutoGenerateColumns="None" 
+                                                                         ItemsSource="{Binding DtPlantOperation}" 
+                                                                         TotalSummarySource="{Binding TotalSummary}"
+                                                                        TotalSummaryGeneratorTemplate="{StaticResource SummaryTemplate}"
+                                                                        BandsSource="{Binding Bands_FirstLevel}"
+                                                                         BandTemplate="{StaticResource RootBandTemplate}"
+                                                                         
+                                                                         SelectionMode="Cell" ImplyNullLikeEmptyStringWhenFiltering="True" >-->
+
+
+                <UIHelper:MyGridControl x:Name="rootGridControl" DockPanel.Dock="Top" Grid.Row="2" Height="Auto" 
+                                                                         AutoGenerateColumns="None" 
+                                                                         ItemsSource="{Binding DtPlantOperation}" 
+                                                                         BandsSource="{Binding DataContext.Bands,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                         BandTemplate="{StaticResource BandTemplate}" 
+                                                                         TotalSummarySource="{Binding TotalSummary}"
+                                                                         
+                                                                        TotalSummaryGeneratorTemplate="{StaticResource SummaryTemplate}"
+                                                                        
+                                                                         SelectionMode="Cell" ImplyNullLikeEmptyStringWhenFiltering="True"  >
+
+                    <!--
+                    GroupSummarySource="{Binding GroupSummary}"
+                    GroupSummaryGeneratorTemplate="{StaticResource SummaryTemplate}"
+                    BandTemplate="{StaticResource BandTemplate}"
+                    BandsSource="{Binding DataContext.Bands,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType=UserControl}}"-->
+                    <dxmvvm:Interaction.Behaviors>
+                        <UIHelper:GridSelectingBehavior />
+                        <dxmvvm:EventToCommand Command="{Binding CustomSummaryCommand}" EventName="CustomSummary" PassEventArgsToCommand="True" />
+                    </dxmvvm:Interaction.Behaviors>
+
+                    <dxg:GridControl.TotalSummary>
+                       
+                    </dxg:GridControl.TotalSummary>
+                    <dxg:GridControl.GroupSummary>
+                        <!--start [GEOS2-4839][gulab lakade][05 10 2023]-->
+                        <dxg:GridSummaryItem x:Name="summery" ShowInGroupColumnFooter="Employee_" FieldName="Employee_"  SummaryType="Count" DisplayFormat=" {0}" Visible="True"   Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="summery1"  FieldName="Employee_"  SummaryType="Count" DisplayFormat=" {0}" Visible="True" Alignment="Left"/>
+                        <dxg:GridSummaryItem x:Name="summery2" ShowInGroupColumnFooter="Plant" FieldName="Plant"  SummaryType="Custom" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="summery3"  FieldName="Plant"  SummaryType="Custom" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <!--COM Stage-->
+                        <dxg:GridSummaryItem x:Name="HRPlan_1Footer" ShowInGroupColumnFooter="HRPlan_1" FieldName="HRPlan_1"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Left"/>
+                        <dxg:GridSummaryItem x:Name="HRPlan_1"  FieldName="HRPlan_1"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <dxg:GridSummaryItem x:Name="HRExpected_1footer" ShowInGroupColumnFooter="HRExpected_1" FieldName="HRExpected_1"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="HRExpected_1"  FieldName="HRExpected_1"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <dxg:GridSummaryItem x:Name="Real_1footer" ShowInGroupColumnFooter="Real_1" FieldName="Real_1"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="Real_1"  FieldName="Real_1"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <!--Design Stage-->
+                        <dxg:GridSummaryItem x:Name="HRPlan_2Footer" ShowInGroupColumnFooter="HRPlan_2" FieldName="HRPlan_2"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="HRPlan_2"  FieldName="HRPlan_2"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <dxg:GridSummaryItem x:Name="HRExpected_2footer" ShowInGroupColumnFooter="HRExpected_2" FieldName="HRExpected_2"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="HRExpected_2"  FieldName="HRExpected_2"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <dxg:GridSummaryItem x:Name="Real_2footer" ShowInGroupColumnFooter="Real_2" FieldName="Real_2"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="Real_2"  FieldName="Real_2"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <!--FQU Stage-->
+                        <dxg:GridSummaryItem x:Name="HRPlan_3Footer" ShowInGroupColumnFooter="HRPlan_3" FieldName="HRPlan_3"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="HRPlan_3"  FieldName="HRPlan_3"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <dxg:GridSummaryItem x:Name="HRExpected_3footer" ShowInGroupColumnFooter="HRExpected_3" FieldName="HRExpected_3"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="HRExpected_3"  FieldName="HRExpected_3"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <dxg:GridSummaryItem x:Name="Real_3footer" ShowInGroupColumnFooter="Real_3" FieldName="Real_3"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="Real_3"  FieldName="Real_3"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <!--ETB Stage-->
+                        <dxg:GridSummaryItem x:Name="HRPlan_4Footer" ShowInGroupColumnFooter="HRPlan_4" FieldName="HRPlan_4"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="HRPlan_4"  FieldName="HRPlan_4"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <dxg:GridSummaryItem x:Name="HRExpected_4footer" ShowInGroupColumnFooter="HRExpected_4" FieldName="HRExpected_4"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="HRExpected_4"  FieldName="HRExpected_4"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <dxg:GridSummaryItem x:Name="Real_4footer" ShowInGroupColumnFooter="Real_4" FieldName="Real_4"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="Real_4"  FieldName="Real_4"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <!--PAK Stage-->
+                        <dxg:GridSummaryItem x:Name="HRPlan_5Footer" ShowInGroupColumnFooter="HRPlan_5" FieldName="HRPlan_5"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="HRPlan_5"  FieldName="HRPlan_5"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <dxg:GridSummaryItem x:Name="HRExpected_5footer" ShowInGroupColumnFooter="HRExpected_5" FieldName="HRExpected_5"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="HRExpected_5"  FieldName="HRExpected_5"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <dxg:GridSummaryItem x:Name="Real_5footer" ShowInGroupColumnFooter="Real_5" FieldName="Real_5"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="Real_5"  FieldName="Real_5"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <!--CAM Stage-->
+                        <dxg:GridSummaryItem x:Name="HRPlan_6Footer" ShowInGroupColumnFooter="HRPlan_6" FieldName="HRPlan_6"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="HRPlan_6"  FieldName="HRPlan_6"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <dxg:GridSummaryItem x:Name="HRExpected_6footer" ShowInGroupColumnFooter="HRExpected_6" FieldName="HRExpected_6"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="HRExpected_6"  FieldName="HRExpected_6"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <dxg:GridSummaryItem x:Name="Real_6footer" ShowInGroupColumnFooter="Real_6" FieldName="Real_6"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="Real_6"  FieldName="Real_6"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <!--CNC Stage-->
+                        <dxg:GridSummaryItem x:Name="HRPlan_7Footer" ShowInGroupColumnFooter="HRPlan_7" FieldName="HRPlan_7"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="HRPlan_7"  FieldName="HRPlan_7"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <dxg:GridSummaryItem x:Name="HRExpected_7footer" ShowInGroupColumnFooter="HRExpected_7" FieldName="HRExpected_7"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="HRExpected_7"  FieldName="HRExpected_7"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <dxg:GridSummaryItem x:Name="Real_7footer" ShowInGroupColumnFooter="Real_7" FieldName="Real_7"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="Real_7"  FieldName="Real_7"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <!--TAL Stage-->
+                        <dxg:GridSummaryItem x:Name="HRPlan_8Footer" ShowInGroupColumnFooter="HRPlan_8" FieldName="HRPlan_8"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="HRPlan_8"  FieldName="HRPlan_8"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <dxg:GridSummaryItem x:Name="HRExpected_8footer" ShowInGroupColumnFooter="HRExpected_8" FieldName="HRExpected_8"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="HRExpected_8"  FieldName="HRExpected_8"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <dxg:GridSummaryItem x:Name="Real_8footer" ShowInGroupColumnFooter="Real_8" FieldName="Real_8"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="Real_8"  FieldName="Real_8"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <!--MON Stage-->
+                        <dxg:GridSummaryItem x:Name="HRPlan_9Footer" ShowInGroupColumnFooter="HRPlan_9" FieldName="HRPlan_9"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="HRPlan_9"  FieldName="HRPlan_9"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <dxg:GridSummaryItem x:Name="HRExpected_9footer" ShowInGroupColumnFooter="HRExpected_9" FieldName="HRExpected_9"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="HRExpected_9"  FieldName="HRExpected_9"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <dxg:GridSummaryItem x:Name="Real_9footer" ShowInGroupColumnFooter="Real_9" FieldName="Real_9"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="Real_9"  FieldName="Real_9"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <!--SOL Stage-->
+                        <dxg:GridSummaryItem x:Name="HRPlan_10Footer" ShowInGroupColumnFooter="HRPlan_10" FieldName="HRPlan_10"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="HRPlan_10"  FieldName="HRPlan_10"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <dxg:GridSummaryItem x:Name="HRExpected_10footer" ShowInGroupColumnFooter="HRExpected_10" FieldName="HRExpected_10"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="HRExpected_10"  FieldName="HRExpected_10"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <dxg:GridSummaryItem x:Name="Real_10footer" ShowInGroupColumnFooter="Real_10" FieldName="Real_10"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="Real_10"  FieldName="Real_10"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <!--PQU Stage-->
+                        <dxg:GridSummaryItem x:Name="HRPlan_11Footer" ShowInGroupColumnFooter="HRPlan_11" FieldName="HRPlan_11"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="HRPlan_11"  FieldName="HRPlan_11"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <dxg:GridSummaryItem x:Name="HRExpected_11footer" ShowInGroupColumnFooter="HRExpected_11" FieldName="HRExpected_11"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="HRExpected_11"  FieldName="HRExpected_11"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <dxg:GridSummaryItem x:Name="Real_11footer" ShowInGroupColumnFooter="Real_11" FieldName="Real_11"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="Real_11"  FieldName="Real_11"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <!--WAR Stage-->
+                        <dxg:GridSummaryItem x:Name="HRPlan_12Footer" ShowInGroupColumnFooter="HRPlan_12" FieldName="HRPlan_12"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="HRPlan_12"  FieldName="HRPlan_12"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <dxg:GridSummaryItem x:Name="HRExpected_12footer" ShowInGroupColumnFooter="HRExpected_12" FieldName="HRExpected_12"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="HRExpected_12"  FieldName="HRExpected_12"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <dxg:GridSummaryItem x:Name="Real_12footer" ShowInGroupColumnFooter="Real_12" FieldName="Real_12"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="Real_12"  FieldName="Real_12"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <!--ARC Stage-->
+                        <dxg:GridSummaryItem x:Name="HRPlan_21Footer" ShowInGroupColumnFooter="HRPlan_21" FieldName="HRPlan_21"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="HRPlan_21"  FieldName="HRPlan_21"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <dxg:GridSummaryItem x:Name="HRExpected_21footer" ShowInGroupColumnFooter="HRExpected_21" FieldName="HRExpected_21"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="HRExpected_21"  FieldName="HRExpected_21"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <dxg:GridSummaryItem x:Name="Real_21footer" ShowInGroupColumnFooter="Real_21" FieldName="Real_21"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="Real_21"  FieldName="Real_21"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <!--CUT Stage-->
+                        <dxg:GridSummaryItem x:Name="HRPlan_26Footer" ShowInGroupColumnFooter="HRPlan_26" FieldName="HRPlan_26"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="HRPlan_26"  FieldName="HRPlan_26"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <dxg:GridSummaryItem x:Name="HRExpected_26footer" ShowInGroupColumnFooter="HRExpected_26" FieldName="HRExpected_26"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="HRExpected_26"  FieldName="HRExpected_26"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <dxg:GridSummaryItem x:Name="Real_26footer" ShowInGroupColumnFooter="Real_26" FieldName="Real_26"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="Real_26"  FieldName="Real_26"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <!--TUB Stage-->
+                        <dxg:GridSummaryItem x:Name="HRPlan_27Footer" ShowInGroupColumnFooter="HRPlan_27" FieldName="HRPlan_27"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="HRPlan_27"  FieldName="HRPlan_27"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <dxg:GridSummaryItem x:Name="HRExpected_27footer" ShowInGroupColumnFooter="HRExpected_27" FieldName="HRExpected_27"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="HRExpected_27"  FieldName="HRExpected_27"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <dxg:GridSummaryItem x:Name="Real_27footer" ShowInGroupColumnFooter="Real_27" FieldName="Real_27"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="Real_27"  FieldName="Real_27"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <!--QAC Stage-->
+                        <dxg:GridSummaryItem x:Name="HRPlan_28Footer" ShowInGroupColumnFooter="HRPlan_28" FieldName="HRPlan_28"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="HRPlan_28"  FieldName="HRPlan_28"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <dxg:GridSummaryItem x:Name="HRExpected_28footer" ShowInGroupColumnFooter="HRExpected_28" FieldName="HRExpected_28"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="HRExpected_28"  FieldName="HRExpected_28"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <dxg:GridSummaryItem x:Name="Real_28footer" ShowInGroupColumnFooter="Real_28" FieldName="Real_28"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="Real_28"  FieldName="Real_28"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <!--CNQ Stage-->
+                        <dxg:GridSummaryItem x:Name="HRPlan_33Footer" ShowInGroupColumnFooter="HRPlan_33" FieldName="HRPlan_33"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="HRPlan_33"  FieldName="HRPlan_33"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <dxg:GridSummaryItem x:Name="HRExpected_33footer" ShowInGroupColumnFooter="HRExpected_33" FieldName="HRExpected_33"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="HRExpected_33"  FieldName="HRExpected_33"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <dxg:GridSummaryItem x:Name="Real_33footer" ShowInGroupColumnFooter="Real_33" FieldName="Real_33"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="Real_33"  FieldName="Real_33"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <!--WP3 Stage-->
+                        <dxg:GridSummaryItem x:Name="HRPlan_35Footer" ShowInGroupColumnFooter="HRPlan_35" FieldName="HRPlan_35"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="HRPlan_35"  FieldName="HRPlan_35"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <dxg:GridSummaryItem x:Name="HRExpected_35footer" ShowInGroupColumnFooter="HRExpected_35" FieldName="HRExpected_35"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="HRExpected_35"  FieldName="HRExpected_35"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <dxg:GridSummaryItem x:Name="Real_35footer" ShowInGroupColumnFooter="Real_35" FieldName="Real_35"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="Real_35"  FieldName="Real_35"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <!--WIR Stage-->
+                        <dxg:GridSummaryItem x:Name="HRPlan_37Footer" ShowInGroupColumnFooter="HRPlan_37" FieldName="HRPlan_37"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="HRPlan_37"  FieldName="HRPlan_37"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <dxg:GridSummaryItem x:Name="HRExpected_37footer" ShowInGroupColumnFooter="HRExpected_37" FieldName="HRExpected_37"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="HRExpected_37"  FieldName="HRExpected_37"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <dxg:GridSummaryItem x:Name="Real_37footer" ShowInGroupColumnFooter="Real_37" FieldName="Real_37"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+                        <dxg:GridSummaryItem x:Name="Real_37"  FieldName="Real_37"  SummaryType="Sum" DisplayFormat=" {0}" Visible="True" Alignment="Right"/>
+
+                        <!--end [GEOS2-4839][gulab lakade][05 10 2023]-->
+                    </dxg:GridControl.GroupSummary>
+                    <dxg:GridControl.View>
+                        <dxg:TableView x:Name="PlantOperationTableView"                                
+                                            GroupSummaryDisplayMode="AlignByColumns"
+                                           ShowGroupedColumns="True"
+                                           AllowGrouping="True"
+                                           ShowSearchPanelMode="Always"
+                                       NavigationStyle="Cell"
+                                       ShowFixedTotalSummary="False"
+                                       ShowTotalSummary="True"
+                                       ShowHorizontalLines="True"
+                                       AllowPerPixelScrolling="True"
+                                       ShowGroupPanel="False"
+                                       ShowColumnHeaders="True" 
+                                       ShowVerticalLines="True" 
+                                       ShowIndicator="True"
+                                       AutoWidth="True" 
+                                       HorizontalScrollbarVisibility="Auto" 
+                                       VerticalScrollbarVisibility="Auto"
+                                       HorizontalContentAlignment="Center"
+                                        FilterEditorShowOperandTypeIcon="True"
+                                       RowMinHeight="20"
+                                       AllowSorting="False" 
+                                       AllowScrollHeaders="False"
+                                       AllowEditing="True"
+                                       AllowColumnMoving="True"
+                                       AutoMoveRowFocus="False"
+                                       AllowScrollAnimation="True" 
+                                       AllowBestFit="True"
+                                       AllowResizing="True"
+                                       AllowColumnFiltering="True"
+                                       AllowConditionalFormattingMenu="True"
+                                       SearchPanelHorizontalAlignment="Stretch"
+                                      UseLegacyFilterEditor="True"
+                                           UIHelper:MultipleCellEditHelperSAMWorkPlanning.IsEnabled="True"
+                                       ShowGroupFooters="True"
+                                        SearchString="{Binding MyFilterString,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+                            <dxg:TableView.GroupRowStyle>
+                                <Style TargetType="{x:Type dxg:GroupRowControl}">
+                                    <Setter Property="Background" Value="DimGray" />
+                                </Style>
+                            </dxg:TableView.GroupRowStyle>
+                            <dxg:TableView.Resources>
+                                <DataTemplate x:Key="PlantOperationPrintHeaderTemplate">
+                                    <Grid Width="{Binding UsablePageWidth}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="50" />
+                                            <ColumnDefinition Width="130" />
+                                        </Grid.ColumnDefinitions>
+                                        <dxe:TextEdit Text=" " Width="{Binding UsablePageWidth}" Grid.ColumnSpan="3" IsPrintingMode="True" Background="#333E5E" HorizontalAlignment="Stretch" 
+                                                      VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" Height="50" />
+                                        <dxe:TextEdit Text="Plant Operational Planning Report" IsPrintingMode="True" HorizontalAlignment="Stretch" 
+                                                      VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" />
+                                        <Image Source="/Emdep.Geos.Modules.ERM/Assets/Images/GeosReportLogo.png" Height="50" Width="80"  dxp:ExportSettings.TargetType="Image" Grid.Column="2" />
+                                    </Grid>
+                                </DataTemplate>
+
+                                <DataTemplate x:Key="PlantOperationPrintFooterTemplate">
+                                    <dxe:TextEdit HorizontalContentAlignment="Center" 
+                                                  Width="{Binding Path=UsablePageWidth, Mode=OneWay}" 
+                                                  dxp:ExportSettings.TargetType="PageNumber" 
+                                                  dxp:PageNumberExportSettings.Kind="NumberOfTotal" 
+                                                  dxp:PageNumberExportSettings.Format="Page {0} of {1}"/>
+                                </DataTemplate>
+
+                            </dxg:TableView.Resources>
+                            <dxg:TableView.FormatConditions>
+                                <dxg:FormatCondition FieldName="IsChecked" ValueRule="Equal" Value1="True" ApplyToRow="True">
+                                    <dxg:FormatCondition.Format>
+                                        <dx:Format Foreground="Gray"/>
+                                    </dxg:FormatCondition.Format>
+                                </dxg:FormatCondition>
+
+                                <dxg:FormatCondition FieldName="Value" Expression="[Value] Is Not Null">
+                                    <dxg:FormatCondition.Format>
+                                        <dx:Format Background="#FF9ACCFF" Foreground="#FF00008B" FontWeight="Bold"/>
+                                    </dxg:FormatCondition.Format>
+                                </dxg:FormatCondition>
+
+                                <dxg:FormatCondition FieldName="Value" Expression="[Value] Is Null">
+                                    <dxg:FormatCondition.Format>
+                                        <dx:Format Background="#FF9ACCFF"/>
+                                    </dxg:FormatCondition.Format>
+                                </dxg:FormatCondition>
+
+                            </dxg:TableView.FormatConditions>
+                            <dxmvvm:Interaction.Behaviors>
+
+                                <!--<dxmvvm:EventToCommand EventName="ShowFilterPopup"
+                                               Command="{Binding CustomShowFilterPopupCommand}"
+                                               PassEventArgsToCommand="True"/>
+
+                                <dxmvvm:EventToCommand Command="{Binding TableViewLoadedCommand}"
+                                                       EventName="Loaded" PassEventArgsToCommand="True"/>
+                                <dxmvvm:EventToCommand Command="{Binding TableViewUnloadedCommand}"
+                                                       EventName="Unloaded" PassEventArgsToCommand="True" />-->
+
+                            </dxmvvm:Interaction.Behaviors>
+                            <!--start [GEOS2-4839][gulab lakade][05 10 2023]-->
+                            <dxg:TableView.GroupColumnSummaryItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Value}" HorizontalAlignment="Right"/>
+                                </DataTemplate>
+                            </dxg:TableView.GroupColumnSummaryItemTemplate>
+                            <dxg:TableView.GroupFooterSummaryContentStyle>
+                                <Style TargetType="dx:DataContentPresenter" >
+                                    <Setter Property="HorizontalAlignment" Value="Right"/>
+                                </Style>
+                            </dxg:TableView.GroupFooterSummaryContentStyle>
+                            <!--end [GEOS2-4839][gulab lakade][05 10 2023]-->
+                        </dxg:TableView>
+                    </dxg:GridControl.View>
+                </UIHelper:MyGridControl>
+
+            </Grid>
+
+        </Grid>
+    </DockPanel>
+</UserControl>

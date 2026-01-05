@@ -1,0 +1,903 @@
+﻿<UserControl x:Class="Emdep.Geos.Modules.Warehouse.Views.Dashboard1View"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.Warehouse.Views"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:WarehouseCommon ="clr-namespace:Emdep.Geos.Modules.Warehouse"
+             xmlns:Helper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+             xmlns:Converters="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+             xmlns:sysglb="clr-namespace:System.Globalization;assembly=mscorlib"
+             xmlns:dxga="http://schemas.devexpress.com/winfx/2008/xaml/gauges"
+             xmlns:system="clr-namespace:System;assembly=mscorlib"
+             xmlns:dxdo="http://schemas.devexpress.com/winfx/2008/xaml/docking"
+             xmlns:dxc="http://schemas.devexpress.com/winfx/2008/xaml/charts"
+             mc:Ignorable="d"
+             Style="{DynamicResource UserControlStyle}"
+             d:DesignHeight="300" d:DesignWidth="300">
+
+    <UserControl.Resources>
+        <system:Double x:Key="FontSize18">18</system:Double>
+
+        <DataTemplate x:Key="orderProcessingItemTemplate">
+            <TextBlock Foreground="{DynamicResource SolidColorBrushStyle}">
+                <Run Text="#"/>
+                <Run Text="{Binding DataContext.OfferCode,RelativeSource={RelativeSource AncestorType=dxdo:LayoutPanel}}"/>
+            </TextBlock>
+        </DataTemplate>
+
+        <DataTemplate x:Key="orderProcessingContentTemplate">
+            <Grid Background="{Binding DataContext.StatusColor,RelativeSource={RelativeSource AncestorType=dxdo:LayoutPanel}}" ShowGridLines="False">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="5" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="70*" />
+                    <RowDefinition Height="30" />
+                    <RowDefinition Height="30*" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Margin="5"
+                           HorizontalAlignment="Left" VerticalAlignment="Top" Style="{StaticResource TextBlock25Style}"
+                           Text="{Binding DataContext.Customer, RelativeSource={RelativeSource AncestorType=dxdo:LayoutPanel,Mode=FindAncestor},Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                           Foreground="{Binding StatusColor,Converter={Converters:ForegroundColorConverter}}"/>
+
+                <dxe:ImageEdit Margin="5" Grid.Column="2" Grid.Row="0" 
+                               HorizontalAlignment="Right" VerticalAlignment="Center" 
+                               Height="50" Width="50"
+                               IsReadOnly="True" ShowMenu="False"
+                               ToolTip="{Binding DataContext.UserName, RelativeSource={RelativeSource AncestorType=dxdo:LayoutPanel,Mode=FindAncestor},Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+                    <dxe:ImageEdit.Style>
+                        <Style TargetType="{x:Type dxe:ImageEdit}">
+                            <Setter Property="Source" Value="{Binding Path=AssignedToImageInBytes,Converter={Converters:ByteArrayToImageConverter}}"></Setter>
+                            <Style.Triggers>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding Path=AssignedToImageInBytes}" Value="{x:Null}"/>
+                                        <Condition Binding="{Binding Path=IdUserGender}" Value="2"/>
+                                    </MultiDataTrigger.Conditions>
+                                    <Setter Property="Source" Value="{DynamicResource MaleUserWhiteImageStyle}"/>
+                                </MultiDataTrigger>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding Path=AssignedToImageInBytes}" Value="{x:Null}"/>
+                                        <Condition Binding="{Binding Path=IdUserGender}" Value="1"/>
+                                    </MultiDataTrigger.Conditions>
+                                    <Setter Property="Source" Value="{DynamicResource FemaleUserWhiteImageStyle}"/>
+                                </MultiDataTrigger>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding Path=AssignedToImageInBytes}" Value="{x:Null}"/>
+                                        <Condition Binding="{Binding Path=IdUserGender}" Value="{x:Null}"/>
+                                    </MultiDataTrigger.Conditions>
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </MultiDataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </dxe:ImageEdit.Style>
+                </dxe:ImageEdit>
+
+                <Image Grid.Column="0" Width="24" Height="24"
+                       Grid.Row="1"
+                           Margin="5 0 0 5"
+                           HorizontalAlignment="Left"
+                        VerticalAlignment="Top">
+                    <Image.Style>
+                        <Style>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsCritical}" Value="1">
+                                    <Setter Property="Image.Source" Value="/Emdep.Geos.Modules.Warehouse;component/Assets/Images/Critical.png"/>
+                                    <Setter Property="Image.ToolTip" Value="IsCritical"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsCritical}" Value="0">
+                                    <Setter Property="Image.Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Image.Style>
+                </Image>
+
+                <TextBlock Grid.Column="0" Grid.Row="2"
+                           HorizontalAlignment="Left" 
+                           Margin="5 0 5 -10" TextAlignment="Left"
+                           Text="{Binding DataContext.POCode,RelativeSource={RelativeSource AncestorType=dxdo:LayoutPanel,Mode=FindAncestor},Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                           Foreground="{Binding StatusColor,Converter={Converters:ForegroundColorConverter}}"/>
+
+                <TextBlock HorizontalAlignment="Right" Grid.Column="2" Grid.Row="2" Margin="5 0 5 -10" TextAlignment="Right" 
+                           Text="{Binding DataContext.POReceivedDate,StringFormat=d,ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture} , RelativeSource={RelativeSource AncestorType=dxdo:LayoutPanel,Mode=FindAncestor},Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                           Foreground="{Binding StatusColor,Converter={Converters:ForegroundColorConverter}}"/>
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="orderPreparationItemTemplate">
+            <TextBlock Text="{Binding DataContext.OTCode,RelativeSource={RelativeSource AncestorType=dxdo:LayoutPanel}}"
+                       Foreground="{DynamicResource SolidColorBrushStyle}"/>
+        </DataTemplate>
+
+        <DataTemplate x:Key="orderPreparationContentTemplate">
+            <Grid Background="{Binding DataContext.StatusColor,RelativeSource={RelativeSource AncestorType=dxdo:LayoutPanel}}" ShowGridLines="False">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="5" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="60*" />
+                    <RowDefinition Height="40*" />
+                    <RowDefinition Height="10" />
+                    <RowDefinition Height="3" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Margin="5"
+                           HorizontalAlignment="Left" VerticalAlignment="Top" Style="{StaticResource TextBlock25Style}"
+                           Text="{Binding DataContext.Customer, RelativeSource={RelativeSource AncestorType=dxdo:LayoutPanel,Mode=FindAncestor},Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                           Foreground="{Binding StatusColor,Converter={Converters:ForegroundColorConverter}}"/>
+
+                <ItemsControl Margin="5 5 7 5" Grid.Column="2" Grid.Row="0" 
+                              HorizontalAlignment="Right" VerticalAlignment="Top"
+                              ItemsSource="{Binding DataContext.UserShortDetails,RelativeSource={RelativeSource AncestorType=dxdo:LayoutPanel,Mode=FindAncestor},Mode=TwoWay ,UpdateSourceTrigger=PropertyChanged}"
+                              Grid.RowSpan="2">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel IsItemsHost="True" Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <dxe:ImageEdit VerticalAlignment="Top" HorizontalAlignment="Right" Height="50" Width="50"
+                                           IsReadOnly="True" ShowMenu="False" Margin="5 0 0 0">
+                                <dxe:ImageEdit.Style>
+                                    <Style TargetType="{x:Type dxe:ImageEdit}">
+                                        <Setter Property="Source" Value="{Binding Path=UserImageInBytes,Converter={Converters:ByteArrayToImageConverter}}"/>
+                                        <Setter Property="ToolTip" Value="{Binding Path=UserName}"/>
+                                        <Style.Triggers>
+                                            <MultiDataTrigger>
+                                                <MultiDataTrigger.Conditions>
+                                                    <Condition Binding="{Binding Path=UserImageInBytes}" Value="{x:Null}"/>
+                                                    <Condition Binding="{Binding Path=IdUserGender}" Value="2"/>
+                                                </MultiDataTrigger.Conditions>
+                                                <Setter Property="Source" Value="{DynamicResource MaleUserWhiteImageStyle}"/>
+                                            </MultiDataTrigger>
+                                            <MultiDataTrigger>
+                                                <MultiDataTrigger.Conditions>
+                                                    <Condition Binding="{Binding Path=UserImageInBytes}" Value="{x:Null}"/>
+                                                    <Condition Binding="{Binding Path=IdUserGender}" Value="1"/>
+                                                </MultiDataTrigger.Conditions>
+                                                <Setter Property="Source" Value="{DynamicResource FemaleUserWhiteImageStyle}"/>
+                                            </MultiDataTrigger>
+                                            <MultiDataTrigger>
+                                                <MultiDataTrigger.Conditions>
+                                                    <Condition Binding="{Binding Path=AssignedToImageInBytes}" Value="{x:Null}"/>
+                                                    <Condition Binding="{Binding Path=IdUserGender}" Value="{x:Null}"/>
+                                                </MultiDataTrigger.Conditions>
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                            </MultiDataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </dxe:ImageEdit.Style>
+                            </dxe:ImageEdit>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <Grid Grid.Column="2" Grid.Row="1" HorizontalAlignment="Right" Margin="0 0 5 0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="5"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center" 
+                               Grid.Column="2"
+                               Text="{Binding DataContext.OTDeliveryDate,StringFormat=d,ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture} , RelativeSource={RelativeSource AncestorType=dxdo:LayoutPanel,Mode=FindAncestor},Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                               Foreground="{Binding StatusColor,Converter={Converters:ForegroundColorConverter}}"/>
+
+                    <dxe:ImageEdit Grid.Column="0"
+                                   VerticalAlignment="Bottom" HorizontalAlignment="Right" 
+                                   Height="30" Width="30"
+                                   IsReadOnly="True" ShowMenu="False"
+                                   ShowBorder="False">
+                        <dxe:ImageEdit.Style>
+                            <Style TargetType="{x:Type dxe:ImageEdit}">
+                                <Style.Triggers>
+
+                                    <DataTrigger Binding="{Binding CarriageMethod}" Value="{x:Null}">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+
+                                    <DataTrigger Binding="{Binding CarriageMethod.IdImage}" Value="1">
+                                        <Setter Property="Source" Value="{DynamicResource GroundCarriageMethodImageStyle}"/>
+                                        <Setter Property="ToolTip" Value="{Binding CarriageMethod.Value}"/>
+                                    </DataTrigger>
+
+                                    <DataTrigger Binding="{Binding CarriageMethod.IdImage}" Value="2">
+                                        <Setter Property="Source" Value="{DynamicResource SeaCarriageMethodImageStyle}"/>
+                                        <Setter Property="ToolTip" Value="{Binding CarriageMethod.Value}"/>
+                                    </DataTrigger>
+
+                                    <DataTrigger Binding="{Binding CarriageMethod.IdImage}" Value="3">
+                                        <Setter Property="Source" Value="{DynamicResource AirCarriageMethodImageStyle}"/>
+                                        <Setter Property="ToolTip" Value="{Binding CarriageMethod.Value}"/>
+                                    </DataTrigger>
+
+                                    <DataTrigger Binding="{Binding CarriageMethod.IdImage}" Value="0">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+
+                                </Style.Triggers>
+                            </Style>
+                        </dxe:ImageEdit.Style>
+                    </dxe:ImageEdit>
+                </Grid>
+
+                <Grid Grid.Column="0" Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="5"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0"
+                                Orientation="Horizontal"  
+                                HorizontalAlignment="Stretch" 
+                                VerticalAlignment="Stretch" Margin="5 0 5 5">
+
+                        <TextBlock Style="{StaticResource TextBlock25Style}"
+                                   HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                                   Text="{Binding DataContext.Progress, RelativeSource={RelativeSource AncestorType=dxdo:LayoutPanel,Mode=FindAncestor},Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                   Foreground="{Binding StatusColor,Converter={Converters:ForegroundColorConverter}}"/>
+
+                        <TextBlock Style="{StaticResource TextBlock14Style}"
+                                   HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                                   Text="%"
+                                   Foreground="{Binding StatusColor,Converter={Converters:ForegroundColorConverter}}"/>
+                    </StackPanel>
+
+                    <Image Grid.Column="2" Width="24" Height="24"
+                           Margin="0 0 0 5"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Bottom">
+                        <Image.Style>
+                            <Style>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsCritical}" Value="1">
+                                        <Setter Property="Image.Source" Value="/Emdep.Geos.Modules.Warehouse;component/Assets/Images/Critical.png"/>
+                                        <Setter Property="Image.ToolTip" Value="IsCritical"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IsCritical}" Value="0">
+                                        <Setter Property="Image.Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Image.Style>
+                    </Image>
+                </Grid>
+
+                <dxe:ProgressBarEdit Margin="5 0 5 0" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3"
+                                     Value="{Binding DataContext.Progress,RelativeSource={RelativeSource AncestorType=dxdo:LayoutPanel,Mode=FindAncestor},Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                     HorizontalAlignment="Stretch" VerticalAlignment="Center">
+                </dxe:ProgressBarEdit>
+            </Grid>
+        </DataTemplate>
+
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="100*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Label Content="{DynamicResource Dashboard1}" Style="{StaticResource LabelTitleStyle}" Grid.Row="0" Grid.Column="0"/>
+
+            <DockPanel Grid.Row="0" Grid.Column="1">
+                <Grid HorizontalAlignment="Right" Width="Auto" Height="45" >
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="45"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Warehouse combobox section -->
+                    <DockPanel Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Height="30" >
+                        <Image Style="{DynamicResource WarehouseImageStyle}" Width="24" Height="24" Margin="7,0,3,0" />
+                        <TextBlock Text="{DynamicResource Warehouse}"  FontWeight="Bold" Margin="5,2,5,0" VerticalAlignment="Bottom" />
+                    </DockPanel>
+
+                    <dxe:ComboBoxEdit Name="CbeWareHouse" Style="{DynamicResource ComboBoxEditStyle}" Grid.Column="1" Width="150" Height="30"
+                                      Margin="5,0,5,5" VerticalAlignment="Bottom" HorizontalAlignment="Right" IsTextEditable="False"
+                                      ItemsSource ="{Binding Source={x:Static WarehouseCommon:WarehouseCommon.Instance}, Path=WarehouseList ,UpdateSourceTrigger=PropertyChanged , Mode=TwoWay}"
+                                      SelectedItem="{Binding Source={x:Static WarehouseCommon:WarehouseCommon.Instance}, Path=Selectedwarehouse,UpdateSourceTrigger=PropertyChanged}"
+                                      DisplayMember="Name" ShowError="False" ShowErrorToolTip="False" >
+
+                        <dxmvvm:Interaction.Triggers>
+                            <dxmvvm:EventToCommand EventName="EditValueChanged" Command="{Binding CommandWarehouseEditValueChanged}" 
+                                                   CommandParameter="{Binding ElementName=CbeWareHouse,Path=SelectedItem}"/>
+                        </dxmvvm:Interaction.Triggers>
+                    </dxe:ComboBoxEdit>
+
+                    <!-- Refresh Button -->
+                    <Button Content=" " Grid.Row="0" Grid.Column="2" Height="40" Width="40" HorizontalAlignment="Right"  Command="{Binding RefreshButtonCommand}" CommandParameter="{Binding ElementName=WarehouseTableView}" Margin="0,0,5,5">
+                        <Button.ToolTip>
+                            <TextBlock Text="{DynamicResource ButtonRefresh}"/>
+                        </Button.ToolTip>
+                        <Button.ContentTemplate>
+                            <DataTemplate>
+                                <Image Style="{ DynamicResource WareHouseRefreshButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                            </DataTemplate>
+                        </Button.ContentTemplate>
+                    </Button>
+
+                </Grid>
+            </DockPanel>
+        </Grid>
+
+        <Grid Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="40*"/>
+                <ColumnDefinition Width="5"/>
+                <ColumnDefinition Width="60*"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="10*"/>
+                <RowDefinition Height="5"/>
+                <RowDefinition Height="90*"/>
+            </Grid.RowDefinitions>
+
+            <!--CurrentWeek-->
+
+            <Border Grid.Row="0" Grid.Column="0" Style="{DynamicResource BorderStyle}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <Viewbox StretchDirection="DownOnly">
+                    <TextBlock Text="{Binding CurrentWeek,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                               TextAlignment="Center" Style="{StaticResource TextBlock30Style}" 
+                               FontWeight="Bold">
+                    </TextBlock>
+                </Viewbox>
+            </Border>
+
+            <Grid Grid.Row="0" Grid.Column="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="50*"/>
+                    <ColumnDefinition Width="3"/>
+                    <ColumnDefinition Width="50*"/>
+                </Grid.ColumnDefinitions>
+
+                <!--Total Orders-->
+                <Border Style="{DynamicResource BorderStyle}" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                    <Viewbox StretchDirection="DownOnly">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <TextBlock Text="{DynamicResource TotalOrders}" Style="{StaticResource TextBlock30Style}"/>
+                            <TextBlock FontWeight="Bold" Style="{StaticResource TextBlock30Style}"> 
+                                    <Run Text=" ["/>
+                                    <Run Text="{Binding OrderPreparationDetailsList.Count,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}"/>
+                                    <Run Text="]"/>
+                            </TextBlock>
+                        </StackPanel>
+                    </Viewbox>
+                </Border>
+
+                <!--Inventory-->
+                <Border Style="{DynamicResource BorderStyle}" Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                    <Viewbox StretchDirection="DownOnly">
+                        <TextBlock Text="{DynamicResource Inventory}" Style="{StaticResource TextBlock30Style}" TextAlignment="Center" HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
+                    </Viewbox>
+                </Border>
+            </Grid>
+
+            <Grid Grid.Column="0" Grid.Row="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="60"/>
+                    <RowDefinition Height="3"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="50*"/>
+                    <ColumnDefinition Width="5"/>
+                    <ColumnDefinition Width="50*"/>
+                </Grid.ColumnDefinitions>
+
+                <!--ORDER PROCESSING-->
+                <Border Style="{DynamicResource BorderStyle}" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                    <Viewbox StretchDirection="DownOnly">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <TextBlock Text="{DynamicResource OrderProcessing}" Style="{StaticResource TextBlock25Style}"></TextBlock>
+                            <TextBlock FontWeight="Bold" Style="{StaticResource TextBlock25Style}">
+                            <Run Text=" ["/>
+                            <Run Text="{Binding DataContext.OrderProcessingList.Count,Mode=OneWay,RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                            <Run Text="]"/>
+                            </TextBlock>
+                        </StackPanel>
+                    </Viewbox>
+                </Border>
+
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Column="0" Grid.Row="2">
+                    <Border VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Style="{DynamicResource BorderStyle}">
+                        <dxdo:LayoutGroup Orientation="Vertical" ItemsSource="{Binding OrderProcessingList,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" 
+                                      ItemCaptionTemplate="{StaticResource orderProcessingItemTemplate}" ShowCloseButton="False"
+                                      ItemContentTemplate="{StaticResource orderProcessingContentTemplate}" VerticalAlignment="Stretch" ScrollViewer.VerticalScrollBarVisibility="Visible">
+                            <dxdo:LayoutGroup.ItemStyle>
+                                <Style TargetType="dxdo:LayoutPanel">
+                                    <Setter Property="ShowPinButton" Value="False"/>
+                                    <Setter Property="ShowCloseButton" Value="False"/>
+                                    <Setter Property="ItemHeight" Value="120"/>
+                                    <Setter Property="MaxHeight" Value="120"/>
+                                </Style>
+                            </dxdo:LayoutGroup.ItemStyle>
+                        </dxdo:LayoutGroup>
+                    </Border>
+                </ScrollViewer>
+
+                <!--ORDER PREPARATION-->
+                <Border Style="{DynamicResource BorderStyle}" Grid.Row="0" Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                    <Viewbox StretchDirection="DownOnly">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <TextBlock Text="{DynamicResource OrderPreparation}" Style="{StaticResource TextBlock25Style}"></TextBlock>
+                            <TextBlock FontWeight="Bold" Style="{StaticResource TextBlock25Style}"> 
+                            <Run Text=" ["/>
+                            <Run Text="{Binding DataContext.OrderPreparationList.Count,Mode=OneWay,RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                            <Run Text="]"/>
+                            </TextBlock>
+                        </StackPanel>
+                    </Viewbox>
+                </Border>
+
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Column="2" Grid.Row="2">
+                    <Border VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Style="{DynamicResource BorderStyle}">
+                        <dxdo:LayoutGroup Orientation="Vertical" ItemsSource="{Binding OrderPreparationList,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" 
+                                          ItemCaptionTemplate="{StaticResource orderPreparationItemTemplate}" 
+                                          ShowCloseButton="False"
+                                          ItemContentTemplate="{StaticResource orderPreparationContentTemplate}" 
+                                          VerticalAlignment="Stretch" 
+                                          ScrollViewer.VerticalScrollBarVisibility="Visible">
+                            <dxdo:LayoutGroup.ItemStyle>
+                                <Style TargetType="dxdo:LayoutPanel">
+                                    <Setter Property="ShowPinButton" Value="False"/>
+                                    <Setter Property="ShowCloseButton" Value="False"/>
+                                    <Setter Property="ItemHeight" Value="120"/>
+                                    <Setter Property="MaxHeight" Value="120"/>
+                                </Style>
+                            </dxdo:LayoutGroup.ItemStyle>
+                            <dxmvvm:Interaction.Behaviors>
+                                <dxmvvm:EventToCommand Command="{Binding SelectedItemChangedCommand}" 
+                                                       EventName="SelectedItemChanged" 
+                                                       PassEventArgsToCommand="True"/>
+                            </dxmvvm:Interaction.Behaviors>
+                        </dxdo:LayoutGroup>
+                    </Border>
+                </ScrollViewer>
+            </Grid>
+
+            <Grid Grid.Column="2" Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="50*"/>
+                    <ColumnDefinition Width="5"/>
+                    <ColumnDefinition Width="50*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="50*"/>
+                    <RowDefinition Height="5"/>
+                    <RowDefinition Height="50*"/>
+                </Grid.RowDefinitions>
+
+                <!--Total Orders Grid-->
+                <Grid Grid.Column="0" Grid.Row="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="50*"/>
+                        <RowDefinition Height="50*"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="50*"/>
+                        <ColumnDefinition Width="50*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!--Complaints-->
+                    <dxdo:LayoutGroup Grid.Row="0" Grid.Column="0" HorizontalAlignment="Stretch"
+                                      VerticalAlignment="Stretch" Padding="0">
+                        <dxdo:LayoutPanel Caption="{DynamicResource Complaints}" ShowCloseButton="False" ShowPinButton="False" 
+                                          Background="{Binding GeosAppSettingColorList[3].DefaultValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Margin="0" Padding="0">
+                            <dxdo:LayoutPanel.Appearance>
+                                <dxdo:Appearance>
+                                    <dxdo:Appearance.Normal>
+                                        <dxdo:AppearanceObject Foreground="{DynamicResource SolidColorBrushStyle}" FontSize="{StaticResource FontSize18}"
+                                                               FontWeight="Regular"/>
+                                    </dxdo:Appearance.Normal>
+                                </dxdo:Appearance>
+                            </dxdo:LayoutPanel.Appearance>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="60*"/>
+                                    <RowDefinition Height="3"/>
+                                    <RowDefinition Height="40*"/>
+                                    <RowDefinition Height="10"/>
+                                    <RowDefinition Height="3"/>
+                                </Grid.RowDefinitions>
+
+                                <Viewbox Grid.Row="0" Margin="5 0 0 0" StretchDirection="DownOnly" HorizontalAlignment="Left">
+                                    <TextBlock Text="{Binding ComplaintOffersCount,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                                               HorizontalAlignment="Left" VerticalAlignment="Center"
+                                               Foreground="{Binding GeosAppSettingColorList[3].DefaultValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,Converter={Converters:ForegroundColorConverter}}"
+                                               Style="{StaticResource TextBlock55Style}">
+                                    </TextBlock>
+                                </Viewbox>
+
+                                <Viewbox Grid.Row="2" Margin="5 0 0 0" StretchDirection="DownOnly" HorizontalAlignment="Left">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Style="{StaticResource TextBlock40Style}" Margin="5 0 0 0"
+                                                   Foreground="{Binding GeosAppSettingColorList[3].DefaultValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,Converter={Converters:ForegroundColorConverter}}"
+                                                   Text="{Binding ComplaintOffersAvgValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+
+                                        <TextBlock Style="{StaticResource TextBlock25Style}"
+                                                   Text="%" VerticalAlignment="Center" Margin="4 0 0 0"
+                                                   Foreground="{Binding GeosAppSettingColorList[3].DefaultValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,Converter={Converters:ForegroundColorConverter}}"/>
+                                    </StackPanel>
+                                </Viewbox>
+
+                                <dxe:ProgressBarEdit Margin="5 0 5 0" Grid.Row="3"
+                                                     Value="{Binding ComplaintOffersAvgValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                                                     HorizontalAlignment="Stretch" VerticalAlignment="Center">
+                                </dxe:ProgressBarEdit>
+                            </Grid>
+                        </dxdo:LayoutPanel>
+                    </dxdo:LayoutGroup>
+
+                    <!--Urgent-->
+                    <dxdo:LayoutGroup Grid.Row="0" Grid.Column="1" HorizontalAlignment="Stretch"
+                                       VerticalAlignment="Stretch">
+                        <dxdo:LayoutPanel Caption="{DynamicResource Urgent}" ShowCloseButton="False" ShowPinButton="False"
+                                          Background="{Binding GeosAppSettingColorList[0].DefaultValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+                            <dxdo:LayoutPanel.Appearance>
+                                <dxdo:Appearance>
+                                    <dxdo:Appearance.Normal>
+                                        <dxdo:AppearanceObject Foreground="{DynamicResource SolidColorBrushStyle}" FontSize="{StaticResource FontSize18}" 
+                                                               FontWeight="Regular"/>
+                                    </dxdo:Appearance.Normal>
+                                </dxdo:Appearance>
+                            </dxdo:LayoutPanel.Appearance>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="60*"/>
+                                    <RowDefinition Height="3"/>
+                                    <RowDefinition Height="40*"/>
+                                    <RowDefinition Height="10"/>
+                                    <RowDefinition Height="3"/>
+                                </Grid.RowDefinitions>
+
+                                <Viewbox Grid.Row="0" Margin="5 0 0 0" StretchDirection="DownOnly" HorizontalAlignment="Left">
+                                    <TextBlock Text="{Binding UrgentOffersCount,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                                               HorizontalAlignment="Left" VerticalAlignment="Center" 
+                                               Foreground="{Binding GeosAppSettingColorList[0].DefaultValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,Converter={Converters:ForegroundColorConverter}}"
+                                               Style="{StaticResource TextBlock55Style}">
+                                    </TextBlock>
+                                </Viewbox>
+
+                                <Viewbox Grid.Row="2" Margin="5 0 0 0" StretchDirection="DownOnly" HorizontalAlignment="Left">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Style="{StaticResource TextBlock40Style}" Margin="5 0 0 0"
+                                                   Foreground="{Binding GeosAppSettingColorList[0].DefaultValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,Converter={Converters:ForegroundColorConverter}}"
+                                                   Text="{Binding UrgentOffersAvgValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+
+                                        <TextBlock Style="{StaticResource TextBlock25Style}"
+                                                   Text="%" VerticalAlignment="Center" Margin="4 0 0 0"
+                                                   Foreground="{Binding GeosAppSettingColorList[0].DefaultValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,Converter={Converters:ForegroundColorConverter}}"/>
+                                    </StackPanel>
+                                </Viewbox>
+
+                                <dxe:ProgressBarEdit Margin="5 0 5 0" Grid.Row="3" Value="{Binding UrgentOffersAvgValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                                                     HorizontalAlignment="Stretch" VerticalAlignment="Center">
+                                </dxe:ProgressBarEdit>
+                            </Grid>
+                        </dxdo:LayoutPanel>
+                    </dxdo:LayoutGroup>
+
+                    <!--In next 7 days-->
+                    <dxdo:LayoutGroup Grid.Row="1" Grid.Column="0" HorizontalAlignment="Stretch"
+                                      VerticalAlignment="Stretch">
+                        <dxdo:LayoutPanel Caption="{DynamicResource InNext7Days}" ShowCloseButton="False" ShowPinButton="False"
+                                          Background="{Binding GeosAppSettingColorList[1].DefaultValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+                            <dxdo:LayoutPanel.Appearance>
+                                <dxdo:Appearance>
+                                    <dxdo:Appearance.Normal>
+                                        <dxdo:AppearanceObject Foreground="{DynamicResource SolidColorBrushStyle}" FontSize="{StaticResource FontSize18}"
+                                                               FontWeight="Regular"/>
+                                    </dxdo:Appearance.Normal>
+                                </dxdo:Appearance>
+                            </dxdo:LayoutPanel.Appearance>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="60*"/>
+                                    <RowDefinition Height="3"/>
+                                    <RowDefinition Height="40*"/>
+                                    <RowDefinition Height="10"/>
+                                    <RowDefinition Height="3"/>
+                                </Grid.RowDefinitions>
+
+                                <Viewbox Grid.Row="0" Margin="5 0 0 0" StretchDirection="DownOnly" HorizontalAlignment="Left">
+                                    <TextBlock Text="{Binding UpComingOffersCount,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                                               HorizontalAlignment="Left" VerticalAlignment="Center"
+                                               Foreground="{Binding GeosAppSettingColorList[1].DefaultValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,Converter={Converters:ForegroundColorConverter}}"
+                                               Style="{StaticResource TextBlock55Style}">
+                                    </TextBlock>
+                                </Viewbox>
+
+                                <Viewbox Grid.Row="2" Margin="5 0 0 0" StretchDirection="DownOnly" HorizontalAlignment="Left">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Style="{StaticResource TextBlock40Style}" Margin="5 0 0 0"
+                                                   Foreground="{Binding GeosAppSettingColorList[1].DefaultValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,Converter={Converters:ForegroundColorConverter}}"
+                                                   Text="{Binding UpcomingOffersAvgValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+
+                                        <TextBlock Style="{StaticResource TextBlock25Style}"
+                                                   Text="%" VerticalAlignment="Center" Margin="4 0 0 0"
+                                                   Foreground="{Binding GeosAppSettingColorList[1].DefaultValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,Converter={Converters:ForegroundColorConverter}}"/>
+                                    </StackPanel>
+                                </Viewbox>
+
+                                <dxe:ProgressBarEdit Margin="5 0 5 0" Grid.Row="3" Value="{Binding UpcomingOffersAvgValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                                                     HorizontalAlignment="Stretch" VerticalAlignment="Center">
+                                </dxe:ProgressBarEdit>
+                            </Grid>
+                        </dxdo:LayoutPanel>
+                    </dxdo:LayoutGroup>
+
+                    <!--After a week-->
+                    <dxdo:LayoutGroup Grid.Row="1" Grid.Column="1" HorizontalAlignment="Stretch"
+                                       VerticalAlignment="Stretch">
+                        <dxdo:LayoutPanel Caption="{DynamicResource AfterWeek}" ShowCloseButton="False" ShowPinButton="False"
+                                          Background="{Binding GeosAppSettingColorList[2].DefaultValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+                            <dxdo:LayoutPanel.Appearance>
+                                <dxdo:Appearance>
+                                    <dxdo:Appearance.Normal>
+                                        <dxdo:AppearanceObject Foreground="{DynamicResource SolidColorBrushStyle}" FontSize="{StaticResource FontSize18}"
+                                                               FontWeight="Regular"/>
+                                    </dxdo:Appearance.Normal>
+                                </dxdo:Appearance>
+                            </dxdo:LayoutPanel.Appearance>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="60*"/>
+                                    <RowDefinition Height="3"/>
+                                    <RowDefinition Height="40*"/>
+                                    <RowDefinition Height="10"/>
+                                    <RowDefinition Height="3"/>
+                                </Grid.RowDefinitions>
+
+                                <Viewbox Grid.Row="0" Margin="5 0 0 0" StretchDirection="DownOnly" HorizontalAlignment="Left">
+                                    <TextBlock Text="{Binding FutureOffersCount,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Left" VerticalAlignment="Center"
+                                           Foreground="{Binding GeosAppSettingColorList[2].DefaultValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,Converter={Converters:ForegroundColorConverter}}"
+                                           Style="{StaticResource TextBlock55Style}">
+                                    </TextBlock>
+                                </Viewbox>
+
+                                <Viewbox Grid.Row="2" Margin="5 0 0 0" StretchDirection="DownOnly" HorizontalAlignment="Left">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Style="{StaticResource TextBlock40Style}" Margin="5 0 0 0"
+                                                   Foreground="{Binding GeosAppSettingColorList[2].DefaultValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,Converter={Converters:ForegroundColorConverter}}"
+                                                   Text="{Binding FutureOffersAvgValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+
+                                        <TextBlock Style="{StaticResource TextBlock25Style}"
+                                                   Text="%" VerticalAlignment="Center" Margin="4 0 0 0"
+                                                   Foreground="{Binding GeosAppSettingColorList[2].DefaultValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,Converter={Converters:ForegroundColorConverter}}"/>
+                                    </StackPanel>
+                                </Viewbox>
+
+                                <dxe:ProgressBarEdit Margin="5 0 5 0" Grid.Row="3" Value="{Binding FutureOffersAvgValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                                                     HorizontalAlignment="Stretch" VerticalAlignment="Center">
+                                </dxe:ProgressBarEdit>
+                            </Grid>
+                        </dxdo:LayoutPanel>
+                    </dxdo:LayoutGroup>
+                </Grid>
+
+                <!--Inventory Grid-->
+                <Grid Grid.Column="2" Grid.Row="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="33*"/>
+                        <RowDefinition Height="33*"/>
+                        <RowDefinition Height="33*"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="50*"/>
+                        <ColumnDefinition Width="50*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!--Items out of stock-->
+                    <dxdo:LayoutGroup Grid.Row="0" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                        <dxdo:LayoutPanel Caption="{DynamicResource ItemsOutOfStock}" ShowCloseButton="False" ShowPinButton="False" >
+                            <dxdo:LayoutPanel.Appearance>
+                                <dxdo:Appearance>
+                                    <dxdo:Appearance.Normal>
+                                        <dxdo:AppearanceObject Foreground="{DynamicResource SolidColorBrushStyle}" FontSize="{StaticResource FontSize18}"
+                                                               FontWeight="Regular"/>
+                                    </dxdo:Appearance.Normal>
+                                </dxdo:Appearance>
+                            </dxdo:LayoutPanel.Appearance>
+
+                            <Viewbox Margin="5 0 0 0" StretchDirection="DownOnly" HorizontalAlignment="Left" VerticalAlignment="Top">
+                                <TextBlock Text="{Binding ItemsOutOfStockList.Count,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" 
+                                               HorizontalAlignment="Left" VerticalAlignment="Center"
+                                               FontSize="55">
+                                    <TextBlock.Style>
+                                        <Style TargetType="{x:Type TextBlock}">
+                                            <Setter Property="Foreground" Value="{Binding GeosAppSettingColorList[3].DefaultValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,Converter={Converters:ForegroundColorConverter}}"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding ItemsOutOfStockList.Count,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" Value="0">
+                                                    <Setter Property="Foreground" Value="{DynamicResource SolidColorBrushStyle}"></Setter>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Viewbox>
+                            <dxdo:LayoutPanel.Style>
+                                <Style TargetType="{x:Type dxdo:LayoutPanel}">
+                                    <Setter Property="Background" Value="{Binding GeosAppSettingColorList[3].DefaultValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ItemsOutOfStockList.Count,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" Value="0">
+                                            <Setter Property="Background" Value="Transparent"></Setter>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </dxdo:LayoutPanel.Style>
+                        </dxdo:LayoutPanel>
+                    </dxdo:LayoutGroup>
+
+                    <!--Items under min stock-->
+                    <dxdo:LayoutGroup Grid.Row="0" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                        <dxdo:LayoutPanel Caption="{DynamicResource ItemsUnderMinStock}" ShowCloseButton="False" ShowPinButton="False">
+                            <dxdo:LayoutPanel.Appearance>
+                                <dxdo:Appearance>
+                                    <dxdo:Appearance.Normal>
+                                        <dxdo:AppearanceObject Foreground="{DynamicResource SolidColorBrushStyle}" FontSize="{StaticResource FontSize18}"
+                                                               FontWeight="Regular"/>
+                                    </dxdo:Appearance.Normal>
+                                </dxdo:Appearance>
+                            </dxdo:LayoutPanel.Appearance>
+                            <Viewbox Margin="5 0 0 0" StretchDirection="DownOnly" HorizontalAlignment="Left" VerticalAlignment="Top">
+                                <TextBlock Text="{Binding ItemsUnderMinStockList.Count,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" 
+                                           VerticalAlignment="Center" 
+                                           FontSize="55">
+                                    <TextBlock.Style>
+                                        <Style TargetType="{x:Type TextBlock}">
+                                            <Setter Property="Foreground" Value="Black"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding ItemsUnderMinStockList.Count,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" Value="0">
+                                                    <Setter Property="Foreground" Value="{DynamicResource SolidColorBrushStyle}"></Setter>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Viewbox>
+                            <dxdo:LayoutPanel.Style>
+                                <Style TargetType="{x:Type dxdo:LayoutPanel}">
+                                    <Setter Property="Background" Value="Yellow"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ItemsUnderMinStockList.Count,Mode=OneWay,UpdateSourceTrigger=PropertyChanged}" Value="0">
+                                            <Setter Property="Background" Value="Transparent"></Setter>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </dxdo:LayoutPanel.Style>
+                        </dxdo:LayoutPanel>
+                    </dxdo:LayoutGroup>
+
+                    <!--Locations To Refill-->
+                    <dxdo:LayoutGroup Grid.Row="1" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                        <dxdo:LayoutPanel Caption="{DynamicResource LocationsToRefill}" ShowCloseButton="False" ShowPinButton="False">
+                            <dxdo:LayoutPanel.Appearance>
+                                <dxdo:Appearance>
+                                    <dxdo:Appearance.Normal>
+                                        <dxdo:AppearanceObject Foreground="{DynamicResource SolidColorBrushStyle}" FontSize="{StaticResource FontSize18}"
+                                                               FontWeight="Regular"/>
+                                    </dxdo:Appearance.Normal>
+                                </dxdo:Appearance>
+                            </dxdo:LayoutPanel.Appearance>
+
+                            <Viewbox  Grid.Column="0" Margin="5 0 0 0" StretchDirection="DownOnly" HorizontalAlignment="Left">
+                                <TextBlock  Text="{Binding TotalItemsToRefill.TotalItemsToRefill,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                                           HorizontalAlignment="Left" 
+                                           Style="{StaticResource TextBlock55Style}">
+                                </TextBlock>
+                            </Viewbox>
+                        </dxdo:LayoutPanel>
+                    </dxdo:LayoutGroup>
+
+                    <!--Locations Out of Stock-->
+                    <dxdo:LayoutGroup Grid.Row="1" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                        <dxdo:LayoutPanel Caption="{DynamicResource LocationsOutOfStock}" ShowCloseButton="False" ShowPinButton="False">
+                            <dxdo:LayoutPanel.Appearance>
+                                <dxdo:Appearance>
+                                    <dxdo:Appearance.Normal>
+                                        <dxdo:AppearanceObject Foreground="{DynamicResource SolidColorBrushStyle}" FontSize="{StaticResource FontSize18}"
+                                                               FontWeight="Regular"/>
+                                    </dxdo:Appearance.Normal>
+                                </dxdo:Appearance>
+                            </dxdo:LayoutPanel.Appearance>
+                            <Viewbox Margin="5 0 0 0" StretchDirection="DownOnly" HorizontalAlignment="Left">
+                                <TextBlock Text="{Binding CountOfRefillWithNoStock,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                                           HorizontalAlignment="Left"
+                                           FontSize="55">
+                                    <TextBlock.Style>
+                                        <Style TargetType="{x:Type TextBlock}">
+                                            <Setter Property="Foreground" Value="{Binding GeosAppSettingColorList[3].DefaultValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,Converter={Converters:ForegroundColorConverter}}"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding CountOfRefillWithNoStock,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Value="0">
+                                                    <Setter Property="Foreground" Value="{DynamicResource SolidColorBrushStyle}"></Setter>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Viewbox>
+                            <dxdo:LayoutPanel.Style>
+                                <Style TargetType="{x:Type dxdo:LayoutPanel}">
+                                    <Setter Property="Background" Value="{Binding GeosAppSettingColorList[3].DefaultValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding CountOfRefillWithNoStock,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Value="0">
+                                            <Setter Property="Background" Value="Transparent"></Setter>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </dxdo:LayoutPanel.Style>
+                        </dxdo:LayoutPanel>
+                    </dxdo:LayoutGroup>
+
+                    <!--Items To Put-Away-->
+                    <dxdo:LayoutGroup Grid.Row="2" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                        <dxdo:LayoutPanel Caption="{DynamicResource ItemsToPutAway}" ShowCloseButton="False" ShowPinButton="False">
+                            <dxdo:LayoutPanel.Appearance>
+                                <dxdo:Appearance>
+                                    <dxdo:Appearance.Normal>
+                                        <dxdo:AppearanceObject Foreground="{DynamicResource SolidColorBrushStyle}" FontSize="{StaticResource FontSize18}"
+                                                               FontWeight="Regular"/>
+                                    </dxdo:Appearance.Normal>
+                                </dxdo:Appearance>
+                            </dxdo:LayoutPanel.Appearance>
+
+                            <Viewbox StretchDirection="DownOnly" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5 0 0 0">
+                                <TextBlock Text="{Binding TotalItemsToPutAway.Count,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                                           HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5 0 0 0"
+                                           Style="{StaticResource TextBlock55Style}">
+                                </TextBlock>
+                            </Viewbox>
+
+                        </dxdo:LayoutPanel>
+                    </dxdo:LayoutGroup>
+                </Grid>
+
+                <Border Grid.Row="2" Grid.Column="0" Style="{DynamicResource BorderStyle}">
+                    <dxc:ChartControl x:Name="Chart" BorderThickness="0" 
+                                      VerticalAlignment="Stretch"
+                                      HorizontalAlignment="Stretch"
+                                      VerticalContentAlignment="Stretch"
+                                      HorizontalContentAlignment="Stretch"
+                                      CrosshairEnabled="True"
+                                      ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                      DataSource="{Binding DataTableTotalOrdersGraph, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                        <dxc:ChartControl.Legend>
+                            <dxc:Legend HorizontalPosition="Center" VerticalPosition="TopOutside" Orientation="Horizontal"/>
+                        </dxc:ChartControl.Legend>
+                        <dxmvvm:Interaction.Triggers>
+                            <dxmvvm:EventToCommand EventName="Loaded" Command="{Binding ChartLoadCommand}" CommandParameter="{Binding ElementName=Chart}" />
+                        </dxmvvm:Interaction.Triggers>
+                    </dxc:ChartControl>
+                </Border>
+            </Grid>
+        </Grid>
+    </Grid>
+</UserControl>

@@ -1,0 +1,164 @@
+﻿<UserControl x:Class="Emdep.Geos.Modules.Epc.Views.WatcherView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.Epc.Views"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:dxp="http://schemas.devexpress.com/winfx/2008/xaml/printing"
+             xmlns:viewModel="clr-namespace:Emdep.Geos.Modules.Epc.ViewModels"
+             xmlns:UIConverter="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+             xmlns:dxgt="clr-namespace:DevExpress.Xpf.Grid.Themes;assembly=DevExpress.Xpf.Grid.v19.2"
+              
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="1200">
+    
+    <UserControl.DataContext>
+        <viewModel:WatcherViewModel />
+    </UserControl.DataContext>
+    
+    <UserControl.Resources>
+                <ResourceDictionary Source="/Emdep.Geos.Modules.Epc;component/Resources/EpcCommonResource.xaml" />
+    </UserControl.Resources>
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        <Label Style="{StaticResource LabelStyle}" Content="Watcher" Margin="0" Padding="5" Grid.Row="0" Grid.Column="0" />
+        <Button HorizontalAlignment="Right" Grid.Column="1" Grid.Row="0" Height="40" Width="40" Margin="0,0,0,5" Command="{Binding PrintButtonCommand}" CommandParameter="{Binding ElementName=watcherTable}">
+            <Button.ContentTemplate>
+                <DataTemplate>
+                    <Image Style="{DynamicResource PrinterButtonImageStyle}" Grid.Column="0" Height="24" Width="24" Margin="-10" />
+                </DataTemplate>
+            </Button.ContentTemplate>
+        </Button>
+        <dxg:GridControl ItemsSource="{Binding TaskWatcherList}" Margin="0" Padding="0" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
+            <dxg:GridControl.Columns>
+                <!--<dxg:GridColumn FieldName="Project.Product.ProductName" Header="Product Name" />-->
+                <dxg:GridColumn FieldName="Project.ProjectCode" Header="Project Code" VisibleIndex="0" FixedWidth="True" Width="90">
+                    <dxg:GridColumn.DisplayTemplate>
+                        <ControlTemplate>
+                            <TextBlock Margin="5,0,0,0" VerticalAlignment="Center">
+                                            <Hyperlink TargetName="_blank" Style="{DynamicResource hyperlinkGridStyle}"
+                                                       Command="{Binding View.DataContext.HyperlinkToProjectCodeCommand}" CommandParameter="{Binding Data.Project}">
+                                                <TextBlock x:Name="PART_Editor" Text="{Binding DataContext.Project.ProjectCode}" />
+                                             </Hyperlink>
+                                         </TextBlock>
+                        </ControlTemplate>
+                    </dxg:GridColumn.DisplayTemplate>
+                </dxg:GridColumn>
+                <dxg:GridColumn FieldName="Project.ProjectName" Header="Project Name" VisibleIndex="1" FixedWidth="False" Width="*" />
+                <!--<dxg:GridColumn FieldName="Owner.FullName"     Header="Project Owner" VisibleIndex="2" FixedWidth="True" Width="120"/>-->
+                <dxg:GridColumn FieldName="Project.Customer.CustomerName" Header="Customer" VisibleIndex="2" FixedWidth="True" Width="150" />
+                <dxg:GridColumn FieldName="ProductRoadmap.LinkedTo" Header="Source" VisibleIndex="3" FixedWidth="True" Width="100" />
+                <dxg:GridColumn FieldName="TaskTitle" Header="Task Name" VisibleIndex="4" FixedWidth="False" Width="*" />
+                <!--<dxg:GridColumn FieldName="TaskType.Name"  Header="Task Type" />-->
+                <dxg:GridColumn FieldName="FullName" DisplayMemberBinding="{Binding Path=TaskUsers[0].User.FullName}" Header="Resources" VisibleIndex="5" FixedWidth="True" Width="120" />
+                <dxg:GridColumn FieldName="TaskPriority.Value" Header="Priority" DisplayTemplate="{StaticResource TaskPriorityColumnDisplayTemplate}" VisibleIndex="6" FixedWidth="True" Width="60" PrintCellStyle="{StaticResource ImageColumnPrintingStyle}" />
+
+                <dxg:GridColumn FieldName="PlannedHours" Header="Expected Hours" VisibleIndex="7" FixedWidth="True" Width="70">
+                    <dxg:GridColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Path=Data.PlannedHours,Converter={StaticResource TimeConverter}}" Margin="2" Padding="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+                        </DataTemplate>
+                    </dxg:GridColumn.CellTemplate>
+                    <dxg:GridColumn.PrintCellStyle>
+                        <Style TargetType="dxe:TextEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                            <Style.Setters>
+                                <Setter Property="dxp:ExportSettings.TargetType" Value="Panel" />
+                                <Setter Property="DisplayTemplate">
+                                    <Setter.Value>
+                                        <ControlTemplate>
+                                            <dxe:TextEdit Text="{Binding Path=RowData.Row.PlannedHours,Converter={ StaticResource TimeConverter}}" HorizontalAlignment="Center" Margin="4" IsPrintingMode="True" />
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style.Setters>
+                        </Style>
+                    </dxg:GridColumn.PrintCellStyle>
+                </dxg:GridColumn>
+                <dxg:GridColumn FieldName="WorkedHours" Header="Current Hours" VisibleIndex="8" FixedWidth="True" Width="70">
+                    <dxg:GridColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Path=Data.WorkedHours ,Converter={StaticResource TimeConverter}}" Margin="2" Padding="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+                        </DataTemplate>
+                    </dxg:GridColumn.CellTemplate>
+                    <dxg:GridColumn.PrintCellStyle>
+                        <Style TargetType="dxe:TextEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                        <Style.Setters>
+                            <Setter Property="dxp:ExportSettings.TargetType" Value="Panel" />
+                            <Setter Property="DisplayTemplate">
+                                <Setter.Value>
+                                    <ControlTemplate>
+                                        <dxe:TextEdit Text="{Binding Path=RowData.Row.WorkedHours,Converter={ StaticResource TimeConverter}}" HorizontalAlignment="Center" Margin="4" IsPrintingMode="True" />
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style.Setters>
+                    </Style>
+                    </dxg:GridColumn.PrintCellStyle>
+                </dxg:GridColumn>
+                <dxg:GridColumn FieldName="DueDate" Header="Due Date" VisibleIndex="9" FixedWidth="True" Width="80" />
+                <dxg:GridColumn FieldName="Progress" VisibleIndex="10" FixedWidth="True" Width="70" BestFitMode="Smart">
+                    <dxg:GridColumn.EditSettings>
+                        <dxe:ProgressBarEditSettings Maximum="100" Minimum="0" ContentDisplayMode="Value" DisplayFormat="{}{0}%" />
+                    </dxg:GridColumn.EditSettings>
+                </dxg:GridColumn>
+            </dxg:GridControl.Columns>
+            <dxg:GridControl.View>
+                <dxg:TableView x:Name="watcherTable" ShowIndicator="False" 
+                               ShowSearchPanelMode="Always" 
+                               ShowSearchPanelCloseButton="True" 
+                               ShowSearchPanelFindButton="True"
+                               AllowSorting="True" AllowColumnFiltering="True"
+                               AllowEditing="False" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" AutoWidth="True"
+                               ShowGroupPanel="False" AllowBestFit="True" NavigationStyle="Row">
+                    <dxg:TableView.Resources>
+                        <DataTemplate x:Key="WatcherViewCustomPrintHeaderTemplate">
+                            <Grid Width="{Binding UsablePageWidth}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="50" />
+                                    <ColumnDefinition Width="130" />
+                                </Grid.ColumnDefinitions>
+                                <dxe:TextEdit Text=" " Width="{Binding UsablePageWidth}" Grid.ColumnSpan="3" IsPrintingMode="True" Background="#333E5E" HorizontalAlignment="Stretch" 
+                                              VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" FontWeight="Bold" FontSize="20" Height="50" />
+
+                                <dxe:TextEdit Text="Watcher Report" IsPrintingMode="True" HorizontalAlignment="Stretch" 
+                                              VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" FontWeight="Bold" FontSize="20" />
+                                <Image Source="/Emdep.Geos.Modules.Epc;component/Images/GeosReportLogo.png" Height="50" Width="80" dxp:ExportSettings.TargetType="Image" Grid.Column="2" />
+                            </Grid>
+                        </DataTemplate>
+                        <DataTemplate x:Key="WatcherViewCustomPrintFooterTemplate">
+                            <dxe:TextEdit HorizontalContentAlignment="Center" 
+                                           Width="{Binding Path=UsablePageWidth, Mode=OneWay}" 
+                                           dxp:ExportSettings.TargetType="PageNumber" 
+                                           dxp:PageNumberExportSettings.Kind="NumberOfTotal" 
+                                           dxp:PageNumberExportSettings.Format="Page {0} of {1}">
+                            </dxe:TextEdit>
+                        </DataTemplate>
+                    </dxg:TableView.Resources>
+
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="RowDoubleClick">
+                            <behaviors:InvokeDelegateCommandAction Command="{Binding GridDoubleClickCommand }" CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=InvokeParameter}" />
+                        </i:EventTrigger>
+
+                    </i:Interaction.Triggers>
+                </dxg:TableView>
+            </dxg:GridControl.View>
+        </dxg:GridControl>
+    </Grid>
+
+</UserControl>

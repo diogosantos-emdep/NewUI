@@ -1,0 +1,38 @@
+﻿<dxwui:WinUIDialogWindow x:Class="Emdep.Geos.Modules.Warehouse.Views.InventoryWizzardView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.Warehouse.Views"
+             mc:Ignorable="d"
+             xmlns:dxwuin="http://schemas.devexpress.com/winfx/2008/xaml/windowsui/navigation" 
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"             
+             xmlns:behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"            
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+             TitleStyle="{DynamicResource WinUIDialogWindowTitleStyle}"
+             Title="{DynamicResource InventoryViewHeader }"
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+           >
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="PreviewTextInput">
+            <behaviors:InvokeDelegateCommandAction Command="{Binding CommandScanBarcode}" CommandParameter="{Binding Path=InvokeParameter, RelativeSource={RelativeSource Self}}"/>
+        </i:EventTrigger>
+        <i:EventTrigger EventName="Loaded">
+            <behaviors:InvokeDelegateCommandAction Command="{Binding CommandOnLoaded}" CommandParameter="{Binding Path=InvokeParameter, RelativeSource={RelativeSource Self}}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+    <dxmvvm:Interaction.Behaviors>
+        <dxwuin:FrameNavigationService Frame="{Binding ElementName=NavigationRoot}"/>
+    </dxmvvm:Interaction.Behaviors>
+
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape" Command="{Binding CommandCancelButton}" />
+    </dxwui:WinUIDialogWindow.InputBindings>
+
+
+    <Grid Height="{Binding WindowHeight, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+              Width="{Binding WindowWidth, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+        <dxwui:NavigationFrame Name="NavigationRoot" AnimationType="SlideHorizontal" BackNavigationMode="PreviousScreen" />
+    </Grid>
+
+</dxwui:WinUIDialogWindow>

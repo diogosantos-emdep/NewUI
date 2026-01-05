@@ -1,0 +1,24 @@
+Drop procedure if exists sites_GetLoginUserSiteDetails_V2680;
+delimiter $$
+CREATE  PROCEDURE `sites_GetLoginUserSiteDetails_V2680`(
+      IN _IdCompany smallint(5) UNSIGNED)
+ BEGIN
+   -- call sites_GetLoginUserSiteDetails_V2680("18");
+ --  [Pallavi.Kale][27/11/2025] [GEOS2-1000]
+
+         SELECT s.IdSite,
+                s.Name,
+                s.IdCountry,
+                s.ShortName,
+                cou.name AS countryName,
+                cou.IdZone,
+                zones.Name AS zoneName,
+                cou.iso As CountryIso
+           FROM sites s
+                INNER JOIN countries cou ON s.IdCountry = cou.idCountry
+                INNER JOIN zones ON zones.IdZone = cou.IdZone
+          WHERE s.IdSite = _IdCompany;
+          
+END $$
+
+delimiter ;

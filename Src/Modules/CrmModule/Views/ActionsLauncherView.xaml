@@ -1,0 +1,493 @@
+﻿<dxwui:WinUIDialogWindow  x:Class="Emdep.Geos.Modules.Crm.Views.ActionsLauncherView"
+	                        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	                        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	                        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	                        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	                        xmlns:local="clr-namespace:Emdep.Geos.Modules.Crm.Views"
+	                        xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+	                        xmlns:dxdo="http://schemas.devexpress.com/winfx/2008/xaml/docking"
+	                        xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+	                        xmlns:dxn="http://schemas.devexpress.com/winfx/2008/xaml/navbar"
+	                        xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+	                        xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"
+	                        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+	                        xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+	                        xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+	                        xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+	                        xmlns:ViewModel="clr-namespace:Emdep.Geos.Modules.Crm.ViewModels"
+	                        xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+	                        xmlns:dxp="http://schemas.devexpress.com/winfx/2008/xaml/printing"
+	                        xmlns:dxnav="http://schemas.devexpress.com/winfx/2008/xaml/navigation"
+	                        xmlns:dxci="http://schemas.devexpress.com/winfx/2008/xaml/core/internal"
+	                        xmlns:dxgt="http://schemas.devexpress.com/winfx/2008/xaml/grid/themekeys"
+	                        xmlns:UIConverter="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+	                        xmlns:Converters="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+	                        xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+	                        xmlns:Validation ="clr-namespace:Emdep.Geos.UI.Validations;assembly=Emdep.Geos.UI.Validations"
+                            mc:Ignorable="d" d:DesignHeight="500" d:DesignWidth="900" >
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape"  Command="{Binding CancelButtonCommand}"/>
+    </dxwui:WinUIDialogWindow.InputBindings>
+    <Grid MaxHeight="670" MinHeight="650">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="70"/>
+            <RowDefinition Height="10"/>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="10"/>
+            <RowDefinition Height="50" />
+        </Grid.RowDefinitions>
+        <Label Content="{DynamicResource ActionsLauncher}" Style="{StaticResource LabelTitleStyle}" Margin="20,0,0,0" Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Center" />
+        <Grid Grid.Row="2" HorizontalAlignment="center" VerticalAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto" >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="10"/>
+                <ColumnDefinition Width="300"/>
+                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="350"/>
+                <ColumnDefinition Width="10"/>
+                <ColumnDefinition Width="350"/>
+                <ColumnDefinition Width="10"/>
+            </Grid.ColumnDefinitions>
+            <Grid Grid.Column="1" HorizontalAlignment="Stretch" Margin="5,5,5,5" VerticalAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="30"/>
+                    <RowDefinition Height="10"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="30"/>
+                    <RowDefinition Height="10"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="30"/>
+                    <RowDefinition Height="10"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="30"/>
+                    <RowDefinition Height="10"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="30"/>
+                    <RowDefinition Height="10"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="30"/>
+					<RowDefinition Height="10"/>
+					<RowDefinition Height="25"/>
+					<RowDefinition Height="30"/>
+                    <RowDefinition Height="10"/><!--chitra.girigosavi GEOS2-7242 01/04/2025-->
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="30"/>
+                </Grid.RowDefinitions>
+                <!--Subject-->
+                <Label HorizontalAlignment="Left" Content="{DynamicResource ALSubject}" Grid.Row="0"/>
+                <dxe:TextEdit Grid.Row="1" Height="30" HorizontalAlignment="Stretch" VerticalAlignment="Center" Text="{Binding Subject}">
+                    <Binding Path="Subject" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                        <Binding.ValidationRules>
+                            <Validation:ActionValidation FieldName="Subject" ValidationStep="UpdatedValue" />
+                        </Binding.ValidationRules>
+                    </Binding>
+                </dxe:TextEdit>
+                <!--Region-->
+                <Label HorizontalAlignment="Left" Content="{DynamicResource ALRegion}" Grid.Row="3"/>
+                <dxe:ComboBoxEdit Name="CbeRegion" Style="{DynamicResource ComboBoxEditStyle}" DisplayMember="RegionName" IsTextEditable="False" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                                  Grid.Row="4" VerticalContentAlignment="Center" ItemsSource="{Binding RegionList,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+                    <dxe:ComboBoxEdit.EditValue>
+                        <Binding Path="SelectedRegion" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay"/>
+                    </dxe:ComboBoxEdit.EditValue>
+                    <dxe:ComboBoxEdit.StyleSettings>
+                        <dxe:CheckedComboBoxStyleSettings />
+                    </dxe:ComboBoxEdit.StyleSettings>
+                    <dxmvvm:Interaction.Triggers>
+                        <dxmvvm:EventToCommand EventName="PopupClosed" Command="{Binding ChangeRegionCommand}" PassEventArgsToCommand="True"/>
+                    </dxmvvm:Interaction.Triggers>
+                </dxe:ComboBoxEdit>
+                <!--Country-->
+                <Label HorizontalAlignment="Left" Content="{DynamicResource ALCountry}" Grid.Row="6"/>
+                <dxe:ComboBoxEdit Grid.Row="7"  Name="CbeCountry" Style="{DynamicResource ComboBoxEditStyle}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                   IsTextEditable="False" DisplayMember="Name" ItemsSource="{Binding DataContext.CountryList, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow},Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+                    <dxe:ComboBoxEdit.EditValue>
+                        <Binding Path="SelectedCountry" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay"/>
+                    </dxe:ComboBoxEdit.EditValue>
+                    <dxe:ComboBoxEdit.StyleSettings>
+                        <dxe:CheckedComboBoxStyleSettings />
+                    </dxe:ComboBoxEdit.StyleSettings>
+                    <dxmvvm:Interaction.Triggers>
+                        <dxmvvm:EventToCommand EventName="PopupClosed" Command="{Binding ChangeCountryCommand}" PassEventArgsToCommand="True"/>
+                    </dxmvvm:Interaction.Triggers>
+                </dxe:ComboBoxEdit>
+				<!--Source [GEOS2-6446][06.11.2024][rdixit]-->
+				<Label HorizontalAlignment="Left" Content="{DynamicResource ALSource}" Grid.Row="9"/>
+				<dxe:ComboBoxEdit Grid.Row="10"  Name="CbeSource" Style="{DynamicResource ComboBoxEditStyle}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                   IsTextEditable="False" DisplayMember="Value" ValueMember="IdLookupValue"
+								  ItemsSource="{Binding DataContext.SourceList, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow},Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+					<dxe:ComboBoxEdit.EditValue>
+						<Binding Path="SelectedSource" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay"/>
+					</dxe:ComboBoxEdit.EditValue>
+					
+					<dxe:ComboBoxEdit.ItemTemplate>
+						<DataTemplate>
+							<DockPanel>
+								<Rectangle Width="15" Height="15" Margin="3" Fill="{Binding HtmlColor}" />
+								<TextBlock Text="{Binding Value}" Margin="5,0,0,0" Padding="3" />
+							</DockPanel>
+						</DataTemplate>
+					</dxe:ComboBoxEdit.ItemTemplate>
+					<dxe:ComboBoxEdit.StyleSettings>
+						<dxe:CheckedComboBoxStyleSettings />
+					</dxe:ComboBoxEdit.StyleSettings>
+					<dxmvvm:Interaction.Triggers>
+						<dxmvvm:EventToCommand EventName="PopupClosed" Command="{Binding ChangeSourceCommand}" PassEventArgsToCommand="True"/>
+					</dxmvvm:Interaction.Triggers>
+				</dxe:ComboBoxEdit>
+
+                <!--Tag-->
+                <Label HorizontalAlignment="Left" Content="{DynamicResource ALTag}" Grid.Row="12"/>
+                <!--<dxe:TextEdit Grid.Row="10" HorizontalAlignment="Stretch" VerticalAlignment="Center" Height="30"
+                 Text="{Binding DataContext.Tag, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow},Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>-->
+                <dxe:ComboBoxEdit Height="30" Grid.Row="13"                                                            
+                                  AllowDefaultButton="False"                                                                                           
+                                  ItemsSource="{Binding DataContext.FilteredTags,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow, Mode=FindAncestor}, UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"                                                            
+                                  AutoComplete="False"                                                             
+                                  IsTextEditable="True"                                                           
+                                  ImmediatePopup="True" MaxLength="20"                                                            
+                                  HorizontalAlignment="Stretch"                                                             
+                                  VerticalAlignment="Top"                                                             
+                                  Style="{DynamicResource ComboBoxEditStyle}"                                                            
+                                  EditValue="{Binding DataContext.Tag,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow, Mode=FindAncestor},ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+                    <dxe:ComboBoxEdit.PopupContentTemplate>
+                        <ControlTemplate>
+                            <dxg:GridControl Name="PART_GridControl" AutoGenerateColumns="None" EnableSmartColumnsGeneration="False" Height="Auto" 
+                                             ItemsSource="{Binding DataContext.FilteredTags,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow, Mode=FindAncestor}, UpdateSourceTrigger=PropertyChanged}"
+                                             SelectedItem="{Binding DataContext.SelectedTag,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow, Mode=FindAncestor}, UpdateSourceTrigger=PropertyChanged}" >
+                                <dxg:GridControl.Columns>
+                                    <dxg:GridColumn FieldName="Name" Width="300" ReadOnly="True" FilterPopupMode="CheckedList" />
+                                </dxg:GridControl.Columns>
+                                <dxg:GridControl.View>
+                                    <dxg:TableView AutoWidth="True"                                                                                   
+                                                   ShowColumnHeaders="False"                                                                                   
+                                                   ShowIndicator="False"                                                                                                                                      
+                                                   ShowGroupPanel="False"                                                                                   
+                                                   ShowSearchPanelMode="Never"                                                                                   
+                                                   ShowHorizontalLines="False"                                                   
+                                                   ShowVerticalLines="False"                                                                                       
+                                                   ScrollViewer.HorizontalScrollBarVisibility="Hidden"                                                                                   
+                                                   ScrollViewer.VerticalScrollBarVisibility="Visible"                                                                                   
+                                                   SearchPanelHorizontalAlignment="Stretch"                                                                                   
+                                                   ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly" />
+                                </dxg:GridControl.View>
+                            </dxg:GridControl>
+                        </ControlTemplate>
+                    </dxe:ComboBoxEdit.PopupContentTemplate>
+                    <dxmvvm:Interaction.Behaviors>
+                        <dxmvvm:EventToCommand EventName="EditValueChanging" Command="{Binding DataContext.OnTextEditValueChangingCommand,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" PassEventArgsToCommand="True" />
+                    </dxmvvm:Interaction.Behaviors>
+                </dxe:ComboBoxEdit>
+
+                <!--DueDate-->
+                <Label HorizontalAlignment="Left" Content="{DynamicResource ALDueDate}" Grid.Row="15"/>
+                <dxe:DateEdit Grid.Row="16" VerticalAlignment="Top" Height="30" InvalidValueBehavior="AllowLeaveEditor" MaskUseAsDisplayFormat="True" MinValue="01/01/1990" HorizontalContentAlignment="Right"
+                              Mask="{Binding CultureInfo.CurrentCulture.DateTimeFormat.YearMonthPattern}" IsTextEditable="False" ShowClearButton="False" HorizontalAlignment="Stretch">
+                    <dxe:DateEdit.EditValue>
+                        <Binding Path="DataContext.DueDate" RelativeSource="{RelativeSource AncestorType=dxwui:WinUIDialogWindow}" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay" ValidatesOnDataErrors="True">
+                            <Binding.ValidationRules>
+                                <Validation:ActionValidation FieldName="DueDate" />
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </dxe:DateEdit.EditValue>
+                </dxe:DateEdit>
+                <!--Reporter-->
+                <Label HorizontalAlignment="Left" Content="{DynamicResource ALReporter}" Grid.Row="18"/>
+                <dxe:ComboBoxEdit Grid.Row="19" VerticalContentAlignment="Center" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" IsSynchronizedWithCurrentItem="True"
+                                  AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True" IsTextEditable="False" DisplayMember="FullName" ValueMember="IdUser" 
+                                  ItemsSource="{Binding DataContext.ReporterList, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow},Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  SelectedItem="{Binding DataContext.SelectedActionReporter, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow},Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
+                    <dxe:ComboBoxEdit.SelectedIndex>
+                        <Binding Path="SelectedReporter" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                            <Binding.ValidationRules>
+                                <Validation:ActionValidation FieldName="SelectedReporter" ValidationStep="UpdatedValue" />
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </dxe:ComboBoxEdit.SelectedIndex>
+                    <dxe:ComboBoxEdit.StyleSettings>
+                        <dxe:ComboBoxStyleSettings />
+                    </dxe:ComboBoxEdit.StyleSettings>
+                </dxe:ComboBoxEdit>
+                
+                <!--chitra.girigosavi GEOS2-7242 01/04/2025-->
+                <!--Status-->
+                <!--[pramod.misal][GEOS2-8169][7.7.2025]-->
+                <Label Grid.Row="21" Content="{DynamicResource NewALStatus}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                <!--<dxe:ComboBoxEdit Grid.Row="22" HorizontalAlignment="Stretch"
+                ItemsSource="{Binding StatusList,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                DisplayMember="Value" ValueMember="IdLookupValue" ImmediatePopup="True" ApplyItemTemplateToSelectedItem="True"
+                IsSynchronizedWithCurrentItem="True" 
+                AllowUpdateTwoWayBoundPropertiesOnSynchronization="True"
+                IsTextEditable="False"
+                SelectedItem="{Binding DataContext.SelectedStatus, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow},Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                    <dxe:ComboBoxEdit.ItemContainerStyle>
+                        <Style TargetType="dxe:ComboBoxEditItem">
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            --><!--<Setter Property="IsEnabled" Value="{Binding IsEnabled}" />--><!--
+                        </Style>
+                    </dxe:ComboBoxEdit.ItemContainerStyle>
+                    <dxe:ComboBoxEdit.ItemTemplate>
+                        <DataTemplate>
+                            <Border Background="{Binding HtmlColor}" Padding="3">
+                                <Label Content="{Binding Value}" Foreground="Black" Margin="5,0,0,0"/>
+                            </Border>
+                        </DataTemplate>
+                    </dxe:ComboBoxEdit.ItemTemplate>
+                    <dxe:ComboBoxEdit.EditNonEditableTemplate>
+                        <ControlTemplate>
+                            <Border Background="{Binding SelectedItem.HtmlColor}" Padding="3">
+                                <Label Content="{Binding SelectedItem.Value}" Foreground="Black" Margin="5,0,0,0"/>
+                            </Border>
+                        </ControlTemplate>
+                    </dxe:ComboBoxEdit.EditNonEditableTemplate>
+                    <dxmvvm:Interaction.Triggers>
+                        <dxmvvm:EventToCommand EventName="PopupClosed" Command="{Binding ChangeStatusCommand}" PassEventArgsToCommand="True"/>
+                    </dxmvvm:Interaction.Triggers>
+                    <dxe:ComboBoxEdit.SelectedIndex>
+                        <Binding Path="SelectedStatusIndex" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                            <Binding.ValidationRules>
+                                <Validation:ActionValidation FieldName="SelectedStatusIndex" ValidationStep="UpdatedValue" />
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </dxe:ComboBoxEdit.SelectedIndex>
+                    <dxe:ComboBoxEdit.StyleSettings>
+                        <dxe:CheckedComboBoxStyleSettings />
+                    </dxe:ComboBoxEdit.StyleSettings>
+                </dxe:ComboBoxEdit>-->
+
+                <!--[pramod.misal][GEOS2-8169][7.7.2025]-->
+                <dxe:ComboBoxEdit Grid.Row="22"
+                  HorizontalAlignment="Stretch"
+                  ItemsSource="{Binding StatusList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                  DisplayMember="Value"
+                  ValueMember="IdLookupValue"
+                  IsTextEditable="False"
+                  ImmediatePopup="True"
+                  EditValue="{Binding DataContext.SelectedStatuses, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow},Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                  ApplyItemTemplateToSelectedItem="False"
+                  Name="CbeStatus">
+
+                  
+                    <!--<dxe:ComboBoxEdit.EditValue>
+                        <Binding Path="SelectedStatuses" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged"/>
+                    </dxe:ComboBoxEdit.EditValue>-->
+                    
+
+                   
+                    <dxe:ComboBoxEdit.StyleSettings>
+                        <dxe:CheckedComboBoxStyleSettings />
+                    </dxe:ComboBoxEdit.StyleSettings>
+
+                  
+                    <dxe:ComboBoxEdit.ItemTemplate>
+                        <DataTemplate>
+                            <DockPanel LastChildFill="True" Margin="2">
+
+                            
+                                <dxe:CheckEdit 
+                                    IsChecked="{Binding IsSelected, Mode=TwoWay, RelativeSource={RelativeSource AncestorType=dxe:ComboBoxEditItem}}"
+                                    VerticalAlignment="Center"
+                                    Margin="0,0,-30,0"
+                                     />
+
+                               
+                                <Border Background="{Binding HtmlColor}" 
+                                    Padding="5"
+                                    CornerRadius="2"
+                                    VerticalAlignment="Center" Margin="18,0,0,0"
+                                    Height="Auto">
+                                                    <TextBlock Text="{Binding Value}" 
+                                           VerticalAlignment="Center" 
+                                           Foreground="Black"/>
+                                </Border>
+
+                            </DockPanel>
+                        </DataTemplate>
+                    </dxe:ComboBoxEdit.ItemTemplate>
+
+         
+
+
+
+                    <dxe:ComboBoxEdit.ItemContainerStyle>
+    <Style TargetType="dxe:ComboBoxEditItem">
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    </Style>
+</dxe:ComboBoxEdit.ItemContainerStyle>
+
+
+                    <!-- Command trigger on popup close -->
+                    <dxmvvm:Interaction.Triggers>
+                        <dxmvvm:EventToCommand EventName="PopupClosed" Command="{Binding ChangeStatusCommand}" PassEventArgsToCommand="True"/>
+                    </dxmvvm:Interaction.Triggers>
+                </dxe:ComboBoxEdit>
+
+            </Grid>
+            <Label HorizontalAlignment="Left" VerticalAlignment="Top" Content="{DynamicResource ALSalesOwner}" Height="25" Grid.Column="3"/>
+            <dxg:GridControl  x:Name="SalesOwnerGridControl" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="0,30,0,0" Grid.Column="3"                           
+                             ItemsSource="{Binding DataContext.FilteredSalesUsers,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow},UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"                       
+                             SelectionMode="Cell"  ImplyNullLikeEmptyStringWhenFiltering="True"   AllowLiveDataShaping="True">
+                <dxg:GridColumn Header=" " FieldName="IsChecked" Width="25" MinWidth="15" IsSmart="True" ReadOnly="False" FixedWidth="True" FilterPopupMode="Default">
+                    <dxg:GridColumn.CellTemplate>
+                        <DataTemplate>
+                            <dxe:CheckEdit x:Name="PART_Editor" Width="15" HorizontalAlignment="Center">
+                                <dxmvvm:Interaction.Behaviors>
+                                    <dxmvvm:EventToCommand  EventName="Checked" 
+                                                                    Command="{Binding DataContext.SalesOwnerCheckBoxSelectedCommand,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"                                                                   
+                                                                    CommandParameter="{Binding ElementName=SalesOwnerTableView}">
+                                        <dxmvvm:EventToCommand.EventArgsConverter>
+                                            <dx:EventArgsToDataRowConverter />
+                                        </dxmvvm:EventToCommand.EventArgsConverter>
+                                    </dxmvvm:EventToCommand>
+                                    <dxmvvm:EventToCommand  EventName="Unchecked" 
+                                                                    Command="{Binding DataContext.SalesOwnerUnCheckBoxSelectedCommand,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"
+                                                                    CommandParameter="{Binding ElementName=SalesOwnerTableView}"/>
+                                </dxmvvm:Interaction.Behaviors>
+                            </dxe:CheckEdit>
+                        </DataTemplate>
+                    </dxg:GridColumn.CellTemplate>
+                </dxg:GridColumn>
+                <dxg:GridColumn Header=" " FieldName="FullName" Width="*" MinWidth="130"  ReadOnly="True" FixedWidth="True" FilterPopupMode="Default"/>
+                <dxmvvm:Interaction.Behaviors>
+                    <UIHelper:GridSelectingBehavior />
+                </dxmvvm:Interaction.Behaviors>
+                <dxg:GridControl.TotalSummary>
+                    <dxg:GridSummaryItem x:Name="summary" FieldName="FullName" SummaryType="Count" DisplayFormat="Total Count: {0}" Visible="True" Alignment="Left"/>
+                </dxg:GridControl.TotalSummary>
+                <dxg:GridControl.View>
+                    <dxg:TableView x:Name="SalesOwnerTableView"
+                                   ShowGroupedColumns="True"  
+                                   HorizontalScrollbarVisibility="Hidden"  
+                                   VerticalScrollbarVisibility="Visible"                                                                        
+                                   ShowGroupPanel="False"  
+                                   ShowAutoFilterRow="False"                        
+                                   AllowEditing="True"  
+                                   ShowHorizontalLines="False"  
+                                   ShowVerticalLines="False"  
+                                   ShowSearchPanelMode="Always"                                
+                                   SearchPanelHorizontalAlignment="Stretch"                                                                 
+                                   AllowColumnMoving="True"
+                                   NavigationStyle="Cell"                                   
+                                   ShowTotalSummary="False"
+                                   ShowColumnHeaders="False"
+                                   ShowIndicator="False"                                  
+                                   ShowFixedTotalSummary="True"
+                                   EditorShowMode="MouseDown"
+                                   ImmediateUpdateRowPosition="True"
+                                   FilterRowDelay="0">
+
+                    </dxg:TableView>
+                </dxg:GridControl.View>
+            </dxg:GridControl>
+            <Label HorizontalAlignment="Left" VerticalAlignment="Top" Content="{DynamicResource ALPlant}" Grid.Column="5" Height="25"/>
+            <!--[rdixit][GEOS2-4651][11.07.2023]-->
+            <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" VerticalAlignment="Top" Grid.Column="5" Height="25">
+                <dxe:CheckEdit IsChecked="{Binding DataContext.IsChecked, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" 
+                               IsReadOnly="False" HorizontalAlignment="Left" VerticalAlignment="Center">
+                    <dxmvvm:Interaction.Behaviors>
+                        <dxmvvm:EventToCommand EventName="Checked" Command="{Binding DataContext.CollapseExpand,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" CommandParameter="{Binding ElementName=PlantTreeListView}"/>
+                        <dxmvvm:EventToCommand EventName="Unchecked" Command="{Binding DataContext.CollapseExpand,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" CommandParameter="{Binding ElementName=PlantTreeListView}"/>
+                    </dxmvvm:Interaction.Behaviors>
+                </dxe:CheckEdit>
+                <Label Margin="2,0,15,0" Content="{DynamicResource CollapseUncollapse}" VerticalAlignment="Center"/>
+            </StackPanel>
+            <dxg:TreeListControl Selector.IsSelected="True"  x:Name="PlantTreeList" KeyboardNavigation.DirectionalNavigation="None" Grid.Row="0" Margin="0,30,0,0" Grid.Column="5"  MaxHeight="1000" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+                                 ItemsSource="{Binding DataContext.FilteredCustomerSiteList, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"
+               >
+                <dxg:TreeListControl.Columns>
+                    <!--<dxg:TreeListColumn Header=" " FieldName="IsChecked" Width="15" MinWidth="15" ReadOnly="False" FixedWidth="True" FilterPopupMode="Default">
+                        <dxg:TreeListColumn.CellTemplate>
+                            <DataTemplate>
+                                <dxe:CheckEdit x:Name="PART_Editor">
+                                    <dxmvvm:Interaction.Behaviors>
+                                        <dxmvvm:EventToCommand  EventName="Checked" 
+                                                                    Command="{Binding DataContext.PlantCheckBoxSelectedCommand,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"
+                                                                    CommandParameter="{Binding ElementName=PlantTreeListView}" PassEventArgsToCommand="True" />
+                                        <dxmvvm:EventToCommand  EventName="Unchecked" 
+                                                                    Command="{Binding DataContext.PlantUnCheckBoxSelectedCommand,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"
+                                                                    CommandParameter="{Binding ElementName=PlantTreeListView}" PassEventArgsToCommand="True"/>
+                                    </dxmvvm:Interaction.Behaviors>
+                                </dxe:CheckEdit>
+                            </DataTemplate>
+                        </dxg:TreeListColumn.CellTemplate>
+                    </dxg:TreeListColumn>-->
+                    <dxg:TreeListColumn Width="*" FieldName="Name" FixedWidth="True" ReadOnly="True"/>
+                    <dxg:TreeListColumn FieldName="Key" Width="0" Visible="False"/>
+
+                </dxg:TreeListControl.Columns>
+                <dxg:TreeListControl.TotalSummary><!--chitra.girigosavi GEOS2-7733 09/04/2025-->
+                    <dxg:TreeListSummaryItem 
+                    FieldName="Name"
+                    SummaryType="Custom"
+                    DisplayFormat="Total Count: {0}"
+                    Visible="True"
+                    Alignment="Left">
+                    </dxg:TreeListSummaryItem>
+                </dxg:TreeListControl.TotalSummary>
+                <dxg:TreeListControl.View>
+                    <dxg:TreeListView Name="PlantTreeListView" 
+                                      ShowTotalSummary="False"
+                                      ShowFixedTotalSummary="True"
+                                      EnableSelectedRowAppearance="True"                                      
+                                      AllowRecursiveNodeChecking="True"
+                                      ShowSearchPanelMode="Always"
+                                      ShowColumnHeaders="False"
+                                      ShowIndicator="False"
+                                      ShowVerticalLines="False"
+                                      VerticalScrollbarVisibility="Visible"
+                                      ParentFieldName="Parent" 
+                                      KeyFieldName="Key"
+                                      CustomSummary="PlantTreeListView_CustomSummary"
+                                      FilterMode="Extended"
+                                      SearchPanelHorizontalAlignment="Stretch"
+                                      ShowHorizontalLines="False"                                          
+                                      AutoExpandAllNodes="False"
+                                      AllowDragDrop="True"
+                                      AllowBandMultiRow="False"
+                                      NavigationStyle="Cell"
+                                      EditorShowMode="MouseDown"
+                                      ImmediateUpdateCheckBoxState="True"
+                                      ShowCheckboxes="True"           
+                                      CheckBoxFieldName="IsChecked"
+                                      FilterRowDelay="0">
+                        <!--Defines cell tooltip template for the entire view           NodeCheckStateChanged="PlantTreeListView_NodeCheckStateChanged"-->
+                        <dxg:TreeListView.CellToolTipTemplate>
+                            <DataTemplate>
+                                <Border Background="LightGray" BorderThickness="0" Padding="10,2">
+                                    <Label Content="{Binding}" />
+                                </Border>
+                            </DataTemplate>
+                        </dxg:TreeListView.CellToolTipTemplate>
+
+                        
+
+                        <dxmvvm:Interaction.Behaviors>
+                            <!--<dxmvvm:EventToCommand Command="{Binding DataContext.plant1,RelativeSource={RelativeSource AncestorType=dxg:GridControl}}" EventName="PlantTreeListView_NodeCheckStateChanged" PassEventArgsToCommand="True">
+                                <dxmvvm:EventToCommand.EventArgsConverter>
+                                    <dx:EventArgsToDataRowConverter />
+                                </dxmvvm:EventToCommand.EventArgsConverter>
+                            </dxmvvm:EventToCommand>-->
+
+                            <dxmvvm:EventToCommand EventName="NodeCheckStateChanged"
+                                                   Command="{Binding plantSelectUnselectCommand}"
+                                                   PassEventArgsToCommand="True"/>
+
+                        </dxmvvm:Interaction.Behaviors>
+                    </dxg:TreeListView>
+                </dxg:TreeListControl.View>
+            </dxg:TreeListControl>
+        </Grid>
+        <Grid Grid.Row="6" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Button Grid.Row="1" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Top"
+                    Style="{DynamicResource Button16Style}" Content="{DynamicResource Accept}" Command="{Binding AcceptButtonCommand}"
+                    CommandParameter="{Binding ElementName=LayoutRoot}" Height="30" Width="100" />
+            <Button Grid.Row="1" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Top"
+                    Style="{DynamicResource Button16Style}" Content="{DynamicResource Cancel}" Height="30"
+                    Command="{Binding CancelButtonCommand}" Width="100" />
+        </Grid>
+    </Grid>
+</dxwui:WinUIDialogWindow>

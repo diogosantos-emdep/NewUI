@@ -1,0 +1,149 @@
+﻿<dxwui:WinUIDialogWindow x:Class="Emdep.Geos.Modules.SCM.Views.AddListValueView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.SCM.Views"
+                           xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors" 
+             xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+                         xmlns:Interactive="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+                         xmlns:Validation ="clr-namespace:Emdep.Geos.UI.Validations;assembly=Emdep.Geos.UI.Validations"
+                         xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+                         xmlns:behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300"
+                         Title="{Binding WindowHeader}"
+                           TitleStyle="{DynamicResource WinUIDialogWindowTitleStyle}"
+    Style="{DynamicResource WinUIDialogWindowStyle}"
+                         >
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape"  Command="{Binding AddListValueViewCancelButtonCommand}"/>
+    </dxwui:WinUIDialogWindow.InputBindings>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="50"/>
+        </Grid.RowDefinitions>
+
+        <!--<Label Content="{DynamicResource SCMAddListValueTitle}" Style="{StaticResource LabelTitleStyle}" Grid.Row="0" HorizontalAlignment="Left" Padding="0,-10,0,0"/>-->
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="200"/>
+                <ColumnDefinition Width="5"/>
+                <ColumnDefinition Width="45"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="5"/>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="5"/>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="5"/>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="10"/>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="5"/>
+                <RowDefinition Height="30"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock Grid.Column="0" Grid.Row="0" Text="{DynamicResource SCMAddListValueName}" Style="{StaticResource TextBlock14Style}" VerticalAlignment="Center"/>
+            
+            <dxe:TextEdit Grid.Column="1" Grid.Row="0" Text="{Binding DataContext.Name,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}">
+                <dxe:TextEdit.EditValue>
+                    <Binding Path="DataContext.Name" RelativeSource="{RelativeSource AncestorType=dxwui:WinUIDialogWindow}" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay" ValidatesOnDataErrors="True">
+                        <Binding.ValidationRules>
+                            <Validation:AddEditCustompropertyValidation FieldName="Name" ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True"/>
+                        </Binding.ValidationRules>
+                    </Binding>
+                </dxe:TextEdit.EditValue>
+                <dxmvvm:Interaction.Behaviors>
+
+                    <dxmvvm:EventToCommand 
+                                                                EventName="EditValueChanged" Command="{Binding DataContext.ChangeNameCommand, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"/>
+                </dxmvvm:Interaction.Behaviors>
+            </dxe:TextEdit>
+
+            <!--LanguageList-->
+            <dxe:ListBoxEdit Name="listBoxLanguage" Grid.Row="0" Grid.Column="3" Grid.RowSpan="8"
+                                                     ItemsSource="{Binding DataContext.Languages, Mode=TwoWay,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"
+                                                     SelectedItem="{Binding DataContext.SelectedLanguage,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" 
+                                                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                                     DisplayMember="TwoLetterISOLanguage" ValueMember="IdLanguage" 
+                                                     VerticalContentAlignment="Center"
+                                                     HorizontalContentAlignment="Center"
+                                                     ScrollViewer.VerticalScrollBarVisibility="Hidden">
+                <dxmvvm:Interaction.Behaviors>
+                    <dxmvvm:EventToCommand 
+                                                            EventName="SelectedIndexChanged" Command="{Binding DataContext.ChangeLanguageCommand,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"/>
+                </dxmvvm:Interaction.Behaviors>
+            </dxe:ListBoxEdit>
+
+            <dxe:CheckEdit Grid.Row="2" Grid.Column="1" IsChecked="{Binding IsCheckedCopyName}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+            <TextBlock Grid.Row="2" Grid.Column="1" Margin="20 0 0 0" Text="{DynamicResource SCMAddListValueCopyName}" Style="{StaticResource TextBlock14Style}" VerticalAlignment="Center" />
+
+            <TextBlock Grid.Column="0" Grid.Row="4" Text="{DynamicResource SCMAddListValuePosition}" Style="{StaticResource TextBlock14Style}" VerticalAlignment="Center"/>
+            <dxe:TextEdit Grid.Column="1" Grid.Row="4" Text="{Binding Position,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />
+
+            <TextBlock Grid.Column="0" Grid.Row="6" Text="{DynamicResource SCMAddListValueAbbreviation}" Style="{StaticResource TextBlock14Style}" VerticalAlignment="Center"/>
+            <dxe:TextEdit Grid.Column="1" Grid.Row="6" Text="{Binding Abbreviation,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />
+
+            <TextBlock Grid.Column="0" Grid.Row="8" Text="{DynamicResource SCMAddListValueHtmlColor}" Style="{StaticResource TextBlock14Style}" VerticalAlignment="Center"/>
+            <dxe:PopupColorEdit Margin="0,-5,0,0" Grid.Row="8" Grid.Column="1" x:Name="brushColorEdit" Color="{Binding DataContext.HtmlColor, Mode=TwoWay,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"  Palettes="{Binding ElementName=palettes, Path=EditValue, Mode=TwoWay}"
+                                            ShowDefaultColorButton="{Binding Path=ShowAutomaticButton, ElementName=paintControl}"
+                                            ShowNoColorButton="{Binding Path=ShowNoColorButton, ElementName=paintControl}"
+                                            ShowMoreColorsButton="{Binding Path=ShowMoreColorsButton, ElementName=paintControl}"
+                                            ChipSize="{Binding Path=ChipSize, ElementName=paintControl}" 
+                                          
+                                            >
+                
+            </dxe:PopupColorEdit>
+           
+
+
+            <TextBlock Grid.Column="0" Grid.Row="10" Text="{DynamicResource SCMAddListValueInUse}" Style="{StaticResource TextBlock14Style}" VerticalAlignment="Top"/>
+            <StackPanel Orientation="Horizontal" Grid.Row="10" Grid.Column="1">
+                <dxe:ToggleSwitch VerticalAlignment="Center" HorizontalAlignment="Center" CheckedStateContent="Yes" UncheckedStateContent="No"  ContentPlacement="Inside" 
+                                     Height="30" Width="88" IsChecked="{Binding DataContext.InUse,Mode=TwoWay ,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow,Mode=FindAncestor}, UpdateSourceTrigger=PropertyChanged}">
+                </dxe:ToggleSwitch>
+            </StackPanel>
+
+
+        </Grid>
+
+        <!--Accept/Cancel button start-->
+        <Grid Grid.Row="2" Margin="20,0,0,0" HorizontalAlignment="Center" >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="10"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Button Content="{DynamicResource SCMAccept}"
+                        Grid.Column="0"
+                        Command="{Binding AcceptButtonCommand}"
+                        Height="30"
+                        Width="100"
+                        Style="{DynamicResource Button16Style}"
+                        VerticalAlignment="Bottom" />
+            <Button Content="{DynamicResource SCMCancel}"
+                        Grid.Column="2"
+                        Command="{Binding AddListValueViewCancelButtonCommand}" 
+                        Height="30"
+                        Width="100"
+                        Style="{DynamicResource Button16Style}"
+                        VerticalAlignment="Bottom" />
+        </Grid>
+        <!--Accept/Cancel button end-->
+
+    </Grid>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="KeyDown">
+            <behaviors:InvokeDelegateCommandAction Command="{Binding CommandTextInput}" CommandParameter="{Binding Path=InvokeParameter, RelativeSource={RelativeSource Self}}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+</dxwui:WinUIDialogWindow>

@@ -1,0 +1,2671 @@
+﻿using DevExpress.Mvvm;
+using DevExpress.Xpf.Core;
+using Emdep.Geos.Data.Common;
+using Emdep.Geos.Data.Common.Hrm;
+using Emdep.Geos.Modules.Hrm.Views;
+using Emdep.Geos.Services.Contracts;
+using Emdep.Geos.UI.Commands;
+using Emdep.Geos.UI.Common;
+using Emdep.Geos.UI.ServiceProcess;
+using Prism.Logging;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.IO;
+using System.Linq;
+using Emdep.Geos.UI.Validations;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Input;
+using System.Windows.Controls;
+using System.Globalization;
+using DevExpress.Xpf.Editors;
+using Emdep.Geos.UI.CustomControls;
+using System.Windows;
+using System.ServiceModel;
+using Emdep.Geos.Data.Common.Epc;
+using System.Windows.Media;
+using DevExpress.Mvvm.UI;
+
+namespace Emdep.Geos.Modules.Hrm.ViewModels
+{
+    public class AddNewLeaveViewModel : INotifyPropertyChanged, IDataErrorInfo
+    {
+        #region TaskLog
+        /// <summary>
+        /// [0001][25/06/2018][lsharma][SPRINT 41][HRM-M041-21]Simplify the way to add leaves]
+        /// In this task default values loaded on Add new leave for Employee and StartDate,EndDate & AllDayEvent as per active view selection
+        /// </summary>
+        #endregion
+
+        #region Services
+        ICrmService CrmStartUp = new CrmServiceController(GeosApplication.Instance.ApplicationSettings["ServicePath"].ToString());
+        IHrmService HrmService = new HrmServiceController(GeosApplication.Instance.ApplicationSettings["ServicePath"].ToString());
+        #endregion
+
+        #region Declaration
+        private EmployeeShift selectedEmployeeShift;
+        private ObservableCollection<EmployeeShift> employeeShiftList;
+        private bool isEditInit;
+        private int selectedIndexForCompanyShift;
+        private CompanyShift selectedCompanyShift;
+        private ObservableCollection<CompanyShift> companyShifts;
+        private string startDateErrorMessage = string.Empty;
+        private string endDateErrorMessage = string.Empty;
+        private int selectedIndexForEmployee;
+        private bool isSave;
+        private bool isNew;
+        private bool IsBusy;
+        private bool isNewLeave;
+        private bool flag;
+        private ObservableCollection<Attachment> attachmentList;
+        private byte[] leaveFileInBytes;
+        private CompanyShift[] companyShiftArray;
+        private Int32[] companyShiftIdArray;
+        private string leaveFileName;
+        private DateTime? startDate;
+        private DateTime? endDate;
+        private DateTime? startTime;
+        private DateTime? endTime;
+        private Visibility shiftVisibility;
+        private TimeSpan sTime;
+        private TimeSpan eTime;
+        
+        private int selectedLeaveType;
+        private string startTimeErrorMessage = string.Empty;
+        private string endTimeErrorMessage = string.Empty;
+        private string error = string.Empty;
+        private string remarks;
+        private bool isAllDayEvent;
+        private List<DateTime> _FromDates;
+        private bool invertIsAllDayEvent;
+        private List<DateTime> _ToDates;
+        private string timeEditMask;
+        private ObservableCollection<EmployeeLeave> existEmployeeLeave;
+        private ObservableCollection<Employee> employeeListFinal;
+        private ObservableCollection<CompanyLeave> companyLeavesList;
+        private ObservableCollection<EmployeeLeave> existEmployeeLeaveList;
+        
+        private string leaveTitle;
+        private bool isEditEmployee;
+        private EmployeeLeave updateEmployeeLeave;
+        private EmployeeLeave oldEmployeeLeaveDetatils;
+        private long selectedPeriod;
+        private List<Company> companyList;
+        private ObservableCollection<EmployeeChangelog> employeeLeaveChangeLogList;
+        private ObservableCollection<EmployeeAttendance> employeeAttendanceList;
+        private List<Object> attachmentObjectList;
+        private Visibility isVisible;
+        private Attachment attachedFile;
+        private List<object> selectedEmployeeList;
+        private bool isReadOnlyField;
+        private bool isAcceptEnabled;
+        #endregion
+
+        #region Public Icommands
+        public ICommand EmployeePopupClosedCommand { get; private set; }
+        public ICommand ChooseFileCommandForLeave { get; set; }
+        public ICommand CancelCommandForLeave { get; set; }
+        public ICommand AddNewLeaveAcceptButtonCommand { get; set; }
+        public ICommand OnDateEditValueChangingCommand { get; set; }
+        public ICommand OnTimeEditValueChangingCommand { get; set; }
+        public ICommand AddNewLeaveViewCancelButtonCommand { get; set; }
+        public ICommand CheckedCommand { get; set; }
+        public ICommand SelectedIndexChangedCommand { get; set; }
+
+        public ICommand SelectedIndexChangedForCompanyShiftCommand { get; set; }
+        public ICommand DocumentViewCommand { get; set; }
+        public ICommand SelectedItemChangedCommand { get; set; }
+        public ICommand CommandTextInput { get; set; }
+        #endregion
+
+        #region Properties
+
+        public EmployeeShift SelectedEmployeeShift
+        {
+            get
+            {
+                return selectedEmployeeShift;
+            }
+
+            set
+            {
+                selectedEmployeeShift = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("SelectedEmployeeShift"));
+            }
+        }
+        public ObservableCollection<EmployeeShift> EmployeeShiftList
+        {
+            get
+            {
+                return employeeShiftList;
+            }
+
+            set
+            {
+                employeeShiftList = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("EmployeeShiftList"));
+            }
+        }
+
+        public Visibility ShiftVisibility
+        {
+            get
+            {
+                return shiftVisibility;
+            }
+
+            set
+            {
+                shiftVisibility = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("ShiftVisibility"));
+            }
+        }
+        public bool IsEditInit
+        {
+            get
+            {
+                return isEditInit;
+            }
+
+            set
+            {
+                isEditInit = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("IsEditInit"));
+            }
+        }
+        public int SelectedIndexForCompanyShift
+        {
+            get
+            {
+                return selectedIndexForCompanyShift;
+            }
+
+            set
+            {
+                selectedIndexForCompanyShift = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("SelectedIndexForCompanyShift"));
+            }
+        }
+
+        public CompanyShift SelectedCompanyShift
+        {
+            get
+            {
+                return selectedCompanyShift;
+            }
+
+            set
+            {
+                selectedCompanyShift = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("SelectedCompanyShift"));
+            }
+        }
+        public int SelectedIndexForEmployee
+        {
+            get
+            {
+                return selectedIndexForEmployee;
+            }
+
+            set
+            {
+                selectedIndexForEmployee = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("SelectedIndexForEmployee"));
+            }
+        }
+        public ObservableCollection<CompanyShift> CompanyShifts
+        {
+            get
+            {
+                return companyShifts;
+            }
+
+            set
+            {
+                companyShifts = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("CompanyShifts"));
+
+            }
+        }
+        public GeosProvider CurrentGeosProvider { get; set; }
+        public List<GeosProvider> GeosProviderList { get; set; }
+        public string WorkingPlantId { get; set; }
+        public List<Company> SelectedPlantList { get; set; }
+        public List<EmployeeLeave> NewEmployeeLeaveList { get; set; }
+
+        public bool IsNewLeave
+        {
+            get { return isNewLeave; }
+            set
+            {
+                isNewLeave = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("IsNewLeave"));
+            }
+        }
+
+        public EmployeeLeave UpdateEmployeeLeave
+        {
+            get { return updateEmployeeLeave; }
+            set
+            {
+                updateEmployeeLeave = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("UpdateEmployeeLeave"));
+            }
+        }
+
+        public EmployeeLeave OldEmployeeLeaveDetatils
+        {
+            get { return oldEmployeeLeaveDetatils; }
+            set
+            {
+                oldEmployeeLeaveDetatils = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("UpdateEmployeeLeave"));
+            }
+        }
+
+        public ulong IdEmployeeLeave { get; private set; }
+        public string OldLeaveFileName { get; set; }
+        public bool ChangeFileUpload { get; set; }
+
+        
+
+        public ObservableCollection<EmployeeLeave> ExistEmployeeLeave
+        {
+            get { return existEmployeeLeave; }
+            set
+            {
+                existEmployeeLeave = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("ExistEmployeeLeave"));
+            }
+        }
+
+        public string TimeEditMask
+        {
+            get { return timeEditMask; }
+            set
+            {
+                timeEditMask = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("TimeEditMask"));
+            }
+        }
+
+        public bool InvertIsAllDayEvent
+        {
+            get { return invertIsAllDayEvent; }
+            set
+            {
+                invertIsAllDayEvent = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("InvertIsAllDayEvent"));
+            }
+        }
+
+        public List<DateTime> FromDates
+        {
+            get { return _FromDates; }
+            set
+            {
+                if (value != _FromDates)
+                {
+                    _FromDates = value;
+                    OnPropertyChanged(new PropertyChangedEventArgs("_FromDates"));
+                }
+            }
+        }
+
+        public List<DateTime> ToDates
+        {
+            get { return _ToDates; }
+            set
+            {
+                if (value != _ToDates)
+                {
+                    _ToDates = value;
+                    OnPropertyChanged(new PropertyChangedEventArgs("_ToDates"));
+                }
+            }
+        }
+
+        public bool IsAllDayEvent
+        {
+            get { return isAllDayEvent; }
+            set
+            {
+                isAllDayEvent = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("IsAllDayEvent"));
+                // CheckDateTimeValidation();
+                if (value)
+                {
+                    InvertIsAllDayEvent = false;
+                    //StartTimeErrorMessage = string.Empty;
+                    //EndTimeErrorMessage = string.Empty;
+                    //StartTime = FromDates[0];
+                    //EndTime = ToDates[0];
+                }
+                else
+                {
+                    //StartTime = FromDates[0];
+                    //EndTime = ToDates[0];
+                    InvertIsAllDayEvent = true;
+                }
+            }
+        }
+
+        public bool IsNew
+        {
+            get { return isNew; }
+            set
+            {
+                isNew = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("IsNew"));
+            }
+        }
+
+        public bool IsSave
+        {
+            get { return isSave; }
+            set
+            {
+                isSave = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("IsSave"));
+            }
+        }
+
+        public ObservableCollection<Employee> EmployeeListFinal
+        {
+            get { return employeeListFinal; }
+            set
+            {
+                employeeListFinal = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("EmployeeListFinal"));
+            }
+        }
+
+        public ObservableCollection<CompanyLeave> CompanyLeavesList
+        {
+            get { return companyLeavesList; }
+            set
+            {
+                companyLeavesList = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("CompanyLeavesList"));
+            }
+        }
+
+        public ObservableCollection<EmployeeLeave> ExistEmployeeLeaveList
+        {
+            get { return existEmployeeLeaveList; }
+            set
+            {
+                existEmployeeLeaveList = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("ExistEmployeeLeaveList"));
+            }
+        }
+
+        public ObservableCollection<Attachment> AttachmentList
+        {
+            get { return attachmentList; }
+            set
+            {
+                attachmentList = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("AttachmentList"));
+            }
+        }
+
+        public byte[] LeaveFileInBytes
+        {
+            get { return leaveFileInBytes; }
+            set
+            {
+                leaveFileInBytes = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("LeaveFileInBytes"));
+            }
+        }
+
+        public Int32[] CompanyShiftIdArray
+        {
+            get { return companyShiftIdArray; }
+            set
+            {
+                companyShiftIdArray = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("CompanyShiftIdArray"));
+            }
+        }
+
+        public CompanyShift[] CompanyShiftArray
+        {
+            get { return companyShiftArray; }
+            set
+            {
+                companyShiftArray = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("CompanyShiftArray"));
+            }
+        }
+
+        public string LeaveFileName
+        {
+            get { return leaveFileName; }
+            set
+            {
+                leaveFileName = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("LeaveFileName"));
+            }
+        }
+
+        public DateTime? StartTime
+        {
+            get { return startTime; }
+            set
+            {
+                startTime = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("StartTime"));
+            }
+        }
+
+        public TimeSpan STime
+        {
+            get { return sTime; }
+            set
+            {
+                sTime = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("STime"));
+            }
+        }
+
+        public DateTime? EndTime
+        {
+            get { return endTime; }
+            set
+            {
+                endTime = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("EndTime"));
+            }
+        }
+
+        public TimeSpan ETime
+        {
+            get { return eTime; }
+            set
+            {
+                eTime = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("ETime"));
+            }
+        }
+
+        public int SelectedLeaveType
+        {
+            get { return selectedLeaveType; }
+            set
+            {
+                selectedLeaveType = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("SelectedLeaveType"));
+            }
+        }
+
+        public string Remarks
+        {
+            get { return remarks; }
+            set
+            {
+                remarks = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("Remarks"));
+            }
+        }
+
+        public string LeaveTitle
+        {
+            get { return leaveTitle; }
+            set
+            {
+                leaveTitle = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("LeaveTitle"));
+            }
+        }
+        public DateTime? StartDate
+        {
+            get { return startDate; }
+            set
+            {
+                startDate = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("StartDate"));
+            }
+        }
+
+        public DateTime? EndDate
+        {
+            get { return endDate; }
+            set
+            {
+                endDate = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("EndDate"));
+            }
+        }
+
+        public string StartDateErrorMessage
+        {
+            get { return startDateErrorMessage; }
+            set
+            {
+                startDateErrorMessage = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("StartDateErrorMessage"));
+            }
+        }
+
+        public string EndDateErrorMessage
+        {
+            get { return endDateErrorMessage; }
+            set
+            {
+                endDateErrorMessage = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("EndDateErrorMessage"));
+            }
+        }
+
+        public string StartTimeErrorMessage
+        {
+            get { return startTimeErrorMessage; }
+            set
+            {
+                startTimeErrorMessage = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("StartTimeErrorMessage"));
+            }
+        }
+
+        public ObservableCollection<EmployeeChangelog> EmployeeLeaveChangeLogList
+        {
+            get { return employeeLeaveChangeLogList; }
+            set
+            {
+                employeeLeaveChangeLogList = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("EmployeeLeaveChangeLogList"));
+            }
+        }
+
+        public string EndTimeErrorMessage
+        {
+            get { return endTimeErrorMessage; }
+            set
+            {
+                endTimeErrorMessage = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("EndTimeErrorMessage"));
+            }
+        }
+
+        public long SelectedPeriod
+        {
+            get { return selectedPeriod; }
+            set
+            {
+                selectedPeriod = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("SelectedPeriod"));
+            }
+        }
+
+        public List<Company> CompanyList
+        {
+            get { return companyList; }
+            set
+            {
+                companyList = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("CompanyList"));
+            }
+        }
+
+        public ObservableCollection<EmployeeAttendance> EmployeeAttendanceList
+        {
+            get { return employeeAttendanceList; }
+            set
+            {
+                employeeAttendanceList = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("EmployeeAttendanceList"));
+            }
+        }
+
+        public List<object> AttachmentObjectList
+        {
+            get { return attachmentObjectList; }
+            set
+            {
+                attachmentObjectList = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("AttachmentObjectList"));
+            }
+        }
+
+        public Visibility IsVisible
+        {
+            get { return isVisible; }
+            set
+            {
+                isVisible = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("IsVisible"));
+            }
+        }
+
+        public bool IsAdd { get; set; }
+
+        public Attachment AttachedFile
+        {
+            get { return attachedFile; }
+            set
+            {
+                attachedFile = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("AttachedFile"));
+            }
+
+        }
+
+        public List<object> SelectedEmployeeList
+        {
+            get { return selectedEmployeeList; }
+            set
+            {
+                selectedEmployeeList = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("SelectedEmployeeList"));
+            }
+        }
+        public bool IsReadOnlyField
+        {
+            get { return isReadOnlyField; }
+            set
+            {
+                isReadOnlyField = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("IsReadOnlyField"));
+            }
+        }
+
+        public bool IsAcceptEnabled
+        {
+            get { return isAcceptEnabled; }
+            set
+            {
+                isAcceptEnabled = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("IsAcceptEnabled"));
+            }
+        }
+        #endregion
+
+        #region public Events
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        public void OnPropertyChanged(PropertyChangedEventArgs e)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, e);
+            }
+        }
+
+        public event EventHandler RequestClose;
+
+        #endregion
+
+        #region Constructor
+
+        /// <summary>
+        /// [001] Sprint46 HRM Take values from lookup values instead of the existing tables by Mayuri  
+        /// </summary>     
+        public AddNewLeaveViewModel()
+        {
+            try
+            {
+        /// [0001][04/08/2020][sjadhav][SPRINT 84][GEOS2-2437][GHRM - Employee Leaves export report [#ERF59]]        
+                ShiftVisibility = Visibility.Visible;
+                SetUserPermission();
+                GeosApplication.Instance.Logger.Log("Method AddNewLeaveViewModel()...", category: Category.Info, priority: Priority.Low);
+                CancelCommandForLeave = new RelayCommand(new Action<object>(CloseWindow));
+                AddNewLeaveAcceptButtonCommand = new RelayCommand(new Action<object>(AddNewLeaveInformation));
+                ChooseFileCommandForLeave = new RelayCommand(new Action<object>(BrowseFileAction));
+                OnDateEditValueChangingCommand = new DelegateCommand<EditValueChangingEventArgs>(OnDateEditValueChanging);
+                SelectedIndexChangedCommand = new DelegateCommand<RoutedEventArgs>(SelectedIndexChangedCommandAction);
+                OnTimeEditValueChangingCommand = new DelegateCommand<RoutedEventArgs>(OnTimeEditValueChanging);
+                AddNewLeaveViewCancelButtonCommand = new RelayCommand(new Action<object>(CloseWindow));
+                SelectedIndexChangedForCompanyShiftCommand = new DelegateCommand<RoutedEventArgs>(SelectedIndexChangedForCompanyShiftCommandAction);
+                CheckedCommand = new RelayCommand(new Action<object>(CheckedCommandAction));
+                EmployeePopupClosedCommand = new DevExpress.Mvvm.DelegateCommand<object>(EmployeePopupClosedCommandAction);
+                CommandTextInput = new DelegateCommand<KeyEventArgs>(ShortcutAction);
+
+                TimeEditMask = CultureInfo.CurrentCulture.DateTimeFormat.ShortTimePattern;
+                FillFromDates();
+                FillToDates();
+                InvertIsAllDayEvent = true;
+
+                //List<Company> plantOwners = HrmCommon.Instance.SelectedAuthorizedPlantsList.Cast<Company>().ToList();
+
+                //var plantOwnersIds = string.Join(",", plantOwners.Select(i => i.IdCompany));
+
+                //EmployeeAttendanceList = new ObservableCollection<EmployeeAttendance>(HrmService.GetEmployeeAttendanceForNewLeave(plantOwnersIds, HrmCommon.Instance.SelectedPeriod, HrmCommon.Instance.ActiveEmployee.Organization, HrmCommon.Instance.ActiveEmployee.EmployeeDepartments, HrmCommon.Instance.IdUserPermission));
+                DocumentViewCommand = new RelayCommand(new Action<object>(OpenEmployeeLeaveDocument));
+                SelectedItemChangedCommand = new DelegateCommand<EditValueChangedEventArgs>(SelectedItemChangedCommandAction);
+                //[001] Fill Employee leave as per lookup value
+                FillEmployeeLeaveType();
+
+                //EmployeeListFinal = new ObservableCollection<Employee>(HrmService.GetAllEmployeesByIdCompany(plantOwnersIds));
+                //EmployeeListFinal.Insert(0, new Employee() { FirstName = "---", IdEmployee = 0 });
+                //CompanyLeavesList = new ObservableCollection<CompanyLeave>(HrmService.GetSelectedIdCompanyLeaves(plantOwnersIds));
+                //CompanyLeavesList.Insert(0, new CompanyLeave() { Name = "---", IdCompanyLeave = 0 });
+
+                GeosApplication.Instance.Logger.Log("Method AddNewLeaveViewModel()....executed successfully", category: Category.Info, priority: Priority.Low);
+            }
+            catch (Exception ex)
+            {
+                GeosApplication.Instance.Logger.Log("Get an error in Method AddNewLeaveViewModel()...." + ex.Message, category: Category.Exception, priority: Priority.Low);
+            }
+
+        }
+        #endregion
+
+        #region Methods
+        /// [0001][04/08/2020][sjadhav][SPRINT 84][GEOS2-2437][GHRM - Employee Leaves export report [#ERF59]]
+        /// [002][01-10-2020][cpatil][SPRINT 86][GEOS2-2622][In some employees when we try add Leaves the system show the message “Current Date range is Overlapped with another entries”,]
+        /// Code for Selection of Shift
+        private void SelectedIndexChangedForCompanyShiftCommandAction(RoutedEventArgs obj)
+        {
+            try
+            {
+                GeosApplication.Instance.Logger.Log("Method SelectedIndexChangedForCompanyShiftCommandAction()...", category: Category.Info, priority: Priority.Low);
+                
+                SelectedEmployeeShift = EmployeeShiftList[SelectedIndexForCompanyShift];
+                CheckDateTimeValidation();
+                //[002]
+                if (flag)
+                {
+                    StartTime = GetShiftStartTime((int)StartTime.Value.Date.DayOfWeek, EmployeeShiftList[SelectedIndexForCompanyShift], true);
+                    EndTime = GetShiftStartTime((int)EndTime.Value.Date.DayOfWeek, EmployeeShiftList[SelectedIndexForCompanyShift], false);                    
+                }
+                flag = true;
+                if (CompanyShiftArray==null)
+                {
+                    CompanyShiftIdArray = new Int32[SelectedEmployeeList.Count];
+                    CompanyShiftArray = new CompanyShift[SelectedEmployeeList.Count];
+                }
+                CompanyShiftIdArray[0] = EmployeeShiftList[SelectedIndexForCompanyShift].IdCompanyShift;
+                CompanyShiftArray[0] = EmployeeShiftList[SelectedIndexForCompanyShift].CompanyShift;
+                GeosApplication.Instance.Logger.Log("Method SelectedIndexChangedForCompanyShiftCommandAction()....executed successfully", category: Category.Info, priority: Priority.Low);
+            }
+            catch (Exception ex)
+            {
+                GeosApplication.Instance.Logger.Log("Get an error in Method SelectedIndexChangedForCompanyShiftCommandAction()...." + ex.Message, category: Category.Exception, priority: Priority.Low);
+            }
+        }
+
+        private DateTime GetShiftStartTime(int dayOfWeek, EmployeeShift selectedEmployeeShift, bool isStartTime)
+        {
+            //var shiftStartTime = StartTime.Value.Date.AddHours(CompanyShifts[SelectedIndexForCompanyShift].StartTime1.Hours).AddMinutes(CompanyShifts[SelectedIndexForCompanyShift].StartTime1.Minutes);
+            //var shiftEndTime = EndTime.Value.Date.AddHours(CompanyShifts[SelectedIndexForCompanyShift].EndTime1.Hours).AddMinutes(CompanyShifts[SelectedIndexForCompanyShift].EndTime1.Minutes);
+
+            try
+            {
+                switch (dayOfWeek)
+                {
+                    case 0:
+                        TimeSpan SunStartTime = SelectedEmployeeShift.CompanyShift.SunStartTime;
+                        TimeSpan SunEndTime = SelectedEmployeeShift.CompanyShift.SunEndTime;
+                        if (isStartTime)
+                            return StartTime.Value.Date.AddHours(SunStartTime.Hours).AddMinutes(SunStartTime.Minutes);
+                        else
+                            return EndTime.Value.Date.AddHours(SunEndTime.Hours).AddMinutes(SunEndTime.Minutes);
+
+
+                    case 1:
+                        TimeSpan MonStartTime = selectedEmployeeShift.CompanyShift.MonStartTime;
+                        TimeSpan MonEndTime = selectedEmployeeShift.CompanyShift.MonEndTime;
+                        if (isStartTime)
+                            return StartTime.Value.Date.AddHours(MonStartTime.Hours).AddMinutes(MonStartTime.Minutes);
+                        else
+                            return EndTime.Value.Date.AddHours(MonEndTime.Hours).AddMinutes(MonEndTime.Minutes);
+
+                    case 2:
+                        TimeSpan TueStartTime = SelectedEmployeeShift.CompanyShift.TueStartTime;
+                        TimeSpan TueEndTime = SelectedEmployeeShift.CompanyShift.TueEndTime;
+                        if (isStartTime)
+                            return StartTime.Value.Date.AddHours(TueStartTime.Hours).AddMinutes(TueStartTime.Minutes);
+                        else
+                            return EndTime.Value.Date.AddHours(TueEndTime.Hours).AddMinutes(TueEndTime.Minutes);
+
+                    case 3:
+                        TimeSpan WedStartTime = SelectedEmployeeShift.CompanyShift.WedStartTime;
+                        TimeSpan WedEndTime = SelectedEmployeeShift.CompanyShift.WedEndTime;
+                        if (isStartTime)
+                            return StartTime.Value.Date.AddHours(WedStartTime.Hours).AddMinutes(WedStartTime.Minutes);
+                        else
+                            return EndTime.Value.Date.AddHours(WedEndTime.Hours).AddMinutes(WedEndTime.Minutes);
+
+                    case 4:
+                        TimeSpan ThuStartTime = SelectedEmployeeShift.CompanyShift.ThuStartTime;
+                        TimeSpan ThuEndTime = SelectedEmployeeShift.CompanyShift.ThuEndTime;
+                        if (isStartTime)
+                            return StartTime.Value.Date.AddHours(ThuStartTime.Hours).AddMinutes(ThuStartTime.Minutes);
+                        else
+                            return EndTime.Value.Date.AddHours(ThuEndTime.Hours).AddMinutes(ThuEndTime.Minutes);
+
+                    case 5:
+                        TimeSpan FriStartTime = SelectedEmployeeShift.CompanyShift.FriStartTime;
+                        TimeSpan FriEndTime = SelectedEmployeeShift.CompanyShift.FriEndTime;
+                        if (isStartTime)
+                            return StartTime.Value.Date.AddHours(FriStartTime.Hours).AddMinutes(FriStartTime.Minutes);
+                        else
+                            return EndTime.Value.Date.AddHours(FriEndTime.Hours).AddMinutes(FriEndTime.Minutes);
+
+                    case 6:
+                        TimeSpan SatStartTime = SelectedEmployeeShift.CompanyShift.SatStartTime;
+                        TimeSpan SatEndTime = SelectedEmployeeShift.CompanyShift.SatEndTime;
+                        if (isStartTime)
+                            return StartTime.Value.Date.AddHours(SatStartTime.Hours).AddMinutes(SatStartTime.Minutes);
+                        else
+                            return EndTime.Value.Date.AddHours(SatEndTime.Hours).AddMinutes(SatEndTime.Minutes);
+
+                    default:
+                        return (DateTime)StartTime;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return new DateTime();
+            }
+        }
+        
+        private void EmployeePopupClosedCommandAction(object obj)
+        {
+            try
+            {
+                GeosApplication.Instance.Logger.Log("Method EmployeePopupClosedCommandAction() ...", category: Category.Info, priority: Priority.Low);
+
+                if (SelectedEmployeeList.Count > 1)
+                {
+                    ShiftVisibility = Visibility.Collapsed;
+                }
+                else
+                {
+                    ShiftVisibility = Visibility.Visible;
+                }
+                
+                LoadShiftData();
+                LoadAnyPreShift();
+                GeosApplication.Instance.Logger.Log("Method EmployeePopupClosedCommandAction() executed successfully", category: Category.Info, priority: Priority.Low);
+            }
+            catch (Exception ex)
+            {
+                GeosApplication.Instance.Logger.Log("Get an error in Method EmployeePopupClosedCommandAction()...." + ex.Message, category: Category.Exception, priority: Priority.Low);
+            }
+        }
+
+        private void LoadAnyPreShift()
+        {
+            if (IsNew)
+            {                
+                List<EmployeeLeave> EmpLeaves = new List<EmployeeLeave>();
+                if (ExistEmployeeLeaveList.Any(x => StartDate.Value.Date >= x.StartDate.Value.Date && EndDate.Value.Date <= x.EndDate.Value.Date))
+                {
+                    EmpLeaves = ExistEmployeeLeaveList.Where(x => StartDate.Value.Date >= x.StartDate.Value.Date && EndDate.Value.Date <= x.EndDate.Value.Date).ToList();                
+                }
+                else if (ExistEmployeeLeaveList.Any(x => StartDate.Value.Date == x.StartDate.Value.Date && EndDate.Value.Date == x.EndDate.Value.Date))
+                {
+                    EmpLeaves = ExistEmployeeLeaveList.Where(x => StartDate.Value.Date == x.StartDate.Value.Date && EndDate.Value.Date == x.EndDate.Value.Date).ToList();                
+                }
+
+                if(EmpLeaves!=null)
+                {   
+                    for (int j = 0; j < SelectedEmployeeList.Count; j++)
+                    {                    
+                        if (EmpLeaves.Any(el => el.IdEmployee == Convert.ToInt32(SelectedEmployeeList[j])))
+                        {
+                            EmployeeLeave empLeave = EmpLeaves.Where(el => el.IdEmployee == Convert.ToInt32(SelectedEmployeeList[j])).FirstOrDefault();
+                            if (EmployeeShiftList.Any(esl => esl.IdCompanyShift == empLeave.IdCompanyShift))
+                            {
+                                SelectedIndexForCompanyShift = EmployeeShiftList.IndexOf(EmployeeShiftList.Where(esl => esl.IdCompanyShift == empLeave.IdCompanyShift).FirstOrDefault());
+                                
+                                    CompanyShiftIdArray[j] = EmployeeShiftList[SelectedIndexForCompanyShift].IdCompanyShift;
+                                    CompanyShiftArray[j] = EmployeeShiftList[SelectedIndexForCompanyShift].CompanyShift;
+                                
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        private void LoadShiftData()
+        {
+            CompanyShiftIdArray = new Int32[SelectedEmployeeList.Count];
+            CompanyShiftArray = new CompanyShift[SelectedEmployeeList.Count];
+            
+            if (SelectedEmployeeList.Count > 0)
+            {               
+                    for (int j = 0; j < SelectedEmployeeList.Count; j++)
+                    {
+                        EmployeeShiftList = new ObservableCollection<EmployeeShift>();
+                        ObservableCollection <EmployeeShift> TempEmpShiftList = new ObservableCollection<EmployeeShift>(HrmService.GetEmployeeShiftsByIdEmployee(Convert.ToInt32(SelectedEmployeeList[j])));
+
+                        foreach (EmployeeShift Shift in TempEmpShiftList)
+                        {
+                            if(Shift.CompanyShift.Name != "---")
+                                EmployeeShiftList.Add(Shift);
+                        }
+
+                        if (EmployeeShiftList.Count > 0)
+                        {
+                            CompanyShiftIdArray[j] = EmployeeShiftList[0].IdCompanyShift;
+                            CompanyShiftArray[j] = EmployeeShiftList[0].CompanyShift;
+                            SelectedIndexForCompanyShift = 0;
+                        }
+
+                        if (EmployeeShiftList.Count == 0)
+                        {
+                            SelectedIndexForCompanyShift = 0;
+                        }
+                        else
+                        {
+                            Double Hour = 0;                            
+                            for (int i = 0; i < EmployeeShiftList.Count; i++)
+                            {
+                                
+                                if (EmployeeShiftList[i].CompanyShift.Name != "---")
+                                {
+                                    DateTime shiftStartTime = GetShiftStartTime((int)StartTime.Value.Date.DayOfWeek, EmployeeShiftList[i], true);
+                                    DateTime shiftEndTime = GetShiftStartTime((int)EndTime.Value.Date.DayOfWeek, EmployeeShiftList[i], false);
+
+                                    TimeSpan Diff = new TimeSpan();
+                                    if (shiftStartTime > shiftEndTime)
+                                    {
+                                        Diff = new TimeSpan(0, (24 - shiftStartTime.TimeOfDay.Hours) + shiftEndTime.TimeOfDay.Hours, 0, 0);
+                                        Diff = Diff.Subtract(new TimeSpan(0, 0, Math.Abs(shiftStartTime.TimeOfDay.Minutes - shiftEndTime.TimeOfDay.Minutes), 0));
+                                    }
+                                    else
+                                        Diff = shiftEndTime.Subtract(shiftStartTime);
+
+                                    if (Hour==0)
+                                        Hour = Convert.ToDouble(Diff.TotalHours);
+
+                                    if (Hour > Diff.TotalHours)
+                                    {
+                                        Hour = Diff.TotalHours;
+                                        CompanyShiftIdArray[j] = EmployeeShiftList[i].IdCompanyShift;
+                                        CompanyShiftArray[j] = EmployeeShiftList[i].CompanyShift;
+                                        SelectedIndexForCompanyShift = i;
+                                    }
+                                    else if (Hour == Diff.TotalHours && i>0)
+                                    {
+                                        try
+                                        {
+                                            if (EmployeeShiftList[i].IdCompanyShift < EmployeeShiftList[i - 1].IdCompanyShift)
+                                            {
+                                                CompanyShiftIdArray[j] = EmployeeShiftList[i - 1].IdCompanyShift;
+                                                CompanyShiftArray[j] = EmployeeShiftList[i - 1].CompanyShift;
+                                                SelectedIndexForCompanyShift = i - 1;
+                                            }
+                                            else
+                                            {
+                                                CompanyShiftIdArray[j] = EmployeeShiftList[i].IdCompanyShift;
+                                                CompanyShiftArray[j] = EmployeeShiftList[i].CompanyShift;
+                                                SelectedIndexForCompanyShift = i;
+                                            }
+                                        }
+                                        catch (Exception ex)
+                                        { }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                StartTime = GetShiftStartTime((int)StartTime.Value.Date.DayOfWeek, EmployeeShiftList[SelectedIndexForCompanyShift], true);
+                EndTime = GetShiftStartTime((int)EndTime.Value.Date.DayOfWeek, EmployeeShiftList[SelectedIndexForCompanyShift], false);
+            }
+            else
+            {                
+                EmployeeShiftList = new ObservableCollection<EmployeeShift>();
+                EmployeeShift tempEmployeeShift = new EmployeeShift();
+                tempEmployeeShift.CompanyShift = new CompanyShift() { Name = "---", IdCompanyShift = 0 };
+                EmployeeShiftList.Insert(0, tempEmployeeShift);
+                
+                SelectedEmployeeShift = tempEmployeeShift;
+                SelectedIndexForCompanyShift = 0;
+            }
+        }
+        private void SelectedIndexChangedCommandAction(RoutedEventArgs obj)
+        {
+            try
+            {
+                GeosApplication.Instance.Logger.Log("Method SelectedIndexChangedCommandAction()...", category: Category.Info, priority: Priority.Low);
+
+                if (SelectedIndexForEmployee > 0)
+                {
+                    if (!IsEditInit)
+                    {
+                        var SelectedEmployee = EmployeeListFinal[SelectedIndexForEmployee];                        
+                        EmployeeShiftList = new ObservableCollection<EmployeeShift>(HrmService.GetEmployeeShiftsByIdEmployee(SelectedEmployee.IdEmployee));
+                        if (EmployeeShiftList.Count == 2)
+                            SelectedIndexForCompanyShift = 1;
+
+                    }
+                }
+                else
+                {                    
+                    EmployeeShiftList = new ObservableCollection<EmployeeShift>();
+                    EmployeeShift tempEmployeeShift = new EmployeeShift();
+                    tempEmployeeShift.CompanyShift = new CompanyShift() { Name = "---", IdCompanyShift = 0 };
+                    EmployeeShiftList.Insert(0, tempEmployeeShift);
+                    SelectedIndexForCompanyShift = 0;
+                    SelectedEmployeeShift = tempEmployeeShift;
+                }
+                GeosApplication.Instance.Logger.Log("Method SelectedIndexChangedCommandAction()....executed successfully", category: Category.Info, priority: Priority.Low);
+            }
+            catch (FaultException<ServiceException> ex)
+            {
+                if (DXSplashScreen.IsActive) { DXSplashScreen.Close(); }
+                GeosApplication.Instance.Logger.Log("Get an error in SelectedIndexChangedCommandAction() Method " + ex.Detail.ErrorMessage, category: Category.Info, priority: Priority.Low);
+                CustomMessageBox.Show(GeosApplication.Instance.ExceptionHandlingOperationString(ex.Detail, null), Application.Current.Resources["PopUpWarningColor"].ToString(), CustomMessageBox.MessageImagePath.NotOk, MessageBoxButton.OK);
+            }
+            catch (ServiceUnexceptedException ex)
+            {
+                if (DXSplashScreen.IsActive) { DXSplashScreen.Close(); }
+                GeosApplication.Instance.Logger.Log("Get an error in SelectedIndexChangedCommandAction() Method - ServiceUnexceptedException " + ex.Message, category: Category.Info, priority: Priority.Low);
+                GeosApplication.Instance.ExceptionHandlingOperation(ex.ExceptionType, GeosApplication.Instance.ApplicationSettings["ServiceProviderIP"].ToString(), null);
+            }
+            catch (Exception ex)
+            {
+                GeosApplication.Instance.Logger.Log("Get an error in Method SelectedIndexChangedCommandAction()...." + ex.Message, category: Category.Exception, priority: Priority.Low);
+            }
+        }
+        private void OnDateEditValueChanging(EditValueChangingEventArgs obj)
+        {
+            try
+            {
+                GeosApplication.Instance.Logger.Log("Method OnDateEditValueChanging ...", category: Category.Info, priority: Priority.Low);
+
+                startDateErrorMessage = string.Empty;
+
+                if (StartDate != null && EndDate != null)
+                {
+                    if (StartDate.Value.Date > EndDate.Value.Date)
+                    {
+                        startDateErrorMessage = System.Windows.Application.Current.FindResource("AddEmployeeStartDateError").ToString();
+                        endDateErrorMessage = System.Windows.Application.Current.FindResource("AddEmployeeEndDateError").ToString();
+                    }
+                    else
+                    {
+                        startDateErrorMessage = string.Empty;
+                        endDateErrorMessage = string.Empty;
+                    }
+                }
+                else
+                {
+                    startDateErrorMessage = string.Empty;
+                    endDateErrorMessage = string.Empty;
+                }
+
+                CheckDateTimeValidation();
+
+                GeosApplication.Instance.Logger.Log("Method OnDateEditValueChanging() executed successfully", category: Category.Info, priority: Priority.Low);
+            }
+            catch (Exception ex)
+            {
+                GeosApplication.Instance.Logger.Log("Get an error in Method OnDateEditValueChanging()...." + ex.Message, category: Category.Exception, priority: Priority.Low);
+            }
+        }
+
+        private void OnTimeEditValueChanging(RoutedEventArgs obj)
+        {
+            try
+            {
+                GeosApplication.Instance.Logger.Log("Method OnTimeEditValueChanging ...", category: Category.Info, priority: Priority.Low);
+
+                StartTimeErrorMessage = string.Empty;
+
+                if (StartTime != null && EndTime != null)
+                {
+
+
+                    if (StartTime > EndTime)
+                    {
+                        StartTimeErrorMessage = System.Windows.Application.Current.FindResource("AddEmployeeLeaveStartTimeError").ToString();
+                        EndTimeErrorMessage = System.Windows.Application.Current.FindResource("AddEmployeeLeaveEndTimeError").ToString();
+                    }
+                    else
+                    {
+                        StartTimeErrorMessage = string.Empty;
+                        EndTimeErrorMessage = string.Empty;
+                    }
+                }
+                else
+                {
+                    StartTimeErrorMessage = string.Empty;
+                    EndTimeErrorMessage = string.Empty;
+                }
+
+                CheckDateTimeValidation();
+
+                GeosApplication.Instance.Logger.Log("Method OnTimeEditValueChanging() executed successfully", category: Category.Info, priority: Priority.Low);
+            }
+            catch (Exception ex)
+            {
+                GeosApplication.Instance.Logger.Log("Get an error in Method OnTimeEditValueChanging()...." + ex.Message, category: Category.Exception, priority: Priority.Low);
+            }
+        }
+
+
+        /// <summary>
+        ///Validation for Date & time done by mayuri
+        /// </summary>
+        public void CheckDateTimeValidation()
+        {
+            try
+            {
+                GeosApplication.Instance.Logger.Log("Method CheckDateTimeValidation()...", category: Category.Info, priority: Priority.Low);
+                
+
+                if (!HrmCommon.Instance.IsPermissionReadOnly)
+                {
+                    if (!IsAllDayEvent)
+                    {
+                        if (StartDate != null && EndDate != null && StartTime != null && EndTime != null)
+                        {
+                            DateTime _TempStartDate = StartDate.Value.Date.AddHours(StartTime.Value.TimeOfDay.Hours).AddMinutes(StartTime.Value.TimeOfDay.Minutes);
+                            DateTime _TimeEndDate = EndDate.Value.Date.AddHours(EndTime.Value.TimeOfDay.Hours).AddMinutes(EndTime.Value.TimeOfDay.Minutes);
+                            if (_TempStartDate >= _TimeEndDate)
+                            {
+                                StartTimeErrorMessage = System.Windows.Application.Current.FindResource("AddEmployeeLeaveStartTimeError").ToString();
+                                EndTimeErrorMessage = System.Windows.Application.Current.FindResource("AddEmployeeLeaveEndTimeError").ToString();
+                            }
+                            else
+                            {
+                                StartTimeErrorMessage = string.Empty;
+                                EndTimeErrorMessage = string.Empty;
+                            }
+                        }
+                        else
+                        {
+                            StartTimeErrorMessage = string.Empty;
+                            EndTimeErrorMessage = string.Empty;
+                        }
+                     }
+                    else
+                    {
+                        StartTimeErrorMessage = string.Empty;
+                        EndTimeErrorMessage = string.Empty;
+                    }
+
+                    error = EnableValidationAndGetError();
+                    PropertyChanged(this, new PropertyChangedEventArgs("StartDate"));
+                    PropertyChanged(this, new PropertyChangedEventArgs("EndDate"));
+                    PropertyChanged(this, new PropertyChangedEventArgs("StartTime"));
+                    PropertyChanged(this, new PropertyChangedEventArgs("EndTime"));
+                }
+                GeosApplication.Instance.Logger.Log("Method CheckDateTimeValidation()....executed successfully", category: Category.Info, priority: Priority.Low);
+            }
+            catch (Exception ex)
+            {
+                GeosApplication.Instance.Logger.Log("Get an error in Method CheckDateTimeValidation()...." + ex.Message, category: Category.Exception, priority: Priority.Low);
+            }
+        }
+        /// <summary>
+        ///This function use to add change log in employee detail.
+        ///Sprint 46 Task -- Changelog when managing employee leaves--by Amit
+        /// </summary>
+        public void AddEmployeeLeaveChangeLogDetails()
+        {
+            try
+            {
+                GeosApplication.Instance.Logger.Log("Method AddChangedDetailsInLog()...", category: Category.Info, priority: Priority.Low);
+
+                EmployeeLeaveChangeLogList = new ObservableCollection<EmployeeChangelog>();
+                LookupValue newType = GeosApplication.Instance.EmployeeLeaveList.FirstOrDefault(x => x.IdLookupValue == GeosApplication.Instance.EmployeeLeaveList[SelectedLeaveType].IdLookupValue);
+
+                //New Attachment Removed
+                if (IsNewLeave == false)
+                {
+                    LookupValue oldType = GeosApplication.Instance.EmployeeLeaveList.FirstOrDefault(x => x.IdLookupValue == OldEmployeeLeaveDetatils.IdLeave);
+
+                    //Start Date 
+                    if (!OldEmployeeLeaveDetatils.StartDate.Value.ToShortDateString().Equals(StartDate.Value.ToShortDateString()))
+                    {
+                        EmployeeLeaveChangeLogList.Add(new EmployeeChangelog() { IdEmployee = OldEmployeeLeaveDetatils.IdEmployee, ChangeLogDatetime = GeosApplication.Instance.ServerDateTime, ChangeLogIdUser = GeosApplication.Instance.ActiveUser.IdUser, ChangeLogChange = string.Format(System.Windows.Application.Current.FindResource("EmployeeLeaveStartDateChangeLog").ToString(), OldEmployeeLeaveDetatils.StartDate.Value.ToShortDateString(), StartDate.Value.ToShortDateString()) });
+                    }
+                    //End Date 
+                    if (!OldEmployeeLeaveDetatils.EndDate.Value.ToShortDateString().Equals(EndDate.Value.ToShortDateString()))
+                    {
+                        EmployeeLeaveChangeLogList.Add(new EmployeeChangelog() { IdEmployee = OldEmployeeLeaveDetatils.IdEmployee, ChangeLogDatetime = GeosApplication.Instance.ServerDateTime, ChangeLogIdUser = GeosApplication.Instance.ActiveUser.IdUser, ChangeLogChange = string.Format(System.Windows.Application.Current.FindResource("EmployeeLeaveEndDateChangeLog").ToString(), OldEmployeeLeaveDetatils.EndDate.Value.ToShortDateString(), EndDate.Value.ToShortDateString()) });
+                    }
+                    //Start Time 
+
+                    if (!OldEmployeeLeaveDetatils.StartTime.Equals(StartTime.Value.TimeOfDay))
+                    {
+                        EmployeeLeaveChangeLogList.Add(new EmployeeChangelog() { IdEmployee = OldEmployeeLeaveDetatils.IdEmployee, ChangeLogDatetime = GeosApplication.Instance.ServerDateTime, ChangeLogIdUser = GeosApplication.Instance.ActiveUser.IdUser, ChangeLogChange = string.Format(System.Windows.Application.Current.FindResource("EmployeeLeaveStartTimeChangeLog").ToString(), OldEmployeeLeaveDetatils.StartTime, StartTime.Value.TimeOfDay) });
+                    }
+                    //End Time 
+                    if (!OldEmployeeLeaveDetatils.EndTime.Equals(EndTime.Value.TimeOfDay))
+                    {
+                        EmployeeLeaveChangeLogList.Add(new EmployeeChangelog() { IdEmployee = OldEmployeeLeaveDetatils.IdEmployee, ChangeLogDatetime = GeosApplication.Instance.ServerDateTime, ChangeLogIdUser = GeosApplication.Instance.ActiveUser.IdUser, ChangeLogChange = string.Format(System.Windows.Application.Current.FindResource("EmployeeLeaveEndTimeChangeLog").ToString(), OldEmployeeLeaveDetatils.EndTime, EndTime.Value.TimeOfDay) });
+                    }
+                    //Leave Type
+
+                    if (!oldType.Value.Equals(newType.Value))
+                    {
+                        EmployeeLeaveChangeLogList.Add(new EmployeeChangelog() { IdEmployee = OldEmployeeLeaveDetatils.IdEmployee, ChangeLogDatetime = GeosApplication.Instance.ServerDateTime, ChangeLogIdUser = GeosApplication.Instance.ActiveUser.IdUser, ChangeLogChange = string.Format(System.Windows.Application.Current.FindResource("EmployeeLeaveTypeChangeLog").ToString(), oldType.Value, newType.Value) });
+                    }
+                    //Remarks 
+                    if (!string.IsNullOrEmpty(OldEmployeeLeaveDetatils.Remark) && !string.IsNullOrEmpty(Remarks) && !OldEmployeeLeaveDetatils.Remark.Equals(Remarks))
+                    {
+                        EmployeeLeaveChangeLogList.Add(new EmployeeChangelog() { IdEmployee = OldEmployeeLeaveDetatils.IdEmployee, ChangeLogDatetime = GeosApplication.Instance.ServerDateTime, ChangeLogIdUser = GeosApplication.Instance.ActiveUser.IdUser, ChangeLogChange = string.Format(System.Windows.Application.Current.FindResource("EmployeeLeaveRemarksChangeLog").ToString(), OldEmployeeLeaveDetatils.Remark, Remarks) });
+                    }
+                    //Remarks Null
+                    if (string.IsNullOrEmpty(OldEmployeeLeaveDetatils.Remark) && !string.IsNullOrEmpty(Remarks))
+                    {
+                        EmployeeLeaveChangeLogList.Add(new EmployeeChangelog() { IdEmployee = OldEmployeeLeaveDetatils.IdEmployee, ChangeLogDatetime = GeosApplication.Instance.ServerDateTime, ChangeLogIdUser = GeosApplication.Instance.ActiveUser.IdUser, ChangeLogChange = string.Format(System.Windows.Application.Current.FindResource("EmployeeLeaveRemarksChangeLog").ToString(), "None", Remarks) });
+                    }
+                    //New Remarks Null
+                    if (!string.IsNullOrEmpty(OldEmployeeLeaveDetatils.Remark) && string.IsNullOrEmpty(Remarks))
+                    {
+                        EmployeeLeaveChangeLogList.Add(new EmployeeChangelog() { IdEmployee = OldEmployeeLeaveDetatils.IdEmployee, ChangeLogDatetime = GeosApplication.Instance.ServerDateTime, ChangeLogIdUser = GeosApplication.Instance.ActiveUser.IdUser, ChangeLogChange = string.Format(System.Windows.Application.Current.FindResource("EmployeeLeaveRemarksChangeLog").ToString(), OldEmployeeLeaveDetatils.Remark, "None") });
+                    }
+                    //Attachment
+                    if (!string.IsNullOrEmpty(OldEmployeeLeaveDetatils.FileName) && !string.IsNullOrEmpty(leaveFileName) && !OldEmployeeLeaveDetatils.FileName.Equals(leaveFileName))
+                    {
+                        EmployeeLeaveChangeLogList.Add(new EmployeeChangelog() { IdEmployee = OldEmployeeLeaveDetatils.IdEmployee, ChangeLogDatetime = GeosApplication.Instance.ServerDateTime, ChangeLogIdUser = GeosApplication.Instance.ActiveUser.IdUser, ChangeLogChange = string.Format(System.Windows.Application.Current.FindResource("EmployeeLeaveAttachementChangeLog").ToString(), OldEmployeeLeaveDetatils.FileName, LeaveFileName) });
+                    }
+                    //Attachment Null
+                    if (string.IsNullOrEmpty(OldEmployeeLeaveDetatils.FileName) && !string.IsNullOrEmpty(leaveFileName))
+                    {
+                        EmployeeLeaveChangeLogList.Add(new EmployeeChangelog() { IdEmployee = OldEmployeeLeaveDetatils.IdEmployee, ChangeLogDatetime = GeosApplication.Instance.ServerDateTime, ChangeLogIdUser = GeosApplication.Instance.ActiveUser.IdUser, ChangeLogChange = string.Format(System.Windows.Application.Current.FindResource("EmployeeLeaveAttachementChangeLog").ToString(), "None", LeaveFileName) });
+                    }
+                    //New Attachment Removed
+                    if (!string.IsNullOrEmpty(OldEmployeeLeaveDetatils.FileName) && string.IsNullOrEmpty(leaveFileName))
+                    {
+                        EmployeeLeaveChangeLogList.Add(new EmployeeChangelog() { IdEmployee = OldEmployeeLeaveDetatils.IdEmployee, ChangeLogDatetime = GeosApplication.Instance.ServerDateTime, ChangeLogIdUser = GeosApplication.Instance.ActiveUser.IdUser, ChangeLogChange = string.Format(System.Windows.Application.Current.FindResource("EmployeeLeaveAttachementChangeLog").ToString(), OldEmployeeLeaveDetatils.FileName, "None") });
+                    }
+                }
+                //Leave Created
+                if (IsNewLeave == true)
+                {
+                    EmployeeLeaveChangeLogList.Add(new EmployeeChangelog() { IdEmployee = EmployeeListFinal[SelectedIndexForEmployee].IdEmployee, ChangeLogDatetime = GeosApplication.Instance.ServerDateTime, ChangeLogIdUser = GeosApplication.Instance.ActiveUser.IdUser, ChangeLogChange = string.Format(System.Windows.Application.Current.FindResource("EmployeeLeaveAddChangeLog").ToString(), newType.Value, StartDate.Value.ToShortDateString(), EndDate.Value.ToShortDateString()) });
+                }
+                //Leave Deleted
+                //if (UpdateEmployeeLeave.TransactionOperation == ModelBase.TransactionOperations.Delete)
+                //{
+                //    EmployeeLeaveChangeLogList.Add(new EmployeeChangelog() { IdEmployee = OldEmployeeLeaveDetatils.IdEmployee, ChangeLogDatetime = GeosApplication.Instance.ServerDateTime, ChangeLogIdUser = GeosApplication.Instance.ActiveUser.IdUser, ChangeLogChange = string.Format(System.Windows.Application.Current.FindResource("EmployeeLeaveDeleteChangeLog").ToString(), newType.Value) });
+                //}
+                GeosApplication.Instance.Logger.Log("Method AddChangedDetailsInLog()...Executed Successfully", category: Category.Info, priority: Priority.Low);
+            }
+            catch (Exception ex)
+            {
+                GeosApplication.Instance.Logger.Log("Get an error in Method AddChangedDetailsInLog()...", category: Category.Info, priority: Priority.Low);
+            }
+        }
+        /// <summary>
+        /// [HRM-M041-21] added new parameters
+        /// [001] Sprint46 HRM Take values from lookup values instead of the existing tables by Mayuri  
+        /// [002][SP-65][skale][20-06-2019][GEOS2-1588]Add a new filter criterion to Leaves and Attendance Window in GHRM
+        /// [003] [cpatil][2020-01-22][GEOS2-2008] We can not see some the Employees in LEAVES and ATTENDANCE with Period = 2019, but the same employees in 2020 we can see.
+        /// </summary>
+        /// <param name="EmployeeLeaveList"></param>
+        /// <param name="selectedEmployee">selectedEmployee</param>
+        /// <param name="selectedStartDate">selectedStartDate</param>
+        /// <param name="selectedEndDate">selectedEndDate</param>
+        /// <param name="activeView">activeViewType</param>
+        public void Init(ObservableCollection<EmployeeLeave> EmployeeLeaveList, object selectedEmployee, DateTime selectedStartDate, DateTime selectedEndDate, byte activeViewType,
+                            ObservableCollection<Employee> employeeListFinalForLeaves = null, ObservableCollection<EmployeeAttendance> employeeAttendanceList = null)
+        {
+            try
+            {
+                GeosApplication.Instance.Logger.Log("Method Init()...", category: Category.Info, priority: Priority.Low);
+                ExistEmployeeLeaveList = EmployeeLeaveList;
+                IsNewLeave = true;
+                //List<Company> plantOwners = HrmCommon.Instance.SelectedAuthorizedPlantsList.Cast<Company>().ToList();
+
+                //var plantOwnersIds = string.Join(",", plantOwners.Select(i => i.IdCompany));
+                EmployeeAttendanceList = employeeAttendanceList; //new ObservableCollection<EmployeeAttendance>(HrmService.GetEmployeeAttendanceForNewLeave(plantOwnersIds, HrmCommon.Instance.SelectedPeriod, HrmCommon.Instance.ActiveEmployee.Organization, HrmCommon.Instance.ActiveEmployee.EmployeeDepartments, HrmCommon.Instance.IdUserPermission));
+                
+                if (employeeListFinalForLeaves == null)
+                {
+                    EmployeeListFinal = new ObservableCollection<Employee>();
+                    foreach (var item in SelectedPlantList)
+                    {
+                        // [003] Changed service method GetAllEmployeesForLeaveByIdCompany_V2032 to GetAllEmployeesForLeaveByIdCompany_V2039
+                        var tempEmployeeListFinal = new ObservableCollection<Employee>(HrmService.GetAllEmployeesForLeaveByIdCompany_V2041(item.IdCompany.ToString(), SelectedPeriod, HrmCommon.Instance.ActiveEmployee.Organization, HrmCommon.Instance.ActiveEmployee.EmployeeDepartments, HrmCommon.Instance.IdUserPermission)).OrderBy(x => x.FullName);//[002] added
+
+                        EmployeeListFinal.AddRange(tempEmployeeListFinal);
+                    }
+                }
+                else
+                {
+                    EmployeeListFinal = employeeListFinalForLeaves;
+                }
+                EmployeeListFinal = new ObservableCollection<Employee>(EmployeeListFinal.GroupBy(p => p.IdEmployee).Select(g => g.First()).ToList());
+                
+                //EmployeeListFinal.Insert(0, new Employee() { FirstName = "---", IdEmployee = 0 });
+                Employee obj = selectedEmployee as Employee;
+
+
+                if (obj != null)
+                {
+                    SelectedIndexForEmployee = EmployeeListFinal.IndexOf(EmployeeListFinal.FirstOrDefault(x => x.IdEmployee == obj.IdEmployee));
+                    
+                }
+
+                if (selectedStartDate != DateTime.MinValue && selectedEndDate != DateTime.MinValue)
+                {
+                    StartDate = selectedStartDate;
+                    EndDate = selectedEndDate;
+
+                    StartTime = FromDates[FromDates.FindIndex(x => x.Hour == StartDate.Value.Hour && x.Minute == StartDate.Value.Minute)];
+                    EndTime = ToDates[ToDates.FindIndex(x => x.Hour == EndDate.Value.Hour && x.Minute == EndDate.Value.Minute)];
+
+                    if (activeViewType == 1)
+                        IsAllDayEvent = true;
+                    else
+                    {
+                        if (StartTime == DateTime.MinValue && EndTime == DateTime.MinValue)
+                        {
+                            IsAllDayEvent = true;
+                            if (StartDate == selectedEndDate.AddDays(-1))
+                                EndDate = selectedEndDate.AddDays(-1);
+                        }
+                    }
+                }
+                //[001] Code Comment [important]
+                //CompanyLeavesList = new ObservableCollection<CompanyLeave>(HrmService.GetSelectedIdCompanyLeaves(WorkingPlantId));
+                //CompanyLeavesList.Insert(0, new CompanyLeave() { Name = "---", IdCompanyLeave = 0 });
+
+                IsVisible = Visibility.Hidden;
+                IsAdd = true;
+                /// [0001][04/08/2020][sjadhav][SPRINT 84][GEOS2-2437][GHRM - Employee Leaves export report [#ERF59]]
+                /// For Selected Employee, load shift
+                SelectedEmployeeList = new List<object>();
+                if (obj != null)
+                {                    
+                    SelectedEmployeeList.Add(obj.IdEmployee);                    
+                }
+                else if (SelectedIndexForEmployee > -1)
+                {
+                    SelectedEmployeeList.Add(EmployeeListFinal[SelectedIndexForEmployee].IdEmployee);
+                }
+                LoadShiftData();
+                LoadAnyPreShift();
+                GeosApplication.Instance.Logger.Log("Method Init()....executed successfully", category: Category.Info, priority: Priority.Low);
+            }
+            catch (FaultException<ServiceException> ex)
+            {
+                if (DXSplashScreen.IsActive) { DXSplashScreen.Close(); }
+                GeosApplication.Instance.Logger.Log("Get an error in Init() Method " + ex.Detail.ErrorMessage, category: Category.Info, priority: Priority.Low);
+                CustomMessageBox.Show(GeosApplication.Instance.ExceptionHandlingOperationString(ex.Detail, null), Application.Current.Resources["PopUpWarningColor"].ToString(), CustomMessageBox.MessageImagePath.NotOk, MessageBoxButton.OK);
+            }
+            catch (ServiceUnexceptedException ex)
+            {
+                if (DXSplashScreen.IsActive) { DXSplashScreen.Close(); }
+                GeosApplication.Instance.Logger.Log("Get an error in Init() Method - ServiceUnexceptedException " + ex.Message, category: Category.Info, priority: Priority.Low);
+                GeosApplication.Instance.ExceptionHandlingOperation(ex.ExceptionType, GeosApplication.Instance.ApplicationSettings["ServiceProviderIP"].ToString(), null);
+            }
+            catch (Exception ex)
+            {
+                GeosApplication.Instance.Logger.Log("Get an error in Method Init()...." + ex.Message, category: Category.Exception, priority: Priority.Low);
+            }
+        }
+
+        /// <summary>
+        /// [001] Sprint46 HRM Take values from lookup values instead of the existing tables by Mayuri   
+        /// [003] [cpatil][2020-01-22][GEOS2-2008] We can not see some the Employees in LEAVES and ATTENDANCE with Period = 2019, but the same employees in 2020 we can see.
+        /// </summary>
+        /// <param name="EmployeeLeave"></param>
+        public void EditInit(EmployeeLeave EmployeeLeave, ObservableCollection<EmployeeLeave> EmployeeLeaveList, 
+                                ObservableCollection<Employee> employeeListFinalForLeaves = null, ObservableCollection<EmployeeAttendance> employeeAttendanceList = null)
+        {
+            try
+            {
+                GeosApplication.Instance.Logger.Log("Method EditInit()...", category: Category.Info, priority: Priority.Low);
+                EmployeeListFinal = new ObservableCollection<Employee>();
+                IsNewLeave = false;
+                OldEmployeeLeaveDetatils = new EmployeeLeave();
+                OldEmployeeLeaveDetatils = (EmployeeLeave)EmployeeLeave.Clone();
+                EmployeeAttendanceList = employeeAttendanceList;
+                if (employeeListFinalForLeaves == null)
+                {
+                    foreach (var item in SelectedPlantList)
+                    {
+                        // [003] Changed service method GetAllEmployeesForLeaveByIdCompany_V2032 to GetAllEmployeesForLeaveByIdCompany_V2039
+                        var tempEmployeeListFinal = new ObservableCollection<Employee>(HrmService.GetAllEmployeesForLeaveByIdCompany_V2041(item.IdCompany.ToString(), SelectedPeriod, HrmCommon.Instance.ActiveEmployee.Organization, HrmCommon.Instance.ActiveEmployee.EmployeeDepartments, HrmCommon.Instance.IdUserPermission)).OrderBy(x => x.FullName);
+                        EmployeeListFinal.AddRange(tempEmployeeListFinal);
+                    }
+                }
+                else
+                {
+                    EmployeeListFinal = employeeListFinalForLeaves;
+                }
+                EmployeeListFinal = new ObservableCollection<Employee>(EmployeeListFinal.GroupBy(p => p.IdEmployee).Select(g => g.First()).ToList());
+                //EmployeeListFinal.Insert(0, new Employee() { FirstName = "---", IdEmployee = 0 });
+
+                //[001] Code Comment [important]
+                //CompanyLeavesList = new ObservableCollection<CompanyLeave>(HrmService.GetSelectedIdCompanyLeaves(WorkingPlantId));
+                //CompanyLeavesList.Insert(0, new CompanyLeave() { Name = "---", IdCompanyLeave = 0 });
+
+                SelectedIndexForEmployee = EmployeeListFinal.IndexOf(EmployeeListFinal.FirstOrDefault(x => x.IdEmployee == EmployeeLeave.IdEmployee));
+                StartDate = EmployeeLeave.StartDate;
+                EndDate = EmployeeLeave.EndDate;
+                
+                StartTime = FromDates[FromDates.FindIndex(x => x.Hour == StartDate.Value.Hour && x.Minute == StartDate.Value.Minute)];
+                EndTime = ToDates[ToDates.FindIndex(x => x.Hour == EndDate.Value.Hour && x.Minute == EndDate.Value.Minute)];
+                //StartTime = Convert.ToDateTime(EmployeeLeave.StartTime.ToString());
+                //EndTime = Convert.ToDateTime(EmployeeLeave.EndTime.ToString());
+                IsAllDayEvent = Convert.ToBoolean(EmployeeLeave.IsAllDayEvent);
+
+
+                //[001] Code Comment [important]
+                // SelectedLeaveType = companyLeavesList.FindIndex(x => x.IdCompanyLeave == Convert.ToUInt16(EmployeeLeave.IdLeave));              
+                SelectedLeaveType = GeosApplication.Instance.EmployeeLeaveList.ToList().FindIndex(x => x.IdLookupValue == Convert.ToInt32(EmployeeLeave.IdLeave));
+
+                Remarks = EmployeeLeave.Remark;
+
+                LeaveFileName = EmployeeLeave.FileName;
+                OldLeaveFileName = EmployeeLeave.FileName;
+
+                
+                IdEmployeeLeave = EmployeeLeave.IdEmployeeLeave;
+                EmployeeShiftList = new ObservableCollection<EmployeeShift>();
+                ObservableCollection<EmployeeShift> TempEmpShiftList = new ObservableCollection<EmployeeShift>(HrmService.GetEmployeeShiftsByIdEmployee(EmployeeListFinal[SelectedIndexForEmployee].IdEmployee));
+
+                foreach (EmployeeShift Shift in TempEmpShiftList)
+                {
+                    if (Shift.CompanyShift.Name != "---")
+                        EmployeeShiftList.Add(Shift);
+                }
+                //EmployeeShiftList = new ObservableCollection<EmployeeShift>(HrmService.GetEmployeeShiftsByIdEmployee(EmployeeListFinal[SelectedIndexForEmployee].IdEmployee));
+                StartTime = FromDates[FromDates.FindIndex(x => x.Hour == StartDate.Value.Hour && x.Minute == StartDate.Value.Minute)];                
+                EndTime = FromDates[FromDates.FindIndex(x => x.Hour == EndDate.Value.Hour && x.Minute == EndDate.Value.Minute)];
+
+                
+                if (EmployeeShiftList != null)
+                {
+                    EmployeeShiftList.ToList().ForEach(esl => esl.IsEnabled = true);
+                    if (!EmployeeShiftList.Any(a => a.CompanyShift.IdCompanyShift == EmployeeLeave.IdCompanyShift))
+                    //if(SelectedIndexForCompanyShift<0)
+                    {
+                        EmployeeShift ObjShift = new EmployeeShift();
+                        ObjShift.IdCompanyShift = EmployeeLeave.IdCompanyShift;
+                        ObjShift.CompanyShift = EmployeeLeave.CompanyShift;
+                        EmployeeShiftList.Add(ObjShift);
+                        ObjShift.IsEnabled = false;
+                    }
+                }
+                SelectedIndexForCompanyShift = EmployeeShiftList.IndexOf(EmployeeShiftList.FirstOrDefault(x => x.IdCompanyShift == EmployeeLeave.IdCompanyShift));
+
+                AttachmentList = new ObservableCollection<Attachment>();
+                if (!string.IsNullOrEmpty(EmployeeLeave.FileName))
+                {
+                    Attachment attachment = new Attachment();
+                    attachment.FilePath = null;
+                    attachment.OriginalFileName = EmployeeLeave.FileName;
+                    attachment.IsDeleted = false;
+                    //attachment.FileByte = LeaveFileInBytes;
+                    AttachmentList.Add(attachment);
+                    AttachedFile = AttachmentList[0];
+                }
+                ExistEmployeeLeaveList = EmployeeLeaveList;
+                if (AttachmentList.Count > 0)
+                    IsVisible = Visibility.Visible;
+                else
+                    IsVisible = Visibility.Hidden;
+                IsAdd = false;
+                GeosApplication.Instance.Logger.Log("Method EditInit()....executed successfully", category: Category.Info, priority: Priority.Low);
+            }
+            catch (FaultException<ServiceException> ex)
+            {
+                if (DXSplashScreen.IsActive) { DXSplashScreen.Close(); }
+                GeosApplication.Instance.Logger.Log("Get an error in EditInit() Method " + ex.Detail.ErrorMessage, category: Category.Info, priority: Priority.Low);
+                CustomMessageBox.Show(GeosApplication.Instance.ExceptionHandlingOperationString(ex.Detail, null), Application.Current.Resources["PopUpWarningColor"].ToString(), CustomMessageBox.MessageImagePath.NotOk, MessageBoxButton.OK);
+            }
+            catch (ServiceUnexceptedException ex)
+            {
+                if (DXSplashScreen.IsActive) { DXSplashScreen.Close(); }
+                GeosApplication.Instance.Logger.Log("Get an error in EditInit() Method - ServiceUnexceptedException " + ex.Message, category: Category.Info, priority: Priority.Low);
+                GeosApplication.Instance.ExceptionHandlingOperation(ex.ExceptionType, GeosApplication.Instance.ApplicationSettings["ServiceProviderIP"].ToString(), null);
+            }
+            catch (Exception ex)
+            {
+                GeosApplication.Instance.Logger.Log("Get an error in Method EditInit()...." + ex.Message, category: Category.Exception, priority: Priority.Low);
+            }
+        }
+
+        /// <summary>
+        /// This method use for Add Read only permission
+        ///  [HRM-M046-07] Add new permission ReadOnly--by Amit
+        /// </summary>
+        /// <param name="EmployeeLeave"></param>
+        public void InitReadOnly(EmployeeLeave EmployeeLeave)
+        {
+            try
+            {
+
+                GeosApplication.Instance.Logger.Log("Method InitReadOnly()...", category: Category.Info, priority: Priority.Low);
+                //EmployeeListFinal = new ObservableCollection<Employee>();
+                IsNewLeave = false;
+                OldEmployeeLeaveDetatils = new EmployeeLeave();
+                OldEmployeeLeaveDetatils = (EmployeeLeave)EmployeeLeave.Clone();
+
+                EmployeeListFinal = new ObservableCollection<Employee>();
+                EmployeeListFinal.Add(EmployeeLeave.Employee);
+
+                SelectedIndexForEmployee = EmployeeListFinal.IndexOf(EmployeeListFinal.FirstOrDefault(x => x.IdEmployee == EmployeeLeave.IdEmployee));
+                StartDate = EmployeeLeave.StartDate;
+                EndDate = EmployeeLeave.EndDate;
+
+                StartTime = FromDates[FromDates.FindIndex(x => x.Hour == StartDate.Value.Hour && x.Minute == StartDate.Value.Minute)];
+                EndTime = ToDates[ToDates.FindIndex(x => x.Hour == EndDate.Value.Hour && x.Minute == EndDate.Value.Minute)];
+
+                IsAllDayEvent = Convert.ToBoolean(EmployeeLeave.IsAllDayEvent);
+
+                SelectedLeaveType = GeosApplication.Instance.EmployeeLeaveList.ToList().FindIndex(x => x.IdLookupValue == Convert.ToUInt16(EmployeeLeave.IdLeave));
+
+                Remarks = EmployeeLeave.Remark;
+                // Company = EmployeeLeave.CompanyLeave.Company;
+
+                LeaveFileName = EmployeeLeave.FileName;
+                OldLeaveFileName = EmployeeLeave.FileName;
+
+                IdEmployeeLeave = EmployeeLeave.IdEmployeeLeave;
+
+                AttachmentList = new ObservableCollection<Attachment>();
+                if (!string.IsNullOrEmpty(EmployeeLeave.FileName))
+                {
+                    Attachment attachment = new Attachment();
+                    attachment.FilePath = null;
+                    attachment.OriginalFileName = EmployeeLeave.FileName;
+                    attachment.IsDeleted = false;
+                    // attachment.FileByte = LeaveFileInBytes;
+                    AttachmentList.Add(attachment);
+                    AttachedFile = AttachmentList[0];
+                }
+                if (AttachmentList.Count > 0)
+                    IsVisible = Visibility.Visible;
+                else
+                    IsVisible = Visibility.Hidden;
+                IsAdd = false;
+                GeosApplication.Instance.Logger.Log("Method InitReadOnly()....executed successfully", category: Category.Info, priority: Priority.Low);
+            }
+            catch (FaultException<ServiceException> ex)
+            {
+                if (DXSplashScreen.IsActive) { DXSplashScreen.Close(); }
+                GeosApplication.Instance.Logger.Log("Get an error in InitReadOnly() Method " + ex.Detail.ErrorMessage, category: Category.Info, priority: Priority.Low);
+                CustomMessageBox.Show(GeosApplication.Instance.ExceptionHandlingOperationString(ex.Detail, null), Application.Current.Resources["PopUpWarningColor"].ToString(), CustomMessageBox.MessageImagePath.NotOk, MessageBoxButton.OK);
+            }
+            catch (ServiceUnexceptedException ex)
+            {
+                if (DXSplashScreen.IsActive) { DXSplashScreen.Close(); }
+                GeosApplication.Instance.Logger.Log("Get an error in InitReadOnly() Method - ServiceUnexceptedException " + ex.Message, category: Category.Info, priority: Priority.Low);
+                GeosApplication.Instance.ExceptionHandlingOperation(ex.ExceptionType, GeosApplication.Instance.ApplicationSettings["ServiceProviderIP"].ToString(), null);
+            }
+            catch (Exception ex)
+            {
+                GeosApplication.Instance.Logger.Log("Get an error in Method InitReadOnly()...." + ex.Message, category: Category.Exception, priority: Priority.Low);
+            }
+        }
+
+        public void BrowseFileAction(object obj)
+        {
+            GeosApplication.Instance.Logger.Log("Method BrowseFile() ...", category: Category.Info, priority: Priority.Low);
+            if (obj != null)
+            {
+                DXSplashScreen.Show<SplashScreenView>();
+                if (DXSplashScreen.IsActive && !GeosApplication.Instance.IsLoadOneTime) { DXSplashScreen.Close(); }
+                IsBusy = true;
+            }
+            try
+            {
+                Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
+                dlg.DefaultExt = "Pdf Files|*.pdf";
+                dlg.Filter = "Pdf Files|*.pdf";
+
+                Nullable<bool> result = dlg.ShowDialog();
+
+                if (result == true)
+                {
+                    LeaveFileInBytes = System.IO.File.ReadAllBytes(dlg.FileName);
+                    AttachmentList = new ObservableCollection<Attachment>();
+
+                    FileInfo file = new FileInfo(dlg.FileName);
+                    LeaveFileName = file.Name;
+
+                    ObservableCollection<Attachment> newAttachmentList = new ObservableCollection<Attachment>();
+
+                    Attachment attachment = new Attachment();
+                    attachment.FilePath = file.FullName;
+                    attachment.OriginalFileName = file.Name;
+                    attachment.IsDeleted = false;
+                    attachment.FileByte = LeaveFileInBytes;
+
+                    AttachmentObjectList = new List<object>();
+                    AttachmentObjectList.Add(attachment);
+
+                    newAttachmentList.Add(attachment);
+                    AttachmentList = newAttachmentList;
+
+                    if (AttachmentList.Count > 0)
+                    {
+                        AttachedFile = AttachmentList[0];
+                        IsVisible = Visibility.Visible;
+                    }
+                    else
+                        IsVisible = Visibility.Hidden;
+
+                    //ChangeFileUpload = true;
+                }
+                if (obj != null)
+                {
+                    IsBusy = false;
+                }
+                IsAdd = true;
+            }
+            catch (Exception ex)
+            {
+                if (obj != null)
+                {
+                    IsBusy = false;
+                }
+                if (DXSplashScreen.IsActive && !GeosApplication.Instance.IsLoadOneTime) { DXSplashScreen.Close(); }
+            }
+            GeosApplication.Instance.Logger.Log("Method BrowseFile() executed successfully", category: Category.Info, priority: Priority.Low);
+        }
+
+        /// <summary>
+        /// [001] Sprint46 HRM Take values from lookup values instead of the existing tables by Mayuri     
+        /// [002][SP-65][skale][20-06-2019][GEOS2-1588]Add a new filter criterion to Leaves and Attendance Window in GHRM
+        /// [003][cpatil][25-12-2019][GEOS2-1941] GRHM - Calculation of holidays
+        /// [004][skale][31/01/2020][GEOS2-1959]- GHRM - Leaves/Attendance inactive employees
+        /// [005][cpatil][27-08-2020][GEOS2-2486] Wrong counting holidays - if many plants are selected, the program counts all official holidays for a selected employee.
+        /// </summary>
+        private void AddNewLeaveInformation(object obj)
+        {
+            try
+            {
+                GeosApplication.Instance.Logger.Log("Method AddNewLeaveInformation()...", category: Category.Info, priority: Priority.Low);
+
+                error = EnableValidationAndGetError();
+                PropertyChanged(this, new PropertyChangedEventArgs("SelectedIndexForEmployee"));
+                PropertyChanged(this, new PropertyChangedEventArgs("StartTime"));
+                PropertyChanged(this, new PropertyChangedEventArgs("EndTime"));
+                PropertyChanged(this, new PropertyChangedEventArgs("StartDate"));
+                PropertyChanged(this, new PropertyChangedEventArgs("EndDate"));
+                PropertyChanged(this, new PropertyChangedEventArgs("SelectedLeaveType"));
+                PropertyChanged(this, new PropertyChangedEventArgs("SelectedIndexForCompanyShift"));
+
+                List<Attachment> temp = new List<Attachment>();
+                if (error != null)
+                {
+                    return;
+                }
+
+                IsBusy = true;
+                if (!string.IsNullOrEmpty(Remarks))
+                    Remarks = Remarks.Trim();
+
+                if (AttachmentList != null && AttachmentList.Count == 0)
+                {
+                    LeaveFileName = null;
+                    LeaveFileInBytes = null;
+                }
+
+                StartDate = StartDate.Value.Date.AddHours(StartTime.Value.TimeOfDay.Hours).AddMinutes(StartTime.Value.TimeOfDay.Minutes);
+                EndDate = EndDate.Value.Date.AddHours(EndTime.Value.TimeOfDay.Hours).AddMinutes(EndTime.Value.TimeOfDay.Minutes);
+                STime = StartTime.Value.TimeOfDay;
+                ETime = EndDate.Value.TimeOfDay;
+                AddEmployeeLeaveChangeLogDetails();
+
+
+                //[004] added 
+                List<int> SelectedEmployeesList = SelectedEmployeeList.Cast<int>().ToList();
+                var EmployeeIds = string.Join(",", SelectedEmployeesList.Select(i => i));
+                List<EmployeeContractSituation> SelectedEmployeeContractList = HrmService.GetEmployeeContracts(EmployeeIds);
+                //end
+
+                NewEmployeeLeaveList = new List<EmployeeLeave>();
+                string EmployeeOverlappedLeavesWarning = "\n";
+                List<EmployeeLeave> ExistEmpLeaveList = new List<EmployeeLeave>();
+                bool IsLeave = true;
+                bool IsAttendance = true;
+                bool IsAuthorizedLeave;
+                bool IsEmployeeOverlappedLeavesWarning = false;
+                bool IsEmployeeAuthorizedLeveError = false;
+                string EmployeeAuthorizedLeveError = "\n";
+                
+                bool IsInactiveEmployeeLeave = true;
+                string EmployeeInactiveLeaveError = "\n";
+
+                List<string> ErrorMessageList = new List<string>();
+
+
+                for (int j = 0; j < SelectedEmployeeList.Count; j++)
+                {
+                    if (IsNew)
+                    {
+                        ExistEmpLeaveList = ExistEmployeeLeaveList.Where(x => x.IdEmployee == Convert.ToInt16(SelectedEmployeeList[j]) && (StartDate >= x.StartDate && StartDate <= x.EndDate || EndDate <= x.StartDate && EndDate >= x.EndDate)).ToList();
+                    }
+                    else
+                    {
+                        ExistEmpLeaveList = ExistEmployeeLeaveList.Where(x => x.IdEmployee == Convert.ToInt16(SelectedEmployeeList[j]) && x.IdEmployeeLeave != IdEmployeeLeave && (StartDate >= x.StartDate && StartDate <= x.EndDate || EndDate <= x.StartDate && EndDate >= x.EndDate)).ToList();
+                    }
+
+                    IsLeave = true;
+                    IsAttendance = true;
+
+                    IsAuthorizedLeave = false;
+
+                    Employee tempEmployee = EmployeeListFinal.FirstOrDefault(x => x.IdEmployee == Convert.ToInt32(SelectedEmployeeList[j]));
+
+                    if (tempEmployee != null)
+                    {
+                        if (tempEmployee.EmployeeAnnualLeaves != null && tempEmployee.EmployeeAnnualLeaves.Count > 0)
+                        {
+                            if (tempEmployee.EmployeeAnnualLeaves.Any(x => x.IdLeave == GeosApplication.Instance.EmployeeLeaveList[SelectedLeaveType].IdLookupValue))
+                                IsAuthorizedLeave = true;
+                            else
+                            {
+                                EmployeeAuthorizedLeveError = EmployeeAuthorizedLeveError + tempEmployee.FullName + "\n";
+                                IsEmployeeAuthorizedLeveError = true;
+                            }
+                        }
+                        else
+                        {
+                            EmployeeAuthorizedLeveError = EmployeeAuthorizedLeveError + tempEmployee.FullName + "\n";
+                            IsEmployeeAuthorizedLeveError = true;
+                        }
+                    }
+
+                    if (IsEmployeeAuthorizedLeveError && SelectedEmployeeList.Count == 1)
+                    {
+                        CustomMessageBox.Show(string.Format(System.Windows.Application.Current.FindResource("AddEmployeeLeaveAuthorizedLeaveNotRegistered").ToString(), GeosApplication.Instance.EmployeeLeaveList[SelectedLeaveType].Value), Application.Current.Resources["PopUpWarningColor"].ToString(), CustomMessageBox.MessageImagePath.NotOk, MessageBoxButton.OK);
+                        return;
+                    }
+
+                    for (int i = 0; i < ExistEmpLeaveList.Count; i++)
+                    {
+                        if (IsAllDayEvent == true)
+                        {
+                            IsLeave = false;
+                            break;
+                        }
+                        if (ExistEmpLeaveList[i].IsAllDayEvent == 1)
+                        {
+                            IsLeave = false;
+                            break;
+                        }
+                        if (i == 0)
+                        {
+                            if (StartDate < ExistEmpLeaveList[i].StartDate && EndDate <= ExistEmpLeaveList[i].StartDate)
+                            {
+                                IsLeave = true;
+                                break;
+                            }
+                            if (ExistEmpLeaveList.Count == 1)
+                            {
+                                if (StartDate >= ExistEmpLeaveList[i].EndDate && EndDate > ExistEmpLeaveList[i].EndDate)
+                                {
+                                    IsLeave = true;
+                                    break;
+                                }
+
+                            }
+                         }
+                        else
+                        {
+                            if (i <= ExistEmpLeaveList.Count - 1)
+                            {
+                                if (StartDate >= ExistEmpLeaveList[i - 1].EndDate && EndDate <= ExistEmpLeaveList[i].StartDate)
+                                {
+                                    IsLeave = true;
+                                    break;
+                                }
+                                else if (i == ExistEmpLeaveList.Count - 1)
+                                {
+                                    if (StartDate >= ExistEmpLeaveList[i].EndDate && EndDate > ExistEmpLeaveList[i].EndDate)
+                                    {
+                                        IsLeave = true;
+                                        break;
+                                    }
+
+                                }
+                            }
+
+                        }
+
+                        IsLeave = false;
+                    }
+                    if (IsLeave == false && SelectedEmployeeList.Count == 1)
+                    {
+                        CustomMessageBox.Show(string.Format(System.Windows.Application.Current.FindResource("AddEmployeeLeaveOverlapped").ToString()), Application.Current.Resources["PopUpWarningColor"].ToString(), CustomMessageBox.MessageImagePath.NotOk, MessageBoxButton.OK);
+                        return;
+                    }
+
+                    var ExistEmpAttendanceList = EmployeeAttendanceList.Where(x => x.IdEmployee == Convert.ToInt16(SelectedEmployeeList[j]) && x.StartDate.Date == StartDate.Value.Date).OrderBy(x => x.StartDate).ToList();
+                    for (int i = 0; i < ExistEmpAttendanceList.Count; i++)
+                    {
+                        if (IsAllDayEvent == true)
+                        {
+                            IsAttendance = false;
+                            break;
+                        }
+
+                        if (i == 0)
+                        {
+                            if (StartDate < ExistEmpAttendanceList[i].StartDate && EndDate <= ExistEmpAttendanceList[i].StartDate)
+                            {
+                                IsAttendance = true;
+                                break;
+                            }
+                            else if (ExistEmpAttendanceList.Count == 1)
+                            {
+                                if (StartDate >= ExistEmpAttendanceList[i].EndDate && EndDate > ExistEmpAttendanceList[i].EndDate)
+                                {
+                                    IsAttendance = true;
+                                    break;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if (i <= ExistEmpAttendanceList.Count - 1)
+                            {
+                                if (StartDate >= ExistEmpAttendanceList[i - 1].EndDate && EndDate <= ExistEmpAttendanceList[i].StartDate)
+                                {
+                                    IsAttendance = true;
+                                    break;
+                                }
+                                else if (i == ExistEmpAttendanceList.Count - 1)
+                                {
+                                    if (StartDate >= ExistEmpAttendanceList[i].EndDate && EndDate > ExistEmpAttendanceList[i].EndDate)
+                                    {
+                                        IsAttendance = true;
+                                        break;
+                                    }
+                                }
+
+                            }
+                        }
+
+                        IsAttendance = false;
+                    }
+
+                    if (IsAttendance == false && SelectedEmployeeList.Count == 1)
+                    {
+                        CustomMessageBox.Show(string.Format(System.Windows.Application.Current.FindResource("AddEmployeeLeaveOverlapped").ToString()), Application.Current.Resources["PopUpWarningColor"].ToString(), CustomMessageBox.MessageImagePath.NotOk, MessageBoxButton.OK);
+                        return;
+                    }
+                    //[004] added 
+                    if (tempEmployee != null)
+                    {
+
+                        if (SelectedEmployeeContractList != null && SelectedEmployeeContractList.Count > 0)
+                        {
+                            List<EmployeeContractSituation> EmployeeContractSituationList = SelectedEmployeeContractList.Where(x=>x.IdEmployee== tempEmployee.IdEmployee).ToList();
+
+                            if (EmployeeContractSituationList != null && EmployeeContractSituationList.Count > 0)
+                            {
+                                for (int i = 0; i < EmployeeContractSituationList.Count; i++)
+                                {
+
+                                    if (EmployeeContractSituationList[i].ContractSituationEndDate == null)
+                                    {
+                                        DateTime? EmployeeContractEndDate = EmployeeContractSituationList[i].ContractSituationEndDate == null ? GeosApplication.Instance.ServerDateTime.Date : EmployeeContractSituationList[i].ContractSituationEndDate;
+
+                                        if (StartDate.Value.Date >= EmployeeContractSituationList[i].ContractSituationStartDate.Value.Date && 
+                                            (EndDate.Value.Date <= EmployeeContractEndDate || EndDate.Value.Date >= EmployeeContractEndDate))
+                                        {
+                                            IsInactiveEmployeeLeave = true;
+                                            break;
+                                        }
+                                        else
+                                        {
+                                            IsInactiveEmployeeLeave = false;
+                                        }
+                                    }
+                                   else if (StartDate.Value.Date >= EmployeeContractSituationList[i].ContractSituationStartDate.Value.Date && EndDate.Value.Date <= EmployeeContractSituationList[i].ContractSituationEndDate.Value.Date)
+                                    {
+                                        IsInactiveEmployeeLeave = true;
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        IsInactiveEmployeeLeave = false;
+                                    }
+                                }
+
+                                if (!IsInactiveEmployeeLeave)
+                                {
+                                    EmployeeInactiveLeaveError = EmployeeInactiveLeaveError + tempEmployee.FullName +"\n";
+                                    ErrorMessageList.Add(EmployeeInactiveLeaveError);
+                                }
+
+                                if (!IsInactiveEmployeeLeave && SelectedEmployeeList.Count == 1)
+                                {
+                                    CustomMessageBox.Show(string.Format(System.Windows.Application.Current.FindResource("ErrorMessageForInactiveEmployeeLeave").ToString(), EmployeeInactiveLeaveError), Application.Current.Resources["PopUpWarningColor"].ToString(), CustomMessageBox.MessageImagePath.NotOk, MessageBoxButton.OK);
+                                    return;
+                                }
+                            }
+                            else
+                            {
+                                CustomMessageBox.Show(string.Format(System.Windows.Application.Current.FindResource("ErrorMessageForInactiveEmployeeLeave").ToString(), EmployeeInactiveLeaveError), Application.Current.Resources["PopUpWarningColor"].ToString(), CustomMessageBox.MessageImagePath.NotOk, MessageBoxButton.OK);
+                                return;
+                            }
+
+                        }
+                      
+                    }//end
+
+                    if (IsNew == true && IsLeave == true && IsAttendance == true && IsAuthorizedLeave && IsInactiveEmployeeLeave) 
+                    //  if (IsNew == true && IsLeave == true && IsAttendance == true && IsAuthorizedLeave)
+                    {
+                        //if StartDate and end Date year not same split in two 
+                        List<Tuple<DateTime, DateTime>> dtSeperatedByYear = new List<Tuple<DateTime, DateTime>>(SeperateStartEndDateIfYearNotSame(new Tuple<DateTime, DateTime>(StartDate.Value, EndDate.Value)));
+                        if (dtSeperatedByYear != null && dtSeperatedByYear.Count > 0)
+                        {
+                            foreach (var item in dtSeperatedByYear)
+                            {
+                                EmployeeLeave TempEmployeeLeave = new EmployeeLeave()
+                                {
+                                    //Employee = EmployeeListFinal[EmployeeListFinal.FindIndex(x => x.IdEmployee == Convert.ToInt16(SelectedEmployeeList[j]))],
+                                    Employee = EmployeeListFinal.FirstOrDefault(x => x.IdEmployee == Convert.ToInt32(SelectedEmployeeList[j])),
+                                    //[001] Code Comment and Get Company Leave using Lookup value
+                                    //CompanyLeave = CompanyLeavesList[SelectedLeaveType],
+                                    CompanyLeave = GetCompanyLeave(GeosApplication.Instance.EmployeeLeaveList[SelectedLeaveType]),
+                                    IdEmployee = Convert.ToInt16(SelectedEmployeeList[j]),
+                                    StartDate = item.Item1,
+                                    EndDate = item.Item2,
+                                    //IdLeave = Convert.ToInt16(CompanyLeavesList[SelectedLeaveType].IdCompanyLeave),
+                                    IdLeave = GeosApplication.Instance.EmployeeLeaveList[SelectedLeaveType].IdLookupValue,
+                                    Remark = Remarks,
+                                    FileName = LeaveFileName,
+                                    IsAllDayEvent = Convert.ToSByte(IsAllDayEvent),
+                                    
+                                    EmployeeChangelogs = new List<EmployeeChangelog>(EmployeeLeaveChangeLogList),
+                                    /// [0001][04/08/2020][sjadhav][SPRINT 84][GEOS2-2437][GHRM - Employee Leaves export report [#ERF59]]
+                                    IdCompanyShift = CompanyShiftIdArray[j],
+                                    CompanyShift = CompanyShiftArray[j]
+                                    
+
+                                };
+                                //[002]added
+                                string[] IdEmployeeCompany = TempEmployeeLeave.Employee.EmployeeCompanyIds.ToString().Split(',');
+                                CompanyList = new List<Company>(SelectedPlantList.Where(x => x.IdCompany == Convert.ToInt32(IdEmployeeCompany[0])).ToList());
+                                TempEmployeeLeave.CompanyLeave.Company = CompanyList.FirstOrDefault();
+                                NewEmployeeLeaveList.Add(TempEmployeeLeave);
+
+                            }
+                        }
+                        else
+                        {
+                            EmployeeLeave TempEmployeeLeave = new EmployeeLeave()
+                            {
+                                //Employee = EmployeeListFinal[EmployeeListFinal.FindIndex(x => x.IdEmployee == Convert.ToInt16(SelectedEmployeeList[j]))],
+                                Employee = EmployeeListFinal.FirstOrDefault(x => x.IdEmployee == Convert.ToInt32(SelectedEmployeeList[j])),
+                                //[001] Code Comment and Get Company Leave using Lookup value
+                                //CompanyLeave = CompanyLeavesList[SelectedLeaveType],
+                                CompanyLeave = GetCompanyLeave(GeosApplication.Instance.EmployeeLeaveList[SelectedLeaveType]),
+                                IdEmployee = Convert.ToInt16(SelectedEmployeeList[j]),
+                                StartDate = StartDate,
+                                EndDate = EndDate,
+                                //IdLeave = Convert.ToInt16(CompanyLeavesList[SelectedLeaveType].IdCompanyLeave),
+                                
+                                IdLeave = GeosApplication.Instance.EmployeeLeaveList[SelectedLeaveType].IdLookupValue,
+                                Remark = Remarks,
+                                FileName = LeaveFileName,
+                                IsAllDayEvent = Convert.ToSByte(IsAllDayEvent),
+                                EmployeeChangelogs = new List<EmployeeChangelog>(EmployeeLeaveChangeLogList),
+                                IdCompanyShift = CompanyShiftIdArray[j],
+                                CompanyShift = CompanyShiftArray[j]
+                            };
+                            //[002]added
+                            string[] IdEmployeeCompany = TempEmployeeLeave.Employee.EmployeeCompanyIds.ToString().Split(',');
+                            CompanyList = new List<Company>(SelectedPlantList.Where(x => x.IdCompany == Convert.ToInt32(IdEmployeeCompany[0])).ToList());
+                            
+                            NewEmployeeLeaveList.Add(TempEmployeeLeave);
+                        }
+                    }
+                    else if (IsLeave == false || IsAttendance == false)
+                    {
+                        //EmployeeOverlappedLeavesWarning = EmployeeOverlappedLeavesWarning + EmployeeListFinal[EmployeeListFinal.FindIndex(x => x.IdEmployee == Convert.ToInt16(SelectedEmployeeList[j]))].FullName + "\n";
+                        if (IsAuthorizedLeave)
+                        {
+                            EmployeeOverlappedLeavesWarning = EmployeeOverlappedLeavesWarning + EmployeeListFinal.FirstOrDefault(x => x.IdEmployee == Convert.ToInt16(SelectedEmployeeList[j])).FullName + "\n";
+                            IsEmployeeOverlappedLeavesWarning = true;
+                        }
+
+                    }
+                }
+
+                if (IsNew == true)
+                {
+                    IsBusy = false;
+                    if (NewEmployeeLeaveList.Count < SelectedEmployeeList.Count)
+                    {
+                        if (NewEmployeeLeaveList.Count >= 1)
+                        {
+                            if (IsEmployeeOverlappedLeavesWarning && IsEmployeeAuthorizedLeveError)
+                            {
+                                CustomMessageBox.Show(string.Format(System.Windows.Application.Current.FindResource("AddMultipleEmployeeLeaveAuthorizedLeaveNotRegistered").ToString(), GeosApplication.Instance.EmployeeLeaveList[SelectedLeaveType].Value, EmployeeAuthorizedLeveError), Application.Current.Resources["PopUpOverlapColor"].ToString(), CustomMessageBox.MessageImagePath.Warning, MessageBoxButton.OK);
+                                CustomMessageBox.Show(string.Format(System.Windows.Application.Current.FindResource("AddMultipleEmployeeLeaveOverlapped").ToString(), EmployeeOverlappedLeavesWarning), Application.Current.Resources["PopUpOverlapColor"].ToString(), CustomMessageBox.MessageImagePath.Warning, MessageBoxButton.OK);
+                            }
+                            else if (IsEmployeeAuthorizedLeveError)
+                                CustomMessageBox.Show(string.Format(System.Windows.Application.Current.FindResource("AddMultipleEmployeeLeaveAuthorizedLeaveNotRegistered").ToString(), GeosApplication.Instance.EmployeeLeaveList[SelectedLeaveType].Value, EmployeeAuthorizedLeveError), Application.Current.Resources["PopUpOverlapColor"].ToString(), CustomMessageBox.MessageImagePath.Warning, MessageBoxButton.OK);
+                            else if (IsEmployeeOverlappedLeavesWarning)
+                                CustomMessageBox.Show(string.Format(System.Windows.Application.Current.FindResource("AddMultipleEmployeeLeaveOverlapped").ToString(), EmployeeOverlappedLeavesWarning), Application.Current.Resources["PopUpOverlapColor"].ToString(), CustomMessageBox.MessageImagePath.Warning, MessageBoxButton.OK);
+
+                           else  if (ErrorMessageList !=null && ErrorMessageList.Count >0)
+                            {
+                                CustomMessageBox.Show(string.Format(System.Windows.Application.Current.FindResource("ErrorMessageForInactiveEmployeeLeave").ToString(), EmployeeInactiveLeaveError), Application.Current.Resources["PopUpWarningColor"].ToString(), CustomMessageBox.MessageImagePath.NotOk, MessageBoxButton.OK);
+                                return;
+                            }
+                        }
+                        else
+                        {
+                            if (IsEmployeeOverlappedLeavesWarning && IsEmployeeAuthorizedLeveError)
+                            {
+                                CustomMessageBox.Show(string.Format(System.Windows.Application.Current.FindResource("AddMultipleEmployeeLeaveAuthorizedLeaveNotRegistered").ToString(), GeosApplication.Instance.EmployeeLeaveList[SelectedLeaveType].Value, EmployeeAuthorizedLeveError), Application.Current.Resources["PopUpWarningColor"].ToString(), CustomMessageBox.MessageImagePath.NotOk, MessageBoxButton.OK);
+                                CustomMessageBox.Show(string.Format(System.Windows.Application.Current.FindResource("AddMultipleEmployeeLeaveOverlapped").ToString(), EmployeeOverlappedLeavesWarning), Application.Current.Resources["PopUpWarningColor"].ToString(), CustomMessageBox.MessageImagePath.NotOk, MessageBoxButton.OK);
+                                return;
+                            }
+
+                            if (IsEmployeeAuthorizedLeveError)
+                            {
+                                CustomMessageBox.Show(string.Format(System.Windows.Application.Current.FindResource("AddMultipleEmployeeLeaveAuthorizedLeaveNotRegistered").ToString(), GeosApplication.Instance.EmployeeLeaveList[SelectedLeaveType].Value, EmployeeAuthorizedLeveError), Application.Current.Resources["PopUpWarningColor"].ToString(), CustomMessageBox.MessageImagePath.NotOk, MessageBoxButton.OK);
+                                return;
+                            }
+
+                            if (IsEmployeeOverlappedLeavesWarning)
+                            {
+                                CustomMessageBox.Show(string.Format(System.Windows.Application.Current.FindResource("AddMultipleEmployeeLeaveOverlapped").ToString(), EmployeeOverlappedLeavesWarning), Application.Current.Resources["PopUpWarningColor"].ToString(), CustomMessageBox.MessageImagePath.NotOk, MessageBoxButton.OK);
+                                return;
+                            }
+                            else if (ErrorMessageList != null && ErrorMessageList.Count > 0)
+                            {
+                                CustomMessageBox.Show(string.Format(System.Windows.Application.Current.FindResource("ErrorMessageForInactiveEmployeeLeave").ToString(), EmployeeInactiveLeaveError), Application.Current.Resources["PopUpWarningColor"].ToString(), CustomMessageBox.MessageImagePath.NotOk, MessageBoxButton.OK);
+                                return;
+                            }
+                        }
+                    }
+
+                   
+                    IsBusy = true;
+                    NewEmployeeLeaveList = HrmService.AddEmployeeLeavesFromList_V2045(NewEmployeeLeaveList, LeaveFileInBytes, SelectedPeriod);
+                    IsSave = true;
+
+                    string EmployeeExceedAnnualLeavesWarning = string.Empty;
+                    foreach (var newEmpLeave in NewEmployeeLeaveList)
+                    {
+                        // var employeeJobDescription = newEmpLeave.EmployeeJobDescription.LastOrDefault();
+
+                        //[002] added
+                        string[] IdCompanys = newEmpLeave.Employee.EmployeeCompanyIds.ToString().Split(',');
+                        //[003] service method changed IsEmployeeEnjoyedAllAnnualLeavesSprint60 to IsEmployeeEnjoyedAllAnnualLeaves_V2038
+                        //[005] service method changed IsEmployeeEnjoyedAllAnnualLeaves_V2038 to IsEmployeeEnjoyedAllAnnualLeaves_V2050
+                        bool IsEnjoyedAllAnnualLeaves = HrmService.IsEmployeeEnjoyedAllAnnualLeaves_V2050(newEmpLeave.IdEmployee, (int)(newEmpLeave.IdLeave), SelectedPeriod, Convert.ToInt32(IdCompanys[0]));//swapnil
+
+                        if (IsEnjoyedAllAnnualLeaves)
+                        {
+                            EmployeeAnnualLeave TempEmployeeAnnualLeave = new EmployeeAnnualLeave();
+                            if (newEmpLeave.Employee.CompanyShift != null)
+                            {
+                                //[003] service method changed GetEmployeeEnjoyedLeaveHours to GetEmployeeEnjoyedLeaveHours_V2038
+                                //[005] service method changed GetEmployeeEnjoyedLeaveHours_V2038 to GetEmployeeEnjoyedLeaveHours_V2050
+                                TempEmployeeAnnualLeave = HrmService.GetEmployeeEnjoyedLeaveHours_V2050(newEmpLeave.IdEmployee, (newEmpLeave.IdLeave), SelectedPeriod, Convert.ToInt32(IdCompanys[0]));//swapnil
+                                decimal RemainingHours = TempEmployeeAnnualLeave.Remaining;
+
+                                if (newEmpLeave.Employee.CompanyShift.CompanyAnnualSchedule.DailyHoursCount == 0)
+                                {
+                                    continue;
+                                }
+
+                                int Days = (int)(RemainingHours / (newEmpLeave.Employee.CompanyShift.CompanyAnnualSchedule.DailyHoursCount));
+                                decimal Hours = RemainingHours % (newEmpLeave.Employee.CompanyShift.CompanyAnnualSchedule.DailyHoursCount);
+                                string ExceededDaysAnsHours = string.Empty;
+
+                                if (Days == 0)
+                                {
+                                    ExceededDaysAnsHours = Hours + "h";
+                                }
+                                else
+                                {
+                                    ExceededDaysAnsHours = Days + "d" + " and " + Hours + "H";
+                                }
+
+                                EmployeeExceedAnnualLeavesWarning = EmployeeExceedAnnualLeavesWarning + "   " + newEmpLeave.Employee.FullName + " - " + ExceededDaysAnsHours;
+                            }
+                        }
+                    }
+                    IsBusy = false;
+
+                    if (!string.IsNullOrEmpty(EmployeeExceedAnnualLeavesWarning))
+                        CustomMessageBox.Show(string.Format(System.Windows.Application.Current.FindResource("AddEmployeeExceedAnnualLeavesWarning").ToString(), GeosApplication.Instance.EmployeeLeaveList[SelectedLeaveType].Value, EmployeeExceedAnnualLeavesWarning), Application.Current.Resources["PopUpOverlapColor"].ToString(), CustomMessageBox.MessageImagePath.Warning, MessageBoxButton.OK);
+
+                    CustomMessageBox.Show(string.Format(System.Windows.Application.Current.FindResource("AddEmployeeLeaveSuccess").ToString()), Application.Current.Resources["PopUpSuccessColor"].ToString(), CustomMessageBox.MessageImagePath.Ok, MessageBoxButton.OK);
+                    RequestClose(null, null);
+                }
+                else
+                {
+                    //While update if StartDate and end Date year not same split in two (First one updated and second inserted)
+                    List<Tuple<DateTime, DateTime>> dtSeperatedByYear = new List<Tuple<DateTime, DateTime>>(SeperateStartEndDateIfYearNotSame(new Tuple<DateTime, DateTime>(StartDate.Value, EndDate.Value)));
+                    if (dtSeperatedByYear != null && dtSeperatedByYear.Count > 0)
+                    {
+
+                        //[001] Code Comment  and changes as per lookup value
+                        UpdateEmployeeLeave = new EmployeeLeave()
+                        {
+
+                            Employee = EmployeeListFinal[SelectedIndexForEmployee],
+                            // CompanyLeave = CompanyLeavesList[SelectedLeaveType],
+                            CompanyLeave = GetCompanyLeave(GeosApplication.Instance.EmployeeLeaveList[SelectedLeaveType]),
+                            IdEmployee = EmployeeListFinal[SelectedIndexForEmployee].IdEmployee,
+                            StartDate = dtSeperatedByYear[0].Item1,
+                            EndDate = dtSeperatedByYear[0].Item2,
+                            //IdLeave = Convert.ToInt16(CompanyLeavesList[SelectedLeaveType].IdCompanyLeave),
+                            
+                            IdLeave = GeosApplication.Instance.EmployeeLeaveList[SelectedLeaveType].IdLookupValue,
+                            Remark = Remarks,
+                            FileName = LeaveFileName,
+                            IdEmployeeLeave = IdEmployeeLeave,
+                            IsAllDayEvent = Convert.ToSByte(IsAllDayEvent),
+                            EmployeeChangelogs = new List<EmployeeChangelog>(EmployeeLeaveChangeLogList),
+							IdCompanyShift = EmployeeShiftList[SelectedIndexForCompanyShift].CompanyShift.IdCompanyShift,
+                            CompanyShift = EmployeeShiftList[SelectedIndexForCompanyShift].CompanyShift
+                        };
+
+                        UpdateEmployeeLeave = HrmService.UpdateEmployeeLeave_V2045(UpdateEmployeeLeave, SelectedPeriod);
+
+                        EmployeeLeave TempEmployeeLeave = new EmployeeLeave()
+                        {
+                            //Employee = EmployeeListFinal[EmployeeListFinal.FindIndex(x => x.IdEmployee == Convert.ToInt16(SelectedEmployeeList[j]))],
+                            Employee = EmployeeListFinal.FirstOrDefault(x => x.IdEmployee == Convert.ToInt32(EmployeeListFinal[SelectedIndexForEmployee].IdEmployee)),
+                            //[001] Code Comment and Get Company Leave using Lookup value
+                            //CompanyLeave = CompanyLeavesList[SelectedLeaveType],
+                            CompanyLeave = GetCompanyLeave(GeosApplication.Instance.EmployeeLeaveList[SelectedLeaveType]),
+                            IdEmployee = EmployeeListFinal[SelectedIndexForEmployee].IdEmployee,
+                            StartDate = dtSeperatedByYear[1].Item1,
+                            EndDate = dtSeperatedByYear[1].Item2,
+                            //IdLeave = Convert.ToInt16(CompanyLeavesList[SelectedLeaveType].IdCompanyLeave),
+                            IdCompanyShift = EmployeeShiftList[SelectedIndexForCompanyShift].CompanyShift.IdCompanyShift,
+                            IdLeave = GeosApplication.Instance.EmployeeLeaveList[SelectedLeaveType].IdLookupValue,
+                            Remark = Remarks,
+                            FileName = LeaveFileName,
+                            IsAllDayEvent = Convert.ToSByte(IsAllDayEvent),
+                            EmployeeChangelogs = new List<EmployeeChangelog>(EmployeeLeaveChangeLogList),
+                            CompanyShift = EmployeeShiftList[SelectedIndexForCompanyShift].CompanyShift
+                        };
+                        //[002]added
+                        string[] IdEmployeeCompany = TempEmployeeLeave.Employee.EmployeeCompanyIds.ToString().Split(',');
+                        CompanyList = new List<Company>(SelectedPlantList.Where(x => x.IdCompany == Convert.ToInt32(IdEmployeeCompany[0])).ToList());
+                        TempEmployeeLeave.CompanyLeave.Company = CompanyList.FirstOrDefault();
+                        NewEmployeeLeaveList.Add(TempEmployeeLeave);
+                        IsBusy = true;
+                        NewEmployeeLeaveList = HrmService.AddEmployeeLeavesFromList_V2045(NewEmployeeLeaveList, LeaveFileInBytes, SelectedPeriod);
+                        IsSave = true;
+                    }
+                    else
+                    {
+                        UpdateEmployeeLeave = new EmployeeLeave()
+                        {
+                            Employee = EmployeeListFinal[SelectedIndexForEmployee],
+                            // CompanyLeave = CompanyLeavesList[SelectedLeaveType],
+                            CompanyLeave = GetCompanyLeave(GeosApplication.Instance.EmployeeLeaveList[SelectedLeaveType]),
+                            IdEmployee = EmployeeListFinal[SelectedIndexForEmployee].IdEmployee,
+                            StartDate = StartDate,
+                            EndDate = EndDate,
+                            //IdLeave = Convert.ToInt16(CompanyLeavesList[SelectedLeaveType].IdCompanyLeave),
+                            IdLeave = GeosApplication.Instance.EmployeeLeaveList[SelectedLeaveType].IdLookupValue,
+                            IdCompanyShift = EmployeeShiftList[SelectedIndexForCompanyShift].CompanyShift.IdCompanyShift,
+                            Remark = Remarks,
+                            FileName = LeaveFileName,
+                            IdEmployeeLeave = IdEmployeeLeave,
+                            IsAllDayEvent = Convert.ToSByte(IsAllDayEvent),
+                            EmployeeChangelogs = new List<EmployeeChangelog>(EmployeeLeaveChangeLogList),
+                            CompanyShift = EmployeeShiftList[SelectedIndexForCompanyShift].CompanyShift
+                        };
+
+                        UpdateEmployeeLeave = HrmService.UpdateEmployeeLeave_V2045(UpdateEmployeeLeave, SelectedPeriod);
+                    }
+
+                    UpdateEmployeeLeave.CompanyLeave.Company = OldEmployeeLeaveDetatils.CompanyLeave.Company;
+
+                    if (LeaveFileName == null || OldLeaveFileName != LeaveFileName)
+                    {
+                        HrmService.DeleteEmployeeLeaveAttachment(EmployeeListFinal[SelectedIndexForEmployee].EmployeeCode, UpdateEmployeeLeave.IdEmployeeLeave, OldLeaveFileName);
+                    }
+
+                    if (LeaveFileInBytes != null)
+                    {
+                        HrmService.SaveEmployeeLeaveAttachment(EmployeeListFinal[SelectedIndexForEmployee].EmployeeCode, UpdateEmployeeLeave.IdEmployeeLeave, LeaveFileName, LeaveFileInBytes);
+                    }
+
+                    IsSave = true;
+
+                    //[002]added
+                    string[] idEmployeeCompany = UpdateEmployeeLeave.Employee.EmployeeCompanyIds.ToString().Split(',');
+                    //[003] service method changed IsEmployeeEnjoyedAllAnnualLeavesSprint60 to IsEmployeeEnjoyedAllAnnualLeaves_V2038
+                    //[005] service method changed IsEmployeeEnjoyedAllAnnualLeaves_V2038 to IsEmployeeEnjoyedAllAnnualLeaves_V2050
+                    bool IsEnjoyedAllAnnualLeaves = HrmService.IsEmployeeEnjoyedAllAnnualLeaves_V2050(UpdateEmployeeLeave.IdEmployee, (int)(UpdateEmployeeLeave.IdLeave), SelectedPeriod, Convert.ToInt32(idEmployeeCompany[0]));//swapnil
+
+                    if (IsEnjoyedAllAnnualLeaves)
+                    {
+                        EmployeeAnnualLeave TempEmployeeAnnualLeave = new EmployeeAnnualLeave();
+                        if (UpdateEmployeeLeave.Employee.CompanyShift != null)
+                        {
+                            decimal RemainingHours = 0;
+                            TempEmployeeAnnualLeave = UpdateEmployeeLeave.Employee.EmployeeAnnualLeaves.FirstOrDefault(x => x.IdLeave == UpdateEmployeeLeave.IdLeave);
+                            //[005] service method changed GetEmployeeEnjoyedLeaveHours_V2038 to GetEmployeeEnjoyedLeaveHours_V2050
+                            if (TempEmployeeAnnualLeave == null)
+                                TempEmployeeAnnualLeave = HrmService.GetEmployeeEnjoyedLeaveHours_V2050(UpdateEmployeeLeave.IdEmployee, (UpdateEmployeeLeave.IdLeave), SelectedPeriod, Convert.ToInt32(idEmployeeCompany[0]));
+                            RemainingHours = TempEmployeeAnnualLeave.Remaining;
+                            int Days = (int)(RemainingHours / (UpdateEmployeeLeave.Employee.CompanyShift.CompanyAnnualSchedule.DailyHoursCount));
+                            decimal Hours = (RemainingHours % (UpdateEmployeeLeave.Employee.CompanyShift.CompanyAnnualSchedule.DailyHoursCount));
+                            string ExceededDaysAnsHours = string.Empty;
+                            string EmployeeExceedAnnualLeavesWarning = string.Empty;
+
+                            if (Days == 0)
+                            {
+                                ExceededDaysAnsHours = Hours + "h";
+                            }
+                            else
+                            {
+                                ExceededDaysAnsHours = Days + "d" + " and " + Hours + "H";
+                            }
+
+                            EmployeeExceedAnnualLeavesWarning = EmployeeExceedAnnualLeavesWarning + "\n" + UpdateEmployeeLeave.Employee.FullName + " - " + ExceededDaysAnsHours;
+                            if (!string.IsNullOrEmpty(EmployeeExceedAnnualLeavesWarning))
+                                CustomMessageBox.Show(string.Format(System.Windows.Application.Current.FindResource("AddEmployeeExceedAnnualLeavesWarning").ToString(), GeosApplication.Instance.EmployeeLeaveList[SelectedLeaveType].Value, EmployeeExceedAnnualLeavesWarning), Application.Current.Resources["PopUpOverlapColor"].ToString(), CustomMessageBox.MessageImagePath.Warning, MessageBoxButton.OK);
+                        }
+                    }
+
+                    IsBusy = false;
+                    CustomMessageBox.Show(string.Format(System.Windows.Application.Current.FindResource("UpdateEmployeeLeaveSuccess").ToString()), Application.Current.Resources["PopUpSuccessColor"].ToString(), CustomMessageBox.MessageImagePath.Ok, MessageBoxButton.OK);
+                    RequestClose(null, null);
+                }
+
+                IsBusy = false;
+
+                GeosApplication.Instance.Logger.Log("Method AddNewLeaveInformation()....executed successfully", category: Category.Info, priority: Priority.Low);
+            }
+            catch (FaultException<ServiceException> ex)
+            {
+                if (DXSplashScreen.IsActive) { DXSplashScreen.Close(); }
+                GeosApplication.Instance.Logger.Log("Get an error in AddNewLeaveInformation() Method " + ex.Detail.ErrorMessage, category: Category.Info, priority: Priority.Low);
+                CustomMessageBox.Show(GeosApplication.Instance.ExceptionHandlingOperationString(ex.Detail, null), Application.Current.Resources["PopUpWarningColor"].ToString(), CustomMessageBox.MessageImagePath.NotOk, MessageBoxButton.OK);
+            }
+            catch (ServiceUnexceptedException ex)
+            {
+                if (DXSplashScreen.IsActive) { DXSplashScreen.Close(); }
+                GeosApplication.Instance.Logger.Log("Get an error in AddNewLeaveInformation() Method - ServiceUnexceptedException " + ex.Message, category: Category.Info, priority: Priority.Low);
+                GeosApplication.Instance.ExceptionHandlingOperation(ex.ExceptionType, GeosApplication.Instance.ApplicationSettings["ServiceProviderIP"].ToString(), null);
+            }
+            catch (Exception ex)
+            {
+                GeosApplication.Instance.Logger.Log("Get an error in Method AddNewLeaveInformation()...." + ex.Message, category: Category.Exception, priority: Priority.Low);
+            }
+        }
+
+
+        //Check if startdate and enddate year not same then split it in two seperate leaves
+        private List<Tuple<DateTime, DateTime>> SeperateStartEndDateIfYearNotSame(Tuple<DateTime, DateTime> tupStartEnd)
+        {
+            List<Tuple<DateTime, DateTime>> ListTuple = new List<Tuple<DateTime, DateTime>>();
+
+            if (tupStartEnd.Item1.Year != tupStartEnd.Item2.Year)
+            {
+                List<DateTime> dtStart = new List<DateTime>();
+                for (DateTime i = tupStartEnd.Item1; i <= tupStartEnd.Item2;)
+                {
+                    dtStart.Add(i);
+                    i = i.AddDays(1);
+                    if (i.Year == tupStartEnd.Item2.Year)
+                        break;
+                }
+
+                ListTuple.Add(new Tuple<DateTime, DateTime>(dtStart.FirstOrDefault(), dtStart.LastOrDefault()));
+                ListTuple.Add(new Tuple<DateTime, DateTime>(dtStart.LastOrDefault().AddDays(1), tupStartEnd.Item2));
+
+            }
+            return ListTuple;
+        }
+
+        private void CloseWindow(object obj)
+        {
+            IsSave = false;
+            RequestClose(null, null);
+        }
+
+        private void FillFromDates()
+        {
+            FromDates = new List<DateTime>();
+
+            double addMinutes = 0;
+            DateTime today = DateTime.Today;
+            DateTime tomorrow = today.AddDays(1);
+            for (DateTime i = today; i < tomorrow; i = i.AddMinutes(1))
+            {
+                DateTime dtotherdate = new DateTime(DateTime.MinValue.Year, DateTime.MinValue.Month, DateTime.MinValue.Day, i.Hour, i.Minute, i.Second);
+                FromDates.Add(dtotherdate);
+            }
+        }
+
+        private void FillToDates()
+        {
+            ToDates = new List<DateTime>();
+
+            double addMinutes = 0;
+            DateTime today = DateTime.Today;
+            DateTime tomorrow = today.AddDays(1);
+            for (DateTime i = today; i < tomorrow; i = i.AddMinutes(1))
+            {
+                DateTime dtotherdate = new DateTime(DateTime.MinValue.Year, DateTime.MinValue.Month, DateTime.MinValue.Day, i.Hour, i.Minute, i.Second);
+                ToDates.Add(dtotherdate);
+            }
+        }
+
+        bool allowValidation = false;
+        string EnableValidationAndGetError()
+        {
+            allowValidation = true;
+            string error = ((IDataErrorInfo)this).Error;
+            if (!string.IsNullOrEmpty(error))
+            {
+                return error;
+            }
+            return null;
+        }
+        string IDataErrorInfo.Error
+        {
+            get
+            {
+                if (!allowValidation) return null;
+                IDataErrorInfo me = (IDataErrorInfo)this;
+                string error =
+                me[BindableBase.GetPropertyName(() => SelectedIndexForEmployee)] +
+                me[BindableBase.GetPropertyName(() => StartDate)] +
+                me[BindableBase.GetPropertyName(() => EndDate)] +
+                me[BindableBase.GetPropertyName(() => StartTime)] +
+                me[BindableBase.GetPropertyName(() => EndTime)] +
+                me[BindableBase.GetPropertyName(() => SelectedLeaveType)]+
+                me[BindableBase.GetPropertyName(() => SelectedIndexForCompanyShift)];
+
+                if (!string.IsNullOrEmpty(error))
+                    return "Please check inputted data.";
+
+                return null;
+            }
+        }
+
+        string IDataErrorInfo.this[string columnName]
+        {
+            get
+            {
+                if (!allowValidation) return null;
+                string empName = BindableBase.GetPropertyName(() => SelectedIndexForEmployee);
+                string leaveStartTime = BindableBase.GetPropertyName(() => StartTime);
+                string leaveEndTime = BindableBase.GetPropertyName(() => EndTime);
+                string leaveStartDate = BindableBase.GetPropertyName(() => StartDate);
+                string leaveEndDate = BindableBase.GetPropertyName(() => EndDate);
+                string selectedType = BindableBase.GetPropertyName(() => SelectedLeaveType);
+                string selectedShift = BindableBase.GetPropertyName(() => SelectedIndexForCompanyShift);
+
+                if (columnName == empName)
+                {
+                    return LeaveValidations.GetErrorMessage(empName, SelectedIndexForEmployee);
+                }
+
+                if (columnName == leaveStartDate)
+                {
+                    if (!string.IsNullOrEmpty(startDateErrorMessage))
+                    {
+                        return startDateErrorMessage;
+                    }
+                    else
+                    {
+                        return LeaveValidations.GetErrorMessage(leaveStartDate, StartDate);
+                    }
+                }
+
+                if (columnName == leaveEndDate)
+                {
+                    if (!string.IsNullOrEmpty(endDateErrorMessage))
+                    {
+                        return endDateErrorMessage;
+                    }
+                }
+
+                if (columnName == leaveStartTime)
+                {
+                    if (!string.IsNullOrEmpty(StartTimeErrorMessage))
+                    {
+                        return StartTimeErrorMessage;
+                    }
+                    else
+                    {
+                        return LeaveValidations.GetErrorMessage(leaveStartTime, StartTime);
+                    }
+                }
+
+                if (columnName == leaveEndTime)
+                {
+                    if (!string.IsNullOrEmpty(EndTimeErrorMessage))
+                    {
+                        return EndTimeErrorMessage;
+                    }
+                    else
+                    {
+                        return LeaveValidations.GetErrorMessage(leaveEndTime, EndTime);
+                    }
+                }
+
+                if (columnName == selectedType)
+                {
+                    return LeaveValidations.GetErrorMessage(selectedType, SelectedLeaveType);
+                }
+
+                if (columnName == leaveStartDate)
+                {
+                    return LeaveValidations.GetErrorMessage(leaveStartDate, StartDate);
+                }
+
+                if (columnName == leaveEndDate)
+                {
+                    return LeaveValidations.GetErrorMessage(leaveEndDate, EndDate);
+                }
+				/// [0001][04/08/2020][sjadhav][SPRINT 84][GEOS2-2437][GHRM - Employee Leaves export report [#ERF59]]
+                if (columnName == selectedShift)
+                {
+                    return LeaveValidations.GetErrorMessage(selectedShift, SelectedIndexForCompanyShift);
+                }
+
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// [001] Sprint46 HRM Take values from lookup values instead of the existing tables by Mayuri
+        /// Function Created to fill EmployeeLeave from Lookup values
+        /// </summary>
+        public void FillEmployeeLeaveType()
+        {
+            try
+            {
+                GeosApplication.Instance.Logger.Log("Method FillEmployeeLeaveType()...", category: Category.Info, priority: Priority.Low);
+
+                if (GeosApplication.Instance.EmployeeLeaveList == null)
+                {
+                    GeosApplication.Instance.EmployeeLeaveList = new ObservableCollection<LookupValue>(CrmStartUp.GetLookupValues(32));
+                    GeosApplication.Instance.EmployeeLeaveList.Insert(0, new LookupValue() { Value = "---", IdLookupValue = 0 });
+                }
+            }
+            catch (FaultException<ServiceException> ex)
+            {
+                if (DXSplashScreen.IsActive) { DXSplashScreen.Close(); }
+                GeosApplication.Instance.Logger.Log("Get an error in FillEmployeeLeaveType() Method " + ex.Detail.ErrorMessage, category: Category.Info, priority: Priority.Low);
+                CustomMessageBox.Show(GeosApplication.Instance.ExceptionHandlingOperationString(ex.Detail, null), Application.Current.Resources["PopUpWarningColor"].ToString(), CustomMessageBox.MessageImagePath.NotOk, MessageBoxButton.OK);
+            }
+            catch (ServiceUnexceptedException ex)
+            {
+                if (DXSplashScreen.IsActive) { DXSplashScreen.Close(); }
+                GeosApplication.Instance.Logger.Log("Get an error in FillEmployeeLeaveType() Method - ServiceUnexceptedException " + ex.Message, category: Category.Info, priority: Priority.Low);
+                GeosApplication.Instance.ExceptionHandlingOperation(ex.ExceptionType, GeosApplication.Instance.ApplicationSettings["ServiceProviderIP"].ToString(), null);
+            }
+            catch (Exception ex)
+            {
+                GeosApplication.Instance.Logger.Log("Get an error in Method FillEmployeeLeaveType()...." + ex.Message, category: Category.Exception, priority: Priority.Low);
+            }
+        }
+
+        /// <summary>
+        /// [001] Sprint46 HRM Take values from lookup values instead of the existing tables by Mayuri
+        /// Function Created to Fill CompanyWork from Lookup values
+        /// </summary>
+        public CompanyLeave GetCompanyLeave(LookupValue obj)
+        {
+            CompanyLeave companyLeave = new CompanyLeave
+            {
+                IdCompanyLeave = (ulong)obj.IdLookupValue,
+                Name = obj.Value
+            };
+            return companyLeave;
+        }
+
+        /// <summary>
+        /// HRM	It must not be possible to put the same hour for a leave by sdesai
+        /// Method to check date time validation on all day event
+        /// </summary>
+        /// <param name="obj"></param>
+        private void CheckedCommandAction(object obj)
+        {
+            try
+            {
+                GeosApplication.Instance.Logger.Log("Method CheckedCommandAction()...", category: Category.Info, priority: Priority.Low);
+
+                CheckDateTimeValidation();
+            }
+            catch (Exception ex)
+            {
+                GeosApplication.Instance.Logger.Log("Get an error in Method CheckedCommandAction()...." + ex.Message, category: Category.Exception, priority: Priority.Low);
+            }
+        }
+
+        public void SelectedItemChangedCommandAction(EditValueChangedEventArgs obj)
+        {
+            try
+            {
+                GeosApplication.Instance.Logger.Log("Method SelectedItemChangedCommandAction()...", category: Category.Info, priority: Priority.Low);
+                if (obj.NewValue == null)
+                {
+
+                    AttachmentList.Clear();
+                    IsVisible = Visibility.Collapsed;
+                }
+                GeosApplication.Instance.Logger.Log("Method SelectedItemChangedCommandAction()....executed successfully", category: Category.Info, priority: Priority.Low);
+            }
+            catch (Exception ex)
+            {
+                GeosApplication.Instance.Logger.Log("Get an error in Method SelectedItemChangedCommandAction()...." + ex.Message, category: Category.Exception, priority: Priority.Low);
+            }
+        }
+
+        private void OpenEmployeeLeaveDocument(object obj)
+        {
+            try
+            {
+                GeosApplication.Instance.Logger.Log("Method OpenEmployeeLeaveDocument()...", category: Category.Info, priority: Priority.Low);
+                if (IsAdd)
+                {
+                    byte[] EmployeeLeaveAttachmentBytes = LeaveFileInBytes;
+                    EmployeeDocumentView employeeDocumentView = new EmployeeDocumentView();
+                    EmployeeDocumentViewModel employeeDocumentViewModel = new EmployeeDocumentViewModel();
+                    if (EmployeeLeaveAttachmentBytes != null)
+                    {
+                        employeeDocumentViewModel.OpenPdfFromBytes(EmployeeLeaveAttachmentBytes, LeaveFileName);
+
+                        employeeDocumentView.DataContext = employeeDocumentViewModel;
+                        employeeDocumentView.ShowDialog();
+                    }
+                    else
+                    {
+                        CustomMessageBox.Show(string.Format("Could not find file {0}", LeaveFileName), Application.Current.Resources["PopUpWarningColor"].ToString(), CustomMessageBox.MessageImagePath.NotOk, MessageBoxButton.OK);
+                    }
+                }
+                else
+                {
+                    byte[] EmployeeLeaveAttachmentBytes = HrmService.GetEmployeeLeaveAttachment(OldEmployeeLeaveDetatils);
+                    EmployeeDocumentView employeeDocumentView = new EmployeeDocumentView();
+                    EmployeeDocumentViewModel employeeDocumentViewModel = new EmployeeDocumentViewModel();
+                    if (EmployeeLeaveAttachmentBytes != null)
+                    {
+                        employeeDocumentViewModel.OpenPdfFromBytes(EmployeeLeaveAttachmentBytes, OldEmployeeLeaveDetatils.FileName);
+
+                        employeeDocumentView.DataContext = employeeDocumentViewModel;
+                        employeeDocumentView.ShowDialog();
+                    }
+                    else
+                    {
+                        CustomMessageBox.Show(string.Format("Could not find file {0}", OldEmployeeLeaveDetatils.FileName), Application.Current.Resources["PopUpWarningColor"].ToString(), CustomMessageBox.MessageImagePath.NotOk, MessageBoxButton.OK);
+                    }
+                }
+                GeosApplication.Instance.Logger.Log("Method OpenEmployeeLeaveDocument()....executed successfully", category: Category.Info, priority: Priority.Low);
+            }
+            catch (FaultException<ServiceException> ex)
+            {
+                if (DXSplashScreen.IsActive) { DXSplashScreen.Close(); }
+                GeosApplication.Instance.Logger.Log("Get an error in OpenEmployeeLeaveDocument() Method " + ex.Detail.ErrorMessage, category: Category.Info, priority: Priority.Low);
+                CustomMessageBox.Show(GeosApplication.Instance.ExceptionHandlingOperationString(ex.Detail, null), Application.Current.Resources["PopUpWarningColor"].ToString(), CustomMessageBox.MessageImagePath.NotOk, MessageBoxButton.OK);
+            }
+            catch (ServiceUnexceptedException ex)
+            {
+                if (DXSplashScreen.IsActive) { DXSplashScreen.Close(); }
+                GeosApplication.Instance.Logger.Log("Get an error in OpenEmployeeLeaveDocument() Method - ServiceUnexceptedException " + ex.Message, category: Category.Info, priority: Priority.Low);
+            }
+            catch (Exception ex)
+            {
+                GeosApplication.Instance.Logger.Log("Get an error in Method OpenEmployeeEducationDocument()...." + ex.Message, category: Category.Exception, priority: Priority.Low);
+            }
+        }
+        private void ShortcutAction(KeyEventArgs obj)
+        {
+
+            GeosApplication.Instance.Logger.Log("Method ShortcutAction ...", category: Category.Info, priority: Priority.Low);
+            try
+            {
+                
+                HrmCommon.Instance.OpenWindowClickOnShortcutKey(obj);
+
+                GeosApplication.Instance.Logger.Log("Method ShortcutAction....executed successfully.", category: Category.Info, priority: Priority.Low);
+            }
+            catch (Exception ex)
+            {
+                if (DXSplashScreen.IsActive && !GeosApplication.Instance.IsLoadOneTime) { DXSplashScreen.Close(); }
+                GeosApplication.Instance.Logger.Log("Get an error in Method ShortcutAction...." + ex.Message, category: Category.Exception, priority: Priority.Low);
+            }
+        }
+        #endregion
+        private void SetUserPermission()
+        {
+            //HrmCommon.Instance.UserPermission = PermissionManagement.PlantViewer;
+
+            switch (HrmCommon.Instance.UserPermission)
+            {
+                case PermissionManagement.SuperAdmin:
+                    IsAcceptEnabled = true;
+                    IsReadOnlyField = false;
+                    break;
+
+                case PermissionManagement.Admin:
+                    IsAcceptEnabled = true;
+                    IsReadOnlyField = false;
+                    break;
+
+                case PermissionManagement.PlantViewer:
+                    IsAcceptEnabled = false;
+                    IsReadOnlyField = true;
+                    break;
+
+                case PermissionManagement.GlobalViewer:
+                    IsAcceptEnabled = false;
+                    IsReadOnlyField = true;
+                    break;
+
+                default:
+                    IsAcceptEnabled = false;
+                    IsReadOnlyField = true;
+                    break;
+            }
+        }
+
+    }
+}

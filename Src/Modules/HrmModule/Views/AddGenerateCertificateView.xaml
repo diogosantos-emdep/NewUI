@@ -1,0 +1,129 @@
+﻿<dxwui:WinUIDialogWindow x:Class="Emdep.Geos.Modules.Hrm.Views.AddGenerateCertificateView"
+                         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                         xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                         xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+                         xmlns:local="clr-namespace:Emdep.Geos.Modules.Hrm.Views"
+                         xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+                         xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors" 
+                         xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+                         xmlns:Interactive="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+                         xmlns:Converter="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+                         xmlns:Validation ="clr-namespace:Emdep.Geos.UI.Validations;assembly=Emdep.Geos.UI.Validations"
+                         xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"                         
+                         mc:Ignorable="d" 
+                         d:DesignHeight="200" d:DesignWidth="300" Style="{DynamicResource WinUIDialogWindowStyle}">
+
+    <dxwui:WinUIDialogWindow.Resources>
+        <dxmvvm:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <Converter:GroupboxBackroundColorConvertor x:Key="GroupboxBackroundColorConvertor" />
+        <Converter:ForegroundColorConverter x:Key="ForegroundColorConverter" />
+    </dxwui:WinUIDialogWindow.Resources>
+
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape"  Command="{Binding EscapeButtonCommand}"/>
+    </dxwui:WinUIDialogWindow.InputBindings>
+    <dxwui:WinUIDialogWindow.TitleStyle>
+        <Style TargetType="ContentControl">
+            <Setter Property="ContentTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                            <TextBlock Text="{DynamicResource certificate}" Style="{DynamicResource CustomTitleStyle}"  HorizontalAlignment="Center" FontSize="24" VerticalAlignment="Center"/>
+                        </DataTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </dxwui:WinUIDialogWindow.TitleStyle>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="5"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="5"/>
+            <RowDefinition Height="45"/>
+            <RowDefinition Height="5"/>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <!--<ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="10"/>
+            <ColumnDefinition Width="270"/>-->
+            <ColumnDefinition Width="155"/>
+            <ColumnDefinition Width="350"/>
+        </Grid.ColumnDefinitions>
+
+       
+        <!--Language-->
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="{DynamicResource Languages}" Style="{StaticResource TextBlock16Style}" VerticalAlignment="Center" />
+        <dxe:ComboBoxEdit   Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Left" Width="350" Height="30"
+                          AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True"
+                          ApplyItemTemplateToSelectedItem="True"
+                          IsSynchronizedWithCurrentItem="True"
+                          AllowUpdateTwoWayBoundPropertiesOnSynchronization="True"
+                          IsReadOnly="False"
+                          IsTextEditable="False"
+                          AllowItemHighlighting="True"
+                            ItemsSource="{Binding DataContext.Languages, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"
+                            ValueMember="IdLanguage"
+                            DisplayMember="Name"
+                            SelectedIndex="{Binding DataContext.SettingWindowLanguageSelectedIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"
+                           >
+            <dxe:ComboBoxEdit.ItemTemplate>
+                <DataTemplate>
+                    <DockPanel >
+                        <Image Source="{Binding LanguageImage, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         Margin="5,2,2,2" Height="24" Width="24"/>
+                        <TextBlock Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             Padding="2" Margin="5,0,0,0" Style="{DynamicResource TextBlockStyle}" />
+                    </DockPanel>
+                </DataTemplate>
+            </dxe:ComboBoxEdit.ItemTemplate>
+        </dxe:ComboBoxEdit>
+    
+        <!--Folder-->
+        <TextBlock Grid.Row="2" Grid.Column="0" Grid.RowSpan="2" Text="{DynamicResource outputfolder}" Style="{StaticResource TextBlock16Style}" VerticalAlignment="Center" TextWrapping="Wrap"/>
+        <Grid Grid.Row="2" Grid.Column="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <TextBox Grid.Column="0" Text="{Binding DataContext.FolderPathTextBox, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" Height="30" />
+            <Button Grid.Column="1" Content="Browse"  Command="{Binding BrowseButtonClickCommand }"  Height="30" />
+        </Grid>
+
+        <!--<StackPanel Grid.Row="2" Grid.Column="2" >
+            <TextBox Text="{Binding SourceFilePath}"  Height="30" />
+            <Button Content="Browse" Click="BrowseButton_Click"  Height="30" />
+        </StackPanel>-->
+
+
+
+        <!--Accept and Cancel Buttons-->
+        <Grid Grid.Row="4" ShowGridLines="False" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Left">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Button  HorizontalAlignment="Right"
+                     Style="{DynamicResource Button16Style}"
+                     VerticalAlignment="Top"
+                     Content="{DynamicResource AddEditSkillsAcceptButton}"
+                     Command="{Binding AcceptButtonClickCommand}"
+                     IsEnabled="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsAdminPermissionForHRM, Mode=TwoWay ,UpdateSourceTrigger=PropertyChanged}"
+                     Height="30"
+                     Width="100" />
+
+            <Button Grid.Row="4" Grid.Column="2"
+                    HorizontalAlignment="Left"
+                    Style="{DynamicResource Button16Style}"
+                    VerticalAlignment="Top"
+                    Content="{DynamicResource AddEditSkillsCancelButton}"
+                    Command="{Binding CancelButtonCommand }"
+                    Height="30"
+                    Width="100" />
+        </Grid>
+    </Grid>
+</dxwui:WinUIDialogWindow>

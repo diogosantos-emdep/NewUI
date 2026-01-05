@@ -1,0 +1,513 @@
+﻿<UserControl x:Class="Emdep.Geos.Modules.SCM.Views.ThreeDConnectorView"
+              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.SCM.Views"
+              xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+              xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"
+              xmlns:Converters="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+              xmlns:sysglb="clr-namespace:System.Globalization;assembly=mscorlib"
+             xmlns:SCMApplication="clr-namespace:Emdep.Geos.Modules.SCM.Common_Classes" 
+              xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+               xmlns:dxp="http://schemas.devexpress.com/winfx/2008/xaml/printing" 
+              xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+               xmlns:dxgt="http://schemas.devexpress.com/winfx/2008/xaml/grid/themekeys"
+              xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+               xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+              xmlns:behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+
+    <UserControl.Resources>
+        <Converters:ImageUrlToByteArrayConverter x:Key="ImageUrlToByteArrayConverter" />
+
+
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Label Content="{DynamicResource SCM3DConnectorItemsTitle}" Margin="5,0,0,0" HorizontalAlignment="Left" Style="{StaticResource LabelTitleStyle}" Grid.Row="0" />
+        <Grid HorizontalAlignment="Right" Grid.Row="0" Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="AUTO"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="AUTO"/>
+                <ColumnDefinition Width="AUTO" />
+                <ColumnDefinition Width="AUTO" />
+                <ColumnDefinition Width="AUTO" />
+                <ColumnDefinition Width="AUTO" />
+                <ColumnDefinition Width="AUTO" />
+                <ColumnDefinition Width="AUTO" />
+            </Grid.ColumnDefinitions>
+
+
+            <Grid HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Column="1">
+                <Grid.ColumnDefinitions >
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <!--WareHouse-->
+                <Grid Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" >
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="5"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <!-- Warehouse Image -->
+                    <Image Grid.Column="0" Style="{DynamicResource WarehouseImageStyle}"
+                       Width="24" Height="24" Margin="0,-10,5,0"
+                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    <!--<TextBlock Grid.Column="2" Margin="0,-10,5,0"
+                           Text="{DynamicResource Warehouse}" FontWeight="Bold"
+                           VerticalAlignment="Center" HorizontalAlignment="Center" />-->
+                    <TextBlock Grid.Column="2" Text="{DynamicResource CommonPlant}" 
+                               FontWeight="Bold" Margin="0,-10,5,0"  VerticalAlignment="Center" HorizontalAlignment="Center" IsEnabled="True"  />
+
+                </Grid>
+                <dxe:ComboBoxEdit Name="Cbeplant" Style="{DynamicResource ComboBoxEditStyle}" Grid.Column="1" Width="150" Height="30"
+                                      VerticalAlignment="Center" HorizontalAlignment="Right" IsTextEditable="False"
+                                    ItemsSource ="{Binding Source={x:Static SCMApplication:SCMCommon.Instance}, Path=PlantList ,UpdateSourceTrigger=PropertyChanged , Mode=TwoWay}"
+                                      EditValue="{Binding Source={x:Static SCMApplication:SCMCommon.Instance}, Path=SelectedPlant,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                    DisplayMember="ShortName" ShowError="False" ShowErrorToolTip="False" 
+                                      Margin="0,-10,0,0">
+                    <dxe:ComboBoxEdit.StyleSettings>
+                        <dxe:CheckedComboBoxStyleSettings />
+                    </dxe:ComboBoxEdit.StyleSettings>
+                    <dxmvvm:Interaction.Triggers>
+                        <dxmvvm:EventToCommand EventName="PopupClosed"
+                                               Command="{Binding DataContext.PlantOwnerPopupClosedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                               PassEventArgsToCommand="True"/>
+                    </dxmvvm:Interaction.Triggers>
+                </dxe:ComboBoxEdit>
+                <!-- Period -->
+                <DockPanel Grid.Column="2" Grid.Row="0" HorizontalAlignment="Right"   VerticalAlignment="Center" Margin="15,0,0,0" >
+                    <TextBlock Text="{Binding FromDate,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,StringFormat=d,ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,-10,5,0"/>
+                    <TextBlock Text=" - " HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold" Margin="0,-10,5,0"/>
+                    <TextBlock Text="{Binding ToDate,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,StringFormat=d,ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,-10,5,0"/>
+                </DockPanel>
+                <!--Calender Icon-->
+                <dxwui:AppBar x:Name="Appbar" HideMode="AlwaysVisible" Background="Transparent" Grid.Column="3"
+                                  IsSticky="True" HorizontalAlignment="Stretch"
+                                  VerticalAlignment="Stretch"
+                                  IsOpen="True" IsExitButtonEnabled="False" Margin="0,-10,5,0">
+
+                    <dxwui:AppBarButton x:Name="appbarbutton" ToolTip="{DynamicResource PeriodSelect}"
+                                        GlyphHeight="24" GlyphWidth="24" AllowGlyphTheming="False"
+                                        Style="{DynamicResource CalendarImageGlyphStyle}"
+                                        GlyphStretch="Fill" IsEllipseEnabled="False" >
+                        <dxwui:AppBarButton.Flyout>
+                            <dxwui:MenuFlyout ShowIndicator="True" x:Name="MenuLayout">
+                                <dxwui:MenuFlyoutItem StaysOpenOnClick="True">
+                                    <Grid Width="Auto" Height="Auto">
+                                        <DockPanel>
+                                            <StackPanel Orientation="Vertical" x:Name="PeriodCategories">
+                                                <!--This Year-->
+                                                <Button x:Name="ThisYear" Content="This Year" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                            Height="30" Width="110"
+                                                            Command="{Binding PeriodCommand}"
+                                                            CommandParameter="{Binding ElementName=ThisYear}">
+                                                </Button>
+                                                <!--Last Year-->
+                                                <Button x:Name="LastYear" Content="Last Year" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                            Height="30" Width="110"
+                                                            Command="{Binding PeriodCommand}"
+                                                            CommandParameter="{Binding ElementName=LastYear}">
+                                                </Button>
+                                                <!--This Month-->
+                                                <Button x:Name="ThisMonth" Content="{DynamicResource SAMThisMonth}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                            Height="30" Width="110"
+                                                            Command="{Binding PeriodCommand}"
+                                                            CommandParameter="{Binding ElementName=ThisMonth}">
+                                                </Button>
+                                                <!--Last month-->
+                                                <Button x:Name="LastMonth" Content="{DynamicResource SAMLastMonth}" HorizontalAlignment="Center" VerticalAlignment="Center" 
+                                                            Height="30" Width="110"
+                                                            Command="{Binding PeriodCommand}"
+                                                            CommandParameter="{Binding ElementName=LastMonth}">
+                                                </Button>
+                                                <!--This week-->
+                                                <Button x:Name="ThisWeek" Content="{DynamicResource SAMThisWeek}" HorizontalAlignment="Center" VerticalAlignment="Center" 
+                                                            Height="30" Width="110"
+                                                            Command="{Binding PeriodCommand}"
+                                                            CommandParameter="{Binding ElementName=ThisWeek}">
+                                                </Button>
+                                                <!--Last week-->
+                                                <Button x:Name="LastWeek" Content="{DynamicResource SAMLastWeek}" HorizontalAlignment="Center" VerticalAlignment="Center" 
+                                                            Height="30" Width="110"
+                                                            Command="{Binding PeriodCommand}"
+                                                            CommandParameter="{Binding ElementName=LastWeek}">
+                                                </Button>
+                                                <!--Last 12 month-->
+                                                <Button x:Name="Last12Months" Content="Last 12 Months" HorizontalAlignment="Center" VerticalAlignment="Center" 
+                                                            Height="30" Width="110"
+                                                            Command="{Binding PeriodCommand}"
+                                                            CommandParameter="{Binding ElementName=Last12Months}">
+                                                </Button>
+                                                <!--Custom Range-->
+                                                <Button x:Name="CustomRange" Content="{DynamicResource PeriodCustomRange}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                            Height="30" Width="110"
+                                                            Command="{Binding PeriodCustomRangeCommand}"
+                                                            CommandParameter="{Binding ElementName=CustomRange}">
+                                                </Button>
+                                                <StackPanel Orientation="Horizontal" Margin="0,50,0,0">
+                                                    <Button Content="{DynamicResource SAMApply}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                            Height="30" Width="60" Background="Yellow" 
+                                                            Command="{Binding ApplyCommand}" CommandParameter="{Binding ElementName=MenuLayout}">
+                                                    </Button>
+                                                    <Button Content="{DynamicResource SAMCancel}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                            Height="30" Width="60" 
+                                                            Command="{Binding CancelCommand}" CommandParameter="{Binding ElementName=MenuLayout}">
+                                                    </Button>
+                                                </StackPanel>
+                                            </StackPanel>
+                                            <StackPanel Visibility="{Binding DataContext.IsCalendarVisible, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" Orientation="Horizontal">
+                                                <StackPanel Orientation="Vertical">
+                                                    <dxe:TextEdit Text="{Binding DataContext.StartDate, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
+                                                  Height="30" TextWrapping="Wrap" Mask="dd/MM/yyyy"  
+                                                  MaskType="DateTimeAdvancingCaret"  
+                                                  MaskUseAsDisplayFormat="True"
+                                                  HorizontalAlignment="Stretch" IsReadOnly="True"  Margin="2,2,2,2">
+                                                    </dxe:TextEdit>
+                                                    <!--Calendar-->
+                                                    <dxe:DateEditCalendar DateTime="{Binding DataContext.StartDate, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                                      VerticalAlignment="Center"
+                                                                      ShowToday="False"
+                                                                      ShowClearButton="False"/>
+                                                </StackPanel>
+                                                <StackPanel Orientation="Vertical">
+                                                    <dxe:TextEdit Text="{Binding DataContext.EndDate, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
+                                                  Height="30" TextWrapping="Wrap" Mask="dd/MM/yyyy"  
+                                                  MaskType="DateTimeAdvancingCaret"  
+                                                  MaskUseAsDisplayFormat="True"
+                                                  HorizontalAlignment="Stretch" IsReadOnly="True"  Margin="2,2,2,2">
+                                                    </dxe:TextEdit>
+                                                    <!--Calendar-->
+                                                    <dxe:DateEditCalendar DateTime="{Binding DataContext.EndDate, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                                                      VerticalAlignment="Center"
+                                                                      ShowToday="False"
+                                                                      ShowClearButton="False"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </DockPanel>
+                                    </Grid>
+                                </dxwui:MenuFlyoutItem>
+                            </dxwui:MenuFlyout>
+                        </dxwui:AppBarButton.Flyout>
+                    </dxwui:AppBarButton>
+                </dxwui:AppBar>
+            </Grid>
+            <!--Refresh Button-->
+            <Button Visibility="Visible" Grid.Row="0" Grid.Column="3" Height="40" Width="40" Margin="0,-15,5,0" HorizontalAlignment="Right" 
+                                Command="{Binding RefreshButtonCommand}"
+                                CommandParameter="{Binding ElementName=ItemListTableView}" >
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource ButtonRefresh}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Image Style="{DynamicResource RefreshButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+            <!--Print Button-->
+            <Button Visibility="Visible" Grid.Row="0" Grid.Column="4" Height="40" Width="40" Margin="0,-15,5,0" HorizontalAlignment="Right" 
+                    Command="{Binding PrintButtonCommand}"
+                    CommandParameter="{Binding ElementName=ItemListTableView}">
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource ButtonPrint}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Image Style="{DynamicResource PrinterButtonImageStyle}" Height="24" Width="24" Margin="-10"/>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+            <!--Export Button-->
+            <Button Visibility="Visible" Grid.Row="0" Grid.Column="5" Height="40" Width="40" Margin="0,-15,5,0" HorizontalAlignment="Right" 
+                    Command="{Binding ExportButtonCommand}"
+                    CommandParameter="{Binding ElementName=ItemListTableView}" >
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource ButtonExportToExcel}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Image Style="{DynamicResource ExcelExportButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+
+
+
+        </Grid>
+
+        <Grid Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <dxg:GridControl VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                             AllowLiveDataShaping="True" Grid.Row="1"
+                             
+                             ItemsSource="{Binding ThreeDConnectorGridList,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" SelectionMode="Row"                        
+                             ImplyNullLikeEmptyStringWhenFiltering="True">
+
+                <!--Emdep Reference-->
+                <dxg:GridColumn Header="{DynamicResource SCM3DConnectorEmdepReferenceGridHeader}" FieldName="EmdepReference" 
+                                AllowBestFit="True" Width="120" MaxWidth="120"
+                               FilterPopupMode="CheckedList" FixedWidth="False" AllowResizing="True" AllowEditing="False" 
+                                >
+                    <dxg:GridColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Margin="5,0,0,0" VerticalAlignment="Center"  >
+                                            <Hyperlink TargetName="_blank"  
+                                                       Command="{Binding View.DataContext.HyperlinkForWebsite}" 
+                                                       CommandParameter="{Binding Data.EmdepReference}"
+                                                       Style="{DynamicResource hyperlinkGridStyle}">
+                                                <TextBlock Name="PART_Editor" Text="{Binding RowData.Row.EmdepReference}" Style="{DynamicResource HyperlinkTextBlock}" TextDecorations="Underline" />
+                                            </Hyperlink>
+                                        </TextBlock>
+                        </DataTemplate>
+                    </dxg:GridColumn.CellTemplate>
+                </dxg:GridColumn>
+
+                <!--Reference-->
+                <dxg:GridColumn Header="{DynamicResource SCM3DConnectorReferenceGridHeader}"  FieldName="Reference"
+                                AllowBestFit="True" MinWidth="150" ReadOnly="True"
+                               FilterPopupMode="CheckedList" FixedWidth="False" AllowResizing="True" AllowEditing="False"
+                               >
+                </dxg:GridColumn>
+
+                <!--Images-->
+                <dxg:GridColumn Header="{DynamicResource SCM3DConnectorImageGridHeader}" AllowPrinting="False" FieldName="ConnectorsImageInBytes" Width="82" MaxWidth="60" FilterPopupMode="CheckedList"  ReadOnly="True">
+                    <dxg:GridColumn.CellTemplate>
+                        <DataTemplate>
+                            <Image Source="{Binding RowData.Row.ConnectorsImagePath,Converter={StaticResource ImageUrlToByteArrayConverter},UpdateSourceTrigger=PropertyChanged ,ConverterParameter='image/png'}"
+                                       VerticalAlignment="Stretch" HorizontalAlignment="Stretch" MaxHeight="60" MinHeight="60">
+                                <Image.ToolTip>
+                                    <Image Source="{Binding RowData.Row.ConnectorsImagePath,Converter={StaticResource ImageUrlToByteArrayConverter},UpdateSourceTrigger=PropertyChanged ,ConverterParameter='image/png'}"                             
+                                       VerticalAlignment="Center" Height="200" Width="300" Margin="2,0,0,0" />
+
+                                </Image.ToolTip>
+                                <dxmvvm:Interaction.Behaviors>
+                                    <dxmvvm:EventToCommand EventName="MouseDown" CommandParameter="{Binding ElementName=ConnectorGridControl1}"
+                                       Command="{Binding DataContext.ImageClickCommand,RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                       PassEventArgsToCommand="True"/>
+                                </dxmvvm:Interaction.Behaviors>
+                            </Image>
+                        </DataTemplate>
+                    </dxg:GridColumn.CellTemplate>
+                </dxg:GridColumn>
+
+
+                <!--Family-->
+                <dxg:GridColumn Header="{DynamicResource SCM3DConnectorFamilyGridHeader}"  FieldName="FamilyName"
+                                AllowBestFit="True" MinWidth="100" ReadOnly="True" 
+                               FilterPopupMode="CheckedList" FixedWidth="False" AllowResizing="True" AllowEditing="False"
+                              >
+                </dxg:GridColumn>
+                <!--Sub Family-->
+                <dxg:GridColumn Header="{DynamicResource SCM3DConnectorSubFamilyGridHeader}"  FieldName="SubFamilyName"
+                                AllowBestFit="True" MinWidth="100" ReadOnly="True"
+                               FilterPopupMode="CheckedList" FixedWidth="False" AllowResizing="True" AllowEditing="False"
+                              >
+                </dxg:GridColumn>
+
+                <!--Type-->
+                <dxg:GridColumn Header="{DynamicResource SCM3DConnectorTypeGridHeader}"  FieldName="TypeName"
+                                AllowBestFit="True" MinWidth="100" ReadOnly="True"
+                               FilterPopupMode="CheckedList" FixedWidth="False" AllowResizing="True" AllowEditing="False"
+                              >
+                </dxg:GridColumn>
+
+
+                <!--Item Created In-->
+                <dxg:GridColumn Header="{DynamicResource SCM3DConnectorCreatedInGridHeader}"  FieldName="CreationDate"
+                                AllowBestFit="True" MinWidth="120" ReadOnly="True"
+                               FilterPopupMode="CheckedList" FixedWidth="False" AllowResizing="True" AllowEditing="False"
+                              >
+                </dxg:GridColumn>
+
+                <!--Plant-->
+                <dxg:GridColumn Header="{DynamicResource SCM3DConnectorPlantGridHeader}"  FieldName="PlantName"
+                                AllowBestFit="True" Width="60" MaxWidth="60"  ReadOnly="True"
+                               FilterPopupMode="CheckedList" FixedWidth="False" AllowResizing="True" AllowEditing="False"
+                              >
+                </dxg:GridColumn>
+
+                <!--OT-->
+                <dxg:GridColumn Header="{DynamicResource SCM3DConnectorOtGridHeader}"  FieldName="OTCode"
+                                AllowBestFit="True" MinWidth="120" ReadOnly="True"
+                               FilterPopupMode="CheckedList" FixedWidth="False" AllowResizing="True" AllowEditing="False"
+                              >
+                </dxg:GridColumn>
+
+                <!--Item n*-->
+                <dxg:GridColumn Header="{DynamicResource SCM3DConnectorItemnGridHeader}"  FieldName="ItemNumber"
+                                AllowBestFit="True" MinWidth="120" ReadOnly="True"
+                               FilterPopupMode="CheckedList" FixedWidth="False" AllowResizing="True" AllowEditing="False"
+                              >
+                </dxg:GridColumn>
+
+                <!--Item Status-->
+                <dxg:GridColumn Header="{DynamicResource SCM3DConnectorItemStatusGridHeader}"  FieldName="ItemStatus"
+                                AllowBestFit="True" MinWidth="120" ReadOnly="True"
+                               FilterPopupMode="CheckedList" FixedWidth="False" AllowResizing="True" AllowEditing="False"
+                              >
+                </dxg:GridColumn>
+
+                <!--Drawing-->
+                <dxg:GridColumn Header="{DynamicResource SCM3DConnectorDrawingGridHeader}"  FieldName="IdDrawing"
+                                AllowBestFit="True" MinWidth="120" ReadOnly="True"
+                               FilterPopupMode="CheckedList" FixedWidth="False" AllowResizing="True" AllowEditing="False"
+                              >
+                </dxg:GridColumn>
+
+                <!--Drawing CreatedIn-->
+                <dxg:GridColumn Header="{DynamicResource SCM3DConnectorDrawingCreatedINGridHeader}"  FieldName="DrawingCreatedIn"
+                                AllowBestFit="True" MinWidth="250" ReadOnly="True"
+                               FilterPopupMode="CheckedList" FixedWidth="False" AllowResizing="True" AllowEditing="False"
+                              >
+
+                </dxg:GridColumn>
+
+                <!--Revision-->
+                <dxg:GridColumn Header="{DynamicResource SCM3DConnectorRevisionGridHeader}"  FieldName="Revision"
+                                AllowBestFit="True" MinWidth="120" ReadOnly="True"
+                               FilterPopupMode="CheckedList" FixedWidth="False" AllowResizing="True" AllowEditing="False"
+                              >
+                </dxg:GridColumn>
+
+                <!--Designer-->
+                <dxg:GridColumn Header="{DynamicResource SCM3DConnectorDesignerGridHeader}"  FieldName="DesignerFullName"
+                                AllowBestFit="True" MinWidth="120" ReadOnly="True"
+                               FilterPopupMode="CheckedList" FixedWidth="False" AllowResizing="True" AllowEditing="False"
+                              >
+                </dxg:GridColumn>
+
+                <!--Reworks-->
+                <dxg:GridColumn Header="{DynamicResource SCM3DConnectorReworksGridHeader}"  FieldName="Reworks"
+                                AllowBestFit="True" MinWidth="120" ReadOnly="True"
+                               FilterPopupMode="CheckedList" FixedWidth="False" AllowResizing="True" AllowEditing="False"
+                              >
+                </dxg:GridColumn>
+
+                <!--Reworks Stage-->
+                <dxg:GridColumn Header="{DynamicResource SCM3DConnectorReworksStageGridHeader}"  FieldName="ReworkStage"
+                                AllowBestFit="True" MinWidth="220" ReadOnly="True"
+                               FilterPopupMode="CheckedList" FixedWidth="False" AllowResizing="True" AllowEditing="False"
+                              >
+                </dxg:GridColumn>
+
+                <!--Reworks Comment-->
+                <dxg:GridColumn Header="{DynamicResource SCM3DConnectorReworksCommentGridHeader}"  FieldName="ReworkComment"
+                                AllowBestFit="True" MinWidth="250" ReadOnly="True"
+                               FilterPopupMode="CheckedList" FixedWidth="False" AllowResizing="True" AllowEditing="False"
+                              >
+                </dxg:GridColumn>
+
+              
+
+
+
+
+                <dxmvvm:Interaction.Behaviors>
+                    <UIHelper:GridSelectingBehavior />
+                </dxmvvm:Interaction.Behaviors>
+
+
+
+                <dxg:GridControl.TotalSummary>
+
+                    <dxg:GridSummaryItem x:Name="summary" FieldName="" SummaryType="Count" DisplayFormat="Total Count : {0}" Visible="True" Alignment="Left"/>
+
+                </dxg:GridControl.TotalSummary>
+
+
+                <dxg:GridControl.View>
+                    <dxg:TableView x:Name="ItemListTableView"
+                                    ShowGroupedColumns="True"  
+                                   HorizontalScrollbarVisibility="Auto"  
+                                   VerticalScrollbarVisibility="Auto" 
+                                   ShowIndicator="False" 
+                                   ShowColumnHeaders="True"  
+                                   ShowGroupPanel="False"  
+                                   ShowAutoFilterRow="False"
+                                   AllowEditing="True"  
+                                   ShowHorizontalLines="True"  
+                                   ShowVerticalLines="True"  
+                                   ShowSearchPanelMode="Always" 
+                                   SearchPanelHorizontalAlignment="Stretch" 
+                                   EnableImmediatePosting="True"
+                                   ImmediateUpdateRowPosition="False"
+                                   FilterRowDelay="500"
+                                   AllowColumnMoving="True"
+                                   NavigationStyle="Row"
+                                   ShowFixedTotalSummary="True"
+                                   FilterEditorShowOperandTypeIcon="True"
+                                   AllowColumnFiltering="True"
+                                   UseLegacyFilterEditor="True"
+                                   ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly"
+                                 AllowHorizontalScrollingVirtualization="False"
+                                   ShowFilterPopup="{DXEvent Handler='@args.PopupBaseEdit.PopupWidth=200'}" 
+                              IsColumnChooserVisible="{Binding IsCategoriesColumnChooserVisible,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                   AllowConditionalFormattingMenu="True"
+                                   >
+                       
+
+                        <dxg:TableView.Resources>
+                            <DataTemplate x:Key="3dConnectorReportPrintHeaderTemplate">
+                                <Grid Width="{Binding UsablePageWidth}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="50" />
+                                        <ColumnDefinition Width="130" />
+                                    </Grid.ColumnDefinitions>
+                                    <dxe:TextEdit Text=" " Width="{Binding UsablePageWidth}" Grid.ColumnSpan="3" IsPrintingMode="True" Background="#333E5E" HorizontalAlignment="Stretch" 
+                                                      VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" Height="50" />
+                                    <dxe:TextEdit Text="3D Connector Items Report" IsPrintingMode="True" HorizontalAlignment="Stretch" 
+                                                      VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" />
+                                    <Image Source="/Emdep.Geos.Modules.SAM;component/Assets/Images/GeosReportLogo.png" Height="50" Width="80"  dxp:ExportSettings.TargetType="Image" Grid.Column="2" />
+                                </Grid>
+                            </DataTemplate>
+
+                            <DataTemplate x:Key="3dConnectorReportPrintFooterTemplate">
+                                <dxe:TextEdit HorizontalContentAlignment="Center" 
+                                                  Width="{Binding Path=UsablePageWidth, Mode=OneWay}" 
+                                                  dxp:ExportSettings.TargetType="PageNumber" 
+                                                  dxp:PageNumberExportSettings.Kind="NumberOfTotal" 
+                                                  dxp:PageNumberExportSettings.Format="Page {0} of {1}"/>
+                            </DataTemplate>
+
+                        </dxg:TableView.Resources>
+
+                        <dxmvvm:Interaction.Behaviors>
+
+
+                            <dxmvvm:EventToCommand EventName="ShowFilterPopup"
+                                                   Command="{Binding CommandShowFilterPopupClick}"
+                                                   PassEventArgsToCommand="True"/>
+
+                            <dxmvvm:EventToCommand Command="{Binding TableViewLoadedCommand}"
+                                                   EventName="Loaded"
+                                                   PassEventArgsToCommand="True" />
+
+                        </dxmvvm:Interaction.Behaviors>
+
+
+                    </dxg:TableView>
+                </dxg:GridControl.View>
+            </dxg:GridControl>
+        </Grid>
+
+    </Grid>
+    <!--[shweta.thube][GEOS2-6630][04.04.2025]-->
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="KeyDown">
+            <behaviors:InvokeDelegateCommandAction Command="{Binding CommandTextInput}" CommandParameter="{Binding Path=InvokeParameter, RelativeSource={RelativeSource Self}}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+
+</UserControl>

@@ -1,0 +1,105 @@
+﻿<UserControl x:Class="Emdep.Geos.Modules.Warehouse.Views.StaticFiltersPanel"
+               xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:dxb="http://schemas.devexpress.com/winfx/2008/xaml/bars"
+             xmlns:dxnav="http://schemas.devexpress.com/winfx/2008/xaml/navigation"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:Helper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+             xmlns:ViewModels="clr-namespace:Emdep.Geos.Modules.Warehouse.ViewModels"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:Converters="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+             xmlns:local="clr-namespace:DevExpress.DevAV"
+              xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+             xmlns:dxwuin="http://schemas.devexpress.com/winfx/2008/xaml/windowsui/navigation"
+             mc:Ignorable="d"
+             d:DesignHeight="300" d:DesignWidth="300"
+             x:Name="root">
+    <UserControl.DataContext>
+        <ViewModels:PurchaseOrderViewModel/>
+    </UserControl.DataContext>
+    <UserControl.Resources>
+        <Converters:ImageConverter x:Key="ImageConverter"/>
+        <Style x:Key="HideButtonStyle" TargetType="{x:Type ToggleButton}">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ToggleButton}">
+                        <Border BorderThickness="0" Background="{TemplateBinding Background}">
+                            <Grid>
+                                <Image Stretch="None" VerticalAlignment="Center" HorizontalAlignment="Center"
+                                   Source="/Emdep.Geos.Modules.Warehouse;component/Assets/Images/ArrowRight.png"
+                                   Visibility="{TemplateBinding IsChecked, Converter={dxmvvm:BooleanToVisibilityConverter Inverse=True}}"/>
+                                <Image Stretch="None" VerticalAlignment="Center" HorizontalAlignment="Center"
+                                   Source="/Emdep.Geos.Modules.Warehouse;component/Assets/Images/ArrowLeft.png"
+                                   Visibility="{TemplateBinding IsChecked, Converter={dxmvvm:BooleanToVisibilityConverter}}"/>
+                            </Grid>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="LeftPanelTileItemStyle" TargetType="{x:Type dxnav:TileBarItem}">
+            <Setter Property="Foreground" Value="#FF787878"/>
+            <Setter Property="BorderBrush" Value="#FFD6D6D6"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+            <Setter Property="Height" Value="80"/>
+            <Setter Property="Width" Value="200"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="SelectionPadding" Value="0" />
+            <Setter Property="Command" Value="{Binding NavigateCommand}"/>
+            <Setter Property="ContentTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                        <Grid>
+                            <TextBlock Text="{Binding EntitiesCount,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" FontSize="36" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-5,8,0" Opacity="0.6"/>
+                            <TextBlock HorizontalAlignment="Left" VerticalAlignment="Bottom" Text="{Binding Name}" FontSize="13" Margin="6,0,0,3"/>
+                            <Image HorizontalAlignment="Left" VerticalAlignment="Top" Source="{Binding ImageUri, Converter={StaticResource ImageConverter}}" dxb:ImageColorizer.IsEnabled="True"
+                               dxb:ImageColorizer.Color="{Binding Path=(TextElement.Foreground).Color, RelativeSource={RelativeSource Self}}"
+                               Stretch="None" Margin="6,6,0,0"/>
+                            
+                        </Grid>
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Foreground" Value="White"/>
+                    <Setter Property="Background" Value="#FF2F51A5"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+    <DockPanel>
+        <Helper:DpiResizingPanel DockPanel.Dock="Left">
+            <dxnav:TileBar DockPanel.Dock="Left"
+                               Visibility="{Binding ElementName=expandButton, Path=IsChecked, Converter={dxmvvm:BooleanToVisibilityConverter}}"
+                               Margin="42,-20,0,0"
+                               Grid.Row="1"
+                               SelectedIndex="0"
+                               Orientation="Vertical"
+                               Width="215"
+                               ItemSpacing="5"
+                               ItemsSource="{Binding Listofitem ,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                               ItemContainerStyle="{StaticResource LeftPanelTileItemStyle}"
+                               Padding="0"  >
+             
+                <dxmvvm:Interaction.Behaviors>
+                    <dxmvvm:EventToCommand Command="{Binding CommandShowFilterPopupClick}" EventName="SelectionChanged" PassEventArgsToCommand="True"/>
+                    <!--<Helper:FilterUnselectionBehavior  SelectedFilter="{Binding FilterTreeViewModel.SelectedItem, Mode=TwoWay}"/>-->
+                </dxmvvm:Interaction.Behaviors>
+            </dxnav:TileBar>
+        </Helper:DpiResizingPanel>
+        <ToggleButton x:Name="expandButton" DockPanel.Dock="Left" Style="{StaticResource HideButtonStyle}" IsChecked="True" VerticalAlignment="Center"/>
+        <dxwui:NavigationFrame   x:Name="Navigatedframe" Grid.Row="1" AnimationType="SlideHorizontal">
+        <dxmvvm:Interaction.Behaviors>
+            <dxwuin:FrameNavigationService/>
+        </dxmvvm:Interaction.Behaviors>
+    </dxwui:NavigationFrame>
+    </DockPanel>
+   
+</UserControl>

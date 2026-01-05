@@ -1,0 +1,128 @@
+﻿<UserControl x:Class="Emdep.Geos.Modules.Epc.Views.RequestAssistanceView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.Epc.Views"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:viewModel="clr-namespace:Emdep.Geos.Modules.Epc.ViewModels"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:dxp="http://schemas.devexpress.com/winfx/2008/xaml/printing"
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"
+             xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+             xmlns:dxgt="clr-namespace:DevExpress.Xpf.Grid.Themes;assembly=DevExpress.Xpf.Grid.v19.2"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="1200">
+    
+    <UserControl.DataContext>
+        <viewModel:RequestAssistanceViewModel />
+    </UserControl.DataContext>
+    
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Emdep.Geos.Modules.Epc;component/Resources/EpcCommonResource.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <UIHelper:ColumnTemplateSelector x:Key="ColumnTemplateSelector" />
+            <DataTemplate x:Key="ArrayColumnTemplate">
+                <ContentControl>
+                    <dxg:GridColumn FieldName="{Binding Path=FieldName}" UIHelper:ColumnBindingHelper.BindingPath="{Binding FieldName}" Header="{Binding HeaderText}" AllowCellMerge="{Binding AllowCellMerge}" FixedWidth="{Binding FixedWidth}" AllowBestFit="true" Width="{Binding  Width}" AllowEditing="False" />
+                </ContentControl>
+            </DataTemplate>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        <Label Style="{StaticResource LabelStyle}" Content="Request Assistance" Margin="0" Padding="5" Grid.Row="0" Grid.Column="0" />
+        <Button HorizontalAlignment="Right" Grid.Column="1" Grid.Row="0" Height="40" Width="40" Margin="0,0,0,5" Command="{Binding PrintButtonCommand}" CommandParameter="{Binding ElementName=requestAssistanceTable}">
+            <Button.ContentTemplate>
+                <DataTemplate>
+                    <Image Style="{DynamicResource PrinterButtonImageStyle}" Grid.Column="0" Height="24" Width="24" Margin="-10" />
+                </DataTemplate>
+            </Button.ContentTemplate>
+        </Button>
+        <dxg:GridControl ItemsSource="{Binding TaskList}" Margin="0" Padding="0" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
+            <dxg:GridControl.Columns>
+                <dxg:GridColumn FieldName="Project.ProjectCode" Header="Project Code" VisibleIndex="0" FixedWidth="True" Width="90">
+                    <dxg:GridColumn.DisplayTemplate>
+                        <ControlTemplate>
+                            <TextBlock Margin="5,0,0,0" VerticalAlignment="Center">
+                                            <Hyperlink TargetName="_blank" Style="{DynamicResource hyperlinkGridStyle}"
+                                                       Command="{Binding View.DataContext.HyperlinkToProjectCodeCommand}" CommandParameter="{Binding Data.Project}">
+                                                <TextBlock x:Name="PART_Editor" Text="{Binding DataContext.Project.ProjectCode}" />
+                                             </Hyperlink>
+                                         </TextBlock>
+                        </ControlTemplate>
+                    </dxg:GridColumn.DisplayTemplate>
+                </dxg:GridColumn>
+                <dxg:GridColumn FieldName="Project.ProjectName" Header="Project Name" VisibleIndex="1" FixedWidth="False" Width="*" />
+                <!--<dxg:GridColumn FieldName="Owner.FullName" Header=" Project Owner" VisibleIndex="2" FixedWidth="True" Width="120"/>-->
+                <dxg:GridColumn FieldName="Project.Customer.CustomerName" Header="Customer" VisibleIndex="2" FixedWidth="True" Width="150" />
+                <dxg:GridColumn FieldName="TaskTitle" Header="Task" VisibleIndex="3" FixedWidth="False" Width="*" />
+                <dxg:GridColumn FieldName="ProductRoadmap.LinkedTo" Header="Source" VisibleIndex="3" FixedWidth="True" Width="100" />
+                <dxg:GridColumn FieldName="FullName" DisplayMemberBinding="{Binding Path=TaskAssistances[0].RequestFrom.FullName}" Header="Request From" VisibleIndex="4" FixedWidth="True" Width="120">
+
+                </dxg:GridColumn>
+
+                <dxg:GridColumn FieldName="RequestDate" DisplayMemberBinding="{Binding Path=TaskAssistances[0].RequestDate}" Header="Request Date" VisibleIndex="5" FixedWidth="True" Width="80" />
+                <dxg:GridColumn FieldName="TaskPriority.Value" Header="Priority" VisibleIndex="6" FixedWidth="True" Width="60" DisplayTemplate="{StaticResource TaskPriorityColumnDisplayTemplate}" PrintCellStyle="{StaticResource ImageColumnPrintingStyle}" />
+
+
+                <dxg:GridColumn FieldName="DueDate" VisibleIndex="7" FixedWidth="True" Width="80" />
+                <dxg:GridColumn FieldName="Progress" BestFitMode="Smart" VisibleIndex="8" FixedWidth="True" Width="70">
+                    <dxg:GridColumn.EditSettings>
+                        <dxe:ProgressBarEditSettings Maximum="100" Minimum="0" ContentDisplayMode="Value" DisplayFormat="{}{0}%" />
+                    </dxg:GridColumn.EditSettings>
+                </dxg:GridColumn>
+            </dxg:GridControl.Columns>
+            <dxg:GridControl.View>
+                <dxg:TableView x:Name="requestAssistanceTable" ShowSearchPanelMode="Always" 
+                               ShowGroupPanel="False" HorizontalAlignment="Stretch"
+                               AllowColumnFiltering="True"
+                               VerticalAlignment="Stretch" AutoWidth="True" ShowIndicator="False" 
+                               AllowEditing="False" AllowSorting="True" NavigationStyle="Row">
+                    <dxg:TableView.Resources>
+                        <DataTemplate x:Key="RequestAssistanceViewCustomPrintHeaderTemplate">
+                            <Grid Width="{Binding UsablePageWidth}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="50" />
+                                    <ColumnDefinition Width="130" />
+                                </Grid.ColumnDefinitions>
+                                <dxe:TextEdit Text=" " Width="{Binding UsablePageWidth}" Grid.ColumnSpan="3" IsPrintingMode="True" Background="#333E5E" HorizontalAlignment="Stretch" 
+                                              VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" FontWeight="Bold" FontSize="20" Height="50" />
+                                <dxe:TextEdit Text="Request Assistance Report" IsPrintingMode="True" HorizontalAlignment="Stretch" 
+                                              VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" FontWeight="Bold" FontSize="20" />
+                                <Image Source="/Emdep.Geos.Modules.Epc;component/Images/GeosReportLogo.png" Height="50" Width="80" dxp:ExportSettings.TargetType="Image" Grid.Column="2" />
+                            </Grid>
+                        </DataTemplate>
+                        <DataTemplate x:Key="RequestAssistanceViewCustomPrintFooterTemplate">
+                            <dxe:TextEdit HorizontalContentAlignment="Center"
+                         Width="{Binding Path=UsablePageWidth, Mode=OneWay}"
+                         dxp:ExportSettings.TargetType="PageNumber"
+                         dxp:PageNumberExportSettings.Kind="NumberOfTotal"
+                         dxp:PageNumberExportSettings.Format="Page {0} of {1}">
+                            </dxe:TextEdit>
+                        </DataTemplate>
+                    </dxg:TableView.Resources>
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="RowDoubleClick">
+                            <behaviors:InvokeDelegateCommandAction Command="{Binding GridDoubleClickCommand }" CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=InvokeParameter}" />
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </dxg:TableView>
+            </dxg:GridControl.View>
+        </dxg:GridControl>
+
+    </Grid>
+</UserControl>

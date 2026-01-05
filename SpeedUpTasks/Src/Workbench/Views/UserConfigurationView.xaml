@@ -1,0 +1,107 @@
+﻿<!--<Window x:Class="Workbench.Views.UserConfigurationView" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="UserConfigurationView" Height="300" Width="300">
+    <Grid>
+    </Grid>
+</Window>-->
+
+<dxwui:WinUIDialogWindow x:Class="Workbench.Views.UserConfigurationView"
+                         xmlns:ViewModels="clr-namespace:Workbench.ViewModels"
+                         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                         xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+                         xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+                         xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors" 
+                         xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+                         xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid" 
+                         xmlns:dxgt="http://schemas.devexpress.com/winfx/2008/xaml/grid/themekeys"
+                         xmlns:application="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+                          xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+                         xmlns:glob="clr-namespace:System.Globalization;assembly=mscorlib"
+                         Height="200" Width="300"
+                        
+                        Style="{DynamicResource WinUIDialogWindowworkbenchBackgroundStyle}">
+
+    <dxwui:WinUIDialogWindow.DataContext>
+        <ViewModels:UserConfigurationViewModel />
+    </dxwui:WinUIDialogWindow.DataContext>
+
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape" Command="{Binding AboutWindowCancelButtonCommand}" />
+    </dxwui:WinUIDialogWindow.InputBindings>
+
+    <dxwui:WinUIDialogWindow.Resources>
+    </dxwui:WinUIDialogWindow.Resources>
+
+    <Grid Width="Auto" Margin="0,-20,0,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30" />
+            <RowDefinition Height="40" />
+            <RowDefinition Height="40" />
+            <RowDefinition Height="50" />
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="50*" />
+            <ColumnDefinition Width="110" />
+            <ColumnDefinition Width="180" />
+            <ColumnDefinition Width="55" />
+            <ColumnDefinition Width="70" />
+            <ColumnDefinition Width="50*" />
+        </Grid.ColumnDefinitions>
+
+        <Button Grid.Row="0" Grid.Column="5" Command="{Binding UpdaterWindowMinimizeCommand}" Height="30" Width="100" Margin="0,0,-35,0"
+                HorizontalAlignment="Right" VerticalAlignment="Top" Visibility="Visible">
+            <Button.Template>
+                <ControlTemplate>
+                    <Image Source="{DynamicResource MinimizeImageSource}" Height="16" />
+                </ControlTemplate>
+            </Button.Template>
+            <Button.ToolTip>
+                <ToolTip Content="Minimize" />
+            </Button.ToolTip>
+        </Button>
+
+        <Label Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" Content="{DynamicResource UserConfigurationWindowTitle}" 
+               Width="300" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="-10,-20,0,0" Style="{DynamicResource LabelTitle}" />
+        <Label Grid.Row="1" Grid.Column="1" Content="{DynamicResource UserConfigurationWindowServiceProvider}" 
+               VerticalAlignment="Center" HorizontalAlignment="Center" />
+        <dxe:ComboBoxEdit Grid.Row="1"
+                          IsTextEditable="False" 
+                          SelectedItem="{Binding SelectedIndexGeosServiceProviders}"
+                          Grid.Column="2"
+                          Width="180"
+                          HorizontalAlignment="Left" 
+                          VerticalAlignment="Top" ItemsSource="{Binding ListGeosServiceProviders}">
+            <dxmvvm:Interaction.Triggers>
+                <dxmvvm:EventToCommand EventName="SelectedIndexChanged" PassEventArgsToCommand="True" Command="{Binding ServiceProvidersSelectionChangedCommand,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
+            </dxmvvm:Interaction.Triggers>
+        </dxe:ComboBoxEdit>
+
+        <Label Content="Url:" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" />
+
+        <dxe:TextEdit Grid.Row="2"
+                      Width="350"
+                      Height="35"
+                      Grid.ColumnSpan="4"
+                      Grid.Column="2"
+                      HorizontalAlignment="Left"
+                      VerticalAlignment="Stretch"
+                      HorizontalContentAlignment="Left"			
+                      EditValue="{Binding ServicePath, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />
+
+        <DockPanel Width="250" Grid.Column="1" Grid.Row="5" Grid.ColumnSpan="3" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Button Content="{DynamicResource ConfigurationAccept}" 
+                    Height="30" 
+                    Width="100" 
+                    HorizontalAlignment="Left" 
+                    VerticalAlignment="Top"
+                    Command="{Binding UserConfigurationSaveButtonCommand}" />
+
+            <Button Content="{DynamicResource ConfigurationCancel}"  
+                    Height="30" 
+                    Width="100" 
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Top"
+                    Command="{Binding UserConfigurationCancelButtonCommand}" />
+        </DockPanel>
+    </Grid>
+</dxwui:WinUIDialogWindow>

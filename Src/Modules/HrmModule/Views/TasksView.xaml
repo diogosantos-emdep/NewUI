@@ -1,0 +1,248 @@
+﻿<UserControl x:Class="Emdep.Geos.Modules.Hrm.Views.TasksView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.Hrm.Views"
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"            
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+             xmlns:Converters="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+             xmlns:dxwuin="http://schemas.devexpress.com/winfx/2008/xaml/windowsui/navigation"
+             xmlns:dxnav="http://schemas.devexpress.com/winfx/2008/xaml/navigation" 
+             xmlns:dxp="http://schemas.devexpress.com/winfx/2008/xaml/printing" 
+             xmlns:dxdb="http://schemas.devexpress.com/winfx/2008/xaml/demobase"
+             xmlns:sysglb="clr-namespace:System.Globalization;assembly=mscorlib"
+             xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+             xmlns:HrmApplication="clr-namespace:Emdep.Geos.Modules.Hrm" 
+             xmlns:dxgt="http://schemas.devexpress.com/winfx/2008/xaml/grid/themekeys"
+             xmlns:ViewModel="clr-namespace:Emdep.Geos.Modules.Hrm.ViewModels"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+
+    <UserControl.Resources>
+        <Converters:ForegroundColorConverter x:Key="ForegroundColorConverter"/>
+    </UserControl.Resources>
+
+    <Grid Background="{DynamicResource EmpDetailBackColor}">
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="55"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="250"/>
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Label Content="{DynamicResource Tasks}" HorizontalAlignment="Left" Style="{StaticResource LabelTitleStyle}" Grid.Row="0" Grid.Column="0" />
+        <Grid HorizontalAlignment="Right" Grid.Row="0" Grid.Column="1" Margin="0,5,0,0" >
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Add New Tasks -->
+            <!--[GEOS2-3943][rdixit][22.11.2022] Added IsEnabled Property-->
+            <Button Visibility="Visible" Grid.Row="0" Grid.Column="0" Height="40" Width="40" HorizontalAlignment="Right" 
+                    Command="{Binding AddNewTasksCommand}"
+                    CommandParameter="{Binding ElementName=TasksTableView}"
+                    IsEnabled="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsAdminPermissionForHRM, Mode=TwoWay ,UpdateSourceTrigger=PropertyChanged}"
+                    Margin="0,0,5,5">
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource AddTasks}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Image Style="{DynamicResource AddNewButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+
+            <!-- Refresh Tasks Grid-->
+            <Button Visibility="Visible" Grid.Row="0" Grid.Column="1" Height="40" Width="40" HorizontalAlignment="Right" 
+                    Command="{Binding RefreshButtonCommand}"
+                    Margin="0,0,5,5">
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource ButtonRefresh}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Image Style="{DynamicResource RefreshButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+
+            <!-- Print Tasks List-->
+            <Button Visibility="Visible" Grid.Row="0" Grid.Column="2" Height="40" Width="40" HorizontalAlignment="Right" 
+                    Command="{Binding PrintButtonCommand}"
+                    CommandParameter="{Binding ElementName=TasksTableView}" Margin="0,0,5,5">
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource ButtonPrint}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Image Style="{DynamicResource PrinterButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+
+            <!-- Export Tasks List-->
+            <Button Visibility="Visible" Grid.Row="0" Grid.Column="3" Height="40" Width="40" HorizontalAlignment="Right" 
+                    Command="{Binding ExportButtonCommand}"
+                    CommandParameter="{Binding ElementName=TasksTableView}" Margin="0,0,5,5">
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource ButtonExportToExcel}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Image Style="{DynamicResource ExcelExportButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+
+        </Grid>
+
+        <dxg:GridControl VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                         ItemsSource="{Binding Path=TasksList,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" SelectionMode="Row"
+                         SelectedItem="{Binding Path=SelectedTasks,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                         ImplyNullLikeEmptyStringWhenFiltering="True">
+
+            <dxg:GridColumn Header="{DynamicResource TasksCode}" FieldName="Code" FilterPopupMode="CheckedList" MinWidth="100" Width="100" ReadOnly="True" FixedWidth="True" />
+            <dxg:GridColumn Header="{DynamicResource TasksDescription}" FieldName="Description" MinWidth="100" Width="300" FilterPopupMode="CheckedList" ReadOnly="True"/>
+            <dxg:GridColumn Header="{DynamicResource TasksJobRequirement}" FieldName="JobRequirement" MinWidth="100" Width="200" FilterPopupMode="CheckedList" ReadOnly="True"/>
+            <dxg:GridColumn Header="{DynamicResource TasksObjective}" FieldName="ProfessionalObjective.CodeWithDescription" FilterPopupMode="CheckedList" MinWidth="100" Width="150" ReadOnly="True" FixedWidth="True" />
+            <dxg:GridColumn Header="{DynamicResource TasksSkill}" FieldName="Skills" ColumnFilterMode="DisplayText" FilterPopupMode="CheckedList" MinWidth="100" Width="150" ReadOnly="True" FixedWidth="True" />
+
+            <dxg:GridColumn Header="{DynamicResource TasksInUse}" FieldName="InUse" FixedWidth="True" FilterPopupMode="CheckedList" MinWidth="60" Width="100" ReadOnly="True">
+                <dxg:GridColumn.CellTemplate>
+                    <DataTemplate>
+                        <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" TextAlignment="Left" Margin="5,0,5,0">
+                            <TextBlock.Style>
+                                <Style TargetType="{x:Type TextBlock}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Path=RowData.Row.InUse}" Value="True">
+                                            <Setter Property="TextBlock.Text" Value="Yes"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Path=RowData.Row.InUse}" Value="False">
+                                            <Setter Property="TextBlock.Text" Value="No"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </DataTemplate>
+                </dxg:GridColumn.CellTemplate>
+                <dxg:GridColumn.PrintCellStyle>
+                    <Style TargetType="dxe:BaseEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                        <Setter Property="dxp:ExportSettings.TargetType" Value="Text" />
+                        <Setter Property="dxp:TextExportSettings.Text" Value="{Binding Path=RowData.Row.TasksInUse}" >
+                        </Setter>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Path=RowData.Row.InUse}" Value="True">
+                                <Setter Property="dxp:TextExportSettings.Text" Value="Yes"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Path=RowData.Row.InUse}" Value="False">
+                                <Setter Property="dxp:TextExportSettings.Text" Value="No"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </dxg:GridColumn.PrintCellStyle>
+                <dxg:GridColumn.EditSettings>
+                    <dxe:TextEditSettings>
+                        <dxe:TextEditSettings.DisplayTextConverter>
+                            <dxmvvm:ObjectToObjectConverter>
+                                <dxmvvm:MapItem Source="True" Target="Yes"/>
+                                <dxmvvm:MapItem Source="False" Target="No"/>
+                            </dxmvvm:ObjectToObjectConverter>
+                        </dxe:TextEditSettings.DisplayTextConverter>
+                    </dxe:TextEditSettings>
+                </dxg:GridColumn.EditSettings>
+            </dxg:GridColumn>
+
+            <dxmvvm:Interaction.Behaviors>
+                <UIHelper:GridSelectingBehavior />
+            </dxmvvm:Interaction.Behaviors>
+
+            <dxg:GridControl.TotalSummary>
+                <dxg:GridSummaryItem x:Name="summary" FieldName="Name" SummaryType="Count" DisplayFormat="Total Count: {0}" Visible="True" Alignment="Left"/>
+            </dxg:GridControl.TotalSummary>
+
+            <dxg:GridControl.View>
+                <dxg:TableView x:Name="TasksTableView"
+                               NavigationStyle="Row"
+                               RowDetailsVisibilityMode="Visible"
+                               ShowHorizontalLines="True"
+                               ShowSearchPanelMode="Always"
+                               ShowColumnHeaders="True"                                  
+                               VerticalScrollbarVisibility="Auto" 
+                               HorizontalScrollbarVisibility="Auto"
+                               AllowFixedColumnMenu="False"
+                               ShowFixedTotalSummary="True" 
+                               AllowSorting="True"
+                               AllowColumnFiltering="True"
+                               ShowSearchPanelCloseButton="False"
+                               SearchPanelHorizontalAlignment="Stretch"                                
+                               ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly"                             
+                               AllowGrouping="True"
+                               ShowGroupPanel="False"    
+                               AllowColumnMoving="True"
+                               AllowEditing="False"
+                               EnableImmediatePosting="True"
+                               FocusedRow="{Binding Path=SelectedTask,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                               UseLegacyFilterEditor="True"
+                               ImmediateUpdateRowPosition="True"
+                               ShowIndicator="False" AutoWidth="True">
+
+                    <dxg:TableView.Resources>
+                        <DataTemplate x:Key="TasksReportPrintHeaderTemplate">
+                            <Grid Width="{Binding UsablePageWidth}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="50" />
+                                    <ColumnDefinition Width="130" />
+                                </Grid.ColumnDefinitions>
+                                <dxe:TextEdit Text=" " Width="{Binding UsablePageWidth}" Grid.ColumnSpan="3" IsPrintingMode="True" Background="#333E5E" HorizontalAlignment="Stretch" 
+                                                      VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" Height="50" />
+                                <dxe:TextEdit Text="Tasks Report" IsPrintingMode="True" HorizontalAlignment="Stretch" 
+                                                      VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" />
+                                <Image Source="/Emdep.Geos.Modules.Hrm;component/Assets/Images/GeosReportLogo.png" Height="50" Width="80"  dxp:ExportSettings.TargetType="Image" Grid.Column="2" />
+                            </Grid>
+                        </DataTemplate>
+
+                        <DataTemplate x:Key="TasksReportPrintFooterTemplate">
+                            <dxe:TextEdit HorizontalContentAlignment="Center" 
+                                          Width="{Binding Path=UsablePageWidth, Mode=OneWay}" 
+                                          dxp:ExportSettings.TargetType="PageNumber" 
+                                          dxp:PageNumberExportSettings.Kind="NumberOfTotal" 
+                                          dxp:PageNumberExportSettings.Format="Page {0} of {1}"/>
+                        </DataTemplate>
+
+                    </dxg:TableView.Resources>
+
+                    <dxmvvm:Interaction.Behaviors>
+                        <dxmvvm:EventToCommand Command="{Binding EditTasksDoubleClickCommand}" EventName="MouseDoubleClick" CommandParameter="{Binding ElementName=TasksTableView}" >
+                            <dxmvvm:EventToCommand.EventArgsConverter>
+                                <dx:EventArgsToDataRowConverter/>
+                            </dxmvvm:EventToCommand.EventArgsConverter>
+                        </dxmvvm:EventToCommand>
+
+                        <dxmvvm:EventToCommand EventName="ShowFilterPopup"
+                                               Command="{Binding CustomShowFilterPopupCommand}"
+                                               PassEventArgsToCommand="True"/>
+                    </dxmvvm:Interaction.Behaviors>
+
+                </dxg:TableView>
+            </dxg:GridControl.View>
+        </dxg:GridControl>
+    </Grid>
+</UserControl>

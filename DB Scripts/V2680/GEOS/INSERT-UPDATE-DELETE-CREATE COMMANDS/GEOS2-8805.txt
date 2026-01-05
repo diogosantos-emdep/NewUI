@@ -1,0 +1,14 @@
+CREATE TABLE geos.`warehouseschedulepreorder` (
+  `IdWarehouseSchedulePreorder` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `IdWarehouseSchedule` int(10) unsigned NOT NULL,
+  `IdWarehousePreorder` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`IdWarehouseSchedulePreorder`),
+  KEY `FK_warehouseschedulepreorder_1` (`IdWarehouseSchedule`),
+  KEY `FK_warehouseschedulepreorder_2` (`IdWarehousePreorder`),
+  CONSTRAINT `FK_warehouseschedulepreorder_1` FOREIGN KEY (`IdWarehouseSchedule`) REFERENCES `warehouseschedule` (`IdWarehouseSchedule`),
+  CONSTRAINT `FK_warehouseschedulepreorder_2` FOREIGN KEY (`IdWarehousePreorder`) REFERENCES `warehousepreorders` (`IdWarehousePreorder`)
+);
+
+
+INSERT INTO geos.automatic_reports(Name, StartDate, `Interval`, IsEnabled) 
+VALUES ('CreatePreorderJOB', NOW(), 'daily', 1);

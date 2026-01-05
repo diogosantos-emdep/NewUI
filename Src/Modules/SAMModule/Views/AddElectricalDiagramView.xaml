@@ -1,0 +1,179 @@
+﻿<dxwui:WinUIDialogWindow x:Class="Emdep.Geos.Modules.SAM.Views.AddElectricalDiagramView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.SAM.Views"
+             xmlns:dxb="http://schemas.devexpress.com/winfx/2008/xaml/bars"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:dxeh="http://schemas.devexpress.com/winfx/2008/xaml/editors/internal"
+             xmlns:dxet="http://schemas.devexpress.com/winfx/2008/xaml/editors/themekeys"
+             xmlns:dxdo="http://schemas.devexpress.com/winfx/2008/xaml/docking"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:dxn="http://schemas.devexpress.com/winfx/2008/xaml/navbar"
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:dxt="http://schemas.devexpress.com/winfx/2008/xaml/core/themekeys"
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+             xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+             xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+             xmlns:ViewModel="clr-namespace:Emdep.Geos.Modules.SAM.ViewModels"
+             xmlns:Validation ="clr-namespace:Emdep.Geos.UI.Validations;assembly=Emdep.Geos.UI.Validations"
+             xmlns:sysglb="clr-namespace:System.Globalization;assembly=mscorlib"
+             xmlns:Converter="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+             xmlns:ve="http://schemas.devexpress.com/winfx/2008/xaml/docking/visualelements"
+             xmlns:core="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:UIConverter="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+             mc:Ignorable="d"
+             xmlns:dxpdf="http://schemas.devexpress.com/winfx/2008/xaml/pdf" 
+             Height="{Binding DataContext.SystemParameters.PrimaryScreenHeight}"
+             Width="{Binding DataContext.SystemParameters.PrimaryScreenWidth}"
+             HorizontalContentAlignment="Stretch"
+             VerticalContentAlignment="Stretch"
+             Title="{DynamicResource AddElectricalDiagrams}"
+           TitleStyle="{DynamicResource WinUIDialogWindowTitleStyle}"
+            d:DesignHeight="300" d:DesignWidth="300"
+             Style="{DynamicResource WinUIDialogWindowStyle}">
+
+    <Grid Height="{Binding DialogHeight}" Width="{Binding DialogWidth}">
+        <!--[GEOS2-6728][pallavi.kale][14-04-2025]-->
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="50" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="600"/>
+                <ColumnDefinition Width="800*"/>
+
+            </Grid.ColumnDefinitions>
+            <Grid Grid.Column="0"  >
+                <dxg:TreeListControl x:Name="treeListControl" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                             ItemsSource="{Binding  DataContext.ListElectricalDiagram, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}}}"
+                             CurrentItem="{Binding DataContext.SelectedObject,RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}},Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"                                  
+                             ImplyNullLikeEmptyStringWhenFiltering="True" SelectionMode="Row" Margin="20,0,0,0" >
+                    <dxmvvm:Interaction.Behaviors>
+                        <dxmvvm:EventToCommand EventName="CurrentItemChanged" Command="{Binding DataContext.CurrentItemChangedCommand,RelativeSource={RelativeSource AncestorType={x:Type dxwui:WinUIDialogWindow}},Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                             PassEventArgsToCommand="True" />
+                    </dxmvvm:Interaction.Behaviors>
+                    <dxg:TreeListControl.Columns>
+                        <dxg:TreeListColumn  FieldName="Name" UnboundType="Object" FilterPopupMode="CheckedList">
+                            <dxg:TreeListColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock  Text="{Binding Data.Name}" VerticalAlignment="Center" Margin="10 0 0 0"  ToolTip="{Binding Data.Description}"  >
+
+                                    </TextBlock>
+                                    <!--<dxg:GridColumn.CellToolTipBinding>
+                                        <Binding Path="Description" />
+                                    </dxg:GridColumn.CellToolTipBinding>-->
+
+                                </DataTemplate>
+                            </dxg:TreeListColumn.CellTemplate>
+                        </dxg:TreeListColumn>
+
+                    </dxg:TreeListControl.Columns>
+
+                    <dxg:TreeListControl.View>
+                        <dxg:TreeListView Name="GridElectricalDiagramTreeList"                                                                                             
+                                  ShowTotalSummary="False"                                                     
+                                  AllowRecursiveNodeChecking="True"                                                      
+                                  ShowSearchPanelMode="Always"                                                      
+                                  AutoWidth="True"                                                      
+                                  ShowIndicator="False"                                                       
+                                  VerticalScrollbarVisibility="Visible"                                                      
+                                  ParentFieldName="Parent"                                                      
+                                  KeyFieldName="Key" 
+								  FilterMode="Extended"
+                                  SearchPanelHorizontalAlignment="Stretch"                                                      
+                                  AllowDragDrop="False"                                                                                                           
+                                  AutoExpandAllNodes="False"                                                      
+                                  NavigationStyle="Row"                                                       
+                                  ShowVerticalLines="True"                                                      
+                                  ImmediateUpdateRowPosition="True"                                                      
+                                  ShowColumnHeaders="False"
+                                  ExpandCollapseNodesOnNavigation="True"
+                                  ShowFixedTotalSummary="False"
+                                  FilterEditorShowOperandTypeIcon="True" 
+                                  HorizontalAlignment="Stretch" 
+                                  VerticalAlignment="Stretch"
+                                  ShowCheckboxes="True"
+								  CheckBoxFieldName="IsSelected"
+                                  ShowEmptyText="False"
+                                  SearchString="{Binding MyFilterString,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                  FocusedRow="{Binding SelectedObject, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                  AllowChildNodeSourceUpdates="True">
+                        </dxg:TreeListView>
+                    </dxg:TreeListControl.View>
+                </dxg:TreeListControl>
+
+
+            </Grid>
+            <Grid Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10,-10,0,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="40"/>
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <CheckBox  Content="{DynamicResource AddElectricalDiagramsPreview}" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Center" 
+        IsChecked="{Binding DataContext.IsPreview,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow},UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
+                </CheckBox>
+                <dxpdf:PdfViewerControl Grid.Row="1" x:Name="PdfViewer"  DocumentLoaded="PdfViewer_DocumentLoaded" CursorMode="SelectTool" ZoomMode="FitToWidth" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" 
+                                                     Visibility="{Binding DataContext.IsPdfVisible ,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay ,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" 
+                                                     DocumentSource="{Binding DataContext.PdfDoc,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" 
+                                                     CommandBarStyle="None" 
+                                  >
+
+
+
+
+                    <dxpdf:PdfViewerControl.ThumbnailsViewerSettings>
+                        <dxpdf:PdfThumbnailsViewerSettings HideThumbnailsViewer="True"/>
+                    </dxpdf:PdfViewerControl.ThumbnailsViewerSettings>
+
+
+
+                    <dxpdf:PdfViewerControl.AttachmentsViewerSettings>
+                        <dxpdf:PdfAttachmentsViewerSettings HideAttachmentsViewer="True"/>
+                    </dxpdf:PdfViewerControl.AttachmentsViewerSettings>
+
+                </dxpdf:PdfViewerControl>
+
+
+            </Grid>
+
+        </Grid>
+
+
+
+        <Grid Grid.Row="3" ShowGridLines="False" VerticalAlignment="Bottom" HorizontalAlignment="Center"  >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Row="2" Grid.Column="0"
+                    Style="{DynamicResource Button16Style}"
+                    HorizontalAlignment="Right"
+                    Content="{DynamicResource AddElectricalDiagramsAccept}"
+                    Command="{Binding DataContext.AddElectricalDigramViewAcceptButtonCommand,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"
+                    IsEnabled="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsPermissionReadOnlyForSAM}"
+                    Height="30"
+                    Width="100" 
+                    CommandParameter="{Binding ElementName=Compatibility}"
+                    />
+
+            <Button Grid.Row="3" Grid.Column="2"
+                    Style="{DynamicResource Button16Style}"
+                    HorizontalAlignment="Left"
+                    Content="{DynamicResource Cancel}"
+                    Command="{Binding CommandAddElectricalDiagramsCancel}"
+                    Height="30"
+                    Width="100" />
+        </Grid>
+    </Grid>
+
+
+</dxwui:WinUIDialogWindow>

@@ -1,0 +1,877 @@
+﻿<dxwui:WinUIDialogWindow x:Class="Emdep.Geos.Modules.Warehouse.Views.MyPreferencesView"
+                        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                        xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"    
+                        xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+                        xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors" 
+                        xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+                        xmlns:ViewModels="clr-namespace:Emdep.Geos.Modules.Warehouse.ViewModels"
+                        xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+                        xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+                        xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+                        xmlns:WarehouseCommon ="clr-namespace:Emdep.Geos.Modules.Warehouse"
+                        xmlns:Validation ="clr-namespace:Emdep.Geos.UI.Validations;assembly=Emdep.Geos.UI.Validations"
+                        xmlns:local="clr-namespace:Emdep.Geos.Modules.Warehouse.Views"
+                        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+                        xmlns:io="clr-namespace:System.IO.Ports;assembly=System"
+                        mc:Ignorable="d" 
+                        Title="{DynamicResource CrmMainViewModelMyPreferences}"
+                        TitleStyle="{DynamicResource WinUIDialogWindowTitleStyle}">
+
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape"  Command="{Binding MyPreferencesViewCancelButtonCommand}"/>
+    </dxwui:WinUIDialogWindow.InputBindings>
+
+    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+
+        <Grid HorizontalAlignment="Center" VerticalAlignment="Top" Height="Auto" Width="Auto">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="20"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="20"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="20"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Column="0" Grid.Row="0" >
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="20"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="20"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!--#region Warehouse-->
+
+                <Grid Grid.Row="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="10"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Text="{DynamicResource MyPreferencesWareHouse}" 
+                               HorizontalAlignment="Center"  VerticalAlignment="Center" 
+                               FontWeight="Bold" FontSize="20"
+                               Style="{StaticResource TextBlock14Style}">
+                    </TextBlock>
+                    <Border BorderBrush="{DynamicResource BorderBrushColor}" Grid.Row="2" 
+                            BorderThickness="1" HorizontalAlignment="Center">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="10"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="10"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="10"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="10"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{DynamicResource MyPreferencesName}" 
+                                       HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                                       Style="{StaticResource TextBlock14Style}">
+                            </TextBlock>
+
+                            <dxe:ComboBoxEdit Grid.Row="2" Grid.Column="1" 
+                                              HorizontalAlignment="Center"  
+                                              ShowError="False" ShowErrorToolTip="False" 
+                                              Style="{DynamicResource ComboBoxEditStyle}"
+                                              Width="200" Height="30" 
+                                              VerticalAlignment="Top" 
+                                              ItemsSource ="{Binding Source={x:Static WarehouseCommon:WarehouseCommon.Instance}, Path=WarehouseList ,UpdateSourceTrigger=PropertyChanged , Mode=TwoWay}"
+                                              DisplayMember="Name" IsTextEditable="False" 
+                                              SelectedItem="{Binding Selectedwarehouse,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+                            </dxe:ComboBoxEdit>
+
+                            <TextBlock Grid.Row="4" Grid.Column="1" Text="{DynamicResource Preference_Currency}" 
+                                       HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                                       Style="{StaticResource TextBlock14Style}">
+                            </TextBlock>
+
+                            <dxe:ComboBoxEdit Grid.Row="5" Grid.Column="1" 
+                                              HorizontalAlignment="Center"  
+                                              ShowError="False" ShowErrorToolTip="False" 
+                                              Style="{DynamicResource ComboBoxEditStyle}"
+                                              Width="200" Height="30" 
+                                              VerticalAlignment="Top" 
+                                              ItemsSource ="{Binding Currencies,UpdateSourceTrigger=PropertyChanged , Mode=TwoWay}"
+                                              DisplayMember="Name" IsTextEditable="False" 
+                                              SelectedItem="{Binding SelectedCurrency,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+                            </dxe:ComboBoxEdit>
+
+                        </Grid>
+                    </Border>
+                </Grid>
+
+                <!--#endregion Warehouse-->
+
+                <!--#region Paper Printer-->
+
+                <Grid Grid.Row="2">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="10"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0"
+                               Text="{DynamicResource PaperPrinter}" 
+                               HorizontalAlignment="Center"  VerticalAlignment="Center" 
+                               FontWeight="Bold" FontSize="20"
+                               Style="{StaticResource TextBlock14Style}">
+                    </TextBlock>
+
+                    <Border BorderBrush="{DynamicResource BorderBrushColor}" 
+                            Grid.Row="2"
+                            BorderThickness="1"
+                            HorizontalAlignment="Center">
+                        <Grid >
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="10"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="10"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="10"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="1" Grid.Column="1" 
+                                       Text="{DynamicResource PrinterName}" 
+                                       HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                                       Style="{StaticResource TextBlock14Style}">
+                            </TextBlock>
+
+                            <dxe:ComboBoxEdit Grid.Row="2" Grid.Column="1" 
+                                              HorizontalAlignment="Center" VerticalAlignment="Top" 
+                                              ShowError="False" ShowErrorToolTip="False" 
+                                              Style="{DynamicResource ComboBoxEditStyle}"
+                                              Width="200" Height="30" 
+                                              ItemsSource="{Binding PrinterList}"
+                                              IsTextEditable="False" 
+                                              SelectedItem="{Binding DefaultPrinter,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+                            </dxe:ComboBoxEdit>
+                        </Grid>
+                    </Border>
+                </Grid>
+
+                <!--#endregion Paper Printer-->
+
+                <!--#region Picking-->
+                <Grid Grid.Row="4">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="10"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" 
+                               Text="{DynamicResource Picking}" 
+                               HorizontalAlignment="Center"  VerticalAlignment="Center" 
+                               FontWeight="Bold" FontSize="20"
+                               Style="{StaticResource TextBlock14Style}">
+                    </TextBlock>
+
+                    <Border BorderBrush="{DynamicResource BorderBrushColor}" 
+                            Grid.Row="2" 
+                            BorderThickness="1" HorizontalAlignment="Center">
+                        <Grid >
+                            <Grid.ColumnDefinitions >
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="10"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions >
+                                <RowDefinition Height="10"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="10"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="1" Grid.Column="1" 
+                                       Text="{DynamicResource StartTimer}" 
+                                       HorizontalAlignment="Left" VerticalAlignment="Center" 
+                                       Width="130"
+                                       Style="{StaticResource TextBlock14Style}">
+                            </TextBlock>
+                            <Border  Width="70" Height="30" 
+                                     Grid.Column="2" Grid.Row="1"
+                                     HorizontalAlignment="Right">
+                                <dxe:ToggleSwitch IsChecked="{Binding IsStartTimer}" IsThreeState="False" Style="{DynamicResource ToggleSwitchlForegroundStyle}"></dxe:ToggleSwitch>
+                            </Border>
+                        </Grid>
+                    </Border>
+                </Grid>
+                <!--#endregion Picking-->
+
+            </Grid>
+
+            <!--[16/10/2019][skale][GEOS2-1783]- Ajuste pantalla picking-->
+            <Grid Grid.Column="2" Grid.Row="0" >
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"></RowDefinition>
+                    <RowDefinition Height="5"></RowDefinition>
+                    <RowDefinition Height="auto"></RowDefinition>
+                </Grid.RowDefinitions>
+
+                <Grid  Grid.Row="0">
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="10"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0"  
+                           Text="{DynamicResource LabelPrinter}" 
+                           Style="{StaticResource TextBlock14Style}"
+                           HorizontalAlignment="Center"  VerticalAlignment="Center" 
+                           FontWeight="Bold" FontSize="20"/>
+
+                    <Border  
+                        Grid.Row="2" 
+                        HorizontalAlignment="Center">
+
+                        <dx:DXTabControl>
+                            <dx:DXTabItem Header="Printer1">
+                                <!--<Label Content="Hello, world!"/>-->
+                                <Grid>
+                                    <Grid.ColumnDefinitions >
+                                        <ColumnDefinition Width="10"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="10"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions >
+                                        <RowDefinition Height="10"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="10"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="10"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="10"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="10"/>
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Grid.Row="1" Grid.Column="1" 
+                                   Text="{DynamicResource DeliveryNotePrintViewLabelSize}" 
+                                   HorizontalAlignment="Left"   VerticalAlignment="Bottom" 
+                                   Style="{StaticResource TextBlock14Style}"/>
+
+                                    <dxe:ComboBoxEdit Grid.Row="2" Grid.Column="1" 
+                                          HorizontalAlignment="Center" 
+                                          ShowError="False" ShowErrorToolTip="False" 
+                                          Style="{DynamicResource ComboBoxEditStyle}"
+                                          Width="200" Height="30" VerticalAlignment="Top" 
+                                          ItemsSource="{Binding LabelSizeList}"
+                                          IsTextEditable="False"
+                                          DisplayMember="Value" ValueMember="IdLookupValue"
+                                          SelectedItem="{Binding SelectedLabelSize,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+
+                                    <TextBlock Grid.Row="4" Grid.Column="1" 
+                                   Text="{DynamicResource PrinterName}" 
+                                   HorizontalAlignment="Left"   VerticalAlignment="Bottom" 
+                                   Style="{StaticResource TextBlock14Style}"/>
+
+                                    <dxe:ComboBoxEdit Grid.Row="5" Grid.Column="1" 
+                                          HorizontalAlignment="Center" 
+                                          ShowError="False" ShowErrorToolTip="False" 
+                                          Style="{DynamicResource ComboBoxEditStyle}"
+                                          Width="200" Height="30" VerticalAlignment="Top" 
+                                          ItemsSource="{Binding PrinterList}"
+                                          IsTextEditable="False" 
+                                          SelectedItem="{Binding DefaultLabelPrinter,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+
+                                    <TextBlock Grid.Row="7" Grid.Column="1" 
+                                   Text="{DynamicResource PrinterModel}"
+                                   HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                                   Style="{StaticResource TextBlock14Style}"/>
+
+                                    <dxe:ComboBoxEdit Grid.Row="8" Grid.Column="1"
+                                          HorizontalAlignment="Center"  
+                                          ShowError="False" ShowErrorToolTip="False" 
+                                          Style="{DynamicResource ComboBoxEditStyle}"
+                                          Width="200" Height="30" 
+                                          VerticalAlignment="Top" 
+                                          ItemsSource="{Binding ModelList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                          IsTextEditable="False"  
+                                          DisplayMember="Value" ValueMember="IdLookupValue" 
+                                          SelectedItem="{Binding SelectedModel,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged }">
+                                    </dxe:ComboBoxEdit>
+
+                                    <TextBlock Grid.Row="10" Grid.Column="1" 
+                                   Text="{DynamicResource PrinterPort}" 
+                                   HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                                   Style="{StaticResource TextBlock14Style}"/>
+
+                                    <dxe:ComboBoxEdit Grid.Row="11" Grid.Column="1" 
+                                          HorizontalAlignment="Center"  
+                                          ShowError="False" ShowErrorToolTip="False" 
+                                          Style="{DynamicResource ComboBoxEditStyle}"
+                                          Width="200" Height="30" 
+                                          VerticalAlignment="Top" 
+                                          ItemsSource="{Binding ParallelPortList}"  
+                                          SelectedItem="{Binding SelectedParallelPort,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged }"
+                                          IsTextEditable="False"/>
+                                </Grid>
+                            </dx:DXTabItem>
+                            
+                            <dx:DXTabItem Header="Printer2">
+                                <!--<Label Content="DXTabControl"/>-->
+                                <Grid>
+                                    <Grid.ColumnDefinitions >
+                                        <ColumnDefinition Width="10"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="10"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions >
+                                        <RowDefinition Height="10"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="10"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="10"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="10"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="10"/>
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Grid.Row="1" Grid.Column="1" 
+                                   Text="{DynamicResource DeliveryNotePrintViewLabelSize}" 
+                                   HorizontalAlignment="Left"   VerticalAlignment="Bottom" 
+                                   Style="{StaticResource TextBlock14Style}"/>
+
+                                    <dxe:ComboBoxEdit Grid.Row="2" Grid.Column="1" 
+                                          HorizontalAlignment="Center" 
+                                          ShowError="False" ShowErrorToolTip="False" 
+                                          Style="{DynamicResource ComboBoxEditStyle}"
+                                          Width="200" Height="30" VerticalAlignment="Top" 
+                                          ItemsSource="{Binding LabelSizeListForPrinter2}"
+                                          IsTextEditable="False" 
+                                          DisplayMember="Value" ValueMember="IdLookupValue"
+                                          SelectedItem="{Binding SelectedLabelSizeForPrinter2,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+
+                                    <TextBlock Grid.Row="4" Grid.Column="1" 
+                                   Text="{DynamicResource PrinterName}" 
+                                   HorizontalAlignment="Left"   VerticalAlignment="Bottom" 
+                                   Style="{StaticResource TextBlock14Style}"/>
+
+                                    <dxe:ComboBoxEdit Grid.Row="5" Grid.Column="1" 
+                                          HorizontalAlignment="Center" 
+                                          ShowError="False" ShowErrorToolTip="False" 
+                                          Style="{DynamicResource ComboBoxEditStyle}"
+                                          Width="200" Height="30" VerticalAlignment="Top" 
+                                          ItemsSource="{Binding PrinterListForPrinter2}"
+                                          IsTextEditable="False" 
+                                          SelectedItem="{Binding DefaultLabelPrinterForPrinter2,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+
+                                    <TextBlock Grid.Row="7" Grid.Column="1" 
+                                   Text="{DynamicResource PrinterModel}"
+                                   HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                                   Style="{StaticResource TextBlock14Style}"/>
+
+                                    <dxe:ComboBoxEdit Grid.Row="8" Grid.Column="1"
+                                          HorizontalAlignment="Center"  
+                                          ShowError="False" ShowErrorToolTip="False" 
+                                          Style="{DynamicResource ComboBoxEditStyle}"
+                                          Width="200" Height="30" 
+                                          VerticalAlignment="Top" 
+                                          ItemsSource="{Binding ModelListForPrinter2, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                          IsTextEditable="False"  
+                                          DisplayMember="Value" ValueMember="IdLookupValue" 
+                                          SelectedItem="{Binding SelectedModelForPrinter2,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged }">
+                                    </dxe:ComboBoxEdit>
+
+                                    <TextBlock Grid.Row="10" Grid.Column="1" 
+                                   Text="{DynamicResource PrinterPort}" 
+                                   HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                                   Style="{StaticResource TextBlock14Style}"/>
+
+                                    <dxe:ComboBoxEdit Grid.Row="11" Grid.Column="1" 
+                                          HorizontalAlignment="Center"  
+                                          ShowError="False" ShowErrorToolTip="False" 
+                                          Style="{DynamicResource ComboBoxEditStyle}"
+                                          Width="200" Height="30" 
+                                          VerticalAlignment="Top" 
+                                          ItemsSource="{Binding ParallelPortListForPrinter2}"  
+                                          SelectedItem="{Binding SelectedParallelPortForPrinter2,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged }"
+                                          IsTextEditable="False"/>
+                                </Grid>
+                            </dx:DXTabItem>
+                        </dx:DXTabControl>
+
+                        <!--<Grid ShowGridLines="True" >
+                        <Grid.ColumnDefinitions >
+                            <ColumnDefinition Width="10"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="10"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions >
+                            <RowDefinition Height="10"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="10"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="10"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="10"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="1" Grid.Column="1" 
+                                   Text="{DynamicResource PrinterName}" 
+                                   HorizontalAlignment="Left"   VerticalAlignment="Bottom" 
+                                   Style="{StaticResource TextBlock14Style}"/>
+
+                        <dxe:ComboBoxEdit Grid.Row="2" Grid.Column="1" 
+                                          HorizontalAlignment="Center" 
+                                          ShowError="False" ShowErrorToolTip="False" 
+                                          Style="{DynamicResource ComboBoxEditStyle}"
+                                          Width="200" Height="30" VerticalAlignment="Top" 
+                                          ItemsSource="{Binding PrinterList}"
+                                          IsTextEditable="False" 
+                                          SelectedItem="{Binding DefaultLabelPrinter,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+
+                        <TextBlock Grid.Row="4" Grid.Column="1" 
+                                   Text="{DynamicResource PrinterModel}"
+                                   HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                                   Style="{StaticResource TextBlock14Style}"/>
+
+                        <dxe:ComboBoxEdit Grid.Row="5" Grid.Column="1"
+                                          HorizontalAlignment="Center"  
+                                          ShowError="False" ShowErrorToolTip="False" 
+                                          Style="{DynamicResource ComboBoxEditStyle}"
+                                          Width="200" Height="30" 
+                                          VerticalAlignment="Top" 
+                                          ItemsSource="{Binding ModelList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                          IsTextEditable="False"  
+                                          DisplayMember="Value" ValueMember="IdLookupValue" 
+                                          SelectedItem="{Binding SelectedModel,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged }">
+                        </dxe:ComboBoxEdit>
+
+                        <TextBlock Grid.Row="7" Grid.Column="1" 
+                                   Text="{DynamicResource PrinterPort}" 
+                                   HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                                   Style="{StaticResource TextBlock14Style}"/>
+                        
+                        <dxe:ComboBoxEdit Grid.Row="8" Grid.Column="1" 
+                                          HorizontalAlignment="Center"  
+                                          ShowError="False" ShowErrorToolTip="False" 
+                                          Style="{DynamicResource ComboBoxEditStyle}"
+                                          Width="200" Height="30" 
+                                          VerticalAlignment="Top" 
+                                          ItemsSource="{Binding ParallelPortList}"  
+                                          SelectedItem="{Binding SelectedParallelPort,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged }"
+                                          IsTextEditable="False"/>
+                    </Grid>-->
+                    </Border>
+                </Grid>
+
+                <Grid Grid.Row="2" >
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="10"/>
+                        <RowDefinition Height="auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0"
+                           Text="{DynamicResource Appearance}" 
+                           Style="{StaticResource TextBlock14Style}"
+                           HorizontalAlignment="Center"  VerticalAlignment="Center" 
+                           FontWeight="Bold" FontSize="20"/>
+
+                    <Border BorderBrush="{DynamicResource BorderBrushColor}" 
+                        Grid.Row="2"
+                        BorderThickness="1" 
+                        HorizontalAlignment="Center">
+
+                        <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch" >
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="5"/>
+                                <ColumnDefinition Width="120"/>
+                                <ColumnDefinition Width="5"/>
+                                <ColumnDefinition Width="80"/>
+                                <ColumnDefinition Width="5"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="10"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="10"/>
+                            </Grid.RowDefinitions>
+                            <!--Text="{DynamicResource WOSectionPosition}"-->
+                            <!--Text="Position of the collapsed section in work order"-->
+                            <TextBlock Grid.Row="1" Grid.Column="1" 
+                                           Text="{DynamicResource WOSectionPosition}"
+                                       HorizontalAlignment="Left" VerticalAlignment="Top"
+                                       Style="{StaticResource TextBlock14Style}" TextAlignment="Left" TextWrapping="Wrap">
+                            </TextBlock>
+
+                            <dxe:ComboBoxEdit Grid.Row="1" Grid.Column="3" 
+                                              HorizontalAlignment="Stretch" VerticalAlignment="Top"  
+                                              ShowError="False" ShowErrorToolTip="False" 
+                                              Style="{DynamicResource ComboBoxEditStyle}"
+                                              Width="80" Height="30" 
+                                              IsTextEditable="False" 
+                                              ItemsSource="{dxe:EnumItemsSource EnumType=dxlc:MaximizedElementPosition}"  
+                                              EditValue="{Binding SelectedAppearanceItem,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"  >
+                            </dxe:ComboBoxEdit>
+
+                        </Grid>
+
+                    </Border>
+
+                </Grid>
+
+            </Grid>
+
+            <!--#region Label Printer-->
+            <!--<Grid Grid.Column="2" Grid.Row="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="10"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0"  
+                           Text="{DynamicResource LabelPrinter}" 
+                           Style="{StaticResource TextBlock14Style}"
+                           HorizontalAlignment="Center"  VerticalAlignment="Center" 
+                           FontWeight="Bold" FontSize="20"/>
+
+                <Border BorderBrush="{DynamicResource BorderBrushColor}" 
+                        Grid.Row="2"
+                        BorderThickness="1" 
+                        HorizontalAlignment="Center">
+                    <Grid >
+                        <Grid.ColumnDefinitions >
+                            <ColumnDefinition Width="10"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="10"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions >
+                            <RowDefinition Height="10"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="10"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="10"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="10"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="1" Grid.Column="1" 
+                                   Text="{DynamicResource PrinterName}" 
+                                   HorizontalAlignment="Left"   VerticalAlignment="Bottom" 
+                                   Style="{StaticResource TextBlock14Style}"/>
+
+                        <dxe:ComboBoxEdit Grid.Row="2" Grid.Column="1" 
+                                          HorizontalAlignment="Center" 
+                                          ShowError="False" ShowErrorToolTip="False" 
+                                          Style="{DynamicResource ComboBoxEditStyle}"
+                                          Width="200" Height="30" VerticalAlignment="Top" 
+                                          ItemsSource="{Binding PrinterList}"
+                                          IsTextEditable="False" 
+                                          SelectedItem="{Binding DefaultLabelPrinter,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+
+                        <TextBlock Grid.Row="4" Grid.Column="1" 
+                                   Text="{DynamicResource PrinterModel}"
+                                   HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                                   Style="{StaticResource TextBlock14Style}"/>
+
+                        <dxe:ComboBoxEdit Grid.Row="5" Grid.Column="1"
+                                          HorizontalAlignment="Center"  
+                                          ShowError="False" ShowErrorToolTip="False" 
+                                          Style="{DynamicResource ComboBoxEditStyle}"
+                                          Width="200" Height="30" 
+                                          VerticalAlignment="Top" 
+                                          ItemsSource="{Binding ModelList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                          IsTextEditable="False"  
+                                          DisplayMember="Value" ValueMember="IdLookupValue" 
+                                          SelectedItem="{Binding SelectedModel,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged }">
+                        </dxe:ComboBoxEdit>
+
+                        <TextBlock Grid.Row="7" Grid.Column="1" 
+                                   Text="{DynamicResource PrinterPort}" 
+                                   HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                                   Style="{StaticResource TextBlock14Style}"/>
+                        
+                        <dxe:ComboBoxEdit Grid.Row="8" Grid.Column="1" 
+                                          HorizontalAlignment="Center"  
+                                          ShowError="False" ShowErrorToolTip="False" 
+                                          Style="{DynamicResource ComboBoxEditStyle}"
+                                          Width="200" Height="30" 
+                                          VerticalAlignment="Top" 
+                                          ItemsSource="{Binding ParallelPortList}"  
+                                          SelectedItem="{Binding SelectedParallelPort,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged }"
+                                          IsTextEditable="False"/>
+                    </Grid>
+                </Border>
+            </Grid>-->
+            <!--#endregion Label Printer-->
+
+            <!--#region Packing-->
+            <Grid Grid.Column="4" Grid.Row="0">
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="10"/>
+                    <RowDefinition Height="*"/>
+
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" 
+                           Text="{DynamicResource Packing}" 
+                           HorizontalAlignment="Center" VerticalAlignment="Center" 
+                           FontWeight="Bold" FontSize="20"
+                           Style="{StaticResource TextBlock14Style}"/>
+
+                <Border BorderBrush="{DynamicResource BorderBrushColor}" 
+                        Grid.Row="2"
+                        BorderThickness="1"
+                        HorizontalAlignment="Center" VerticalAlignment="Stretch">
+
+                    <Grid>
+                        <Grid.ColumnDefinitions >
+                            <ColumnDefinition Width="10"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="10"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="10"></RowDefinition>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                            <RowDefinition Height="10"></RowDefinition>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                            <RowDefinition Height="5"></RowDefinition>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                            <RowDefinition Height="5"></RowDefinition>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                            <RowDefinition Height="5"></RowDefinition>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                            <RowDefinition Height="5"></RowDefinition>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                            <RowDefinition Height="5"></RowDefinition>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                            <RowDefinition Height="10"></RowDefinition>
+                        </Grid.RowDefinitions>
+
+                        <!--Scale Model-->
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{DynamicResource ScaleModel}" 
+                                   HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                                   Style="{StaticResource TextBlock16Style}"/>
+
+                        <dxe:ComboBoxEdit Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"
+                                          HorizontalAlignment="Left" 
+                                          ShowError="False" ShowErrorToolTip="False" 
+                                          Style="{DynamicResource ComboBoxEditStyle}"
+                                          Width="215" Height="30" 
+                                          VerticalAlignment="Center" 
+                                          ItemsSource="{Binding ScaleModelList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                          IsTextEditable="False"
+                                          SelectedItem="{Binding SelectedScaleModel,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged }">
+                        </dxe:ComboBoxEdit>
+
+                        <!--COM Settings-->
+                        <TextBlock Grid.Row="4" Grid.Column="1"
+                                   Grid.ColumnSpan="2"
+                                   Text="{DynamicResource COMSettings}" 
+                                   HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                                   Style="{StaticResource TextBlock16Style}"/>
+
+                        <!--Port Name-->
+                        <TextBlock Text="{DynamicResource PortName}" Grid.Row="6" Grid.Column="1" 
+                                   VerticalAlignment="Center" HorizontalAlignment="Left"
+                                   Style="{StaticResource TextBlock14Style}">
+                        </TextBlock>
+                        <dxe:ComboBoxEdit Grid.Row="6" Grid.Column="2" 
+                                          Height="30" Width="140" 
+                                          HorizontalAlignment="Left" VerticalAlignment="Center"
+                                          ShowError="False" ShowErrorToolTip="False"
+                                          IsTextEditable="False"
+                                          ItemsSource="{Binding PortList}"
+                                          SelectedItem="{Binding SelectedPort,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                          >
+                            <dxe:ComboBoxEdit.Style>
+                                <Style TargetType="{x:Type dxe:ComboBoxEdit}">
+                                    <Setter Property="IsEnabled" Value="True"></Setter>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SelectedScaleModel}" Value="{x:Null}">
+                                            <Setter Property="IsEnabled" Value="False" ></Setter>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </dxe:ComboBoxEdit.Style>
+
+                        </dxe:ComboBoxEdit>
+
+                        <!--Baud Rate-->
+                        <TextBlock Text="{DynamicResource BaudRate}" Grid.Row="8" Grid.Column="1"
+                                   Style="{StaticResource TextBlock14Style}"
+                                   VerticalAlignment="Center" 
+                                   HorizontalAlignment="Left" >
+                        </TextBlock>
+
+                        <dxe:ComboBoxEdit Grid.Row="8" Grid.Column="2" 
+                                          Height="30" Width="140" 
+                                          HorizontalAlignment="Left" VerticalAlignment="Center"
+                                          ShowError="False" ShowErrorToolTip="False"
+                                          IsTextEditable="False"
+                                          ItemsSource="{Binding SupportedBaudRates}"
+                                          SelectedItem="{Binding SelectedBaudRate,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+
+                            <dxe:ComboBoxEdit.Style>
+                                <Style TargetType="{x:Type dxe:ComboBoxEdit}">
+                                    <Setter Property="IsEnabled" Value="True"></Setter>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SelectedScaleModel}" Value="{x:Null}">
+                                            <Setter Property="IsEnabled" Value="False" ></Setter>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </dxe:ComboBoxEdit.Style>
+                        </dxe:ComboBoxEdit>
+
+                        <!--Parity-->
+                        <TextBlock Text="{DynamicResource Parity}" Grid.Row="10" Grid.Column="1" 
+                                   VerticalAlignment="Center" HorizontalAlignment="Left"
+                                   Style="{StaticResource TextBlock14Style}">
+                        </TextBlock>
+                        <dxe:ComboBoxEdit Grid.Row="10" Grid.Column="2" Width="140"
+                                      ShowError="False" ShowErrorToolTip="False" 
+                                      Height="30" VerticalAlignment="Center" 
+                                      IsTextEditable="False" HorizontalAlignment="Left" 
+                                      ItemsSource="{Binding ParityList,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                      SelectedItem="{Binding SelectedParity,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                      >
+                            <dxe:ComboBoxEdit.Style>
+                                <Style TargetType="{x:Type dxe:ComboBoxEdit}">
+                                    <Setter Property="IsEnabled" Value="True"></Setter>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SelectedScaleModel}" Value="{x:Null}">
+                                            <Setter Property="IsEnabled" Value="False" ></Setter>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </dxe:ComboBoxEdit.Style>
+                        </dxe:ComboBoxEdit>
+
+                        <!--Data Bits-->
+                        <TextBlock Text="{DynamicResource DataBits}" 
+                                   Grid.Row="12" Grid.Column="1" 
+                                   VerticalAlignment="Center" HorizontalAlignment="Left"
+                                   Style="{StaticResource TextBlock14Style}">
+                        </TextBlock>
+                        <dxe:ComboBoxEdit Grid.Row="12" Grid.Column="2" 
+                                          Height="30" Width="140" 
+                                          HorizontalAlignment="Left" VerticalAlignment="Center"
+                                          ShowError="False" ShowErrorToolTip="False"
+                                          IsTextEditable="False"
+                                          ItemsSource="{Binding SupportedDataBits}"
+                                          SelectedItem="{Binding SelectedDataBit,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+                            <dxe:ComboBoxEdit.Style>
+                                <Style TargetType="{x:Type dxe:ComboBoxEdit}">
+                                    <Setter Property="IsEnabled" Value="True"></Setter>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SelectedScaleModel}" Value="{x:Null}">
+                                            <Setter Property="IsEnabled" Value="False" ></Setter>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </dxe:ComboBoxEdit.Style>
+                        </dxe:ComboBoxEdit>
+
+                        <!--Stop Bits-->
+                        <TextBlock Text="Stop Bits"
+                               Grid.Row="14" Grid.Column="1" 
+                               VerticalAlignment="Center" HorizontalAlignment="Left" 
+                               Style="{StaticResource TextBlock14Style}">
+                        </TextBlock>
+                        <dxe:ComboBoxEdit Grid.Row="14" Grid.Column="2" 
+                                          Height="30" Width="140" 
+                                          HorizontalAlignment="Left" VerticalAlignment="Center"
+                                          ShowError="False" ShowErrorToolTip="False"
+                                          IsTextEditable="False"
+                                          ItemsSource="{Binding StopBitsList}"
+                                          SelectedItem="{Binding SelectedStopBit,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+                            <dxe:ComboBoxEdit.Style>
+                                <Style TargetType="{x:Type dxe:ComboBoxEdit}">
+                                    <Setter Property="IsEnabled" Value="True"></Setter>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SelectedScaleModel}" Value="{x:Null}">
+                                            <Setter Property="IsEnabled" Value="False" ></Setter>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </dxe:ComboBoxEdit.Style>
+                        </dxe:ComboBoxEdit>
+                    </Grid>
+                </Border>
+            </Grid>
+            <!--#endregion Packing-->
+
+            <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="5" HorizontalAlignment="Center" >
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <Button Content="{DynamicResource Accept}"
+                        Grid.Column="0"
+                        Command="{Binding MyPreferencesViewAcceptButtonCommand}"
+                        Height="30"
+                        Width="100"
+                        Style="{DynamicResource Button16Style}"
+                        VerticalAlignment="Bottom" />
+
+                <Button Content="{DynamicResource Cancel}"
+                        Grid.Column="2"
+                        Command="{Binding MyPreferencesViewCancelButtonCommand}" 
+                        Height="30"
+                        Width="100"
+                        Style="{DynamicResource Button16Style}"
+                        VerticalAlignment="Bottom" />
+
+            </Grid>
+
+
+
+        </Grid>
+    </ScrollViewer>
+</dxwui:WinUIDialogWindow>

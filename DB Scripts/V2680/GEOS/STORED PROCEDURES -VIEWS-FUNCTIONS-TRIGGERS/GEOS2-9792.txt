@@ -1,0 +1,366 @@
+drop procedure if exists sites_GetSelectedUserCustomersByPlant_V2680
+delimiter $$
+ CREATE  PROCEDURE `geos`.`sites_GetSelectedUserCustomersByPlant_V2680`(
+    IN _idSite   varchar(2000))
+BEGIN
+       /*
+         [Pallavi.Kale][10/09/2025][GEOS2-9792]
+        call sites_GetSelectedUserCustomersByPlant_V2680(18);
+        */
+       DROP TEMPORARY TABLE IF EXISTS CRMTempTable2;CREATE TEMPORARY TABLE IF NOT EXISTS CRMTempTable2 AS
+       (
+       SELECT si.IdSite,
+              cus.IdCustomer,
+              UPPER(cus.Name) AS CustomerGroup,
+              replace(si.name, concat('(', co.name, ')'), '') AS CustomerPlant,
+              TRIM(IFNULL(si.RegisteredName, '')) AS RegisteredName,
+              TRIM(IFNULL(si.CIF, '')) AS RegistrationNumber,
+              co.idCountry,
+              co.Name AS Country,
+              co.iso,
+              TRIM(IFNULL(si.City, '')) AS City,
+              TRIM(si.Address) AS Address,
+              TRIM(IFNULL(si.telephone, '')) AS Phone,
+              TRIM(IFNULL(si.fax, '')) AS Fax,
+              TRIM(IFNULL(si.website, '')) AS WebSite,
+              TRIM(IFNULL(si.Email, '')) AS Email,
+              zo.IdZone as IdZone,
+              zo.Name AS SalesZone,
+              si.PostCode,
+              si.Line,
+              si.CuttingMachines,
+              si.Size,
+              si.NumberOfEmployees,
+              si.IdBusinessField,
+              si.IdBusinessCenter,
+              si.IdBusinessType,
+              bf.Value AS BusinessField,
+              bc.Value AS BusinessCenter,
+              bt.Value AS BusinessType,
+              si.Region,
+              si.Latitude,
+              si.Longitude,
+              si.ShortName,
+              si.ModifiedIn,
+              si.CreatedIn,
+              CONCAT(UPPER(cus.Name), '-', si.name) AS GroupPlantName,
+              si.CreatedBy,
+              createdBy.Name AS CreatedByName,
+              createdBy.Surname AS CreatedBySurname,
+              lv.Value AS SourceName,
+              lvStatus.IdLookupValue as IdStatus,
+              lvStatus.Value as Status,
+              lvStatus.HtmlColor as StatusHtmlColor,
+               (
+    SELECT COUNT(*)
+    FROM people p
+    WHERE p.IdSite = si.IdSite
+      AND p.IsStillActive = 1
+) AS ContactCount
+         FROM sites si
+              INNER JOIN customersitesbyemdepsite cs
+                 ON cs.idCustomerSite = si.IdSite
+              INNER JOIN customers cus ON cus.IdCustomer = si.IdCustomer
+              INNER JOIN countries co ON co.IdCountry = si.IdCountry
+              INNER JOIN zones zo ON zo.IdZone = co.IdZone
+              LEFT JOIN emdep_geos.lookup_values bf
+                 ON bf.IdLookupValue = si.IdBusinessField
+              LEFT JOIN emdep_geos.lookup_values bc
+                 ON bc.IdLookupValue = si.IdBusinessCenter
+              LEFT JOIN emdep_geos.lookup_values bt
+                 ON bt.IdLookupValue = si.IdBusinessType
+              LEFT JOIN people createdBy ON createdBy.IdPerson = si.CreatedBy
+              LEFT JOIN emdep_geos.lookup_values lv
+                 ON lv.IdLookupValue = si.IdSource
+                LEFT JOIN emdep_geos.lookup_values lvStatus
+                 ON lvStatus.IdLookupValue = si.IdStatus
+        WHERE     si.IdCustomer NOT IN (8, 10)
+              AND FIND_IN_SET(cs.IdEmdepSite, _idSite)
+              AND si.IsStillActive = TRUE
+       GROUP BY si.IdSite
+       ORDER BY CustomerGroup, CustomerPlant)      ;SELECT * FROM CRMTempTable2;SELECT concat(ifnull(p.name, ''), ' ', ifnull(p.surname, ''))
+                 AS SalesOwner,
+              (CASE
+                  WHEN (su.IsEnabled = 1 AND p.IsStillActive = 1) THEN 1
+                  ELSE 0
+               END)
+                 AS IsEnabled,
+              p.IdPerson,
+              s.IdSite,
+              p.IdPersonGender,
+              e.idemployee,
+              e.EmployeeCode ,
+              ec.EmployeeContactValue AS Email,
+              jd.IdJobDescription,
+              jd.JobDescriptionCode,
+              jd.JobDescriptionTitle
+         FROM site_sales_owners s
+              INNER JOIN sales_users su ON su.IdSalesUser = s.IdSalesOwner
+              INNER JOIN people p ON p.IdPerson = s.IdSalesOwner
+              left join emdep_geos.employees e on e.iduser=p.idperson
+              Inner join emdep_geos.employee_job_descriptions ejd on ejd.IdEmployee=e.IdEmployee and ejd.IsMainJobDescription = 1
+              Inner join emdep_geos.job_descriptions jd on ejd.IdJobDescription = jd.IdJobDescription
+               left JOIN emdep_geos.employee_contacts ec 
+              on ec.IdEmployee=e.IdEmployee  AND EmployeeContactIdType = 88 WHERE     
+     s.IdSite IN (SELECT IdSite FROM CRMTempTable2)
+       group by s.idsite,p.idperson;
+END $$
+delimiter ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+drop procedure if exists sites_GetSelectedUserCustomersBySalesOwnerId_V2680
+delimiter $$
+CREATE  PROCEDURE `geos`.`sites_GetSelectedUserCustomersBySalesOwnerId_V2680`(
+    IN _idUser   varchar(2000))
+begin
+     /*
+       [Pallavi.Kale][09/10/2025][GEOS2-9792]
+       call sites_GetSelectedUserCustomersBySalesOwnerId_V2680(28); 
+      */
+       DROP TEMPORARY TABLE IF EXISTS CRMTempTable1;CREATE TEMPORARY TABLE IF NOT EXISTS CRMTempTable1 AS
+       (
+       SELECT si.IdSite,
+              cus.IdCustomer,
+              UPPER(cus.Name) AS CustomerGroup,
+              replace(si.name, concat('(', co.name, ')'), '') AS CustomerPlant,
+              TRIM(IFNULL(si.RegisteredName, '')) AS RegisteredName,
+              TRIM(IFNULL(si.CIF, '')) AS RegistrationNumber,
+              co.idCountry,
+              co.Name AS Country,
+              co.iso AS CountryIso,
+              TRIM(IFNULL(si.City, '')) AS City,
+              TRIM(si.Address) AS Address,
+              TRIM(IFNULL(si.telephone, '')) AS Phone,
+              TRIM(IFNULL(si.fax, '')) AS Fax,
+              TRIM(IFNULL(si.website, '')) AS WebSite,
+              TRIM(IFNULL(si.Email, '')) AS Email,
+              zo.Name AS SalesZone,
+              si.PostCode,
+              si.Line,
+              si.CuttingMachines,
+              si.IdBusinessField,
+              si.IdBusinessCenter,
+              si.IdBusinessType,
+              bf.Value AS BusinessField,
+              bc.Value AS BusinessCenter,
+              bt.Value AS BusinessType,
+              si.Region,
+              si.Latitude,
+              si.Longitude,
+              si.ShortName,
+              si.ModifiedIn,
+              si.CreatedIn,
+              CONCAT(UPPER(cus.Name), '-', si.name) AS GroupPlantName,
+              si.CreatedBy,
+              createdBy.Name AS CreatedByName,
+              createdBy.Surname AS CreatedBySurname,
+              lv.Value AS SourceName,
+              lvStatus.IdLookupValue as IdStatus,
+              lvStatus.Value as Status,
+              lvStatus.HtmlColor as StatusHtmlColor,
+              (
+    SELECT COUNT(*)
+    FROM people p
+    WHERE p.IdSite = si.IdSite
+      AND p.IsStillActive = 1
+) AS ContactCount
+         FROM sites si
+              INNER JOIN customers cus ON cus.IdCustomer = si.IdCustomer
+              INNER JOIN countries co ON co.IdCountry = si.IdCountry
+              INNER JOIN zones zo ON zo.IdZone = co.IdZone
+              LEFT JOIN emdep_geos.lookup_values bf
+                 ON bf.IdLookupValue = si.IdBusinessField
+              LEFT JOIN emdep_geos.lookup_values bc
+                 ON bc.IdLookupValue = si.IdBusinessCenter
+              LEFT JOIN emdep_geos.lookup_values bt
+                 ON bt.IdLookupValue = si.IdBusinessType
+              LEFT JOIN people createdBy ON createdBy.IdPerson = si.CreatedBy
+              LEFT JOIN emdep_geos.lookup_values lv
+                 ON lv.IdLookupValue = si.IdSource
+                 LEFT JOIN emdep_geos.lookup_values lvStatus
+                 ON lvStatus.IdLookupValue = si.IdStatus
+        WHERE     si.IdCustomer NOT IN (8, 10)
+              AND (SELECT ifnull(count(site_sales_owners.IdSalesOwner), 0)
+                     FROM site_sales_owners
+                          LEFT JOIN people p
+                             ON site_sales_owners.IdSalesOwner = p.IdPerson
+                    WHERE     site_sales_owners.IdSite = si.IdSite
+                          AND FIND_IN_SET(site_sales_owners.IdSalesOwner,
+                                          _idUser)) > 0
+              AND si.IsStillActive = TRUE
+       GROUP BY si.IdSite
+       ORDER BY CustomerGroup, CustomerPlant)      ;SELECT * FROM CRMTempTable1;SELECT concat(ifnull(p.name, ''), ' ', ifnull(p.surname, ''))
+                 AS SalesOwner,
+              (CASE
+                  WHEN (su.IsEnabled = 1 AND p.IsStillActive = 1) THEN 1
+                  ELSE 0
+               END)
+                 AS IsEnabled,
+              p.IdPerson,
+              s.IdSite,
+              p.IdPersonGender,
+              e.idemployee,
+              e.EmployeeCode ,
+              ec.EmployeeContactValue AS Email,
+              jd.IdJobDescription,
+              jd.JobDescriptionCode,
+              jd.JobDescriptionTitle
+
+
+         FROM site_sales_owners s
+              INNER JOIN sales_users su ON su.IdSalesUser = s.IdSalesOwner
+              INNER JOIN people p ON p.IdPerson = s.IdSalesOwner
+              left join emdep_geos.employees e on e.iduser=p.idperson
+              Inner join emdep_geos.employee_job_descriptions ejd on ejd.IdEmployee=e.IdEmployee AND ejd.IsMainJobDescription = 1
+              Inner join emdep_geos.job_descriptions jd on ejd.IdJobDescription = jd.IdJobDescription
+               left JOIN emdep_geos.employee_contacts ec 
+              on ec.IdEmployee=e.IdEmployee  AND EmployeeContactIdType = 88 WHERE    
+              s.IdSite IN (SELECT IdSite FROM CRMTempTable1)
+group by s.idsite,p.idperson;
+END $$
+delimiter ;
+
+
+
+
+
+
+
+drop procedure if exists sites_GetCustomersBySalesOwnerId_V2680
+delimiter $$
+CREATE  PROCEDURE `geos`.`sites_GetCustomersBySalesOwnerId_V2680`(
+    IN _idUser         smallint(5) UNSIGNED,
+    IN _idZone         smallint(5) UNSIGNED,
+    IN _idPermission   smallint(5) UNSIGNED)
+begin
+	     /*
+      [Pallavi.Kale][09/10/2025][GEOS2-9792]
+       call sites_GetCustomersBySalesOwnerId_V2680(28,18,21); 
+      */
+       DROP TEMPORARY TABLE IF EXISTS CRMTempTable3;CREATE TEMPORARY TABLE IF NOT EXISTS CRMTempTable3 AS
+       (
+       SELECT si.IdSite,
+              cus.IdCustomer,
+              UPPER(cus.Name) AS CustomerGroup,
+              replace(si.name, concat(' (', co.name, ')'), '')
+                 AS CustomerPlant,
+              TRIM(IFNULL(si.RegisteredName, '')) AS RegisteredName,
+              TRIM(IFNULL(si.CIF, '')) AS RegistrationNumber,
+              co.idCountry,
+              co.iso,
+              co.Name AS Country,
+              TRIM(IFNULL(si.City, '')) AS City,
+              TRIM(si.Address) AS Address,
+              TRIM(IFNULL(si.telephone, '')) AS Phone,
+              TRIM(IFNULL(si.fax, '')) AS Fax,
+              TRIM(IFNULL(si.website, '')) AS WebSite,
+              TRIM(IFNULL(si.Email, '')) AS Email,
+              zo.Name AS SalesZone,
+              si.PostCode,
+              si.Line,
+              si.CuttingMachines,
+              si.IdBusinessField,
+              si.IdBusinessCenter,
+              si.IdBusinessType,
+              bf.Value AS BusinessField,
+              bc.Value AS BusinessCenter,
+              bt.Value AS BusinessType,
+              si.Region,
+              si.Latitude,
+              si.Longitude,
+              si.ShortName,
+              si.ModifiedIn,
+              si.CreatedIn,
+              CONCAT(UPPER(cus.Name), ' - ', si.name) AS GroupPlantName,
+              si.CreatedBy,
+              createdBy.Name AS CreatedByName,
+              createdBy.Surname AS CreatedBySurname,
+              lv.Value AS SourceName,
+              lvStatus.IdLookupValue as IdStatus,
+              lvStatus.Value as Status,
+              lvStatus.HtmlColor as StatusHtmlColor,
+               (
+    SELECT COUNT(*)
+    FROM people p
+    WHERE p.IdSite = si.IdSite
+      AND p.IsStillActive = 1
+) AS ContactCount
+         FROM sites si
+              INNER JOIN customers cus ON cus.IdCustomer = si.IdCustomer
+              INNER JOIN countries co ON co.IdCountry = si.IdCountry
+              INNER JOIN zones zo ON zo.IdZone = co.IdZone
+              LEFT JOIN emdep_geos.lookup_values bf
+                 ON bf.IdLookupValue = si.IdBusinessField
+              LEFT JOIN emdep_geos.lookup_values bc
+                 ON bc.IdLookupValue = si.IdBusinessCenter
+              LEFT JOIN emdep_geos.lookup_values bt
+                 ON bt.IdLookupValue = si.IdBusinessType
+              LEFT JOIN people createdBy ON createdBy.IdPerson = si.CreatedBy
+               LEFT JOIN emdep_geos.lookup_values lv ON lv.IdLookupValue=si.IdSource
+               LEFT JOIN site_sales_owners sso ON si.IdSite = sso.IdSite
+              LEFT JOIN emdep_geos.lookup_values lvStatus
+                 ON lvStatus.IdLookupValue = si.IdStatus
+        WHERE     si.IdCustomer NOT IN (8, 10)
+              AND si.IsStillActive = TRUE
+              AND CASE
+                     WHEN _idPermission = 20 OR _idPermission = 21
+                     THEN
+                        FIND_IN_SET(sso.IdSalesOwner, _idUser)
+                     WHEN _idPermission = 22
+                     THEN
+                        TRUE
+                     ELSE
+                        FALSE
+                  END
+       GROUP BY si.IdSite
+       ORDER BY CustomerGroup, CustomerPlant)      ;SELECT * FROM CRMTempTable3;SELECT concat(ifnull(p.name, ''), ' ', ifnull(p.surname, ''))
+                 AS SalesOwner,
+              (CASE
+                  WHEN (su.IsEnabled = 1 AND p.IsStillActive = 1) THEN 1
+                  ELSE 0
+               END)
+                 AS IsEnabled,
+             p.IdPerson,
+              s.IdSite,
+              p.IdPersonGender,
+              e.idemployee,
+              e.EmployeeCode ,
+              ec.EmployeeContactValue AS Email,
+              jd.IdJobDescription,
+              jd.JobDescriptionCode,
+              jd.JobDescriptionTitle
+
+
+         FROM site_sales_owners s
+              INNER JOIN sales_users su ON su.IdSalesUser = s.IdSalesOwner
+              INNER JOIN people p ON p.IdPerson = s.IdSalesOwner
+               left join emdep_geos.employees e on e.iduser=p.idperson
+              Inner join emdep_geos.employee_job_descriptions ejd on ejd.IdEmployee=e.IdEmployee AND  ejd.IsMainJobDescription = 1
+              Inner join emdep_geos.job_descriptions jd on ejd.IdJobDescription = jd.IdJobDescription
+               left JOIN emdep_geos.employee_contacts ec 
+              on ec.IdEmployee=e.IdEmployee  AND EmployeeContactIdType = 88 WHERE    
+              s.IdSite IN (SELECT IdSite FROM CRMTempTable3)
+group by s.idsite,p.idperson;
+END $$
+delimiter ;

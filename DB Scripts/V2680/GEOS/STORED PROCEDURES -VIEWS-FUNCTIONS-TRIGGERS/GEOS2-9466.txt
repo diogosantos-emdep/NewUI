@@ -1,0 +1,104 @@
+DROP PROCEDURE IF EXISTS geos.`EDS_IsCounterpartCodeExist_V2680`;
+DELIMITER $$
+CREATE PROCEDURE geos.`EDS_IsCounterpartCodeExist_V2680`(
+   IN `_Counterpartcode`   text)
+BEGIN
+/*
+call EDS_IsCounterpartCodeExist_V2680("S250192C001001");
+//Shubham[skadam] [V.2.6.8.0] GEOS2-9466 Add a new endpoint called “GetSerialNumber” to get the information of a module 07 10 2025
+*/
+SELECT  cpart.`Code` as CounterpartCode FROM counterparts cpart where FIND_IN_SET(cpart.`Code`,_Counterpartcode);
+
+END$$
+
+DELIMITER ;
+
+
+DROP PROCEDURE IF EXISTS geos.`EDS_GetSerialNumber_V2680`;
+DELIMITER $$
+CREATE PROCEDURE geos.`EDS_GetSerialNumber_V2680`(
+   IN `_Counterpartcode`   text)
+BEGIN
+/*
+call EDS_GetSerialNumber_V2680("S250192C001001");
+call EDS_GetSerialNumber_V2680("2510349P035001");
+call EDS_GetSerialNumber_V2680("2510349P035001");
+SELECT * FROM counterparts ORDER BY IdCounterpart DESC limit 500;
+SELECT * FROM counterparts where Code like "%211135P001001%";
+SELECT * FROM counterpartstracking limit 1;
+SELECT * FROM geos.serialnumbers where Code like "%211135P001001%";
+*/
+   SELECT ot.Code,
+          cpart.`Code` as CounterpartCode,
+          cpty.IdCounterpartType as TypeId,
+          cpty.`Name` as TypeName,
+          ot.NumOT,
+          concat(cust.Name, ' - ', si.Name)   AS customer,
+          IFNULL(ot.DeliveryDate, '1000-01-01')  AS DeliveryDate,
+          oti.IdOTItem,
+          oti.`IsBatch`,
+          oti.`IdItemOtStatus` as IdStatus,
+          istaty.`Name` as StatusName,
+          ri.numitem,
+          ri.Quantity  AS Quantity,
+       --   a.ReworkNumber,
+          a.IdStage as CurrentStageId,
+          a.StageName as CurrentStageName,
+          a.StageCode as CurrentStageCode,
+          typ.Name  AS itemtype,
+          con.IdConnector,
+          prod.Reference   AS reference1,
+          prod.OtherReference AS reference2,
+          con.Ref  AS referenceEMDEP,
+          CONCAT(fam.Name, ' ', IFNULL(connectorsubfamilies.Name, ''))  AS family,
+          connectorcolor.Name  AS connectorcolor,
+          con.NumWays,
+          connectorterminals.Name  AS gender,
+          con.Sealed,
+          prod.IdDrawing,
+          solidworksprojects.Reference   AS solidworksprojectsReference,
+          solidworksprojects.Path  AS solidworksprojectsPath,
+          prod.IdWorkbookOfCpProducts   AS IdWorkbook,
+          cpw.`IsCopy`,
+          q.`IdDetectionsTemplate` as IdTemplate,
+          t.`Name` as TemplateName,
+          null as last
+FROM counterparts cpart
+INNER JOIN(SELECT   cpt.IdCounterpart,
+                    oti.IdOTItem,
+                    cpt.`IdStage`,
+                    s.`Name` as StageName,
+                    s.Code as StageCode
+               FROM counterparts cp
+                    INNER JOIN counterpartstracking cpt  ON cp.IdCounterpart = cpt.IdCounterpart
+                    INNER JOIN otitems oti ON cp.IdOTItem = oti.IdOTItem
+                    INNER JOIN stages s ON s.`IdStage`=cpt.`IdStage`
+              WHERE cp.`Code`=_Counterpartcode ORDER BY 
+    CASE WHEN cpt.EndDate IS NULL THEN 1 ELSE 0 END DESC,  -- prioritize NULL EndDate
+    cpt.EndDate DESC                                        -- otherwise max EndDate
+   LIMIT 1 ) a  ON cpart.IdCounterpart = a.IdCounterpart
+INNER JOIN counterparttypes cpty ON cpty.IdCounterpartType = cpart.IdCounterpartType              
+INNER JOIN otitems oti ON cpart.IdOTItem = oti.IdOTItem
+INNER JOIN itemotstatustypes istaty ON istaty.`IdItemOtStatus`=oti.`IdItemOtStatus`
+INNER JOIN revisionitems ri  ON oti.IdRevisionItem = ri.IdRevisionItem
+INNER JOIN ots ot ON oti.IdOT = ot.IdOT
+INNER JOIN quotations q ON ot.IdQuotation = q.IdQuotation
+LEFT JOIN templates t ON t.`IdTemplate`=q.`IdDetectionsTemplate`
+INNER JOIN sites si ON q.IdCustomer = si.IdSite
+INNER JOIN customers cust ON si.idcustomer = cust.IdCustomer
+LEFT JOIN cpproduct prod ON prod.IdCP = ri.IdProduct
+LEFT JOIN cpproductworkbooks cpw ON cpw.`IdWorkbookOfCpProducts`=prod.IdWorkbookOfCpProducts
+LEFT JOIN cptypes typ ON typ.IdCPType = prod.IdCPType
+LEFT JOIN refconclients rcc ON rcc.Ref = prod.Reference
+LEFT JOIN connectors con ON con.IdConnector = rcc.IdConnector
+LEFT JOIN connectorfamilies fam ON fam.IdFamily = con.Family
+LEFT JOIN connectorsubfamilies ON connectorsubfamilies.idConnectorSubfamily = con.Subfamily
+LEFT JOIN colours AS connectorcolor  ON con.Color = connectorcolor.IdColor
+LEFT JOIN connectorterminals  ON connectorterminals.IdTerminal = con.Terminal
+LEFT JOIN drawings ON prod.IdDrawing = drawings.IdDrawing
+LEFT JOIN solidworksprojects  ON solidworksprojects.IdSolidWorksProject = drawings.IdSolidWorksProject
+where FIND_IN_SET(cpart.`Code`,_Counterpartcode) AND  ri.Quantity != 0;
+
+END$$
+
+DELIMITER ;

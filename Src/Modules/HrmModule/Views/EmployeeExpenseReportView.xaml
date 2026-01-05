@@ -1,0 +1,709 @@
+﻿<UserControl x:Class="Emdep.Geos.Modules.Hrm.Views.EmployeeExpenseReportView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.Hrm.Views"
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+             xmlns:Converters="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+             xmlns:dxwuin="http://schemas.devexpress.com/winfx/2008/xaml/windowsui/navigation"
+             xmlns:dxnav="http://schemas.devexpress.com/winfx/2008/xaml/navigation" 
+             xmlns:dxp="http://schemas.devexpress.com/winfx/2008/xaml/printing" 
+             xmlns:dxdb="http://schemas.devexpress.com/winfx/2008/xaml/demobase"
+             xmlns:sysglb="clr-namespace:System.Globalization;assembly=mscorlib"
+             xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+             xmlns:HrmApplication="clr-namespace:Emdep.Geos.Modules.Hrm"
+             xmlns:ViewModel="clr-namespace:Emdep.Geos.Modules.Hrm.ViewModels"
+             xmlns:Interactive="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:dxgt="http://schemas.devexpress.com/winfx/2008/xaml/grid/themekeys"
+             xmlns:Behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+             xmlns:UIConverter="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters" 
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             mc:Ignorable="d" 
+             d:DesignHeight="500" d:DesignWidth="700">
+
+    <UserControl.Resources><!--[rdixit][GEOS2-3829][26.09.2022]-->
+        <Converters:ImageUrlToByteArrayConverter x:Key="ImageUrlToByteArrayConverter" />
+
+
+        <Style x:Key="HideButtonStyle" TargetType="{x:Type ToggleButton}">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ToggleButton}">
+                        <Border BorderThickness="0" Background="{TemplateBinding Background}">
+                            <Grid>
+                                <Image Stretch="None" VerticalAlignment="Center" HorizontalAlignment="Center"
+                                   Source="/Emdep.Geos.Modules.Warehouse;component/Assets/Images/ArrowRight.png"
+                                   Visibility="{TemplateBinding IsChecked, Converter={dxmvvm:BooleanToVisibilityConverter Inverse=True}}"/>
+                                <Image Stretch="None" VerticalAlignment="Center" HorizontalAlignment="Center"
+                                   Source="/Emdep.Geos.Modules.Warehouse;component/Assets/Images/ArrowLeft.png"
+                                   Visibility="{TemplateBinding IsChecked, Converter={dxmvvm:BooleanToVisibilityConverter}}"/>
+                            </Grid>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+
+
+        <Style x:Key="LeftPanelTileItemStyle" TargetType="{x:Type dxnav:TileBarItem}">
+            <Setter Property="Foreground" Value="{Binding ForeColor,Converter={UIConverter:ForegroundColorConverter}}"/>
+            <Setter Property="BorderBrush" Value="#FFD6D6D6"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Background" Value="{Binding BackColor}"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+            <Setter Property="Height" Value="{Binding Height}"/>
+            <Setter Property="Width" Value="{Binding Width}"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="SelectionPadding" Value="0" />
+            <Setter Property="ContentTemplate" >
+                <Setter.Value >
+                    <DataTemplate >
+                        <StackPanel Orientation="Vertical" HorizontalAlignment="Left" Width="195" Height="75"  >
+                            <Label Content="{Binding EntitiesCount,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" HorizontalContentAlignment="Right"   Margin="0,-5,8,0" VerticalContentAlignment="Top" FontSize="36" Visibility="{Binding EntitiesCountVisibility}"></Label>
+                            <Label Content="{Binding Caption, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalContentAlignment="Left" Margin="6,0,0,3" VerticalAlignment="Bottom" FontSize="15" ></Label>
+                        </StackPanel>
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="BorderThickness" Value="5"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource TileBarItemColorStyle}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Converters:ForegroundColorConverter x:Key="ForegroundColorConverter"/>
+        <Style x:Key="printCellStatusStyle" TargetType="dxe:TextEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+            <Style.Setters>
+                <Setter Property="dxp:ExportSettings.TargetType" Value="Panel"/>
+                <Setter Property="DisplayTemplate">
+                    <Setter.Value>
+                        <ControlTemplate>
+                            <dxe:TextEdit Name="PART_Editor" Text="{Binding RowData.Row.Status}" HorizontalAlignment="Stretch" 
+                                          IsPrintingMode="True">
+                            </dxe:TextEdit>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style.Setters>
+        </Style>
+        
+        
+        
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="55"/>
+            <RowDefinition Height="{Binding GridRowHeight}" />
+            <RowDefinition Height="50*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="250"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Label Content="{DynamicResource EmployeesExpenseReportsHeader}" Style="{StaticResource LabelTitleStyle}" Grid.Row="0" Grid.Column="0"/>
+        <Grid HorizontalAlignment="Right" Grid.Row="0" Grid.Column="1" Margin="0,5,0,0" >
+            <Grid.RowDefinitions>
+                <RowDefinition Height="AUTO"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="AUTO"/>
+                <ColumnDefinition Width="AUTO"/>
+                <ColumnDefinition Width="AUTO" />
+                <ColumnDefinition Width="AUTO" />
+                <ColumnDefinition Width="AUTO" />
+                <ColumnDefinition Width="AUTO" />
+                <ColumnDefinition Width="AUTO" />
+                <ColumnDefinition Width="AUTO" />
+
+            </Grid.ColumnDefinitions>
+
+            <Grid HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Column="1" Margin="0,0,0,-10">
+                <Grid.ColumnDefinitions >
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!--Plant-->
+                <TextBlock Grid.Column="0" Text="{DynamicResource CommonPlant}"  FontWeight="Bold" Grid.Row="0" HorizontalAlignment="Right" Height="25" IsEnabled="True"  />
+                <dxe:ComboBoxEdit Style="{DynamicResource ComboBoxEditStyle}" Grid.Column="1"  Width="150" Height="30"  Margin="5,0,5,0"
+                                  DisplayMember="ShortName" IsTextEditable="False"
+                              ItemsSource ="{Binding Source={x:Static HrmApplication:HrmCommon.Instance}, Path=UserAuthorizedPlantsList ,UpdateSourceTrigger=PropertyChanged , Mode=TwoWay}"
+                              EditValue="{Binding Source={x:Static HrmApplication:HrmCommon.Instance}, Path=SelectedAuthorizedPlantsList,UpdateSourceTrigger=PropertyChanged}">
+                    <dxe:ComboBoxEdit.StyleSettings>
+                        <dxe:CheckedComboBoxStyleSettings />
+                    </dxe:ComboBoxEdit.StyleSettings>
+                    <dxmvvm:Interaction.Triggers>
+                        <dxmvvm:EventToCommand EventName="PopupClosed"
+                                               Command="{Binding DataContext.PlantOwnerPopupClosedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                               CommandParameter="{Binding ElementName=EmployeeExpenseTableView}"/>
+                    </dxmvvm:Interaction.Triggers>
+                </dxe:ComboBoxEdit>
+
+                <!--Period-->
+                <DockPanel Grid.Column="2" Grid.Row="0" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5,0,0,0">
+                    <Image Style="{DynamicResource CalendarImageStyle}" Width="30" Height="20" Margin="2,0,3,0" />
+                    <TextBlock Text="{DynamicResource AnnualSalesPerformanceViewPeriod}" FontWeight="Bold" Margin="0,0,0,0" IsEnabled="True" />
+                </DockPanel>
+
+                <dxe:ComboBoxEdit Grid.Row="0" Grid.Column="3" 
+                                Name="cmbPeriod"
+                                IsTextEditable="False" Margin="5,0,0,0"
+                                HorizontalAlignment="Left"
+                                IsEnabled="True"
+                                Height="30"
+                                Width="90"
+                                MaxLength="4" 
+                                VerticalAlignment="Center" 
+                                ItemsSource="{Binding Source={x:Static HrmApplication:HrmCommon.Instance}, Path=FinancialYearList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                SelectedItem="{Binding Source={x:Static HrmApplication:HrmCommon.Instance}, Path=SelectedPeriod,UpdateSourceTrigger=PropertyChanged}">
+                    <dxe:ComboBoxEdit.StyleSettings>
+                        <dxe:ComboBoxStyleSettings />
+                    </dxe:ComboBoxEdit.StyleSettings>
+                    <dxmvvm:Interaction.Triggers>
+                        <dxmvvm:EventToCommand EventName="EditValueChanged"
+                                           Command="{Binding DataContext.SelectedYearChangedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                          >
+                            <!--CommandParameter="{Binding ElementName=EmployeeExpenseTableView}"-->
+                            <dxmvvm:EventToCommand.CommandParameter>
+                                <MultiBinding Converter="{Converters:ConverterForRefresh}">
+                                    <Binding ElementName="EmployeeExpenseTableView" />
+                                    <Binding ElementName="rangeControl" />
+                                </MultiBinding>
+                            </dxmvvm:EventToCommand.CommandParameter>
+                        </dxmvvm:EventToCommand>
+                    </dxmvvm:Interaction.Triggers>
+                </dxe:ComboBoxEdit>
+            </Grid>
+
+            <Button Content=" " Height="40" Width="40"  HorizontalAlignment="Right" Grid.Column="2" Margin="5,0,0,-5"
+                        Command="{Binding ViewHideRangeControlCommand}">
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource ButtonView}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Image Grid.Column="0" Height="24" Width="24" Margin="-10" >
+                                <Image.Style>
+                                    <Style TargetType="{x:Type Image}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding DataContext.IsViewRangeControl,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button} ,BindsDirectlyToSource=True}"  Value="True">
+                                                <Setter Property="Source" Value="{DynamicResource HRMViewButtonImageStyle}" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding DataContext.IsViewRangeControl,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button},BindsDirectlyToSource=True}" Value="False">
+                                                <Setter Property="Source" Value="{DynamicResource HRMNoViewButtonImageStyle}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Image.Style>
+                            </Image>
+                        </Grid>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+
+            <!-- Add Button -->
+            <!--[GEOS2-3943][rdixit][04.01.2022]-->  <!--[rdixit][GEOS2-6979][02.04.2025]-->
+            <Button Visibility="Visible" Grid.Row="0" Grid.Column="3" Height="40" Width="40" HorizontalAlignment="Right" 
+                        Command="{Binding AddButtonCommand}" Margin="5,0,5,-5" IsEnabled="{Binding IsAddButtonVisible}"
+                        CommandParameter="{Binding ElementName=EmployeeExpenseTableView}">
+                <!--[GEOS2-6499][04.11.2024][rdixit]-->
+                <!--<Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="IsEnabled" Value="False"/>
+                        <Style.Triggers>
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsHRMManageEmployeeContactsPermission}" Value="true" />
+                                    <Condition Binding="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsTravel_AssistantPermissionForHRM}" Value="true" />
+                                    <Condition Binding="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsHRMTravelManagerPermission}" Value="true" />
+                                </MultiDataTrigger.Conditions>
+                                <Setter Property="IsEnabled" Value="True"></Setter>
+                            </MultiDataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>-->
+
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource AddExpenseReport}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Image Style="{DynamicResource AddNewButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+
+            <!-- Refresh Button -->
+            <Button Content=" " Grid.Row="0" Grid.Column="4" Height="40" Width="40" HorizontalAlignment="Right"  Command="{Binding RefreshButtonCommand}" CommandParameter="{Binding ElementName=EmployeeExpenseTableView}" Margin="0,0,5,-5">
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource ButtonRefresh}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Image Style="{ DynamicResource RefreshButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+
+            <!-- Print Button -->
+            <Button Content=" " Grid.Row="0" Grid.Column="5" Height="40" Width="40" HorizontalAlignment="Right"  Command="{Binding PrintButtonCommand}" CommandParameter="{Binding ElementName=EmployeeExpenseTableView}" Margin="0,0,5,-5">
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource ButtonPrint}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Image Style="{ DynamicResource PrinterButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+
+            <!-- Export Button -->
+            <Button Content=" " Grid.Row="0" Grid.Column="6" Height="40" Width="40" HorizontalAlignment="Right"  Command="{Binding ExportButtonCommand}" CommandParameter="{Binding ElementName=EmployeeExpenseTableView}" Margin="0,0,5,-5">
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource ButtonExportToExcel}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Image Style="{ DynamicResource ExcelExportButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+        </Grid>
+        <Grid Grid.Row="1"  Grid.ColumnSpan="2">
+            <dxe:RangeControl x:Name="rangeControl"  Height="100" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="0" DockPanel.Dock="Top"                                                   
+                              SelectionRangeStart="{Binding StartSelectionDate,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                              SelectionRangeEnd="{Binding FinishSelectionDate,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                              RangeStart="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=FinancialYearList}"
+                              RangeEnd="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=SelectedPeriod}">
+               
+                <dxe:CalendarClient Style="{DynamicResource CalendarClientStyle}">
+                    <dxe:CalendarClient.IntervalFactories>
+                        <dxe:YearIntervalFactory/>
+                        <dxe:QuarterIntervalFactory/>
+                        <UIHelper:MonthIntervalFactoryEx />
+                        <UIHelper:DayIntervalFactoryEx/>
+                    </dxe:CalendarClient.IntervalFactories>
+                </dxe:CalendarClient>
+            </dxe:RangeControl>
+        </Grid>
+
+        <DockPanel Grid.Row="2"  Grid.ColumnSpan="2">
+            <Grid>
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="70*"/>
+                </Grid.ColumnDefinitions>
+
+                <dxwui:NavigationFrame   x:Name="Navigatedframe" AnimationType="None">
+                    <dxmvvm:Interaction.Behaviors>
+                        <dxwuin:FrameNavigationService/>
+                    </dxmvvm:Interaction.Behaviors>
+                </dxwui:NavigationFrame>
+
+                <UIHelper:DpiResizingPanel DockPanel.Dock="Left"  Grid.Column="0">
+                    <dxnav:TileBar x:Name="tileBar" DockPanel.Dock="Left" HorizontalAlignment="Left"   VerticalAlignment="Stretch" Margin="-20 0 0 0"
+                               Orientation="Vertical"
+                               ItemSpacing="5"
+                               SelectedItem="{Binding SelectedTileBarItem,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+                               ItemsSource="{Binding FilterStatusListOfTile ,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                               ItemContainerStyle="{StaticResource LeftPanelTileItemStyle}" 
+                               
+                               Visibility="{Binding ElementName=expandButton, Path=IsChecked, Converter={dxmvvm:BooleanToVisibilityConverter }}" >
+                        <dxmvvm:Interaction.Behaviors>
+                            <dxmvvm:EventToCommand Command="{Binding CommandFilterStatusTileClick}"  EventName="SelectionChanged" PassEventArgsToCommand="True"/>
+                            <dxmvvm:EventToCommand Command="{Binding CommandTileBarClickDoubleClick}"  EventName="MouseDoubleClick" CommandParameter="{Binding ElementName=EmployeeExpenseTableView}"/>
+                            <!--<dxmvvm:EventToCommand Command="{Binding CommandEquivalencyWeightShowTileBarFilterPopupClick}" EventName="SelectionChanged" PassEventArgsToCommand="True"/>-->
+
+                        </dxmvvm:Interaction.Behaviors>
+                    </dxnav:TileBar>
+                </UIHelper:DpiResizingPanel>
+
+                <ToggleButton x:Name="expandButton"  Grid.Column="1" DockPanel.Dock="Left" Visibility="{Binding IsTileBarVisible}" Style="{StaticResource HideButtonStyle}" IsChecked="True" VerticalAlignment="Center"/>
+
+                <dxg:GridControl x:Name="GridControlEmpolyeeExpense" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Grid.Column="2" 
+                         ImplyNullLikeEmptyStringWhenFiltering="True" AllowLiveDataShaping="True" ItemsSource="{Binding FinalExpenseList,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+                         SelectedItem="{Binding Path=SelectedGridRow,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" SelectionMode="Cell" Width="Auto" Height="Auto" 
+                          FilterString="{Binding MyFilterString,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" >
+
+                    <dxg:GridColumn Header="{DynamicResource ExpenseCodeGrid}" FieldName="ExpenseCode" FilterPopupMode="CheckedList"  MaxWidth="90" ReadOnly="True" FixedWidth="True" CellStyle="{DynamicResource FocusedHyperlinkCellStyle}">
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock VerticalAlignment="Center" Margin="10 0 0 0">
+                                             <Hyperlink x:Name="hyperlink" 
+                                               TargetName="_blank"
+                                               Command="{Binding DataContext.EditTravelExpenseCommand,RelativeSource={RelativeSource AncestorType=dxg:GridControl}}"
+                                               CommandParameter="{Binding ElementName=EmployeeExpenseTableView}" >
+                                        <InlineUIContainer>
+                                            <TextBlock Text="{Binding Data.ExpenseCode}" Style="{DynamicResource HyperlinkTextBlock}" TextDecorations="Underline"/>
+                                        </InlineUIContainer>
+                                    </Hyperlink>
+                                        </TextBlock>
+                                <DataTemplate.Triggers>
+                                    <Trigger Property="dxg:DataViewBase.IsFocusedCell" Value="True">
+                                        <Setter TargetName="hyperlink" Property="Foreground" Value="OrangeRed"/>
+                                    </Trigger>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="hyperlink" Property="Foreground" Value="OrangeRed" />
+                                    </Trigger>
+                                </DataTemplate.Triggers>
+
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+                    <dxg:GridColumn Header="{DynamicResource ExpenseTitle}" FieldName="ExpenseTitle" MinWidth="200" FilterPopupMode="CheckedList" ReadOnly="True"/>
+
+                    <dxg:GridColumn Header="{DynamicResource ExpenseCurrency}" FieldName="ExpenseCurrency" FilterPopupMode="CheckedList" MinWidth="90" MaxWidth="150" ReadOnly="True">
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Height="24">
+                                    <Image  
+                            Source="{Binding RowData.Row.CountryIconBytes,UpdateSourceTrigger=PropertyChanged}"  
+                            VerticalAlignment="Center" Height="24" Width="24" Margin="2,0,0,0" />
+                                    <TextBlock Text ="{Binding RowData.Row.ExpenseCurrency,UpdateSourceTrigger=PropertyChanged}"  VerticalAlignment="Center" Margin="5,0,0,0" ></TextBlock>
+                                </StackPanel>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                        <dxg:GridColumn.PrintCellStyle>
+                            <Style TargetType="dxe:TextEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                                <Setter Property="dxp:ExportSettings.TargetType" Value="Panel" />
+                                <Setter Property="DisplayTemplate">
+                                    <Setter.Value>
+                                        <ControlTemplate>
+                                            <dxe:TextEdit Name="PART_Editor" Text="{Binding Row.ExpenseCurrency}" HorizontalAlignment="Left"
+                                                        IsPrintingMode="True">
+                                            </dxe:TextEdit>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </dxg:GridColumn.PrintCellStyle>
+                    </dxg:GridColumn>
+                    <dxg:GridColumn Header="{DynamicResource ExpenseStartDate}" FieldName="StartDate" FilterPopupMode="CheckedList" Width="90" ReadOnly="True"/>
+                    <dxg:GridColumn Header="{DynamicResource ExpenseEndDate}" FieldName="EndDate" FilterPopupMode="CheckedList" Width="90" ReadOnly="True"/>
+                    <dxg:GridColumn Header="{DynamicResource ExpenseDuration}" FieldName="Duration" FilterPopupMode="CheckedList" Width="80" ReadOnly="True"/>
+                    <dxg:GridColumn Header="{DynamicResource ExpenseReporter1}" FieldName="Reporter" FilterPopupMode="CheckedList" MinWidth="200" ReadOnly="True"/>
+                    <dxg:GridColumn Header="{DynamicResource ExpenseTotalCount}" FieldName="TotalCount" FilterPopupMode="CheckedList" MinWidth="100" MaxWidth="150" ReadOnly="True"/>
+                    <!--[pramod.misal][GEOS2-5286][9-02-2024]-->
+                    <dxg:GridColumn Header="{DynamicResource ExpenseTotalAmount}" FieldName="TotalAmount" FilterPopupMode="CheckedList" MinWidth="100" MaxWidth="150" ReadOnly="True">
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="1"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="4"/>
+                                            <ColumnDefinition Width="auto"/>
+                                            <ColumnDefinition Width="1"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="1" Text="{Binding RowData.Row.TotalAmount,StringFormat={}{0:N2},ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="3" Text="{Binding RowData.Row.CurSymbol}" VerticalAlignment="Center" />
+                                    </Grid>
+                                </StackPanel>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                        <!--[pramod.misal][GEOS2-5286][9-02-2024]-->
+                        <dxg:GridColumn.PrintCellStyle>
+                            <Style TargetType="dxe:TextEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                                <Setter Property="dxp:ExportSettings.TargetType" Value="Panel" />
+                                <Setter Property="DisplayTemplate">
+                                    <Setter.Value>
+                                        <ControlTemplate>
+                                            <dxe:TextEdit Name="PART_Editor" Text="{Binding RowData.Row.TotalAmount,StringFormat={}{0:N2}, ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}" HorizontalAlignment="Right"
+                                                        IsPrintingMode="True">
+                                            </dxe:TextEdit>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </dxg:GridColumn.PrintCellStyle>
+                    </dxg:GridColumn>
+                    <!--[pramod.misal][GEOS2-5286][9-02-2024]-->
+                    <dxg:GridColumn Header="{DynamicResource ExpenseGivenAmount}" FieldName="GivenAmount" FilterPopupMode="CheckedList" MinWidth="100" MaxWidth="150" ReadOnly="True">
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="1"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="4"/>
+                                            <ColumnDefinition Width="auto"/>
+                                            <ColumnDefinition Width="1"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="1" Text="{Binding RowData.Row.GivenAmount,StringFormat={}{0:N2},ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="3" Text="{Binding RowData.Row.CurSymbol}" VerticalAlignment="Center" />
+                                    </Grid>
+                                </StackPanel>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                        <!--[pramod.misal][GEOS2-5286][22-02-2024]-->
+                        <dxg:GridColumn.PrintCellStyle>
+                            <Style TargetType="dxe:TextEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                                <Setter Property="dxp:ExportSettings.TargetType" Value="Panel" />
+                                <Setter Property="DisplayTemplate">
+                                    <Setter.Value>
+                                        <ControlTemplate>
+                                            <dxe:TextEdit Name="PART_Editor" Text="{Binding RowData.Row.GivenAmount,StringFormat={}{0:N2}, ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}" HorizontalAlignment="Right"
+                                                        IsPrintingMode="True">
+                                            </dxe:TextEdit>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </dxg:GridColumn.PrintCellStyle>
+                    </dxg:GridColumn>
+                    <dxg:GridColumn Header="{DynamicResource ExpenseBalance}" FieldName="Balance" FilterPopupMode="CheckedList" MinWidth="100" MaxWidth="150" ReadOnly="True">
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Height="24">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="1"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="4"/>
+                                            <ColumnDefinition Width="auto"/>
+                                            <ColumnDefinition Width="1"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="1" Text ="{Binding RowData.Row.Balance,ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture},UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"  VerticalAlignment="Center" Margin="5,0,0,0"  >
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Value="True" Binding="{Binding RowData.Row.IsNegative,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+                                                            <Setter Property="Foreground" Value="Red" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Value="False" Binding="{Binding RowData.Row.IsNegative,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+                                                            <Setter Property="Foreground" Value="Green" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                        <TextBlock Grid.Column="3" Text="{Binding RowData.Row.CurSymbol}" VerticalAlignment="Center">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Value="True" Binding="{Binding RowData.Row.IsNegative,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+                                                            <Setter Property="Foreground" Value="Red" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Value="False" Binding="{Binding RowData.Row.IsNegative,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+                                                            <Setter Property="Foreground" Value="Green" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </Grid>
+                                </StackPanel>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                        <dxg:GridColumn.PrintCellStyle>
+                            <Style TargetType="dxe:TextEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                                <Setter Property="dxp:ExportSettings.TargetType" Value="Panel" />
+                                <Setter Property="DisplayTemplate">
+                                    <Setter.Value>
+                                        <ControlTemplate>
+                                            <dxe:TextEdit Name="PART_Editor" Text="{Binding Row.Balance}" HorizontalAlignment="Left"
+                                                        IsPrintingMode="True">
+                                            </dxe:TextEdit>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </dxg:GridColumn.PrintCellStyle>
+                    </dxg:GridColumn>
+                    <dxg:GridColumn Header="{DynamicResource ExpenseStatus}" FieldName="Status" FilterPopupMode="CheckedList" MinWidth="50" Width="70" MaxWidth="120" ReadOnly="True">
+                        <!--[rdixit][GEOS2-3829][26.09.2022]-->
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text ="{Binding RowData.Row.Status,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock" >
+                                            <Setter Property="Background" Value="{Binding RowData.Row.HtmlColor,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                                            <Setter Property="HorizontalAlignment"  Value="Stretch"/>
+                                            <Setter Property="VerticalAlignment" Value="Stretch"/>
+                                            <Setter Property="Foreground" Value="{Binding Path=Background,Converter={StaticResource ForegroundColorConverter}}"/>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                        <dxg:GridColumn.PrintCellStyle>
+                            <Style TargetType="dxe:TextEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                                <Setter Property="dxp:ExportSettings.TargetType" Value="Panel" />
+                                <Setter Property="DisplayTemplate">
+                                    <Setter.Value>
+                                        <ControlTemplate>
+                                            <dxe:TextEdit Name="PART_Editor" Text="{Binding RowData.Row.Status}" HorizontalAlignment="Stretch" IsPrintingMode="True">
+                                            </dxe:TextEdit>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </dxg:GridColumn.PrintCellStyle>
+                    </dxg:GridColumn>
+                    <!--[pramod.misal][GEOS2-4848][27.11.2023]-->
+                    <dxg:GridColumn Header="{DynamicResource LinkedTripTitle}" FieldName="LinkedTripTitle" MinWidth="100" Width="280"  MaxWidth="400" FilterPopupMode="CheckedList" ReadOnly="True"/>
+                    <!--[rdixit][GEOS2-3829][26.09.2022]-->
+                    <dxg:GridColumn Header="{DynamicResource ExpenseReportedPlant}" FieldName="Company" FilterPopupMode="CheckedList" MinWidth="50" Width="90" MaxWidth="120" ReadOnly="True"/>
+                    <!--[rdixit][GEOS2-4472][05.07.2023]-->
+                    <dxg:GridColumn Header="File" MinWidth="40" Width="45" FixedWidth="True" Fixed="Right" ReadOnly="True" AllowColumnFiltering="false" AllowPrinting="False" ShowInColumnChooser="False" AllowMoving="false">
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button x:Name="btnViewFile" ToolTip="View Expense Report" 
+                                Command="{Binding DataContext.OpenPDFDocumentCommand,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                CommandParameter="{Binding RowData.Row}">
+                                    <Button.ContentTemplate>
+                                        <DataTemplate>
+                                            <Image Height="16" Width="16" Source="/Emdep.Geos.Modules.Hrm;component/Assets/Images/pdf-icon.png" />
+                                        </DataTemplate>
+                                    </Button.ContentTemplate>
+                                    <Button.Style>
+                                        <Style TargetType="{x:Type Button}">
+                                            <Style.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Cursor" Value="Hand"/>
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+                    <!--//Shubham[skadam] GEOS2-5139 Add country column with flag in expense reports 18 12 2023-->
+                    <dxg:GridColumn Header="{DynamicResource ExpenseCountry}" FieldName="CountryName" FilterPopupMode="CheckedList" MinWidth="90" MaxWidth="250" ReadOnly="True">
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Height="24">
+                                    <Image  
+                            Source="{Binding RowData.Row.CountryIconUrl,UpdateSourceTrigger=PropertyChanged}"  
+                            VerticalAlignment="Center" Height="24" Width="24" Margin="2,0,0,0" />
+                                    <TextBlock Text ="{Binding RowData.Row.CountryName,UpdateSourceTrigger=PropertyChanged}" ToolTip="{Binding RowData.Row.CountryName,UpdateSourceTrigger=PropertyChanged}"  VerticalAlignment="Center" Margin="5,0,0,0" ></TextBlock>
+                                </StackPanel>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                        <dxg:GridColumn.PrintCellStyle>
+                            <Style TargetType="dxe:TextEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                                <Setter Property="dxp:ExportSettings.TargetType" Value="Panel" />
+                                <Setter Property="DisplayTemplate">
+                                    <Setter.Value>
+                                        <ControlTemplate>
+                                            <dxe:TextEdit Name="PART_Editor" Text="{Binding Row.CountryName}" HorizontalAlignment="Left"
+                                                        IsPrintingMode="True">
+                                            </dxe:TextEdit>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </dxg:GridColumn.PrintCellStyle>
+                    </dxg:GridColumn>
+                    <dxmvvm:Interaction.Behaviors>
+                        <UIHelper:GridSelectingBehavior />
+
+                        <dxmvvm:EventToCommand EventName="CustomUnboundColumnData"
+                                       Command="{Binding CustomUnboundColumnDataCommand}"
+                                       PassEventArgsToCommand="True"/>
+
+                        <dxmvvm:EventToCommand EventName="CustomColumnSort"
+                                       Command="{Binding CustomSortColumnDataCommand}"
+                                       PassEventArgsToCommand="True"/>
+                    </dxmvvm:Interaction.Behaviors>
+
+                    <dxg:GridControl.TotalSummary>
+                        <dxg:GridSummaryItem x:Name="summary" FieldName="ExpenseCode" SummaryType="Count" DisplayFormat="Total Count: {0}" Visible="True" Alignment="Left"/>
+                    </dxg:GridControl.TotalSummary>
+
+                    <dxg:GridControl.View>
+                        <dxg:TableView x:Name="EmployeeExpenseTableView"
+                                   NavigationStyle="Row"
+                                   RowDetailsVisibilityMode="Visible"
+                                   ShowHorizontalLines="True"
+                                   ShowSearchPanelMode="Always"
+                                   ShowColumnHeaders="True"
+                                   VerticalScrollbarVisibility="Auto" 
+                                   HorizontalScrollbarVisibility="Auto"
+                                   AllowFixedColumnMenu="False"
+                                   ShowTotalSummary="True"
+                           
+                                   ShowFixedTotalSummary="True"
+                                   SearchPanelHorizontalAlignment="Stretch"
+                                   EnableImmediatePosting="True"
+                                   ImmediateUpdateRowPosition="True"
+                                   AllowEditing="True"
+                                   ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly"
+                                   AllowGrouping="True"
+                                   ShowGroupPanel="False"
+                                   ShowIndicator="False" 
+                                    ShowFilterPopup="{DXEvent Handler='@args.PopupBaseEdit.PopupWidth=200'}" 
+                                   FocusedRow="{Binding Path=SelectedGridRow,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                   RowDetailsTemplate="{Binding SelectedItem.DetailTemplate,ElementName=rowTemplateComboBox}"
+                                   RowStyle="{Binding SelectedItem.RowStyle,ElementName=rowTemplateComboBox}"
+                                 UseLegacyFilterEditor="True">
+
+                            <dxg:TableView.Resources>
+                                <DataTemplate x:Key="TravelReportPrintHeaderTemplate">
+                                    <Grid Width="{Binding UsablePageWidth}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="50" />
+                                            <ColumnDefinition Width="130" />
+                                        </Grid.ColumnDefinitions>
+                                        <dxe:TextEdit Text=" " Width="{Binding UsablePageWidth}" Grid.ColumnSpan="3" IsPrintingMode="True" Background="#333E5E" HorizontalAlignment="Stretch" 
+                                              VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" Height="50" />
+                                        <dxe:TextEdit Text="Expenses Report" IsPrintingMode="True" HorizontalAlignment="Stretch" 
+                                              VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" />
+                                        <Image Source="/Emdep.Geos.Modules.Hrm;component/Assets/Images/GeosReportLogo.png" Height="50" Width="80" dxp:ExportSettings.TargetType="Image" Grid.Column="2" />
+                                    </Grid>
+                                </DataTemplate>
+
+                                <DataTemplate x:Key="TravelReportPrintFooterTemplate">
+                                    <dxe:TextEdit HorizontalContentAlignment="Center" 
+                                            Width="{Binding Path=UsablePageWidth, Mode=OneWay}" 
+                                            dxp:ExportSettings.TargetType="PageNumber" 
+                                            dxp:PageNumberExportSettings.Kind="NumberOfTotal" 
+                                            dxp:PageNumberExportSettings.Format="Page {0} of {1}" />
+                                </DataTemplate>
+
+                            </dxg:TableView.Resources>
+                            <dxmvvm:Interaction.Behaviors>
+                                
+                                <dxmvvm:EventToCommand Command="{Binding FilterEditorCreatedCommand}"
+                                                   EventName="FilterEditorCreated"
+                                                   PassEventArgsToCommand="True"/>
+                                  <dxmvvm:EventToCommand Command="{Binding TableViewLoadedCommand}"
+                                                   EventName="Loaded"
+                                                   PassEventArgsToCommand="True" />
+                            </dxmvvm:Interaction.Behaviors>
+
+                        </dxg:TableView>
+                    </dxg:GridControl.View>
+                </dxg:GridControl>
+            </Grid>
+        </DockPanel>
+    </Grid>
+</UserControl>

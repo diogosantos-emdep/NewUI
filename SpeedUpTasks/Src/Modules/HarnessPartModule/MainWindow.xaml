@@ -1,0 +1,527 @@
+﻿<UserControl xmlns:my="clr-namespace:Emdep.Geos.Modules.HarnessPart.Views" 
+             x:Class="Workbranch.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:dxn="http://schemas.devexpress.com/winfx/2008/xaml/navbar"
+     xmlns:dxr="http://schemas.devexpress.com/winfx/2008/xaml/ribbon"
+        xmlns:dxb="http://schemas.devexpress.com/winfx/2008/xaml/bars"
+        xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+        xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+        xmlns:dxc="http://schemas.devexpress.com/winfx/2008/xaml/core"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Emdep.Geos.Modules.HarnessPart"
+        xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+                 xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+        xmlns:R ="Emdep.Geos.Modules.HarnessPart.ucTotalConnector" 
+        xmlns:refactorXaml ="clr-namespace:Emdep.Geos.Modules.HarnessPart"
+        mc:Ignorable="d" 
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:System="clr-namespace:System;assembly=mscorlib"
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+             xmlns:dxwuin="http://schemas.devexpress.com/winfx/2008/xaml/windowsui/navigation"
+           Name="windows"
+              xmlns:dxgt="http://schemas.devexpress.com/winfx/2008/xaml/grid/themekeys"
+              xmlns:dxwuii="http://schemas.devexpress.com/winfx/2008/xaml/windowsui/internal" 
+       Margin="0,0,0,0" Padding="0,0,0,0"  BorderThickness="0"     >
+
+    <UserControl.Resources>
+        <DataTemplate x:Key="FieldValueTemplate">
+            <ContentPresenter Content="{Binding}" >
+                <ContentPresenter.LayoutTransform>
+                    <RotateTransform CenterX="0.5" CenterY="0.5" Angle="90"/>
+                </ContentPresenter.LayoutTransform>
+            </ContentPresenter>
+        </DataTemplate>
+
+        <dxb:PopupMenu x:Key="PopupMenu">
+            <dxb:PopupMenu.Items>
+                <dxb:BarButtonItem x:Name="CloseAll" Content="CloseAll" ItemClick="CloseAll_ItemClick"  BarItemDisplayMode="Content" />
+                <dxb:BarButtonItem x:Name="CloseAllButThis" Content="CloseAllButThis" ItemClick="CloseAllButThis_ItemClick" BarItemDisplayMode="Content"/>
+            </dxb:PopupMenu.Items>
+        </dxb:PopupMenu>
+        <Style x:Key="backDemoButtonStyle" TargetType="{x:Type Button}">
+            <Setter Property="Width" Value="50" />
+            <Setter Property="Height" Value="30" />
+        </Style>
+        <ControlTemplate x:Key="DefaultHeaderControlTemplate" TargetType="dxwuii:NavigationHeaderControl">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <dxwuii:BackButton x:Name="PART_BackButton"   Margin="-28,-20,10,20"   Command="{TemplateBinding ActualBackCommand}"  HorizontalAlignment="Left"  VerticalAlignment="Top">
+                    <!--<dxwuii:BackButton.Template>
+                        <ControlTemplate>
+                            <Grid >
+                                <Image Source="/HarnessPartUI;component/Image/BackButton.png" HorizontalAlignment="Left" VerticalAlignment="Top" Height="25"    />
+                            </Grid>
+                        </ControlTemplate>
+                    </dxwuii:BackButton.Template>-->
+                </dxwuii:BackButton>
+
+                <ContentPresenter x:Name="PART_Content" VerticalAlignment="Top" HorizontalAlignment="Left" Grid.Column="1" Margin="-10,-28,0,10" />
+            </Grid>
+        </ControlTemplate>
+
+        <!--<ControlTemplate x:Key="DefaultHeaderControlTemplate" TargetType="dxwuii:NavigationHeaderControl">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <dxwuii:BackButton x:Name="PART_BackButton" Style="{StaticResource backDemoButtonStyle}" Command="{TemplateBinding ActualBackCommand}" Margin="0,0,10,0">
+                    <dxwuii:BackButton.Template>
+                        <ControlTemplate>
+                            <Grid >
+                                <Image Source="/HarnessPartUI;component/Image/Back.png" HorizontalAlignment="Center" VerticalAlignment="Center" Width="25" Height="25" />
+                            </Grid>
+                        </ControlTemplate>
+                    </dxwuii:BackButton.Template>
+                </dxwuii:BackButton>
+                <ContentPresenter x:Name="PART_Content" VerticalAlignment="Center" Grid.Column="1" />
+            </Grid>
+        </ControlTemplate>-->
+        <Style TargetType="dxwuii:NavigationHeaderControl">
+            <Setter Property="Template" Value="{StaticResource DefaultHeaderControlTemplate}" />
+            <Setter Property="FontSize" Value="25" />
+            <Setter Property="FontWeight" Value="Bold" />
+        </Style>
+
+
+        <!--<Style x:Key="CellStyle12"
+           TargetType="dxg:GridCellContentPresenter"
+           BasedOn="{StaticResource {dxgt:GridRowThemeKey ResourceKey=CellStyle, IsThemeIndependent=False}}">
+            <Setter Property="Background" Value="PaleGreen" />
+        </Style>-->
+
+        <Style  TargetType="dxg:GridCellContentPresenter"  x:Key="CellStyle12"
+        xmlns:dxgt="http://schemas.devexpress.com/winfx/2008/xaml/grid/themekeys"
+        BasedOn="{StaticResource {dxgt:GridRowThemeKey ResourceKey=CellStyle}}">
+            <!--<Setter Property="Background" Value="Green" />-->
+            <!--<Setter Property="Foreground" Value="White" />
+            <Setter Property="Hyperlink.Foreground" Value="Gray" />
+            <Setter Property="TextBlock.Foreground" Value="White" />-->
+            <!--<Setter Property="TextBlock.Foreground" Value="Gray" />-->
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding RowData.IsSelected}" Value="True">
+                    <!--<Setter Property="Background" Value="DeepPink" />-->
+                    <!--<Setter Property="Hyperlink.Foreground" Value="Red" />-->
+                    <Setter Property="TextBlock.Foreground" Value="Red" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="backDemoButtonStylegrid" TargetType="{x:Type Hyperlink}">
+            <Setter Property="Foreground" Value="Red" />
+            <!--<Setter Property="Height" Value="30" />-->
+        </Style>
+        <Style TargetType="ContentControl" x:Key="ccStyle">
+            <Setter Property="ContentTemplate" >
+                <Setter.Value>
+                    <DataTemplate>
+                        <Button Content="123"/>
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Path=Value}" Value="{x:Null}">
+                    <Setter Property="ContentTemplate">
+                        <Setter.Value>
+                            <DataTemplate>
+                                <Border Background="Red"/>
+                            </DataTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style TargetType="dxg:CellContentPresenter" x:Key="cellStylenew"  BasedOn="{StaticResource {dxgt:GridRowThemeKey ResourceKey=CellStyle}}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <ContentControl Style="{StaticResource ccStyle}"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <!--<DataTemplate x:Key="FieldValuegrid">
+            <TextBlock TextAlignment="Center" VerticalAlignment="Center" HorizontalAlignment="Center">       
+                                  <Hyperlink Name="MyHyperlinkimg" NavigateUri="http://www.msn.com" Command="{Binding View.DataContext.HyperLinkCommand}"  BaselineAlignment="Subscript" CommandParameter="{Binding}" >                                                    
+                                 
+                                    <TextBlock  Name="txtMyHyperlink"  Text="{Binding Value}"  TextAlignment="Center" VerticalAlignment="Center" HorizontalAlignment="Center" FontFamily="Segoe UI">
+                                          
+                                    </TextBlock>
+                                     
+                                      <Hyperlink.Style>
+                                            <Style TargetType="Hyperlink">
+                                                <Setter Property="Foreground" Value="#2AB7FF" />
+                                                    <Style.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="true">
+                                                            <Setter Property="Foreground" Value="OrangeRed" />
+                                                        </Trigger>                                                        
+                                                         --><!--<Trigger  Property="IsFocused" Value="true">
+                                                            <Setter Property="Foreground" Value="Blue" />
+                                                        </Trigger>--><!--
+                                                    </Style.Triggers>
+                       
+                                            </Style>
+                                        </Hyperlink.Style>
+                                      
+                                      <Hyperlink.ToolTip>
+                                          <StackPanel Width="100" Height="100"  Background="#FDFDC7">
+                                              --><!--<Image Source="/HarnessPartUI;component/Image/Emdep.png"></Image>--><!--
+                                         <TextBlock Foreground="Black" TextWrapping="Wrap">here is some text features </TextBlock>
+                                          </StackPanel>
+                                      </Hyperlink.ToolTip>
+                                    </Hyperlink>  
+                                    
+                                    
+                                    </TextBlock>
+
+
+        </DataTemplate>-->
+    </UserControl.Resources>
+    <UserControl.CommandBindings>
+        <CommandBinding Command="Help" 
+        CanExecute="HelpCanExecute"
+        Executed="HelpExecuted" />
+    </UserControl.CommandBindings>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <dxwui:PageAdornerControl  Header="HarnessPart" Grid.Row="0"  VerticalAlignment="Bottom" >
+            <dxwui:PageAdornerControl.HeaderTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <ContentPresenter Content="{Binding}"/>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Grid.Column="1" VerticalAlignment="Top">
+                            <dxwui:NavigationButton FontSize="14" Margin="10, 0, 0, 0" Content="Workshop Assembly" NavigateTo="Workshop"  HorizontalAlignment="Right" Height="36" />
+                            <dxwui:NavigationButton FontSize="14" Margin="10, 0, 0, 0" Content="Design" NavigateTo="DESGIN" HorizontalAlignment="Right"/>
+
+                        </StackPanel>
+                    </Grid>
+                </DataTemplate>
+            </dxwui:PageAdornerControl.HeaderTemplate>
+        </dxwui:PageAdornerControl>
+        <Grid Margin="0" Grid.Row="1" VerticalAlignment="Top"  >
+            <Grid.RowDefinitions>
+                <!--<RowDefinition Height="50"/>-->
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <dxr:RibbonControl  Grid.Row="0" x:Name="mainRibbonControl"  RibbonStyle="Office2010"  RibbonTitleBarVisibility="Collapsed" AllowCustomization="False" ToolbarShowMode="Hide"  ShowApplicationButton="True"    AutoHideMode="False"
+                           ToolbarShowCustomizationButton="False" BorderBrush="Red"   VerticalAlignment="Top" HorizontalAlignment="Stretch" Margin="0,-5,0,0"         
+                       >
+
+                <dxr:RibbonControl.ApplicationMenu >
+                    <!--<Border Background="White" BorderThickness="1,0,0,0" BorderBrush="LightGray"> </Border>-->
+                    <dxr:BackstageViewControl BorderBrush="Red" Margin="0,0,0,0" Padding="0,0,0,0" VerticalAlignment="Top"   BorderThickness="10" >
+                        <dxr:BackstageTabItem Content="About" d:IsHidden="True">
+                            <dxr:BackstageTabItem.ContentTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" DockPanel.Dock="Left" >
+                                        <Image Source="{dx:DXImage Image=Info_32x32.png}"  />
+                                        <TextBlock Text="{Binding}"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </dxr:BackstageTabItem.ContentTemplate>
+
+                            <dxr:BackstageTabItem.ControlPane >
+                                <Border Background="Transparent" BorderThickness="0,1,1,1" BorderBrush="Black">
+                                    <Grid Width="Auto" Height="Auto" >
+                                        <TextBlock  Name="txtabout"  Margin="10" TextWrapping="Wrap" 
+                                                 Text="We create useful technology. The result of our research is materialized in equipment and components destined to facilitate the production of electrical wiring, with the highest level of quality.The products that we generated are created so that they have a long service life, are integrated in the line of production of our clients and they adapt, easily, to future systems of work." FontWeight="Bold" FontSize="14" FontFamily="Calibri">
+
+                                        </TextBlock>
+                                    </Grid>
+                                </Border>
+                            </dxr:BackstageTabItem.ControlPane>
+                        </dxr:BackstageTabItem>
+                        <dxr:BackstageTabItem Content="Setting" BorderThickness="10"   >
+                            <dxr:BackstageTabItem.ContentTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" DockPanel.Dock="Left" >
+                                        <Image Source="{dx:DXImage Image=Properties_32x32.png}"  />
+                                        <TextBlock Text="{Binding}"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </dxr:BackstageTabItem.ContentTemplate>
+                            <dxr:BackstageTabItem.ControlPane >
+                                <Border Background="Transparent" BorderThickness="0,1,1,1" BorderBrush="Black">
+                                    <dxlc:LayoutControl Orientation="Vertical" Margin="10,0,10,0" Padding="10,10,0,0" Height="Auto"    >
+                                        <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Height="Auto " >
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="30"/>
+                                                <RowDefinition Height="120"/>
+                                                <RowDefinition Height="90"/>
+                                                <RowDefinition Height="80"/>
+                                            </Grid.RowDefinitions>
+
+                                            <dxlc:LayoutItem Label="Number of Result By Page"  Grid.Column="0" Grid.Row="0" >
+                                                <dxe:SpinEdit x:Name="cv"  Width="50" Text="10" MaskType="Numeric"/>
+                                            </dxlc:LayoutItem>
+                                            <dx:GroupFrame Grid.Column="0" Grid.Row="1" Header="Thumbnail size" HorizontalAlignment="Stretch"  Width="400" BorderBrush="Red">
+
+                                                <StackPanel Orientation="Vertical"  Width="400" >
+                                                    <dxe:CheckEdit Content="Maintain aspect ratio" x:Name="cbSample">
+                                                    </dxe:CheckEdit>
+                                                    <dxlc:LayoutItem Label="Width  " >
+                                                        <StackPanel Orientation="Horizontal">
+
+                                                            <dxe:SpinEdit x:Name="cv1"  Width="50" Text="10" HorizontalAlignment="Left"   Mask ="N"  
+    MaskType="Numeric" MaxValue="100" MinValue="0" />
+                                                            <dxlc:LayoutItem Label="  Pixels" HorizontalAlignment="Left" VerticalAlignment="Center"></dxlc:LayoutItem>
+                                                        </StackPanel>
+                                                    </dxlc:LayoutItem>
+
+
+                                                    <dxlc:LayoutItem Label="Height ">
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <dxe:SpinEdit x:Name="cv4" Mask ="N"  Width="50" Text="10" HorizontalAlignment="Left"  Margin="0,5,0,0" MaskType="Numeric"/>
+                                                            <dxlc:LayoutItem Label="  Pixels" HorizontalAlignment="Left" VerticalAlignment="Center"></dxlc:LayoutItem>
+                                                        </StackPanel>
+                                                    </dxlc:LayoutItem>
+
+                                                </StackPanel>
+                                            </dx:GroupFrame>
+                                            <dx:GroupFrame Grid.Column="0" Grid.Row="2" Header="Default Result View" HorizontalAlignment="Stretch"   >
+                                                <dxlc:LayoutItem Label="" Grid.Column="0" Grid.Row="2"  >
+                                                    <dxe:ListBoxEdit Height="50" Name="listBoxEdit1" VerticalAlignment="Top"  ShowBorder="False" >
+                                                        <dxe:ListBoxEdit.ItemsPanel>
+                                                            <ItemsPanelTemplate>
+                                                                <StackPanel Orientation="Vertical" />
+                                                            </ItemsPanelTemplate>
+                                                        </dxe:ListBoxEdit.ItemsPanel>
+                                                        <dxe:ListBoxEdit.Items>
+                                                            <dxe:ListBoxEditItem Content="Grid"/>
+                                                            <dxe:ListBoxEditItem Content="Thumbnails"/>
+                                                        </dxe:ListBoxEdit.Items>
+                                                        <dxe:ListBoxEdit.StyleSettings>
+                                                            <dxe:RadioListBoxEditStyleSettings/>
+                                                        </dxe:ListBoxEdit.StyleSettings>
+                                                    </dxe:ListBoxEdit>
+                                                    <!--<dxe:TextEdit x:Name="cv2"  Width="30" Text="10"/>-->
+                                                </dxlc:LayoutItem>
+                                            </dx:GroupFrame>
+                                            <!--<dx:GroupFrame Grid.Column="0" Grid.Row="3" HorizontalAlignment="Stretch">-->
+                                            <dxlc:LayoutItem Label=" " Grid.Column="0" Grid.Row="3" HorizontalAlignment="Right"  Margin="0,5,0,0" >
+                                                <StackPanel Orientation="Horizontal" >
+                                                    <Button Content="Apply"  x:Name="btnApply"  Grid.Column="1" Grid.Row="2"  Margin="0,0,9,0" HorizontalAlignment="Right" />
+                                                    <Button Content="Cancel"   x:Name="btnCancel"  Grid.Column="1" Grid.Row="2" HorizontalAlignment="Right"  />
+                                                </StackPanel>
+                                            </dxlc:LayoutItem>
+                                            <!--</dx:GroupFrame>-->
+
+                                        </Grid>
+                                    </dxlc:LayoutControl>
+                                </Border>
+                            </dxr:BackstageTabItem.ControlPane>
+                        </dxr:BackstageTabItem>
+
+                        <!--<dxr:BackstageButtonItem Content="Close" Glyph="{dx:DXImage Image=Close_32x32.png}" />-->
+                        <dxr:BackstageTabItem Content="Exit">
+
+                            <dxr:BackstageTabItem.ContentTemplate>
+                                <DataTemplate>
+
+                                    <StackPanel Orientation="Horizontal" DockPanel.Dock="Left" >
+                                        <Image Source="{dx:DXImage Image=Close_32x32.png}"  />
+                                        <TextBlock Text="{Binding}"/>
+                                    </StackPanel>
+
+                                </DataTemplate>
+                            </dxr:BackstageTabItem.ContentTemplate>
+                            <dxr:BackstageTabItem.ControlPane >
+                                <Border Background="Transparent" BorderThickness="0,1,1,1" BorderBrush="Black">
+                                    <dxlc:LayoutControl Orientation="Vertical" Margin="10,0,10,0" Padding="10,10,0,0" Height="Auto"    >
+
+                                    </dxlc:LayoutControl>
+                                </Border>
+                            </dxr:BackstageTabItem.ControlPane>
+
+                        </dxr:BackstageTabItem>
+                    </dxr:BackstageViewControl>
+
+                </dxr:RibbonControl.ApplicationMenu>
+                <!--<dxr:RibbonControl.ToolbarItems>
+                                <dxb:BarStaticItem BarItemDisplayMode="Content" >
+                                    <dxb:BarStaticItem.ContentTemplate>
+                                        <DataTemplate>
+                                            -->
+                <!--<Image Source="/HarnessPartUI;component/Image/logo.png" Height="50"   Stretch="UniformToFill" />-->
+                <!--
+                                        </DataTemplate>
+                                    </dxb:BarStaticItem.ContentTemplate>
+                                </dxb:BarStaticItem>
+                            </dxr:RibbonControl.ToolbarItems>-->
+
+                <dxr:RibbonDefaultPageCategory Caption="Default Category">
+
+                    <dxr:RibbonPage Caption="Harness Part " x:Name="viewRibbonPag1e">
+                        <dxr:RibbonPageGroup Caption="" x:Name="navigationRibbonPageGroup2" >
+                            <dxb:BarButtonItem Content="New"    Glyph="{dxc:DXImage Image=Customer_16x16.png}" LargeGlyph="{dx:DXImageOffice2013 Image=New_32x32.png}"  ItemClick="BarButtonItem_ItemClick_4" />
+                            <dxb:BarButtonItem Content="Edit"    Glyph="{dxc:DXImage Image=Edit_32x32.png}" LargeGlyph="{dx:DXImageOffice2013 Image=Edit_32x32.png}" ItemClick="BarButtonItem_ItemClick_3"/>
+                            <dxb:BarButtonItem Content="Save"    Glyph="{dxc:DXImageGrayscale Image=PaperKind_Letter.png}" LargeGlyph="{dxc:DXImage Image=Save_32x32.png}"  />
+                            <dxb:BarButtonItem Content="Save All"    Glyph="{dxc:DXImage Image=SaveAll_32x32.png}" LargeGlyph="{dxc:DXImage Image=SaveAll_32x32.png}" />
+                            <dxb:BarButtonItem Content="Print"    Glyph="{dxc:DXImage Image=Print_32x32.png}" LargeGlyph="{dx:DXImageOffice2013 Image=Print_32x32.png}" ItemClick="BarButtonItem_ItemClick_2" />
+                            <dxb:BarButtonItem Content="Export "    Glyph="{dxc:DXImage Image=Export_32x32.png}" LargeGlyph="{dxc:DXImage Image=Export_32x32.png}" />
+                            <dxb:BarButtonItem Content="Refresh "    Glyph="{dxc:DXImage Image=Refresh_32x32.png}" LargeGlyph="{dx:DXImageOffice2013 Image=Refresh_32x32.png}" />
+                            <dxb:BarButtonItem Content="Save Attachments" Glyph="{dxc:DXImageOffice2013 Image=Attachment_32x32.png}" LargeGlyph="{dxc:DXImageOffice2013 Image=Attachment_32x32.png}" ItemClick="BarButtonItem_ItemClick"/>
+
+                        </dxr:RibbonPageGroup>
+
+                    </dxr:RibbonPage>
+                    <dxr:RibbonPage Caption="View" x:Name="viewRibbonPage" Cursor="Hand">
+
+                        <dxr:RibbonPageGroup Caption="Result Search" x:Name="navigationRibbonPageGroup1" >
+                            <dxb:BarButtonItem Content="Grid"  Command="{Binding Help}"  x:Name="MyCommandButton1"  Glyph="{dx:DXImageOffice2013 Image=Grid_32x32.png}" LargeGlyph="{dx:DXImageOffice2013 Image=Grid_32x32.png}" />
+                            <dxb:BarButtonItem Content="Thumbnails"  Command="{Binding Help}"  x:Name="MyCommandButton" Glyph="{dx:DXImageOffice2013 Image=Palette_32x32.png}" LargeGlyph="{dx:DXImageOffice2013 Image=Palette_32x32.png}" />
+                        </dxr:RibbonPageGroup>
+                    </dxr:RibbonPage>
+                    <dxr:RibbonPage Caption="Report" x:Name="ReportRibbonPag1e">
+                        <dxr:RibbonPageGroup Caption="Report" x:Name="navigationRibbonReport" >
+                            <dxb:BarButtonItem Content="Report" Glyph="{dxc:DXImage Image=GroupHeader_32x32.png}" LargeGlyph="{dx:DXImageOffice2013 Image=GroupHeader_32x32.png}" ItemClick="BarButtonItem_ItemClick_1" />
+                        </dxr:RibbonPageGroup>
+                    </dxr:RibbonPage>
+                    <dxr:RibbonPage Caption="Sample Management" >
+                        <dxr:RibbonPageGroup   >
+                            <dxb:BarButtonItem Content="New Sample"    Glyph="{dxc:DXImage Image=New_32x32.png}" x:Name="NewSample" LargeGlyph="{dx:DXImageOffice2013 Image=New_32x32.png}"  ItemClick="NewSample_ItemClick" />
+                            <dxb:BarButtonItem Content="Sample"  Command="{Binding Help}"  x:Name="MyCommandButton3" Glyph="{dxc:DXImage Image=GroupHeader_32x32.png}" LargeGlyph="{dx:DXImageOffice2013 Image=GroupHeader_32x32.png}"  />
+                            <dxb:BarButtonItem Content="Export"  Command="{Binding Help}"  x:Name="MyCommandButton4" Glyph="pack://application:,,,/HarnessPartUI;component/Image/excel.png" LargeGlyph="pack://application:,,,/HarnessPartUI;component/Image/excel.png"  ItemClick="MyCommandButton4_ItemClick" />
+                        </dxr:RibbonPageGroup>
+                    </dxr:RibbonPage>
+
+                    <!--<dxr:RibbonPage Caption="Themes" x:Name="ReportRibbonPag1eThemes"  >
+                                    -->
+                    <!--<dxr:RibbonPageGroup Caption="Themes" x:Name="navigationRibbonReportThemes" >
+                        <dxb:BarButtonItem Content="Themes" Glyph="{dxc:DXImage Image=GroupHeader_32x32.png}" LargeGlyph="{dx:DXImageOffice2013 Image=GroupHeader_32x32.png}" ItemClick="BarButtonItem_ItemClick_1" />
+                    </dxr:RibbonPageGroup>-->
+                    <!--
+
+                                    <dxr:RibbonPageGroup Caption="Theme" ShowCaptionButton="False">
+                                        <dxr:RibbonGalleryBarItem Name="gTheme">
+                                            <dxr:RibbonGalleryBarItem.Gallery>
+                                                <dxb:Gallery MinColCount="1" ColCount="3" RowCount="2" ItemCheckMode="Single" AllowHoverAnimation="True" AllowHoverImages="True" FilterCaption="Themes" IsItemCaptionVisible="False" HoverGlyphSize="96,96">
+                                                    <dxb:Gallery.Groups>
+                                                        <dxb:GalleryItemGroup Caption="Standard">
+                                                            <dxb:GalleryItem Caption="MetropolisDark" Tag="MetropolisDark"  Glyph="/HarnessPartUI;component/Image/MetropolisDark.png" IsChecked="True" Click="GalleryItem_Click"/>
+                                                            <dxb:GalleryItem Caption="MetropolisLight" Tag="MetropolisLight" Glyph="/HarnessPartUI;component/Image/MetropolisLight.png"  IsChecked="True" Click="GalleryItem_Click_1"/>
+                                                        </dxb:GalleryItemGroup>
+                                                    </dxb:Gallery.Groups>
+                                                </dxb:Gallery>
+                                            </dxr:RibbonGalleryBarItem.Gallery>
+                                        </dxr:RibbonGalleryBarItem>
+                                        -->
+                    <!--<dxb:BarItemLink BarItemName="gTheme" />-->
+                    <!--
+                                    </dxr:RibbonPageGroup>
+
+
+                                </dxr:RibbonPage>-->
+                    <!--<dxr:RibbonPage Caption="Families" >
+                        <dxr:RibbonPageGroup   >
+
+                            <dxb:BarButtonItem Content="Family"  Command="{Binding Help}"  x:Name="MyCommandButton5" Glyph="{dxc:DXImage Image=GroupHeader_32x32.png}" LargeGlyph="{dx:DXImageOffice2013 Image=GroupHeader_32x32.png}" ItemClick="MyCommandButton5_ItemClick" />
+                            
+                        </dxr:RibbonPageGroup>
+                   
+                    </dxr:RibbonPage>-->
+
+
+                </dxr:RibbonDefaultPageCategory>
+
+            </dxr:RibbonControl>
+
+
+            <dxlc:LayoutControl Grid.Row="2"   Padding="0" Margin="0">
+                <dxn:NavBarControl Name="navBarControl1" Width="350"    >
+                    <dxn:NavBarControl.Groups>
+                        <dxn:NavBarGroup   Header="Search"   DisplaySource="Content"  >
+                            <dxn:NavBarGroup.Content>
+                                <dxlc:LayoutControl Orientation="Vertical"  Margin="0,0,0,0" Padding="0,0,0,0" >
+                                    <!--<local:ucHarnessPartSearch x:Name="ucharness"  />-->
+                                    <local:ucHarnessPartSearch   x:Name="ucharness" />
+                                </dxlc:LayoutControl>
+                            </dxn:NavBarGroup.Content>
+                        </dxn:NavBarGroup>
+                    </dxn:NavBarControl.Groups>
+                    <dxn:NavBarControl.View >
+
+                        <dxn:NavigationPaneView  IsOverflowPanelVisible="False"  MaxVisibleGroupCount="0"  GroupButtonControlTemplate="{x:Null}"  />
+                    </dxn:NavBarControl.View>
+                    <!--<dxn:NavBarControl.View>
+                        <dxn:NavigationPaneView 
+                              
+                                IsExpanded="True" 
+                                IsExpandButtonVisible="True"
+                                IsOverflowPanelVisible="False" 
+                                IsSplitterVisible="False" 
+                                ExpandButtonMode="Normal" >
+                            <dxn:NavigationPaneView.OverflowGroupControlTemplate>
+                                <ControlTemplate/>
+                            </dxn:NavigationPaneView.OverflowGroupControlTemplate>
+                        </dxn:NavigationPaneView>
+                    </dxn:NavBarControl.View>-->
+                </dxn:NavBarControl>
+                <dx:DXTabControl Margin="0" x:Name="dxtabcontrol" x:FieldModifier="public"  PreviewMouseRightButtonDown="dxtabcontrol_PreviewMouseRightButtonDown" dxb:BarManager.DXContextMenu="{StaticResource PopupMenu}" SelectionChanged="dxtabcontrol_SelectionChanged" FontFamily="calibri"  >
+                    <dx:DXTabControl.View>
+                        <dx:TabControlScrollView  AllowHideTabItems="True"  HeaderLocation="Top" CloseHeaderMenuOnItemSelecting="True" />
+                    </dx:DXTabControl.View>
+                    <dx:DXTabItem Header="Start Page" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0" >
+                        <!--<DockPanel LastChildFill="True">
+
+                                        <dxlc:FlowLayoutControl   Orientation="Horizontal"   ItemSpace="12" LayerSpace="12" Margin="-0" Padding="0">
+                                            <dxlc:GroupBox Header="Important Logs" MaximizeElementVisibility="Visible"   Height="278" Width="400" Padding="0,0,0,0" >
+                                                <local:ucImportantLogs/>
+                                            </dxlc:GroupBox>
+                                            <dxlc:GroupBox Header="Min Sample Connector Stock" MaximizeElementVisibility="Visible" Height="278" Width="400" Padding="0,0,0,0">
+                                                <local:ucMinSampleConnectorStock/>
+                                            </dxlc:GroupBox>
+                                            <dxlc:GroupBox Header="Latest Connector Introduce" MaximizeElementVisibility="Visible" Height="278" Width="400" Padding="0,0,0,0">
+                                                <local:ucLatestConnector/>
+                                            </dxlc:GroupBox>
+                                            <dxlc:GroupBox Header="Cancel Connector" MaximizeElementVisibility="Visible" Height="278" Width="400" Padding="0,0,0,0">
+                                                <local:ucCancelConnector/>
+                                            </dxlc:GroupBox>
+                                            <dxlc:GroupBox Header="Total Connector" MaximizeElementVisibility="Visible" Height="278" Width="400" Padding="0,0,0,0" >
+                                                <local:ucTotalConnector/>
+                                            </dxlc:GroupBox>
+                                            <dxlc:GroupBox Header="Sample Connector" MaximizeElementVisibility="Visible" Height="278" Width="400" >
+                                                <local:ucSampleConnector/>
+                                            </dxlc:GroupBox>
+                                        </dxlc:FlowLayoutControl>
+                                        -->
+                        <!--</Grid>-->
+                        <!--
+                                    </DockPanel>-->
+                    </dx:DXTabItem>
+                    <dx:DXTabItem Header="Result Search [210]"  x:Name="ResultSearch" DockPanel.Dock="Top" HorizontalAlignment="Stretch" VerticalAlignment="Top" ScrollViewer.HorizontalScrollBarVisibility="Auto"  ScrollViewer.VerticalScrollBarVisibility="Auto" Width="Auto"/>
+                    <!--<dx:DXTabItem Header="SampleManagement"  x:Name="tabitemSample" DockPanel.Dock="Top" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                    <my:ucSampleManagment  Margin="-8" Padding="0" >
+                    </my:ucSampleManagment>
+                </dx:DXTabItem>-->
+                    <!--<dx:DXTabItem Header="Thumbnail Image" x:Name="Thumbnailimage" DockPanel.Dock="Top" HorizontalAlignment="Stretch" VerticalAlignment="Top" ScrollViewer.HorizontalScrollBarVisibility="Auto"  ScrollViewer.VerticalScrollBarVisibility="Auto">
+                    -->
+                    <!--<my:ucThumbnailImage x:Name="ucThumbnailimage"  Margin="-8" Padding="0" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto"/>-->
+                    <!--
+                </dx:DXTabItem>-->
+                </dx:DXTabControl>
+
+
+            </dxlc:LayoutControl>
+        </Grid>
+    </Grid>
+</UserControl>
+
+    

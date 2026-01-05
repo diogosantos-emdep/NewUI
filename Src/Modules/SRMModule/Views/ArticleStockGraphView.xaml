@@ -1,0 +1,195 @@
+﻿<dx:DXDialogWindow x:Class="Emdep.Geos.Modules.SRM.Views.ArticleStockGraphView"             
+                   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"             
+                   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"             
+                   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"              
+                   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"              
+                   xmlns:local="clr-namespace:Emdep.Geos.Modules.SRM.Views"          
+                   xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+                   xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"      
+                   xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol" 
+                   xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+                   xmlns:dxc="http://schemas.devexpress.com/winfx/2008/xaml/charts"
+                   xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+                   xmlns:sysglb="clr-namespace:System.Globalization;assembly=mscorlib"
+                   xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+                   xmlns:Helper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+                   xmlns:UIConverter="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+                   mc:Ignorable="d" WindowState="Normal" Title="{Binding WindowHeader}"
+                   d:DesignHeight="450" d:DesignWidth="800">
+    <!--[rdixit][GEOS2-8247][04.11.2025]-->
+    <ScrollViewer>
+        <Grid ShowGridLines="False">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="45"/>
+                <RowDefinition Height="60"/>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="30"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="10"/>
+            </Grid.ColumnDefinitions>
+
+            <Label Content="{Binding WareHouseName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Grid.Column="2" HorizontalContentAlignment="Center" FontWeight="Bold" 
+               VerticalContentAlignment="Top" FontSize="30"  Padding="10" Width="500"/>
+            <Label Content="{DynamicResource SRMGraph12MonthsRolling}" Background="Black" Foreground="White" FontWeight="Bold" Grid.Row="2" Grid.Column="2" 
+               VerticalContentAlignment="Center" HorizontalContentAlignment="Center" FontSize="20"  Width="500"/>
+
+            <StackPanel Grid.Row="4" Grid.Column="2" Orientation="Vertical">
+                <StackPanel Background="LightBlue">
+                    <!--Graph-->
+
+                    <dxc:ChartControl BorderThickness="0" x:Name="ChartSalesStatusByMonths" HorizontalAlignment="Stretch" VerticalAlignment="Top" Background="LightBlue"                             
+                                  DataSource="{Binding DataTableGraph, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="1200" Height="380">
+                        <dxc:ChartControl.Legend>
+                            <dxc:Legend HorizontalPosition="RightOutside" />
+                        </dxc:ChartControl.Legend>
+                        <dxmvvm:Interaction.Triggers>
+                            <dxmvvm:EventToCommand EventName="Loaded" Command="{Binding ChartArticleGraphLoadCommand}" PassEventArgsToCommand="True"/>
+                            <dxmvvm:EventToCommand EventName="CustomDrawCrosshair" Command="{Binding ChartSalesStatusCustomDrawCrosshairCommand}" PassEventArgsToCommand="True"/>
+                        </dxmvvm:Interaction.Triggers>
+                    </dxc:ChartControl>
+
+                    <Border BorderBrush="Black" BorderThickness="2" ></Border>
+
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="55"/>
+                            <RowDefinition Height="60"/>
+                            <RowDefinition Height="20"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="50"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="50"/>
+                            <ColumnDefinition Width="10"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Label Content="{DynamicResource SRMGraphAvg12MonthsAgo}" Grid.Row="0" Grid.RowSpan="1" Grid.Column="1" HorizontalContentAlignment="Center" FontWeight="Bold"           
+                               VerticalContentAlignment="Top" FontSize="25" Width="Auto" Padding="10"/>
+
+                        <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
+                            <Image Height="40" Width="40" HorizontalAlignment="Center">
+                                <Image.Style>
+                                    <Style TargetType="Image">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Is12MonthAvgGreater}" Value="false">
+                                                <Setter Property="Source" Value="/Emdep.Geos.Modules.SRM;component/Assets/Images/downward.png" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Is12MonthAvgGreater}" Value="true">
+                                                <Setter Property="Source" Value="/Emdep.Geos.Modules.SRM;component/Assets/Images/upward.png" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Image.Style>
+                            </Image>
+                            <Label Content="{Binding Average9to12MonthsAgoPercentage}"  HorizontalContentAlignment="Center" FontWeight="Bold"         
+                           VerticalContentAlignment="Top" FontSize="30" Width="Auto" Padding="10" HorizontalAlignment="Center">
+                                <Label.Style>
+                                    <Style TargetType="Label">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Is12MonthAvgGreater}" Value="false">
+                                                <Setter Property="Foreground" Value="Green" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Is12MonthAvgGreater}" Value="true">
+                                                <Setter Property="Foreground" Value="Red" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Label.Style>
+                            </Label>
+                        </StackPanel>
+
+
+                        <Label Content="{DynamicResource SRMGraphAvg3Months}" Grid.Row="0" Grid.RowSpan="1" Grid.Column="3" HorizontalContentAlignment="Center" FontWeight="Bold" 
+                       VerticalContentAlignment="Top" FontSize="25" Width="Auto" Padding="10"/>
+
+                        <StackPanel Grid.Row="1" Grid.Column="3" Orientation="Horizontal" HorizontalAlignment="Center">
+                            <Image Height="40" Width="40" HorizontalAlignment="Center">
+                                <Image.Style>
+                                    <Style TargetType="Image">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Is3MonthAvgGreater}" Value="false">
+                                                <Setter Property="Source" Value="/Emdep.Geos.Modules.SRM;component/Assets/Images/downward.png" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Is3MonthAvgGreater}" Value="true">
+                                                <Setter Property="Source" Value="/Emdep.Geos.Modules.SRM;component/Assets/Images/upward.png" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Image.Style>
+                            </Image>
+                            <Label Content="{Binding AverageLast3MonthsPercentage}" HorizontalContentAlignment="Center" FontWeight="Bold"                    
+                           VerticalContentAlignment="Top" FontSize="30" Width="Auto" Padding="10" HorizontalAlignment="Center">
+                                <Label.Style>
+                                    <Style TargetType="Label">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Is3MonthAvgGreater}" Value="false">
+                                                <Setter Property="Foreground" Value="Green" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Is3MonthAvgGreater}" Value="true">
+                                                <Setter Property="Foreground" Value="Red" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Label.Style>
+                            </Label>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+
+                <Grid Background="#f0e2bd" Width="600" Margin="0,10,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="5"/>
+                        <RowDefinition Height="40"/>
+                        <RowDefinition Height="5"/>
+                        <RowDefinition Height="40"/>
+                        <RowDefinition Height="5"/>
+                        <RowDefinition Height="40"/>
+                        <RowDefinition Height="5"/>
+                        <RowDefinition Height="40"/>
+                        <RowDefinition Height="5"/>
+                        <RowDefinition Height="40"/>
+                        <RowDefinition Height="5"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Label Content="{DynamicResource SRMGraphTotalPreOrderAERO}" FontWeight="Bold" Grid.Row="1" Grid.Column="0" Margin="10,0,0,0" VerticalContentAlignment="Center" FontSize="20" />
+                    <Label Content="{Binding PreOrderAERO, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" FontWeight="Bold" Grid.Row="1" Foreground="White" Background="Black" Grid.Column="4" Margin="10,0,10,0" 
+                       HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="20" />
+
+                    <Label Content="{DynamicResource SRMGraphActualStock}" FontWeight="Bold" Grid.Row="3" Grid.Column="0" Margin="10,0,0,0" VerticalContentAlignment="Center" FontSize="20" />
+                    <Label Content="{Binding ActualStock, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, StringFormat=N2}" FontWeight="Bold" Grid.Row="3" Foreground="White" Background="Black" Grid.Column="4" Margin="10,0,10,0"          
+                           HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="20" />
+
+                    <Label Content="{DynamicResource SRMGraphStock12MonthsAgo}" FontWeight="Bold" Grid.Row="5" Grid.Column="0" Margin="10,0,0,0" VerticalContentAlignment="Center" FontSize="20" />
+                    <Label Content="{Binding Stock12MonthsAgo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" FontWeight="Bold" Grid.Row="5" Foreground="White" Background="Black" Grid.Column="4" Margin="10,0,10,0"          
+                           HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="20" />
+
+                    <Label Content="{DynamicResource SRMGraphAverageLast3Months}" FontWeight="Bold" Grid.Row="7" Grid.Column="0" Margin="10,0,0,0" VerticalContentAlignment="Center" FontSize="20" />
+                    <Label Content="{Binding AverageLast3Months, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" FontWeight="Bold" Grid.Row="7" Foreground="White" Background="Black" Grid.Column="4" Margin="10,0,10,0"         
+                           HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="20" />
+
+                    <Label Content="{DynamicResource SRMGraphAverage9-12MonthsAgo}" FontWeight="Bold" Grid.Row="9" Grid.Column="0" Margin="10,0,0,0" VerticalContentAlignment="Center" FontSize="20" />
+                    <Label Content="{Binding Average9to12MonthsAgo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" FontWeight="Bold" Grid.Row="9" Foreground="White" Background="Black" Grid.Column="4" Margin="10,0,10,0"          
+                           HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="20" />
+                </Grid>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</dx:DXDialogWindow>

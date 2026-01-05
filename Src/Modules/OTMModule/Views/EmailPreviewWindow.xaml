@@ -1,0 +1,328 @@
+﻿<!--  [pramod.misal][GEOS2-][25-06-2025]  -->
+<Window x:Class="Emdep.Geos.Modules.OTM.Views.EmailPreviewWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:Converters="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:dxre="http://schemas.devexpress.com/winfx/2008/xaml/richedit"
+    xmlns:local="clr-namespace:Emdep.Geos.Modules.OTM.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:sysglb="clr-namespace:System.Globalization;assembly=mscorlib"
+    xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+    Title="{Binding Subject}"
+    WindowStartupLocation="CenterScreen"
+    WindowState="Maximized"
+    WindowStyle="ThreeDBorderWindow"
+    mc:Ignorable="d">
+
+    <Window.Resources>
+        <Converters:EmployeeCodeInitialToImageConverter x:Key="EmployeeCodeInitialToImageConverter" />
+    </Window.Resources>
+
+    <!--  [pramod.misal][GEOS2-][25-06-2025]  -->
+    <Grid
+        Width="Auto"
+        Height="Auto"
+        HorizontalAlignment="Stretch"
+        VerticalAlignment="Stretch"
+        Background="#666666"
+        ShowGridLines="False">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="2" />
+            <RowDefinition Height="30" />
+            <RowDefinition Height="5" />
+            <RowDefinition Height="25" />
+            <RowDefinition Height="25" />
+            <RowDefinition Height="25" />
+            <RowDefinition Height="25" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="30" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="75" />
+            <ColumnDefinition Width="25" />
+            <ColumnDefinition Width="300*" />
+            <ColumnDefinition Width="300*" />
+        </Grid.ColumnDefinitions>
+
+        <!--  Subject  -->
+        <TextBlock
+            Grid.Row="1"
+            Grid.Column="0"
+            Grid.ColumnSpan="4"
+            Margin="20,0,0,0"
+            VerticalAlignment="Center"
+            FontSize="14"
+            Style="{DynamicResource OTMemailTextBlock16Style}"
+            Text="{Binding Subject}"
+            ToolTip="{Binding Subject}" />
+
+        <!--  Sender Name  -->
+        <TextBlock
+            Grid.Row="3"
+            Grid.Column="1"
+            Grid.ColumnSpan="4"
+            FontSize="14"
+            Style="{DynamicResource OTMemailTextBlock16Style}"
+            Text="{Binding SenderName}"
+            ToolTip="{Binding SenderName}" />
+
+        <!--  TO Lable  -->
+        <TextBlock
+            Grid.Row="4"
+            Grid.Column="1"
+            FontSize="14"
+            Style="{DynamicResource OTMemailTextBlock16Style}"
+            Text="{DynamicResource LableTO}" />
+
+        <!--  To Name  -->
+        <!--<TextBlock
+            Grid.Row="4"
+            Grid.Column="2"
+            Grid.ColumnSpan="2"
+            Margin="5,0,0,0"
+            FontSize="14"
+            Style="{DynamicResource OTMemailTextBlock16Style}"
+            Text="{Binding ToRecipientName}"
+            ToolTip="{Binding ToRecipientName}" />-->
+
+
+        <!-- New RecipientName-->
+        <!--[pramod.misal][GEOS2-9896][11.11.2025]-->
+        <ItemsControl Grid.Row="4" Grid.Column="2" Grid.ColumnSpan="2" ItemsSource="{Binding DataContext.ToRecipientNameList,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay, RelativeSource={RelativeSource AncestorType=Window}}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="2"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Row 0: Image -->
+                        <Image Grid.Column="0"
+                    Style="{DynamicResource OTMIsEmdepContactImageStyle}"
+                    Visibility="{Binding IsEmdepContact}"  
+                    Width="14" Height="12"/>
+
+                        <Image Grid.Column="0"
+                     Style="{DynamicResource OTMIsNotEmdepContactImageStyle}"
+                     Visibility="{Binding IsNotEmdepContact}"  
+                     Width="14" Height="14"/>
+
+                        <!--<TextBlock Grid.Column="1" Text=" "></TextBlock>-->
+                        <!-- Row 1: Hyperlink Text -->
+                        <TextBlock Grid.Column="2" TextWrapping="Wrap" FontSize="14">
+                     <Hyperlink x:Name="hyperlink"  
+                                Command="{Binding DataContext.POToClickCommand,
+                                Mode=TwoWay,
+                                UpdateSourceTrigger=PropertyChanged,
+                                RelativeSource={RelativeSource AncestorType=Window}}"
+                                 CommandParameter="{Binding}">       
+                     <InlineUIContainer>
+                         <TextBlock Text="{Binding RecipientName}"
+                                    Style="{DynamicResource OTMEmailHyperlinkTextBlock}"
+                                    TextDecorations="Underline"/>
+                     </InlineUIContainer>
+                     </Hyperlink>
+                 </TextBlock>
+                    </Grid>
+
+
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+
+
+        <!--  CC:  -->
+        <TextBlock
+            Grid.Row="5"
+            Grid.Column="1"
+            FontSize="14"
+            Style="{DynamicResource OTMemailTextBlock16Style}"
+            Text="{DynamicResource LableCC}" />
+
+        <!--  CCName  -->
+        <!--<TextBlock
+            Grid.Row="5"
+            Grid.Column="2"
+            Grid.ColumnSpan="3"
+            Margin="5,0,0,0"
+            FontSize="14"
+            Style="{DynamicResource OTMemailTextBlock16Style}"
+            Text="{Binding CCName}"
+            ToolTip="{Binding CCName}" />-->
+
+        <!--  CCName  -->
+        <!--[pramod.misal][GEOS2-9896][11.11.2025]-->
+        <ItemsControl Grid.Row="5" Grid.Column="2" Grid.ColumnSpan="3" ItemsSource="{Binding DataContext.CCNameList,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay, RelativeSource={RelativeSource AncestorType=Window}}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <!--<StackPanel Orientation="Horizontal">
+                 <Image Style="{DynamicResource OTMIsEmdepContactImageStyle}" Visibility="{Binding IsEmdepContact}"  Width="14" Height="14"/>
+                 <TextBlock TextWrapping="Wrap" 
+                       FontSize="14"   >
+                  <Hyperlink x:Name="hyperlink"  
+                         Command="{Binding DataContext.POCcClickCommand,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"
+                      CommandParameter="{Binding}">       
+             
+                    <InlineUIContainer>
+                        <TextBlock Text="{Binding CCName}" Style="{DynamicResource OTMEmailHyperlinkTextBlock}" TextDecorations="Underline"/>
+                    </InlineUIContainer>
+                  </Hyperlink>
+    
+
+              </TextBlock>
+
+             </StackPanel>-->
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="2"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Row 0: Image -->
+                        <Image Grid.Column="0"
+                        Style="{DynamicResource OTMIsEmdepContactImageStyle}"
+                        Visibility="{Binding IsEmdepContact}"  
+                        Width="14" Height="14"/>
+
+                        <Image Grid.Column="0"
+                         Style="{DynamicResource OTMIsNotEmdepContactImageStyle}"
+                         Visibility="{Binding IsNotEmdepContact}"  
+                         Width="14" Height="14"/>
+
+                        <!-- Row 1: Hyperlink Text -->
+                        <TextBlock Grid.Column="2" TextWrapping="Wrap" FontSize="14">
+                     <Hyperlink x:Name="hyperlink"  
+                                Command="{Binding DataContext.POCcClickCommand,
+                                Mode=TwoWay,
+                                UpdateSourceTrigger=PropertyChanged,
+                                RelativeSource={RelativeSource AncestorType=Window}}"
+                                 CommandParameter="{Binding}">       
+                     <InlineUIContainer>
+                         <TextBlock Text="{Binding CCName, StringFormat='{}{0}; '}"
+                                    Style="{DynamicResource OTMEmailHyperlinkTextBlock}"
+                                    TextDecorations="Underline"/>
+                                                                                                     
+                     </InlineUIContainer>
+                     </Hyperlink>
+                 </TextBlock>
+                    </Grid>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+
+        <!--  Date  -->
+        <TextBlock
+            Grid.Row="3"
+            Grid.Column="3"
+            Margin="5,3,3,0"
+            HorizontalAlignment="Right"
+            FontSize="12"
+            Style="{DynamicResource OTMemailTextBlock16Style}"
+            Text="{Binding DateTime, StringFormat={}{0:dd/MM/yyyy}, ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}">
+            <TextBlock.ToolTip>
+                <ToolTip>
+                    <StackPanel>
+                        <TextBlock Text="{Binding DateTime, StringFormat={}{0:dd/MM/yyyy}, ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}" />
+                    </StackPanel>
+                </ToolTip>
+            </TextBlock.ToolTip>
+        </TextBlock>
+
+        <!--  Employee Photo  -->
+        <Grid
+            Grid.Row="3"
+            Grid.RowSpan="4"
+            Grid.Column="0"
+            Grid.ColumnSpan="2"
+            Width="60"
+            Height="60"
+            Margin="-20,0,0,30">
+            <Ellipse
+                Fill="Transparent"
+                Stroke="Black"
+                StrokeThickness="2" />
+            <Image
+                Width="56"
+                Height="56"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Source="{Binding SenderNameEmployeeCodesWithInitialLetters, Converter={StaticResource EmployeeCodeInitialToImageConverter}, UpdateSourceTrigger=PropertyChanged, ConverterParameter='image/png'}"
+                Stretch="UniformToFill">
+                <Image.Clip>
+                    <EllipseGeometry
+                        Center="28,28"
+                        RadiusX="28"
+                        RadiusY="28" />
+                </Image.Clip>
+            </Image>
+        </Grid>
+
+        <!--  Email body  -->
+        <dxre:RichEditControl
+            x:Name="richEdit"
+            Grid.Row="6"
+            Grid.RowSpan="2"
+            Grid.Column="0"
+            Grid.ColumnSpan="4"
+            Width="Auto"
+            Margin="0,0,0,0"
+            Padding="0"           
+            VerticalAlignment="Stretch"
+            VerticalContentAlignment="Stretch"
+            ZoomChanged="richEdit_ZoomChanged"
+            ActiveViewType="Simple"
+            CommandBarStyle="Empty"
+            DocumentSource="{Binding Emailbody}"
+            Loaded="richEdit_Loaded"
+            ReadOnly="True"
+            ShowBorder="True">
+
+            <dxre:RichEditControl.MailMergeOptions>
+                <dxre:DXRichEditMailMergeOptions ViewMergedData="True" />
+            </dxre:RichEditControl.MailMergeOptions>
+
+
+
+            <dxre:RichEditControl.DocumentCapabilitiesOptions>
+                <dxre:DXRichEditDocumentCapabilitiesOptions HeadersFooters="Disabled" Sections="Enabled" />
+            </dxre:RichEditControl.DocumentCapabilitiesOptions>
+
+
+        </dxre:RichEditControl>
+
+        <Grid Grid.Row="8" Grid.ColumnSpan="4" Background="White" Grid.Column="0">
+            <StackPanel Grid.Row="7" Grid.Column="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="-20,0,-10,0">
+                <TextBlock Style="{DynamicResource OTMemailZoomTitleStyle}" Text="Zoom:" VerticalAlignment="Bottom" Margin="5,0,5,5"/>
+                <dxe:TrackBarEdit Minimum="10" Maximum="500" VerticalAlignment="Bottom"
+                    Value="{Binding DataContext.NewZoomfactor, Mode=TwoWay, RelativeSource={RelativeSource AncestorType=Window}}"  Margin="0,0,5,-2"
+                    TickFrequency="10" 
+                    TickPlacement="None"
+                    Width="150" Height="30"
+                    EditValueChanged="ZoomBar_EditValueChanged"/>
+                <TextBlock  Style="{DynamicResource OTMemailZoomTitleStyle}" Text="{Binding DataContext.Zoomfactor, Mode=TwoWay, RelativeSource={RelativeSource AncestorType=Window}}" VerticalAlignment="Bottom" Margin="0,0,20,6"/>
+
+            </StackPanel>
+        </Grid>
+        
+
+    </Grid>
+</Window>

@@ -1,0 +1,415 @@
+﻿<dxwui:WinUIDialogWindow x:Class="Emdep.Geos.Modules.Hrm.Views.AddEditTasksView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.Hrm.Views"
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors" 
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:dxdo="http://schemas.devexpress.com/winfx/2008/xaml/docking"
+             xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:Interactive="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:UIConverter="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+             xmlns:Validation ="clr-namespace:Emdep.Geos.UI.Validations;assembly=Emdep.Geos.UI.Validations"
+             xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"                          
+             mc:Ignorable="d" 
+                        Height="{Binding SystemParameters.PrimaryScreenHeight}" 
+                        Width="{Binding SystemParameters.PrimaryScreenWidth}"
+                         HorizontalAlignment="Stretch"
+                         VerticalAlignment="Stretch"
+                         HorizontalContentAlignment="Stretch"
+                         VerticalContentAlignment="Stretch"
+                        Style="{DynamicResource WinUIDialogWindowStyle}"
+                        Title="{Binding WindowHeader}"
+                        TitleStyle="{DynamicResource WinUIDialogWindowTitleStyle}">
+
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape"  Command="{Binding EscapeButtonCommand}"/>
+    </dxwui:WinUIDialogWindow.InputBindings>
+
+    <dxwui:WinUIDialogWindow.Resources>
+        <UIConverter:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+        <UIConverter:ForegroundColorConverter x:Key="ForegroundColorConverter"/>
+
+
+
+
+
+
+
+        <ControlTemplate x:Key="popupContentTemplate">
+            <dxg:GridControl x:Name="PART_GridControl" AutoExpandAllGroups="True">
+                <dxg:GridControl.Columns>
+                    <dxg:GridColumn FieldName="CodeWithDescription" />
+                </dxg:GridControl.Columns>
+                <dxg:GridControl.View>
+                    <dxg:TableView Name="View"
+                           ShowGroupedColumns="True"
+                           AutoWidth="True"
+                           AllowPerPixelScrolling="True"
+                           SearchPanelAllowFilter="True"
+                           ShowSearchPanelMode="Always"
+                           SearchPanelHorizontalAlignment="Stretch"
+                           ScrollAnimationDuration="0"
+                           ShowAutoFilterRow="True"
+                           ShowTotalSummary="True"
+                           SearchColumns="CodeWithDescription"
+                        IsSynchronizedWithCurrentItem="False">
+                        <dxg:TableView.RowStyle>
+                            <Style TargetType="{x:Type dxg:RowControl}">
+                                <Style.Triggers>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding Row.IsInActive}" Value="True" />
+                                        </MultiDataTrigger.Conditions>
+                                        <MultiDataTrigger.Setters>
+                                            <Setter Property="Foreground" Value="Gray" />
+                                            <Setter Property="IsEnabled" Value="False" />
+                                        </MultiDataTrigger.Setters>
+                                    </MultiDataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </dxg:TableView.RowStyle>
+                    </dxg:TableView>
+                </dxg:GridControl.View>
+            </dxg:GridControl>
+        </ControlTemplate>
+
+
+
+
+    </dxwui:WinUIDialogWindow.Resources>
+
+    <Grid Height="{Binding DialogHeight}" Width="{Binding DialogWidth}" ShowGridLines="False">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="10"/>
+            <RowDefinition Height="45" />
+        </Grid.RowDefinitions>
+
+        <!-- Add/Edit Task and Skills Grid -->
+        <Grid Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ShowGridLines="False">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="10" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="0" Grid.Column="0" ShowGridLines="False">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="30"/>
+                    <RowDefinition Height="10"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="10"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="10"/>
+                    <RowDefinition Height="30"/>
+                    <RowDefinition Height="10"/>
+                    <RowDefinition Height="22"/>
+                    <RowDefinition Height="10"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!--Code-->
+                <TextBlock Grid.Row="0" Grid.Column="0"  Text="{DynamicResource TasksCode}" Style="{StaticResource TextBlock16Style}" HorizontalAlignment="Left"/>
+                <dxe:TextEdit Grid.Row="0" Grid.Column="2" IsReadOnly="True" HorizontalAlignment="Stretch"
+                      Text="{Binding TasksCode}" >
+                </dxe:TextEdit>
+
+                <!--Description-->
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="{DynamicResource TasksDescription}" Style="{StaticResource TextBlock16Style}"  />
+                <dxe:TextEdit Text="{Binding Description}" NullText="{DynamicResource TasksDescription}" Grid.Row="2" Grid.Column="2" VerticalContentAlignment="Top" 
+                          HorizontalAlignment="Stretch" TabIndex="0" MaxLength="300"
+                      TextWrapping="Wrap" 
+                      AllowNullInput="True" InvalidValueBehavior="AllowLeaveEditor" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Disabled" AcceptsReturn="True">
+                    <dxe:TextEdit.EditValue>
+                        <Binding Path="Description" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                            <Binding.ValidationRules>
+                                <Validation:TasksValidation FieldName="Description" ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True"/>
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </dxe:TextEdit.EditValue>
+                </dxe:TextEdit>
+
+                <!--Job Requirement-->
+                <TextBlock Grid.Row="4" Grid.Column="0" Text="{DynamicResource TasksJobRequirement}" Style="{StaticResource TextBlock16Style}"/>
+                <dxe:TextEdit Text="{Binding TasksJobRequirement}" NullText="{DynamicResource TasksJobRequirement}" Grid.Row="4" Grid.Column="2" VerticalContentAlignment="Top"
+                      TextWrapping="Wrap" HorizontalAlignment="Stretch" MaxLength="100"
+                      AllowNullInput="True" InvalidValueBehavior="AllowLeaveEditor" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Disabled" AcceptsReturn="True">
+                </dxe:TextEdit>
+
+                <!--Objective-->
+                <!--<dxg:LookUpEdit x:Name="PART_Editor1" Grid.Row="6" Grid.Column="2" HorizontalAlignment="Stretch" TabIndex="1"
+                PopupHeight="500"
+                PopupWidth="750"
+                PopupMinHeight="100"
+                PopupMinWidth="100"
+                IsPopupAutoWidth="False"
+                FilterCondition="StartsWith"
+                ItemsSource="{Binding ObjectivesTypeList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                AutoPopulateColumns="False"
+                DisplayMember="CodeWithDescription"
+                ValueMember="IdProfessionalObjective"
+                ImmediatePopup="True"
+                AutoComplete="True"
+                IncrementalFiltering="True">
+
+                    <dxg:LookUpEdit.StyleSettings>
+                        <dxg:SearchLookUpEditStyleSettings />
+                    </dxg:LookUpEdit.StyleSettings>
+
+                    --><!-- Include validation as before --><!--
+                    <dxg:LookUpEdit.SelectedItem>
+                        <Binding Path="DataContext.SelectedObjective" RelativeSource="{RelativeSource AncestorType=dxwui:WinUIDialogWindow}"
+                 ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                            <Binding.ValidationRules>
+                                <Validation:TasksValidation FieldName="SelectedObjective" ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True"/>
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </dxg:LookUpEdit.SelectedItem>
+
+                </dxg:LookUpEdit>-->
+                <TextBlock Grid.Row="6" Grid.Column="0" Text="{DynamicResource TasksObjective}" Style="{StaticResource TextBlock16Style}"/>
+                <dxg:LookUpEdit x:Name="PART_Editor1" 
+                Grid.Row="6" Grid.Column="2" 
+                HorizontalAlignment="Stretch" 
+                TabIndex="1"
+                PopupHeight="500"
+                PopupWidth="750"
+                PopupMinHeight="100"
+                PopupMinWidth="100"
+                IsPopupAutoWidth="False"
+                FilterCondition="Contains" 
+                ItemsSource="{Binding ObjectivesTypeList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                AutoPopulateColumns="False"
+                DisplayMember="CodeWithDescription"
+                ValueMember="IdProfessionalObjective"
+                ImmediatePopup="True"
+                AutoComplete="True"
+                IncrementalFiltering="True"
+                PopupContentTemplate="{StaticResource popupContentTemplate}">
+                   
+
+                    <dxg:LookUpEdit.StyleSettings>
+                        <dxg:SearchLookUpEditStyleSettings />
+                    </dxg:LookUpEdit.StyleSettings>
+
+                    <dxg:LookUpEdit.SelectedItem>
+                        <Binding Path="DataContext.SelectedObjective" 
+                 RelativeSource="{RelativeSource AncestorType=dxwui:WinUIDialogWindow}"
+                 ValidatesOnDataErrors="True" 
+                 UpdateSourceTrigger="PropertyChanged" 
+                 Mode="TwoWay">
+                            <Binding.ValidationRules>
+                                <Validation:TasksValidation FieldName="SelectedObjective" 
+                                            ValidationStep="UpdatedValue" 
+                                            ValidatesOnTargetUpdated="True"/>
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </dxg:LookUpEdit.SelectedItem>
+                </dxg:LookUpEdit>
+
+
+                <!--InUse-->
+                <TextBlock Grid.Row="8" Grid.Column="0" Grid.RowSpan="2" Text="{DynamicResource TasksInUse}" Style="{StaticResource TextBlock16Style}" TextWrapping="Wrap" />
+                <Grid Grid.Row="8" Grid.Column="2" HorizontalAlignment="Left">
+                <dxe:ToggleSwitch x:Name="InUse" 
+                          
+                          ContentPlacement="Inside"
+                          TabIndex="2"
+                          CheckedStateContent="Yes" UncheckedStateContent="No" 
+                          ToggleSwitchWidth="50" ToggleSwitchHeight="22" 
+                          IsThreeState="False"
+                          IsChecked="{Binding TasksInUse,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+                </dxe:ToggleSwitch>
+                </Grid>
+            </Grid>
+
+            <Grid Grid.Row="0" Grid.Column="2" Grid.RowSpan="2" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" >
+
+                <dxlc:GroupBox Grid.Row="0" Grid.Column="2" Grid.RowSpan="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                    <dxlc:GroupBox.HeaderTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{DynamicResource TaskRelatedSkillsItemsHeader}" FontWeight="Bold" VerticalAlignment="Center" />
+                                <TextBlock Name="linkeditemCount1" Text="{Binding DataContext.SelectedSkillsLinkedItems.Count, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" 
+                                                           FontWeight="Bold" Margin="5 0 0 0" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                                <dxe:TextEdit Margin="5 0 0 0" Foreground="Transparent" ShowBorder="False" IsReadOnly="True">
+                                    <dxe:TextEdit.EditValue>
+                                        <Binding Path="DataContext.SelectedAccountSkillsLinkedItemsCount" RelativeSource="{RelativeSource AncestorType=dxwui:WinUIDialogWindow}" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                                            <Binding.ValidationRules>
+                                                <Validation:TasksValidation FieldName="SelectedAccountSkillsLinkedItemsCount" />
+                                            </Binding.ValidationRules>
+                                        </Binding>
+                                    </dxe:TextEdit.EditValue>
+                                </dxe:TextEdit>
+                            </StackPanel>
+                        </DataTemplate>
+                    </dxlc:GroupBox.HeaderTemplate>
+
+                    <dxdo:DockLayoutManager HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Name="dockManager2">
+                        <dxdo:LayoutGroup x:Name="RootGroup1" Orientation="Vertical">
+                            <dxdo:LayoutPanel x:Name="SelectedLinkedItems" Margin="-4 -4 -4 0"
+                                                                  AllowHide="False" AllowClose="False"
+                                                                  ShowPinButton="False"
+                                                                  SnapsToDevicePixels="True">
+
+                                <dxe:ListBoxEdit ItemsSource="{Binding DataContext.SelectedSkillsLinkedItems,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow, Mode=FindAncestor}, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                                                                     HorizontalContentAlignment="Stretch" VerticalAlignment="Stretch"
+                                                                     ScrollViewer.CanContentScroll="False">
+                                    <dxe:ListBoxEdit.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Style="{DynamicResource BorderStyle}">
+                                                <Grid>
+                                                    <Grid.Resources>
+                                                        <Style TargetType="Grid">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding InUse}" Value="False">
+                                                                <Setter Property="Background" Value="Gray"/>
+                                                                <Setter Property="IsEnabled" Value="False"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                        </Style>
+                                                    </Grid.Resources>
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="Auto" />
+                                                        <RowDefinition Height="5" />
+                                                        <RowDefinition Height="Auto" />
+                                                    </Grid.RowDefinitions>
+
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="20" />
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding Code}"
+                                                                                   FontWeight="Bold" HorizontalAlignment="Left"
+                                                                                   TextWrapping="WrapWithOverflow"
+                                                                                   Margin="5 0 0 0"
+                                                                                   Style="{DynamicResource TextBlock14Style}" />
+
+                                                    <dxe:ButtonEdit Grid.Row="0" Grid.Column="1"
+                                                                                    HorizontalAlignment="Right" VerticalAlignment="Top"
+                                                                                    Margin="0 4 4 0" Visibility="{Binding IsVisible,Converter={StaticResource BoolToVisibilityConverter}}"
+                                                                                    ShowText="False" Width="15" Height="15" 
+                                                                                    Background="Transparent"
+                                                                                    AllowDefaultButton="False">
+                                                        <dxe:ButtonEdit.Buttons>
+                                                            <dxe:ButtonInfo GlyphKind="Cancel">
+                                                                <dxmvvm:Interaction.Behaviors>
+                                                                    <dxmvvm:EventToCommand Command="{Binding DataContext.LinkedItemCancelCommand,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"
+                                                                                                           EventName="Click"
+                                                                                                           CommandParameter="{Binding Path=.}" />
+                                                                </dxmvvm:Interaction.Behaviors>
+                                                            </dxe:ButtonInfo>
+                                                        </dxe:ButtonEdit.Buttons>
+                                                    </dxe:ButtonEdit>
+
+                                                    <TextBlock Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="1" Text="{Binding Name}"
+                                                                                   Margin="5 0 0 0"
+                                                                                   HorizontalAlignment="Left"
+                                                                                   Style="{DynamicResource TextBlock12Style}" />
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </dxe:ListBoxEdit.ItemTemplate>
+                                    
+                                </dxe:ListBoxEdit>
+                            </dxdo:LayoutPanel>
+                        </dxdo:LayoutGroup>
+
+                        <!--Add Account in Linked items-->
+                        <dxdo:DockLayoutManager.AutoHideGroups>
+                            <!--Add Skill-->
+                            <dxdo:AutoHideGroup DockType="Bottom">
+                                <dxdo:LayoutPanel x:Name="AddSkill" ItemHeight="385" AllowDrag="False" AllowContextMenu="False" AllowFloat="True" AllowSizing="False"
+                                                                      AllowClose="False" Caption="{DynamicResource TaskRelatedAddSkill}">
+                                    <dxg:GridControl x:Name="linkedItemsAddskill" 
+                                                                         DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow, Mode=FindAncestor}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                         EnableSmartColumnsGeneration="True"
+                                                                         ItemsSource="{Binding SkillsList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                         SelectionMode="Row">
+                                        <dxg:GridColumn FieldName="Code" Header="Code" AllowEditing="False" FilterPopupMode="CheckedList" />
+                                        <dxg:GridColumn FieldName="SkillType.Value" Header="Type" AllowEditing="False" FilterPopupMode="CheckedList" >
+                                            <dxg:GridColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <dxe:TextEdit x:Name="PART_Editor" IsPrintingMode="True" HorizontalAlignment="Stretch" 
+                                                      Background="{Binding RowData.Row.SkillType.HtmlColor}"
+                                                      VerticalAlignment="Stretch"
+                                                      Text="{Binding RowData.Row.SkillType.Value}"
+                                                      IsReadOnly="True" 
+                                                      Foreground="{Binding RowData.Row.SkillType.HtmlColor, Converter={UIConverter:ForegroundColorConverter}}"/>
+                                                </DataTemplate>
+                                            </dxg:GridColumn.CellTemplate>
+                                        </dxg:GridColumn>
+                                        <dxg:GridColumn FieldName="Name" Header="Name" AllowEditing="False" FilterPopupMode="CheckedList" />
+                                        <dxg:GridControl.View>
+                                            <dxg:TableView x:Name="tableAddSkills" AllowBestFit="True" AutoWidth="True" EnableImmediatePosting="True"
+                                                                               HorizontalScrollbarVisibility="Auto" VerticalScrollbarVisibility="Auto"
+                                                                               AllowEditing="True"
+                                                                               IndicatorWidth="25" 
+                                                                               ShowGroupPanel="False" ShowIndicator="False"
+                                                                               FadeSelectionOnLostFocus="False"
+                                                                               NavigationStyle="Row"
+                                                                               ShowSearchPanelMode="Default"
+                                                                               ShowAutoFilterRow="True"
+                                                                               SearchPanelHorizontalAlignment="Stretch"
+                                                                               ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly">
+                                                <dxmvvm:Interaction.Behaviors>
+                                                    <dxmvvm:EventToCommand Command="{Binding DataContext.SkillsRowMouseDoubleClickCommand,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"
+                                                                                           EventName="MouseDoubleClick"
+                                                                                           PassEventArgsToCommand="True">
+                                                        <dxmvvm:EventToCommand.EventArgsConverter>
+                                                            <dx:EventArgsToDataRowConverter />
+                                                        </dxmvvm:EventToCommand.EventArgsConverter>
+                                                    </dxmvvm:EventToCommand>
+                                                </dxmvvm:Interaction.Behaviors>
+                                            </dxg:TableView>
+                                        </dxg:GridControl.View>
+                                    </dxg:GridControl>
+                                </dxdo:LayoutPanel>
+                            </dxdo:AutoHideGroup>
+                        </dxdo:DockLayoutManager.AutoHideGroups>
+                    </dxdo:DockLayoutManager>
+                </dxlc:GroupBox>
+            </Grid>
+        </Grid>
+        
+        <!--Accept and Cancel Buttons-->
+        <Grid Grid.Row="2"  VerticalAlignment="Center" HorizontalAlignment="Stretch" ShowGridLines="False">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <!--[GEOS2-3943][rdixit][22.11.2022] Added IsEnabled Property-->
+            <Button  HorizontalAlignment="Right"
+                     Style="{DynamicResource Button16Style}"
+                     VerticalAlignment="Top"
+                     TabIndex="3"
+                     Content="{DynamicResource AddEditTasksAcceptButton}"
+                     Command="{Binding AcceptFileActionCommand}"
+                     IsEnabled="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsAdminPermissionForHRM, Mode=TwoWay ,UpdateSourceTrigger=PropertyChanged}"
+                     Height="30"
+                     Width="100" />
+
+            <Button Grid.Column="2"
+                    HorizontalAlignment="Left"
+                    Style="{DynamicResource Button16Style}"
+                    VerticalAlignment="Top"
+                    Content="{DynamicResource AddEditTasksCancelButton}"
+                    Command="{Binding CancelButtonCommand }"
+                    Height="30"
+                    Width="100" />
+        </Grid>
+
+    </Grid>
+
+</dxwui:WinUIDialogWindow>

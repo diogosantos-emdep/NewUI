@@ -1,0 +1,899 @@
+﻿<UserControl x:Class="Emdep.Geos.Modules.Hrm.Views.EmployeeOrganizationView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.Hrm.Views"
+             xmlns:ViewModel="clr-namespace:Emdep.Geos.Modules.Hrm.ViewModels"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"  
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+             xmlns:dxwuin="http://schemas.devexpress.com/winfx/2008/xaml/windowsui/navigation"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:dxa="http://schemas.devexpress.com/winfx/2008/xaml/accordion" 
+             xmlns:Converters="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+             xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+             xmlns:sysglb="clr-namespace:System.Globalization;assembly=mscorlib"
+             xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+             xmlns:dxb="http://schemas.devexpress.com/winfx/2008/xaml/bars"
+             xmlns:dxdiag="http://schemas.devexpress.com/winfx/2008/xaml/diagram"
+             xmlns:HrmApplication="clr-namespace:Emdep.Geos.Modules.Hrm"    
+             xmlns:dxgt="http://schemas.devexpress.com/winfx/2008/xaml/grid/themekeys"
+             xmlns:core="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:dxc="http://schemas.devexpress.com/winfx/2008/xaml/charts"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+    <UserControl.Resources>
+        <dxc:BrushOverlayConverter x:Key="brushOverlayConverter"/>
+        <Style TargetType="dxg:GridCardHeaderControl">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <Border Background="#FF515151" Height="1"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+
+
+        <Style x:Key="HideButtonStyle" TargetType="{x:Type ToggleButton}">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ToggleButton}">
+                        <Border BorderThickness="0" Background="{TemplateBinding Background}">
+                            <Grid>
+                                <Image Stretch="None" VerticalAlignment="Center" HorizontalAlignment="Center"
+                                   Source="/Emdep.Geos.Modules.Warehouse;component/Assets/Images/ArrowRight.png"
+                                   Visibility="{TemplateBinding IsChecked, Converter={dxmvvm:BooleanToVisibilityConverter Inverse=True}}"/>
+                                <Image Stretch="None" VerticalAlignment="Center" HorizontalAlignment="Center"
+                                   Source="/Emdep.Geos.Modules.Warehouse;component/Assets/Images/ArrowLeft.png"
+                                   Visibility="{TemplateBinding IsChecked, Converter={dxmvvm:BooleanToVisibilityConverter}}"/>
+                            </Grid>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+
+
+        </Style>
+        <DataTemplate x:Key="departmentItemTemplate">
+            <!--<dxdiag:DiagramContainer Background="{Binding DepartmentHtmlColor}" Width="250" ItemsCanMove="False" ItemsCanSelect="False" 
+                                    CanSelect="False" CanMove="False" CanCopy="False" CanResize="False" CanRotate="False" CanDelete="False" CanAddItems="False" CanEdit="False">
+                <dxdiag:DiagramContentItem Anchors="Top, Bottom" Content="{Binding}">
+                    <dxdiag:DiagramContentItem.ContentTemplate>
+                        <DataTemplate>
+                            <Grid Background="{Binding DepartmentHtmlColor}" HorizontalAlignment="Center">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="250"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock x:Name="Title" FontSize="18" Text="{Binding Name}" Grid.Row="0" Grid.Column="0"
+                           TextWrapping="WrapWithOverflow" HorizontalAlignment="Center" VerticalAlignment="Center" 
+                           TextAlignment="Center" FontWeight="Bold" Margin="5">
+                                </TextBlock>
+                            </Grid>
+                        </DataTemplate>
+                    </dxdiag:DiagramContentItem.ContentTemplate>
+                </dxdiag:DiagramContentItem>
+            </dxdiag:DiagramContainer>-->
+
+            <dxdiag:DiagramShape Content="{Binding Name}" Padding="5" Height="60" Width="300" Background="{Binding DepartmentHtmlColor}"
+                                FontSize="26" FontWeight="Bold" CanMove="False" CanCopy="False" CanResize="False" CanRotate="False" CanEdit="False"/>
+
+        </DataTemplate>
+
+
+        <DataTemplate x:Key="DiagramConnectorTemplate">
+            <dxdiag:DiagramConnector Type="RightAngle" CanSelect="False" CanMove="False"/>
+        </DataTemplate>
+
+        <DataTemplate x:Key="employeeJDGroupTemplate">
+            <dxdiag:DiagramShape Height="1" MinHeight="1" Width="1" MinWidth="1" Background="White" Foreground="Black"
+                                 FontSize="22"  FontWeight="Bold" CanMove="False" CanCopy="False" CanResize="False" CanRotate="False"/>
+        </DataTemplate>
+
+        <DataTemplate x:Key="employeeItemTemplate">
+            <dxdiag:DiagramContainer Height="60" Width="370" ItemsCanMove="False" ItemsCanSelect="False" HorizontalContentAlignment="Stretch"
+                                     CanSelect="False" CanMove="False" CanCopy="False" CanResize="False" CanRotate="False" CanDelete="False" CanAddItems="False" CanEdit="False">
+                <dxdiag:DiagramContentItem Anchors="Top, Bottom, Left, Right" Content="{Binding}" >
+                    <dxdiag:DiagramContentItem.ContentTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="60"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="370"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Background="White" >
+                                    <Label Content="{Binding Name}" Width="310"  
+                                            BorderThickness="0"
+                                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" 
+                                            VerticalAlignment="Stretch" VerticalContentAlignment="Center" 
+                                            Height="60" FontSize="26" Background="White" Foreground="Black"/>
+                                    <dxc:ChartControl Name="chartControl1" BorderThickness="0" HorizontalAlignment="Stretch" DataSource="{Binding JobDescriptionUsages}" Width="60" Height="60" Background="White" Foreground="Black">
+                                        <dxc:ChartControl.Style>
+                                            <Style TargetType="{x:Type dxc:ChartControl}">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding JobDescriptionUsage}" Value="100">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </dxc:ChartControl.Style>
+                                        <dxmvvm:Interaction.Triggers>
+                                            <dxmvvm:EventToCommand EventName="CustomDrawSeriesPoint" 
+                                                                   Command="{Binding DataContext.PieChartDrawSeriesPointCommand,RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                                                   PassEventArgsToCommand="True"/>
+                                        </dxmvvm:Interaction.Triggers>
+                                        <dxc:ChartControl.Diagram>
+                                            <dxc:SimpleDiagram2D>
+                                                <dxc:SimpleDiagram2D.Series>
+                                                    <dxc:PieSeries2D Rotation="-90" ToolTipEnabled="False"  SweepDirection="Clockwise" ToolTipPointPattern="{}{A}: {V}%" ArgumentDataMember="Name" ValueDataMember="Percentage" HoleRadiusPercent="0" BorderBrush="White">
+
+                                                        <!--<dxc:PieSeries2D.Points>
+                                                        <dxc:SeriesPoint Argument="Name" Value="1" />
+                                                    </dxc:PieSeries2D.Points>-->
+                                                        <!--region #Model-->
+                                                        <dxc:PieSeries2D.Model>
+                                                            <dxc:FlatPie2DModel />
+                                                        </dxc:PieSeries2D.Model>
+                                                        <!--endregion #Model-->
+                                                        <dxc:PieSeries2D.PointOptions>
+                                                            <dxc:PointOptions>
+                                                                <dxc:PointOptions.ValueNumericOptions>
+                                                                    <dxc:NumericOptions Format="Percent" Precision="0" />
+                                                                </dxc:PointOptions.ValueNumericOptions>
+                                                            </dxc:PointOptions>
+                                                        </dxc:PieSeries2D.PointOptions>
+                                                        <!--region #LegendPointOptions-->
+                                                        <dxc:PieSeries2D.LegendPointOptions>
+                                                            <dxc:PointOptions Pattern="{}{A}: {V}" />
+                                                        </dxc:PieSeries2D.LegendPointOptions>
+                                                        <!--endregion #LegendPointOptions-->
+
+                                                    </dxc:PieSeries2D>
+                                                </dxc:SimpleDiagram2D.Series>
+                                            </dxc:SimpleDiagram2D>
+                                        </dxc:ChartControl.Diagram>
+                                        <dxc:ChartControl.Legend>
+                                            <dxc:Legend Visible="False" />
+                                        </dxc:ChartControl.Legend>
+                                    </dxc:ChartControl>
+
+                                </StackPanel>
+
+                            </Grid>
+                        </DataTemplate>
+                    </dxdiag:DiagramContentItem.ContentTemplate>
+                </dxdiag:DiagramContentItem>
+            </dxdiag:DiagramContainer>
+        </DataTemplate>
+
+        <DataTemplate x:Key="employeeItemTemplateForIsolated">
+            <dxdiag:DiagramContainer Height="120" Width="300" ItemsCanMove="False" ItemsCanSelect="False" 
+                                    CanSelect="False" CanMove="False" CanCopy="False" CanResize="False" CanRotate="False" CanDelete="False" CanAddItems="False" CanEdit="False">
+                <dxdiag:DiagramContentItem Anchors="Top, Bottom, Left, Right" Content="{Binding}" >
+                    <dxdiag:DiagramContentItem.ContentTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="60"/>
+                                    <RowDefinition Height="60"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="300"/>
+                                </Grid.ColumnDefinitions>
+
+
+                                <dxdiag:DiagramShape Content="{Binding JobDescriptionTitle}" Grid.Row="0" Grid.Column="0" Height="60" Background="{Binding DepartmentHtmlColor}"
+                                     Padding="5" FontSize="22"/>
+                                <dxdiag:DiagramShape Content="{Binding Name}" Grid.Row="1" Grid.Column="0" Height="60" Background="White" Foreground="Black"
+                                     Padding="5" FontSize="22"/>
+                            </Grid>
+                        </DataTemplate>
+                    </dxdiag:DiagramContentItem.ContentTemplate>
+                </dxdiag:DiagramContentItem>
+            </dxdiag:DiagramContainer>
+        </DataTemplate>
+
+        <DataTemplate x:Key="departmentDataTemplate">
+            <StackPanel>
+                <TextBlock Text="{Binding DepartmentName}" TextTrimming="CharacterEllipsis">
+                </TextBlock>
+            </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate x:Key="employeeDataTemplate">
+            <StackPanel>
+                <TextBlock TextTrimming="CharacterEllipsis">
+                        <Run Text="{Binding EmployeeJobDescription.JobDescription.JobDescriptionCode}" />
+                        <Run Text="-" />
+                        <Run Text="{Binding FirstName}" />
+                        <Run Text="{Binding LastName}" />
+                </TextBlock>
+            </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate x:Key="singleEmployeeDetailsTemplate">
+
+            <Grid Margin="15,15,0,0">
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="30"/>
+                    <RowDefinition Height="30"/>
+                    <RowDefinition Height="30"/>
+                    <RowDefinition Height="30"/>
+                    <RowDefinition Height="30"/>
+                    <RowDefinition Height="30"/>
+                    <RowDefinition Height="30"/>
+                    <RowDefinition Height="30"/>
+                    <RowDefinition Height="*"/>
+
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="140"/>
+                    <ColumnDefinition Width="140"/>
+                    <ColumnDefinition Width="132"/>
+                    <ColumnDefinition Width="132"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <dxe:ImageEdit Width="150" Height="150" HorizontalAlignment="Left" VerticalAlignment="Top"  
+                                      Grid.Row="0" Grid.RowSpan="5" Grid.Column="0" ShowMenu="False" IsReadOnly="True">
+                    <dxe:ImageEdit.Style>
+                        <Style TargetType="{x:Type dxe:ImageEdit}">
+                            <Style.Triggers>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding ProfileImageInBytes}" Value="{x:Null}" />
+                                        <Condition Binding="{Binding IdGender}" Value="1" />
+                                    </MultiDataTrigger.Conditions>
+                                    <Setter Property="Source" Value="{DynamicResource EmployeeDefaultImageFemale}" />
+                                </MultiDataTrigger>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding ProfileImageInBytes}" Value="{x:Null}" />
+                                        <Condition Binding="{Binding IdGender}" Value="2" />
+                                    </MultiDataTrigger.Conditions>
+                                    <Setter Property="Source" Value="{DynamicResource EmployeeDefaultImageMale}" />
+                                </MultiDataTrigger>
+                            </Style.Triggers>
+                            <Setter Property="Source" Value="{Binding ProfileImageInBytes,Converter={Converters:ByteArrayToImage}}" />
+                        </Style>
+                    </dxe:ImageEdit.Style>
+                </dxe:ImageEdit>
+
+
+                <TextBlock Grid.Row="0" Grid.Column="1" Margin="10,0,0,0" Text="{DynamicResource EmployeeOrganizationName}" FontWeight="Bold"/>
+                <TextBlock Grid.Row="0" Grid.Column="2"  Margin="0,0,0,0">
+                          <Run Text="{Binding FirstName}" />
+                          <Run Text=""/>    
+                          <Run Text="{Binding LastName}" />
+                </TextBlock>
+                <TextBlock Grid.Row="0" Grid.Column="3"  Margin="5,0,0,0" Text="{DynamicResource EmployeeOrganizationNativeName}" FontWeight="Bold"/>
+                <TextBlock Grid.Row="0" Grid.Column="4"  Margin="5,0,0,0" Text="{Binding NativeName}" />
+                <TextBlock Grid.Row="1" Grid.Column="1"  Margin="10,0,0,0" Text="{DynamicResource EmployeeOrganizationNativeJobDescription}" FontWeight="Bold"/>
+                <TextBlock Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="4" TextWrapping="Wrap" Margin="0,0,0,0">
+                         <Hyperlink Name="hyperlink" Command="{Binding DataContext.SingleEmployeeDocumentViewCommand,
+                             RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}"
+                                   CommandParameter="{Binding ElementName=EmployeeDetailsView}" Style="{DynamicResource hyperlinkGridStyle}">  
+                                    <InlineUIContainer>
+                                        <TextBlock  Text="{Binding EmployeeJobDescription.JobDescription.JobDescriptionCode,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" />
+                                    </InlineUIContainer>
+                        </Hyperlink>
+                <TextBlock Text=" - " />       
+                <TextBlock Text="{Binding EmployeeJobDescription.JobDescription.JobDescriptionTitle}" />
+                <TextBlock  TextWrapping="Wrap"  Text="{Binding EmployeeJobDescription.JobDescriptionUsage,Converter={Converters:PercentageConverter}}"/>
+                </TextBlock>
+
+                <TextBlock Grid.Row="2" Grid.Column="3"  Margin="5,0,0,0" Text="{DynamicResource EmployeeOrganizationLOS}" FontWeight="Bold" />
+                <TextBlock Grid.Row="2" Grid.Column="4"  Margin="5,0,0,0" Text="{Binding LengthOfServiceString}" />
+                <TextBlock Text="{DynamicResource EmployeeOrganizationHireDate}"  Grid.Row="2" Grid.Column="1"  Margin="10,0,0,0" FontWeight="Bold"></TextBlock>
+                <TextBlock Grid.Row="2" Grid.Column="2"  Margin="0,0,0,0" Text="{Binding EmployeeJobDescription.JobDescriptionStartDate,StringFormat=d,ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}" />
+                <TextBlock Grid.Row="3" Grid.Column="1"  Margin="10,0,0,0" Text="{DynamicResource EmployeeOrganizationEmail}" FontWeight="Bold" />
+                <TextBlock Grid.Row="3" Grid.Column="2"     Margin="0,0,0,0">
+                            <Hyperlink Name="hyperlinkForOrg" NavigateUri="#"  Style="{DynamicResource hyperlinkGridStyle}"
+                                         Command="{Binding DataContext.HyperlinkForEmail,RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}" CommandParameter="{Binding EmployeeContactEmail}" > 
+                                   <InlineUIContainer>
+                                         <TextBlock  Text="{Binding EmployeeContactEmail,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" />
+                            </InlineUIContainer> </Hyperlink> 
+                        </TextBlock>
+                <TextBlock Grid.Row="4" Grid.Column="1" Margin="10,0,0,0" Text="{DynamicResource EmployeeOrganizationMobilePhone}" FontWeight="Bold" />
+                <TextBlock Text="{Binding EmployeeContactMobile}" Grid.Row="4" Grid.Column="2" Margin="5,0,0,0"></TextBlock>
+                <TextBlock Grid.Row="5" Grid.Column="1" Margin="10,0,0,0" Text="{DynamicResource EmployeeOrganizationAddress}" FontWeight="Bold" />
+                <TextBlock Text="{Binding FullAddress}" Grid.Row="5" Grid.Column="2" Grid.ColumnSpan="3" Margin="5,0,0,0"  />
+                <TextBlock Grid.Row="6" Grid.Column="1" Margin="10,0,0,0" Text="{DynamicResource EmployeeOrganizationNativeContractSituation}" FontWeight="Bold" />
+                <TextBlock Grid.Row="6" Grid.Column="2" Margin="0,0,0,0" Text="{Binding ContractSituation.Name}" />
+                <dxmvvm:Interaction.Behaviors>
+                    <dxmvvm:EventToCommand Command="{Binding DataContext.CommandGridDoubleClick,RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}" 
+                                           EventName="MouseDoubleClick" 
+                                           CommandParameter="{Binding ElementName=EmployeeDetailsView}">
+                        <dxmvvm:EventToCommand.EventArgsConverter>
+                            <dx:EventArgsToDataRowConverter/>
+                        </dxmvvm:EventToCommand.EventArgsConverter>
+                    </dxmvvm:EventToCommand>
+                </dxmvvm:Interaction.Behaviors>
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="GridExpandDepartmentEmployeeDetailsTemplate">
+            <Grid Margin="15,15,0,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="30"/>
+                    <RowDefinition Height="30"/>
+                    <RowDefinition Height="30"/>
+                    <RowDefinition Height="30"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="140"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="130"/>
+                    <ColumnDefinition Width="130"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <dxe:ImageEdit Width="150" Height="150" HorizontalAlignment="Left" VerticalAlignment="Top"  
+                                      Grid.Row="0" Grid.RowSpan="5" Grid.Column="0" ShowMenu="False" IsReadOnly="True">
+                    <dxe:ImageEdit.Style>
+                        <Style TargetType="{x:Type dxe:ImageEdit}">
+                            <Style.Triggers>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding Row.ProfileImageInBytes}" Value="{x:Null}" />
+                                        <Condition Binding="{Binding Row.IdGender}" Value="1" />
+                                    </MultiDataTrigger.Conditions>
+                                    <Setter Property="Source" Value="{DynamicResource EmployeeDefaultImageFemale}" />
+                                </MultiDataTrigger>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding Row.ProfileImageInBytes}" Value="{x:Null}" />
+                                        <Condition Binding="{Binding Row.IdGender}" Value="2" />
+                                    </MultiDataTrigger.Conditions>
+                                    <Setter Property="Source" Value="{DynamicResource EmployeeDefaultImageMale}" />
+                                </MultiDataTrigger>
+                            </Style.Triggers>
+                            <Setter Property="Source" Value="{Binding Row.ProfileImageInBytes,Converter={Converters:ByteArrayToImage}}" />
+                        </Style>
+                    </dxe:ImageEdit.Style>
+                </dxe:ImageEdit>
+                <TextBlock Grid.Row="0" Grid.Column="1" Margin="10,0,0,0" Text="{DynamicResource EmployeeOrganizationName}" FontWeight="Bold"/>
+                <TextBlock Grid.Row="0" Grid.Column="2"  Margin="0,0,0,0" TextWrapping="Wrap" >
+                          <Run Text="{Binding Row.FirstName}" />
+                          <Run Text=""/> 
+                          <Run Text="{Binding Row.LastName}" />
+                </TextBlock>
+                <!--<TextBlock Grid.Row="0" Grid.Column="2"  Margin="0,0,0,0" Text ="{Binding Row.FullName}" TextWrapping="Wrap" >
+                </TextBlock>-->
+                <TextBlock Grid.Row="0" Grid.Column="3"  Margin="5,0,0,0" Text="{DynamicResource EmployeeOrganizationNativeName}" FontWeight="Bold"/>
+                <TextBlock Grid.Row="0" Grid.Column="4"  Margin="5,0,0,0" Text="{Binding Row.NativeName}" TextWrapping="Wrap" />
+                <TextBlock Grid.Row="1" Grid.Column="1"  Margin="10,0,0,0" Text="{DynamicResource EmployeeOrganizationNativeJobDescription}" FontWeight="Bold"/>
+                <!--<TextBlock Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="3" TextWrapping="Wrap"  Margin="0,0,0,0">
+                        <Hyperlink Name="hyperlink" Style="{DynamicResource hyperlinkGridStyle}" Command="{Binding DataContext.DocumentViewCommand, 
+                            RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}"
+                                     CommandParameter="{Binding ElementName=OrgEmployeeProfileTableView}"> 
+                                   
+                       <Hyperlink.Inlines>
+                          <TextBlock Text="{Binding Row.EmployeeJobDescription.JobDescription.JobDescriptionCode}" />
+                        </Hyperlink.Inlines> 
+                        
+                   </Hyperlink>
+                          <TextBlock Text=" - " />       
+                          <TextBlock  Text="{Binding Row.EmployeeJobDescription.JobDescription.JobDescriptionTitle}" />
+                           <TextBlock  TextWrapping="Wrap"  Text="{Binding Row.EmployeeJobDescription.JobDescriptionUsage,Converter={Converters:PercentageConverter}}"/>
+                </TextBlock>-->
+                <Grid  Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="3"  Margin="0,0,0,0" >
+                    <Grid.ColumnDefinitions >
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <ItemsControl ItemsSource="{Binding Row.EmployeeJobCodes}" Grid.Column ="0">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock HorizontalAlignment="Left"  VerticalAlignment="Center" FontWeight="Normal"  
+                                                 TextWrapping="Wrap"> 
+                                     <Hyperlink Name="hyperlink" Style="{DynamicResource hyperlinkGridStyle}" > 
+                                          <dxmvvm:Interaction.Behaviors>
+                                        <dxmvvm:EventToCommand EventName="Click" PassEventArgsToCommand="True" 
+                                                               CommandParameter="{Binding}"
+                                                               Command="{Binding DataContext.DocumentViewCommand, 
+                                            RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                       </dxmvvm:Interaction.Behaviors>
+                                         <Hyperlink.Inlines>
+                                            <TextBlock Text="{Binding }" />
+                                        </Hyperlink.Inlines> 
+                                     </Hyperlink> 
+                                </TextBlock>
+
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <TextBlock   TextWrapping="Wrap" Text="{Binding Row.EmployeeJobTitles,Converter={Converters:StringConverterForJobTitle}}" Grid.Column="2"/>
+                </Grid>
+                <TextBlock Grid.Row="2" Grid.Column="3"  Margin="5,0,0,0" Text="{DynamicResource EmployeeOrganizationLOS}" FontWeight="Bold" />
+                <TextBlock Grid.Row="2" Grid.Column="4"  Margin="5,0,0,0" Text="{Binding Row.LengthOfServiceString}"/>
+                <TextBlock Text="{DynamicResource EmployeeOrganizationHireDate}"  Grid.Row="2" Grid.Column="1"  Margin="10,0,0,0" FontWeight="Bold"></TextBlock>
+                <TextBlock Grid.Row="2" Grid.Column="2"  Margin="0,0,0,0" Text="{Binding Row.EmployeeJobDescription.JobDescriptionStartDate,StringFormat=d,ConverterCulture={x:Static sysglb:CultureInfo.CurrentCulture}}" />
+                <TextBlock Grid.Row="3" Grid.Column="1"  Margin="10,0,0,0" Text="{DynamicResource EmployeeOrganizationEmail}" FontWeight="Bold" />
+                <TextBlock Grid.Row="3" Grid.Column="2"  Grid.ColumnSpan="5" Margin="0,0,0,0">
+                            <Hyperlink Name="hyperlinkForOrg" NavigateUri="#" Style="{DynamicResource hyperlinkGridStyle}"
+                                         Command="{Binding DataContext.HyperlinkForEmail,RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}" CommandParameter="{Binding Row.EmployeeContactEmail}" > 
+                                    <InlineUIContainer>
+                                         <TextBlock  Text="{Binding Row.EmployeeContactEmail,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" />
+                            </InlineUIContainer>
+                            </Hyperlink> 
+                        </TextBlock>
+
+                <TextBlock Grid.Row="4" Grid.Column="1" Margin="10,0,0,0" Text="{DynamicResource EmployeeOrganizationMobilePhone}" FontWeight="Bold" />
+                <TextBlock Text="{Binding Row.EmployeeContactMobile}" Grid.Row="4" Grid.Column="2" Margin="5,0,0,0"></TextBlock>
+
+
+                <!--<TextBlock Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="3"  Margin="5,0,0,0"  Text="{DynamicResource EmployeeOrganizationAddress}" FontWeight="Bold" />
+                <TextBlock Text="{Binding Row.FullAddress}" Grid.Row="5" Grid.Column="2" Grid.ColumnSpan="3" Margin="5,0,0,0" />-->
+                <TextBlock Grid.Row="5" Grid.Column="1"  Margin="10,0,0,0" Text="{DynamicResource EmployeeOrganizationNativeContractSituation}" FontWeight="Bold" />
+                <TextBlock Grid.Row="5" Grid.Column="2"  Margin="0,0,0,0" Text="{Binding Row.ContractSituation.Name}" />
+            </Grid>
+        </DataTemplate>
+
+        <!--#region rowDetailTemplate-->
+        <DataTemplate x:Key="EmployeeRowDetailTemplate">
+
+            <ContentControl Width="700" Content="{Binding}" ContentTemplate="{StaticResource GridExpandDepartmentEmployeeDetailsTemplate}" HorizontalAlignment="Left"/>
+
+        </DataTemplate>
+
+        <!--#endregion-->
+
+        <DataTemplate x:Key="departmentEmployeeDetailsTemplate">
+            <Grid VerticalAlignment="Stretch" Margin="0,0,0,0">
+                <dxg:GridControl x:Name="EmployeeCardView" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                                 ItemsSource="{Binding DataContext.OrganizationGridList,RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}},UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" SelectionMode="Row">
+
+                    <dxg:GridControl.TotalSummary>
+                        <dxg:GridSummaryItem x:Name="summary" FieldName="FirstName" SummaryType="Count" DisplayFormat="Total Count: {0}" Visible="True" Alignment="Left"/>
+                    </dxg:GridControl.TotalSummary>
+
+                    <dxg:GridControl.View>
+
+                        <dxg:CardView  x:Name="OrgEmployeeProfileTableView"
+                                       CardLayout="Rows"
+                                       ShowSearchPanelMode="Never"
+                                       ShowFixedTotalSummary="True"   
+                                       SearchPanelHorizontalAlignment="Stretch"
+                                       ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly"
+                                       AllowGrouping="True"
+                                       ShowGroupPanel="False" 
+                                       ShowColumnHeaders="False" 
+                                       BorderBrush="Transparent" 
+                                       BorderThickness="1"
+                                       ShowFocusedRectangle="True" 
+                                       ShowGroupedColumns="False"
+                                       AllowEditing="False"
+                                       AllowSorting="False"
+                                       MultiSelectMode="None"
+                                       NavigationStyle="Cell" 
+                                       CardAlignment="Near" 
+                                       Padding="0"
+                                       CardMargin="0"
+                                       ScrollMode="Item" 
+                                       SeparatorThickness="0"
+                                       CardTemplate ="{DynamicResource EmployeeRowDetailTemplate}">
+
+                            <dxmvvm:Interaction.Behaviors>
+                                <dxmvvm:EventToCommand Command="{Binding DataContext.CommandGridDoubleClick,RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}" 
+                                                       EventName="MouseDoubleClick">
+                                    <!--CommandParameter="{Binding ElementName=OrgEmployeeProfileTableView}"-->
+                                    <dxmvvm:EventToCommand.CommandParameter>
+                                        <MultiBinding Converter="{Converters:ConverterForRefresh}">
+                                            <Binding ElementName="OrgEmployeeProfileTableView" />
+                                            <Binding ElementName="EmployeeDetailsView" />
+                                        </MultiBinding>
+                                    </dxmvvm:EventToCommand.CommandParameter>
+                                    <!--<dxmvvm:EventToCommand.EventArgsConverter>
+                                        <dx:EventArgsToDataRowConverter/>
+                                    </dxmvvm:EventToCommand.EventArgsConverter>-->
+                                </dxmvvm:EventToCommand>
+                            </dxmvvm:Interaction.Behaviors>
+
+                        </dxg:CardView>
+
+                    </dxg:GridControl.View>
+                </dxg:GridControl>
+            </Grid>
+        </DataTemplate>
+
+
+        <DataTemplate x:Key="emptyDetailsTemplate">
+            <Grid VerticalAlignment="Stretch">
+                <TextBlock
+                Text="Select an Departments or Employee to see details."
+                FontSize="16"
+                Opacity="0.62"
+                VerticalAlignment="Center"
+                TextAlignment="Center"
+                TextWrapping="Wrap" Foreground="Pink"/>
+
+            </Grid>
+        </DataTemplate>
+
+        <UIHelper:EmployeeDetailsTemplateSelector x:Key="employeeDetailsTemplateSelector"
+                                                  EmployeeDetailsTemplate="{StaticResource singleEmployeeDetailsTemplate}"
+                                                  DepartmentEmployeeDetailsTemplate="{StaticResource departmentEmployeeDetailsTemplate}" 
+                                                  EmptyDetailsTemplate="{StaticResource emptyDetailsTemplate}" />
+
+        <UIHelper:AccordianTemplateSelector x:Key="accordianTemplateSelector"
+                                            EmployeeDataTemplate="{StaticResource employeeDataTemplate}"
+                                            DepartmentDataTemplate="{StaticResource departmentDataTemplate}" />
+
+        <UIHelper:DiagramItemTemplateSelector x:Key="itemTemplateSelector"
+                                    DepartmentTemplate="{StaticResource departmentItemTemplate}" 
+                                    EmployeeTemplate="{StaticResource employeeItemTemplate}"
+                                    JDChildParentTemplate="{StaticResource employeeJDGroupTemplate}"/>
+
+        <UIHelper:DiagramItemTemplateSelector x:Key="itemTemplateSelectorForIsoletedDepartment"
+                                    DepartmentTemplate="{StaticResource departmentItemTemplate}" 
+                                    EmployeeTemplate="{StaticResource employeeItemTemplateForIsolated}"/>
+
+    </UserControl.Resources>
+
+    <Grid Background="{DynamicResource EmpDetailBackColor}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="250"/>
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Label Content="{DynamicResource EmployeeOrganizationHeader}" HorizontalAlignment="Left" Style="{StaticResource LabelTitleStyle}" Grid.Row="0" Grid.Column="0" />
+
+        <Grid HorizontalAlignment="Right" Grid.Row="0" Grid.Column="1" Margin="0,5,0,0" >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="AUTO"/>
+                <ColumnDefinition Width="AUTO" />
+            </Grid.ColumnDefinitions>
+
+            <Grid HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Column="1" Margin="0,0,5,5">
+                <Grid.ColumnDefinitions >
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!--Plant-->
+                <TextBlock Grid.Column="0" Text="{DynamicResource CommonPlant}"  FontWeight="Bold" Margin="10,2,5,0" Grid.Row="0" HorizontalAlignment="Right" Height="25" IsEnabled="True"  />
+
+                <dxe:ComboBoxEdit Style="{DynamicResource ComboBoxEditStyle}" Grid.Column="1"  Width="150" Height="30"                                   
+                                  ItemsSource="{Binding Source={x:Static HrmApplication:HrmCommon.Instance}, Path=IsOrganizationList}"
+                                  EditValue="{Binding Source={x:Static HrmApplication:HrmCommon.Instance}, Path=SelectedAuthorizedPlantsList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="5,0,5,0"
+                                  DisplayMember="ShortName" >
+                    <dxe:ComboBoxEdit.StyleSettings>
+                        <dxe:CheckedComboBoxStyleSettings />
+                    </dxe:ComboBoxEdit.StyleSettings>
+                    <dxmvvm:Interaction.Triggers>
+
+                        <dxmvvm:EventToCommand EventName="EditValueChanged" 
+                                               PassEventArgsToCommand="True"
+                                               Command="{Binding DataContext.PlantOwnerEditValueChangedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"   >
+                            <dxmvvm:EventToCommand.CommandParameter>
+                                <MultiBinding Converter="{Converters:ConverterForRefresh}">
+                                    <Binding ElementName="EmployeeDetailsView" />
+                                </MultiBinding>
+                            </dxmvvm:EventToCommand.CommandParameter>
+                        </dxmvvm:EventToCommand>
+
+                    </dxmvvm:Interaction.Triggers>
+                </dxe:ComboBoxEdit>
+
+
+                <!-- Period -->
+                <DockPanel Grid.Column="2" Grid.Row="0" HorizontalAlignment="Right"   VerticalAlignment="Center" Margin="5,0,0,0" >
+                    <Image Style="{DynamicResource CalendarImageStyle}" Width="30" Height="20" Margin="2,0,3,0" />
+                    <TextBlock Text="{DynamicResource AnnualSalesPerformanceViewPeriod}"  FontWeight="Bold" Margin="0,0,0,0" IsEnabled="True" />
+                </DockPanel>
+
+                <dxe:ComboBoxEdit Grid.Row="0" Grid.Column="3" 
+                                  Name="cmbPeriod"
+                                  IsTextEditable="False" Margin="5,0,0,0"
+                                  HorizontalAlignment="Left"
+                                  IsEnabled="True"
+                                  Height="30"
+                                  Width="100"
+                                  MaxLength="4" 
+                                  VerticalAlignment="Center" 
+                                  ItemsSource="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=FinancialYearLst, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  SelectedItem="{Binding Source={x:Static HrmApplication:HrmCommon.Instance}, Path=SelectedPeriod,UpdateSourceTrigger=PropertyChanged}">
+                    <dxe:ComboBoxEdit.StyleSettings>
+                        <dxe:ComboBoxStyleSettings />
+                    </dxe:ComboBoxEdit.StyleSettings>
+                    <dxmvvm:Interaction.Triggers>
+                        <dxmvvm:EventToCommand EventName="EditValueChanged"
+                                           Command="{Binding DataContext.SelectedYearChangedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                           PassEventArgsToCommand="True">
+                            <dxmvvm:EventToCommand.CommandParameter>
+                                <MultiBinding Converter="{Converters:ConverterForRefresh}">
+                                    <Binding ElementName="EmployeeDetailsView" />
+                                </MultiBinding>
+                            </dxmvvm:EventToCommand.CommandParameter>
+                        </dxmvvm:EventToCommand>
+
+                    </dxmvvm:Interaction.Triggers>
+                </dxe:ComboBoxEdit>
+
+                <!-- Refresh Button -->
+
+                <Button Visibility="Visible" Grid.Row="0" Grid.Column="4" Height="40" Width="40" HorizontalAlignment="Right" 
+                                Command="{Binding RefreshButtonCommand}"
+                                CommandParameter="{Binding ElementName=EmployeeDetailsView}" Margin="5,0,5,0">
+                    <Button.ToolTip>
+                        <TextBlock Text="{DynamicResource ButtonRefresh}"/>
+                    </Button.ToolTip>
+                    <Button.ContentTemplate>
+                        <DataTemplate>
+                            <Image Style="{DynamicResource RefreshButtonImageStyle}"  Height="24" Width="24" Margin="-20"/>
+                        </DataTemplate>
+                    </Button.ContentTemplate>
+                </Button>
+
+                <!-- Print Diagram -->
+
+                <Button Visibility="{Binding IsButtonVisible,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" Grid.Row="0" Grid.Column="5" Height="40" Width="40" HorizontalAlignment="Right" 
+                                Command="{Binding PrintButtonCommand}" Margin="5,0,5,0">
+                    <Button.CommandParameter>
+                        <MultiBinding Converter="{Converters:PrintExportConverter}">
+                            <Binding ElementName="diagramControl"/>
+                            <Binding ElementName="diagramControl1"/>
+                        </MultiBinding>
+                    </Button.CommandParameter>
+                    <Button.ToolTip>
+                        <TextBlock Text="{DynamicResource ButtonPrint}"/>
+                    </Button.ToolTip>
+                    <Button.ContentTemplate>
+                        <DataTemplate>
+                            <Image Style="{DynamicResource PrinterButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                        </DataTemplate>
+                    </Button.ContentTemplate>
+                </Button>
+
+                <!-- Export To Image -->
+                <Button Visibility="{Binding IsButtonVisible,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" Grid.Row="0" Grid.Column="6" Height="40" Width="40" HorizontalAlignment="Right" 
+                                Command="{Binding ExportButtonCommand}" Margin="5,0,5,0">
+                    <Button.CommandParameter>
+                        <MultiBinding Converter="{Converters:PrintExportConverter}">
+                            <Binding ElementName="diagramControl"/>
+                            <Binding ElementName="diagramControl1"/>
+                        </MultiBinding>
+                    </Button.CommandParameter>
+                    <Button.ToolTip>
+                        <TextBlock Text="{DynamicResource ButtonExport}"/>
+                    </Button.ToolTip>
+                    <Button.ContentTemplate>
+                        <DataTemplate>
+                            <Image Style="{DynamicResource DocumentExportButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                        </DataTemplate>
+                    </Button.ContentTemplate>
+                </Button>
+
+                <!--[skale][23/01/2020][GEOS2-1919]- GHRM - Org chart in excel-->
+                <Button Visibility="{Binding IsButtonVisible,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" Grid.Row="0" Grid.Column="7" Height="40" Width="40" HorizontalAlignment="Right" 
+                                Command="{Binding ExportToExcelButtonCommand}" Margin="5,0,5,0">
+                    <Button.CommandParameter>
+                        <MultiBinding Converter="{Converters:PrintExportConverter}">
+                            <Binding ElementName="diagramControl"/>
+                            <Binding ElementName="diagramControl1"/>
+                        </MultiBinding>
+                    </Button.CommandParameter>
+                    <Button.ToolTip>
+                        <TextBlock Text="{DynamicResource ButtonExportToExcel}"/>
+                    </Button.ToolTip>
+                    <Button.ContentTemplate>
+                        <DataTemplate>
+                            <Image Style="{DynamicResource ExcelExportButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                        </DataTemplate>
+                    </Button.ContentTemplate>
+                </Button>
+
+                <!-- Employee Image Check Box. -->
+                <CheckBox x:Name="chkEmpImage" IsChecked="True" Visibility="Collapsed"
+                                   HorizontalAlignment="Right" Height="40" Width="40" Grid.Row="0" Grid.Column="8"  Margin="5,0,5,0"  VerticalAlignment="Center">
+
+                </CheckBox>
+
+                <!-- Switch View -->
+                <dx:DropDownButton x:Name="dropdownButton" Content="Dropdown button" 
+                                   HorizontalAlignment="Right" Height="40" Width="40" Grid.Row="0" Grid.Column="8"  Margin="5,0,5,0"  VerticalAlignment="Center">
+                    <dx:DropDownButton.Style>
+                        <Style>
+                            <Setter Property="dx:DropDownButtonBase.ArrowAlignment" Value="Right"/>
+                            <Setter Property="dx:DropDownButtonBase.ArrowPadding" Value="0"/>
+                        </Style>
+                    </dx:DropDownButton.Style>
+                    <Button.ToolTip>
+                        <TextBlock Text="Switch View"/>
+                    </Button.ToolTip>
+                    <Button.ContentTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+
+                                </Grid.ColumnDefinitions>
+                                <Image Style="{ DynamicResource SwitchOrganizationImageStyle}" Grid.Column="0" Height="24" Width="24" Margin="-20"/>
+                            </Grid>
+                        </DataTemplate>
+                    </Button.ContentTemplate>
+                    <dxb:PopupMenu>
+                        <dxb:BarButtonItem Name="GridView" Content="Employee Detail View" Glyph="{DynamicResource SwitchEmployeeDetailsViewImageStyle}" Command="{Binding ShowEmployeeDetailViewCommand}">
+                            <dxb:BarButtonItem.Style>
+                                <Style>
+                                    <Style.Triggers>
+                                        <Trigger Property="dxb:BarButtonItem.IsMouseOver" Value="True">
+                                            <Setter Property="dxb:BarButtonItem.Glyph" Value="{DynamicResource SwitchEmployeeDetailsViewImageStyle}" />
+                                        </Trigger>
+                                        <Trigger Property="dxb:BarButtonItem.IsMouseOver" Value="False">
+                                            <Setter Property="dxb:BarButtonItem.Glyph" Value="{DynamicResource SwitchEmployeeDetailsViewImageStyle}" />
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </dxb:BarButtonItem.Style>
+                        </dxb:BarButtonItem>
+                        <dxb:BarButtonItem Name="CalendarView" Content="Employee Hierarchical View" Glyph="{DynamicResource SwitchEmployeeHierarchyImageStyle}" Command="{Binding ShowEmployeeHierarchicalViewCommand}">
+
+                        </dxb:BarButtonItem>
+                    </dxb:PopupMenu>
+                </dx:DropDownButton>
+            </Grid>
+        </Grid>
+
+
+
+        <Border BorderThickness="1" BorderBrush="{DynamicResource BorderBrushColor}" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
+            <Grid x:Name="EmployeeDetailsGrid" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" FocusManager.IsFocusScope="True"
+                  VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Background="{DynamicResource EmpDetailBackColor}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition>
+                        <ColumnDefinition.Style>
+                            <Style TargetType="ColumnDefinition">
+                                <Setter Property="Width" Value="200" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsAccordionControlVisible,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" Value="Collapsed">
+                                        <Setter Property="Width" Value="0" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ColumnDefinition.Style>
+                    </ColumnDefinition>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="3"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!--New-->
+
+                <Border BorderThickness="1" BorderBrush="{DynamicResource BorderBrushColor}" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="1">
+                    <dxa:AccordionControl x:Name="EmployeeDetailsView" Grid.Row="0" Grid.Column="0" 
+                                          ExpandMode="MultipleOrNone" SelectedItem="{Binding SelectedItem}"
+                                          SelectionUnit="SubItemOrRootItem" ShowSearchControl="True"
+                                          SearchControlFilterCondition="Contains" ItemsSource="{Binding EmployeeDepartments, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                          DisplayMemberPath="{Binding DepartmentName}"
+                                          ItemTemplateSelector ="{StaticResource accordianTemplateSelector}" 
+                                          ChildrenPath="Employees"
+                                          Visibility="{Binding IsEmployeeDetailViewVisible,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+                                          ScrollBarMode="TouchOverlap">
+                        <dxmvvm:Interaction.Triggers>
+                            <dxmvvm:EventToCommand EventName="SelectedItemChanged" Command="{Binding CommandDepartmentSelection}"
+                                                   PassEventArgsToCommand="True"/>
+                        </dxmvvm:Interaction.Triggers>
+                    </dxa:AccordionControl>
+                </Border>
+                <!--New-->
+
+                <!--toggle Button-->
+                <ToggleButton x:Name="expandButton"  Grid.Row="0" Grid.Column="1"  Command="{Binding HidePanelCommand}" Style="{StaticResource HideButtonStyle}" IsChecked="True" >
+                </ToggleButton>
+
+                <!--<GridSplitter x:Name="gridSplitter"/>-->
+                <ContentPresenter Grid.Column="2" Grid.ColumnSpan="4" Visibility="{Binding IsEmployeeDetailViewVisible,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+                                  Content="{Binding SelectedItem}"
+                                  ContentTemplateSelector="{StaticResource employeeDetailsTemplateSelector}" >
+                </ContentPresenter>
+
+                <!--ContentTemplate="{StaticResource departmentEmployeeDetailsTemplate}"-->
+
+                <dxa:AccordionControl x:Name="EmployeeHeirarchicalView" Grid.Row="0" Grid.Column="0"
+                                      ExpandMode="SingleOrNone" SelectedItem="{Binding SelectedItem}"
+                                      SelectionUnit="SubItemOrRootItem" ShowSearchControl="True"
+                                      Visibility="{Binding IsEmployeeHierarchicalViewVisible,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+                                      SearchControlFilterCondition="Contains" ItemsSource="{Binding EmployeeDepartments}"
+                                      DisplayMemberPath="{Binding DepartmentName}"
+                                      ItemTemplateSelector ="{StaticResource accordianTemplateSelector}">
+                    <dxmvvm:Interaction.Triggers>
+                        <dxmvvm:EventToCommand EventName="SelectedItemChanged"
+                                               Command="{Binding SelectedDepartmentChangedCommand}">
+                            <dxmvvm:EventToCommand.CommandParameter>
+                                <MultiBinding Converter="{Converters:ConverterForRefresh}">
+                                    <Binding ElementName="diagramControl1" />
+                                    <Binding ElementName="diagramControl" />
+                                </MultiBinding>
+                            </dxmvvm:EventToCommand.CommandParameter>
+                        </dxmvvm:EventToCommand>
+                    </dxmvvm:Interaction.Triggers>
+                </dxa:AccordionControl>
+
+
+                <!-- Use This ThemeName="Office2007Black" Theme For Diagram Control for scrollbar issue-->
+                <!--EmployeeHierarchy-->
+                <dxdiag:DiagramControl core:ThemeManager.ThemeName="Office2007Black" 
+                                       ScrollViewer.HorizontalScrollBarVisibility="Visible"
+                                       ScrollViewer.VerticalScrollBarVisibility="Visible"
+                                       x:Name="diagramControl"
+                                       Grid.Row="0" Grid.Column="2"
+                                       Grid.ColumnSpan="{Binding NormalColumnsSpan,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+                                       Visibility="{Binding IsEmployeeHierarchicalViewVisible, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" 
+                                       ToolboxVisibility="Closed" SelectedStencils="BasicShapes, ArrowShapes"
+                                       ShowGrid="false" ShowPageBreaks="false" ShowRulers="false" 
+                                       CanvasSizeMode="Fill" PointerToolDragMode="Selection" TipOverTreeLayoutOffset="40" TipOverTreeLayoutVerticalSpacing="40" TreeLayoutVerticalSpacing="50" TreeLayoutHorizontalSpacing="50" Theme="Linear">
+                    <dxmvvm:Interaction.Behaviors>
+                        <UIHelper:DiagramOrgChartBehaviorEx x:Name="orgChartBehavior" ItemsSource="{Binding DataContext.FinalEmployeeHierarchys,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,ElementName=diagramControl}" 
+                                                            KeyMember="ID" ParentMember="ParentID"
+                                                            ExpandSubordinatesButtonMode="None" LayoutKind="Tree"
+                                                            ItemTemplateSelector="{StaticResource itemTemplateSelector}"
+                                                            ConnectorTemplate="{StaticResource DiagramConnectorTemplate}">
+                        </UIHelper:DiagramOrgChartBehaviorEx>
+
+                    </dxmvvm:Interaction.Behaviors>
+                    <dxdiag:DiagramContainer CanMove="False" CanCopy="False" CanResize="False" CanRotate="False"/>
+                </dxdiag:DiagramControl>
+
+                <!--GridSplitter-->
+                <GridSplitter x:Name="gridSplitter2" Grid.Column="3" ResizeBehavior="PreviousAndNext" HorizontalAlignment="Stretch"
+                              Visibility="{Binding IsolatedDepartmentHierarchyIsVisible,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"/>
+
+                <!--IsolatedDepartmentHierarchy-->
+                <Border BorderBrush="{DynamicResource BorderBrushColor}" Grid.Row="0" Grid.Column="{Binding IsolatedColumn,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" 
+                        Grid.ColumnSpan="{Binding Source={x:Static HrmApplication:HrmCommon.Instance},Path=ColsSpan,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+                        BorderThickness="1" 
+                        Visibility="{Binding IsolatedDepartmentHierarchyIsVisible,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
+                    <dxdiag:DiagramControl x:Name="diagramControl1" core:ThemeManager.ThemeName="Office2007Black"
+                                           Grid.ColumnSpan="{Binding Source={x:Static HrmApplication:HrmCommon.Instance},Path=ColsSpan,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+                                           Visibility="{Binding IsolatedDepartmentHierarchyIsVisible,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+                                           ToolboxVisibility="Closed" SelectedStencils="BasicShapes, ArrowShapes" ShowGrid="false" ShowPageBreaks="false" ShowRulers="false" 
+                                           CanvasSizeMode="Fill" PointerToolDragMode="Selection" TipOverTreeLayoutOffset="40" TipOverTreeLayoutVerticalSpacing="40" TreeLayoutVerticalSpacing="50" Theme="Linear">
+                        <dxmvvm:Interaction.Behaviors>
+                            <dxdiag:DiagramOrgChartBehavior x:Name="orgChartBehavior1" ItemsSource="{Binding DataContext.EmployeeHierarchysforIsolatedDept,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,ElementName=diagramControl1}"
+                                                            KeyMember="ID" ParentMember="ParentID" 
+                                                            ExpandSubordinatesButtonMode="None" LayoutKind="TipOverTree"  
+                                                            ItemTemplateSelector="{StaticResource itemTemplateSelectorForIsoletedDepartment}"
+                                                            ConnectorTemplate="{StaticResource DiagramConnectorTemplate}">
+                            </dxdiag:DiagramOrgChartBehavior>
+                            <!--<dxmvvm:EventToCommand EventName="DiagramCustomLayoutItems" Command="{Binding DataContext.CustomLayoutItemsCommand}" PassEventArgsToCommand="True"/>-->
+                        </dxmvvm:Interaction.Behaviors>
+                        <dxdiag:DiagramContainer CanMove="False" CanCopy="False" CanResize="False" CanRotate="False"/>
+                    </dxdiag:DiagramControl>
+                </Border>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>
+
+

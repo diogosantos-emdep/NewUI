@@ -1,0 +1,595 @@
+﻿<UserControl x:Class="Emdep.Geos.Modules.Hrm.Views.DashboardView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.Hrm.Views"
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:sysglb="clr-namespace:System.Globalization;assembly=mscorlib"
+             xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+             xmlns:dxc="http://schemas.devexpress.com/winfx/2008/xaml/charts"
+             xmlns:dxet="http://schemas.devexpress.com/winfx/2008/xaml/editors/themekeys"
+             xmlns:dxb="http://schemas.devexpress.com/winfx/2008/xaml/bars"
+             xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+             xmlns:HrmApplication="clr-namespace:Emdep.Geos.Modules.Hrm"
+             xmlns:ViewModel="clr-namespace:Emdep.Geos.Modules.Hrm.ViewModels"
+             xmlns:behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+             xmlns:dxgt="http://schemas.devexpress.com/winfx/2008/xaml/grid/themekeys"
+             xmlns:dxi="http://schemas.devexpress.com/winfx/2008/xaml/core/internal"
+             xmlns:dxct="http://schemas.devexpress.com/winfx/2008/xaml/charts/themekeys"
+             xmlns:dxsch="http://schemas.devexpress.com/winfx/2008/xaml/scheduling"
+             xmlns:dxscht="http://schemas.devexpress.com/winfx/2008/xaml/scheduling/themekeys"
+             xmlns:dxschcore="http://schemas.devexpress.com/winfx/2008/xaml/scheduling/core"
+             xmlns:dxschc="http://schemas.devexpress.com/winfx/2008/xaml/scheduling/common"
+             xmlns:dxschv="http://schemas.devexpress.com/winfx/2008/xaml/scheduling/visual"
+             xmlns:Converters="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+             xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+             xmlns:dxdo="http://schemas.devexpress.com/winfx/2008/xaml/docking"
+             xmlns:ve="http://schemas.devexpress.com/winfx/2008/xaml/docking/visualelements"
+             mc:Ignorable="d" 
+             Style="{DynamicResource UserControlStyle}">
+    <UserControl.Resources>
+        <Converters:SchedulingAppointmentForegroundColorConverter x:Key="appointmentForegroundColorConverter"/>
+
+        <DataTemplate x:Key="AxisXLabelTemplate">
+            <ContentPresenter Content="{Binding Path=Content}">
+                <ContentPresenter.LayoutTransform>
+                    <RotateTransform Angle="-90" />
+                </ContentPresenter.LayoutTransform>
+            </ContentPresenter>
+        </DataTemplate>
+
+        <Style TargetType="{x:Type ve:AutoHideTray}">
+            <Setter Property="ItemsPanel">
+                <Setter.Value>
+                    <ItemsPanelTemplate>
+                        <ve:psvStackPanel HorizontalAlignment="Right" />
+                    </ItemsPanelTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <DataTemplate x:Key="AppointmentToolTipContentTemplate">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="2" Text="{Binding Description}" />
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="AppointmentContentTemplate">
+            <StackPanel Orientation="Horizontal">
+                <Image Height="20" Width="20" Margin="0,0,5,-2" Stretch="Fill">
+                    <Image.Style>
+                        <Style>
+                            <Style.Triggers>
+                                
+
+                                <DataTrigger Binding="{Binding Appointment.Location}" Value="TravelsDataTrain">
+                                    <Setter Property="Image.Source" Value="/Emdep.Geos.Modules.Hrm;component/Assets/Images/Train.png" />
+                                    <Setter Property="Image.ToolTip" Value="{DynamicResource EmployeesTravels}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Appointment.Location}" Value="TravelsDataCar">
+                                    <Setter Property="Image.Source" Value="/Emdep.Geos.Modules.Hrm;component/Assets/Images/Car.png" />
+                                    <Setter Property="Image.ToolTip" Value="{DynamicResource EmployeesTravels}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Appointment.Location}" Value="TravelsDataMotor">
+                                    <Setter Property="Image.Source" Value="/Emdep.Geos.Modules.Hrm;component/Assets/Images/motor.png" />
+                                    <Setter Property="Image.ToolTip" Value="{DynamicResource EmployeesTravels}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Appointment.Location}" Value="TravelsDataAir">
+                                    <Setter Property="Image.Source" Value="/Emdep.Geos.Modules.Hrm;component/Assets/Images/Air.png" />
+                                    <Setter Property="Image.ToolTip" Value="{DynamicResource EmployeesTravels}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Appointment.Location}" Value="Leave">
+                                    <Setter Property="Image.Source" Value="/Emdep.Geos.Modules.Hrm;component/Assets/Images/bLeave1.png" />
+                                    <Setter Property="Image.ToolTip" Value="{DynamicResource EmployeesLeave}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Appointment.Location}" Value="Document Expiry">
+                                    <Setter Property="Image.Source" Value="/Emdep.Geos.Modules.Hrm;component/Assets/Images/bDocumentExpiry.png" />
+                                    <Setter Property="Image.ToolTip" Value="{DynamicResource EmployeesDocumentExpiry}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Appointment.Location}" Value="Holidays">
+                                    <Setter Property="Image.Source" Value="/Emdep.Geos.Modules.Hrm;component/Assets/Images/bHolidays.png" />
+                                    <Setter Property="Image.ToolTip" Value="{DynamicResource CompanyHoliday}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Appointment.Location}" Value="Employee Exit">
+                                    <Setter Property="Image.Source" Value="/Emdep.Geos.Modules.Hrm;component/Assets/Images/bEmployeeExit.png" />
+                                    <Setter Property="Image.ToolTip" Value="{DynamicResource EmployeesExit}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Appointment.Location}" Value="Contract Expiry">
+                                    <Setter Property="Image.Source" Value="/Emdep.Geos.Modules.Hrm;component/Assets/Images/bContractExpiry.png" />
+                                    <Setter Property="Image.ToolTip" Value="{DynamicResource EmployeesContractExpiry}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Appointment.Location}" Value="Company Anniversary">
+                                    <Setter Property="Image.Source" Value="/Emdep.Geos.Modules.Hrm;component/Assets/Images/bAnniversary.png" />
+                                    <Setter Property="Image.ToolTip" Value="{DynamicResource EmployeesAnniversary}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Appointment.Location}" Value="Birthday">
+                                    <Setter Property="Image.Source" Value="/Emdep.Geos.Modules.Hrm;component/Assets/Images/bBirthday.png" />
+                                    <Setter Property="Image.ToolTip" Value="{DynamicResource EmployeesBirthday}" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Image.Style>
+                </Image>
+                <TextBlock TextAlignment="Center" Text="{Binding Appointment.Subject}" Foreground="{Binding Label, Converter={StaticResource appointmentForegroundColorConverter}}" />
+            </StackPanel>
+        </DataTemplate>
+
+        <Style x:Key="appointmentStyle" TargetType="dxschv:AppointmentControl">
+            <Setter Property="ShowInterval" Value="False"/>
+            <Setter Property="ShowDescription" Value="True"/>
+            <Setter Property="ShowStatus" Value="False" />
+        </Style>
+
+        <Style TargetType="dxschv:DayAppointmentControl">
+            <Setter Property="ToolTipService.IsEnabled" Value="False"/>
+        </Style>
+
+        <DataTemplate x:Key="appointmentFlyoutContentTemplate">
+            <dxlc:LayoutControl Width="250" Height="auto" IsHitTestVisible="False"  Orientation="Vertical" Padding="1,1,1,1">
+                <StackPanel Orientation="Vertical" >
+                    <dxschv:DayAppointmentControl  MinHeight="10"
+                                                    Panel.ZIndex="0"
+                                                    VerticalAlignment="Stretch"
+                                                    Content="{Binding}"
+                                                    ShowRecurrenceImage="False"
+                                                    ShowReminderImage="False"
+                                                    ShowInterval="False"
+                                                    ShowStatus="False"
+                                                    Foreground="{Binding Label, Converter={StaticResource appointmentForegroundColorConverter}}"
+                                                    Style="{DynamicResource {dxscht:SchedulerFlyoutThemeKey ResourceKey=Appointment}}" />
+                </StackPanel>
+
+                <dxlc:LayoutControl Margin="0,0,0,0" MinHeight="30"  VerticalAlignment="Stretch" Orientation="Vertical" Padding="0">
+                    <dxlc:LayoutItem  Style="{DynamicResource {dxscht:SchedulerFlyoutThemeKey ResourceKey=LayoutItem_Description}}">
+                        <dxlc:LayoutItem.Content>
+                            <TextBlock Text="{Binding Appointment.Description}" Margin="0,0,0,0" VerticalAlignment="Top"  Padding="0" />
+                        </dxlc:LayoutItem.Content>
+                    </dxlc:LayoutItem>
+                </dxlc:LayoutControl>
+
+            </dxlc:LayoutControl>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <Grid Background="{DynamicResource EmpDetailBackColor}" Margin="0,5,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+
+        <dxdo:DockLayoutManager Name="MainDockManager" Grid.Row="0" Margin="8 0 0 0">
+            <dxdo:LayoutGroup x:Name="RootMainGroup" Orientation="Horizontal" >
+                <dxdo:LayoutPanel x:Name="documentGroup" ShowCaption="False" ShowCloseButton="False" ShowBorder="False" >
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="45"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Label Content="{DynamicResource Dashboard}"  Style="{StaticResource LabelTitleStyle}"  Grid.Row="0" Grid.Column="0"  HorizontalAlignment="Left" />
+
+                        <Grid Grid.Column="1" Grid.Row="0" Grid.ColumnSpan="2" HorizontalAlignment="Right" >
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="AUTO"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions >
+                                <ColumnDefinition Width="AUTO"/>
+                                <ColumnDefinition Width="AUTO"/>
+                                <ColumnDefinition Width="AUTO"/>
+                                <ColumnDefinition Width="AUTO"/>
+                                <ColumnDefinition Width="AUTO"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!--Company-->
+                            <TextBlock Grid.Column="0" Grid.Row="0" Text="{DynamicResource CommonCompany}"  FontWeight="Bold" Margin="10,2,5,0"  HorizontalAlignment="Right" Height="25" IsEnabled="True"  />
+
+                            <dxe:ComboBoxEdit Style="{DynamicResource ComboBoxEditStyle}" Grid.Column="1" Grid.Row="0" Width="150" Height="30"                        
+                                                ItemsSource="{Binding Source={x:Static HrmApplication:HrmCommon.Instance}, Path=UserAuthorizedPlantsList}" Margin="5,0,5,0"
+                                                DisplayMember="ShortName"
+                                                EditValue="{Binding Source={x:Static HrmApplication:HrmCommon.Instance}, Path=SelectedAuthorizedPlantsList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                <dxe:ComboBoxEdit.StyleSettings>
+                                    <dxe:CheckedComboBoxStyleSettings />
+                                </dxe:ComboBoxEdit.StyleSettings>
+                                <dxmvvm:Interaction.Triggers>
+                                    <dxmvvm:EventToCommand EventName="PopupClosed"
+                                                            Command="{Binding DataContext.PlantOwnerPopupClosedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                                            PassEventArgsToCommand="True"/>
+                                </dxmvvm:Interaction.Triggers>
+                            </dxe:ComboBoxEdit>
+
+                            <!--Period-->
+                            <DockPanel Grid.Column="2" Grid.Row="0" HorizontalAlignment="Right"   VerticalAlignment="Center" Margin="5,0,0,0" >
+                                <Image Style="{DynamicResource CalendarImageStyle}" Width="30" Height="20" Margin="2,0,3,0" />
+                                <TextBlock Text="{DynamicResource AnnualSalesPerformanceViewPeriod}"  FontWeight="Bold" Margin="0,0,0,0" IsEnabled="True" />
+                            </DockPanel>
+
+                            <dxe:ComboBoxEdit Grid.Row="0" Grid.Column="3" 
+                                                Name="cmbPeriod"
+                                                IsTextEditable="False" Margin="5,0,0,0"
+                                                HorizontalAlignment="Left"
+                                                IsEnabled="True"
+                                                Height="30"
+                                                Width="100"
+                                                MaxLength="4" 
+                                                VerticalAlignment="Center" 
+                                                ItemsSource="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=FinancialYearLst, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                SelectedItem="{Binding Source={x:Static HrmApplication:HrmCommon.Instance}, Path=SelectedPeriod,UpdateSourceTrigger=PropertyChanged}">
+
+                                <dxe:ComboBoxEdit.StyleSettings>
+                                    <dxe:ComboBoxStyleSettings />
+                                </dxe:ComboBoxEdit.StyleSettings>
+
+                                <dxmvvm:Interaction.Triggers>
+                                    <dxmvvm:EventToCommand EventName="EditValueChanged"
+                                                           Command="{Binding DataContext.SelectedYearChangedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                                           PassEventArgsToCommand="True"/>
+                                </dxmvvm:Interaction.Triggers>
+                            </dxe:ComboBoxEdit>
+
+                            <!-- Refresh Button -->
+                            <Button Visibility="Visible" Grid.Row="0" Grid.Column="5" Height="40" Width="40" HorizontalAlignment="Right" 
+                                    Command="{Binding RefreshButtonCommand}"
+                                    Margin="5,0,0,0">
+                                <Button.ToolTip>
+                                    <TextBlock Text="{DynamicResource ButtonRefresh}"/>
+                                </Button.ToolTip>
+                                <Button.ContentTemplate>
+                                    <DataTemplate>
+                                        <Image Style="{DynamicResource RefreshButtonImageStyle}"  Height="24" Width="24" Margin="-20"/>
+                                    </DataTemplate>
+                                </Button.ContentTemplate>
+                            </Button>
+                        </Grid>
+
+                        <dxlc:LayoutControl Margin="0" Padding="0" Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                                            Grid.Column="0" Grid.ColumnSpan="3" Orientation="Vertical"
+                                            DragScrolling="False">
+
+                            <dxlc:LayoutGroup Orientation="Horizontal">
+                                <dxlc:LayoutGroup  View="GroupBox" Header="{DynamicResource TotalEmployees}"  Orientation="Vertical"   HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                                    <dxc:ChartControl Name="EmployeeTotal" CrosshairEnabled="True" BorderThickness="0"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" MinHeight="250"  DataSource="{Binding TotalEmployeeList,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" AutoLayout="False">
+                                        <dxc:ChartControl.Diagram>
+                                            <dxc:SimpleDiagram2D  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Name="simpleDiagram2D">
+                                                <dxc:SimpleDiagram2D.Series>
+                                                    <dxc:PieSeries2D  HoleRadiusPercent="60"   ArgumentDataMember="Alias"  ValueDataMember="EmployeesCount" LegendTextPattern="{}{A}">
+                                                        <!--region #Model-->
+                                                        <dxc:PieSeries2D.Model>
+                                                            <dxc:SimplePie2DModel />
+                                                        </dxc:PieSeries2D.Model>
+                                                        <!--endregion #Model-->
+                                                        <dxc:PieSeries2D.PointOptions>
+                                                            <dxc:PointOptions>
+                                                                <dxc:PointOptions.ValueNumericOptions>
+                                                                    <dxc:NumericOptions Format="Percent" Precision="0"  />
+                                                                </dxc:PointOptions.ValueNumericOptions>
+                                                            </dxc:PointOptions>
+                                                        </dxc:PieSeries2D.PointOptions>
+
+                                                        <dxc:PieSeries2D.TotalLabel>
+                                                            <dxc:PieTotalLabel x:Name="pieTotalLabel" TextPattern="{}{TV}">
+                                                                <dxc:PieTotalLabel.FontSize>
+                                                                    <MultiBinding Converter="{Converters:FontSizeConverter}" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                                                                        <Binding Path="DataContext.TotalEmployeeCount" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType={x:Type UserControl}}" />
+                                                                        <Binding ElementName="simpleDiagram2D" UpdateSourceTrigger="PropertyChanged" Path="ActualHeight"/>
+                                                                    </MultiBinding>
+                                                                </dxc:PieTotalLabel.FontSize>
+                                                            </dxc:PieTotalLabel>
+                                                        </dxc:PieSeries2D.TotalLabel>
+                                                    </dxc:PieSeries2D>
+                                                </dxc:SimpleDiagram2D.Series>
+                                            </dxc:SimpleDiagram2D>
+                                        </dxc:ChartControl.Diagram>
+                                        <dxc:ChartControl.Legend>
+                                            <dxc:Legend HorizontalPosition="Center" MinWidth="80"   HorizontalAlignment="Stretch"  VerticalAlignment="Stretch" VerticalPosition="BottomOutside" Orientation="Horizontal" FontSize="10"/>
+                                        </dxc:ChartControl.Legend>
+                                    </dxc:ChartControl>
+                                </dxlc:LayoutGroup>
+
+                                <dxlc:LayoutGroup  View="GroupBox" Header="{DynamicResource EmployeesByArea}"  Orientation="Vertical" IsCollapsible="False" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                                    <dxc:ChartControl Name="EmployeeByDepartmentChartControl" CrosshairEnabled="True" BorderThickness="0"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" MinHeight="250"  DataSource="{Binding EmployeeCountbyDepartmentArea,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" AutoLayout="False">
+                                        <dxc:ChartControl.Diagram>
+                                            <dxc:SimpleDiagram2D   HorizontalAlignment="Stretch" VerticalAlignment="Stretch" >
+                                                <dxc:SimpleDiagram2D.Series>
+                                                    <dxc:PieSeries2D HoleRadiusPercent="60"  ArgumentDataMember="Value" ValueDataMember="CountValue"  ColorDataMember="HtmlColor" LegendTextPattern="{}{A}">
+                                                        <!--region #Model-->
+                                                        <dxc:PieSeries2D.Model>
+                                                            <dxc:SimplePie2DModel />
+                                                        </dxc:PieSeries2D.Model>
+                                                        <!--endregion #Model-->
+                                                        <dxc:PieSeries2D.PointOptions>
+                                                            <dxc:PointOptions>
+                                                                <dxc:PointOptions.ValueNumericOptions>
+                                                                    <dxc:NumericOptions Format="Percent" Precision="0" />
+                                                                </dxc:PointOptions.ValueNumericOptions>
+                                                            </dxc:PointOptions>
+                                                        </dxc:PieSeries2D.PointOptions>
+                                                    </dxc:PieSeries2D>
+                                                </dxc:SimpleDiagram2D.Series>
+                                            </dxc:SimpleDiagram2D>
+                                        </dxc:ChartControl.Diagram>
+                                        <dxc:ChartControl.Legend>
+                                            <dxc:Legend HorizontalPosition="Center" MinWidth="80"   HorizontalAlignment="Stretch"  VerticalAlignment="Stretch" VerticalPosition="BottomOutside" Orientation="Horizontal" FontSize="10"/>
+                                        </dxc:ChartControl.Legend>
+                                    </dxc:ChartControl>
+                                </dxlc:LayoutGroup>
+
+                                <dxlc:LayoutGroup   View="GroupBox" Header="{DynamicResource EmployeesByGender}" Orientation="Vertical" IsCollapsible="False" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                                    <dxc:ChartControl Name="EmployeeByGenderChartControl" CrosshairEnabled="True" BorderThickness="0"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" MinHeight="250" DataSource="{Binding EmployeeCountByGender,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" AutoLayout="False">
+                                        <dxc:ChartControl.Diagram>
+                                            <dxc:SimpleDiagram2D   HorizontalAlignment="Center" VerticalAlignment="Center" >
+                                                <dxc:SimpleDiagram2D.Series>
+                                                    <dxc:PieSeries2D HoleRadiusPercent="60"  ArgumentDataMember="Value" ValueDataMember="Count" ColorDataMember="HtmlColor" LegendTextPattern="{}{A}">
+                                                        <!--region #Model-->
+                                                        <dxc:PieSeries2D.Model>
+                                                            <dxc:SimplePie2DModel />
+                                                        </dxc:PieSeries2D.Model>
+                                                        <!--endregion #Model-->
+                                                        <dxc:PieSeries2D.PointOptions>
+                                                            <dxc:PointOptions>
+                                                                <dxc:PointOptions.ValueNumericOptions>
+                                                                    <dxc:NumericOptions Format="Percent" Precision="0" />
+                                                                </dxc:PointOptions.ValueNumericOptions>
+                                                            </dxc:PointOptions>
+                                                        </dxc:PieSeries2D.PointOptions>
+                                                    </dxc:PieSeries2D>
+                                                </dxc:SimpleDiagram2D.Series>
+                                            </dxc:SimpleDiagram2D>
+                                        </dxc:ChartControl.Diagram>
+                                        <dxc:ChartControl.Legend>
+                                            <dxc:Legend HorizontalPosition="Center" MinWidth="80" HorizontalAlignment="Center" VerticalPosition="BottomOutside" Orientation="Horizontal" FontSize="10"/>
+                                        </dxc:ChartControl.Legend>
+                                    </dxc:ChartControl>
+                                </dxlc:LayoutGroup>
+
+                                <dxlc:LayoutGroup   View="GroupBox"  Header="{DynamicResource EmployeesByContractType}" Orientation="Vertical" IsCollapsible="False" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                                    <dxc:ChartControl Name="EmployeeByContractTypeChartControl" CrosshairEnabled="True" BorderThickness="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" MinHeight="250" DataSource="{Binding EmployeeCountByContract,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" AutoLayout="False">
+                                        <dxc:ChartControl.Diagram>
+                                            <dxc:SimpleDiagram2D   HorizontalAlignment="Center" VerticalAlignment="Center" >
+                                                <dxc:SimpleDiagram2D.Series>
+                                                    <dxc:PieSeries2D HoleRadiusPercent="60"  ArgumentDataMember="Name" ValueDataMember="EmployeeCount" ColorDataMember="HtmlColor" LegendTextPattern="{}{A}">
+                                                        <!--region #Model-->
+                                                        <dxc:PieSeries2D.Model>
+                                                            <dxc:SimplePie2DModel />
+                                                        </dxc:PieSeries2D.Model>
+                                                        <!--endregion #Model-->
+                                                        <dxc:PieSeries2D.PointOptions>
+                                                            <dxc:PointOptions>
+                                                                <dxc:PointOptions.ValueNumericOptions>
+                                                                    <dxc:NumericOptions Format="Percent" Precision="0" />
+                                                                </dxc:PointOptions.ValueNumericOptions>
+                                                            </dxc:PointOptions>
+                                                        </dxc:PieSeries2D.PointOptions>
+                                                    </dxc:PieSeries2D>
+                                                </dxc:SimpleDiagram2D.Series>
+                                            </dxc:SimpleDiagram2D>
+                                        </dxc:ChartControl.Diagram>
+                                        <dxc:ChartControl.Legend>
+                                            <dxc:Legend HorizontalPosition="Center"    HorizontalAlignment="Center"  MinWidth="80" VerticalPosition="BottomOutside" Orientation="Horizontal" FontSize="10"/>
+                                        </dxc:ChartControl.Legend>
+                                    </dxc:ChartControl>
+                                </dxlc:LayoutGroup>
+
+                            </dxlc:LayoutGroup>
+
+
+                            <dxlc:LayoutGroup Orientation="Horizontal">
+                                <dxlc:LayoutGroup  View="GroupBox"  Header="{DynamicResource EmployeesLengthOfServiceByDepartment}"  Orientation="Vertical" IsCollapsible="False" >
+                                    <dxc:ChartControl x:Name="LengthOfService" Height="280"  CrosshairEnabled="True" BorderThickness="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+                                                      DataSource="{Binding EmployeesLengthOfServiceByDepartment, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                        <dxc:ChartControl.Legend>
+                                            <dxc:Legend HorizontalPosition="Center" VerticalPosition="TopOutside"  Orientation="Horizontal"/>
+                                        </dxc:ChartControl.Legend>
+                                        <dxc:XYDiagram2D>
+
+                                            <dxc:XYDiagram2D.SecondaryAxesY>
+                                                <dxc:SecondaryAxisY2D x:Name="secondAxisY" Alignment="Far" >
+                                                    <dxc:SecondaryAxisY2D.Title>
+                                                        <dxc:AxisTitle Content="Record Count"/>
+                                                    </dxc:SecondaryAxisY2D.Title>
+                                                </dxc:SecondaryAxisY2D>
+                                            </dxc:XYDiagram2D.SecondaryAxesY>
+
+                                            <dxc:BarSideBySideSeries2D x:Name="firstSeries"
+                                                                       ArgumentDataMember="DepartmentName" ValueDataMember="YearsCount" DisplayName="Years"/>
+                                            <!--region #Series-->
+                                            <dxc:BarSideBySideSeries2D x:Name="secondSeries" 
+                                                                       ArgumentDataMember="DepartmentName" ValueDataMember="EmployeesRecordCount" DisplayName="Record Count"  AxisY="{Binding ElementName=secondAxisY}" />
+                                            <!--endregion #Series-->
+
+                                            <dxc:XYDiagram2D.AxisX>
+                                                <dxc:AxisX2D>
+                                                    <dxc:AxisX2D.Title>
+                                                        <dxc:AxisTitle Content="Department" />
+                                                    </dxc:AxisX2D.Title>
+                                                </dxc:AxisX2D>
+                                            </dxc:XYDiagram2D.AxisX>
+                                            <dxc:XYDiagram2D.AxisY>
+                                                <dxc:AxisY2D>
+                                                    <dxc:AxisY2D.Title>
+                                                        <dxc:AxisTitle Content="Years" />
+                                                    </dxc:AxisY2D.Title>
+                                                </dxc:AxisY2D>
+                                            </dxc:XYDiagram2D.AxisY>
+                                        </dxc:XYDiagram2D>
+                                    </dxc:ChartControl>
+                                </dxlc:LayoutGroup>
+
+
+                                <dxlc:LayoutGroup  View="GroupBox" Header="{DynamicResource EmployeesJobPositionHeadCount}"    Orientation="Vertical" IsCollapsible="False" >
+                                    <dxc:ChartControl x:Name="ChartJobPosition" CrosshairEnabled="True" BorderThickness="0" Height="280" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"  DataSource="{Binding EmployeeCountByJobPosition, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                        <dxc:ChartControl.Legend>
+                                            <dxc:Legend HorizontalPosition="Center" VerticalPosition="TopOutside"  Orientation="Horizontal"/>
+                                        </dxc:ChartControl.Legend>
+                                        <dxc:XYDiagram2D >
+                                            <dxc:XYDiagram2D.SecondaryAxesY>
+                                                <dxc:SecondaryAxisY2D x:Name="secondAxisYOfJobPosition" Alignment="Far" >
+                                                    <dxc:SecondaryAxisY2D.Title>
+                                                        <dxc:AxisTitle Content="Record Count"/>
+                                                    </dxc:SecondaryAxisY2D.Title>
+                                                </dxc:SecondaryAxisY2D>
+                                            </dxc:XYDiagram2D.SecondaryAxesY>
+                                            <dxc:BarSideBySideSeries2D x:Name="firstSeriesOfJobPosition" ArgumentDataMember="JobDescriptionTitle" ValueDataMember="YearsCount"  DisplayName="Years" />
+                                            <dxc:BarSideBySideSeries2D x:Name="secondSeriesOfJobPosition" 
+                                                                       ArgumentDataMember="JobDescriptionTitle" ValueDataMember="EmployeeRecordCount"  AxisY="{Binding ElementName=secondAxisYOfJobPosition}" DisplayName="Record Count"/>
+                                            <dxc:XYDiagram2D.AxisX>
+                                                <dxc:AxisX2D>
+                                                    <dxc:AxisX2D.Title>
+                                                        <dxc:AxisTitle Content="Job Position" />
+                                                    </dxc:AxisX2D.Title>
+                                                </dxc:AxisX2D>
+                                            </dxc:XYDiagram2D.AxisX>
+                                            <dxc:XYDiagram2D.AxisY>
+                                                <dxc:AxisY2D>
+                                                    <dxc:AxisY2D.Title>
+                                                        <dxc:AxisTitle Content="Years" />
+                                                    </dxc:AxisY2D.Title>
+                                                </dxc:AxisY2D>
+                                            </dxc:XYDiagram2D.AxisY>
+                                        </dxc:XYDiagram2D>
+                                    </dxc:ChartControl>
+                                </dxlc:LayoutGroup>
+                            </dxlc:LayoutGroup>
+                        </dxlc:LayoutControl>
+                    </Grid>
+                </dxdo:LayoutPanel>
+            </dxdo:LayoutGroup>
+
+            <!--DailyEvents-->
+            <dxdo:DockLayoutManager.AutoHideGroups>
+
+                <dxdo:AutoHideGroup DockType="Bottom" AutoHideSize="100,400">
+                    <dxdo:LayoutPanel dxdo:AutoHideGroup.AutoHideType="Bottom" AllowSizing="True" 
+                                      AllowMaximize="True" AllowMinimize="True" 
+                                      CaptionHorizontalAlignment="Left" AllowClose="False" AllowDrag="False">
+
+                        <dxdo:LayoutPanel.ControlBoxContentTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <Image Style="{DynamicResource AppointmentFilterImageForDashboardStyle}" HorizontalAlignment="Right" Width="24" Height="24" Margin="7,0,3,0">
+                                        <Image.ToolTip>Filter</Image.ToolTip>
+                                    </Image>
+
+                                    <TextBlock Text="Filter :" FontWeight="Bold" Margin="5,2,5,0" Style="{DynamicResource FilterTextBlockStyle}" />
+
+                                    <dxe:ComboBoxEdit Style="{DynamicResource ComboBoxEditStyle}"
+                                                        ItemsSource="{Binding DataContext.AppointmentType, 
+                                                        RelativeSource={RelativeSource AncestorType=dxdo:LayoutPanel}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                                        Margin="5,0,0,0" Height="30" Width="200" VerticalAlignment="Stretch"
+                                                        EditValue="{Binding DataContext.SelectedAppointmentType, 
+                                                        RelativeSource={RelativeSource AncestorType=dxdo:LayoutPanel}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                        <dxe:ComboBoxEdit.StyleSettings>
+                                            <dxe:CheckedComboBoxStyleSettings />
+                                        </dxe:ComboBoxEdit.StyleSettings>
+                                    </dxe:ComboBoxEdit>
+                                </StackPanel>
+                            </DataTemplate>
+                        </dxdo:LayoutPanel.ControlBoxContentTemplate>
+
+                        <dxdo:LayoutPanel.CaptionTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{DynamicResource EmployeesDailyEvents}" VerticalAlignment="Center" />
+                                    <Grid Margin="10,0,0,0" Height="20" Width="30" 
+                                          Visibility="{Binding TodaysTotalAppointmentVisibility}">
+                                        <Ellipse Height="20" Fill="Red" Width="30" Stroke="White" StrokeThickness="1" />
+                                        <TextBlock Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                   FontWeight="Bold" TextAlignment="Center" TextWrapping="Wrap" >
+                                            <TextBlock.Style>
+                                                <Style TargetType="{x:Type TextBlock}">
+                                                    <Setter Property="Foreground" Value="White" />
+                                                    <Setter Property="FontSize" Value="10" />
+                                                    <Setter Property="Text" Value="{Binding TodaysTotalAppointment}" />
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </Grid>
+                                </StackPanel>
+                            </DataTemplate>
+                        </dxdo:LayoutPanel.CaptionTemplate>
+
+                        <UIHelper:SchedulerControlEx x:Name="scheduler" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                                     AllowInplaceEditor="False" AllowAppointmentResize="False"
+                                                     FlyoutContentTemplate="{StaticResource appointmentFlyoutContentTemplate}"
+                                                     AllowAppointmentEdit="True" AllowAppointmentDrag="False"  AllowAppointmentConflicts="True" >
+
+                            <dxsch:SchedulerControl.DataSource>
+                                <dxsch:DataSource x:Name="source" AppointmentLabelsSource="{Binding LabelItems}" 
+                                                  AppointmentsSource="{Binding FilterAppointments,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" >
+                                    <dxsch:DataSource.AppointmentMappings>
+                                        <dxsch:AppointmentMappings AllDay="AllDay" 
+                                                                   Description="Description"
+                                                                   End="EndDate"
+                                                                   Id="UniqueID"
+                                                                   LabelId="Label"
+                                                                   Type="Type"
+                                                                   Location="Location"
+                                                                   QueryEnd="QueryEnd"
+                                                                   QueryStart="QueryStart"
+                                                                   Reminder="ReminderInfo"
+                                                                   ResourceId="ResourceIDs"
+                                                                   RecurrenceInfo="RecurrenceInfo"
+                                                                   Start="StartDate"
+                                                                   StatusId="Status"
+                                                                   Subject="Subject">
+                                            <dxsch:CustomFieldMapping Mapping="IdEmployeeLeave" Name="IdEmployeeLeave" />
+                                            <dxsch:CustomFieldMapping Mapping="IsAllDayEvent" Name="IsAllDayEvent" />
+                                            <dxsch:CustomFieldMapping Mapping="EmployeeCode" Name="EmployeeCode" />
+                                            <dxsch:CustomFieldMapping Mapping="IdEmployee" Name="IdEmployee" />
+                                        </dxsch:AppointmentMappings>
+                                    </dxsch:DataSource.AppointmentMappings>
+                                    <dxsch:DataSource.AppointmentLabelMappings>
+                                        <dxsch:AppointmentLabelMappings Caption="Caption" Id="Id" >
+                                            <dxsch:AppointmentLabelMappings.Color>
+                                                <dxsch:Mapping ConversionBehavior="InPlaceOfMapping" Converter="{dxmvvm:BrushToColorConverter}" FieldName="Color" />
+                                            </dxsch:AppointmentLabelMappings.Color>
+                                        </dxsch:AppointmentLabelMappings>
+                                    </dxsch:DataSource.AppointmentLabelMappings>
+                                </dxsch:DataSource>
+                            </dxsch:SchedulerControl.DataSource>
+
+                            <dxsch:TimelineView AppointmentStyle="{StaticResource appointmentStyle}" 
+                                                AppointmentContentTemplate="{StaticResource AppointmentContentTemplate}" AppointmentMinHeight="35">
+                                <dxsch:TimelineView.TimeScales>
+                                    <dxsch:TimeScaleWeek x:Name="scaleWeek" DisplayFormat="{}{0:dddd, dd MMMM yyyy} - {1:dddd, dd MMMM yyyy}"/>
+                                    <dxsch:TimeScaleDay x:Name="scaleDay" DisplayFormat="{}{0:dd ddd}"/>
+                                </dxsch:TimelineView.TimeScales>
+                            </dxsch:TimelineView>
+
+                            <dxmvvm:Interaction.Triggers>
+                                <dxmvvm:EventToCommand EventName="AppointmentWindowShowing"
+                                                       Command="{Binding DisableAppointmentCommand}" 
+                                                       PassEventArgsToCommand="True"/>
+
+                                <dxmvvm:EventToCommand EventName="PopupMenuShowing"
+                                                       Command="{Binding PopupMenuShowingCommand}"
+                                                       PassEventArgsToCommand="True"/>
+
+                                <dxmvvm:EventToCommand EventName="PreviewKeyDown"
+                                                       Command="{Binding DeleteAppointmentCommand}" 
+                                                       PassEventArgsToCommand="True"/>
+
+                                <dxmvvm:EventToCommand EventName="VisibleIntervalsChanged"
+                                                       Command="{Binding scheduler_VisibleIntervalsChangedCommand}" CommandParameter="{Binding ElementName=scheduler}"
+                                                       PassEventArgsToCommand="True"/>
+                            </dxmvvm:Interaction.Triggers>
+
+                        </UIHelper:SchedulerControlEx>
+                    </dxdo:LayoutPanel>
+                </dxdo:AutoHideGroup>
+            </dxdo:DockLayoutManager.AutoHideGroups>
+            <!--end-->
+        </dxdo:DockLayoutManager>
+    </Grid>
+</UserControl>

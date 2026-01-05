@@ -1,0 +1,496 @@
+﻿<UserControl xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid" 
+             xmlns:dxgt="http://schemas.devexpress.com/winfx/2008/xaml/grid/themekeys"
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:ViewModels="clr-namespace:Emdep.Geos.Modules.Crm.ViewModels"
+             xmlns:i="http://schemas.microsoft.com/expression/2008/interactivity"
+             xmlns:dxp="http://schemas.devexpress.com/winfx/2008/xaml/printing"
+             xmlns:Interactive="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity" 
+             xmlns:Behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+             xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+             mc:Ignorable="d" 
+             x:Class="Emdep.Geos.Modules.Crm.Views.ContactView"
+             Style="{DynamicResource UserControlStyle}">
+
+    <UserControl.Resources>
+        <ControlTemplate x:Key="detailContainerTemplate" TargetType="{x:Type ContentControl}">
+            <Border BorderThickness="0,1,0,0" BorderBrush="{TemplateBinding BorderBrush}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Padding="12,12,12,12" Background="{TemplateBinding Background}">
+                <ContentControl/>
+            </Border>
+        </ControlTemplate>
+
+        <DataTemplate x:Key="DetailCoreTemplate">
+            <dx:MeasurePixelSnapper/>
+        </DataTemplate>
+
+        <DataTemplate x:Key="expandableRowDetailTemplate">
+            <StackPanel Orientation="Vertical">
+                <dx:MeasurePixelSnapper>
+                    <ContentPresenter x:Name="defaultRowPresenter" Content="{Binding}" ContentTemplate="{Binding View.DefaultDataRowTemplate}" />
+                </dx:MeasurePixelSnapper>
+                <dx:DXExpander IsExpanded="{Binding IsSelected}" HorizontalExpand="None" VerticalExpand="FromTopToBottom">
+                    <dxg:RowDetailContainerControl Template="{StaticResource detailContainerTemplate}" Content="{Binding}" ContentTemplate="{DynamicResource DetailCoreTemplate}" />
+                </dx:DXExpander>
+            </StackPanel>
+        </DataTemplate>
+
+        <Style x:Key="myLBStyle" TargetType="{x:Type ListBoxItem}">
+            <Style.Resources>
+                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="Transparent"/>
+            </Style.Resources>
+        </Style>
+
+    </UserControl.Resources>
+
+    <!--<UserControl.DataContext>
+        <ViewModels:ContactViewModel/>
+    </UserControl.DataContext>-->
+
+    <Grid>
+        <DockPanel LastChildFill="True">
+            <Grid DockPanel.Dock="Top" Margin="0,10,0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="0" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <Label Content="{DynamicResource ContactViewHeader}" VerticalAlignment="Bottom" Margin="10,0,0,0" Style="{DynamicResource LabelTitleStyle}" Grid.Column="0"/>
+
+                <!-- Sales Owner -->
+                <DockPanel Grid.Column="3" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=CmbSalesOwnerUsers}" >
+                    <Image Style="{DynamicResource OwnerGroupImageStyle}" Width="24" Height="24" Margin="7,0,3,0" />
+                    <TextBlock Text="{DynamicResource CommonSalesOwner}"  FontWeight="Bold" Margin="5,2,5,0" />
+                </DockPanel>
+
+                <dxe:ComboBoxEdit Style="{DynamicResource ComboBoxEditStyle}" Grid.Column="4" Width="150" Height="40"
+                                      Visibility="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=CmbSalesOwnerUsers}"
+                                      ItemsSource="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=SalesOwnerUsersList}" Margin="5,0,5,0"
+                                      DisplayMember="User.FullName"
+                                      EditValue="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=SelectedSalesOwnerUsersList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                    <dxe:ComboBoxEdit.StyleSettings>
+                        <dxe:CheckedComboBoxStyleSettings />
+                    </dxe:ComboBoxEdit.StyleSettings>
+                    <dxmvvm:Interaction.Triggers>
+                        <dxmvvm:EventToCommand EventName="PopupClosed"
+                                               Command="{Binding DataContext.SalesOwnerPopupClosedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                               PassEventArgsToCommand="True"/>
+                    </dxmvvm:Interaction.Triggers>
+                </dxe:ComboBoxEdit>
+
+                <!-- Plant Owner -->
+                <DockPanel Grid.Column="3" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=CmbPlantOwnerUsers}" >
+                    <Image Style="{DynamicResource PlantOwnerImageStyle}" Width="24" Height="24" Margin="7,0,3,0" />
+                    <TextBlock Text="{DynamicResource CommonPlantOwner}"  FontWeight="Bold" Margin="5,2,5,0" />
+                </DockPanel>
+
+                <dxe:ComboBoxEdit Style="{DynamicResource ComboBoxEditStyle}" Grid.Column="4" Width="150" Height="40"
+                                      Visibility="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=CmbPlantOwnerUsers}"
+                                      ItemsSource="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=PlantOwnerUsersList}" Margin="5,0,5,0"
+                                      DisplayMember="ShortName"
+                    EditValue="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=SelectedPlantOwnerUsersList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                    <dxe:ComboBoxEdit.StyleSettings>
+                        <dxe:CheckedComboBoxStyleSettings />
+                    </dxe:ComboBoxEdit.StyleSettings>
+                    <dxmvvm:Interaction.Triggers>
+                        <dxmvvm:EventToCommand EventName="PopupClosed"
+                                               Command="{Binding DataContext.PlantOwnerPopupClosedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                               PassEventArgsToCommand="True"/>
+                    </dxmvvm:Interaction.Triggers>
+                </dxe:ComboBoxEdit>
+
+
+                <Button Content=" " Height="40" Width="40" Command="{Binding AddContactCommand }" CommandParameter="{Binding ElementName=ContactTableView}" 
+                        HorizontalAlignment="Right" Grid.Column="5"  Margin="0,0,5,0"
+                        IsEnabled="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsPermissionEnabled}">
+                    <Button.ToolTip>
+                        <TextBlock Text="{DynamicResource AddContactViewHeader}"/>
+                    </Button.ToolTip>
+                    <Button.ContentTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Image Style="{DynamicResource AddButtonImageStyle}" Grid.Column="0" Height="24" Width="24" Margin="-10"/>
+                            </Grid>
+                        </DataTemplate>
+                    </Button.ContentTemplate>
+                </Button>
+
+                <Button Content=" " Height="40" Width="40" Command="{Binding ImportContactCommand}" HorizontalAlignment="Right" 
+                        Grid.Column="6" Visibility="Hidden" Margin="0,0,5,0" CommandParameter="{Binding ElementName=ContactTableView}"
+                        IsEnabled="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsPermissionEnabled}">
+                    <Button.ToolTip>
+                        <TextBlock Text="{DynamicResource ImportContactViewHeader}"/>
+                    </Button.ToolTip>
+                    <Button.ContentTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Image Style="{DynamicResource ImportButtonImageStyle}" Grid.Column="0" Height="24" Width="24" Margin="-10"/>
+                            </Grid>
+                        </DataTemplate>
+                    </Button.ContentTemplate>
+                </Button>
+
+                <Button Content=" " Height="40" Width="40" Command="{Binding ExportContactCommand}" CommandParameter="{Binding ElementName=ContactTableView}" HorizontalAlignment="Right" Grid.Column="7" Visibility="Visible" Margin="0,0,5,0">
+                    <Button.ToolTip>
+                        <TextBlock Text="{DynamicResource ExportContactViewHeader}"/>
+                    </Button.ToolTip>
+                    <Button.ContentTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Image Style="{DynamicResource ExportButtonImageStyle}" Grid.Column="0" Height="24" Width="24" Margin="-10"/>
+                            </Grid>
+                        </DataTemplate>
+                    </Button.ContentTemplate>
+                </Button>
+
+                <Button Content=" " Height="40" Width="40" Grid.Column="8" Command="{Binding RefreshContactViewCommand}" CommandParameter="{Binding ElementName=ContactTableView}" HorizontalAlignment="Right" Margin="0,0,5,0">
+                    <Button.ToolTip>
+                        <TextBlock Text="{DynamicResource ButtonRefresh}"/>
+                    </Button.ToolTip>
+                    <Button.ContentTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Image Style="{ DynamicResource RefreshButtonImageStyle}" Grid.Column="0" Height="24" Width="24" Margin="-10"/>
+                            </Grid>
+                        </DataTemplate>
+                    </Button.ContentTemplate>
+                </Button>
+
+                <Button Content=" " Height="40" Width="40" Command="{Binding PrintButtonCommand}" CommandParameter="{Binding ElementName=ContactTableView}" HorizontalAlignment="Right" Grid.Column="9" Margin="0,0,5,0">
+                    <Button.ToolTip>
+                        <TextBlock Text="{DynamicResource ButtonPrint}"/>
+                    </Button.ToolTip>
+                    <Button.ContentTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Image Style="{DynamicResource PrinterButtonImageStyle}" Grid.Column="0" Height="24" Width="24" Margin="-10"/>
+                            </Grid>
+                        </DataTemplate>
+                    </Button.ContentTemplate>
+                </Button>
+
+                <Button Content=" " Height="40" Width="40"  HorizontalAlignment="Right" Grid.Column="10" Margin="0,0,5,0"
+                    Command="{Binding ExportButtonCommand}" CommandParameter="{Binding ElementName=ContactTableView}" >
+                    <Button.ToolTip>
+                        <TextBlock Text="{DynamicResource ButtonExportToExcel}"/>
+                    </Button.ToolTip>
+                    <Button.ContentTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Image Style="{ DynamicResource ExcelExportButtonImageStyle}" Grid.Column="0" Height="24" Width="24" Margin="-10"/>
+                            </Grid>
+                        </DataTemplate>
+                    </Button.ContentTemplate>
+                </Button>
+
+            </Grid>
+
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <StackPanel Orientation="Horizontal" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Center" >
+                    <Button Content="All" Command="{Binding ForSellectAllCommand}" Style="{DynamicResource NewButton20Style}" Width="40"/>
+                    <ListBox ItemsSource="{Binding Letters}" x:Name="dxListBox" Style="{DynamicResource ListBox20Style}" SelectedValue="{Binding SelectedLetter, Mode=TwoWay}"
+                             ScrollViewer.VerticalScrollBarVisibility="Hidden" HorizontalAlignment="Stretch" BorderBrush="Transparent" BorderThickness="0"
+                             ItemContainerStyle="{DynamicResource ListBoxItemItemTemplateStyle}">
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal"/>
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
+                    </ListBox>
+                </StackPanel>
+
+                <dxg:GridControl x:Name="grid" Grid.Row="1" ItemsSource="{Binding PeopleContacts, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="Auto" Height="Auto"
+                                 FilterString="{Binding FilterStringForName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" SelectionMode="Row"
+                                 SelectedItem="{Binding SelectedObject, Mode=TwoWay}"  ImplyNullLikeEmptyStringWhenFiltering="True" >
+
+                    <dxg:GridColumn FieldName="UserGender" Header=" " MinWidth="60" Width="70" MaxWidth="70"  ReadOnly="True" FilterPopupMode="CheckedList">
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <Image Height="30" Width="30">
+                                    <Image.Style>
+                                        <Style>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Value}" Value="Male">
+                                                    <Setter Property="Image.Source" Value="{DynamicResource ContactPersonMaleWhiteImageStyle}"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Value}" Value="Female">
+                                                    <Setter Property="Image.Source" Value="{DynamicResource ContactPersonFemaleWhiteImageStyle}"/>
+                                                </DataTrigger>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding Value}" Value="Male"/>
+                                                        <Condition Binding="{Binding RowData.SelectionState}" Value="None"/>
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="Image.Source" Value="{DynamicResource ContactPersonMaleImageStyle}"/>
+                                                </MultiDataTrigger>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding Value}" Value="Male"/>
+                                                        <Condition Binding="{Binding RowData.SelectionState}" Value="Focused"/>
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="Image.Source" Value="{DynamicResource ContactPersonMaleWhiteImageStyle}"/>
+                                                </MultiDataTrigger>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding Value}" Value="Female"/>
+                                                        <Condition Binding="{Binding RowData.SelectionState}" Value="None"/>
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="Image.Source" Value="{DynamicResource ContactPersonFemaleImageStyle}"/>
+                                                </MultiDataTrigger>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding Value}" Value="Female"/>
+                                                        <Condition Binding="{Binding RowData.SelectionState}" Value="Focused"/>
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="Image.Source" Value="{DynamicResource ContactPersonFemaleWhiteImageStyle}"/>
+                                                </MultiDataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Image.Style>
+                                </Image>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                        <dxg:GridColumn.PrintCellStyle>
+                            <Style TargetType="dxe:BaseEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                                <Setter Property="dxp:ExportSettings.TargetType" Value="Image" />
+                                <Setter Property="dxp:ImageExportSettings.ForceCenterImageMode" Value="True" />
+                                <Setter Property="dxp:ImageExportSettings.ImageRenderMode" Value="UseImageSource" />
+                                <Setter Property="dxp:ImageExportSettings.ImageSource">
+                                    <Setter.Value>
+                                        <Image Source="{dx:DXImage Image={x:Null}}" Stretch="None" />
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Value}" Value="Male">
+                                        <Setter Property="dxp:ImageExportSettings.ImageSource">
+                                            <Setter.Value>
+                                                <Image Source="{DynamicResource ContactPersonMaleBlueImageStyle16x16}" Stretch="Fill" />
+                                            </Setter.Value>
+                                        </Setter>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Value}" Value="Female">
+                                        <Setter Property="dxp:ImageExportSettings.ImageSource">
+                                            <Setter.Value>
+                                                <Image Source="{DynamicResource ContactPersonFemaleBlueImageStyle16x16}" Stretch="Fill" />
+                                            </Setter.Value>
+                                        </Setter>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </dxg:GridColumn.PrintCellStyle>
+                    </dxg:GridColumn>
+
+                    <dxg:GridColumn FieldName="Name" Header="{DynamicResource ContactViewFirstName}" MinWidth="60" Width="150" MaxWidth="200"  ReadOnly="True" FilterPopupMode="CheckedList" />
+                    <dxg:GridColumn FieldName="Surname" Header="{DynamicResource ContactViewLastName}" MinWidth="60" Width="200" MaxWidth="200" ReadOnly="True" FilterPopupMode="CheckedList"  />
+                    <dxg:GridColumn FieldName="CompanyDepartment.Value" Header="{DynamicResource ContactViewDepartment}"  Width="200" ReadOnly="True" FilterPopupMode="CheckedList"  />
+                    <dxg:GridColumn FieldName="JobTitle" Header="{DynamicResource ContactViewJobTitle}"  Width="200"  ReadOnly="True" FilterPopupMode="CheckedList"  />
+                    <dxg:GridColumn FieldName="Phone"  Header ="{DynamicResource ContactViewTelephone}" MinWidth="60" Width="200" MaxWidth="300" ReadOnly="True" FilterPopupMode="CheckedList" />
+
+                    <dxg:GridColumn FieldName="Email" Header="{DynamicResource ContactViewEmail}"  MinWidth="200" Width="200" MaxWidth="300" ReadOnly="True" FilterPopupMode="CheckedList"  >
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock  Margin="5,0,0,0" VerticalAlignment="Center">
+                                    <Hyperlink TargetName="_blank" 
+                                               Command="{Binding View.DataContext.HyperlinkForEmail}" 
+                                               CommandParameter="{Binding Data.Email}"
+                                               Style="{DynamicResource hyperlinkGridStyle}">
+                                        <InlineUIContainer>
+                                            <TextBlock Text="{Binding Data.Email}" Style="{DynamicResource HyperlinkTextBlock}" TextDecorations="Underline"/>
+                                        </InlineUIContainer>
+                                    </Hyperlink>
+                                </TextBlock>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+
+                    <dxg:GridColumn FieldName="CreatedIn" Header="{DynamicResource ContactViewCreationDate}" MinWidth="60" Width="200" MaxWidth="200" ReadOnly="True" FilterPopupMode="CheckedList"  />
+                    <dxg:GridColumn Binding="{Binding Company.Customers[0].CustomerName}" Header="{DynamicResource ContactViewGroup}"  MinWidth="60" Width="150" ReadOnly="True" FilterPopupMode="CheckedList"  />
+                    <dxg:GridColumn FieldName="Company.Name" Header="{DynamicResource ContactViewPlant}"  MinWidth="60" Width="150" ReadOnly="True" FilterPopupMode="CheckedList"  />
+                    <dxg:GridColumn FieldName="Company.Country.Name" Header="{DynamicResource ContactViewCountry}"  MinWidth="100" Width="150" ReadOnly="True" FilterPopupMode="CheckedList"  />
+                    <dxg:GridColumn FieldName="Company.Country.Zone.Name" Header="{DynamicResource ContactViewRegion}"  MinWidth="100" Width="150" ReadOnly="True" FilterPopupMode="CheckedList"  />
+
+                    <dxg:GridColumn FieldName="Company.Address" Header="{DynamicResource ContactViewAddress}"  MinWidth="60" Width="150" ReadOnly="True" Visible="False" ShowInColumnChooser="True" FilterPopupMode="CheckedList"/>
+                    <dxg:GridColumn FieldName="Company.City" Header="{DynamicResource ContactViewCity}"  MinWidth="60" Width="150" ReadOnly="True" Visible="False" ShowInColumnChooser="True" FilterPopupMode="CheckedList"/>
+                    <dxg:GridColumn FieldName="Company.Region" Header="{DynamicResource ContactViewState}"  MinWidth="50" Width="150" ReadOnly="True" Visible="False" ShowInColumnChooser="True" FilterPopupMode="CheckedList"/>
+                    <dxg:GridColumn FieldName="Company.ZipCode" Header="{DynamicResource ContactViewZip}"  MinWidth="60" Width="150" ReadOnly="True" Visible="False" ShowInColumnChooser="True" FilterPopupMode="CheckedList"/>
+
+                    <dxg:GridColumn FieldName="Company.People.FullName" Name="People" ReadOnly="True" Visible="False" ShowInColumnChooser="False"/>
+                    <dxg:GridColumn FieldName="Company.PeopleSalesResponsibleAssemblyBU.FullName" Name="PeopleSalesResponsibleAssemblyBU"  ShowInColumnChooser="False" ReadOnly="True" Visible="False"/>
+
+                    <dxg:GridColumn FieldName="SalesOwner" Name="SalesOwner"
+                                    MinWidth="60" Width="150"
+                                    Visible="{Binding SaleOwnerVisibility, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                                    Header="{DynamicResource AccountViewSalesOwner}"
+                                    ColumnFilterMode="DisplayText"
+                                    ShowInColumnChooser="False"
+                                    UnboundType="String" 
+                                    ReadOnly="True" AllowUnboundExpressionEditor="True"
+                                    FilterPopupMode="CheckedList">
+                        <!--<dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Vertical">
+                                    <TextBlock Text="{Binding RowData.Row.Company.People.FullName}" Margin="5 0"/>
+                                    <TextBlock Text="{Binding RowData.Row.Company.PeopleSalesResponsibleAssemblyBU.FullName}" Margin="5 0"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>-->
+                        <dxg:GridColumn.PrintCellStyle>
+                            <Style TargetType="dxe:BaseEdit" BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+                                <Setter Property="dxp:ExportSettings.TargetType" Value="Panel" />
+                                <Setter Property="DisplayTemplate">
+                                    <Setter.Value>
+                                        <ControlTemplate >
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                                <dxe:TextEdit EditValue="{Binding Value}" IsPrintingMode="True" HorizontalContentAlignment="Left" />
+                                            </StackPanel>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </dxg:GridColumn.PrintCellStyle>
+                    </dxg:GridColumn>
+
+                    <dxg:GridColumn FieldName="ProductInvolved.Value" Header="{DynamicResource ContactViewProductInvolved}"  MinWidth="60" Width="150" ReadOnly="True" Visible="False" ShowInColumnChooser="True" FilterPopupMode="CheckedList"  />
+                    <dxg:GridColumn FieldName="InfluenceLevel.Value" Header="{DynamicResource ContactViewInfluenceLevel}"  MinWidth="60" Width="150" ReadOnly="True" Visible="False" ShowInColumnChooser="True" FilterPopupMode="CheckedList" />
+                    <dxg:GridColumn FieldName="EmdepAffinity.Value" Header="{DynamicResource ContactViewEmdepAffinity}"  MinWidth="60" Width="150" ReadOnly="True" Visible="False" ShowInColumnChooser="True" FilterPopupMode="CheckedList"/>
+                    <dxg:GridColumn FieldName="Competitor.Name" Header="{DynamicResource ContactViewCompetitorAffinity}"  MinWidth="60" Width="150" ReadOnly="True" ShowInColumnChooser="True" Visible="False" FilterPopupMode="CheckedList"   />
+
+                    <dxg:GridColumn Width="40" FieldName=""  AllowSorting="False" MaxWidth="40" FixedWidth="True" Fixed="Right" HorizontalHeaderContentAlignment="Center" AllowColumnFiltering="False" ShowInColumnChooser="False" Visible="True" AllowPrinting="False" FilterPopupMode="CheckedList"  AllowMoving="False">
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Name="disablecontact" Command="{Binding DataContext.DisableContactCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                     CommandParameter="{Binding RowData.Row}" Content="" Width="40" BorderBrush="Transparent" IsEnabled="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=IsPermissionEnabled}">
+                                    <Button.ContentTemplate>
+                                        <DataTemplate>
+                                            <Image Height="16" Width="16" Source="/Emdep.Geos.Modules.Crm;component/Assets/Images/Delete.png"/>
+                                        </DataTemplate>
+                                    </Button.ContentTemplate>
+                                    <Button.ToolTip>
+                                        <TextBlock HorizontalAlignment="Stretch" Text="{DynamicResource ActivityFileDelete}" />
+                                    </Button.ToolTip>
+                                </Button>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+
+                    <dxg:GridControl.TotalSummary>
+                        <dxg:GridSummaryItem x:Name="summary" FieldName="Name" SummaryType="Count" DisplayFormat="Total Count: {0}" Alignment="Left"/>
+                    </dxg:GridControl.TotalSummary>
+                    <dxmvvm:Interaction.Behaviors>
+                        <UIHelper:GridSelectingBehavior />
+
+                        <dxmvvm:EventToCommand EventName="CustomUnboundColumnData"
+                                               Command="{Binding CustomUnboundColumnDataCommand}"
+                                               PassEventArgsToCommand="True"/>
+                    </dxmvvm:Interaction.Behaviors>
+
+                    <dxg:GridControl.View>
+                        <dxg:TableView x:Name="ContactTableView"
+                                       NavigationStyle="Row" 
+                                       RowDetailsVisibilityMode="Visible"
+                                       ShowHorizontalLines="True"
+                                       ShowSearchPanelMode="Always"
+                                       ShowColumnHeaders="True"
+                                       ShowTotalSummary="False"
+                                       ShowFixedTotalSummary ="True"
+                                       FocusedRow="{Binding SelectedObject, Mode=TwoWay}"
+                                       VerticalScrollbarVisibility="Visible"
+                                       SearchPanelHorizontalAlignment="Stretch"
+                                       IsColumnChooserVisible="{Binding IsContactColumnChooserVisible,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                       ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly"
+                                       AllowGrouping="True"
+                                       ShowGroupPanel="False"
+                                       ShowGroupedColumns="False"
+                                       AllowFixedGroups="False"
+                                       ShowIndicator="False" AutoWidth="True">
+
+                            <dxg:TableView.Resources>
+                                <DataTemplate x:Key="ContactViewCustomPrintHeaderTemplate">
+                                    <Grid Width="{Binding UsablePageWidth}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="50" />
+                                            <ColumnDefinition Width="130" />
+                                        </Grid.ColumnDefinitions>
+                                        <dxe:TextEdit Text=" " Width="{Binding UsablePageWidth}" Grid.ColumnSpan="3" IsPrintingMode="True" Background="#333E5E"   HorizontalAlignment="Stretch" 
+                                                      VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" FontWeight="Bold" Style="{DynamicResource TextEdit20Style}" Height="50"/>
+                                        <dxe:TextEdit Text="Contacts Report" IsPrintingMode="True" HorizontalAlignment="Stretch" 
+                                                      VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" FontWeight="Bold" Style="{DynamicResource TextEdit20Style}"/>
+                                        <Image Source="/Emdep.Geos.Modules.Crm;component/Assets/Images/GeosReportLogo.png" Height="50" Width="80"  dxp:ExportSettings.TargetType="Image" Grid.Column="2" />
+                                    </Grid>
+                                </DataTemplate>
+                                <DataTemplate x:Key="ContactViewCustomPrintFooterTemplate">
+                                    <dxe:TextEdit HorizontalContentAlignment="Center" 
+                                                  Width="{Binding UsablePageWidth, Mode=OneWay}" 
+                                                  dxp:ExportSettings.TargetType="PageNumber" 
+                                                  dxp:PageNumberExportSettings.Kind="NumberOfTotal" 
+                                                  dxp:PageNumberExportSettings.Format="Page {0} of {1}" />
+                                </DataTemplate>
+                            </dxg:TableView.Resources>
+
+                            <Interactive:Interaction.Triggers>
+                                <Interactive:EventTrigger  EventName="Loaded" >
+                                    <Behaviors:InvokeDelegateCommandAction Command="{Binding CustomCellAppearanceCommand}"   CommandParameter="{Binding RelativeSource={RelativeSource Self}, Path=InvokeParameter}" />
+                                </Interactive:EventTrigger>
+                            </Interactive:Interaction.Triggers>
+
+                            <dxmvvm:Interaction.Behaviors>
+                                <dxmvvm:EventToCommand Command="{Binding DataContext.EditContactGridDoubleClickCommand,RelativeSource={RelativeSource AncestorType=dxg:GridControl}}" EventName="MouseDoubleClick" CommandParameter="{Binding ElementName=ContactTableView}">
+                                    <dxmvvm:EventToCommand.EventArgsConverter>
+                                        <dx:EventArgsToDataRowConverter/>
+                                    </dxmvvm:EventToCommand.EventArgsConverter>
+                                </dxmvvm:EventToCommand>
+                                <dxmvvm:EventToCommand EventName="ShowFilterPopup"
+                                                       Command="{Binding CustomShowFilterPopupCommand}"
+                                                       PassEventArgsToCommand="True"/>
+                            </dxmvvm:Interaction.Behaviors>
+                        </dxg:TableView>
+                    </dxg:GridControl.View>
+                </dxg:GridControl>
+            </Grid>
+        </DockPanel>
+    </Grid>
+</UserControl>

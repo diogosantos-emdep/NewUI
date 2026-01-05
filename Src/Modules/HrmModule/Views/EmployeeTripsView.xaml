@@ -1,0 +1,601 @@
+﻿<UserControl x:Class="Emdep.Geos.Modules.Hrm.Views.EmployeeTripsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.Hrm.Views"
+              xmlns:dxwuin="http://schemas.devexpress.com/winfx/2008/xaml/windowsui/navigation"
+              xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"  
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+             xmlns:dxp="http://schemas.devexpress.com/winfx/2008/xaml/printing" 
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:HrmApplication="clr-namespace:Emdep.Geos.Modules.Hrm" 
+             xmlns:Converters="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+              xmlns:dxnav="http://schemas.devexpress.com/winfx/2008/xaml/navigation"
+             xmlns:dxgt="http://schemas.devexpress.com/winfx/2008/xaml/grid/themekeys"
+             xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+
+    <UserControl.Resources>
+        <Converters:ForegroundColorConverter x:Key="ForegroundColorConverter"/>
+
+
+        <Style x:Key="LeftPanelTileItemStyle" TargetType="{x:Type dxnav:TileBarItem}">
+            <Setter Property="Foreground" Value="{Binding BackColor,Converter={Converters:ForegroundColorConverter}}"/>
+            <Setter Property="BorderBrush" Value="#FFD6D6D6"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Background" Value="{Binding BackColor}"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+            <Setter Property="Height" Value="{Binding Height}"/>
+            <Setter Property="Width" Value="{Binding Width}"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="SelectionPadding" Value="0" />
+            <Setter Property="ContentTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                        <StackPanel Orientation="Vertical" HorizontalAlignment="Left" Width="195" Height="75"  >
+                            <Label Content="{Binding EntitiesCount,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" HorizontalContentAlignment="Right"   Margin="0,-5,8,0" VerticalContentAlignment="Top" FontSize="36" Visibility="{Binding EntitiesCountVisibility}"></Label>
+                            <Label Content="{Binding Caption, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalContentAlignment="Left" Margin="6,0,0,3" VerticalAlignment="Bottom" FontSize="15" ></Label>
+                        </StackPanel>
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="BorderThickness" Value="5"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource TileBarItemColorStyle}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!--Source="/Emdep.Geos.Modules.Hrm;component/Assets/Images/ArrowLeft.png"-->
+
+        <Style x:Key="HideButtonStyle" TargetType="{x:Type ToggleButton}">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ToggleButton}">
+                        <Border BorderThickness="0" Background="{TemplateBinding Background}">
+                            <Grid>
+                                <Image Stretch="None" VerticalAlignment="Center" HorizontalAlignment="Center"
+                                   Source="/Emdep.Geos.Modules.Hrm;component/Assets/Images/ArrowRight.png"
+                                   Visibility="{TemplateBinding IsChecked, Converter={dxmvvm:BooleanToVisibilityConverter Inverse=True}}"/>
+                                <Image Stretch="None" VerticalAlignment="Center" HorizontalAlignment="Center"
+                                   Source="/Emdep.Geos.Modules.Hrm;component/Assets/Images/ArrowLeft.png"
+                                   Visibility="{TemplateBinding IsChecked, Converter={dxmvvm:BooleanToVisibilityConverter}}"/>
+                            </Grid>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </UserControl.Resources>
+
+
+    <Grid Background="{DynamicResource EmpDetailBackColor}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="55"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="auto" />
+        </Grid.ColumnDefinitions>
+
+        <!--<Label Content="{DynamicResource TripsViewTitle}" HorizontalAlignment="Left" Style="{StaticResource LabelTitleStyle}" Grid.Row="0" Grid.Column="0" />-->
+        <Label Content="{DynamicResource TripsViewTitle1}" HorizontalAlignment="Left" Style="{StaticResource LabelTitleStyle}" Grid.Row="0" Grid.Column="0" />
+
+
+        <Grid HorizontalAlignment="Right" Grid.Row="0" Grid.Column="1" Margin="0,5,0,0" >
+            <Grid.RowDefinitions>
+                <RowDefinition Height="AUTO"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="AUTO"/>
+                <ColumnDefinition Width="AUTO" />
+                <ColumnDefinition Width="AUTO" />
+                <ColumnDefinition Width="AUTO" />
+                <ColumnDefinition Width="AUTO" />
+                <ColumnDefinition Width="AUTO" />
+                <ColumnDefinition Width="AUTO" />
+                <ColumnDefinition Width="AUTO" />
+            </Grid.ColumnDefinitions>
+
+            
+
+                <!--Plant-->
+                <TextBlock Grid.Column="0" Grid.Row="0" Text="{DynamicResource CommonPlant}"  FontWeight="Bold" Margin="10,2,5,0"  HorizontalAlignment="Right" Height="25" IsEnabled="True"  />
+
+                <dxe:ComboBoxEdit Style="{DynamicResource ComboBoxEditStyle}" Grid.Column="1" Grid.Row="0" Width="150" Height="30"                        
+                              ItemsSource="{Binding Source={x:Static HrmApplication:HrmCommon.Instance}, Path=UserAuthorizedPlantsList}"
+                              EditValue="{Binding Source={x:Static HrmApplication:HrmCommon.Instance}, Path=SelectedAuthorizedPlantsList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="5,0,5,0"
+                              DisplayMember="ShortName"  >
+                    <dxe:ComboBoxEdit.StyleSettings>
+                        <dxe:CheckedComboBoxStyleSettings />
+                    </dxe:ComboBoxEdit.StyleSettings>
+
+                    <dxmvvm:Interaction.Triggers>
+                        <dxmvvm:EventToCommand EventName="PopupClosed"
+                                               Command="{Binding DataContext.PlantOwnerPopupClosedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                               PassEventArgsToCommand="True" CommandParameter="{Binding ElementName=TripsTableView}"/>
+                    </dxmvvm:Interaction.Triggers>
+                </dxe:ComboBoxEdit>
+
+                <!--Period-->
+                <DockPanel Grid.Column="2" Grid.Row="0" HorizontalAlignment="Right"   VerticalAlignment="Center" Margin="5,0,0,0" >
+                    <Image Style="{DynamicResource CalendarImageStyle}" Width="30" Height="20" Margin="2,0,3,0" />
+                    <TextBlock Text="{DynamicResource AnnualSalesPerformanceViewPeriod}"  FontWeight="Bold" Margin="0,0,0,0" IsEnabled="True" />
+                </DockPanel>
+
+                <dxe:ComboBoxEdit Grid.Row="0" Grid.Column="3" 
+                                  Name="cmbPeriod"
+                          IsTextEditable="False" Margin="5,0,0,0"
+                          HorizontalAlignment="Left"
+                          IsEnabled="True"
+                          Height="30"
+                          Width="80"
+                          MaxLength="4" 
+                          VerticalAlignment="Center" 
+                         ItemsSource="{Binding Source={x:Static GeosApplication:GeosApplication.Instance}, Path=FinancialYearLst, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 SelectedItem="{Binding Source={x:Static HrmApplication:HrmCommon.Instance}, Path=SelectedPeriod,UpdateSourceTrigger=PropertyChanged}">
+                    <dxe:ComboBoxEdit.StyleSettings>
+                        <dxe:ComboBoxStyleSettings />
+                    </dxe:ComboBoxEdit.StyleSettings>
+                    <dxmvvm:Interaction.Triggers>
+                        <dxmvvm:EventToCommand EventName="EditValueChanged"
+                                            Command="{Binding DataContext.SelectedYearChangedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                            PassEventArgsToCommand="True">
+                        <dxmvvm:EventToCommand.CommandParameter>
+                            <MultiBinding Converter="{Converters:ConverterForRefresh}">
+                                <Binding ElementName="TripsTableView" />
+                                
+                            </MultiBinding>
+                        </dxmvvm:EventToCommand.CommandParameter>
+                    </dxmvvm:EventToCommand>
+                </dxmvvm:Interaction.Triggers>
+                </dxe:ComboBoxEdit>
+
+           
+
+            <!-- Add New Trips -->
+            <Button Visibility="Visible" Grid.Row="0" Grid.Column="4" Height="40" Width="40" HorizontalAlignment="Right" 
+                    Command="{Binding AddNewTripCommand}"
+                    IsEnabled="{Binding IsEnableField,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+                    CommandParameter="{Binding ElementName=TripsTableView}" Margin="5,-4,0,0"
+                    >
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource AddTripInformation}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Image Style="{DynamicResource AddNewButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+
+            <!-- Refresh trips Grid-->
+            <Button Visibility="Visible" Grid.Row="0" Grid.Column="5" Height="40" Width="40" HorizontalAlignment="Right" 
+                                Command="{Binding RefreshButtonCommand}"
+                                CommandParameter="{Binding ElementName=TripsTableView}"
+                                Margin="5,0,5,5">
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource ButtonRefresh}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Image Style="{DynamicResource RefreshButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+
+            <!-- Print trips List-->
+            <Button Visibility="Visible" Grid.Row="0" Grid.Column="6" Height="40" Width="40" HorizontalAlignment="Right" 
+                        Command="{Binding PrintButtonCommand}"
+                        CommandParameter="{Binding ElementName=TripsTableView}" Margin="0,0,5,5">
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource ButtonPrint}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Image Style="{DynamicResource PrinterButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+
+            <!-- Export Trips List-->
+            <Button Visibility="Visible" Grid.Row="0" Grid.Column="7" Height="40" Width="40" HorizontalAlignment="Right" 
+                                Command="{Binding ExportButtonCommand}"
+                    CommandParameter="{Binding ElementName=TripsTableView}" Margin="0,0,5,5">
+                <Button.ToolTip>
+                    <TextBlock Text="{DynamicResource ButtonExportToExcel}"/>
+                </Button.ToolTip>
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <Image Style="{DynamicResource ExcelExportButtonImageStyle}"  Height="24" Width="24" Margin="-10"/>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+        </Grid>
+
+
+
+        <!--[rushikesh.gaikwad][GEOS2-5927][28.08.204]-->
+        <DockPanel Grid.Row="1" Grid.ColumnSpan="2">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+
+                    <ColumnDefinition Width="Auto"/>
+
+                    <ColumnDefinition Width="70*"/>
+                </Grid.ColumnDefinitions>
+
+                <dxwui:NavigationFrame x:Name="Navigatedframe" AnimationType="None">
+                    <dxmvvm:Interaction.Behaviors>
+                        <dxwuin:FrameNavigationService/>
+                    </dxmvvm:Interaction.Behaviors>
+                </dxwui:NavigationFrame>
+
+                <UIHelper:DpiResizingPanel DockPanel.Dock="Left" Grid.Column="0">
+                    <dxnav:TileBar x:Name="tileBar" DockPanel.Dock="Left"
+                               Visibility="{Binding ElementName=expandButton, Path=IsChecked, Converter={dxmvvm:BooleanToVisibilityConverter}}"
+                               Margin="0,-20,0,0"
+                               SelectedItem="{Binding SelectedTileBarItems,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+                               Orientation="Vertical"
+                               ItemSpacing="5"
+                               ItemsSource="{Binding FilterStatusListOfTiles ,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                               ItemContainerStyle="{StaticResource LeftPanelTileItemStyle}"
+                               Focusable="True">
+
+                        <dxmvvm:Interaction.Behaviors>
+                            <dxmvvm:EventToCommand Command="{Binding CommandFilterTripStatusTileClick}" EventName="SelectionChanged" PassEventArgsToCommand="True"/>
+
+                            <dxmvvm:EventToCommand Command="{Binding CommandTileBarClickDoubleClick}"  EventName="MouseDoubleClick" CommandParameter="{Binding ElementName=TripsTableView}"/>
+
+                        </dxmvvm:Interaction.Behaviors>
+                    </dxnav:TileBar>
+                </UIHelper:DpiResizingPanel>
+
+                <ToggleButton x:Name="expandButton" Grid.Column="1" DockPanel.Dock="Left" Visibility="{Binding IsTileBarVisible}" Style="{StaticResource HideButtonStyle}" IsChecked="True" VerticalAlignment="Center"/>
+                <dxg:GridControl VerticalAlignment="Stretch" HorizontalAlignment="Stretch"  Grid.Column="2" 
+                        ItemsSource="{Binding EmployeeTripsList,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" SelectionMode="Cell"
+                             SelectedItem="{Binding SelectedEmployeeTrips,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                             ImplyNullLikeEmptyStringWhenFiltering="True" FilterString="{Binding MyFilterString,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+
+                    <!--Code-->
+                    <dxg:GridColumn FieldName="Code" Header="{DynamicResource TripsCode}"  MinWidth="100" Width="170" ReadOnly="True"  FilterPopupMode="CheckedList">
+
+                        <dxg:GridColumn.CellToolTipBinding>
+                            <Binding Path="Code" />
+                        </dxg:GridColumn.CellToolTipBinding>
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock VerticalAlignment="Center" Margin="10 0 0 0">
+                                             <Hyperlink x:Name="hyperlink" 
+                                               TargetName="_blank"
+                                               Command="{Binding DataContext.EditTripDoubleClickCommand,RelativeSource={RelativeSource AncestorType=dxg:GridControl}}"
+                                               CommandParameter="{Binding ElementName=TripsTableView}" >
+                                        <InlineUIContainer>
+                                            <TextBlock Text="{Binding Data.Code}" Style="{DynamicResource HyperlinkTextBlock}" TextDecorations="Underline"/>
+                                        </InlineUIContainer>
+                                    </Hyperlink>
+                                        </TextBlock>
+                                <DataTemplate.Triggers>
+                                    <Trigger Property="dxg:DataViewBase.IsFocusedCell" Value="True">
+                                        <Setter TargetName="hyperlink" Property="Foreground" Value="OrangeRed"/>
+                                    </Trigger>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="hyperlink" Property="Foreground" Value="OrangeRed" />
+                                    </Trigger>
+                                </DataTemplate.Triggers>
+
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+
+                    <!--Status-->
+                    <dxg:GridColumn FieldName="Status" Header="{DynamicResource TripsStatus}"  MinWidth="150" Width="190" ReadOnly="True"  FilterPopupMode="CheckedList">
+
+                        <dxg:GridColumn.CellToolTipBinding>
+                            <Binding Path="Status" />
+                        </dxg:GridColumn.CellToolTipBinding>
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Height="24">
+                                    <TextBlock Text ="{Binding RowData.Row.Status,UpdateSourceTrigger=PropertyChanged}"  HorizontalAlignment="Center" Margin="5,0,0,0" ></TextBlock>
+                                </StackPanel>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+
+                    <!--Traveller-->
+                    <dxg:GridColumn FieldName="Traveller" Header="{DynamicResource TripsTraveller1}"  MinWidth="200"  ReadOnly="True"  FilterPopupMode="CheckedList">
+
+                        <dxg:GridColumn.CellToolTipBinding>
+                            <Binding Path="Traveller" />
+                        </dxg:GridColumn.CellToolTipBinding>
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Height="24">
+                                    <TextBlock Text ="{Binding RowData.Row.Traveller,UpdateSourceTrigger=PropertyChanged}"  HorizontalAlignment="Center" Margin="5,0,0,0" ></TextBlock>
+                                </StackPanel>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+
+                    <!--Title-->
+                    <!--<dxg:GridColumn FieldName="Title" Header="{DynamicResource TripsTitle}"  MinWidth="100" Width="170" ReadOnly="True"  FilterPopupMode="Default">
+
+                        <dxg:GridColumn.CellToolTipBinding>
+                            <Binding Path="Title" />
+                        </dxg:GridColumn.CellToolTipBinding>
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Height="24">
+                                    <TextBlock Text ="{Binding RowData.Row.Title,UpdateSourceTrigger=PropertyChanged}"  HorizontalAlignment="Center" Margin="5,0,0,0" ></TextBlock>
+                                </StackPanel>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>-->
+
+                    <!--Type-->
+                    <dxg:GridColumn FieldName="Type" Header="{DynamicResource TripsType1}"  MinWidth="100" Width="170" ReadOnly="True"  FilterPopupMode="CheckedList">
+
+                        <dxg:GridColumn.CellToolTipBinding>
+                            <Binding Path="Type" />
+                        </dxg:GridColumn.CellToolTipBinding>
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Height="24">
+                                    <TextBlock Text ="{Binding RowData.Row.Type,UpdateSourceTrigger=PropertyChanged}"  HorizontalAlignment="Center" Margin="5,0,0,0" ></TextBlock>
+                                </StackPanel>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+
+                    <!--Propose-->
+                    <!--<dxg:GridColumn FieldName="Propose" Header="{DynamicResource TripsPurpose}"  MinWidth="150" Width="170" ReadOnly="True"  FilterPopupMode="Default">
+
+                        <dxg:GridColumn.CellToolTipBinding>
+                            <Binding Path="Propose" />
+                        </dxg:GridColumn.CellToolTipBinding>
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Height="24">
+                                    <TextBlock Text ="{Binding RowData.Row.Propose,UpdateSourceTrigger=PropertyChanged}"  HorizontalAlignment="Center" Margin="5,0,0,0" ></TextBlock>
+                                </StackPanel>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>-->
+
+                    <!--Origin-->
+                    <dxg:GridColumn FieldName="Origin" Header="{DynamicResource TripsOrigin}"  MinWidth="150" Width="150" ReadOnly="True"  FilterPopupMode="CheckedList">
+
+                        <dxg:GridColumn.CellToolTipBinding>
+                            <Binding Path="Origin" />
+                        </dxg:GridColumn.CellToolTipBinding>
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Height="24">
+                                    <TextBlock Text ="{Binding RowData.Row.Origin,UpdateSourceTrigger=PropertyChanged}"  HorizontalAlignment="Center" Margin="5,0,0,0" ></TextBlock>
+                                </StackPanel>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+
+                    <!--DepartureTransport-->
+                    <!--[rushikesh.gaikwad][GEOS2-5927][28.08.204]-->
+                    <dxg:GridColumn FieldName="DeptTransportationType.Value" Header="{DynamicResource DepartureTransport}"  MinWidth="150" Width="190" ReadOnly="True"  FilterPopupMode="CheckedList">
+                        <dxg:GridColumn.CellToolTipBinding>
+                            <Binding Path="DeptTransportationType.Value" />
+                        </dxg:GridColumn.CellToolTipBinding>
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Height="24">
+                                    <TextBlock Text ="{Binding RowData.Row.DeptTransportationType.Value,UpdateSourceTrigger=PropertyChanged}"  HorizontalAlignment="Center" Margin="5,0,0,0" ></TextBlock>
+                                </StackPanel>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+
+
+                    <!--TripsDeparture-->
+                    <dxg:GridColumn Header="{DynamicResource TripsDeparture1}" FieldName="DepartureDate"  Width="200" FilterPopupMode="CheckedList" ReadOnly="True" FixedWidth="True"/>
+                   
+
+
+                    <!--Destination-->
+                    <dxg:GridColumn FieldName="Destination" Header="{DynamicResource TripsDestination}"  MinWidth="150" Width="190" ReadOnly="True"  FilterPopupMode="Default">
+
+                        <dxg:GridColumn.CellToolTipBinding>
+                            <Binding Path="Destination" />
+                        </dxg:GridColumn.CellToolTipBinding>
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Height="24">
+                                    <TextBlock Text ="{Binding RowData.Row.Destination,UpdateSourceTrigger=PropertyChanged}"  HorizontalAlignment="Center" Margin="5,0,0,0" ></TextBlock>
+                                </StackPanel>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+
+                    </dxg:GridColumn>
+
+                    <!--ArrivalTransport-->
+                    <!--[rushikesh.gaikwad][GEOS2-5927][28.08.204]-->
+                    <dxg:GridColumn FieldName="ArrTransportationType.Value" Header="{DynamicResource ArrivalTransport}"  MinWidth="150" Width="190" ReadOnly="True"  FilterPopupMode="CheckedList">
+
+                        <dxg:GridColumn.CellToolTipBinding>
+                            <Binding Path="ArrTransportationType.Value" />
+                        </dxg:GridColumn.CellToolTipBinding>
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Height="24">
+                                    <TextBlock Text ="{Binding RowData.Row.ArrTransportationType.Value,UpdateSourceTrigger=PropertyChanged}"  HorizontalAlignment="Center" Margin="5,0,0,0" ></TextBlock>
+                                </StackPanel>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+
+                    <!--TripsArrival-->
+                    <dxg:GridColumn Header="{DynamicResource TripsArrival1}" FieldName="ArrivalDate" FilterPopupMode="CheckedList" MinWidth="150" Width="190" ReadOnly="True" FixedWidth="True"/>
+
+                    <!--Requestor-->
+                    <dxg:GridColumn FieldName="Requestor" Header="{DynamicResource Requestor}"  MinWidth="200" ReadOnly="True"  FilterPopupMode="CheckedList">
+
+                        <dxg:GridColumn.CellToolTipBinding>
+                            <Binding Path="Requestor" />
+                        </dxg:GridColumn.CellToolTipBinding>
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Height="24">
+                                    <TextBlock Text ="{Binding RowData.Row.Requestor,UpdateSourceTrigger=PropertyChanged}"  HorizontalAlignment="Center" Margin="5,0,0,0" ></TextBlock>
+                                </StackPanel>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+
+                    <!--Remarks-->
+                    <!--[rushikesh.gaikwad][GEOS2-5927][28.08.204]-->
+                    <dxg:GridColumn FieldName="Remarks" Header="{DynamicResource Remarks}"  MinWidth="100" Width="170" ReadOnly="True"  FilterPopupMode="CheckedList">
+
+                        <dxg:GridColumn.CellToolTipBinding>
+                            <Binding Path="Type" />
+                        </dxg:GridColumn.CellToolTipBinding>
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Height="24">
+                                    <TextBlock Text ="{Binding RowData.Row.Remarks,UpdateSourceTrigger=PropertyChanged}"  HorizontalAlignment="Center" Margin="5,0,0,0" ></TextBlock>
+                                </StackPanel>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+
+                    <!--Options-->
+                    <!--[rushikesh.gaikwad][GEOS2-5927][28.08.204]-->
+                    <dxg:GridColumn FieldName="Options" Header="{DynamicResource Options}"  MinWidth="50" Width="90" ReadOnly="True" FixedWidth="True" FilterPopupMode="CheckedList" AllowPrinting="False" ShowInColumnChooser="False" AllowMoving="false">
+                        <dxg:GridColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Name="deleteRowItem" ToolTip="{DynamicResource Delete}"  
+                                                                                            IsEnabled="{Binding DataContext.IsDelVisible,RelativeSource={RelativeSource AncestorType=UserControl, Mode=FindAncestor}}"
+                                                                                            Command="{Binding DataContext.DeleteTripsRecordCommand, RelativeSource={RelativeSource AncestorType=UserControl, Mode=FindAncestor}}">
+                                    <Button.ContentTemplate>
+                                        <DataTemplate>
+                                            <Image Style="{DynamicResource DeleteButtonImageStyle}"  Height="16" Width="16"/>
+                                        </DataTemplate>
+                                    </Button.ContentTemplate>
+                                    <Button.Style>
+                                        <Style TargetType="{x:Type Button}">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                            <Style.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Cursor" Value="Hand"/>
+                                                </Trigger>
+                                                <DataTrigger  Binding="{Binding Row.IsDelVisible,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" Value="true" >
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+                            </DataTemplate>
+                        </dxg:GridColumn.CellTemplate>
+                    </dxg:GridColumn>
+
+
+                    <dxmvvm:Interaction.Behaviors>
+                        <UIHelper:GridSelectingBehavior />
+                    </dxmvvm:Interaction.Behaviors>
+
+                    <dxg:GridControl.TotalSummary>
+                        <dxg:GridSummaryItem x:Name="summary" FieldName="Name" SummaryType="Count" DisplayFormat="Total Count: {0}" Visible="True" Alignment="Left"/>
+                    </dxg:GridControl.TotalSummary>
+
+                    <dxg:GridControl.View>
+                        <dxg:TableView x:Name="TripsTableView"
+                                   NavigationStyle="Row"
+                                   RowDetailsVisibilityMode="Visible"
+                                   ShowHorizontalLines="True"
+                                   ShowSearchPanelMode="Always"
+                                   ShowColumnHeaders="True"
+                                   VerticalScrollbarVisibility="Auto" 
+                                   HorizontalScrollbarVisibility="Auto"
+                                   AllowFixedColumnMenu="False"
+                                   ShowFixedTotalSummary="True" 
+                                   SearchPanelHorizontalAlignment="Stretch"
+                                   ColumnChooserColumnDisplayMode="ShowHiddenColumnsOnly"
+                                   AllowGrouping="True"
+                                   ShowGroupPanel="False"     
+                                   FocusedRow="{Binding Path=SelectedHoliday,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                   ShowIndicator="False" AutoWidth="True"
+                                       
+                                   EnableImmediatePosting="True"
+                                   ImmediateUpdateRowPosition="True"
+                                   AllowEditing="True"
+                                   ShowTotalSummary="True"
+                                    UseLegacyFilterEditor="True"
+                                    RowDetailsTemplate="{Binding SelectedItem.DetailTemplate, ElementName=rowTemplateComboBox}"
+                                     RowStyle="{Binding SelectedItem.RowStyle, ElementName=rowTemplateComboBox}"
+                                     ShowFilterPopup="{DXEvent Handler='@args.PopupBaseEdit.PopupWidth=200'}">
+
+                            <dxg:TableView.Resources>
+                                <DataTemplate x:Key="EmployeeTripsReportPrintHeaderTemplate">
+                                    <Grid Width="{Binding UsablePageWidth}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="50" />
+                                            <ColumnDefinition Width="130" />
+                                        </Grid.ColumnDefinitions>
+                                        <dxe:TextEdit Text=" " Width="{Binding UsablePageWidth}" Grid.ColumnSpan="3" IsPrintingMode="True" Background="#333E5E" HorizontalAlignment="Stretch" 
+                                                      VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" Height="50" />
+                                        <dxe:TextEdit Text="Trips Report" IsPrintingMode="True" HorizontalAlignment="Stretch" 
+                                                      VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" />
+                                        <Image Source="/Emdep.Geos.Modules.Hrm;component/Assets/Images/GeosReportLogo.png" Height="50" Width="80"  dxp:ExportSettings.TargetType="Image" Grid.Column="2" />
+                                    </Grid>
+                                </DataTemplate>
+
+                                <DataTemplate x:Key="EmployeeTripsReportPrintFooterTemplate">
+                                    <dxe:TextEdit HorizontalContentAlignment="Center" 
+                                                  Width="{Binding Path=UsablePageWidth, Mode=OneWay}" 
+                                                  dxp:ExportSettings.TargetType="PageNumber" 
+                                                  dxp:PageNumberExportSettings.Kind="NumberOfTotal" 
+                                                  dxp:PageNumberExportSettings.Format="Page {0} of {1}"/>
+                                </DataTemplate>
+
+
+                            </dxg:TableView.Resources>
+
+
+                           
+                            <dxmvvm:Interaction.Behaviors>
+                                <dxmvvm:EventToCommand Command="{Binding EditTripDoubleClickCommand}" EventName="MouseDoubleClick" CommandParameter="{Binding ElementName=TripsTableView}" >
+                                    <dxmvvm:EventToCommand.EventArgsConverter>
+                                        <dx:EventArgsToDataRowConverter/>
+                                    </dxmvvm:EventToCommand.EventArgsConverter>
+                                </dxmvvm:EventToCommand>
+                                <dxmvvm:EventToCommand Command="{Binding FilterEditorCreatedCommand}"
+                                                   EventName="FilterEditorCreated"
+                                                   PassEventArgsToCommand="True"/>
+                                <dxmvvm:EventToCommand Command="{Binding TableViewLoadedCommand}"
+                                                   EventName="Loaded"
+                                                   PassEventArgsToCommand="True" />
+                            </dxmvvm:Interaction.Behaviors>
+
+                        </dxg:TableView>
+
+                    </dxg:GridControl.View>
+
+                </dxg:GridControl>
+
+            </Grid>
+
+        </DockPanel>
+    </Grid>
+
+
+</UserControl>

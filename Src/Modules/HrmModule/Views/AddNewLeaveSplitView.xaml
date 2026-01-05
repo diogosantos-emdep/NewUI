@@ -1,0 +1,513 @@
+﻿<UserControl x:Class="Emdep.Geos.Modules.Hrm.Views.AddNewLeaveSplitView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:Validation="clr-namespace:Emdep.Geos.UI.Validations;assembly=Emdep.Geos.UI.Validations"
+             xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:HrmApplication="clr-namespace:Emdep.Geos.Modules.Hrm" 
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:UIConverter ="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"            
+             mc:Ignorable="d"
+             d:DesignHeight="450" d:DesignWidth="800">
+    <!--xmlns:sys="clr-namespace:System;assembly=mscorlib"-->
+    <UserControl.Resources>
+
+        <UIConverter:DateFormatConverter x:Key="DateFormatConverter" />
+        <!--<sys:String x:Key="ShortDateTimeFormat">dd/MM/yyyy hh:mm tt</sys:String>
+        <sys:String x:Key="ShortTimeFormat">hh:mm tt</sys:String>
+        <sys:String x:Key="ShortDateFormat">dd/MM/yyyy</sys:String>-->
+        
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+
+        <DataTemplate x:Key="headerTemplate" >
+            <TextBlock Text="{Binding TaskOfferCode,UpdateSourceTrigger=PropertyChanged}" />
+        </DataTemplate>
+        <!--MaxWidth="800"-->
+        <DataTemplate x:Key="FlowLayoutitemTemplate">
+            <dx:DXTabControl 
+                             ItemsSource="{Binding Tasks ,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                             Name="DXTabControl2"
+                             TabContentCacheMode="CacheTabsOnSelecting">
+                <dx:DXTabControl.ItemContainerStyle>
+                    <Style TargetType="dx:DXTabItem">
+                        <Setter Property="Header" Value="{Binding Header,UpdateSourceTrigger=PropertyChanged}"/>
+                        <Setter Property="CloseCommand" Value="{Binding RelativeSource={RelativeSource AncestorType=UserControl}, Path=DataContext.CloseTaskCommand}" />
+                        <Setter Property="CloseCommandParameter" Value="{Binding}" />
+                    </Style>
+                </dx:DXTabControl.ItemContainerStyle>
+                <dx:DXTabItem>
+                    <ScrollViewer ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto">
+
+                        <Grid>
+
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="AUTO"/>
+                                <RowDefinition Height="AUTO"/>
+                                <RowDefinition Height="AUTO"/>
+                                <RowDefinition Height="AUTO"/>
+                                <RowDefinition Height="AUTO"/>
+                                <RowDefinition Height="AUTO"/>
+                                <RowDefinition Height="AUTO"/>
+                                <RowDefinition Height="AUTO"/>
+                                <RowDefinition Height="AUTO"/>
+                                <RowDefinition Height="AUTO"/>
+                                <RowDefinition Height="AUTO"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="120"/>
+                                <ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="120"/>
+                                <ColumnDefinition Width="0"/>
+                            </Grid.ColumnDefinitions>
+                            <!--IsReadOnly="{Binding IsReadOnlyField,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"-->
+                            <Label Grid.Row="0" Grid.Column="0" Content="{DynamicResource Employee}" Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,5,5,5"/>
+                            <dxe:ComboBoxEdit Style="{DynamicResource ComboBoxEditStyle}"  Grid.Column="1" 
+                          Grid.Row="0" Grid.ColumnSpan="2" Height="30"  Margin="5,5,5,5" 
+                          ItemsSource="{Binding EmployeeListFinal,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged }" 
+                          DisplayMember="FullName" ValueMember="IdEmployee"  IsTextEditable="False" ValidateOnTextInput="False"
+                          AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True"
+                          IsReadOnly="{Binding IsReadOnlyField,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+                          EditValue="{Binding SelectedEmployeeList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                          IsEnabled="False">
+                                <dxe:ComboBoxEdit.StyleSettings>
+                                    <dxe:CheckedComboBoxStyleSettings />
+                                </dxe:ComboBoxEdit.StyleSettings>
+
+                                <dxe:ComboBoxEdit.SelectedIndex>
+                                    <Binding Path="SelectedIndexForEmployee" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                                        <Binding.ValidationRules >
+                                            <Validation:LeaveValidations FieldName="SelectedIndexForEmployee" ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True"/>
+                                        </Binding.ValidationRules>
+                                    </Binding>
+                                </dxe:ComboBoxEdit.SelectedIndex>
+                                <!--[0001][04/08/2020][sjadhav][SPRINT 84][GEOS2-2437][GHRM - Employee Leaves export report [#ERF59]]-->
+                                <dxmvvm:Interaction.Triggers>
+                                    <dxmvvm:EventToCommand EventName="PopupClosed"
+                                               Command="{Binding EmployeePopupClosedCommand}" 
+                                               PassEventArgsToCommand="True"/>
+                                </dxmvvm:Interaction.Triggers>
+                                <!--, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}-->
+                                <!--<dxmvvm:Interaction.Behaviors>
+                <dxmvvm:EventToCommand EventName="SelectedIndexChanged"
+                                       Command="{Binding SelectedIndexChangedCommand, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}"
+                                       PassEventArgsToCommand="True"/>
+            </dxmvvm:Interaction.Behaviors>-->
+                            </dxe:ComboBoxEdit>
+
+                            <!--[0001][04/08/2020][sjadhav][SPRINT 84][GEOS2-2437][GHRM - Employee Leaves export report [#ERF59]]-->
+                            <!--Shift-->
+
+                            <!--IsReadOnly="{Binding IsReadOnlyField,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"-->
+                            <Label Grid.Row="1" Grid.Column="0" Content="{DynamicResource AttendanceShift}" Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,5,5,5"  Visibility="{Binding ShiftVisibility}"/>
+                            <dxe:ComboBoxEdit Style="{DynamicResource ComboBoxEditStyle}"  
+                              Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="2"
+                              Height="30" Margin="5,5,5,5"  Visibility="{Binding ShiftVisibility}"
+                              ItemsSource="{Binding EmployeeShiftList, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                              DisplayMember="CompanyShift.Name" ValueMember="CompanyShift.IdCompanyShift"  IsTextEditable="False" ValidateOnTextInput="False"
+                              AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True"
+                              ApplyItemTemplateToSelectedItem="True"
+                              IsEnabled="False">
+
+                                <dxe:ComboBoxEdit.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Margin="5 0">
+                                                <TextBlock.Style>
+                                                    <Style>
+                                                        <Setter Property="TextBlock.Text" Value="{Binding CompanyShift.Name}" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IdCompanyShift}" Value="0">
+                                                                <Setter Property="TextBlock.Text" Value="---" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                            <TextBlock>
+                                                <TextBlock.Style>
+                                                    <Style>
+                                                        <Setter Property="TextBlock.Text" Value="-"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IdCompanyShift}" Value="0">
+                                                                <Setter Property="TextBlock.Text" Value="{x:Null}" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+
+                                            <TextBlock Margin="5 0">
+                                                <TextBlock.Style>
+                                                    <Style>
+                                                        <Setter Property="TextBlock.Text" Value="{Binding CompanyShift.CompanySchedule.Company.Alias}"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IdCompanyShift}" Value="0">
+                                                                <Setter Property="TextBlock.Text" Value="{x:Null}" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </dxe:ComboBoxEdit.ItemTemplate>
+
+                                <dxe:ComboBoxEdit.SelectedIndex>
+                                    <Binding Path="SelectedIndexForCompanyShift" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                                        <Binding.ValidationRules >
+                                            <Validation:AttendanceValidation FieldName="SelectedIndexForCompanyShift" ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True"/>
+                                        </Binding.ValidationRules>
+                                    </Binding>
+                                </dxe:ComboBoxEdit.SelectedIndex>
+
+                                <dxe:ComboBoxEdit.ItemContainerStyle>
+                                    <Style TargetType="dxe:ComboBoxEditItem">
+                                        <Setter Property="IsEnabled" Value="{Binding IsEnabled}" />
+                                    </Style>
+                                </dxe:ComboBoxEdit.ItemContainerStyle>
+
+                                <dxmvvm:Interaction.Behaviors>
+                                    <dxmvvm:EventToCommand EventName="SelectedIndexChanged"
+                                           Command="{Binding SelectedIndexChangedForCompanyShiftCommand}"
+                                           PassEventArgsToCommand="True"/>
+                                </dxmvvm:Interaction.Behaviors>
+                            </dxe:ComboBoxEdit>
+                            <!--, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}-->
+                            <!--FromDate-->
+
+                            <Label Content= "{DynamicResource LeaveStartTime}" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="5 5 5 5" HorizontalAlignment="Left" Height="30" FontSize="16" />
+
+                            <dxe:DateEdit  Grid.Row="2" Grid.Column="1" 
+                       Margin="5 5 5 5" HorizontalAlignment="Stretch" VerticalAlignment="Center"                        
+                       AllowNullInput="True"
+                       IsReadOnly="{Binding IsReadOnlyField,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
+
+                                <dxe:DateEdit.EditValue>
+                                    <Binding Path="StartDate" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay"
+                                                  ValidatesOnDataErrors="True">
+                                        <Binding.ValidationRules>
+                                            <Validation:LeaveValidations FieldName="StartDate" ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True"/>
+                                        </Binding.ValidationRules>
+                                    </Binding>
+                                </dxe:DateEdit.EditValue>
+
+                                <dxmvvm:Interaction.Behaviors>
+                                    <dxmvvm:EventToCommand EventName="EditValueChanging" Command="{Binding OnDateEditValueChangingCommand}" PassEventArgsToCommand="True"/>
+                                </dxmvvm:Interaction.Behaviors>
+                            </dxe:DateEdit>
+                            <!-- ,RelativeSource={RelativeSource AncestorType=UserControl} -->
+                            <dxe:ComboBoxEdit Grid.Row="2" Grid.Column="2" Height="25" VerticalAlignment="Top" Margin="5,5,5,5"  
+                                                   IsEnabled="{Binding InvertIsAllDayEvent,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                                    ItemsSource="{Binding FromDates}"
+                                                    MaskType="DateTimeAdvancingCaret" Mask="{Binding TimeEditMask,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                                    DisplayFormatString="{Binding TimeEditMask,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged }" HorizontalAlignment="Stretch"
+                                                   IsReadOnly="{Binding IsReadOnlyField,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
+                                <dxe:ComboBoxEdit.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Converter={StaticResource DateFormatConverter}}"/>
+                                    </DataTemplate>
+                                </dxe:ComboBoxEdit.ItemTemplate>
+                                <dxe:ComboBoxEdit.SelectedItem>
+                                    <!--RelativeSource="{RelativeSource AncestorType=UserControl}" -->
+                                    <Binding Path="StartTime" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                                        <Binding.ValidationRules>
+                                            <Validation:LeaveValidations FieldName="StartTime" ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True"/>
+                                        </Binding.ValidationRules>
+                                    </Binding>
+                                </dxe:ComboBoxEdit.SelectedItem>
+
+                                <dxmvvm:Interaction.Behaviors>
+                                    <dxmvvm:EventToCommand EventName="SelectedIndexChanged" Command="{Binding OnTimeEditValueChangingCommand}" PassEventArgsToCommand="True"/>
+                                </dxmvvm:Interaction.Behaviors>
+                            </dxe:ComboBoxEdit>
+
+
+                            <!--ToDate-->
+
+                            <Label Content= "{DynamicResource LeaveEndTime}" Grid.Row="3" Grid.Column="0"  HorizontalAlignment="Left" Margin="5 5 5 5" Height="30" FontSize="16" />
+
+
+                            <dxe:DateEdit Grid.Row="3" Grid.Column="1" ValidateOnEnterKeyPressed="True"
+                      Margin="5 5 5 5" HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                      AllowNullInput="True" 
+                      IsReadOnly="{Binding IsReadOnlyField,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
+                                <dxe:DateEdit.EditValue>
+                                    <Binding Path="EndDate" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay"
+                                                 ValidatesOnDataErrors="True">
+                                        <Binding.ValidationRules>
+                                            <Validation:LeaveValidations FieldName="EndDate" ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True"/>
+                                        </Binding.ValidationRules>
+                                    </Binding>
+                                </dxe:DateEdit.EditValue>
+                                <dxmvvm:Interaction.Behaviors>
+                                    <dxmvvm:EventToCommand EventName="EditValueChanging" Command="{Binding OnDateEditValueChangingCommand}" PassEventArgsToCommand="True"/>
+                                </dxmvvm:Interaction.Behaviors>
+
+                            </dxe:DateEdit>
+                            <!--,RelativeSource={RelativeSource AncestorType=UserControl}-->
+                            <dxe:ComboBoxEdit Grid.Row="3" Grid.Column="2" Height="25" VerticalAlignment="Top" Margin="5,5,5,5" 
+                                                  IsEnabled="{Binding InvertIsAllDayEvent,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                                    ItemsSource="{Binding ToDates}" 
+                                                    MaskType="DateTimeAdvancingCaret" Mask="{Binding TimeEditMask,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                                    DisplayFormatString="{Binding TimeEditMask,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged }" HorizontalAlignment="Stretch" 
+                                                   IsReadOnly="{Binding IsReadOnlyField,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
+                                <dxe:ComboBoxEdit.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Converter={StaticResource DateFormatConverter}}"/>
+                                    </DataTemplate>
+                                </dxe:ComboBoxEdit.ItemTemplate>
+                                <dxe:ComboBoxEdit.SelectedItem>
+                                    <!--DataContext.-->
+                                    <!--RelativeSource="{RelativeSource AncestorType=UserControl}"-->
+                                    <Binding Path="EndTime" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                                        <Binding.ValidationRules>
+                                            <Validation:LeaveValidations FieldName="EndTime" ValidationStep="UpdatedValue" ValidatesOnTargetUpdated="True"/>
+                                        </Binding.ValidationRules>
+                                    </Binding>
+                                </dxe:ComboBoxEdit.SelectedItem>
+                                <dxmvvm:Interaction.Behaviors>
+                                    <!--,RelativeSource={RelativeSource AncestorType=UserControl}-->
+                                    <dxmvvm:EventToCommand EventName="SelectedIndexChanged" Command="{Binding OnTimeEditValueChangingCommand}" PassEventArgsToCommand="True"/>
+                                </dxmvvm:Interaction.Behaviors>
+                            </dxe:ComboBoxEdit>
+
+
+
+                            <dxe:CheckEdit Content="{DynamicResource AllDayEvent}" Grid.Row="2" Grid.Column="3" x:Name="chkAllDay" Height="30" FontSize="16"
+                                      Margin="5 5 5 5"
+                                     HorizontalAlignment="Left" 
+                                     IsChecked="{Binding IsAllDayEvent,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                       IsReadOnly="{Binding IsReadOnlyField,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
+                                <dxmvvm:Interaction.Behaviors>
+                                    <dxmvvm:EventToCommand EventName="Checked" Command="{Binding CheckedCommand}"></dxmvvm:EventToCommand>
+                                    <!--,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}-->
+                                    <dxmvvm:EventToCommand EventName="Unchecked" Command="{Binding CheckedCommand}"></dxmvvm:EventToCommand>
+                                    <!--,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}-->
+                                </dxmvvm:Interaction.Behaviors>
+                            </dxe:CheckEdit>
+
+                            <Label Grid.Row="4" Grid.Column="0" Content="{DynamicResource LeaveType}" Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,5,5,5"/>
+                            <dxe:ComboBoxEdit Style="{DynamicResource ComboBoxEditStyle}" Grid.Column="1" Grid.Row="4" Grid.ColumnSpan="2"  Height="30"  Margin="5,5,5,5" HorizontalAlignment="Stretch"  
+                         ItemsSource="{Binding EmployeeLeaveList,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+                          DisplayMember="Value" ValueMember="IdLookupValue" 
+                          IsTextEditable="False" ValidateOnTextInput="False"
+                          AutoComplete="True" ImmediatePopup="True" IncrementalFiltering="True"
+                          IsReadOnly="{Binding IsReadOnlyField,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
+                                <dxe:ComboBoxEdit.SelectedIndex>
+                                    <Binding Path="SelectedLeaveType" ValidatesOnDataErrors="True" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+
+                                    </Binding>
+                                </dxe:ComboBoxEdit.SelectedIndex>
+                            </dxe:ComboBoxEdit>
+                            <!--[rdixit][GEOS2-6571][14.12.2024]-->
+                            <Image x:Name="RefInfoImage" Grid.Row="4" ToolTip="{DynamicResource LeaveTypeMsgForMultipleEmployees}" Grid.Column="3" 
+       HorizontalAlignment="Left" Margin="5,0,0,0" Height="18" Width="18" 
+       Source="/Emdep.Geos.Modules.HRM;component/Assets/Images/INFO1.png" VerticalAlignment="Center" >
+                                <Image.Style>
+                                    <Style TargetType="Image">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding SelectedEmployeeList.Count}" Value="1">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding SelectedEmployeeList.Count}" Value="{x:Null}">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding SelectedEmployeeList.Count}" Value="0">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Image.Style>
+                            </Image>
+                            <Label Grid.Row="5" Grid.Column="0" Content="{DynamicResource LeaveRemarks}" Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,5,5,5"/>
+                            <TextBox Margin="5,5,5,5" Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2"  Height="90" TextWrapping="Wrap" Text="{Binding Remarks,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+                 VerticalAlignment="Stretch" HorizontalAlignment="Stretch" ScrollViewer.VerticalScrollBarVisibility="Auto" 
+                 AcceptsReturn="True"
+                 IsReadOnly="{Binding IsReadOnlyField,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
+                            </TextBox>
+
+                            <Label Grid.Row="6" Grid.Column="0" Content="{DynamicResource LeaveAttachment}" Height="30" FontSize="16"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,5,5,5"/>
+
+                            <!--,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow,Mode=FindAncestor}-->
+                            <!--,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow,Mode=FindAncestor}-->
+                            <dxe:ComboBoxEdit x:Name="editor" Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2" Height="30" 
+                          EditValue="{Binding AttachmentObjectList,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                          ItemsSource="{Binding AttachmentList,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                          ScrollViewer.VerticalScrollBarVisibility="Auto"
+                          DisplayMember="OriginalFileName"
+                          HorizontalAlignment="Stretch"
+                          VerticalAlignment="Center"
+                          AllowDefaultButton="False"
+                          AutoComplete="True"
+                          ImmediatePopup="True" Margin="5 5 5 5"
+                          ValidateOnEnterKeyPressed="True" 
+                          ValidateOnTextInput="True"
+                          IsTextEditable="False" Style="{DynamicResource ComboBoxEditStyle}" 
+                          IsReadOnly="{Binding IsReadOnlyField,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"
+                          SelectedItem="{Binding AttachedFile,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}">
+
+                                <dxe:ComboBoxEdit.StyleSettings>
+                                    <dxe:TokenComboBoxStyleSettings  NewTokenPosition="Far" EnableTokenWrapping="True"  />
+                                </dxe:ComboBoxEdit.StyleSettings>
+                                <dxmvvm:Interaction.Behaviors>
+                                    <dxmvvm:EventToCommand EventName="EditValueChanged"
+                                                           Command="{Binding SelectedItemChangedCommand}"
+                                                           PassEventArgsToCommand="True"/>
+                                    <!--, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}-->
+                                    <!--,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow,Mode=FindAncestor}-->
+                                </dxmvvm:Interaction.Behaviors>
+                            </dxe:ComboBoxEdit>
+                            <Button Name="btnViewLeaveFile" ToolTip="View Document" Grid.Row="6" Grid.Column="3" Height="30" Width="40" 
+                Visibility="{Binding IsVisible,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                Command="{Binding DocumentViewCommand}"
+                                   HorizontalAlignment="Left" >
+                                <Button.ContentTemplate>
+                                    <DataTemplate>
+                                        <Image Height="16" Width="16" Source="/Emdep.Geos.Modules.Hrm;component/Assets/Images/pdf-icon.png" />
+                                    </DataTemplate>
+                                </Button.ContentTemplate>
+                                <Button.Style>
+                                    <Style TargetType="{x:Type Button}">
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter  Property="Cursor" Value="Hand"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+
+
+                            <Button Content= "{DynamicResource ChooseFile}"
+                    Height="30"  
+                    Grid.Row="7" Grid.Column="1"
+                    Width="120" 
+                    Margin="5,5,5,5"
+                    FontSize="16"
+                    HorizontalAlignment="Right"   
+                   VerticalAlignment="Center" 
+                   Command="{Binding ChooseFileCommandForLeave}" Style="{DynamicResource ButtonStyle}" 
+                   IsEnabled="{Binding IsAcceptEnabled}"
+                   Grid.ColumnSpan="2"/>
+            <!--<StackPanel Orientation="Horizontal" Grid.Column="1" Grid.Row=" 8" Grid.ColumnSpan="2">
+                                <Button Content="{DynamicResource Accept}"
+                Command="{Binding AddNewLeaveAcceptButtonCommand}"
+                   FontSize="16"
+                    Height="30"
+                    Width="100"
+                    Margin="5,5,15,5"
+                    Style="{DynamicResource Button16Style}"
+                    VerticalAlignment="Bottom" 
+                    IsEnabled="{Binding IsAcceptEnabled}"/>
+
+                                <Button Content="{DynamicResource Cancel}"
+                Command="{Binding CancelCommandForLeave}" 
+                   FontSize="16"
+                    Height="30"
+                    Width="100"
+                    Margin="5,5,5,5"
+                    Style="{DynamicResource Button16Style}"
+                    VerticalAlignment="Bottom" />
+            </StackPanel>-->
+
+
+
+                        </Grid>
+                    </ScrollViewer>
+                </dx:DXTabItem>
+
+                <dx:DXTabControl.View>
+                    <dx:TabControlScrollView x:Name="DXTabControl1"
+                                             HideButtonShowMode="InAllTabs"
+                                             NewButtonShowMode="NoWhere"
+                                             NewTabCommand="{Binding AddNewTaskCommand}" />
+                </dx:DXTabControl.View>
+                <dxmvvm:Interaction.Behaviors>
+                    <dxmvvm:EventToCommand Command="{Binding DataContext.SelectionChangedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                           EventName="SelectionChanged"
+                                           PassEventArgsToCommand="True" />
+                </dxmvvm:Interaction.Behaviors>
+            </dx:DXTabControl>
+        </DataTemplate>
+
+    </UserControl.Resources>
+
+    <Grid >
+        <Grid.RowDefinitions>
+            <!--<RowDefinition Height="40" />-->
+            <RowDefinition Height="*" />
+            <RowDefinition Height="40" />
+        </Grid.RowDefinitions>
+        <!--<Button Grid.Row="0" Height="40" Width="40" HorizontalAlignment="Right" VerticalAlignment="Top" 
+                Visibility="{Binding AddNewTaskbtnVisibility,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,Converter={StaticResource BoolToVis},FallbackValue=Hidden}"
+                Command="{Binding AddNewTaskCommand}">
+            <Button.ToolTip>
+                <TextBlock Text="{DynamicResource ButtonSplit}" />
+            </Button.ToolTip>
+            <Button.ContentTemplate>
+                <DataTemplate>
+                    <Image Source="{DynamicResource SplitImageSource}"
+                           Height="24" Width="24"
+                           Stretch="None"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"/>
+                </DataTemplate>
+            </Button.ContentTemplate>
+        </Button>-->
+        <dxlc:FlowLayoutControl Grid.Row="0"
+                                Margin="-10"
+                                MaxWidth="1500"
+                                AllowItemMoving="False"
+                                AllowMaximizedElementMoving="False"
+                                AnimateItemMoving="True"
+                                BreakFlowToFit="False"
+                                DragScrolling="False"
+                                ItemsSource="{Binding Tasks}"
+                                ItemTemplate="{StaticResource FlowLayoutitemTemplate}"
+                                MaximizedElementPosition="Left"
+                                Orientation="Horizontal"
+                                ScrollViewer.HorizontalScrollBarVisibility="Visible"
+                                ScrollViewer.VerticalScrollBarVisibility="Hidden"
+                                ShowLayerSeparators="True"
+                                StretchContent="True">
+        </dxlc:FlowLayoutControl>
+
+        <!--ItemsSource="{Binding Tasks}" ItemTemplate="{StaticResource FlowLayoutitemTemplate}"-->
+        <StackPanel Grid.Row="1"
+                    Margin="0,10,0,0"
+                    Width="290"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Orientation="Horizontal">
+
+            <Button Height="30"
+                    Width="100"
+                    Margin="15,0,30,0"
+                    VerticalAlignment="Bottom"
+                    Command="{Binding SplitAttendanceViewAcceptButtonCommand}"
+                    Content="{DynamicResource EditTargetAndForecastViewAccept}"
+                    Style="{DynamicResource Button16Style}" />
+            <Button Height="30"
+                    Width="100"
+                    Margin="30,0,0,0"
+                    VerticalAlignment="Bottom"
+                    Command="{Binding SplitAttendanceViewCancelButtonCommand}"
+                    Content="{DynamicResource EditTargetAndForecastViewCancel}"
+                    Style="{DynamicResource Button16Style}" />
+        </StackPanel>
+    </Grid>
+
+</UserControl>

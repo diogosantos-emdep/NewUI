@@ -1,0 +1,85 @@
+﻿<dxwui:WinUIDialogWindow x:Class="Emdep.Geos.Modules.Warehouse.Views.WarehouseLocationPrintView"
+                         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                         xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                         xmlns:local="clr-namespace:Emdep.Geos.Modules.Warehouse.Views"
+                         xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+                         xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+                         xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"  
+                         xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+                         xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+                         Style="{DynamicResource WinUIDialogWindowStyle}"
+                         Title="{DynamicResource WarehouseLocationPrintTitle}"
+                         TitleStyle="{DynamicResource WinUIDialogWindowTitleStyle}"
+                         mc:Ignorable="d"                        
+                         Height="700" Width="1300">
+
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape" Command="{Binding CloseWindowCommand}"/>
+    </dxwui:WinUIDialogWindow.InputBindings>
+
+    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="40"/>
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="120"/>
+                    <!--<ColumnDefinition Width="50"/>-->
+                    <ColumnDefinition Width="480"/>
+                </Grid.ColumnDefinitions>
+                <Label Content="{DynamicResource WarehouseLocationPrintLabelSize}" Grid.Column="0"  HorizontalAlignment="Left" VerticalContentAlignment="Center"/>
+                <dxe:ComboBoxEdit Grid.Column="1" HorizontalAlignment="Left" Width="100" IsTextEditable="False" ItemsSource="{Binding LabelSizeList}" SelectedIndex="{Binding SelectedIndexLabelSize,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+            </Grid>
+
+            <dxg:TreeListControl Grid.Row="1" ItemsSource="{Binding WarehouseLocationList}" VerticalAlignment="Top" HorizontalAlignment="Stretch" 
+                             SelectionMode="None" Width="600" MaxHeight="500" MinHeight="500">
+                <dxg:TreeListControl.Columns>
+                    <dxg:TreeListColumn Header="{DynamicResource GridColFullName}" FieldName="FullName" Width="70*" ReadOnly="True" />
+                    <dxg:TreeListColumn Header="{DynamicResource GridColImageDirection}" FieldName="ImageDirection" Width="30*">
+                        <dxg:TreeListColumn.CellTemplate>
+                            <DataTemplate>
+                                <dxe:ComboBoxEdit Name="PART_Editor"
+                                                  ItemsSource="{Binding View.DataContext.ImageDirectionList}"
+                                                  DisplayMember="Name" />
+                            </DataTemplate>
+                        </dxg:TreeListColumn.CellTemplate>
+                    </dxg:TreeListColumn>
+                </dxg:TreeListControl.Columns>
+                <dxg:TreeListControl.View>
+                    <dxg:TreeListView Name="treeListView1" ShowTotalSummary="True" ShowCheckboxes="True"  AllowRecursiveNodeChecking="False"
+                                   CheckBoxFieldName="IsChecked" ParentFieldName="Parent" KeyFieldName="IdWarehouseLocation" />
+                </dxg:TreeListControl.View>
+            </dxg:TreeListControl>
+
+            <StackPanel Grid.Row="2" 
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Bottom"
+                    Orientation="Horizontal" 
+                    Width="290">
+
+                <Button Content="{DynamicResource WarehouseLocationPrintViewAccept}"
+                            Command="{Binding PrintLocationCommand}"
+                            Height="30"
+                            Width="100"
+                            Margin="30,0,10,0" 
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Bottom" />
+
+                <Button Content="{DynamicResource WarehouseLocationPrintViewCancel}"
+                            Command="{Binding CloseWindowCommand}" 
+                            Height="30"
+                            Width="100"
+                            Margin="10,0,0,0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Bottom"/>
+            </StackPanel>
+
+        </Grid>
+    </ScrollViewer>
+</dxwui:WinUIDialogWindow>

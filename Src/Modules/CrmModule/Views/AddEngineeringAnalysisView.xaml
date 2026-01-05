@@ -1,0 +1,294 @@
+﻿<dxwui:WinUIDialogWindow x:Class="Emdep.Geos.Modules.Crm.Views.AddEngineeringAnalysisView"
+                         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                         xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"
+                         xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+                         xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+                         xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+                         xmlns:ViewModels="clr-namespace:Emdep.Geos.Modules.Crm.ViewModels"
+                         xmlns:behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+                         xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+                         xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+                         xmlns:UIConverter ="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+                         xmlns:Validation ="clr-namespace:Emdep.Geos.UI.Validations;assembly=Emdep.Geos.UI.Validations"
+                         xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+                         xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+                         Height="400" Width="500"
+                         Title ="{DynamicResource LeadsEngineeringAnalysis}"
+                         TitleStyle="{DynamicResource WinUIDialogWindowTitleStyle}"
+                         Style="{DynamicResource WinUIDialogWindowStyle}">
+
+    <dxwui:WinUIDialogWindow.InputBindings>
+        <KeyBinding Key="Escape" Command="{Binding AddEngineeringAnalysisCancelButtonCommand}"/>
+    </dxwui:WinUIDialogWindow.InputBindings>
+    <Window.Resources>
+
+        <Style xmlns:dxet="http://schemas.devexpress.com/winfx/2008/xaml/editors/themekeys"
+               x:Key="{dxet:EditorListBoxThemeKey ResourceKey=CheckBoxItemStyle, IsThemeIndependent=True}"
+               BasedOn="{StaticResource {dxet:EditorListBoxThemeKey ResourceKey=CheckBoxItemStyle}}"
+               TargetType="{x:Type dxe:ListBoxEditItem}"  >
+            <Setter Property="IsEnabled" Value="{Binding IsArticleEnabled}" />
+        </Style>
+
+
+        <DataTemplate x:Key="RevisionTemplate" x:Shared="False">
+            <Grid ShowGridLines="False" HorizontalAlignment="Center" VerticalAlignment="Top" Height="Auto "
+                Width="400" Background="Transparent" >
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="2*" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="50" />
+                </Grid.RowDefinitions>
+
+                <StackPanel Orientation="Vertical" Grid.Row="0" Margin="0,5,0,0" >
+                    <Label Content="{DynamicResource LeadEngAnalysisType}" FontWeight="Bold" />
+
+                    <dxg:GridControl VerticalAlignment="Stretch" HorizontalAlignment="Stretch"  Height="102"
+                                     ScrollViewer.HorizontalScrollBarVisibility="Visible"
+                                     ItemsSource="{Binding EngineeringAnalysisTypes}"
+                                    SelectionMode="None">
+                        <!--<dxg:GridColumn Header="Type" FieldName="IsChecked" MinWidth="30" Width="50" FixedWidth="True" FilterPopupMode="CheckedList" HorizontalHeaderContentAlignment="Right" EditSettings="{dxe:TextSettings HorizontalContentAlignment=Right}" >
+                            <dxg:GridColumn.CellTemplate>
+                                <DataTemplate>
+                                    <dxe:CheckEdit IsChecked="{Binding Data.IsChecked}" HorizontalAlignment="Center" VerticalAlignment="Center"  Command="{Binding DataContext.SelectedItemChangedCommand,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" 
+                                                                           CommandParameter="{Binding RowData.Row}" IsEnabled="{Binding Data.IsArticleEnabled}"  >
+                                        
+                                  
+                                    </dxe:CheckEdit>
+                                </DataTemplate>
+                            </dxg:GridColumn.CellTemplate>
+                        </dxg:GridColumn>
+                      
+                        <dxg:GridColumn Header="" FieldName="Reference"  Visible="True" MinWidth="100" Width="*">
+                            <dxg:GridColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Grid.Column="2" Text="{Binding Data.Reference}" Style="{StaticResource TextBlock14Style}" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                                </DataTemplate>
+                            </dxg:GridColumn.CellTemplate>
+                        </dxg:GridColumn>-->
+                        <dxg:GridColumn Header="{DynamicResource Type}" FieldName="Reference" Width="*" MinWidth="200">
+                            <dxg:GridColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <!-- Checkbox bound to IsChecked -->
+                                        <dxe:CheckEdit IsChecked="{Binding Data.IsChecked}" VerticalAlignment="Center" Margin="0,0,5,0"/>
+
+                                        <!-- Text bound to Reference -->
+                                        <TextBlock Text="{Binding Data.Reference}" 
+                                                   VerticalAlignment="Center" 
+                                                   Style="{StaticResource TextBlock14Style}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </dxg:GridColumn.CellTemplate>
+                        </dxg:GridColumn>
+
+                        <!--rahul.gadhave-->
+                        <dxg:GridColumn  Header="{DynamicResource AnalysisAssignee}" FieldName="FirstName" MinWidth="50" Width="*"                 
+                                         Visible="{Binding DataContext.IsAssignee, 
+                                                  RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow},Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                            <dxg:GridColumn.CellTemplate>
+                                <DataTemplate>
+                                    <dxe:ComboBoxEdit   IsEnabled="{Binding DataContext.IsAssigneeReadOnly, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                                        ItemsSource="{Binding Data.AssigneeList}"
+                                                        SelectedIndex="{Binding Data.SelectedIndexAssignee}"
+                                          NullText="---"
+                                          DisplayMember="FirstName"
+                                                        ValueMember="IdUser"
+                                          HorizontalAlignment="Stretch"
+                                          VerticalAlignment="Stretch"
+                                          AllowNullInput="True"/>              
+                                </DataTemplate>
+                            </dxg:GridColumn.CellTemplate>
+                        </dxg:GridColumn>
+                        <!--End-->
+
+                        <dxg:GridColumn Header="{DynamicResource AnalysisStatus}" FieldName="IsSelected"  Visible="True" MinWidth="60" Width="40">
+                            <dxg:GridColumn.CellTemplate>
+                                <DataTemplate>
+                                    <dxe:ToggleSwitch x:Name="chkInUse" Grid.Column="3"  HorizontalAlignment="Center" VerticalAlignment="Center" ContentPlacement="Inside"
+                                        CheckedStateContent="Done" UncheckedStateContent="Todo" ToggleSwitchWidth="60" ToggleSwitchHeight="22" IsThreeState="False"      
+                                        IsChecked="{Binding Data.IsSelected}" IsEnabled="{Binding Data.IsArticleEnabled}"  IsReadOnly="{Binding DataContext.IsCompletedReadOnly, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  >
+                                        <dxe:ToggleSwitch.Style>
+                                            <Style TargetType="{x:Type dxe:ToggleSwitch}">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Data.IsChecked}" Value="true">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Data.IsChecked}" Value="false">
+                                                        <Setter Property="Visibility" Value="Hidden"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </dxe:ToggleSwitch.Style>
+                                    </dxe:ToggleSwitch>
+                                </DataTemplate>
+                            </dxg:GridColumn.CellTemplate>
+                        </dxg:GridColumn>
+                        <dxg:GridControl.View>
+                            <dxg:TableView x:Name="ItemListTableView"
+                                ShowGroupedColumns="False"  
+                                NavigationStyle="None"
+                                HorizontalScrollbarVisibility="Auto"  
+                                VerticalScrollbarVisibility="Auto" 
+                                ShowColumnHeaders="True"
+                                ShowIndicator="False"  
+                                ShowGroupPanel="False"  
+                                ShowHorizontalLines="True"  
+                                ShowVerticalLines="True"  
+                                ShowSearchPanelMode="Never" 
+                                AllowEditing="True"
+                                AllowColumnMoving="True">
+                            </dxg:TableView>
+                        </dxg:GridControl.View>
+                    </dxg:GridControl>
+
+                   
+                </StackPanel>
+
+                <StackPanel Orientation="Vertical" Grid.Row="1">
+                    <Label Content="{DynamicResource LeadEngAnalysisComments}" FontWeight="Bold"/>
+                    <dxe:TextEdit Text="{Binding Comments}" 
+                          Height="75"  TextWrapping="WrapWithOverflow"
+                          HorizontalAlignment="Stretch"
+                          VerticalAlignment="Top"
+                          AcceptsReturn="True"
+                          VerticalScrollBarVisibility="Visible" 
+                          VerticalContentAlignment="Stretch"
+                          HorizontalContentAlignment="Left"
+                          Style="{DynamicResource TextEditStyle}"  InvalidValueBehavior="AllowLeaveEditor"
+                          IsReadOnly="{Binding IsCommentsReadOnly, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  ValidateOnTextInput="True" ShowErrorToolTip="True" ShowError="True">
+                        <dxe:TextEdit.EditValue>
+                            <Binding Path="Comments" ValidatesOnDataErrors="True"  UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                                <Binding.ValidationRules>
+                                    <Validation:EngineeringAnalysisValidation FieldName="Comments"/>
+                                </Binding.ValidationRules>
+                            </Binding>
+                        </dxe:TextEdit.EditValue>
+                    </dxe:TextEdit>
+                </StackPanel>
+
+                <StackPanel Orientation="Vertical" Grid.Row="2" Margin="0,5,0,0">
+                    <Label Content="{DynamicResource LeadEngAnalysisAttachments}"  FontWeight="Bold"   />
+                    <dxe:ComboBoxEdit x:Name="editor" Height="75" NullText="{DynamicResource ActivityNoFileChose}" 
+                              EditValue="{Binding TempAttachmentList, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                              ItemsSource="{Binding TempAttachmentList,UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                              ScrollViewer.VerticalScrollBarVisibility="Auto"
+                              DisplayMember="OriginalFileName"
+                              AllowDefaultButton="False"
+                              AutoComplete="True"
+                              ImmediatePopup="True" Margin="0 0 0 0"
+                              ValidateOnEnterKeyPressed="True" 
+                              ValidateOnTextInput="True"
+                              IsTextEditable="False" Style="{DynamicResource ComboBoxEditStyle}" 
+                              IsReadOnly="{Binding IsEngineeringAnalysisTypesReadOnly, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                        <!--<dxe:ComboBoxEdit.SelectedIndex>
+                            <Binding Path="SelectedIndexAttachment" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                                <Binding.ValidationRules>
+                            <Validation:EngineeringAnalysisValidation FieldName="SelectedIndexAttachment" ValidationStep="UpdatedValue" />
+                        </Binding.ValidationRules>
+                            </Binding>
+                        </dxe:ComboBoxEdit.SelectedIndex>-->
+                        <dxe:ComboBoxEdit.StyleSettings>
+                            <dxe:TokenComboBoxStyleSettings  NewTokenPosition="Far" EnableTokenWrapping="True"  />
+                        </dxe:ComboBoxEdit.StyleSettings>
+                    </dxe:ComboBoxEdit>
+                    <Button Content= "{DynamicResource LeadEngAnalysisChooseFile}"
+                    Height="30" 
+                    HorizontalAlignment="Right" 
+                    Margin="0,5,0,0" 
+                    VerticalAlignment="Center" 
+                    Width="110"
+                    Command="{Binding DataContext.ChooseFileCommand,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" Style="{DynamicResource ButtonStyle}" 
+                    IsEnabled="{Binding IsEngAnalysisChooseFileEnable,Mode=OneTime}"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Vertical" Grid.Row="3">
+                    <Label Content="{DynamicResource LeadEngAnalysisDueDate}" FontWeight="Bold" />
+                    <dxe:DateEdit HorizontalAlignment="Stretch" 
+                              VerticalAlignment="Top" ValidateOnTextInput="True" 
+                              Height="30"  
+                              Mask="{Binding CultureInfo.CurrentCulture.DateTimeFormat.YearMonthPattern}" MaskUseAsDisplayFormat="True"
+                              IsTextEditable="False"
+                              HorizontalContentAlignment="Right"  InvalidValueBehavior="AllowLeaveEditor"
+                              IsReadOnly="{Binding IsDateReadOnly, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                ShowErrorToolTip="True" ShowError="True">
+                        <dxe:TextEdit.EditValue>
+                            <Binding Path="DueDate" ValidatesOnDataErrors="True"  UpdateSourceTrigger="PropertyChanged" Mode="TwoWay">
+                                <Binding.ValidationRules>
+                                    <Validation:EngineeringAnalysisValidation FieldName="DueDate"/>
+                                </Binding.ValidationRules>
+                            </Binding>
+                        </dxe:TextEdit.EditValue>
+                    </dxe:DateEdit>
+                </StackPanel>
+
+                <!--<StackPanel Orientation="Horizontal" Grid.Row="4">
+            <Label Content="{DynamicResource ActivityCompleted}" 
+                   HorizontalAlignment="Left" VerticalAlignment="Center" FontWeight="Bold" />
+            <dxe:CheckEdit Height="30" Margin="10 0 0 0"
+                           HorizontalAlignment="Left" VerticalAlignment="Center"
+                           IsReadOnly="{Binding DataContext.IsCompletedReadOnly, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                           IsChecked="{Binding DataContext.IsCompleted, RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                <dxe:CheckEdit.LayoutTransform>
+                    <ScaleTransform ScaleX="1.2" ScaleY="1.2" />
+                </dxe:CheckEdit.LayoutTransform>
+            </dxe:CheckEdit>
+        </StackPanel>-->
+                <DockPanel Grid.Row="5" HorizontalAlignment="Center" VerticalAlignment="Center" Width="250" Height="30"  Margin="0 5 0 0">
+                    <Button HorizontalAlignment="Left" Width="100" Command="{Binding DataContext.AddEngineeringAnalysisAcceptButtonCommand,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" Content="{DynamicResource LeadEngAnalysisAccept}"
+                    IsEnabled="{Binding IsAcceptEnable,Mode=OneTime}"/>
+                    <Button HorizontalAlignment="Right" Width="100" Command="{Binding DataContext.AddEngineeringAnalysisCancelButtonCommand,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" Content="{DynamicResource LeadEngAnalysisCancel}"/>
+                </DockPanel>
+            </Grid>
+        </DataTemplate>
+    </Window.Resources>
+
+    <dx:DXTabControl Name="tabRevision"
+                     ItemsSource="{Binding DataContext.RevisionList,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow},Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" ItemTemplate="{DynamicResource RevisionTemplate}" TabContentCacheMode="CacheAllTabs" SelectedItem="{Binding DataContext.SelectedRevision,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow},Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" >
+        <dx:DXTabControl.ItemHeaderTemplate>
+            <DataTemplate>
+                <DockPanel>
+                    <TextBlock VerticalAlignment="Center"
+                                                   Text="{Binding Path=Header}"/>
+                    <!--<dxe:TextEdit HorizontalAlignment="Right" VerticalAlignment="Center"  ShowBorder="False" IsReadOnly="True"    ShowError="True" ShowErrorToolTip="True"                                             >
+                        <Binding Path="DataContext.RevError" RelativeSource="{RelativeSource AncestorType=dxwui:WinUIDialogWindow}" UpdateSourceTrigger="PropertyChanged" Mode="TwoWay" ValidatesOnDataErrors="True">
+                            <Binding.ValidationRules>
+                                <Validation:UserValidation FieldName="RevError" ValidationStep="UpdatedValue" />
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </dxe:TextEdit>-->
+                </DockPanel>
+            </DataTemplate>
+        </dx:DXTabControl.ItemHeaderTemplate>
+
+        <dx:DXTabControl.View>
+            <dx:TabControlScrollView x:Name="DXTabControlRev"
+                                                                 HeaderOrientation="Horizontal"
+                                                                 NewButtonShowMode="InTabPanel"/>
+        </dx:DXTabControl.View>
+        <dxmvvm:Interaction.Behaviors>
+            <dxmvvm:EventToCommand EventName="TabAdding" 
+                                                                       Command="{Binding DataContext.TabAddingCommand,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" 
+                                                                      PassEventArgsToCommand="True" />
+
+            <dxmvvm:EventToCommand EventName="SelectionChanged" 
+                                                           Command="{Binding DataContext.TabPreviousCommand,RelativeSource={RelativeSource AncestorType=dxwui:WinUIDialogWindow}}" 
+                                                          PassEventArgsToCommand="True" />
+        </dxmvvm:Interaction.Behaviors>
+    </dx:DXTabControl>
+
+    
+
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="KeyDown">
+            <behaviors:InvokeDelegateCommandAction Command="{Binding CommandTextInput}" CommandParameter="{Binding Path=InvokeParameter, RelativeSource={RelativeSource Self}}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+ 
+</dxwui:WinUIDialogWindow>

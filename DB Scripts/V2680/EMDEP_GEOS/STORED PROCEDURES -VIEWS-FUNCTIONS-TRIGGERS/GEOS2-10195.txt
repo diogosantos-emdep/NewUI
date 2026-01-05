@@ -1,0 +1,15 @@
+DROP PROCEDURE IF EXISTS GetAllCompanyByUserId_V2680;
+DELIMITER $$
+CREATE PROCEDURE GetAllCompanyByUserId_V2680(
+   IN _IdUser   int(10) UNSIGNED)
+BEGIN
+-- [Rahul.gadhave][Date:12/11/2025][GEOS2-10195]
+-- call GetAllCompanyByUserId_V2680(1);
+    SELECT DISTINCT c.*
+    FROM companies AS c
+    INNER JOIN site_user_permission AS sup ON c.IdCompany = sup.IdCompany
+    INNER JOIN site_user_module_geos_permission AS sump ON sup.Id = sump.IdSiteUserPermission
+    INNER JOIN geos_providers AS gp  ON c.IdCompany = gp.IdCompany
+    WHERE sup.IdUser = _IdUser;
+END $$
+DELIMITER ;

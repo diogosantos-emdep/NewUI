@@ -1,0 +1,405 @@
+﻿<Window x:Class="Emdep.Geos.Modules.ERM.Views.PLAShowLoadWorkStationView"
+       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"             
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:dxga="http://schemas.devexpress.com/winfx/2008/xaml/gauges"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors" 
+             xmlns:dxp="http://schemas.devexpress.com/winfx/2008/xaml/printing"
+             xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+             xmlns:ViewModels="clr-namespace:Emdep.Geos.Modules.ERM.ViewModels"
+             xmlns:dxc="http://schemas.devexpress.com/winfx/2008/xaml/charts" 
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:sysglb="clr-namespace:System.Globalization;assembly=mscorlib"
+             xmlns:dxsch="http://schemas.devexpress.com/winfx/2008/xaml/scheduler"
+             xmlns:Scheduler="clr-namespace:DevExpress.Xpf.Scheduler.UI;assembly=DevExpress.Xpf.Scheduler.v19.2"
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:dxschcore="clr-namespace:DevExpress.XtraScheduler;assembly=DevExpress.XtraScheduler.v19.2.Core"
+             xmlns:behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+             xmlns:Interactive="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:Behaviors="clr-namespace:Emdep.Geos.UI.Behaviors;assembly=Emdep.Geos.UI.Common"
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+             xmlns:dxci="http://schemas.devexpress.com/winfx/2008/xaml/core/internal"
+             xmlns:UIConverter="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
+             xmlns:UIHelper="clr-namespace:Emdep.Geos.UI.Helper;assembly=Emdep.Geos.UI.Helper"
+             xmlns:dxschint="http://schemas.devexpress.com/winfx/2008/xaml/scheduler/internal"
+             xmlns:dxscht="http://schemas.devexpress.com/winfx/2008/xaml/scheduler/themekeys"
+             xmlns:ERMApplication="clr-namespace:Emdep.Geos.Modules.ERM.CommonClasses"
+             xmlns:Serialization="clr-namespace:DevExpress.Xpf.LayoutControl.Serialization;assembly=DevExpress.Xpf.LayoutControl.v19.2"
+             xmlns:dxb="http://schemas.devexpress.com/winfx/2008/xaml/bars"
+             xmlns:GeosApplication="clr-namespace:Emdep.Geos.UI.Common;assembly=Emdep.Geos.UI.Common"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:dxgt="http://schemas.devexpress.com/winfx/2008/xaml/grid/themekeys"
+             xmlns:gif="http://wpfanimatedgif.codeplex.com"
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.ERM.Views"
+        
+             mc:Ignorable="d" 
+             WindowState="Maximized" >
+   
+    <Window.InputBindings>
+        <KeyBinding Key="Escape" Command="{Binding CloseButtonCommand}" />
+    </Window.InputBindings>
+   
+    <Window.Resources>
+        
+        <UIHelper:ColumnTemplateSelector x:Key="ColumnTemplateSelector"/>
+
+        <Style x:Key="ColumnStyle" TargetType="dxg:GridColumn">
+            <Setter Property="FilterPopupMode" Value="CheckedList"/>
+
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Path=IsVertical}" Value="True">
+                    <Setter Property="HeaderTemplate">
+                        <Setter.Value>
+                            <DataTemplate>
+                                <ContentControl Content="{Binding}">
+                                    <ContentControl.LayoutTransform>
+                                        <RotateTransform Angle="-90"/>
+                                    </ContentControl.LayoutTransform>
+                                </ContentControl>
+                            </DataTemplate>
+                        </Setter.Value>
+                    </Setter>
+                    <Setter Property="FilterEditorHeaderTemplate">
+                        <Setter.Value>
+                            <DataTemplate>
+                                <ContentControl Content="{Binding}">
+                                    <ContentControl.LayoutTransform>
+                                        <RotateTransform Angle="0"/>
+                                    </ContentControl.LayoutTransform>
+                                </ContentControl>
+                            </DataTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="PrintColumnHeaderStyle" TargetType="dxe:TextEdit"  BasedOn="{StaticResource {dxgt:TableViewThemeKey ResourceKey=DefaultPrintCellStyle}}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Path=Column.DataContext.IsVertical}" Value="True">
+                    <Setter Property="dxp:ExportSettings.TargetType" Value="Image"/>
+                    <Setter Property="Height" Value="150"/>
+                    <Setter Property="DisplayTemplate">
+                        <Setter.Value>
+                            <ControlTemplate>
+                                <dxe:TextEdit Name="PART_Editor" HorizontalAlignment="Left" Text="{Binding Path=Column.DataContext.FieldName}" IsPrintingMode="True" >
+                                    <dxe:TextEdit.LayoutTransform >
+                                        <RotateTransform Angle="-90"/>
+                                    </dxe:TextEdit.LayoutTransform>
+                                </dxe:TextEdit>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <DataTemplate x:Key="DefaultColunmTemplate">
+            <ContentControl>
+                <dxg:GridColumn Header="{Binding HeaderText,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                FieldName="{Binding ColumnFieldName,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                HorizontalHeaderContentAlignment="Left"
+                                Width="{Binding Width}"
+                                MinWidth="{Binding Width}"
+                                Visible="{Binding Visible,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ReadOnly="True" FixedWidth="True" FilterPopupMode="Default">
+                    <dxg:GridColumn.EditSettings>
+                        <dxe:TextEditSettings HorizontalContentAlignment="Left"/>
+                    </dxg:GridColumn.EditSettings>
+                </dxg:GridColumn>
+            </ContentControl>
+        </DataTemplate>
+
+        <DataTemplate x:Key="CalendarWeekColumnTemplate">
+            <ContentControl>
+                <dxg:GridColumn FieldName="{Binding ColumnFieldName}" 
+                                Header="{Binding HeaderText}"   
+                                HeaderToolTip="{Binding ColumnFieldName}"
+                                AllowCellMerge="{Binding AllowCellMerge}"  
+                                FixedWidth="{Binding FixedWidth}"   
+                                AllowBestFit="true"
+                               
+                                AllowEditing="False" 
+                                AllowAutoFilter="False" 
+                                Visible="False"
+                                AllowMoving="True" 
+                                ShowInColumnChooser="True" 
+                                ReadOnly="True"  />
+
+                <!--Width="{Binding  Width}"-->
+            </ContentControl>
+        </DataTemplate>
+
+
+
+        <DataTemplate x:Key="OTCodeColumnTemplate">
+            <ContentControl>
+                <dxg:GridColumn FieldName="{Binding ColumnFieldName,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                Header="{Binding HeaderText,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                               AllowCellMerge="{Binding AllowCellMerge}" AllowSearchPanel="True"
+                                IsSmart="True"
+                                 Width="{Binding  Width}"
+                                AllowBestFit="true" 
+                     FixedWidth="{Binding FixedWidth}"  AllowEditing="False" 
+                                AllowAutoFilter="False" 
+                                Visible="False"
+                                HeaderToolTip="{Binding HeaderText}"
+                                AllowMoving="True" 
+                                ShowInColumnChooser="True" 
+                                ReadOnly="True"  FilterPopupMode="Default"  >
+                </dxg:GridColumn>
+            </ContentControl>
+        </DataTemplate>
+
+
+
+
+        <DataTemplate x:Key="PlantColumnTemplate">
+            <ContentControl>
+                <dxg:GridColumn FieldName="{Binding ColumnFieldName,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                Header="{Binding HeaderText,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                               AllowCellMerge="{Binding AllowCellMerge}" 
+                                
+                                AllowBestFit="true" 
+                     FixedWidth="{Binding FixedWidth}"  AllowEditing="False" 
+                                AllowAutoFilter="False" 
+                                Visible="True"
+                                HeaderToolTip="{Binding HeaderText}"
+                                AllowMoving="True" 
+                                ShowInColumnChooser="True" 
+                                ReadOnly="True"  FilterPopupMode="Default" >
+                </dxg:GridColumn>
+            </ContentControl>
+        </DataTemplate>
+
+        <DataTemplate x:Key="CPTypeColumnTemplate">
+            <ContentControl>
+                <dxg:GridColumn FieldName="{Binding ColumnFieldName,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                Header="{Binding HeaderText,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                               AllowCellMerge="{Binding AllowCellMerge}" 
+                                
+                                AllowBestFit="true" 
+                     FixedWidth="{Binding FixedWidth}"  AllowEditing="False" 
+                                AllowAutoFilter="False" 
+                                Visible="True"
+                                HeaderToolTip="{Binding HeaderText}"
+                                AllowMoving="True" 
+                                Width="{Binding Width}"
+                                ShowInColumnChooser="True" 
+                                ReadOnly="True"  FilterPopupMode="Default" AllowSearchPanel="True" >
+                </dxg:GridColumn>
+            </ContentControl>
+        </DataTemplate>
+        <DataTemplate x:Key="SummaryTemplateEquipment">
+            <ContentControl>
+                <dxg:GridSummaryItem FieldName="{Binding Path=(dxci:DependencyObjectExtensions.DataContext).FieldName, RelativeSource={RelativeSource Self}}"
+                                     SummaryType="{Binding Path=(dxci:DependencyObjectExtensions.DataContext).Type, RelativeSource={RelativeSource Self}}"
+                                     DisplayFormat="{Binding Path=(dxci:DependencyObjectExtensions.DataContext).DisplayFormat, RelativeSource={RelativeSource Self}}" 
+                                    
+                                     />
+            </ContentControl>
+        </DataTemplate>
+
+        <DataTemplate x:Key="ArrayOfferOptionColumnTemplate">
+            <ContentControl>
+                <dxg:GridColumn FieldName="{Binding Path=FieldName}" Tag="{Binding}"  Header="{Binding HeaderText}"   AllowCellMerge="{Binding AllowCellMerge}"  FixedWidth="{Binding FixedWidth}"  AllowBestFit="true" Width="{Binding  Width}" HorizontalHeaderContentAlignment="Center"  Visible="{Binding Visible}" AllowMoving="False" ShowInColumnChooser="False" AllowSorting="False" 
+                                ReadOnly="True" BestFitArea="All" AllowSearchPanel="True" >
+                    <dxg:GridColumn.EditSettings>
+                        <dxe:TextEditSettings Mask="D" MaskType="Numeric" HorizontalContentAlignment="Right" MaskUseAsDisplayFormat="true" ValidateOnTextInput="True" ValidateOnEnterKeyPressed="True" AllowNullInput="False">
+                        </dxe:TextEditSettings>
+                    </dxg:GridColumn.EditSettings>
+                </dxg:GridColumn>
+            </ContentControl>
+        </DataTemplate>
+
+        <DataTemplate x:Key="CalendarWeekPDAWorkstationColumnTemplate">
+            <ContentControl>
+                <dxg:GridColumn FieldName="{Binding FieldName}" Header="{Binding HeaderText}" AllowCellMerge="{Binding AllowCellMerge}"  FixedWidth="{Binding FixedWidth}"   AllowBestFit="true" Width="{Binding  Width}" AllowEditing="False" AllowAutoFilter="False"  Visible="False"  AllowMoving="True" ShowInColumnChooser="True" 
+                                ReadOnly="True" AllowSearchPanel="True" />
+            </ContentControl>
+        </DataTemplate>
+
+        <DataTemplate x:Key="PDAOTCodeColumnTemplate">
+            <ContentControl>
+                <dxg:GridColumn FieldName="{Binding FieldName}" Header="{Binding HeaderText}" AllowCellMerge="{Binding AllowCellMerge}"  FixedWidth="{Binding FixedWidth}"   AllowBestFit="true" Width="{Binding  Width}" AllowEditing="False" AllowAutoFilter="False"  Visible="True"  AllowMoving="True" ShowInColumnChooser="True" 
+                                ReadOnly="True" Fixed="None" AllowSearchPanel="True" />
+            </ContentControl>
+        </DataTemplate>
+    </Window.Resources>
+    <Grid Background="{DynamicResource AppointmentHeaderBackground}">
+        <dxlc:LayoutGroup  dxlc:LayoutControl.AllowHorizontalSizing="True" 
+                                   View="GroupBox" Header="{DynamicResource PDALoadWorkstation}"      
+                                  IsCollapsible="True" IsCollapsed="False" Margin="5,0,5,5">
+            <dxlc:LayoutGroup.HeaderTemplate>
+                <DataTemplate>
+                    <Grid ShowGridLines="True">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="{Binding}" Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Stretch" />
+                    </Grid>
+                </DataTemplate>
+            </dxlc:LayoutGroup.HeaderTemplate>
+            <dxlc:LayoutGroup.GroupBoxStyle>
+                <Style TargetType="dxlc:GroupBox">
+                    <Setter Property="BorderThickness" Value="2" />
+
+                </Style>
+            </dxlc:LayoutGroup.GroupBoxStyle>
+            <Grid>
+                    <Grid.ColumnDefinitions>
+                        <!--<ColumnDefinition Width="20*" />
+                            <ColumnDefinition Width="10" />-->
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <!--<RowDefinition Height="5"/>-->
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                <!--MaxHeight="700" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"  -->
+                <dxg:GridControl x:Name="grid" DockPanel.Dock="Top" 
+                  ItemsSource="{Binding DataTableForGridLayoutLoadWorkstation,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"  FocusManager.IsFocusScope="True"
+                  SelectedItem="{Binding SelectedObject, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                  ColumnsSource="{Binding ColumnsLoadWorkstation,UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Stretch"
+                  AutoGenerateColumns="None" ScrollViewer.HorizontalScrollBarVisibility="Visible"
+                  ColumnGeneratorStyle="{StaticResource ColumnStyle}"
+                  ColumnGeneratorTemplateSelector="{StaticResource ColumnTemplateSelector}"
+                  AllowInitiallyFocusedRow="False"     
+                  SelectionMode="None"
+                  ImplyNullLikeEmptyStringWhenFiltering="True"
+                  TotalSummaryGeneratorTemplate="{StaticResource SummaryTemplateEquipment}"
+                  GroupSummaryGeneratorTemplate="{StaticResource SummaryTemplateEquipment}"
+                  TotalSummarySource="{Binding TotalSummaryLoadWorkstation}"
+                  GroupSummarySource="{Binding GroupSummaryLoadWorkstation}"
+                                                >
+                        <dxg:GridControl.TotalSummary>
+
+                        </dxg:GridControl.TotalSummary>
+
+
+                        <dxg:GridControl.View>
+                            <dxg:TableView x:Name="PlantLoadWorkstationTableView"
+                                                     GroupSummaryDisplayMode="AlignByColumns"
+                                          
+                                         AllowGrouping="True"
+                                         ShowSearchPanelMode="Always"
+                                     NavigationStyle="Cell"
+                                     ShowFixedTotalSummary="False"
+                                     ShowTotalSummary="True"
+                                     ShowHorizontalLines="True"
+                                     AllowPerPixelScrolling="True"
+                                     ShowGroupPanel="False"
+                                     ShowColumnHeaders="True"
+                                     ShowVerticalLines="True"
+                                     ShowIndicator="True"
+                                     AutoWidth="True"
+                                     HorizontalScrollbarVisibility="Visible"
+                                     VerticalScrollbarVisibility="Visible"
+                                     HorizontalContentAlignment="Center"
+                                      FilterEditorShowOperandTypeIcon="True"
+                                     RowMinHeight="20"
+                                     AllowSorting="False"
+                                     AllowScrollHeaders="False"
+                                     AllowEditing="True"
+                                     AllowColumnMoving="True"
+                                     AutoMoveRowFocus="False"
+                                     AllowScrollAnimation="True"
+                                     AllowBestFit="True"
+                                     AllowResizing="True"
+                                     AllowColumnFiltering="True"
+                                     AllowConditionalFormattingMenu="True"
+                                     SearchPanelHorizontalAlignment="Stretch"
+                                    UseLegacyFilterEditor="True">
+                                <!--UIHelper:MultipleCellEditHelperSAMWorkPlanning.IsEnabled="True"-->
+
+                                <dxmvvm:Interaction.Triggers>
+                                    <dxmvvm:EventToCommand EventName="Loaded" Command="{Binding GridActionLoadWorkstationCommand}" CommandParameter="{Binding ElementName=grid}" />
+                                    <dxmvvm:EventToCommand EventName="Unloaded"
+                                            Command="{Binding PLAWorkstationGridControlUnloadedCommand}">
+                                    </dxmvvm:EventToCommand>
+                                    <dxmvvm:EventToCommand EventName="MouseDoubleClick" Command="{Binding ShowLoadWorkStationDialogWindowCommands}"  />
+                                </dxmvvm:Interaction.Triggers>
+
+                                <dxg:TableView.TotalSummaryContentStyle>
+                                    <Style  TargetType="dx:DataContentPresenter">
+                                        <Setter Property="TextBlock.FontWeight" Value="Bold"/>
+                                        <Setter Property="HorizontalAlignment" Value="Right"/>
+                                    </Style>
+                                </dxg:TableView.TotalSummaryContentStyle>
+                                <!--<dxg:TableView.GroupRowStyle>
+                                    <Style TargetType="{x:Type dxg:GroupRowControl}" >
+                                        <Setter Property="Background" Value="DimGray"  />
+
+                                    </Style>
+
+                                </dxg:TableView.GroupRowStyle>-->
+
+                            <dxg:TableView.GroupRowStyle>
+                                
+                                <Style TargetType="{x:Type dxg:GroupRowControl}" BasedOn="{StaticResource BaseUniversalStyle}">
+                                    <Setter Property="Background" Value="DimGray"/>
+
+                                        <Style.Triggers>
+                                        <MultiDataTrigger>
+                                            <MultiDataTrigger.Conditions>
+
+
+                                                <Condition Binding="{Binding Row.GroupColor}" Value="true" />
+
+                                            </MultiDataTrigger.Conditions>
+                                          
+                                            <Setter Property="Background" Value="LightBlue"/>
+
+                                        </MultiDataTrigger>
+
+                                    </Style.Triggers>
+
+                                </Style>
+
+                            </dxg:TableView.GroupRowStyle>
+
+
+                            <dxg:TableView.Resources>
+                                    <DataTemplate x:Key="PageHeader">
+                                        <Grid Width="{Binding UsablePageWidth}">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="50" />
+                                                <ColumnDefinition Width="130" />
+                                            </Grid.ColumnDefinitions>
+                                            <dxe:TextEdit Text=" " Width="{Binding UsablePageWidth}" Grid.ColumnSpan="3" IsPrintingMode="True" Background="#333E5E"   HorizontalAlignment="Stretch"
+                                        VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold" Height="50" />
+                                            <dxe:TextEdit Text="Leads/Offers Report" IsPrintingMode="True"     HorizontalAlignment="Stretch"
+                                        VerticalAlignment="Stretch" Padding="12" Foreground="#FFFFFFFF" Style="{DynamicResource TextEdit20Style}" FontWeight="Bold"/>
+                                            <Image Source="/Emdep.Geos.Modules.Crm;component/Assets/Images/GeosReportLogo.png" Height="50" Width="80"  dxp:ExportSettings.TargetType="Image" Grid.Column="2" />
+                                        </Grid>
+                                    </DataTemplate>
+
+                                    <DataTemplate x:Key="PageFooter">
+                                        <dxe:TextEdit HorizontalContentAlignment="Center"
+                                      Width="{Binding Path=UsablePageWidth, Mode=OneWay}"
+                                      dxp:ExportSettings.TargetType="PageNumber"
+                                      dxp:PageNumberExportSettings.Kind="NumberOfTotal"
+                                      dxp:PageNumberExportSettings.Format="Page {0} of {1}" >
+                                        </dxe:TextEdit>
+                                    </DataTemplate>
+                                </dxg:TableView.Resources>
+
+                            </dxg:TableView>
+                        </dxg:GridControl.View>
+                    </dxg:GridControl>
+
+
+                </Grid>
+           
+
+        </dxlc:LayoutGroup>
+    </Grid>
+</Window>

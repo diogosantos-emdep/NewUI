@@ -1,0 +1,37 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:cs="colorscheme_ignorable_uri" xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core" xmlns:dxc="http://schemas.devexpress.com/winfx/2008/xaml/charts" xmlns:dxct="http://schemas.devexpress.com/winfx/2008/xaml/charts/themekeys" xmlns:dxi="http://schemas.devexpress.com/winfx/2008/xaml/core/internal" xmlns:dxt="http://schemas.devexpress.com/winfx/2008/xaml/core/themekeys" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:sys="clr-namespace:System;assembly=mscorlib" mc:Ignorable="cs">
+    <!-- General -->
+    <Style x:Key="{dxt:DefaultStyleThemeKey FullName=DevExpress.Xpf.Charts.DropTargetControl}" TargetType="{x:Type dxc:DropTargetControl}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type dxc:DropTargetControl}">
+                    <Grid x:Name="Root" Background="Transparent" Opacity="0.5">
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup>
+                                <VisualState x:Name="Normal" />
+                                <VisualState x:Name="HasData">
+                                    <Storyboard>
+                                        <ColorAnimation Duration="0" Storyboard.TargetName="IsDefault" Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" To="#FFFFFFFF" />
+                                        <ColorAnimation Duration="0" Storyboard.TargetName="IsDefault" Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)" To="#FFB9B9B9" />
+                                        <ColorAnimation Duration="0" Storyboard.TargetName="Content" Storyboard.TargetProperty="(Label.Foreground).(SolidColorBrush.Color)" To="#FF373A3D" />
+                                        <DoubleAnimation Duration="0" Storyboard.TargetName="Root" Storyboard.TargetProperty="Opacity" To="1" />
+                                    </Storyboard>
+                                </VisualState>
+                                <VisualState x:Name="DataOver">
+                                    <Storyboard>
+                                        <ColorAnimation Duration="0" Storyboard.TargetName="IsDefault" Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" To="#FFF0F0F0" />
+                                        <ColorAnimation Duration="0" Storyboard.TargetName="IsDefault" Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)" To="#FF083493" />
+                                        <ColorAnimation Duration="0" Storyboard.TargetName="Content" Storyboard.TargetProperty="(Label.Foreground).(SolidColorBrush.Color)" To="#FF373A3D" />
+                                        <DoubleAnimation Duration="0" Storyboard.TargetName="Root" Storyboard.TargetProperty="Opacity" To="1" />
+                                    </Storyboard>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                        <Border x:Name="IsDefault" Background="#FFFFFFFF" BorderBrush="#FFB9B9B9" BorderThickness="1" />
+                        <Label x:Name="Content" Foreground="#FF373A3D" Margin="12,3,12,3" HorizontalAlignment="Center" Content="{TemplateBinding Content}" />
+                        <Label AllowDrop="True" />
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+</ResourceDictionary>
