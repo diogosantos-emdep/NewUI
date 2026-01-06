@@ -696,7 +696,7 @@ namespace Emdep.Geos.Modules.APM.ViewModels
             }
         }
 
-        private void OnAlertButtonClickInternal(APMAlertTileBarFilters clickedItem)
+        private async void OnAlertButtonClickInternal(APMAlertTileBarFilters clickedItem)
         {
             try
             {
@@ -704,50 +704,27 @@ namespace Emdep.Geos.Modules.APM.ViewModels
 
                 GeosApplication.Instance.Logger?.Log($"Alert button clicked: {clickedItem.Caption}", Category.Info, Priority.Low);
 
-                // Toggle logic
+                // --- LÓGICA DE TOGGLE ---
+                // Se clicou no mesmo botão, limpa o filtro. Senão, aplica o novo.
                 if (!string.IsNullOrWhiteSpace(_lastAppliedAlertCaption) &&
                     _lastAppliedAlertCaption.Equals(clickedItem.Caption, StringComparison.OrdinalIgnoreCase))
                 {
-                    // Clear alert filter
+                    // Desativar filtro
                     _lastAppliedAlertCaption = null;
                     SelectedAlertTileBarItem = null;
-                    _alertFilteredBase = null;
-
-                    // Restore previous data
-                    if (_dataBeforeAlertFilter != null)
-                    {
-                        SetActionPlanList(_dataBeforeAlertFilter);
-                        _dataBeforeAlertFilter = null;
-                    }
-
-                    // Recalculate counts
-                    RecalculateAllCounts();
-                    return;
                 }
-
-                // Apply new alert filter
-                _lastAppliedAlertCaption = clickedItem.Caption;
-                SelectedAlertTileBarItem = clickedItem;
-
-                // Build baseline (considering side filter if active)
-                var baseline = BuildBaselineForAlertTiles();
-                
-                // Store data before alert filter
-                if (_dataBeforeAlertFilter == null)
+                else
                 {
-                    _dataBeforeAlertFilter = _currentFilteredBase ?? _allDataCache;
+                    // Ativar novo filtro
+                    _lastAppliedAlertCaption = clickedItem.Caption;
+                    SelectedAlertTileBarItem = clickedItem;
                 }
+                _alertFilteredBase = null;
+                _dataBeforeAlertFilter = null;
 
-                // Apply alert filter
-                var filtered = ApplyAlertToPlans(baseline, clickedItem.Caption);
-                
-                _alertFilteredBase = filtered;
-                SetActionPlanList(filtered);
+                await RefreshDataAsync();
 
-                // Recalculate all counts
-                RecalculateAllCounts();
-
-                GeosApplication.Instance.Logger?.Log($"Applied alert filter '{clickedItem.Caption}': {filtered.Count} plans", Category.Info, Priority.Low);
+                GeosApplication.Instance.Logger?.Log($"Alert filter applied via SQL reload: '{clickedItem.Caption}'", Category.Info, Priority.Low);
             }
             catch (Exception ex)
             {

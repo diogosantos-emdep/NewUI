@@ -28,6 +28,8 @@ using DevExpress.Xpf.Editors.Settings.Extension;
 using DevExpress.Xpf.Editors.Validation;
 using DevExpress.Xpf.LayoutControl;
 using DevExpress.Xpf.WindowsUI;
+using Emdep.Geos.Modules.APM.Views;
+using Emdep.Geos.UI.Common;
 using System;
 using System.Diagnostics;
 using System.Windows;
@@ -50,6 +52,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Shell;
 using Workbench.ViewModels;
+using Workbench.Views;
 
 
 namespace Workbench.Views {

@@ -634,119 +634,138 @@ namespace Emdep.Geos.Modules.APM.ViewModels
 
         #region Data Loading - Async Paging
 
+
+
         private async Task LoadActionPlansPageAsync()
         {
+            // [FIX LOOP 1] Impede re-entradas se já estiver a carregar (Evita loop infinito no scroll)
+            if (IsLoadingMore) return;
+
             try
             {
-                // Validações essenciais
-                if (GeosApplication.Instance == null)
-                {
-                    GeosApplication.Instance.Logger?.Log("GeosApplication.Instance is null", Category.Exception, Priority.High);
-                    return;
-                }
+                if (GeosApplication.Instance == null || GeosApplication.Instance.ActiveUser == null) return;
 
-                if (GeosApplication.Instance.ActiveUser == null)
-                {
-                    GeosApplication.Instance.Logger?.Log("ActiveUser is null", Category.Exception, Priority.High);
-                    return;
-                }
-
+                // Cancelar pedidos anteriores pendentes para poupar rede
                 _loadCancellationTokenSource?.Cancel();
                 _loadCancellationTokenSource = new CancellationTokenSource();
                 var cancellationToken = _loadCancellationTokenSource.Token;
 
                 IsLoadingMore = true;
 
-                // OTIMIZAÇÃO: Carregar TODOS os dados UMA VEZ (na primeira página)
+                // --- 1. CARREGAMENTO DOS DADOS (BACKEND) ---
                 if (_allDataCache == null)
                 {
                     _allDataCache = await Task.Run(() =>
                     {
-                        // Obter período do APMCommon (igual ao código original)
-                        string period;
-                        if (APMCommon.Instance?.SelectedPeriod != null && APMCommon.Instance.SelectedPeriod.Count > 0)
+                        // [LÓGICA DE ANOS]
+                        // Obtém o ano selecionado na UI (ex: 2025)
+                        long selectedYear = DateTime.Now.Year;
+                        if (APMCommon.Instance?.SelectedPeriod?.Count > 0)
                         {
-                            var selectedYear = APMCommon.Instance.SelectedPeriod.Cast<long>().FirstOrDefault();
-                            period = selectedYear.ToString();
+                            selectedYear = APMCommon.Instance.SelectedPeriod.Cast<long>().FirstOrDefault();
                         }
-                        else
-                        {
-                            period = DateTime.Now.Year.ToString();
-                        }
+
+                        // Cria a string para o SQL: "2025,2024"
+                        // O SQL vai trazer: Tudo de 2025 + Tudo de 2024 + Tudo o que for mais antigo e estiver ABERTO
+                        string period = $"{selectedYear},{selectedYear - 1}";
 
                         int userId = GeosApplication.Instance.ActiveUser.IdUser;
 
-                        GeosApplication.Instance.Logger?.Log($"Loading ALL Action Plans: period={period}, userId={userId}", Category.Info, Priority.Low);
+                        // Filtros de Texto (Botões de Alerta e Tiles Laterais)
+                        string filterAlert = !string.IsNullOrEmpty(_lastAppliedAlertCaption) ? _lastAppliedAlertCaption : null;
+                        string filterTheme = null;
 
-                        return _apmService.GetActionPlanDetails_WithCounts(period, userId);
+                        if (_lastAppliedSideTileFilter != null && !IsAllCaption(_lastAppliedSideTileFilter.Caption))
+                        {
+                            filterTheme = _lastAppliedSideTileFilter.Caption;
+                        }
+
+                        // [CONFIGURAÇÃO DE REDE] - IP do Slave/App Server correto
+                        string ip = "10.13.3.33";
+                        string port = "90";
+                        string path = ""; // Vazio porque o serviço está na raiz (:90/APMService.svc)
+
+                        // Instancia o controlador com os dados manuais (Ignora app.config)
+                        var localService = new APMServiceController(ip, port, path);
+
+                        return localService.GetActionPlanDetails_WithCounts(period, userId, filterAlert, filterTheme);
+
                     }, cancellationToken);
 
-                    if (_allDataCache == null)
+                    // Se a lista vier vazia ou nula, paramos aqui
+                    if (_allDataCache == null || _allDataCache.Count == 0)
                     {
-                        GeosApplication.Instance.Logger?.Log("GetActionPlanDetails_V2680 returned null", Category.Exception, Priority.High);
                         _hasMoreData = false;
+                        IsLoadingMore = false; // Importante libertar a flag
                         return;
                     }
 
-                    GeosApplication.Instance.Logger?.Log($"Loaded {_allDataCache.Count} total Action Plans into cache", Category.Info, Priority.Low);
+                    // --- 2. SINCRONIZAÇÃO DA UI (Counts e Dropdowns) ---
+                    // Executamos na Thread Principal porque vamos mexer na UI
+                    if (Application.Current != null)
+                    {
+                        Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            UpdateSideTileCounts(_allDataCache);
+                            UpdateAlertButtonCounts(_allDataCache);
+                            PopulateDropdownFilters(_allDataCache);
+                        });
+                    }
                 }
 
                 if (cancellationToken.IsCancellationRequested) return;
 
-                var allActionPlans = _allDataCache;
+                // --- 3. PAGINAÇÃO E VISUALIZAÇÃO NA GRID ---
 
-                // Proteção contra resultado null
-                if (allActionPlans == null)
+                // Verifica se há algum filtro visual aplicado
+                bool isFiltering = !string.IsNullOrEmpty(_lastAppliedAlertCaption) ||
+                                   (_lastAppliedSideTileFilter != null && !IsAllCaption(_lastAppliedSideTileFilter.Caption));
+
+                if (isFiltering)
                 {
-                    GeosApplication.Instance.Logger?.Log("GetActionPlanDetails_V2680 returned null", Category.Exception, Priority.High);
-                    _hasMoreData = false;
-                    return;
+                    // Se estiver a filtrar, desligamos a paginação para mostrar todos os resultados filtrados
+                    _pageSize = 999999;
+                    if (_allDataCache.Count > 0) await PopulateAllTasksInCacheAsync();
+                }
+                else
+                {
+                    // Paginação normal
+                    _pageSize = 50;
                 }
 
-                // PAGINAÇÃO EM MEMÓRIA (super rápida)
                 var skip = _currentPage * _pageSize;
-                var pagedData = allActionPlans.Skip(skip).Take(_pageSize).ToList();
+                var pagedData = _allDataCache.Skip(skip).Take(_pageSize).ToList();
+                var dtos = pagedData.Select(MapToDto).Where(dto => dto != null).ToList();
 
-                // Mapeamento sequencial (AsParallel causa problemas com WPF Dispatcher)
-                var dtos = pagedData
-                    .Select(MapToDto)
-                    .Where(dto => dto != null)
-                    .ToList();
-
-                // Proteção para Application.Current
+                // Adiciona os itens à lista observável da Grid
                 if (Application.Current != null)
                 {
                     Application.Current.Dispatcher.Invoke(() =>
                     {
                         foreach (var dto in dtos)
                         {
+                            if (isFiltering) dto.IsExpanded = true;
                             ActionPlans.Add(dto);
                         }
                     });
                 }
-                else
-                {
-                    // Fallback se não estiver em contexto WPF
-                    foreach (var dto in dtos)
-                    {
-                        ActionPlans.Add(dto);
-                    }
-                }
 
                 _currentPage++;
-                _hasMoreData = pagedData.Count == _pageSize;
 
-                GeosApplication.Instance.Logger.Log($"Loaded page {_currentPage}, {dtos.Count} items", Category.Info, Priority.Low);
-            }
-            catch (OperationCanceledException)
-            {
-                GeosApplication.Instance.Logger.Log("LoadActionPlansPageAsync - Cancelled", Category.Info, Priority.Low);
+                // [FIX LOOP 2] Cálculo correto de 'HasMoreData' para impedir scroll infinito desnecessário
+                if (isFiltering)
+                {
+                    _hasMoreData = false;
+                }
+                else
+                {
+                    // Só dizemos que há mais dados se a página atual veio cheia E ainda sobraram itens no cache
+                    _hasMoreData = (pagedData.Count == _pageSize) && (_allDataCache.Count > (skip + pagedData.Count));
+                }
             }
             catch (Exception ex)
             {
                 GeosApplication.Instance.Logger.Log($"Error in LoadActionPlansPageAsync: {ex.Message}", Category.Exception, Priority.High);
-                // Não dar throw aqui para não crashar a UI thread se for async void
-                // throw; 
             }
             finally
             {
@@ -1179,6 +1198,8 @@ namespace Emdep.Geos.Modules.APM.ViewModels
                     Location = entity.Location ?? string.Empty,
                     IdLocation = entity.IdCompany,
 
+                    ThemeAggregates = entity.ThemeAggregates,
+                    StatusAggregates = entity.StatusAggregates,
                     // --- CONTAGENS (Vêm do SQL/C#) ---
                     TasksCount = entity.TotalActionItems, // Total de itens (não a contagem da lista, que pode vir vazia)
                     TotalActionItems = entity.TotalActionItems,
@@ -2770,6 +2791,28 @@ namespace Emdep.Geos.Modules.APM.ViewModels
                 }
             }
             return result;
+        }
+        private void PopulateDropdownFilters(List<APMActionPlanModern> data)
+        {
+            if (data == null || data.Count == 0) return;
+
+            try
+            {
+                // 1. Atualizar Filtro de Departamentos
+                var uniqueDepts = data
+                    .Where(x => !string.IsNullOrEmpty(x.Department))
+                    .Select(x => x.Department)
+                    .Distinct()
+                    .OrderBy(x => x)
+                    .ToList();
+
+                // Se tiveres uma lista na ViewModel (ex: DepartmentFilterList), podes limpá-la e adicionar estes itens.
+            }
+            catch (Exception ex)
+            {
+                // Category.Exception existe no teu Logger
+                GeosApplication.Instance.Logger?.Log($"Error populating dropdowns: {ex.Message}", Category.Exception, Priority.Low);
+            }
         }
 
         private bool IsClosedItem(TaskOrSubTaskItem item)

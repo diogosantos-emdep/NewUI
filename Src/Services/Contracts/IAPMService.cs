@@ -671,7 +671,7 @@ namespace Emdep.Geos.Services.Contracts
 
         [OperationContract]
         [FaultContract(typeof(ServiceException))]
-        List<APMActionPlanModern> GetActionPlanDetails_WithCounts(string selectedPeriod, int idUser);
+        List<APMActionPlanModern> GetActionPlanDetails_WithCounts(string selectedPeriod, int idUser, string filterAlert = null, string filterTheme = null);
 
         //[rdixit][GEOS2-9354][01.09.2025]
         [OperationContract]

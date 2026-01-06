@@ -20955,9 +20955,12 @@ namespace Emdep.Geos.Data.BusinessLogic
             return actionPlanList;
         }
 
-        public List<APMActionPlanModern> GetActionPlanDetails_WithCounts(string connectionString, string selectedPeriod, Int32 idUser, string countryIconFilePath)
+        public List<APMActionPlanModern> GetActionPlanDetails_WithCounts(string connectionString, string selectedPeriod, Int32 idUser, string countryIconFilePath, string filterAlert = null, string filterTheme = null)
         {
             List<APMActionPlanModern> actionPlanList = new List<APMActionPlanModern>();
+            // Dicionários para montagem rápida da hierarquia
+            var planDictionary = new Dictionary<long, APMActionPlanModern>();
+            var taskDictionary = new Dictionary<long, APMActionPlanTask>();
 
             try
             {
@@ -20968,25 +20971,30 @@ namespace Emdep.Geos.Data.BusinessLogic
                     mySqlCommand.CommandType = CommandType.StoredProcedure;
                     mySqlCommand.Parameters.AddWithValue("_SelectedPeriod", selectedPeriod);
                     mySqlCommand.Parameters.AddWithValue("_iduser", idUser);
+                    // Novos Parâmetros de Filtro
+                    mySqlCommand.Parameters.AddWithValue("_FilterAlertStatus", string.IsNullOrEmpty(filterAlert) ? (object)DBNull.Value : filterAlert);
+                    mySqlCommand.Parameters.AddWithValue("_FilterTheme", string.IsNullOrEmpty(filterTheme) ? (object)DBNull.Value : filterTheme);
 
                     using (MySqlDataReader rdr = mySqlCommand.ExecuteReader())
                     {
+                        // ==========================================================
+                        // 1. LER ACTION PLANS (Tabela 0)
+                        // ==========================================================
                         while (rdr.Read())
                         {
                             APMActionPlanModern actionPlan = new APMActionPlanModern();
 
+                            // Mapeamento Básico
                             if (rdr["IdActionPlan"] != DBNull.Value) actionPlan.IdActionPlan = Convert.ToInt64(rdr["IdActionPlan"]);
                             if (rdr["Code"] != DBNull.Value) actionPlan.Code = Convert.ToString(rdr["Code"]);
                             if (rdr["Description"] != DBNull.Value) actionPlan.Description = Convert.ToString(rdr["Description"]);
 
+                            // ... (Mapeamentos existentes de Location, Responsible, etc.) ...
                             if (rdr["IdCompany"] != DBNull.Value) actionPlan.IdCompany = Convert.ToInt32(rdr["IdCompany"]);
                             if (rdr["Location"] != DBNull.Value) actionPlan.Location = Convert.ToString(rdr["Location"]);
+                            if (rdr["Responsible"] != DBNull.Value) actionPlan.Responsible = Convert.ToString(rdr["Responsible"]); else actionPlan.Responsible = string.Empty;
 
-                            if (rdr["Responsible"] != DBNull.Value)
-                                actionPlan.Responsible = Convert.ToString(rdr["Responsible"]);
-                            else
-                                actionPlan.Responsible = string.Empty;
-
+                            // Country & Icon
                             if (rdr["Country"] != DBNull.Value)
                             {
                                 actionPlan.CountryName = Convert.ToString(rdr["Country"]);
@@ -20994,6 +21002,7 @@ namespace Emdep.Geos.Data.BusinessLogic
                                 actionPlan.CountryIconUrl = "https://api.emdep.com/GEOS/Images?FilePath=/Images/Countries/" + actionPlan.CountryIso + ".png";
                             }
 
+                            // User Details
                             if (rdr["EmployeeCode"] != DBNull.Value) actionPlan.EmployeeCode = Convert.ToString(rdr["EmployeeCode"]);
                             if (rdr["IdUser"] != DBNull.Value) actionPlan.ResponsibleIdUser = Convert.ToInt32(rdr["IdUser"]);
                             if (rdr["IdEmployee"] != DBNull.Value) actionPlan.IdEmployee = Convert.ToInt32(rdr["IdEmployee"]);
@@ -21001,67 +21010,46 @@ namespace Emdep.Geos.Data.BusinessLogic
                             if (rdr["LastName"] != DBNull.Value) actionPlan.LastName = Convert.ToString(rdr["LastName"]);
                             if (rdr["IdGender"] != DBNull.Value) actionPlan.IdGender = Convert.ToInt16(rdr["IdGender"]);
 
+                            // Origin & Business Unit
                             if (rdr["IdLookupValue"] != DBNull.Value) actionPlan.IdLookupOrigin = Convert.ToInt32(rdr["IdLookupValue"]);
                             if (rdr["Origin"] != DBNull.Value) actionPlan.Origin = Convert.ToString(rdr["Origin"]);
                             if (rdr["IdBusinessUnit"] != DBNull.Value) actionPlan.IdLookupBusinessUnit = Convert.ToInt32(rdr["IdBusinessUnit"]);
                             if (rdr["BusinessUnit"] != DBNull.Value) actionPlan.BusinessUnit = Convert.ToString(rdr["BusinessUnit"]);
                             if (rdr["BusinessUnitHtmlColor"] != DBNull.Value) actionPlan.BusinessUnitHTMLColor = Convert.ToString(rdr["BusinessUnitHtmlColor"]);
 
+                            // Counts (Stats)
                             if (rdr["TotalActionItems"] != DBNull.Value) actionPlan.TotalActionItems = Convert.ToInt16(rdr["TotalActionItems"]);
                             if (rdr["TotalOpenItems"] != DBNull.Value) actionPlan.TotalOpenItems = Convert.ToInt16(rdr["TotalOpenItems"]);
                             if (rdr["TotalClosedItems"] != DBNull.Value) actionPlan.TotalClosedItems = Convert.ToInt16(rdr["TotalClosedItems"]);
 
-                            if (rdr["Stat_Overdue15"] != DBNull.Value)
-                                actionPlan.Stat_Overdue15 = Convert.ToInt32(rdr["Stat_Overdue15"]);
+                            // Stats extra
+                            if (rdr["Stat_Overdue15"] != DBNull.Value) actionPlan.Stat_Overdue15 = Convert.ToInt32(rdr["Stat_Overdue15"]);
+                            if (rdr["Stat_HighPriorityOverdue"] != DBNull.Value) actionPlan.Stat_HighPriorityOverdue = Convert.ToInt32(rdr["Stat_HighPriorityOverdue"]);
+                            if (rdr["Stat_MaxDueDays"] != DBNull.Value) actionPlan.Stat_MaxDueDays = Convert.ToInt32(rdr["Stat_MaxDueDays"]);
+                            if (rdr["Stat_ThemesList"] != DBNull.Value) actionPlan.Stat_ThemesList = Convert.ToString(rdr["Stat_ThemesList"]); else actionPlan.Stat_ThemesList = string.Empty;
 
-                            if (rdr["Stat_HighPriorityOverdue"] != DBNull.Value)
-                                actionPlan.Stat_HighPriorityOverdue = Convert.ToInt32(rdr["Stat_HighPriorityOverdue"]);
+                            // --- NOVOS CAMPOS AGREGADOS (Importante para os Filtros) ---
+                            if (rdr["ThemeAggregates"] != DBNull.Value) actionPlan.ThemeAggregates = Convert.ToString(rdr["ThemeAggregates"]); else actionPlan.ThemeAggregates = string.Empty;
+                            if (rdr["StatusAggregates"] != DBNull.Value) actionPlan.StatusAggregates = Convert.ToString(rdr["StatusAggregates"]); else actionPlan.StatusAggregates = string.Empty;
 
-                            if (rdr["Stat_MaxDueDays"] != DBNull.Value)
-                                actionPlan.Stat_MaxDueDays = Convert.ToInt32(rdr["Stat_MaxDueDays"]);
-
-                            if (rdr["Stat_ThemesList"] != DBNull.Value)
-                                actionPlan.Stat_ThemesList = Convert.ToString(rdr["Stat_ThemesList"]);
-                            else
-                                actionPlan.Stat_ThemesList = string.Empty;
-
-                            if (rdr["ThemeAggregates"] != DBNull.Value)
-                                actionPlan.ThemeAggregates = Convert.ToString(rdr["ThemeAggregates"]);
-                            else
-                                actionPlan.ThemeAggregates = string.Empty;
-
-                            if (rdr["StatusAggregates"] != DBNull.Value)
-                                actionPlan.StatusAggregates = Convert.ToString(rdr["StatusAggregates"]);
-                            else
-                                actionPlan.StatusAggregates = string.Empty;
-
+                            // Meta Info
                             if (rdr["CreatedBy"] != DBNull.Value) actionPlan.CreatedBy = Convert.ToInt16(rdr["CreatedBy"]);
                             if (rdr["CreatedByName"] != DBNull.Value) actionPlan.CreatedByName = Convert.ToString(rdr["CreatedByName"]);
                             if (rdr["CreatedIn"] != DBNull.Value) actionPlan.CreatedIn = Convert.ToDateTime(rdr["CreatedIn"]);
-
-                            if (rdr["IdDepartment"] != DBNull.Value)
-                            {
-                                actionPlan.IdDepartment = Convert.ToInt32(rdr["IdDepartment"]);
-                                actionPlan.Department = Convert.ToString(rdr["Department"]);
-                            }
+                            if (rdr["IdDepartment"] != DBNull.Value) { actionPlan.IdDepartment = Convert.ToInt32(rdr["IdDepartment"]); actionPlan.Department = Convert.ToString(rdr["Department"]); }
                             if (rdr["OriginDescription"] != DBNull.Value) actionPlan.OriginDescription = Convert.ToString(rdr["OriginDescription"]);
                             if (rdr["ActionPlanResponsibleDisplayName"] != DBNull.Value) actionPlan.ActionPlanResponsibleDisplayName = Convert.ToString(rdr["ActionPlanResponsibleDisplayName"]);
 
+                            // Grouping / Site Info
                             if (rdr["IdSite"] != DBNull.Value) actionPlan.IdSite = Convert.ToInt32(rdr["IdSite"]);
                             if (rdr["CustomerName"] != DBNull.Value) actionPlan.Group = Convert.ToString(rdr["CustomerName"]);
-
-                            if (rdr["SiteName"] != DBNull.Value)
-                            {
-                                actionPlan.Site = Convert.ToString(rdr["SiteName"]);
-                                actionPlan.GroupName = actionPlan.Group + " " + "(" + actionPlan.Site + ")";
-                            }
+                            if (rdr["SiteName"] != DBNull.Value) { actionPlan.Site = Convert.ToString(rdr["SiteName"]); actionPlan.GroupName = actionPlan.Group + " " + "(" + actionPlan.Site + ")"; }
                             if (rdr["IdZone"] != DBNull.Value) actionPlan.IdZone = Convert.ToInt32(rdr["IdZone"]);
                             if (rdr["Region"] != DBNull.Value) actionPlan.Zone = Convert.ToString(rdr["Region"]);
 
-                            if (actionPlan.TotalActionItems != 0)
-                                actionPlan.Percentage = (int)(((float)actionPlan.TotalClosedItems / actionPlan.TotalActionItems) * 100);
-                            else
-                                actionPlan.Percentage = 0;
+                            // Percentage Logic
+                            if (actionPlan.TotalActionItems != 0) actionPlan.Percentage = (int)(((float)actionPlan.TotalClosedItems / actionPlan.TotalActionItems) * 100);
+                            else actionPlan.Percentage = 0;
 
                             if (actionPlan.Percentage <= 24) actionPlan.TotalClosedColor = "Red";
                             else if (actionPlan.Percentage >= 25 && actionPlan.Percentage <= 49) actionPlan.TotalClosedColor = "Orange";
@@ -21069,9 +21057,56 @@ namespace Emdep.Geos.Data.BusinessLogic
                             else if (actionPlan.Percentage >= 75 && actionPlan.Percentage <= 99) actionPlan.TotalClosedColor = "LightGreen";
                             else if (actionPlan.Percentage == 100) actionPlan.TotalClosedColor = "Green";
 
+                            // Inicializar lista de tasks
                             actionPlan.TaskList = new List<APMActionPlanTask>();
 
+                            // Adicionar à lista principal e ao dicionário
                             actionPlanList.Add(actionPlan);
+                            if (!planDictionary.ContainsKey(actionPlan.IdActionPlan))
+                                planDictionary.Add(actionPlan.IdActionPlan, actionPlan);
+                        }
+
+                        // ==========================================================
+                        // 2. LER TASKS (Tabela 1) - Se existirem
+                        // ==========================================================
+                        if (rdr.NextResult())
+                        {
+                            while (rdr.Read())
+                            {
+                                var task = MapTaskFromReader(rdr); // Helper method ou código inline
+
+                                // Encontrar o pai (Action Plan) e adicionar
+                                if (task.IdActionPlan > 0 && planDictionary.ContainsKey(task.IdActionPlan))
+                                {
+                                    var parent = planDictionary[task.IdActionPlan];
+                                    parent.TaskList.Add(task);
+
+                                    // Adicionar ao dicionário de tasks para as subtasks usarem depois
+                                    if (!taskDictionary.ContainsKey(task.IdActionPlanTask))
+                                        taskDictionary.Add(task.IdActionPlanTask, task);
+                                }
+                            }
+                        }
+
+                        // ==========================================================
+                        // 3. LER SUB-TASKS (Tabela 2) - Se existirem
+                        // ==========================================================
+                        if (rdr.NextResult())
+                        {
+                            while (rdr.Read())
+                            {
+                                var subTask = MapTaskFromReader(rdr);
+
+                                // CORREÇÃO: IdParent é long, verificamos se é > 0 em vez de .HasValue
+                                if (subTask.IdParent > 0 && taskDictionary.ContainsKey(subTask.IdParent))
+                                {
+                                    var parentTask = taskDictionary[subTask.IdParent]; // CORREÇÃO: Removemos o .Value
+
+                                    // Requer a Opção A (propriedade SubTasks na classe)
+                                    if (parentTask.SubTasks == null) parentTask.SubTasks = new List<APMActionPlanTask>();
+                                    parentTask.SubTasks.Add(subTask);
+                                }
+                            }
                         }
                     }
                 }
@@ -21083,6 +21118,32 @@ namespace Emdep.Geos.Data.BusinessLogic
             }
 
             return actionPlanList;
+        }
+
+        private APMActionPlanTask MapTaskFromReader(MySqlDataReader rdr)
+        {
+            APMActionPlanTask task = new APMActionPlanTask();
+
+            if (rdr["IdTask"] != DBNull.Value) task.IdActionPlanTask = Convert.ToInt64(rdr["IdTask"]);
+            if (rdr["IdActionPlan"] != DBNull.Value) task.IdActionPlan = Convert.ToInt64(rdr["IdActionPlan"]);
+            if (rdr["TaskNumber"] != DBNull.Value) task.TaskNumber = Convert.ToInt32(rdr["TaskNumber"]);
+            if (rdr["Title"] != DBNull.Value) task.Title = Convert.ToString(rdr["Title"]);
+            if (rdr["Description"] != DBNull.Value) task.Description = Convert.ToString(rdr["Description"]);
+
+            if (rdr["IdParent"] != DBNull.Value) task.IdParent = Convert.ToInt64(rdr["IdParent"]);
+
+            if (rdr["Status"] != DBNull.Value) task.Status = Convert.ToString(rdr["Status"]);
+            if (rdr["Priority"] != DBNull.Value) task.Priority = Convert.ToString(rdr["Priority"]);
+            if (rdr["Theme"] != DBNull.Value) task.Theme = Convert.ToString(rdr["Theme"]);
+
+            if (rdr["StatusHTMLColor"] != DBNull.Value) task.CardDueColor = Convert.ToString(rdr["StatusHTMLColor"]);
+
+            if (rdr["DueDate"] != DBNull.Value) task.DueDate = Convert.ToDateTime(rdr["DueDate"]);
+            if (rdr["OpenDate"] != DBNull.Value) task.OpenDate = Convert.ToDateTime(rdr["OpenDate"]);
+            if (rdr["CloseDate"] != DBNull.Value) task.CloseDate = Convert.ToDateTime(rdr["CloseDate"]);
+
+
+            return task;
         }
 
 

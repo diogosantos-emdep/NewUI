@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Security;
+using System.Runtime.Remoting.Channels;
 using System.Security.Cryptography.X509Certificates;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
@@ -12320,7 +12321,7 @@ namespace Emdep.Geos.UI.ServiceProcess
                     factory.Close();
             }
         }
-        public List<APMActionPlanModern> GetActionPlanDetails_WithCounts(string selectedPeriod, int idUser)
+        public List<APMActionPlanModern> GetActionPlanDetails_WithCounts(string selectedPeriod, int userId, string filterAlert = null, string filterTheme = null)
         {
             try
             {
@@ -12340,7 +12341,7 @@ namespace Emdep.Geos.UI.ServiceProcess
 
                 // 2. Criar o Canal e Chamar o Serviço
                 IAPMService channel = factory.CreateChannel();
-                return channel.GetActionPlanDetails_WithCounts(selectedPeriod, idUser);
+                return channel.GetActionPlanDetails_WithCounts(selectedPeriod, userId, filterAlert, filterTheme);
             }
             catch (FaultException<ServiceException> faultEx)
             {

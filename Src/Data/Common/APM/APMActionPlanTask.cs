@@ -1190,7 +1190,7 @@ namespace Emdep.Geos.Data.Common.APM
         //[shweta.thube][GEOS2-8066]
         [NotMapped]
         [DataMember]
-        public string EmployeeContactValue
+        public string EmployeeContactValuef
         {
             get { return employeeContactValue; }
             set
@@ -1199,6 +1199,13 @@ namespace Emdep.Geos.Data.Common.APM
                 OnPropertyChanged("EmployeeContactValue");
             }
         }
+        [NotMapped]
+        [DataMember]
+        public List<APMActionPlanTask> SubTasks { get; set; } = new List<APMActionPlanTask>();
+
+        [NotMapped]
+        [DataMember]
+        public string EmployeeContactValue { get; set; }
         //[shweta.thube][GEOS2-8066]
         [NotMapped]
         [DataMember]

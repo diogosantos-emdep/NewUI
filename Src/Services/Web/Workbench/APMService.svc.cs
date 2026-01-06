@@ -2916,25 +2916,19 @@ namespace Emdep.Geos.Services.Web.Workbench
             }
         }
 
-        public List<APMActionPlanModern> GetActionPlanDetails_WithCounts(string selectedPeriod, int idUser)
+        public List<APMActionPlanModern> GetActionPlanDetails_WithCounts(string selectedPeriod, int idUser, string filterAlert = null, string filterTheme = null)
         {
             try
             {
-                // 1. Obtém a string de conexão (usando o método novo que adicionaste abaixo)
                 string connString = GetConnectionString();
 
-                // 2. Obtém o caminho das imagens (usando o método novo)
                 string iconPath = GetCountryIconPath();
 
-                // 3. Chama o Manager
-                return new APMManager().GetActionPlanDetails_WithCounts(connString, selectedPeriod, idUser, iconPath);
+                return new APMManager().GetActionPlanDetails_WithCounts(connString, selectedPeriod, idUser, iconPath, filterAlert, filterTheme);
             }
             catch (Exception ex)
             {
-                // Cria o erro de serviço vazio
                 var fault = new ServiceException();
-
-                // Lança a exceção para o cliente (WCF)
                 throw new FaultException<ServiceException>(fault, new FaultReason(ex.Message));
             }
         }

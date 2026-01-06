@@ -42,6 +42,8 @@ namespace Emdep.Geos.Modules.APM.ViewModels
         private string _site;
         private string _countryIconUrl;
         private int _idLookupStatus;
+        private string _themeAggregates;
+        private string _statusAggregates;
 
         public long IdActionPlan
         {
@@ -63,6 +65,19 @@ namespace Emdep.Geos.Modules.APM.ViewModels
         {
             get => _title;
             set { _title = value; OnPropertyChanged(); }
+        }
+
+        
+        public string ThemeAggregates
+        {
+            get => _themeAggregates;
+            set { _themeAggregates = value; OnPropertyChanged(); }
+        }
+
+        public string StatusAggregates
+        {
+            get => _statusAggregates;
+            set { _statusAggregates = value; OnPropertyChanged(); }
         }
 
         public string Responsible
