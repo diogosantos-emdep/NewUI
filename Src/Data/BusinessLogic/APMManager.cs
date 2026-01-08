@@ -12211,9 +12211,9 @@ namespace Emdep.Geos.Data.BusinessLogic
                 SubTasks = new List<Emdep.Geos.Data.Common.APM.APMActionPlanSubTask>()
             };
 
-            using (var con = new System.Data.SqlClient.SqlConnection(connectionString))
+            using (var con = new MySql.Data.MySqlClient.MySqlConnection(connectionString))
             {
-                using (var cmd = new System.Data.SqlClient.SqlCommand("APM_GetActionPlanDetailsPT", con))
+                using (var cmd = new MySql.Data.MySqlClient.MySqlCommand("APM_GetActionPlanDetailsPT", con))
                 {
                     cmd.CommandType = System.Data.CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("_IdActionPlan", idActionPlan);

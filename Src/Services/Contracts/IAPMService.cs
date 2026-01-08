@@ -853,10 +853,8 @@ namespace Emdep.Geos.Services.Contracts
         [FaultContract(typeof(ServiceException))]
         ActionPlanDetailsData GetActionPlanDetails(int idActionPlan);
         [OperationContract]
-        List<APMActionPlanTask> GetTaskListByIdActionPlan_V2680PT(
+        ActionPlanDetailsData GetActionPlanDetailsPT(
             long idActionPlan, 
-            string period, 
-            int userId,
             string filterLocation = null,
             string filterResponsible = null,
             string filterBusinessUnit = null,

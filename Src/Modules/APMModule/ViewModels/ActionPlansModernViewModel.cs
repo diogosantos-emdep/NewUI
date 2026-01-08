@@ -5,7 +5,7 @@ using Emdep.Geos.Data.Common;
 using Emdep.Geos.Data.Common.APM;
 using Emdep.Geos.Data.Common.Epc;
 using Emdep.Geos.Data.Common.Hrm;
-
+using System;
 using Emdep.Geos.Modules.APM.CommonClasses;
 using Emdep.Geos.Modules.APM.Views;
 using Emdep.Geos.Services.Contracts;
@@ -23,6 +23,7 @@ using System.ServiceModel;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
@@ -59,6 +60,9 @@ namespace Emdep.Geos.Modules.APM.ViewModels
         // Cache inteligente: IdActionPlan -> List<Tasks>
         private readonly Dictionary<long, List<ActionPlanTaskModernDto>> _tasksCache;
         private readonly object _cacheLock = new object();
+        
+        // Lock object for thread-safe collection operations
+        private readonly object _collectionLock = new object();
 
         // Cache de imagens de responsáveis: EmployeeCode -> ImageSource
         private readonly Dictionary<string, ImageSource> _inMemoryImageCache = new Dictionary<string, ImageSource>();
@@ -433,6 +437,11 @@ namespace Emdep.Geos.Modules.APM.ViewModels
 
                 ActionPlans = new ObservableCollection<ActionPlanModernDto>();
                 SelectedActionPlanTasks = new ObservableCollection<ActionPlanTaskModernDto>();
+                
+                // CRITICAL: Enable collection synchronization to prevent DevExpress Grid enumeration errors
+                // This allows the collection to be safely accessed from multiple threads
+                BindingOperations.EnableCollectionSynchronization(ActionPlans, _collectionLock);
+                BindingOperations.EnableCollectionSynchronization(SelectedActionPlanTasks, _collectionLock);
 
                 // Inicializar CancellationTokenSource para evitar NullRef
                 _loadCancellationTokenSource = new CancellationTokenSource();
@@ -732,6 +741,42 @@ namespace Emdep.Geos.Modules.APM.ViewModels
                     }
 
                     // ==============================================================================
+                    // [CRITICAL FIX] REMOVE DUPLICATES - Two Action Plans with same Code but different IDs
+                    // This happens when DB has duplicate records (e.g., AP24.0015 with ID=78 and ID=386)
+                    // Keep only the one with the HIGHEST IdActionPlan (most recent)
+                    // ==============================================================================
+                    var originalCount = _allDataCache.Count;
+                    var duplicateGroups = _allDataCache
+                        .GroupBy(ap => ap.Code)
+                        .Where(g => g.Count() > 1)
+                        .ToList();
+
+                    if (duplicateGroups.Any())
+                    {
+                        GeosApplication.Instance.Logger?.Log(
+                            $"[LoadActionPlansPageAsync] WARNING: Found {duplicateGroups.Count} duplicate Action Plan codes!",
+                            Category.Warn, Priority.High);
+
+                        foreach (var group in duplicateGroups)
+                        {
+                            var duplicates = group.OrderBy(ap => ap.IdActionPlan).ToList();
+                            GeosApplication.Instance.Logger?.Log(
+                                $"[LoadActionPlansPageAsync] Duplicate Code='{group.Key}': IDs=[{string.Join(", ", duplicates.Select(d => d.IdActionPlan))}] - Keeping ID={duplicates.Last().IdActionPlan}",
+                                Category.Warn, Priority.High);
+                        }
+
+                        // Remove duplicates: Keep only the record with highest IdActionPlan for each Code
+                        _allDataCache = _allDataCache
+                            .GroupBy(ap => ap.Code)
+                            .Select(g => g.OrderByDescending(ap => ap.IdActionPlan).First())
+                            .ToList();
+
+                        GeosApplication.Instance.Logger?.Log(
+                            $"[LoadActionPlansPageAsync] Removed {originalCount - _allDataCache.Count} duplicate records. New count: {_allDataCache.Count}",
+                            Category.Info, Priority.Medium);
+                    }
+
+                    // ==============================================================================
                     // [CORREÇÃO CRÍTICA] Preencher a Lista Mestra de DTOs IMEDIATAMENTE
                     // ==============================================================================
                     // Isto garante que o ApplyFilters tem dados para trabalhar sem ir à BD
@@ -772,9 +817,12 @@ namespace Emdep.Geos.Modules.APM.ViewModels
                     {
                         Application.Current.Dispatcher.Invoke(() =>
                         {
-                            foreach (var dto in _allActionPlansUnfiltered)
+                            lock (_collectionLock)
                             {
-                                ActionPlans.Add(dto);
+                                foreach (var dto in _allActionPlansUnfiltered)
+                                {
+                                    ActionPlans.Add(dto);
+                                }
                             }
                         });
                     }
@@ -810,9 +858,12 @@ namespace Emdep.Geos.Modules.APM.ViewModels
                         {
                             Application.Current.Dispatcher.Invoke(() =>
                             {
-                                foreach (var dto in pagedDtos)
+                                lock (_collectionLock)
                                 {
-                                    ActionPlans.Add(dto);
+                                    foreach (var dto in pagedDtos)
+                                    {
+                                        ActionPlans.Add(dto);
+                                    }
                                 }
                             });
                         }
@@ -836,6 +887,43 @@ namespace Emdep.Geos.Modules.APM.ViewModels
         }
         #endregion
 
+        #region Helper Methods for String Filters
+
+        private string GetFilterString(System.Collections.IEnumerable list)
+        {
+            if (list == null) return null;
+            var ids = new List<string>();
+            foreach (var item in list)
+            {
+                // Tenta extrair Id via Reflection/Dynamic se não soubermos o tipo exato
+                try
+                {
+                    // Verifica se é um objeto comum de filtro (IdLookupValue, Id, IdDepartment etc)
+                    if (item == null) continue;
+
+                    // Reflection genérica para encontrar "Id...", "Id" ou "IdLookupValue"
+                    var type = item.GetType();
+                    var prop = type.GetProperty("Id") ?? 
+                               type.GetProperty("IdLookupValue") ?? 
+                               type.GetProperty("IdDepartment") ?? 
+                               type.GetProperty("IdCompany") ?? 
+                               type.GetProperty("IdUser"); // Para Responsible
+
+                    if (prop != null)
+                    {
+                        var val = prop.GetValue(item);
+                        if (val != null) ids.Add(val.ToString());
+                    }
+                }
+                catch { }
+            }
+            return ids.Any() ? string.Join(",", ids) : null;
+        }
+
+
+
+        #endregion
+
         #region Master/Detail - Lazy Load Tasks
 
         /// <summary>
@@ -843,7 +931,7 @@ namespace Emdep.Geos.Modules.APM.ViewModels
         /// </summary>
         public async Task LoadTasksForActionPlanAsync(ActionPlanModernDto actionPlan)
         {
-            GeosApplication.Instance.Logger?.Log($"[LoadTasksForActionPlanAsync] INÍCIO - ActionPlan {actionPlan?.Code}", Category.Info, Priority.Low);
+            GeosApplication.Instance.Logger?.Log($"[LoadTasksForActionPlanAsync] INÍCIO - ActionPlan {actionPlan?.Code} (ID={actionPlan?.IdActionPlan})", Category.Info, Priority.Low);
 
             // 1. Validações Iniciais
             if (actionPlan == null)
@@ -868,37 +956,110 @@ namespace Emdep.Geos.Modules.APM.ViewModels
             try
             {
                 GeosApplication.Instance.Logger?.Log($"[LoadTasksForActionPlanAsync] {actionPlan.Code} - Setting IsLoadingTasks = true", Category.Info, Priority.Low);
-                actionPlan.IsLoadingTasks = true;
-
-                // 2. Preparar Parâmetros
-                string period = DateTime.Now.Year.ToString();
-                if (APMCommon.Instance?.SelectedPeriod != null && APMCommon.Instance.SelectedPeriod.Count > 0)
+                
+                // CRITICAL: Set IsLoadingTasks on UI thread synchronously to ensure it's set before proceeding
+                if (Application.Current != null)
                 {
-                    period = APMCommon.Instance.SelectedPeriod.Cast<long>().FirstOrDefault().ToString();
+                    await Application.Current.Dispatcher.InvokeAsync(() => 
+                        actionPlan.IsLoadingTasks = true
+                    , System.Windows.Threading.DispatcherPriority.Normal);
+                    // Small delay to let the UI update complete
+                    await Task.Delay(50);
                 }
+                else
+                {
+                    actionPlan.IsLoadingTasks = true;
+                }
+
+                // 2. Preparar Parâmetros FILTRADOS (AQUI ESTÁ A LÓGICA DO "BUBBLE UP")
+                // Se o utilizador tem filtros ativos na UI, temos de os passar para o SP
+                
+                string filterLocation = GetFilterString(SelectedLocation);
+                string filterResponsible = GetFilterString(SelectedPerson);
+                string filterBusinessUnit = GetFilterString(SelectedBusinessUnit);
+                string filterOrigin = GetFilterString(SelectedOrigin);
+                string filterDepartment = GetFilterString(SelectedDepartment);
+                
+                // Customers: extrair IdSite
+                string filterCustomer = null; 
+                if (SelectedCustomer != null && SelectedCustomer.Any())
+                {
+                    // Assume que SelectedCustomer é lista de objetos onde IdSite está acessível ou via Type casting
+                    // Tenta extrair IDs de forma segura
+                    var ids = new List<long>();
+                    foreach(var item in SelectedCustomer)
+                    {
+                        if(item is APMCustomer cust) ids.Add(cust.IdSite);
+                        // Outros tipos se necessário
+                    }
+                    if(ids.Any()) filterCustomer = string.Join(",", ids);
+                }
+
+                string filterAlert = SelectedAlertTileBarItem?.Type;
+                string filterTheme = SelectedTileBarItem?.Caption != null && !IsAllCaption(SelectedTileBarItem.Caption) ? SelectedTileBarItem.Caption : null;
+
                 int userId = GeosApplication.Instance.ActiveUser.IdUser;
 
                 // 3. Chamada ao Serviço (Executado em Thread Secundária)
                 List<APMActionPlanTask> tasksEntityList = null;
 
+                // Definir período para o fallback
+                string period = DateTime.Now.Year.ToString();
+                if (APMCommon.Instance?.SelectedPeriod != null && APMCommon.Instance.SelectedPeriod.Count > 0)
+                {
+                    period = APMCommon.Instance.SelectedPeriod.Cast<long>().FirstOrDefault().ToString();
+                }
+
                 try
                 {
-                    // Tentativa preferencial: V2680PT
-                    GeosApplication.Instance.Logger?.Log($"[LoadTasksForActionPlanAsync] {actionPlan.Code} - Attempting GetTaskListByIdActionPlan_V2680PT", Category.Info, Priority.Low);
+                    // Tentativa preferencial: APM_GetActionPlanDetailsPT (Novo SP com filtros hierárquicos)
+                    GeosApplication.Instance.Logger?.Log($"[LoadTasksForActionPlanAsync] {actionPlan.Code} - Attempting GetActionPlanDetailsPT with filters: Loc={filterLocation}, Resp={filterResponsible}, Alert={filterAlert}, Theme={filterTheme}", Category.Info, Priority.Low);
 
-                    tasksEntityList = await Task.Run(() => _apmService.GetTaskListByIdActionPlan_V2680PT(
+                    // ALTERAÇÃO CRÍTICA: O serviço retorna um contentor com Tasks E SubTasks separadas.
+                    // Nós fazemos "stitch" no cliente para garantir que as subtasks aparecem.
+                    var resultData = await Task.Run(() => _apmService.GetActionPlanDetailsPT(
                         actionPlan.IdActionPlan,
-                        period,
-                        userId,
-                        null, null, null, null, null, null, null, null // Filtros a null para trazer tudo deste plano
+                        filterLocation, 
+                        filterResponsible, 
+                        filterBusinessUnit, 
+                        filterOrigin, 
+                        filterDepartment, 
+                        filterCustomer, 
+                        filterAlert, 
+                        filterTheme 
                     ));
 
-                    GeosApplication.Instance.Logger?.Log($"[LoadTasksForActionPlanAsync] {actionPlan.Code} - V2680PT returned: {(tasksEntityList == null ? "NULL" : tasksEntityList.Count + " tasks")}", Category.Info, Priority.Low);
+                    if (resultData != null)
+                    {
+                        tasksEntityList = resultData.Tasks ?? new List<APMActionPlanTask>();
+                        var subTasksList = resultData.SubTasks ?? new List<Emdep.Geos.Data.Common.APM.APMActionPlanSubTask>();
+                        
+                        GeosApplication.Instance.Logger?.Log($"[LoadTasksForActionPlanAsync] {actionPlan.Code} - PT returned {tasksEntityList.Count} Tasks and {subTasksList.Count} SubTasks", Category.Info, Priority.Low);
+
+                        // STITCHING: Associar SubTasks às Tasks Pais
+                        if (subTasksList.Count > 0 && tasksEntityList.Count > 0)
+                        {
+                            // Criar lookup para performance
+                            var subTasksByParent = subTasksList.GroupBy(s => s.IdParent).ToDictionary(g => g.Key, g => g.ToList());
+
+                            foreach (var t in tasksEntityList)
+                            {
+                                if (subTasksByParent.ContainsKey(t.IdActionPlanTask))
+                                {
+                                    t.SubTaskList = subTasksByParent[t.IdActionPlanTask];
+                                }
+                            }
+                        }
+                    }
+                    else 
+                    {
+                        GeosApplication.Instance.Logger?.Log($"[LoadTasksForActionPlanAsync] {actionPlan.Code} - GetActionPlanDetailsPT returned NULL resultData", Category.Info, Priority.Low);
+                    }
                 }
                 catch (Exception exPT)
                 {
                     // Fallback para V2680 se o novo endpoint falhar
-                    GeosApplication.Instance.Logger?.Log($"[LoadTasksForActionPlanAsync] {actionPlan.Code} - V2680PT failed: {exPT.Message}. Falling back to V2680.", Category.Warn, Priority.Medium);
+                    GeosApplication.Instance.Logger?.Log($"[LoadTasksForActionPlanAsync] {actionPlan.Code} - GetActionPlanDetailsPT failed: {exPT.Message}. Falling back to V2680.", Category.Warn, Priority.Medium);
 
                     try
                     {
@@ -926,9 +1087,15 @@ namespace Emdep.Geos.Modules.APM.ViewModels
                         if (taskDto != null)
                         {
                             // Mapeamento de SubTasks
+                            // Ensure SubTasks collection is initialized locally first
+                            var subDtos = new ObservableCollection<ActionPlanTaskModernDto>();
+                            
+                            // Check if SubTaskList exists in the entity returned by service
                             if (taskEntity.SubTaskList != null && taskEntity.SubTaskList.Count > 0)
                             {
-                                var subDtos = new ObservableCollection<ActionPlanTaskModernDto>();
+                                // Enable thread-safe synchronization for this new collection
+                                BindingOperations.EnableCollectionSynchronization(subDtos, _collectionLock);
+                                
                                 foreach (var subEntity in taskEntity.SubTaskList)
                                 {
                                     var subDto = MapSubTaskToActionPlanTaskDto(subEntity);
@@ -944,6 +1111,10 @@ namespace Emdep.Geos.Modules.APM.ViewModels
                             }
                             else
                             {
+                                // Initialize empty collection even if no subtasks
+                                // This is CRITICAL for DevExpress Detail descriptor to work properly
+                                BindingOperations.EnableCollectionSynchronization(subDtos, _collectionLock);
+                                taskDto.SubTasks = subDtos;
                                 taskDto.TotalSubTasks = 0;
                                 taskDto.CompletedSubTasks = 0;
                             }
@@ -957,25 +1128,30 @@ namespace Emdep.Geos.Modules.APM.ViewModels
                     GeosApplication.Instance.Logger?.Log($"[LoadTasksForActionPlanAsync] {actionPlan.Code} - Service returned NULL or empty list", Category.Info, Priority.Low);
                 }
 
-                // 5. Atualização da UI (Thread Principal)
+                // 5. Atualização da UI (Thread Principal) - CRITICAL: Use Invoke to ensure completion before return
+                // This prevents DevExpress Grid from enumerating while we're modifying
                 if (Application.Current != null)
                 {
-                    Application.Current.Dispatcher.Invoke(() =>
+                    // Add delay to let Grid finish any pending enumeration
+                    await Task.Delay(100);
+                    
+                    await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
                         // Atribui tasks ao objeto DTO existente
-                        actionPlan.Tasks = loadedTasks;
+                        var tasksCollection = new ObservableCollection<ActionPlanTaskModernDto>(loadedTasks.OrderBy(t => t.TaskNumber));
+                        // Enable thread-safe collection synchronization
+                        BindingOperations.EnableCollectionSynchronization(tasksCollection, _collectionLock);
+                        
+                        actionPlan.Tasks = tasksCollection;
                         actionPlan.VisibleTasks = loadedTasks;
                         actionPlan.TasksCount = loadedTasks.Count;
 
-                        // Garante que a coleção de SubTasks não é nula (evita erros de binding no XAML)
-                        foreach (var t in actionPlan.Tasks ?? new ObservableCollection<ActionPlanTaskModernDto>())
-                        {
-                            if (t.SubTasks == null) t.SubTasks = new ObservableCollection<ActionPlanTaskModernDto>();
-                        }
-
                         GeosApplication.Instance.Logger?.Log($"[LoadTasksForActionPlanAsync] {actionPlan.Code} - ASSIGNED {loadedTasks.Count} tasks to Tasks collection", Category.Info, Priority.Low);
 
-                    });
+                    }, System.Windows.Threading.DispatcherPriority.ContextIdle);
+                    
+                    // Small delay after assignment to let UI process the change
+                    await Task.Delay(50);
                 }
             }
             catch (Exception ex)
@@ -985,15 +1161,30 @@ namespace Emdep.Geos.Modules.APM.ViewModels
                 // Em caso de erro, garante que a UI recebe uma lista vazia para sair do estado de loading
                 if (Application.Current != null)
                 {
-                    Application.Current.Dispatcher.Invoke(() =>
+                    await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
-                        if (actionPlan.Tasks == null) actionPlan.Tasks = new ObservableCollection<ActionPlanTaskModernDto>();
-                    });
+                        if (actionPlan.Tasks == null)
+                        {
+                            var emptyTasks = new ObservableCollection<ActionPlanTaskModernDto>();
+                            BindingOperations.EnableCollectionSynchronization(emptyTasks, _collectionLock);
+                            actionPlan.Tasks = emptyTasks;
+                        }
+                    }, System.Windows.Threading.DispatcherPriority.ContextIdle);
                 }
             }
             finally
             {
-                actionPlan.IsLoadingTasks = false;
+                // CRITICAL: Set IsLoadingTasks on UI thread synchronously to ensure proper state
+                if (Application.Current != null)
+                {
+                    await Application.Current.Dispatcher.InvokeAsync(() => 
+                        actionPlan.IsLoadingTasks = false
+                    , System.Windows.Threading.DispatcherPriority.Normal);
+                }
+                else
+                {
+                    actionPlan.IsLoadingTasks = false;
+                }
                 GeosApplication.Instance.Logger?.Log($"[LoadTasksForActionPlanAsync] {actionPlan.Code} - FINISHED", Category.Info, Priority.Low);
             }
         }
@@ -1022,6 +1213,44 @@ namespace Emdep.Geos.Modules.APM.ViewModels
                 return;
             }
 
+            // =================================================================================
+            // FIX: Prevent multiple expansions to avoid Grid Virtualization / Collection Modified errors
+            // Use "Accordion" style - collapse others when opening a new one.
+            // User requested limit, we implement limit of 1 (Single Expansion) for maximum stability.
+            // =================================================================================
+            if (!actionPlan.IsExpanded) // Only if we are about to expand
+            {
+                try
+                {
+                    // Find others that are expanded
+                    var othersExpanded = ActionPlans.Where(x => x != actionPlan && x.IsExpanded).ToList();
+                    
+                    if (othersExpanded.Count > 0)
+                    {
+                        GeosApplication.Instance.Logger?.Log($"[ToggleActionPlanExpandAsync] Auto-collapsing {othersExpanded.Count} other rows to prevent grid instability.", Category.Info, Priority.Low);
+                                                
+                        // Collapsing others in background before proceeding
+                        // NOTE: We cannot modify collection/properties bound to Grid from background thread without jumping through hoops.
+                        // But since we are already in an Async Command context (started by UI), we are fine.
+                        // We will do one by one and yield to keep UI responsive.
+                        
+                        foreach (var other in othersExpanded)
+                        {
+                            other.IsExpanded = false;
+                        }
+                        
+                        // Give time for the grid to process the collapsing animation/logic
+                        // This 300ms delay is likely what was missing to prevent the "Collection Modified" error
+                        // because DevExpress grid does cleanup on animation end or layout update.
+                        await Task.Delay(200);
+                    }
+                }
+                catch (Exception ex)
+                {
+                     GeosApplication.Instance.Logger?.Log($"[ToggleActionPlanExpandAsync] Error collapsing others: {ex.Message}", Category.Warn, Priority.Medium);
+                }
+            }
+
             GeosApplication.Instance.Logger?.Log($"[ToggleActionPlanExpandAsync] {actionPlan.Code} - Current IsExpanded={actionPlan.IsExpanded}, TasksCount={actionPlan.TasksCount}, toggling...", Category.Info, Priority.Low);
             
             actionPlan.IsExpanded = !actionPlan.IsExpanded;
@@ -1030,6 +1259,13 @@ namespace Emdep.Geos.Modules.APM.ViewModels
 
             if (actionPlan.IsExpanded)
             {
+                // Ensure Tasks collection is initialized to empty if null (prevents null binding issues in Grid)
+                if (actionPlan.Tasks == null)
+                {
+                    actionPlan.Tasks = new ObservableCollection<ActionPlanTaskModernDto>();
+                    BindingOperations.EnableCollectionSynchronization(actionPlan.Tasks, _collectionLock);
+                }
+
                 GeosApplication.Instance.Logger?.Log($"[ToggleActionPlanExpandAsync] {actionPlan.Code} - Calling LoadTasksForActionPlanAsync...", Category.Info, Priority.Low);
                 await LoadTasksForActionPlanAsync(actionPlan);
                 GeosApplication.Instance.Logger?.Log($"[ToggleActionPlanExpandAsync] {actionPlan.Code} - LoadTasksForActionPlanAsync completed. Tasks.Count={actionPlan.Tasks?.Count ?? 0}", Category.Info, Priority.Low);
@@ -1118,38 +1354,122 @@ namespace Emdep.Geos.Modules.APM.ViewModels
             // Se já tem sub-tasks carregadas, não recarregar
             if (task.SubTasks != null && task.SubTasks.Count > 0) return;
 
+            // Se já estiver a carregar, evita duplicar o pedido
+            if (task.IsLoadingSubTasks) return;
+
             try
             {
                 task.IsLoadingSubTasks = true;
 
-                var subTasksData = await Task.Run(() =>
-                {
-                    lock (_cacheLock)
-                    {
-                        if (_allDataCache != null)
-                        {
-                            foreach (var ap in _allDataCache)
-                            {
-                                if (ap.TaskList != null)
-                                {
-                                    var foundTask = ap.TaskList.FirstOrDefault(t => t.IdActionPlanTask == task.IdTask);
+                // Primeiro tenta obter subtasks diretamente do serviço (com filtros), para garantir consistência com o SP moderno
+                List<Emdep.Geos.Data.Common.APM.APMActionPlanSubTask> subTasksData = null;
 
-                                    // Acede à lista de dados brutos (APMActionPlanSubTask)
-                                    if (foundTask?.SubTaskList != null)
+                try
+                {
+                    // Reutilizar os filtros atuais da UI
+                    string filterLocation = GetFilterString(SelectedLocation);
+                    string filterResponsible = GetFilterString(SelectedPerson);
+                    string filterBusinessUnit = GetFilterString(SelectedBusinessUnit);
+                    string filterOrigin = GetFilterString(SelectedOrigin);
+                    string filterDepartment = GetFilterString(SelectedDepartment);
+                    string filterCustomer = null;
+                    if (SelectedCustomer != null && SelectedCustomer.Any())
+                    {
+                        var ids = new List<long>();
+                        foreach (var item in SelectedCustomer)
+                        {
+                            if (item is APMCustomer cust) ids.Add(cust.IdSite);
+                        }
+                        if (ids.Any()) filterCustomer = string.Join(",", ids);
+                    }
+                    string filterAlert = SelectedAlertTileBarItem?.Type;
+                    string filterTheme = SelectedTileBarItem?.Caption != null && !IsAllCaption(SelectedTileBarItem.Caption) ? SelectedTileBarItem.Caption : null;
+
+                    int userId = GeosApplication.Instance.ActiveUser.IdUser;
+
+                    GeosApplication.Instance.Logger?.Log($"[LoadSubTasksForTaskAsync] Calling service GetActionPlanDetailsPT for ActionPlanId={task.IdActionPlan} TaskId={task.IdTask} with filters: Loc={filterLocation}, Resp={filterResponsible}, Alert={filterAlert}, Theme={filterTheme}", Category.Info, Priority.Low);
+
+                    // ALTERAÇÃO CRÍTICA: O serviço retorna Tasks E SubTasks separadas.
+                    var resultData = await Task.Run(() => _apmService.GetActionPlanDetailsPT(
+                        task.IdActionPlan,
+                        filterLocation,
+                        filterResponsible,
+                        filterBusinessUnit,
+                        filterOrigin,
+                        filterDepartment,
+                        filterCustomer,
+                        filterAlert,
+                        filterTheme
+                    ));
+
+                    if (resultData != null && resultData.Tasks != null)
+                    {
+                        var flatSubTasks = resultData.SubTasks ?? new List<Emdep.Geos.Data.Common.APM.APMActionPlanSubTask>();
+                        
+                        // Primeiro, verificar se a task está na lista principal (às vezes a task pai vem na lista de tasks)
+                        var foundTask = resultData.Tasks.FirstOrDefault(t => t.IdActionPlanTask == task.IdTask);
+                        
+                        if (foundTask != null)
+                        {
+                            // Opção A: A task veio preenchida do servidor (se o server fizesse nesting)
+                            if (foundTask.SubTaskList != null && foundTask.SubTaskList.Count > 0)
+                            {
+                                subTasksData = foundTask.SubTaskList;
+                            }
+                            // Opção B: Stitching manual usando a lista flat de subtasks
+                            else if (flatSubTasks.Count > 0)
+                            {
+                                subTasksData = flatSubTasks.Where(s => s.IdParent == task.IdTask).ToList();
+                            }
+                        }
+                        else
+                        {
+                            // Fallback: Tentar encontrar subtasks diretamente para este pai na lista flat
+                            // (Caso raro onde o pai não vem na lista principal mas as subtasks vêm)
+                            var directMatches = flatSubTasks.Where(s => s.IdParent == task.IdTask).ToList();
+                            if (directMatches.Any())
+                            {
+                                subTasksData = directMatches;
+                            }
+                        }
+                    }
+                }
+                catch (Exception svcEx)
+                {
+                    GeosApplication.Instance.Logger?.Log($"[LoadSubTasksForTaskAsync] Service call failed: {svcEx.Message}. Falling back to cache.", Category.Warn, Priority.Medium);
+                }
+
+                // Fallback para cache local se o serviço não retornar dados
+                if (subTasksData == null)
+                {
+                    subTasksData = await Task.Run(() =>
+                    {
+                        lock (_cacheLock)
+                        {
+                            if (_allDataCache != null)
+                            {
+                                foreach (var ap in _allDataCache)
+                                {
+                                    if (ap.TaskList != null)
                                     {
-                                        return foundTask.SubTaskList;
+                                        var foundTask = ap.TaskList.FirstOrDefault(t => t.IdActionPlanTask == task.IdTask);
+                                        if (foundTask?.SubTaskList != null)
+                                        {
+                                            return foundTask.SubTaskList;
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
-                    return new List<Emdep.Geos.Data.Common.APM.APMActionPlanSubTask>();
-                });
+                        return new List<Emdep.Geos.Data.Common.APM.APMActionPlanSubTask>();
+                    });
+                }
 
-                // CONVERSÃO CORRETA: Mapear para ActionPlanTaskModernDto
+                // CONVERSÃO E ORDENAÇÃO
                 var subTaskDtos = subTasksData
                                     .Select(MapSubTaskToActionPlanTaskDto)
                                     .Where(dto => dto != null)
+                                    .OrderBy(dto => dto.Code) // Ordena por código (ex: 1.1, 1.2)
                                     .ToList();
 
                 // Atualizar na UI Thread
@@ -1157,13 +1477,20 @@ namespace Emdep.Geos.Modules.APM.ViewModels
                 {
                     Application.Current.Dispatcher.Invoke(() =>
                     {
-                        // Aqui o tipo já bate certo: ObservableCollection<ActionPlanTaskModernDto>
-                        task.SubTasks = new ObservableCollection<ActionPlanTaskModernDto>(subTaskDtos);
+                        // Atribuição única para evitar erros de "Collection Modified"
+                        var subTasksCollection = new ObservableCollection<ActionPlanTaskModernDto>(subTaskDtos);
+                        BindingOperations.EnableCollectionSynchronization(subTasksCollection, _collectionLock);
+                        task.SubTasks = subTasksCollection;
+
+                        // Atualizar contadores visuais se necessário
+                        task.TotalSubTasks = task.SubTasks.Count;
                     });
                 }
                 else
                 {
-                    task.SubTasks = new ObservableCollection<ActionPlanTaskModernDto>(subTaskDtos);
+                    var subTasksCollection = new ObservableCollection<ActionPlanTaskModernDto>(subTaskDtos);
+                    BindingOperations.EnableCollectionSynchronization(subTasksCollection, _collectionLock);
+                    task.SubTasks = subTasksCollection;
                 }
 
                 GeosApplication.Instance.Logger?.Log($"Loaded {subTaskDtos.Count} sub-tasks for Task {task.Code}", Category.Info, Priority.Low);
@@ -1171,6 +1498,17 @@ namespace Emdep.Geos.Modules.APM.ViewModels
             catch (Exception ex)
             {
                 GeosApplication.Instance.Logger?.Log($"Error loading sub-tasks for Task {task.Code}: {ex.Message}", Category.Exception, Priority.High);
+
+                // Em caso de erro, inicializa vazio para desbloquear a UI
+                if (Application.Current != null)
+                {
+                    Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        var emptySubTasks = new ObservableCollection<ActionPlanTaskModernDto>();
+                        BindingOperations.EnableCollectionSynchronization(emptySubTasks, _collectionLock);
+                        task.SubTasks = emptySubTasks;
+                    }), System.Windows.Threading.DispatcherPriority.Background);
+                }
             }
             finally
             {
@@ -1227,8 +1565,11 @@ namespace Emdep.Geos.Modules.APM.ViewModels
                         var cachedTasks = _tasksCache[idActionPlan];
                         Application.Current.Dispatcher.Invoke(() =>
                         {
-                            SelectedActionPlanTasks.Clear();
-                            foreach (var task in cachedTasks) SelectedActionPlanTasks.Add(task);
+                            lock (_collectionLock)
+                            {
+                                SelectedActionPlanTasks.Clear();
+                                foreach (var task in cachedTasks) SelectedActionPlanTasks.Add(task);
+                            }
                         });
                         return;
                     }
@@ -1281,14 +1622,20 @@ namespace Emdep.Geos.Modules.APM.ViewModels
                 {
                     Application.Current.Dispatcher.Invoke(() =>
                     {
-                        SelectedActionPlanTasks.Clear();
-                        foreach (var task in taskDtos) SelectedActionPlanTasks.Add(task);
+                        lock (_collectionLock)
+                        {
+                            SelectedActionPlanTasks.Clear();
+                            foreach (var task in taskDtos) SelectedActionPlanTasks.Add(task);
+                        }
                     });
                 }
                 else
                 {
-                    SelectedActionPlanTasks.Clear();
-                    foreach (var task in taskDtos) SelectedActionPlanTasks.Add(task);
+                    lock (_collectionLock)
+                    {
+                        SelectedActionPlanTasks.Clear();
+                        foreach (var task in taskDtos) SelectedActionPlanTasks.Add(task);
+                    }
                 }
             }
             catch (Exception ex)
@@ -1341,14 +1688,20 @@ namespace Emdep.Geos.Modules.APM.ViewModels
                 {
                     Application.Current.Dispatcher.Invoke(() =>
                     {
-                        ActionPlans.Clear();
-                        SelectedActionPlanTasks.Clear();
+                        lock (_collectionLock)
+                        {
+                            ActionPlans.Clear();
+                            SelectedActionPlanTasks.Clear();
+                        }
                     });
                 }
                 else
                 {
-                    ActionPlans.Clear();
-                    SelectedActionPlanTasks.Clear();
+                    lock (_collectionLock)
+                    {
+                        ActionPlans.Clear();
+                        SelectedActionPlanTasks.Clear();
+                    }
                 }
 
                 // Limpar TODOS os caches (incluindo data cache)
@@ -2409,7 +2762,17 @@ namespace Emdep.Geos.Modules.APM.ViewModels
             {
                 if (_allActionPlansUnfiltered == null || !_allActionPlansUnfiltered.Any())
                 {
-                    if (ActionPlans == null) ActionPlans = new ObservableCollection<ActionPlanModernDto>();
+                    if (Application.Current != null)
+                    {
+                        Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            if (ActionPlans == null) ActionPlans = new ObservableCollection<ActionPlanModernDto>();
+                        });
+                    }
+                    else
+                    {
+                        if (ActionPlans == null) ActionPlans = new ObservableCollection<ActionPlanModernDto>();
+                    }
                     return;
                 }
 
@@ -2481,8 +2844,28 @@ namespace Emdep.Geos.Modules.APM.ViewModels
                     else if (alert.Contains("Done") || alert.Contains("Closed")) query = query.Where(ap => ap.TotalOpenItems == 0);
                 }
 
-                // Atualizar Grid
-                ActionPlans = new ObservableCollection<ActionPlanModernDto>(query.ToList());
+                // Atualizar Grid - SEMPRE na UI thread para evitar "collection was modified" exception
+                var filteredList = query.ToList();
+                if (Application.Current != null)
+                {
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        lock (_collectionLock)
+                        {
+                            ActionPlans = new ObservableCollection<ActionPlanModernDto>(filteredList);
+                            // Re-enable synchronization on the new collection
+                            BindingOperations.EnableCollectionSynchronization(ActionPlans, _collectionLock);
+                        }
+                    });
+                }
+                else
+                {
+                    lock (_collectionLock)
+                    {
+                        ActionPlans = new ObservableCollection<ActionPlanModernDto>(filteredList);
+                        BindingOperations.EnableCollectionSynchronization(ActionPlans, _collectionLock);
+                    }
+                }
             }
             catch (Exception ex)
             {

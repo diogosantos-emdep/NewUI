@@ -243,21 +243,6 @@ namespace Emdep.Geos.Modules.APM.ViewModels
             }
         }
 
-        private void ApplySideTileFilter(string criteria, string caption, List<APMActionPlanModern> effectiveBase)
-        {
-            try
-            {
-
-                RecalculateAllCounts();
-
-                GeosApplication.Instance.Logger?.Log($"Side filter changed to '{caption}'. Global recalculation triggered.", Category.Info, Priority.Low);
-            }
-            catch (Exception ex)
-            {
-                GeosApplication.Instance.Logger?.Log($"Error in ApplySideTileFilter: {ex.Message}", Category.Exception, Priority.High);
-            }
-        }
-
 
 
         private List<APMActionPlanTask> ApplyCustomFilterToTasks(List<APMActionPlanTask> source, string criteria)
@@ -426,56 +411,56 @@ namespace Emdep.Geos.Modules.APM.ViewModels
 
         private void RecalculateAllCounts()
         {
-            try
-            {
-                // 1. A BASE deve ser SÓ os Dropdowns/Search (NUNCA deve ter o SideFilter aplicado aqui)
-                var baseData = _currentFilteredBase ?? _allDataCache;
+            //try
+            //{
+            //    // 1. A BASE deve ser SÓ os Dropdowns/Search (NUNCA deve ter o SideFilter aplicado aqui)
+            //    var baseData = _currentFilteredBase ?? _allDataCache;
 
-                if (baseData == null || baseData.Count == 0)
-                {
-                    ResetAllCountsToZero();
-                    // Limpa a grid
-                    SetActionPlanList(new List<APMActionPlanModern>());
-                    return;
-                }
+            //    if (baseData == null || baseData.Count == 0)
+            //    {
+            //        ResetAllCountsToZero();
+            //        // Limpa a grid
+            //        SetActionPlanList(new List<APMActionPlanModern>());
+            //        return;
+            //    }
 
-                // 2. Identificar Filtros Ativos
-                var activeSideFilter = _lastAppliedSideTileFilter; // O objeto do filtro lateral
-                var activeAlertCaption = _lastAppliedAlertCaption; // O texto do alerta (ex: "Overdue")
+            //    // 2. Identificar Filtros Ativos
+            //    var activeSideFilter = _lastAppliedSideTileFilter; // O objeto do filtro lateral
+            //    var activeAlertCaption = _lastAppliedAlertCaption; // O texto do alerta (ex: "Overdue")
 
-                // 3. Atualizar Botões de Alerta
-                // REGRA: Usa Base + Side Filter (Ignora o próprio Alerta para mostrar o que está "disponível")
-                UpdateAlertButtonCounts(baseData, activeSideFilter);
+            //    // 3. Atualizar Botões de Alerta
+            //    // REGRA: Usa Base + Side Filter (Ignora o próprio Alerta para mostrar o que está "disponível")
+            //    UpdateAlertButtonCounts(baseData, activeSideFilter);
 
-                // 4. Atualizar Side Tiles (AQUI ESTAVA O ERRO PROVAVELMENTE)
-                // REGRA: Usa Base + Alerta (Ignora o próprio Side Filter para que os outros tiles não vão a zero)
-                UpdateSideTileCounts(baseData, activeAlertCaption);
+            //    // 4. Atualizar Side Tiles (AQUI ESTAVA O ERRO PROVAVELMENTE)
+            //    // REGRA: Usa Base + Alerta (Ignora o próprio Side Filter para que os outros tiles não vão a zero)
+            //    UpdateSideTileCounts(baseData, activeAlertCaption);
 
-                // 5. Grid Final (O único sítio que aplica AMBOS)
-                var finalDataForGrid = ApplyFinalFilters(baseData, activeSideFilter, activeAlertCaption);
+            //    // 5. Grid Final (O único sítio que aplica AMBOS)
+            //    var finalDataForGrid = ApplyFinalFilters(baseData, activeSideFilter, activeAlertCaption);
 
-                // Normalização de DueDays para visualização correta
-                foreach (var ap in finalDataForGrid)
-                {
-                    // (Otimização) Só calcula se tiver tasks, senão confia nos Stats do Header
-                    if (ap.TaskList != null)
-                    {
-                        foreach (var task in ap.TaskList)
-                        {
-                            task.DueDays = task.DueDate < DateTime.Now ? CalculateDueDays(task.DueDate) : 0;
-                            if (task.SubTaskList != null)
-                                foreach (var s in task.SubTaskList) s.DueDays = s.DueDate < DateTime.Now ? CalculateDueDays(s.DueDate) : 0;
-                        }
-                    }
-                }
+            //    // Normalização de DueDays para visualização correta
+            //    foreach (var ap in finalDataForGrid)
+            //    {
+            //        // (Otimização) Só calcula se tiver tasks, senão confia nos Stats do Header
+            //        if (ap.TaskList != null)
+            //        {
+            //            foreach (var task in ap.TaskList)
+            //            {
+            //                task.DueDays = task.DueDate < DateTime.Now ? CalculateDueDays(task.DueDate) : 0;
+            //                if (task.SubTaskList != null)
+            //                    foreach (var s in task.SubTaskList) s.DueDays = s.DueDate < DateTime.Now ? CalculateDueDays(s.DueDate) : 0;
+            //            }
+            //        }
+            //    }
 
-                // Atualiza a Grid
-                SetActionPlanList(finalDataForGrid);
-            }
-            catch (Exception ex)
-            {
-                GeosApplication.Instance.Logger?.Log($"Error in RecalculateAllCounts: {ex.Message}", Category.Exception, Priority.High);
-            }
+            //    // Atualiza a Grid
+            //    SetActionPlanList(finalDataForGrid);
+            //}
+            //catch (Exception ex)
+            //{
+            //    GeosApplication.Instance.Logger?.Log($"Error in RecalculateAllCounts: {ex.Message}", Category.Exception, Priority.High);
+            //}
         }
 
         private void UpdateAlertButtonCounts(List<APMActionPlanModern> baseData, TileBarFilters activeSideFilter)
@@ -1708,8 +1693,6 @@ namespace Emdep.Geos.Modules.APM.ViewModels
                 // 4. Atualizar a Grid
                 SetActionPlanList(filteredList);
 
-                // 5. Atualizar os Tiles
-                RecalculateAllCounts();
             }
             catch (Exception ex)
             {

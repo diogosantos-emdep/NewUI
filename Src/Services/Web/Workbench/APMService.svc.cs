@@ -3646,6 +3646,42 @@ namespace Emdep.Geos.Services.Web.Workbench
                 throw new FaultException<ServiceException>(exp, ex.ToString());
             }
         }
+
+        public ActionPlanDetailsData GetActionPlanDetailsPT(
+            long idActionPlan, 
+            string filterLocation = null,
+            string filterResponsible = null,
+            string filterBusinessUnit = null,
+            string filterOrigin = null,
+            string filterDepartment = null,
+            string filterCustomer = null,
+            string alertFilter = null,
+            string filterTheme = null)
+        {
+            try
+            {
+                APMManager mgr = new APMManager();
+                string connectionString = ConfigurationManager.ConnectionStrings["WorkbenchContext"].ConnectionString;
+                return mgr.GetActionPlanDetails(
+                    connectionString, 
+                    (int)idActionPlan, 
+                    filterLocation, 
+                    filterResponsible, 
+                    filterBusinessUnit, 
+                    filterOrigin, 
+                    filterDepartment, 
+                    filterCustomer, 
+                    alertFilter, 
+                    filterTheme);
+            }
+            catch (Exception ex)
+            {
+                ServiceException exp = new ServiceException();
+                exp.ErrorMessage = ex.Message;
+                exp.ErrorDetails = ex.ToString();
+                throw new FaultException<ServiceException>(exp, ex.ToString());
+            }
+        }
     }
 
 }

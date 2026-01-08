@@ -12422,10 +12422,8 @@ namespace Emdep.Geos.UI.ServiceProcess
             }
         }
 
-        public List<APMActionPlanTask> GetTaskListByIdActionPlan_V2680PT(
+        public ActionPlanDetailsData GetActionPlanDetailsPT(
             long idActionPlan, 
-            string period, 
-            int userId,
             string filterLocation = null,
             string filterResponsible = null,
             string filterBusinessUnit = null,
@@ -12454,11 +12452,9 @@ namespace Emdep.Geos.UI.ServiceProcess
                 // 2. Criar o Canal
                 IAPMService channel = factory.CreateChannel();
 
-                // 3. Chamar a nova versão PT (Performance Tuned) com TODOS os filtros
-                return channel.GetTaskListByIdActionPlan_V2680PT(
+                // 3. Chamar a nova versão PT com TODOS os filtros (retorna ActionPlanDetailsData)
+                return channel.GetActionPlanDetailsPT(
                     idActionPlan, 
-                    period, 
-                    userId, 
                     filterLocation, 
                     filterResponsible, 
                     filterBusinessUnit, 

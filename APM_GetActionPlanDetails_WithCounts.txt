@@ -134,7 +134,19 @@ BEGIN
         );
 
     -- =================================================================================
-    -- 4. CONTAGENS SIMPLIFICADAS (sem agregados por Theme/Status)
+    -- 4. REMOVER DUPLICADOS (manter apenas MAX(IdActionPlan) por Code)
+    -- =================================================================================
+    DROP TEMPORARY TABLE IF EXISTS UniqueFilteredAPs;
+    CREATE TEMPORARY TABLE UniqueFilteredAPs (IdActionPlan INT PRIMARY KEY) ENGINE=MEMORY;
+    
+    INSERT INTO UniqueFilteredAPs (IdActionPlan)
+    SELECT MAX(f.IdActionPlan)
+    FROM FinalFilteredAPs f
+    INNER JOIN emdep_geos.action_plans ap ON f.IdActionPlan = ap.IdActionPlan
+    GROUP BY ap.Code;
+
+    -- =================================================================================
+    -- 5. CONTAGENS SIMPLIFICADAS (sem agregados por Theme/Status)
     -- =================================================================================
     DROP TEMPORARY TABLE IF EXISTS Counts_General;
     CREATE TEMPORARY TABLE Counts_General (IdActionPlan INT PRIMARY KEY, Total INT, Open INT, Closed INT, Overdue INT, HighPriorityOverdue INT) ENGINE=MEMORY;
@@ -145,13 +157,13 @@ BEGIN
            SUM(CASE WHEN t.CloseDate IS NOT NULL THEN 1 ELSE 0 END), 
            SUM(CASE WHEN t.CloseDate IS NULL AND t.DueDate < NOW() THEN 1 ELSE 0 END),
            SUM(CASE WHEN t.CloseDate IS NULL AND t.DueDate < NOW() AND t.IdPriority = 10001 THEN 1 ELSE 0 END)
-    FROM FinalFilteredAPs u 
+    FROM UniqueFilteredAPs u 
     JOIN emdep_geos.action_plan_task t ON u.IdActionPlan = t.IdActionPlan 
     WHERE t.InUse = 1 
     GROUP BY u.IdActionPlan;
 
     -- =================================================================================
-    -- 5. OUTPUT FINAL
+    -- 6. OUTPUT FINAL (usando UniqueFilteredAPs para evitar duplicados)
     -- =================================================================================
     SELECT DISTINCT
            ap.IdActionPlan, 
@@ -180,7 +192,7 @@ BEGIN
            lvz.IdLookupValue AS IdZone, lvz.Value AS Region
            
     FROM emdep_geos.action_plans ap
-    INNER JOIN FinalFilteredAPs f ON ap.IdActionPlan = f.IdActionPlan
+    INNER JOIN UniqueFilteredAPs f ON ap.IdActionPlan = f.IdActionPlan
     INNER JOIN emdep_geos.companies com ON com.IdCompany = ap.IdLocation
     INNER JOIN countries co ON co.idCountry = com.IdCountry
     INNER JOIN emdep_geos.employees emp ON emp.IdEmployee = ap.IdResponsibleEmployee
