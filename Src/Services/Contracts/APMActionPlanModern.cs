@@ -26,6 +26,7 @@ namespace Emdep.Geos.Services.Contracts
         [DataMember] public string Zone { get; set; }
         [DataMember] public int IdZone { get; set; } // ADICIONADO: Necessário para filtros
 
+        [DataMember] public int IdLocation { get; set; }
         // --- PESSOAS ---
         [DataMember] public int IdEmployee { get; set; }
 

@@ -75,6 +75,16 @@ namespace Emdep.Geos.Data.Common.APM
                 OnPropertyChanged("IdActionPlan");
             }
         }
+
+
+        #region Novas Propriedades para Filtros Modernos (Adicionar Manualmente)
+
+        [DataMember]
+        public string ThemeAggregates { get; set; }
+
+        [DataMember]
+        public string StatusAggregates { get; set; }
+
         [DataMember]
         public int Stat_Overdue15 { get; set; }
 
@@ -83,6 +93,22 @@ namespace Emdep.Geos.Data.Common.APM
 
         [DataMember]
         public int Stat_MaxDueDays { get; set; }
+
+        [DataMember]
+        public string CustomerName { get; set; }
+
+        // Se já tens IdCompany, podes adicionar IdLocation a apontar para o mesmo ou como propriedade nova
+        [DataMember]
+        public int IdLocation
+        {
+            get { return IdCompany; }
+            set { IdCompany = value; }
+        }
+
+        #endregion
+
+
+       
 
         [DataMember]
         public string Stat_ThemesList { get; set; }
@@ -651,7 +677,13 @@ namespace Emdep.Geos.Data.Common.APM
                 OnPropertyChanged("MaxTaskNumber");
             }
         }
+
+
+
+
         #endregion
+
+
 
         #region Constructor
         public APMActionPlan()

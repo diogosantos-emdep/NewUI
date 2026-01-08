@@ -22,28 +22,54 @@ namespace Emdep.Geos.Modules.APM.ViewModels
             return days > 0 ? days : 0;
         }
 
+
         public static ActionPlanModernDto MapToPlanDto(APMActionPlan entity)
         {
             if (entity == null) return null;
 
             return new ActionPlanModernDto
             {
+                // --- Identificação Básica ---
                 IdActionPlan = entity.IdActionPlan,
                 Code = entity.Code ?? string.Empty,
-                Title = entity.Description ?? string.Empty,
+                Title = entity.Description ?? string.Empty, // Nota: entity.Description mapeia para Dto.Title
                 Responsible = entity.FullName ?? string.Empty,
                 EmployeeCode = entity.EmployeeCode ?? string.Empty,
+
+                // --- Localização e Organização ---
                 IdDepartment = entity.IdDepartment,
                 Department = entity.Department,
-                IdLocation = 0,
+                IdLocation = entity.IdLocation, // Assegura que isto vem preenchido do SP
                 Location = entity.Location,
-                BusinessUnit = string.Empty,
-                Origin = entity.Origin,
                 IdSite = entity.IdSite,
                 Site = entity.Site,
                 IdCustomer = entity.IdCustomer,
-                CustomerName = string.Empty,
+                CustomerName = entity.CustomerName ?? string.Empty,
+                BusinessUnit = entity.BusinessUnit ?? string.Empty,
+                Origin = entity.Origin,
 
+                // --- Estatísticas & Agregados (CRÍTICO PARA OS FILTROS FUNCIONAREM) ---
+                // Estes campos vêm do SP (APM_GetActionPlanDetails_WithCounts)
+                // Se não forem preenchidos, os filtros laterais e de alerta assumem 0.
+
+                ThemeAggregates = entity.ThemeAggregates,   // Ex: "T|Safety:2;T|Quality:1"
+                StatusAggregates = entity.StatusAggregates, // Ex: "S|Done:5;S|To Do:2"
+
+                Stat_Overdue15 = entity.Stat_Overdue15,
+                Stat_HighPriorityOverdue = entity.Stat_HighPriorityOverdue,
+                Stat_MaxDueDays = entity.Stat_MaxDueDays,
+
+                // --- Contagens Totais ---
+                TotalActionItems = entity.TotalActionItems,
+                TotalOpenItems = entity.TotalOpenItems,
+                TotalClosedItems = entity.TotalClosedItems,
+
+                // Cálculo da Percentagem (Evitar divisão por zero)
+                Percentage = entity.TotalActionItems > 0
+                    ? Math.Round(((double)entity.TotalClosedItems / entity.TotalActionItems) * 100, 0)
+                    : 0,
+
+                // Inicializar coleção de tasks vazia (Lazy Loading)
                 Tasks = new ObservableCollection<ActionPlanTaskModernDto>()
             };
         }

@@ -10,6 +10,10 @@
 //------------------------------------------------------------------------------
 
 using DevExpress.Core;
+using DevExpress.Mvvm;
+using DevExpress.Mvvm.UI;
+using DevExpress.Mvvm.UI.Interactivity;
+using DevExpress.Mvvm.UI.ModuleInjection;
 using DevExpress.Xpf.Core;
 using DevExpress.Xpf.Core.ConditionalFormatting;
 using DevExpress.Xpf.Core.DataSources;
@@ -29,7 +33,19 @@ using DevExpress.Xpf.Editors.Settings;
 using DevExpress.Xpf.Editors.Settings.Extension;
 using DevExpress.Xpf.Editors.Themes;
 using DevExpress.Xpf.Editors.Validation;
+using DevExpress.Xpf.Grid;
+using DevExpress.Xpf.Grid.ConditionalFormatting;
+using DevExpress.Xpf.Grid.LookUp;
+using DevExpress.Xpf.Grid.Themes;
+using DevExpress.Xpf.Grid.TreeList;
+using DevExpress.Xpf.LayoutControl;
+using DevExpress.Xpf.Printing;
+using DevExpress.Xpf.WindowsUI;
+using Emdep.Geos.Modules.SCM.Views;
+using Emdep.Geos.UI.Behaviors;
 using Emdep.Geos.UI.Common;
+using Emdep.Geos.UI.Helper;
+using Emdep.Geos.UI.Validations;
 using System;
 using System.Diagnostics;
 using System.Windows;

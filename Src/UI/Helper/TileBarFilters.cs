@@ -18,6 +18,8 @@ namespace Emdep.Geos.UI.Helper
         private string caption;
         private int entitiesCount;
         private Visibility entitiesCountVisibility;
+        private bool isSelected;
+
         public string Caption
         {
             get
@@ -55,6 +57,20 @@ namespace Emdep.Geos.UI.Helper
             {
                 entitiesCountVisibility = value;
                 OnPropertyChanged(new PropertyChangedEventArgs("EntitiesCountVisibility"));
+            }
+        }
+
+        public bool IsSelected
+        {
+            get
+            {
+                return isSelected;
+            }
+
+            set
+            {
+                isSelected = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("IsSelected"));
             }
         }
 

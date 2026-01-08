@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic; // Necessário para HashSet
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq; // Necessário para Any()
 using System.Runtime.CompilerServices;
 
 namespace Emdep.Geos.Modules.APM.ViewModels
@@ -42,8 +44,10 @@ namespace Emdep.Geos.Modules.APM.ViewModels
         private string _site;
         private string _countryIconUrl;
         private int _idLookupStatus;
-        private string _themeAggregates;
-        private string _statusAggregates;
+
+        public string StatusAggregates { get; set; }
+
+        // ... [Propriedades existentes mantidas iguais] ...
 
         public long IdActionPlan
         {
@@ -67,17 +71,11 @@ namespace Emdep.Geos.Modules.APM.ViewModels
             set { _title = value; OnPropertyChanged(); }
         }
 
-        
-        public string ThemeAggregates
+        private ObservableCollection<ActionPlanTaskModernDto> _visibleTasks;
+        public ObservableCollection<ActionPlanTaskModernDto> VisibleTasks
         {
-            get => _themeAggregates;
-            set { _themeAggregates = value; OnPropertyChanged(); }
-        }
-
-        public string StatusAggregates
-        {
-            get => _statusAggregates;
-            set { _statusAggregates = value; OnPropertyChanged(); }
+            get => _visibleTasks;
+            set { _visibleTasks = value; OnPropertyChanged(); }
         }
 
         public string Responsible
@@ -170,50 +168,42 @@ namespace Emdep.Geos.Modules.APM.ViewModels
             set { _totalClosedColor = value; OnPropertyChanged(); }
         }
 
-        /// <summary>
-        /// Indica se o action plan está expandido (master/detail)
-        /// </summary>
         public bool IsExpanded
         {
             get => _isExpanded;
             set { _isExpanded = value; OnPropertyChanged(); }
         }
 
-        /// <summary>
-        /// Indica se está carregando tasks (lazy-load)
-        /// </summary>
         public bool IsLoadingTasks
         {
             get => _isLoadingTasks;
             set { _isLoadingTasks = value; OnPropertyChanged(); }
         }
 
-        /// <summary>
-        /// Coleção de Tasks deste Action Plan (lazy-loaded)
-        /// </summary>
         public ObservableCollection<ActionPlanTaskModernDto> Tasks
         {
             get => _tasks;
             set { _tasks = value; OnPropertyChanged(); }
         }
+
         private string _businessUnitHTMLColor;
         public string BusinessUnitHTMLColor
         {
             get => _businessUnitHTMLColor;
             set { _businessUnitHTMLColor = value; OnPropertyChanged(); }
         }
+
         public long IdCustomer
         {
             get => _idCustomer;
             set { _idCustomer = value; OnPropertyChanged(); }
         }
 
-        // Adicionar dentro da classe ActionPlanModernDto
-        private int _statOverdue15;
+        private int _stat_Overdue15;
         public int Stat_Overdue15
         {
-            get => _statOverdue15;
-            set { _statOverdue15 = value; OnPropertyChanged(); }
+            get => _stat_Overdue15;
+            set { _stat_Overdue15 = value; OnPropertyChanged(); }
         }
 
         private int _statHighPriorityOverdue;
@@ -230,6 +220,26 @@ namespace Emdep.Geos.Modules.APM.ViewModels
             set { _statMaxDueDays = value; OnPropertyChanged(); }
         }
 
+        private int _idLookupBusinessUnit;
+        public int IdLookupBusinessUnit
+        {
+            get => _idLookupBusinessUnit;
+            set { _idLookupBusinessUnit = value; OnPropertyChanged(); }
+        }
+
+        private int _idLookupOrigin;
+        public int IdLookupOrigin
+        {
+            get => _idLookupOrigin;
+            set { _idLookupOrigin = value; OnPropertyChanged(); }
+        }
+
+        private string _themeAggregates;
+        public string ThemeAggregates
+        {
+            get => _themeAggregates;
+            set { _themeAggregates = value; OnPropertyChanged(); }
+        }
 
         public string CustomerName
         {
@@ -284,6 +294,98 @@ namespace Emdep.Geos.Modules.APM.ViewModels
             get => _countryIconUrl;
             set { _countryIconUrl = value; OnPropertyChanged(); }
         }
+
+        // ====================================================================================
+        // NOVO CÓDIGO: MÉTODOS DE FILTRAGEM RÁPIDA (PASSO 1)
+        // ====================================================================================
+
+        /// <summary>
+        /// Verifica se este DTO corresponde aos filtros de dropdown passados como HashSets (O(1)).
+        /// </summary>
+        public bool MatchesFilters(
+            HashSet<int> locationIds,
+            HashSet<int> businessUnitIds,
+            HashSet<int> originIds,
+            HashSet<int> departmentIds,
+            HashSet<int> customerIds,    // Baseado em IdSite
+            HashSet<string> customerGroups, // Baseado em GroupName
+            bool includeBlankCustomers,
+            HashSet<string> responsibleNames, // Para match por nome
+            HashSet<int> responsibleIds       // Para match por ID
+        )
+        {
+            // 1. Verificações Simples (IDs) - Rápidas
+            if (locationIds != null && !locationIds.Contains(this.IdLocation)) return false;
+            if (businessUnitIds != null && !businessUnitIds.Contains(this.IdLookupBusinessUnit)) return false;
+            if (originIds != null && !originIds.Contains(this.IdLookupOrigin)) return false;
+            if (departmentIds != null && !departmentIds.Contains(this.IdDepartment)) return false;
+
+            // 2. Verificação de Customer (Lógica Complexa: ID OU Grupo OU Blank)
+            bool hasCustomerFilter = (customerIds != null || customerGroups != null || includeBlankCustomers);
+            if (hasCustomerFilter)
+            {
+                bool match = false;
+                // a) Blank
+                if (includeBlankCustomers && this.IdSite == 0) match = true;
+                // b) ID Site
+                else if (customerIds != null && this.IdSite > 0 && customerIds.Contains(this.IdSite)) match = true;
+                // c) Group Name
+                else if (customerGroups != null && !string.IsNullOrWhiteSpace(this.GroupName) && customerGroups.Contains(this.GroupName)) match = true;
+
+                if (!match) return false;
+            }
+
+            // 3. Verificação de Responsável (Deep Check: Plano OU Task OU Subtask)
+            bool hasRespFilter = (responsibleNames != null && responsibleNames.Count > 0) ||
+                                 (responsibleIds != null && responsibleIds.Count > 0);
+
+            if (hasRespFilter)
+            {
+                // Checa responsável do Plano (match por ID é preferencial, Nome é fallback)
+                if (IsResponsibleMatch(this.Responsible, this.IdEmployee, responsibleNames, responsibleIds)) return true;
+
+                // Se o plano não bateu, verifica se alguma Task ou SubTask bate
+                // Isso permite filtrar "Tudo o que tem a ver com o Responsável X"
+                if (this.Tasks != null)
+                {
+                    foreach (var task in this.Tasks)
+                    {
+                        // Task (Geralmente só tem nome no DTO, ID não disponível facilmente aqui)
+                        if (IsResponsibleMatch(task.Responsible, 0, responsibleNames, responsibleIds)) return true;
+
+                        if (task.SubTasks != null)
+                        {
+                            foreach (var sub in task.SubTasks)
+                            {
+                                if (IsResponsibleMatch(sub.Responsible, 0, responsibleNames, responsibleIds)) return true;
+                            }
+                        }
+                    }
+                }
+
+                // Se percorreu tudo e não encontrou, falha
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Helper para verificar se um responsável bate com os filtros (ID ou Nome)
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private bool IsResponsibleMatch(string name, int id, HashSet<string> names, HashSet<int> ids)
+        {
+            // Prioridade ID
+            if (ids != null && id > 0 && ids.Contains(id)) return true;
+
+            // Fallback Nome
+            if (names != null && !string.IsNullOrEmpty(name) && names.Contains(name)) return true;
+
+            return false;
+        }
+
+        // ====================================================================================
 
         public event PropertyChangedEventHandler PropertyChanged;
 

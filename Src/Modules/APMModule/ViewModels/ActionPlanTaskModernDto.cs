@@ -45,7 +45,7 @@ namespace Emdep.Geos.Modules.APM.ViewModels
         private bool _isExpanded;
         private bool _isLoadingSubTasks;
         private int _idLookupStatus;
-        private ObservableCollection<SubTaskModernDto> _subTasks;
+        private ObservableCollection<ActionPlanTaskModernDto> _subTasks;
 
         public long IdTask
         {
@@ -63,7 +63,31 @@ namespace Emdep.Geos.Modules.APM.ViewModels
             get => _idLookupStatus;
             set { _idLookupStatus = value; OnPropertyChanged(); }
         }
+        private ObservableCollection<SubTaskModernDto> _visibleSubTasks;
+        public ObservableCollection<SubTaskModernDto> VisibleSubTasks
+        {
+            get => _visibleSubTasks;
+            set { _visibleSubTasks = value; OnPropertyChanged(); }
+        }
 
+        private bool _isPartOfFilterPath;
+        public bool IsPartOfFilterPath
+        {
+            get => _isPartOfFilterPath;
+            set { _isPartOfFilterPath = value; OnPropertyChanged(); }
+        }
+        private long? _idParent; // Nullable porque tarefas principais não têm pai
+        public long? IdParent
+        {
+            get => _idParent;
+            set { _idParent = value; OnPropertyChanged(); }
+        }
+
+        public ObservableCollection<ActionPlanTaskModernDto> SubTasks
+        {
+            get => _subTasks;
+            set { _subTasks = value; OnPropertyChanged(); }
+        }
         public int TaskNumber
         {
             get => _taskNumber;
@@ -260,15 +284,6 @@ namespace Emdep.Geos.Modules.APM.ViewModels
         {
             get => _isLoadingSubTasks;
             set { _isLoadingSubTasks = value; OnPropertyChanged(); }
-        }
-
-        /// <summary>
-        /// Coleção de Sub-Tasks desta Task (lazy-loaded)
-        /// </summary>
-        public ObservableCollection<SubTaskModernDto> SubTasks
-        {
-            get => _subTasks;
-            set { _subTasks = value; OnPropertyChanged(); }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

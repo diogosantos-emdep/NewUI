@@ -1,0 +1,200 @@
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS APM_GetActionPlanDetails_WithCounts$$
+
+CREATE PROCEDURE APM_GetActionPlanDetails_WithCounts(
+    IN _SelectedPeriod VARCHAR(255),
+    IN _Iduser INT,
+    -- Dropdown Filters (múltipla seleção - CSV: '1,2,3')
+    IN _FilterLocation VARCHAR(500),
+    IN _FilterResponsible VARCHAR(500),
+    IN _FilterBusinessUnit VARCHAR(500),
+    IN _FilterOrigin VARCHAR(500),
+    IN _FilterDepartment VARCHAR(500),
+    IN _FilterCustomer VARCHAR(500),
+    -- Alert Filters (apenas um ativo)
+    IN _AlertFilter VARCHAR(50), -- 'LongestOverdue', 'Overdue15', 'HighPriorityOverdue', 'MostOverdueTheme', 'ToDo', 'InProgress', 'Blocked', 'Closed'
+    -- Side Filters (Theme)
+    IN _FilterTheme VARCHAR(50) -- 'Safety', 'Quality', etc.
+)
+BEGIN
+    DECLARE _UserEmployeeId INT;
+    SET SESSION group_concat_max_len = 1000000;
+    
+    SELECT IdEmployee INTO _UserEmployeeId FROM employees WHERE IdUser = _Iduser LIMIT 1;
+
+    -- =================================================================================
+    -- 1. PERMISS�ES E SEGURAN�A (UserAllowedAPs)
+    -- =================================================================================
+    DROP TEMPORARY TABLE IF EXISTS UserAllowedAPs;
+    CREATE TEMPORARY TABLE UserAllowedAPs (IdActionPlan INT PRIMARY KEY) ENGINE=MEMORY;
+
+    -- 1.1 ADMIN
+    IF EXISTS (SELECT 1 FROM user_permissions WHERE IdUser = _Iduser AND IdPermission = 122) THEN
+        INSERT INTO UserAllowedAPs (IdActionPlan)
+        SELECT IdActionPlan FROM emdep_geos.action_plans WHERE InUse = 1;
+
+    -- 1.2 LOCATION MANAGER
+    ELSEIF EXISTS (SELECT 1 FROM user_permissions WHERE IdUser = _Iduser AND IdPermission = 134) THEN
+        INSERT IGNORE INTO UserAllowedAPs (IdActionPlan)
+        SELECT DISTINCT ap.IdActionPlan
+        FROM emdep_geos.action_plans ap
+        INNER JOIN emdep_geos.companies com ON com.IdCompany = ap.IdLocation
+        INNER JOIN site_user_permission sup ON sup.IdCompany = com.IdCompany
+        INNER JOIN emdep_geos.site_user_module_geos_permission gp ON sup.Id = gp.IdSiteUserPermission
+        WHERE sup.IdUser = _Iduser AND gp.IdGeosModule = 15 AND ap.InUse = 1
+        UNION
+        SELECT IdActionPlan FROM emdep_geos.action_plans WHERE CreatedBy = _Iduser AND InUse = 1
+        UNION
+        SELECT IdActionPlan FROM emdep_geos.action_plans WHERE IdResponsibleEmployee = _UserEmployeeId AND InUse = 1;
+
+    -- 1.3 DEPARTMENT MANAGER
+    ELSEIF EXISTS (SELECT 1 FROM user_permissions WHERE IdUser = _Iduser AND IdPermission = 135) THEN
+        INSERT IGNORE INTO UserAllowedAPs (IdActionPlan)
+        SELECT DISTINCT ap.IdActionPlan
+        FROM emdep_geos.action_plans ap
+        INNER JOIN emdep_geos.employee_job_descriptions ejd ON ejd.IdEmployee = _UserEmployeeId
+        INNER JOIN emdep_geos.job_descriptions jd ON jd.IdJobDescription = ejd.IdJobDescription
+        WHERE ap.IdDepartment = jd.IdDepartment AND ap.InUse = 1
+        UNION
+        SELECT IdActionPlan FROM emdep_geos.action_plans WHERE CreatedBy = _Iduser AND InUse = 1
+        UNION
+        SELECT IdActionPlan FROM emdep_geos.action_plans WHERE IdResponsibleEmployee = _UserEmployeeId AND InUse = 1;
+
+    -- 1.4 BASE USER
+    ELSE
+        INSERT IGNORE INTO UserAllowedAPs (IdActionPlan)
+        SELECT DISTINCT ap.IdActionPlan
+        FROM emdep_geos.action_plans ap
+        LEFT JOIN emdep_geos.action_plan_task t ON t.IdActionPlan = ap.IdActionPlan
+        WHERE ap.InUse = 1 AND (
+            t.IdResponsibleEmployee = _UserEmployeeId
+            OR t.DelegatedTo = _UserEmployeeId
+            OR FIND_IN_SET(_UserEmployeeId, t.RequestParticipants) > 0
+            OR ap.CreatedBy = _Iduser
+            OR t.CreatedBy = _Iduser
+        );
+    END IF;
+
+    -- =================================================================================
+    -- 2. FILTRO DE DATA
+    -- =================================================================================
+    DELETE FROM UserAllowedAPs 
+    WHERE IdActionPlan NOT IN (
+        SELECT IdActionPlan FROM emdep_geos.action_plans
+        WHERE FIND_IN_SET(YEAR(CreatedIn), _SelectedPeriod) > 0 AND InUse = 1
+        UNION
+        SELECT DISTINCT t.IdActionPlan FROM emdep_geos.action_plan_task t
+        WHERE t.InUse = 1 AND t.CloseDate IS NULL AND t.IdStatus NOT IN (10002, 10003) 
+    );
+
+    -- =================================================================================
+    -- 3. APLICAR FILTROS (Action Plans que TÊM tasks/subtasks que correspondem)
+    -- =================================================================================
+    DROP TEMPORARY TABLE IF EXISTS FinalFilteredAPs;
+    CREATE TEMPORARY TABLE FinalFilteredAPs (IdActionPlan INT PRIMARY KEY) ENGINE=MEMORY;
+
+    -- LÓGICA MODERNUI:
+    -- - Filtros aplicam-se a TASKS e SUBTASKS (mesmo colapsadas)
+    -- - Action Plans aparecem se TÊM ≥1 task/subtask que corresponde aos critérios
+    -- - As tasks são carregadas depois no APM_GetActionPlanDetailsPT
+    
+    INSERT INTO FinalFilteredAPs (IdActionPlan)
+    SELECT DISTINCT u.IdActionPlan
+    FROM UserAllowedAPs u
+    INNER JOIN emdep_geos.action_plans ap ON u.IdActionPlan = ap.IdActionPlan
+    INNER JOIN emdep_geos.action_plan_task t ON u.IdActionPlan = t.IdActionPlan 
+    LEFT JOIN emdep_geos.lookup_values lvStatus ON t.IdStatus = lvStatus.IdLookupValue
+    LEFT JOIN emdep_geos.lookup_values lvTheme ON t.IdTheme = lvTheme.IdLookupValue
+    LEFT JOIN emdep_geos.lookup_values lvPriority ON t.IdPriority = lvPriority.IdLookupValue
+    LEFT JOIN geos.sites si ON si.IdSite = ap.IdSite
+    WHERE t.InUse = 1 
+        -- Dropdown Filters (Action Plan level)
+        AND (_FilterLocation IS NULL OR _FilterLocation = '' OR FIND_IN_SET(ap.IdLocation, _FilterLocation) > 0)
+        AND (_FilterResponsible IS NULL OR _FilterResponsible = '' OR FIND_IN_SET(t.IdResponsibleEmployee, _FilterResponsible) > 0)
+        AND (_FilterBusinessUnit IS NULL OR _FilterBusinessUnit = '' OR FIND_IN_SET(ap.IdBusinessUnit, _FilterBusinessUnit) > 0)
+        AND (_FilterOrigin IS NULL OR _FilterOrigin = '' OR FIND_IN_SET(ap.IdOrigin, _FilterOrigin) > 0)
+        AND (_FilterDepartment IS NULL OR _FilterDepartment = '' OR FIND_IN_SET(ap.IdDepartment, _FilterDepartment) > 0)
+        AND (_FilterCustomer IS NULL OR _FilterCustomer = '' OR FIND_IN_SET(si.IdCustomer, _FilterCustomer) > 0)
+        
+        -- Side Filter (Theme)
+        AND (_FilterTheme IS NULL OR _FilterTheme = '' OR lvTheme.Value = _FilterTheme)
+        
+        -- Alert Filters (Status-based)
+        AND (
+            _AlertFilter IS NULL OR _AlertFilter = '' OR
+            (_AlertFilter = 'ToDo' AND (lvStatus.Value LIKE '%To do%' OR lvStatus.Value LIKE '%To Do%')) OR
+            (_AlertFilter = 'InProgress' AND lvStatus.Value LIKE '%In Progress%') OR
+            (_AlertFilter = 'Blocked' AND lvStatus.Value LIKE '%Blocked%') OR
+            (_AlertFilter = 'Closed' AND (lvStatus.Value LIKE '%Done%' OR lvStatus.Value LIKE '%Closed%')) OR
+            (_AlertFilter = 'Overdue15' AND t.CloseDate IS NULL AND DATEDIFF(CURDATE(), t.DueDate) >= 15) OR
+            (_AlertFilter = 'HighPriorityOverdue' AND t.CloseDate IS NULL AND t.DueDate < CURDATE() AND lvPriority.Value LIKE '%High%') OR
+            (_AlertFilter = 'LongestOverdue' AND t.CloseDate IS NULL AND t.DueDate < CURDATE()) OR
+            (_AlertFilter = 'MostOverdueTheme' AND t.CloseDate IS NULL AND t.DueDate < CURDATE())
+        );
+
+    -- =================================================================================
+    -- 4. CONTAGENS SIMPLIFICADAS (sem agregados por Theme/Status)
+    -- =================================================================================
+    DROP TEMPORARY TABLE IF EXISTS Counts_General;
+    CREATE TEMPORARY TABLE Counts_General (IdActionPlan INT PRIMARY KEY, Total INT, Open INT, Closed INT, Overdue INT, HighPriorityOverdue INT) ENGINE=MEMORY;
+    INSERT INTO Counts_General (IdActionPlan, Total, Open, Closed, Overdue, HighPriorityOverdue)
+    SELECT u.IdActionPlan, 
+           COUNT(DISTINCT t.IdTask), 
+           SUM(CASE WHEN t.CloseDate IS NULL THEN 1 ELSE 0 END), 
+           SUM(CASE WHEN t.CloseDate IS NOT NULL THEN 1 ELSE 0 END), 
+           SUM(CASE WHEN t.CloseDate IS NULL AND t.DueDate < NOW() THEN 1 ELSE 0 END),
+           SUM(CASE WHEN t.CloseDate IS NULL AND t.DueDate < NOW() AND t.IdPriority = 10001 THEN 1 ELSE 0 END)
+    FROM FinalFilteredAPs u 
+    JOIN emdep_geos.action_plan_task t ON u.IdActionPlan = t.IdActionPlan 
+    WHERE t.InUse = 1 
+    GROUP BY u.IdActionPlan;
+
+    -- =================================================================================
+    -- 5. OUTPUT FINAL
+    -- =================================================================================
+    SELECT DISTINCT
+           ap.IdActionPlan, 
+           ap.Code, 
+           ap.Description, 
+           ap.Description AS Title,
+           
+           com.IdCompany, com.Alias AS Location,
+           co.Name AS Country, co.Iso AS CountryIso,
+           emp.EmployeeCode, emp.IdUser, emp.IdEmployee,
+           emp.FirstName, emp.LastName, emp.IdGender,
+           lv.IdLookupValue, lv.Value AS Origin,
+           lvap.IdLookupValue AS IdBusinessUnit, lvap.Value AS BusinessUnit, lvap.HtmlColor AS BusinessUnitHtmlColor,
+           
+           COALESCE(cg.Total, 0) AS TotalActionItems,
+           COALESCE(cg.Open, 0) AS TotalOpenItems,
+           COALESCE(cg.Closed, 0) AS TotalClosedItems,
+           COALESCE(cg.Overdue, 0) AS Stat_Overdue15,
+           COALESCE(cg.HighPriorityOverdue, 0) AS Stat_HighPriorityOverdue,
+
+           ap.CreatedBy, CONCAT(usr.FirstName, ' ', usr.LastName) AS CreatedByName, ap.CreatedIn,
+           ap.IdDepartment, lvDep.DepartmentName AS Department, ap.OriginDescription,
+           CONCAT(emp.FirstName, ' ', emp.LastName) AS Responsible,
+           COALESCE(emp.DisplayName, CONCAT(emp.FirstName, ' ', emp.LastName)) AS ActionPlanResponsibleDisplayName,
+           si.IdSite, si.Name AS SiteName, cus.IdCustomer, cus.Name AS CustomerName,
+           lvz.IdLookupValue AS IdZone, lvz.Value AS Region
+           
+    FROM emdep_geos.action_plans ap
+    INNER JOIN FinalFilteredAPs f ON ap.IdActionPlan = f.IdActionPlan
+    INNER JOIN emdep_geos.companies com ON com.IdCompany = ap.IdLocation
+    INNER JOIN countries co ON co.idCountry = com.IdCountry
+    INNER JOIN emdep_geos.employees emp ON emp.IdEmployee = ap.IdResponsibleEmployee
+    INNER JOIN emdep_geos.lookup_values lv ON lv.IdLookupValue = ap.IdOrigin
+    LEFT JOIN emdep_geos.lookup_values lvap ON lvap.IdLookupValue = ap.IdBusinessUnit
+    LEFT JOIN emdep_geos.users usr ON usr.IdUser = ap.CreatedBy
+    INNER JOIN departments lvDep ON lvDep.IdDepartment = ap.IdDepartment
+    LEFT JOIN geos.sites si ON si.IdSite = ap.IdSite
+    LEFT JOIN geos.customers cus ON cus.IdCustomer = si.IdCustomer
+    LEFT JOIN geos.countries cor ON cor.IdCountry = si.IdCountry
+    LEFT JOIN emdep_geos.lookup_values lvz ON cor.IdRegion = lvz.IdLookupValue
+    LEFT JOIN Counts_General cg ON cg.IdActionPlan = ap.IdActionPlan
+    
+    ORDER BY ap.Code ASC;
+
+END$$
+DELIMITER ;

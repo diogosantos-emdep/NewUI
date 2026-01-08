@@ -12190,6 +12190,125 @@ namespace Emdep.Geos.Data.BusinessLogic
             }
             return email;
         }
+
+        // Cola isto dentro da classe APMManager
+
+        public Emdep.Geos.Services.Contracts.ActionPlanDetailsData GetActionPlanDetails(
+            string connectionString, 
+            int idActionPlan,
+            string filterLocation = null,
+            string filterResponsible = null,
+            string filterBusinessUnit = null,
+            string filterOrigin = null,
+            string filterDepartment = null,
+            string filterCustomer = null,
+            string alertFilter = null,
+            string filterTheme = null)
+        {
+            var result = new Emdep.Geos.Services.Contracts.ActionPlanDetailsData
+            {
+                Tasks = new List<Emdep.Geos.Data.Common.APM.APMActionPlanTask>(),
+                SubTasks = new List<Emdep.Geos.Data.Common.APM.APMActionPlanSubTask>()
+            };
+
+            using (var con = new System.Data.SqlClient.SqlConnection(connectionString))
+            {
+                using (var cmd = new System.Data.SqlClient.SqlCommand("APM_GetActionPlanDetailsPT", con))
+                {
+                    cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("_IdActionPlan", idActionPlan);
+
+                    // Dropdown Filters
+                    cmd.Parameters.AddWithValue("_FilterLocation", string.IsNullOrEmpty(filterLocation) ? (object)DBNull.Value : filterLocation);
+                    cmd.Parameters.AddWithValue("_FilterResponsible", string.IsNullOrEmpty(filterResponsible) ? (object)DBNull.Value : filterResponsible);
+                    cmd.Parameters.AddWithValue("_FilterBusinessUnit", string.IsNullOrEmpty(filterBusinessUnit) ? (object)DBNull.Value : filterBusinessUnit);
+                    cmd.Parameters.AddWithValue("_FilterOrigin", string.IsNullOrEmpty(filterOrigin) ? (object)DBNull.Value : filterOrigin);
+                    cmd.Parameters.AddWithValue("_FilterDepartment", string.IsNullOrEmpty(filterDepartment) ? (object)DBNull.Value : filterDepartment);
+                    cmd.Parameters.AddWithValue("_FilterCustomer", string.IsNullOrEmpty(filterCustomer) ? (object)DBNull.Value : filterCustomer);
+
+                    // Alert & Theme Filters
+                    cmd.Parameters.AddWithValue("_AlertFilter", string.IsNullOrEmpty(alertFilter) ? (object)DBNull.Value : alertFilter);
+                    cmd.Parameters.AddWithValue("_FilterTheme", string.IsNullOrEmpty(filterTheme) ? (object)DBNull.Value : filterTheme);
+
+                    con.Open();
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        // --- 1. LER TASKS (Result Set 1) ---
+                        // 1. LER TASKS
+                        while (reader.Read())
+                        {
+                            var task = new Emdep.Geos.Data.Common.APM.APMActionPlanTask
+                            {
+                                IdActionPlanTask = Convert.ToInt64(reader["IdActionPlanTask"]),
+
+                                IdParent = reader["IdParent"] != DBNull.Value ? Convert.ToInt64(reader["IdParent"]) : 0,
+
+                                TaskNumber = Convert.ToInt32(reader["TaskNumber"]),
+                                Title = reader["Title"].ToString(),
+                                Description = reader["Description"] != DBNull.Value ? reader["Description"].ToString() : "",
+
+                                IdLookupStatus = Convert.ToInt32(reader["IdLookupStatus"]),
+                                Status = reader["Status"].ToString(),
+
+                                StatusHtmlColor = reader["StatusHTMLColor"] != DBNull.Value ? reader["StatusHTMLColor"].ToString() : "",
+                                IdLocation = reader["IdLocation"] != DBNull.Value ? Convert.ToInt32(reader["IdLocation"]) : 0,
+
+                                IdLookupPriority = Convert.ToInt32(reader["IdPriority"]), 
+                                Priority = reader["Priority"].ToString(),
+
+                                IdLookupTheme = Convert.ToInt32(reader["IdTheme"]),
+                                Theme = reader["Theme"].ToString(),
+
+                                CreatedIn = Convert.ToDateTime(reader["CreatedIn"]),
+                                DueDate = Convert.ToDateTime(reader["DueDate"]),
+
+                                Responsible = reader["Responsible"].ToString(),
+
+                                CommentsCount = Convert.ToInt32(reader["CommentsCount"]),
+                                FileCount = Convert.ToInt32(reader["FileCount"]),
+                                Progress = Convert.ToInt32(reader["Progress"]),
+                                IdActionPlan = Convert.ToInt64(reader["IdActionPlan"])
+                            };
+
+                            result.Tasks.Add(task);
+                        }
+
+                        if (reader.NextResult())
+                        {
+                            while (reader.Read())
+                            {
+                                result.SubTasks.Add(new Emdep.Geos.Data.Common.APM.APMActionPlanSubTask
+                                {
+                                    IdActionPlanTask = Convert.ToInt64(reader["IdActionPlanTask"]),
+                                    IdParent = Convert.ToInt64(reader["IdParent"]), // Subtasks têm sempre pai
+                                    TaskNumber = Convert.ToInt32(reader["TaskNumber"]),
+                                    Title = reader["Title"] != DBNull.Value ? reader["Title"].ToString() : "", // As vezes titulo vem null na subtask
+                                    Description = reader["Description"] != DBNull.Value ? reader["Description"].ToString() : "",
+
+                                    IdLookupStatus = Convert.ToInt32(reader["IdLookupStatus"]),
+                                    Status = reader["Status"].ToString(),
+                                    StatusHtmlColor = reader["StatusHTMLColor"] != DBNull.Value ? reader["StatusHTMLColor"].ToString() : "",
+
+                                    IdLookupPriority = Convert.ToInt32(reader["IdPriority"]),
+                                    Priority = reader["Priority"].ToString(),
+
+                                    IdLookupTheme = Convert.ToInt32(reader["IdTheme"]),
+                                    Theme = reader["Theme"].ToString(),
+
+                                    CreatedIn = Convert.ToDateTime(reader["CreatedIn"]),
+                                    DueDate = Convert.ToDateTime(reader["DueDate"]),
+
+                                    Responsible = reader["Responsible"].ToString()
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+            return result;
+        }
+
+
         //[shweta.thube][GEOS2-8066]
         public APMActionPlanTask GetToPersonMail_V2650(string connectionString, Int64 toPersonEmailID)
         {
@@ -20955,12 +21074,21 @@ namespace Emdep.Geos.Data.BusinessLogic
             return actionPlanList;
         }
 
-        public List<APMActionPlanModern> GetActionPlanDetails_WithCounts(string connectionString, string selectedPeriod, Int32 idUser, string countryIconFilePath, string filterAlert = null, string filterTheme = null)
+        public List<APMActionPlanModern> GetActionPlanDetails_WithCounts(
+            string connectionString, 
+            string selectedPeriod, 
+            Int32 idUser, 
+            string countryIconFilePath, 
+            string filterLocation = null,
+            string filterResponsible = null,
+            string filterBusinessUnit = null,
+            string filterOrigin = null,
+            string filterDepartment = null,
+            string filterCustomer = null,
+            string alertFilter = null,
+            string filterTheme = null)
         {
             List<APMActionPlanModern> actionPlanList = new List<APMActionPlanModern>();
-            // Dicionários para montagem rápida da hierarquia
-            var planDictionary = new Dictionary<long, APMActionPlanModern>();
-            var taskDictionary = new Dictionary<long, APMActionPlanTask>();
 
             try
             {
@@ -20969,40 +21097,52 @@ namespace Emdep.Geos.Data.BusinessLogic
                     con.Open();
                     MySqlCommand mySqlCommand = new MySqlCommand("APM_GetActionPlanDetails_WithCounts", con);
                     mySqlCommand.CommandType = CommandType.StoredProcedure;
+
                     mySqlCommand.Parameters.AddWithValue("_SelectedPeriod", selectedPeriod);
                     mySqlCommand.Parameters.AddWithValue("_iduser", idUser);
-                    // Novos Parâmetros de Filtro
-                    mySqlCommand.Parameters.AddWithValue("_FilterAlertStatus", string.IsNullOrEmpty(filterAlert) ? (object)DBNull.Value : filterAlert);
+
+                    // Dropdown Filters (CSV strings ou NULL)
+                    mySqlCommand.Parameters.AddWithValue("_FilterLocation", string.IsNullOrEmpty(filterLocation) ? (object)DBNull.Value : filterLocation);
+                    mySqlCommand.Parameters.AddWithValue("_FilterResponsible", string.IsNullOrEmpty(filterResponsible) ? (object)DBNull.Value : filterResponsible);
+                    mySqlCommand.Parameters.AddWithValue("_FilterBusinessUnit", string.IsNullOrEmpty(filterBusinessUnit) ? (object)DBNull.Value : filterBusinessUnit);
+                    mySqlCommand.Parameters.AddWithValue("_FilterOrigin", string.IsNullOrEmpty(filterOrigin) ? (object)DBNull.Value : filterOrigin);
+                    mySqlCommand.Parameters.AddWithValue("_FilterDepartment", string.IsNullOrEmpty(filterDepartment) ? (object)DBNull.Value : filterDepartment);
+                    mySqlCommand.Parameters.AddWithValue("_FilterCustomer", string.IsNullOrEmpty(filterCustomer) ? (object)DBNull.Value : filterCustomer);
+
+                    // Alert Filter (single value ou NULL)
+                    mySqlCommand.Parameters.AddWithValue("_AlertFilter", string.IsNullOrEmpty(alertFilter) ? (object)DBNull.Value : alertFilter);
+
+                    // Side Filter (Theme)
                     mySqlCommand.Parameters.AddWithValue("_FilterTheme", string.IsNullOrEmpty(filterTheme) ? (object)DBNull.Value : filterTheme);
 
                     using (MySqlDataReader rdr = mySqlCommand.ExecuteReader())
                     {
-                        // ==========================================================
-                        // 1. LER ACTION PLANS (Tabela 0)
-                        // ==========================================================
+
                         while (rdr.Read())
                         {
                             APMActionPlanModern actionPlan = new APMActionPlanModern();
 
-                            // Mapeamento Básico
                             if (rdr["IdActionPlan"] != DBNull.Value) actionPlan.IdActionPlan = Convert.ToInt64(rdr["IdActionPlan"]);
                             if (rdr["Code"] != DBNull.Value) actionPlan.Code = Convert.ToString(rdr["Code"]);
+
                             if (rdr["Description"] != DBNull.Value) actionPlan.Description = Convert.ToString(rdr["Description"]);
 
-                            // ... (Mapeamentos existentes de Location, Responsible, etc.) ...
-                            if (rdr["IdCompany"] != DBNull.Value) actionPlan.IdCompany = Convert.ToInt32(rdr["IdCompany"]);
-                            if (rdr["Location"] != DBNull.Value) actionPlan.Location = Convert.ToString(rdr["Location"]);
-                            if (rdr["Responsible"] != DBNull.Value) actionPlan.Responsible = Convert.ToString(rdr["Responsible"]); else actionPlan.Responsible = string.Empty;
-
-                            // Country & Icon
-                            if (rdr["Country"] != DBNull.Value)
+                            if (rdr["IdCompany"] != DBNull.Value)
                             {
-                                actionPlan.CountryName = Convert.ToString(rdr["Country"]);
+                                actionPlan.IdCompany = Convert.ToInt32(rdr["IdCompany"]);
+                                actionPlan.IdLocation = actionPlan.IdCompany; // <--- ADICIONA ISTO para o Frontend não falhar
+                            }
+                            if (rdr["Location"] != DBNull.Value) actionPlan.Location = Convert.ToString(rdr["Location"]);
+
+                            if (rdr["Responsible"] != DBNull.Value) actionPlan.Responsible = Convert.ToString(rdr["Responsible"]);
+                            else actionPlan.Responsible = string.Empty;
+
+                            if (rdr["CountryIso"] != DBNull.Value)
+                            {
                                 actionPlan.CountryIso = Convert.ToString(rdr["CountryIso"]);
                                 actionPlan.CountryIconUrl = "https://api.emdep.com/GEOS/Images?FilePath=/Images/Countries/" + actionPlan.CountryIso + ".png";
                             }
 
-                            // User Details
                             if (rdr["EmployeeCode"] != DBNull.Value) actionPlan.EmployeeCode = Convert.ToString(rdr["EmployeeCode"]);
                             if (rdr["IdUser"] != DBNull.Value) actionPlan.ResponsibleIdUser = Convert.ToInt32(rdr["IdUser"]);
                             if (rdr["IdEmployee"] != DBNull.Value) actionPlan.IdEmployee = Convert.ToInt32(rdr["IdEmployee"]);
@@ -21010,29 +21150,19 @@ namespace Emdep.Geos.Data.BusinessLogic
                             if (rdr["LastName"] != DBNull.Value) actionPlan.LastName = Convert.ToString(rdr["LastName"]);
                             if (rdr["IdGender"] != DBNull.Value) actionPlan.IdGender = Convert.ToInt16(rdr["IdGender"]);
 
-                            // Origin & Business Unit
                             if (rdr["IdLookupValue"] != DBNull.Value) actionPlan.IdLookupOrigin = Convert.ToInt32(rdr["IdLookupValue"]);
                             if (rdr["Origin"] != DBNull.Value) actionPlan.Origin = Convert.ToString(rdr["Origin"]);
                             if (rdr["IdBusinessUnit"] != DBNull.Value) actionPlan.IdLookupBusinessUnit = Convert.ToInt32(rdr["IdBusinessUnit"]);
                             if (rdr["BusinessUnit"] != DBNull.Value) actionPlan.BusinessUnit = Convert.ToString(rdr["BusinessUnit"]);
                             if (rdr["BusinessUnitHtmlColor"] != DBNull.Value) actionPlan.BusinessUnitHTMLColor = Convert.ToString(rdr["BusinessUnitHtmlColor"]);
 
-                            // Counts (Stats)
                             if (rdr["TotalActionItems"] != DBNull.Value) actionPlan.TotalActionItems = Convert.ToInt16(rdr["TotalActionItems"]);
                             if (rdr["TotalOpenItems"] != DBNull.Value) actionPlan.TotalOpenItems = Convert.ToInt16(rdr["TotalOpenItems"]);
                             if (rdr["TotalClosedItems"] != DBNull.Value) actionPlan.TotalClosedItems = Convert.ToInt16(rdr["TotalClosedItems"]);
 
-                            // Stats extra
                             if (rdr["Stat_Overdue15"] != DBNull.Value) actionPlan.Stat_Overdue15 = Convert.ToInt32(rdr["Stat_Overdue15"]);
                             if (rdr["Stat_HighPriorityOverdue"] != DBNull.Value) actionPlan.Stat_HighPriorityOverdue = Convert.ToInt32(rdr["Stat_HighPriorityOverdue"]);
-                            if (rdr["Stat_MaxDueDays"] != DBNull.Value) actionPlan.Stat_MaxDueDays = Convert.ToInt32(rdr["Stat_MaxDueDays"]);
-                            if (rdr["Stat_ThemesList"] != DBNull.Value) actionPlan.Stat_ThemesList = Convert.ToString(rdr["Stat_ThemesList"]); else actionPlan.Stat_ThemesList = string.Empty;
 
-                            // --- NOVOS CAMPOS AGREGADOS (Importante para os Filtros) ---
-                            if (rdr["ThemeAggregates"] != DBNull.Value) actionPlan.ThemeAggregates = Convert.ToString(rdr["ThemeAggregates"]); else actionPlan.ThemeAggregates = string.Empty;
-                            if (rdr["StatusAggregates"] != DBNull.Value) actionPlan.StatusAggregates = Convert.ToString(rdr["StatusAggregates"]); else actionPlan.StatusAggregates = string.Empty;
-
-                            // Meta Info
                             if (rdr["CreatedBy"] != DBNull.Value) actionPlan.CreatedBy = Convert.ToInt16(rdr["CreatedBy"]);
                             if (rdr["CreatedByName"] != DBNull.Value) actionPlan.CreatedByName = Convert.ToString(rdr["CreatedByName"]);
                             if (rdr["CreatedIn"] != DBNull.Value) actionPlan.CreatedIn = Convert.ToDateTime(rdr["CreatedIn"]);
@@ -21040,74 +21170,28 @@ namespace Emdep.Geos.Data.BusinessLogic
                             if (rdr["OriginDescription"] != DBNull.Value) actionPlan.OriginDescription = Convert.ToString(rdr["OriginDescription"]);
                             if (rdr["ActionPlanResponsibleDisplayName"] != DBNull.Value) actionPlan.ActionPlanResponsibleDisplayName = Convert.ToString(rdr["ActionPlanResponsibleDisplayName"]);
 
-                            // Grouping / Site Info
                             if (rdr["IdSite"] != DBNull.Value) actionPlan.IdSite = Convert.ToInt32(rdr["IdSite"]);
                             if (rdr["CustomerName"] != DBNull.Value) actionPlan.Group = Convert.ToString(rdr["CustomerName"]);
                             if (rdr["SiteName"] != DBNull.Value) { actionPlan.Site = Convert.ToString(rdr["SiteName"]); actionPlan.GroupName = actionPlan.Group + " " + "(" + actionPlan.Site + ")"; }
                             if (rdr["IdZone"] != DBNull.Value) actionPlan.IdZone = Convert.ToInt32(rdr["IdZone"]);
                             if (rdr["Region"] != DBNull.Value) actionPlan.Zone = Convert.ToString(rdr["Region"]);
 
-                            // Percentage Logic
-                            if (actionPlan.TotalActionItems != 0) actionPlan.Percentage = (int)(((float)actionPlan.TotalClosedItems / actionPlan.TotalActionItems) * 100);
-                            else actionPlan.Percentage = 0;
+                            if (actionPlan.TotalActionItems != 0)
+                                actionPlan.Percentage = (int)(((float)actionPlan.TotalClosedItems / actionPlan.TotalActionItems) * 100);
+                            else
+                                actionPlan.Percentage = 0;
 
                             if (actionPlan.Percentage <= 24) actionPlan.TotalClosedColor = "Red";
-                            else if (actionPlan.Percentage >= 25 && actionPlan.Percentage <= 49) actionPlan.TotalClosedColor = "Orange";
-                            else if (actionPlan.Percentage >= 50 && actionPlan.Percentage <= 74) actionPlan.TotalClosedColor = "Yellow";
-                            else if (actionPlan.Percentage >= 75 && actionPlan.Percentage <= 99) actionPlan.TotalClosedColor = "LightGreen";
-                            else if (actionPlan.Percentage == 100) actionPlan.TotalClosedColor = "Green";
+                            else if (actionPlan.Percentage <= 49) actionPlan.TotalClosedColor = "Orange";
+                            else if (actionPlan.Percentage <= 74) actionPlan.TotalClosedColor = "Yellow";
+                            else if (actionPlan.Percentage <= 99) actionPlan.TotalClosedColor = "LightGreen";
+                            else actionPlan.TotalClosedColor = "Green";
 
-                            // Inicializar lista de tasks
                             actionPlan.TaskList = new List<APMActionPlanTask>();
 
-                            // Adicionar à lista principal e ao dicionário
                             actionPlanList.Add(actionPlan);
-                            if (!planDictionary.ContainsKey(actionPlan.IdActionPlan))
-                                planDictionary.Add(actionPlan.IdActionPlan, actionPlan);
                         }
 
-                        // ==========================================================
-                        // 2. LER TASKS (Tabela 1) - Se existirem
-                        // ==========================================================
-                        if (rdr.NextResult())
-                        {
-                            while (rdr.Read())
-                            {
-                                var task = MapTaskFromReader(rdr); // Helper method ou código inline
-
-                                // Encontrar o pai (Action Plan) e adicionar
-                                if (task.IdActionPlan > 0 && planDictionary.ContainsKey(task.IdActionPlan))
-                                {
-                                    var parent = planDictionary[task.IdActionPlan];
-                                    parent.TaskList.Add(task);
-
-                                    // Adicionar ao dicionário de tasks para as subtasks usarem depois
-                                    if (!taskDictionary.ContainsKey(task.IdActionPlanTask))
-                                        taskDictionary.Add(task.IdActionPlanTask, task);
-                                }
-                            }
-                        }
-
-                        // ==========================================================
-                        // 3. LER SUB-TASKS (Tabela 2) - Se existirem
-                        // ==========================================================
-                        if (rdr.NextResult())
-                        {
-                            while (rdr.Read())
-                            {
-                                var subTask = MapTaskFromReader(rdr);
-
-                                // CORREÇÃO: IdParent é long, verificamos se é > 0 em vez de .HasValue
-                                if (subTask.IdParent > 0 && taskDictionary.ContainsKey(subTask.IdParent))
-                                {
-                                    var parentTask = taskDictionary[subTask.IdParent]; // CORREÇÃO: Removemos o .Value
-
-                                    // Requer a Opção A (propriedade SubTasks na classe)
-                                    if (parentTask.SubTasks == null) parentTask.SubTasks = new List<APMActionPlanTask>();
-                                    parentTask.SubTasks.Add(subTask);
-                                }
-                            }
-                        }
                     }
                 }
             }

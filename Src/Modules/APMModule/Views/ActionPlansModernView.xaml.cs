@@ -1,5 +1,7 @@
 using DevExpress.Xpf.Grid;
+using Emdep.Geos.Data.Common;
 using Emdep.Geos.Modules.APM.ViewModels;
+using Prism.Logging;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -27,24 +29,54 @@ namespace Emdep.Geos.Modules.APM.Views
         /// </summary>
         public async void RowDetails_Loaded(object sender, RoutedEventArgs e)
         {
-            if (sender is FrameworkElement element)
+            try
             {
-                // Handle ActionPlan expansion
-                if (element.DataContext is EditGridCellData cellData && cellData.Row is ActionPlanModernDto actionPlan)
+                if (sender is FrameworkElement element)
                 {
-                    if (ViewModel != null && actionPlan.IsExpanded)
+                    // Handle ActionPlan expansion
+                    if (element.DataContext is EditGridCellData cellData && cellData.Row is ActionPlanModernDto actionPlan)
                     {
-                        await ViewModel.LoadTasksForActionPlanAsync(actionPlan);
+                        Emdep.Geos.UI.Common.GeosApplication.Instance.Logger?.Log(
+                            $"[RowDetails_Loaded] ActionPlan={actionPlan.Code}, IsExpanded={actionPlan.IsExpanded}, TasksCount={actionPlan.TasksCount}",
+                            Category.Info,
+                            Priority.Low);
+
+                        // SÓ carregar se IsExpanded=true (evitar carregamento prematuro quando Loaded é chamado ao renderizar a grid)
+                        if (ViewModel != null && actionPlan.IsExpanded && (actionPlan.Tasks == null || actionPlan.Tasks.Count == 0))
+                        {
+                            await ViewModel.LoadTasksForActionPlanAsync(actionPlan);
+                        }
+                    }
+                    // Handle Task expansion (for sub-tasks)
+                    else if (element.DataContext is ActionPlanTaskModernDto task)
+                    {
+                        Emdep.Geos.UI.Common.GeosApplication.Instance.Logger?.Log(
+                            $"[RowDetails_Loaded] Task={task.TaskNumber}, IsExpanded={task.IsExpanded}, TotalSubTasks={task.TotalSubTasks}",
+                            Category.Info,
+                            Priority.Low);
+
+                        // SÓ carregar se IsExpanded=true
+                        if (ViewModel != null && task.IsExpanded && (task.SubTasks == null || task.SubTasks.Count == 0))
+                        {
+                            await ViewModel.LoadSubTasksForTaskAsync(task);
+                        }
+                    }
+                    else
+                    {
+                        // Carregamento prematuro (antes de expandir) - ignorar
+                        Emdep.Geos.UI.Common.GeosApplication.Instance.Logger?.Log(
+                            $"[RowDetails_Loaded] Ignored - DataContext type: {element.DataContext?.GetType().Name}, not expanded yet",
+                            Category.Debug,
+                            Priority.Low);
                     }
                 }
-                // Handle Task expansion (for sub-tasks)
-                else if (element.DataContext is ActionPlanTaskModernDto task)
-                {
-                    if (ViewModel != null && task.IsExpanded)
-                    {
-                        await ViewModel.LoadSubTasksForTaskAsync(task);
-                    }
-                }
+            }
+            catch (System.Exception ex)
+            {
+                Emdep.Geos.UI.Common.GeosApplication.Instance.Logger?.Log(
+                    $"[RowDetails_Loaded] EXCEPTION: {ex.Message}\n{ex.StackTrace}",
+                    Category.Exception,
+                    Priority.High);
             }
         }
 

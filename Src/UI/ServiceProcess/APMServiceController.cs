@@ -291,6 +291,7 @@ namespace Emdep.Geos.UI.ServiceProcess
         }
 
 
+
         //[Sudhir.Jangra][GEOS2-5971]
 
         public List<Company> GetAuthorizedLocationListByIdUser_V2550(int idUser)
@@ -12321,7 +12322,17 @@ namespace Emdep.Geos.UI.ServiceProcess
                     factory.Close();
             }
         }
-        public List<APMActionPlanModern> GetActionPlanDetails_WithCounts(string selectedPeriod, int userId, string filterAlert = null, string filterTheme = null)
+        public List<APMActionPlanModern> GetActionPlanDetails_WithCounts(
+            string selectedPeriod, 
+            int userId, 
+            string filterLocation = null,
+            string filterResponsible = null,
+            string filterBusinessUnit = null,
+            string filterOrigin = null,
+            string filterDepartment = null,
+            string filterCustomer = null,
+            string alertFilter = null,
+            string filterTheme = null)
         {
             try
             {
@@ -12339,9 +12350,19 @@ namespace Emdep.Geos.UI.ServiceProcess
                     }
                 }
 
-                // 2. Criar o Canal e Chamar o Serviço
+                // 2. Criar o Canal e Chamar o Serviço com TODOS os filtros
                 IAPMService channel = factory.CreateChannel();
-                return channel.GetActionPlanDetails_WithCounts(selectedPeriod, userId, filterAlert, filterTheme);
+                return channel.GetActionPlanDetails_WithCounts(
+                    selectedPeriod, 
+                    userId, 
+                    filterLocation, 
+                    filterResponsible, 
+                    filterBusinessUnit, 
+                    filterOrigin, 
+                    filterDepartment, 
+                    filterCustomer, 
+                    alertFilter, 
+                    filterTheme);
             }
             catch (FaultException<ServiceException> faultEx)
             {
@@ -12359,7 +12380,110 @@ namespace Emdep.Geos.UI.ServiceProcess
                 throw new ServiceUnexceptedException(ServiceExceptionType.UnknownException, unknownProblem.Message, unknownProblem.InnerException, unknownProblem.Source);
             }
         }
+        public ActionPlanDetailsData GetActionPlanDetails(int idActionPlan)
+        {
+            try
+            {
+                // 1. Verificar e Inicializar a Factory (Cópia exata do método de cima)
+                if (factory == null || factory.State == CommunicationState.Faulted || factory.State == CommunicationState.Closed)
+                {
+                    factory = new ChannelFactory<IAPMService>(binding, endPointAddress);
 
+                    // Configurar comportamentos para evitar erros de limite de dados
+                    foreach (OperationDescription op in factory.Endpoint.Contract.Operations)
+                    {
+                        DataContractSerializerOperationBehavior dataContractBehavior = op.Behaviors.Find<DataContractSerializerOperationBehavior>();
+                        if (dataContractBehavior != null)
+                            dataContractBehavior.MaxItemsInObjectGraph = 2147483647;
+                    }
+                }
+
+                // 2. Criar a variável 'channel' manualmente
+                IAPMService channel = factory.CreateChannel();
+
+                // 3. Agora sim, podes chamar o método usando a variável 'channel' que acabaste de criar
+                return channel.GetActionPlanDetails(idActionPlan);
+            }
+            catch (FaultException<ServiceException> faultEx)
+            {
+                if (factory != null) factory.Abort();
+                throw;
+            }
+            catch (CommunicationException commProblem)
+            {
+                if (factory != null) factory.Abort();
+                // Ajusta esta exceção conforme o que usas no projeto (ServiceUnexceptedException ou outra)
+                throw new Exception("Communication Error: " + commProblem.Message);
+            }
+            catch (Exception unknownProblem)
+            {
+                if (factory != null) factory.Abort();
+                throw;
+            }
+        }
+
+        public List<APMActionPlanTask> GetTaskListByIdActionPlan_V2680PT(
+            long idActionPlan, 
+            string period, 
+            int userId,
+            string filterLocation = null,
+            string filterResponsible = null,
+            string filterBusinessUnit = null,
+            string filterOrigin = null,
+            string filterDepartment = null,
+            string filterCustomer = null,
+            string alertFilter = null,
+            string filterTheme = null)
+        {
+            try
+            {
+                // 1. Verificar e Inicializar a Factory (Padrão existente)
+                if (factory == null || factory.State == CommunicationState.Faulted || factory.State == CommunicationState.Closed)
+                {
+                    factory = new ChannelFactory<IAPMService>(binding, endPointAddress);
+
+                    // Configurar comportamentos para evitar erros de limite (MaxItemsInObjectGraph)
+                    foreach (OperationDescription op in factory.Endpoint.Contract.Operations)
+                    {
+                        DataContractSerializerOperationBehavior dataContractBehavior = op.Behaviors.Find<DataContractSerializerOperationBehavior>();
+                        if (dataContractBehavior != null)
+                            dataContractBehavior.MaxItemsInObjectGraph = 2147483647;
+                    }
+                }
+
+                // 2. Criar o Canal
+                IAPMService channel = factory.CreateChannel();
+
+                // 3. Chamar a nova versão PT (Performance Tuned) com TODOS os filtros
+                return channel.GetTaskListByIdActionPlan_V2680PT(
+                    idActionPlan, 
+                    period, 
+                    userId, 
+                    filterLocation, 
+                    filterResponsible, 
+                    filterBusinessUnit, 
+                    filterOrigin, 
+                    filterDepartment, 
+                    filterCustomer, 
+                    alertFilter, 
+                    filterTheme);
+            }
+            catch (FaultException<ServiceException> faultEx)
+            {
+                if (factory != null) factory.Abort();
+                throw;
+            }
+            catch (CommunicationException commProblem)
+            {
+                if (factory != null) factory.Abort();
+                throw new ServiceUnexceptedException(ServiceExceptionType.CommunicationException, commProblem.Message, commProblem.InnerException, commProblem.Source);
+            }
+            catch (Exception unknownProblem)
+            {
+                if (factory != null) factory.Abort();
+                throw new ServiceUnexceptedException(ServiceExceptionType.UnknownException, unknownProblem.Message, unknownProblem.InnerException, unknownProblem.Source);
+            }
+        }
     }
 }
 

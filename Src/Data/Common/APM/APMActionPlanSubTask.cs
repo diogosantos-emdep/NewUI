@@ -127,7 +127,17 @@ namespace Emdep.Geos.Data.Common.APM
                 OnPropertyChanged("IdActionPlanTask");
             }
         }
-
+        [NotMapped]
+        [DataMember]
+        public string StatusHtmlColor
+        {
+            get { return statusHTMLColor; }
+            set
+            {
+                statusHTMLColor = value;
+                OnPropertyChanged("StatusHtmlColor");
+            }
+        }
         [NotMapped]
         [DataMember]
         public Int32 TaskNumber

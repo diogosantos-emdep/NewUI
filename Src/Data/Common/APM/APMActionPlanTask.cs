@@ -1233,7 +1233,11 @@ namespace Emdep.Geos.Data.Common.APM
                 OnPropertyChanged("IsTaskAdded");
             }
         }
+        [DataMember]
+        public string StatusHtmlColor { get; set; } 
 
+        [DataMember]
+        public int IdLocation { get; set; } 
         //[pallavi.kale][GEOS2-7002]
         [NotMapped]
         [DataMember]

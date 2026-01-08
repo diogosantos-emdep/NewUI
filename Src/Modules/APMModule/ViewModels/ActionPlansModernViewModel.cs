@@ -52,6 +52,9 @@ namespace Emdep.Geos.Modules.APM.ViewModels
         private List<APMActionPlanModern> _allDataCache;
         private CancellationTokenSource _loadCancellationTokenSource;
         private CancellationTokenSource _searchCancellationTokenSource;
+        
+        // Flag para prevenir loop infinito quando dropdowns mudam
+        private bool _isRefreshing = false;
 
         // Cache inteligente: IdActionPlan -> List<Tasks>
         private readonly Dictionary<long, List<ActionPlanTaskModernDto>> _tasksCache;
@@ -155,9 +158,10 @@ namespace Emdep.Geos.Modules.APM.ViewModels
             get => _selectedLocation;
             set
             {
+                if (_isRefreshing) return; // Prevenir loop
                 _selectedLocation = value;
                 OnPropertyChanged(nameof(SelectedLocation));
-                ApplyInMemoryFiltersAsync();
+                _ = RefreshDataAsync(); // MODERNUI: Reload from SQL with filters
             }
         }
 
@@ -166,9 +170,10 @@ namespace Emdep.Geos.Modules.APM.ViewModels
             get => _selectedPerson;
             set
             {
+                if (_isRefreshing) return; // Prevenir loop
                 _selectedPerson = value;
                 OnPropertyChanged(nameof(SelectedPerson));
-                ApplyInMemoryFiltersAsync();
+                _ = RefreshDataAsync(); // MODERNUI: Reload from SQL with filters
             }
         }
 
@@ -177,9 +182,10 @@ namespace Emdep.Geos.Modules.APM.ViewModels
             get => _selectedBusinessUnit;
             set
             {
+                if (_isRefreshing) return; // Prevenir loop
                 _selectedBusinessUnit = value;
                 OnPropertyChanged(nameof(SelectedBusinessUnit));
-                ApplyInMemoryFiltersAsync();
+                _ = RefreshDataAsync(); // MODERNUI: Reload from SQL with filters
             }
         }
 
@@ -188,9 +194,10 @@ namespace Emdep.Geos.Modules.APM.ViewModels
             get => _selectedOrigin;
             set
             {
+                if (_isRefreshing) return; // Prevenir loop
                 _selectedOrigin = value;
                 OnPropertyChanged(nameof(SelectedOrigin));
-                ApplyInMemoryFiltersAsync();
+                _ = RefreshDataAsync(); // MODERNUI: Reload from SQL with filters
             }
         }
 
@@ -199,9 +206,10 @@ namespace Emdep.Geos.Modules.APM.ViewModels
             get => _selectedDepartment;
             set
             {
+                if (_isRefreshing) return; // Prevenir loop
                 _selectedDepartment = value;
                 OnPropertyChanged(nameof(SelectedDepartment));
-                ApplyInMemoryFiltersAsync();
+                _ = RefreshDataAsync(); // MODERNUI: Reload from SQL with filters
             }
         }
 
@@ -210,9 +218,10 @@ namespace Emdep.Geos.Modules.APM.ViewModels
             get => _selectedCustomer;
             set
             {
+                if (_isRefreshing) return; // Prevenir loop
                 _selectedCustomer = value;
                 OnPropertyChanged(nameof(SelectedCustomer));
-                ApplyInMemoryFiltersAsync();
+                _ = RefreshDataAsync(); // MODERNUI: Reload from SQL with filters
             }
         }
 
@@ -638,14 +647,14 @@ namespace Emdep.Geos.Modules.APM.ViewModels
 
         private async Task LoadActionPlansPageAsync()
         {
-            // [FIX LOOP 1] Impede re-entradas se já estiver a carregar (Evita loop infinito no scroll)
+            // [FIX LOOP] Impede re-entradas se já estiver a carregar
             if (IsLoadingMore) return;
 
             try
             {
                 if (GeosApplication.Instance == null || GeosApplication.Instance.ActiveUser == null) return;
 
-                // Cancelar pedidos anteriores pendentes para poupar rede
+                // Cancelar pedidos anteriores
                 _loadCancellationTokenSource?.Cancel();
                 _loadCancellationTokenSource = new CancellationTokenSource();
                 var cancellationToken = _loadCancellationTokenSource.Token;
@@ -658,56 +667,86 @@ namespace Emdep.Geos.Modules.APM.ViewModels
                     _allDataCache = await Task.Run(() =>
                     {
                         // [LÓGICA DE ANOS]
-                        // Obtém o ano selecionado na UI (ex: 2025)
                         long selectedYear = DateTime.Now.Year;
                         if (APMCommon.Instance?.SelectedPeriod?.Count > 0)
                         {
                             selectedYear = APMCommon.Instance.SelectedPeriod.Cast<long>().FirstOrDefault();
                         }
 
-                        // Cria a string para o SQL: "2025,2024"
-                        // O SQL vai trazer: Tudo de 2025 + Tudo de 2024 + Tudo o que for mais antigo e estiver ABERTO
                         string period = $"{selectedYear},{selectedYear - 1}";
-
                         int userId = GeosApplication.Instance.ActiveUser.IdUser;
 
-                        // Filtros de Texto (Botões de Alerta e Tiles Laterais)
-                        string filterAlert = !string.IsNullOrEmpty(_lastAppliedAlertCaption) ? _lastAppliedAlertCaption : null;
-                        string filterTheme = null;
+                        // [MODERNUI - CONSTRUIR FILTROS SQL]
+                        // Passar NULL permite ao SQL filtrar diretamente (muito mais rápido)
+                        string filterLocation = BuildLocationFilter();
+                        string filterResponsible = BuildResponsibleFilter();
+                        string filterBusinessUnit = BuildBusinessUnitFilter();
+                        string filterOrigin = BuildOriginFilter();
+                        string filterDepartment = BuildDepartmentFilter();
+                        string filterCustomer = BuildCustomerFilter();
+                        string alertFilter = GetCurrentAlertFilter();
+                        string themeFilter = GetCurrentThemeFilter();
 
-                        if (_lastAppliedSideTileFilter != null && !IsAllCaption(_lastAppliedSideTileFilter.Caption))
-                        {
-                            filterTheme = _lastAppliedSideTileFilter.Caption;
-                        }
+                        GeosApplication.Instance.Logger?.Log(
+                            $"[LoadActionPlansAsync] Calling SP with filters: " +
+                            $"Location={filterLocation ?? "null"}, " +
+                            $"Responsible={filterResponsible ?? "null"}, " +
+                            $"BU={filterBusinessUnit ?? "null"}, " +
+                            $"Alert={alertFilter ?? "null"}, " +
+                            $"Theme={themeFilter ?? "null"}",
+                            Category.Info, Priority.Low);
 
-                        // [CONFIGURAÇÃO DE REDE] - IP do Slave/App Server correto
+                        // [CONFIGURAÇÃO DE REDE]
                         string ip = "10.13.3.33";
                         string port = "90";
-                        string path = ""; // Vazio porque o serviço está na raiz (:90/APMService.svc)
-
-                        // Instancia o controlador com os dados manuais (Ignora app.config)
+                        string path = "";
                         var localService = new APMServiceController(ip, port, path);
 
-                        return localService.GetActionPlanDetails_WithCounts(period, userId, filterAlert, filterTheme);
+                        return localService.GetActionPlanDetails_WithCounts(
+                            period, 
+                            userId, 
+                            filterLocation, 
+                            filterResponsible, 
+                            filterBusinessUnit, 
+                            filterOrigin, 
+                            filterDepartment, 
+                            filterCustomer, 
+                            alertFilter, 
+                            themeFilter);
 
                     }, cancellationToken);
 
-                    // Se a lista vier vazia ou nula, paramos aqui
+                    GeosApplication.Instance.Logger?.Log(
+                        $"[LoadActionPlansPageAsync] SP returned {(_allDataCache == null ? "NULL" : _allDataCache.Count + " Action Plans")}",
+                        Category.Info, Priority.Low);
+
+                    // Se vier vazio, sair
                     if (_allDataCache == null || _allDataCache.Count == 0)
                     {
+                        GeosApplication.Instance.Logger?.Log(
+                            "[LoadActionPlansPageAsync] NO ACTION PLANS RETURNED - Aborting",
+                            Category.Warn, Priority.Medium);
                         _hasMoreData = false;
-                        IsLoadingMore = false; // Importante libertar a flag
+                        IsLoadingMore = false;
                         return;
                     }
 
-                    // --- 2. SINCRONIZAÇÃO DA UI (Counts e Dropdowns) ---
-                    // Executamos na Thread Principal porque vamos mexer na UI
+                    // ==============================================================================
+                    // [CORREÇÃO CRÍTICA] Preencher a Lista Mestra de DTOs IMEDIATAMENTE
+                    // ==============================================================================
+                    // Isto garante que o ApplyFilters tem dados para trabalhar sem ir à BD
+                    _allActionPlansUnfiltered = _allDataCache.Select(MapToDto).Where(x => x != null).ToList();
+
+                    // --- 2. SINCRONIZAÇÃO DA UI ---
                     if (Application.Current != null)
                     {
                         Application.Current.Dispatcher.Invoke(() =>
                         {
-                            UpdateSideTileCounts(_allDataCache);
-                            UpdateAlertButtonCounts(_allDataCache);
+                            // Atualiza os contadores laterais usando a lista mestra
+                            UpdateSideTileCounts();
+                            UpdateAlertButtonCounts();
+
+                            // Se o método PopulateDropdownFilters esperar a lista original (APMActionPlanModern), usa o _allDataCache
                             PopulateDropdownFilters(_allDataCache);
                         });
                     }
@@ -717,50 +756,72 @@ namespace Emdep.Geos.Modules.APM.ViewModels
 
                 // --- 3. PAGINAÇÃO E VISUALIZAÇÃO NA GRID ---
 
-                // Verifica se há algum filtro visual aplicado
-                bool isFiltering = !string.IsNullOrEmpty(_lastAppliedAlertCaption) ||
-                                   (_lastAppliedSideTileFilter != null && !IsAllCaption(_lastAppliedSideTileFilter.Caption));
-
-                if (isFiltering)
+                // MODERNUI FIX: Se Theme ou Alert ativos, o SP JÁ FILTROU!
+                // NÃO aplicar filtros in-memory (ApplyFilters) porque o novo SP não retorna ThemeAggregates
+                bool hasSideTile = _lastAppliedSideTileFilter != null && !IsAllCaption(_lastAppliedSideTileFilter.Caption);
+                bool hasAlert = !string.IsNullOrWhiteSpace(_lastAppliedAlertCaption);
+                
+                if (hasSideTile || hasAlert)
                 {
-                    // Se estiver a filtrar, desligamos a paginação para mostrar todos os resultados filtrados
-                    _pageSize = 999999;
-                    if (_allDataCache.Count > 0) await PopulateAllTasksInCacheAsync();
-                }
-                else
-                {
-                    // Paginação normal
-                    _pageSize = 50;
-                }
-
-                var skip = _currentPage * _pageSize;
-                var pagedData = _allDataCache.Skip(skip).Take(_pageSize).ToList();
-                var dtos = pagedData.Select(MapToDto).Where(dto => dto != null).ToList();
-
-                // Adiciona os itens à lista observável da Grid
-                if (Application.Current != null)
-                {
-                    Application.Current.Dispatcher.Invoke(() =>
+                    // Theme/Alert: SP já filtrou, apenas mostrar tudo (sem paginação)
+                    GeosApplication.Instance.Logger?.Log(
+                        $"[LoadActionPlansPageAsync] Theme/Alert active - showing all {_allActionPlansUnfiltered.Count} APs returned by SP",
+                        Category.Info, Priority.Low);
+                    
+                    if (Application.Current != null)
                     {
-                        foreach (var dto in dtos)
+                        Application.Current.Dispatcher.Invoke(() =>
                         {
-                            if (isFiltering) dto.IsExpanded = true;
-                            ActionPlans.Add(dto);
-                        }
-                    });
-                }
-
-                _currentPage++;
-
-                // [FIX LOOP 2] Cálculo correto de 'HasMoreData' para impedir scroll infinito desnecessário
-                if (isFiltering)
-                {
+                            foreach (var dto in _allActionPlansUnfiltered)
+                            {
+                                ActionPlans.Add(dto);
+                            }
+                        });
+                    }
                     _hasMoreData = false;
                 }
                 else
                 {
-                    // Só dizemos que há mais dados se a página atual veio cheia E ainda sobraram itens no cache
-                    _hasMoreData = (pagedData.Count == _pageSize) && (_allDataCache.Count > (skip + pagedData.Count));
+                    // Verifica se há filtros de DROPDOWN ativos
+                    bool hasDropdowns = (SelectedLocation != null && SelectedLocation.Count > 0) ||
+                                        (SelectedPerson != null && SelectedPerson.Count > 0) ||
+                                        (SelectedBusinessUnit != null && SelectedBusinessUnit.Count > 0) ||
+                                        (SelectedOrigin != null && SelectedOrigin.Count > 0) ||
+                                        (SelectedDepartment != null && SelectedDepartment.Count > 0) ||
+                                        (SelectedCustomer != null && SelectedCustomer.Count > 0);
+
+                    if (hasDropdowns)
+                    {
+                        // [MODO FILTRO DROPDOWN] Mostra tudo o que corresponder (sem paginação)
+                        _pageSize = 999999;
+                        ApplyFilters(); // Este método vai preencher a ActionPlans
+                        _hasMoreData = false;
+                    }
+                    else
+                    {
+                        // [MODO PAGINAÇÃO] Mostra em blocos de 50
+                        _pageSize = 50;
+                        var skip = _currentPage * _pageSize;
+
+                        // Paginar sobre a lista mestra de DTOs
+                        var pagedDtos = _allActionPlansUnfiltered.Skip(skip).Take(_pageSize).ToList();
+
+                        if (Application.Current != null)
+                        {
+                            Application.Current.Dispatcher.Invoke(() =>
+                            {
+                                foreach (var dto in pagedDtos)
+                                {
+                                    ActionPlans.Add(dto);
+                                }
+                            });
+                        }
+
+                        _currentPage++;
+
+                        // Verificar se ainda há mais dados para scroll
+                        _hasMoreData = (pagedDtos.Count == _pageSize) && (_allActionPlansUnfiltered.Count > (skip + pagedDtos.Count));
+                    }
                 }
             }
             catch (Exception ex)
@@ -782,93 +843,200 @@ namespace Emdep.Geos.Modules.APM.ViewModels
         /// </summary>
         public async Task LoadTasksForActionPlanAsync(ActionPlanModernDto actionPlan)
         {
-            if (actionPlan == null) return;
+            GeosApplication.Instance.Logger?.Log($"[LoadTasksForActionPlanAsync] INÍCIO - ActionPlan {actionPlan?.Code}", Category.Info, Priority.Low);
 
-            // Se já tem tasks carregadas, não recarregar
-            if (actionPlan.Tasks != null && actionPlan.Tasks.Count > 0) return;
+            // 1. Validações Iniciais
+            if (actionPlan == null)
+            {
+                GeosApplication.Instance.Logger?.Log($"[LoadTasksForActionPlanAsync] ActionPlan is NULL - ABORTING", Category.Info, Priority.Low);
+                return;
+            }
+
+            if (actionPlan.IsLoadingTasks)
+            {
+                GeosApplication.Instance.Logger?.Log($"[LoadTasksForActionPlanAsync] Already loading for {actionPlan.Code} - ABORTING", Category.Info, Priority.Low);
+                return;
+            }
+
+            // Se já tem tasks carregadas, não recarregar (evita chamadas redundantes)
+            if (actionPlan.Tasks != null && actionPlan.Tasks.Count > 0)
+            {
+                GeosApplication.Instance.Logger?.Log($"[LoadTasksForActionPlanAsync] {actionPlan.Code} já tem {actionPlan.Tasks.Count} tasks carregadas - ABORTING", Category.Info, Priority.Low);
+                return;
+            }
 
             try
             {
+                GeosApplication.Instance.Logger?.Log($"[LoadTasksForActionPlanAsync] {actionPlan.Code} - Setting IsLoadingTasks = true", Category.Info, Priority.Low);
                 actionPlan.IsLoadingTasks = true;
 
-                // Verificar cache primeiro
-                List<ActionPlanTaskModernDto> taskDtos;
-                lock (_cacheLock)
+                // 2. Preparar Parâmetros
+                string period = DateTime.Now.Year.ToString();
+                if (APMCommon.Instance?.SelectedPeriod != null && APMCommon.Instance.SelectedPeriod.Count > 0)
                 {
-                    if (_tasksCache.ContainsKey(actionPlan.IdActionPlan))
+                    period = APMCommon.Instance.SelectedPeriod.Cast<long>().FirstOrDefault().ToString();
+                }
+                int userId = GeosApplication.Instance.ActiveUser.IdUser;
+
+                // 3. Chamada ao Serviço (Executado em Thread Secundária)
+                List<APMActionPlanTask> tasksEntityList = null;
+
+                try
+                {
+                    // Tentativa preferencial: V2680PT
+                    GeosApplication.Instance.Logger?.Log($"[LoadTasksForActionPlanAsync] {actionPlan.Code} - Attempting GetTaskListByIdActionPlan_V2680PT", Category.Info, Priority.Low);
+
+                    tasksEntityList = await Task.Run(() => _apmService.GetTaskListByIdActionPlan_V2680PT(
+                        actionPlan.IdActionPlan,
+                        period,
+                        userId,
+                        null, null, null, null, null, null, null, null // Filtros a null para trazer tudo deste plano
+                    ));
+
+                    GeosApplication.Instance.Logger?.Log($"[LoadTasksForActionPlanAsync] {actionPlan.Code} - V2680PT returned: {(tasksEntityList == null ? "NULL" : tasksEntityList.Count + " tasks")}", Category.Info, Priority.Low);
+                }
+                catch (Exception exPT)
+                {
+                    // Fallback para V2680 se o novo endpoint falhar
+                    GeosApplication.Instance.Logger?.Log($"[LoadTasksForActionPlanAsync] {actionPlan.Code} - V2680PT failed: {exPT.Message}. Falling back to V2680.", Category.Warn, Priority.Medium);
+
+                    try
                     {
-                        taskDtos = _tasksCache[actionPlan.IdActionPlan];
-                        actionPlan.Tasks = new ObservableCollection<ActionPlanTaskModernDto>(taskDtos);
-                        return;
+                        tasksEntityList = await Task.Run(() => _apmService.GetTaskListByIdActionPlan_V2680(actionPlan.IdActionPlan, period, userId));
+                        GeosApplication.Instance.Logger?.Log($"[LoadTasksForActionPlanAsync] {actionPlan.Code} - V2680 fallback returned tasks", Category.Info, Priority.Low);
+                    }
+                    catch (Exception exV2680)
+                    {
+                        GeosApplication.Instance.Logger?.Log($"[LoadTasksForActionPlanAsync] {actionPlan.Code} - V2680 fallback also failed: {exV2680.Message}", Category.Exception, Priority.High);
+                        throw;
                     }
                 }
 
-                // Carregar do serviço
-                var tasks = await Task.Run(() =>
+                // 4. Mapeamento (DTOs)
+                var loadedTasks = new ObservableCollection<ActionPlanTaskModernDto>();
+
+                if (tasksEntityList != null && tasksEntityList.Count > 0)
                 {
-                    string period;
-                    if (APMCommon.Instance?.SelectedPeriod != null && APMCommon.Instance.SelectedPeriod.Count > 0)
+                    GeosApplication.Instance.Logger?.Log($"[LoadTasksForActionPlanAsync] {actionPlan.Code} - Processing {tasksEntityList.Count} tasks", Category.Info, Priority.Low);
+
+                    foreach (var taskEntity in tasksEntityList)
                     {
-                        var selectedYear = APMCommon.Instance.SelectedPeriod.Cast<long>().FirstOrDefault();
-                        period = selectedYear.ToString();
+                        var taskDto = MapTaskToDto(taskEntity);
+
+                        if (taskDto != null)
+                        {
+                            // Mapeamento de SubTasks
+                            if (taskEntity.SubTaskList != null && taskEntity.SubTaskList.Count > 0)
+                            {
+                                var subDtos = new ObservableCollection<ActionPlanTaskModernDto>();
+                                foreach (var subEntity in taskEntity.SubTaskList)
+                                {
+                                    var subDto = MapSubTaskToActionPlanTaskDto(subEntity);
+                                    if (subDto != null) subDtos.Add(subDto);
+                                }
+
+                                taskDto.SubTasks = subDtos;
+                                taskDto.IsLoadingSubTasks = false;
+                                taskDto.TotalSubTasks = subDtos.Count;
+
+                                // Nota: Assume que o método helper IsClosedExact existe na classe
+                                taskDto.CompletedSubTasks = subDtos.Count(x => IsClosedExact(x.Status, x.IdLookupStatus));
+                            }
+                            else
+                            {
+                                taskDto.TotalSubTasks = 0;
+                                taskDto.CompletedSubTasks = 0;
+                            }
+
+                            loadedTasks.Add(taskDto);
+                        }
                     }
-                    else
-                    {
-                        period = DateTime.Now.Year.ToString();
-                    }
-
-                    int userId = GeosApplication.Instance.ActiveUser.IdUser;
-                    return _apmService.GetTaskListByIdActionPlan_V2680(actionPlan.IdActionPlan, period, userId);
-                });
-
-                if (tasks == null) tasks = new List<APMActionPlanTask>();
-
-                taskDtos = tasks.Select(MapTaskToDto).Where(dto => dto != null).ToList();
-
-                // Guardar no cache
-                lock (_cacheLock)
+                }
+                else
                 {
-                    if (!_tasksCache.ContainsKey(actionPlan.IdActionPlan))
-                        _tasksCache[actionPlan.IdActionPlan] = taskDtos;
+                    GeosApplication.Instance.Logger?.Log($"[LoadTasksForActionPlanAsync] {actionPlan.Code} - Service returned NULL or empty list", Category.Info, Priority.Low);
                 }
 
-                // Popular no Action Plan
+                // 5. Atualização da UI (Thread Principal)
                 if (Application.Current != null)
                 {
                     Application.Current.Dispatcher.Invoke(() =>
                     {
-                        actionPlan.Tasks = new ObservableCollection<ActionPlanTaskModernDto>(taskDtos);
+                        // Atribui tasks ao objeto DTO existente
+                        actionPlan.Tasks = loadedTasks;
+                        actionPlan.VisibleTasks = loadedTasks;
+                        actionPlan.TasksCount = loadedTasks.Count;
+
+                        // Garante que a coleção de SubTasks não é nula (evita erros de binding no XAML)
+                        foreach (var t in actionPlan.Tasks ?? new ObservableCollection<ActionPlanTaskModernDto>())
+                        {
+                            if (t.SubTasks == null) t.SubTasks = new ObservableCollection<ActionPlanTaskModernDto>();
+                        }
+
+                        GeosApplication.Instance.Logger?.Log($"[LoadTasksForActionPlanAsync] {actionPlan.Code} - ASSIGNED {loadedTasks.Count} tasks to Tasks collection", Category.Info, Priority.Low);
+
                     });
                 }
-                else
-                {
-                    actionPlan.Tasks = new ObservableCollection<ActionPlanTaskModernDto>(taskDtos);
-                }
-
-                GeosApplication.Instance.Logger?.Log($"Loaded {taskDtos.Count} tasks for Action Plan {actionPlan.Code}", Category.Info, Priority.Low);
             }
             catch (Exception ex)
             {
-                GeosApplication.Instance.Logger?.Log($"Error loading tasks for Action Plan {actionPlan.Code}: {ex.Message}", Category.Exception, Priority.High);
+                GeosApplication.Instance.Logger?.Log($"[LoadTasksForActionPlanAsync] EXCEPTION for {actionPlan.Code}: {ex.Message}", Category.Exception, Priority.High);
+
+                // Em caso de erro, garante que a UI recebe uma lista vazia para sair do estado de loading
+                if (Application.Current != null)
+                {
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        if (actionPlan.Tasks == null) actionPlan.Tasks = new ObservableCollection<ActionPlanTaskModernDto>();
+                    });
+                }
             }
             finally
             {
                 actionPlan.IsLoadingTasks = false;
+                GeosApplication.Instance.Logger?.Log($"[LoadTasksForActionPlanAsync] {actionPlan.Code} - FINISHED", Category.Info, Priority.Low);
             }
         }
+        private bool IsFilterActive()
+        {
+            // Verifica Dropdowns
+            bool hasDropdowns = (SelectedLocation != null && SelectedLocation.Count > 0) ||
+                                (SelectedPerson != null && SelectedPerson.Count > 0) ||
+                                (SelectedBusinessUnit != null && SelectedBusinessUnit.Count > 0) ||
+                                (SelectedOrigin != null && SelectedOrigin.Count > 0) ||
+                                (SelectedDepartment != null && SelectedDepartment.Count > 0) ||
+                                (SelectedCustomer != null && SelectedCustomer.Count > 0);
 
-        /// <summary>
-        /// Toggle expand/collapse para um Action Plan
-        /// </summary>
+            // Verifica Tiles e Alertas
+            bool hasSideTile = _lastAppliedSideTileFilter != null && !IsAllCaption(_lastAppliedSideTileFilter.Caption);
+            bool hasAlert = !string.IsNullOrWhiteSpace(_lastAppliedAlertCaption);
+
+            return hasDropdowns || hasSideTile || hasAlert;
+        }
+
         private async Task ToggleActionPlanExpandAsync(ActionPlanModernDto actionPlan)
         {
-            if (actionPlan == null) return;
+            if (actionPlan == null)
+            {
+                GeosApplication.Instance.Logger?.Log("[ToggleActionPlanExpandAsync] actionPlan is NULL", Category.Warn, Priority.Medium);
+                return;
+            }
 
+            GeosApplication.Instance.Logger?.Log($"[ToggleActionPlanExpandAsync] {actionPlan.Code} - Current IsExpanded={actionPlan.IsExpanded}, TasksCount={actionPlan.TasksCount}, toggling...", Category.Info, Priority.Low);
+            
             actionPlan.IsExpanded = !actionPlan.IsExpanded;
+            
+            GeosApplication.Instance.Logger?.Log($"[ToggleActionPlanExpandAsync] {actionPlan.Code} - New IsExpanded={actionPlan.IsExpanded}, TasksCount={actionPlan.TasksCount}", Category.Info, Priority.Low);
 
             if (actionPlan.IsExpanded)
             {
+                GeosApplication.Instance.Logger?.Log($"[ToggleActionPlanExpandAsync] {actionPlan.Code} - Calling LoadTasksForActionPlanAsync...", Category.Info, Priority.Low);
                 await LoadTasksForActionPlanAsync(actionPlan);
+                GeosApplication.Instance.Logger?.Log($"[ToggleActionPlanExpandAsync] {actionPlan.Code} - LoadTasksForActionPlanAsync completed. Tasks.Count={actionPlan.Tasks?.Count ?? 0}", Category.Info, Priority.Low);
+            }
+            else
+            {
+                GeosApplication.Instance.Logger?.Log($"[ToggleActionPlanExpandAsync] {actionPlan.Code} - Collapsed (no action needed)", Category.Info, Priority.Low);
             }
         }
 
@@ -887,9 +1055,62 @@ namespace Emdep.Geos.Modules.APM.ViewModels
             }
         }
 
-        /// <summary>
-        /// Carrega sub-tasks para uma Task específica (chamado ao expandir)
-        /// </summary>
+        private ActionPlanTaskModernDto MapSubTaskToActionPlanTaskDto(Emdep.Geos.Data.Common.APM.APMActionPlanSubTask subTask)
+        {
+            if (subTask == null) return null;
+
+            // CORREÇÃO DA COR: Usar System.Drawing.ColorTranslator
+            System.Drawing.Color statusColor = System.Drawing.Color.Transparent;
+            try
+            {
+                if (!string.IsNullOrEmpty(subTask.StatusHTMLColor))
+                {
+                    statusColor = System.Drawing.ColorTranslator.FromHtml(subTask.StatusHTMLColor);
+                }
+            }
+            catch { /* Ignorar erro de cor inválida */ }
+
+            return new ActionPlanTaskModernDto
+            {
+                IdTask = subTask.IdActionPlanTask,
+                IdActionPlan = subTask.IdActionPlan,
+                IdParent = subTask.IdParent,
+                TaskNumber = subTask.TaskNumber,
+                Code = subTask.Code ?? string.Empty,
+                Title = subTask.Title ?? string.Empty,
+                Description = subTask.Description ?? string.Empty,
+                Responsible = subTask.Responsible ?? string.Empty,
+                IdLookupStatus = subTask.IdLookupStatus,
+                Status = subTask.Status ?? string.Empty,
+
+                // Atribuição corrigida (System.Drawing.Color)
+                StatusColor = statusColor,
+
+                Priority = subTask.Priority ?? string.Empty,
+                Theme = subTask.Theme ?? string.Empty,
+                // Nota: ActionPlanTaskModernDto não tem ThemeHTMLColor - removido
+                OpenDate = subTask.CreatedIn,
+                DueDate = subTask.DueDate,
+                DueDateDisplay = subTask.DueDate != DateTime.MinValue ? subTask.DueDate.ToString("dd/MM/yyyy") : "-",
+                DueDays = subTask.DueDays,
+                DueDaysColor = subTask.CardDueColor ?? string.Empty,
+                Percentage = subTask.Progress, // Usa Percentage em vez de Progress
+                CommentsCount = subTask.CommentsCount,
+                Duration = subTask.Duration,
+                // Nota: ActionPlanTaskModernDto não tem CloseDate - removido
+                OriginalDueDate = subTask.OriginalDueDate,
+                DelegatedTo = subTask.DelegatedTo ?? string.Empty,
+                // Nota: ActionPlanTaskModernDto não tem Location - removido
+                OriginWeek = subTask.OriginWeek ?? string.Empty,
+
+                IsExpanded = false,
+                IsLoadingSubTasks = false,
+
+                // Inicialização correta
+                SubTasks = new ObservableCollection<ActionPlanTaskModernDto>()
+            };
+        }
+
         public async Task LoadSubTasksForTaskAsync(ActionPlanTaskModernDto task)
         {
             if (task == null) return;
@@ -901,14 +1122,10 @@ namespace Emdep.Geos.Modules.APM.ViewModels
             {
                 task.IsLoadingSubTasks = true;
 
-                // Carregar sub-tasks do serviço (via Task.SubTaskList que já foi carregado com a task)
-                // Ou podemos buscar do cache de tasks se necessário
-                var subTasks = await Task.Run(() =>
+                var subTasksData = await Task.Run(() =>
                 {
-                    // Procurar no cache primeiro
                     lock (_cacheLock)
                     {
-                        // Tentar obter do allDataCache que tem TaskList com SubTaskList
                         if (_allDataCache != null)
                         {
                             foreach (var ap in _allDataCache)
@@ -916,6 +1133,8 @@ namespace Emdep.Geos.Modules.APM.ViewModels
                                 if (ap.TaskList != null)
                                 {
                                     var foundTask = ap.TaskList.FirstOrDefault(t => t.IdActionPlanTask == task.IdTask);
+
+                                    // Acede à lista de dados brutos (APMActionPlanSubTask)
                                     if (foundTask?.SubTaskList != null)
                                     {
                                         return foundTask.SubTaskList;
@@ -924,22 +1143,27 @@ namespace Emdep.Geos.Modules.APM.ViewModels
                             }
                         }
                     }
-                    return new List<Data.Common.APM.APMActionPlanSubTask>();
+                    return new List<Emdep.Geos.Data.Common.APM.APMActionPlanSubTask>();
                 });
 
-                var subTaskDtos = subTasks.Select(MapSubTaskToDto).Where(dto => dto != null).ToList();
+                // CONVERSÃO CORRETA: Mapear para ActionPlanTaskModernDto
+                var subTaskDtos = subTasksData
+                                    .Select(MapSubTaskToActionPlanTaskDto)
+                                    .Where(dto => dto != null)
+                                    .ToList();
 
-                // Popular na Task
+                // Atualizar na UI Thread
                 if (Application.Current != null)
                 {
                     Application.Current.Dispatcher.Invoke(() =>
                     {
-                        task.SubTasks = new ObservableCollection<SubTaskModernDto>(subTaskDtos);
+                        // Aqui o tipo já bate certo: ObservableCollection<ActionPlanTaskModernDto>
+                        task.SubTasks = new ObservableCollection<ActionPlanTaskModernDto>(subTaskDtos);
                     });
                 }
                 else
                 {
-                    task.SubTasks = new ObservableCollection<SubTaskModernDto>(subTaskDtos);
+                    task.SubTasks = new ObservableCollection<ActionPlanTaskModernDto>(subTaskDtos);
                 }
 
                 GeosApplication.Instance.Logger?.Log($"Loaded {subTaskDtos.Count} sub-tasks for Task {task.Code}", Category.Info, Priority.Low);
@@ -1163,7 +1387,7 @@ namespace Emdep.Geos.Modules.APM.ViewModels
 
         #region Mapping - Entity to DTO
 
-        private ActionPlanModernDto MapToDto(APMActionPlanModern entity) // Nota: Recebe a classe Modern
+        private ActionPlanModernDto MapToDto(APMActionPlanModern entity)
         {
             if (entity == null) return null;
 
@@ -1182,12 +1406,12 @@ namespace Emdep.Geos.Modules.APM.ViewModels
 
                 var dto = new ActionPlanModernDto
                 {
+                    // --- IDs BÁSICOS ---
                     IdActionPlan = entity.IdActionPlan,
                     Code = entity.Code ?? string.Empty,
                     Title = entity.Description ?? string.Empty,
 
-                    // --- CORREÇÃO RESPONSÁVEL ---
-                    // Usa a propriedade Responsible direta se existir, senão usa o DisplayName
+                    // --- RESPONSÁVEL ---
                     Responsible = !string.IsNullOrEmpty(entity.Responsible)
                                   ? entity.Responsible
                                   : (entity.ActionPlanResponsibleDisplayName ?? string.Empty),
@@ -1195,55 +1419,68 @@ namespace Emdep.Geos.Modules.APM.ViewModels
                     EmployeeCode = entity.EmployeeCode ?? string.Empty,
                     IdGender = entity.IdGender,
                     IdEmployee = entity.IdEmployee,
+
+                    // --- LOCALIZAÇÃO ---
                     Location = entity.Location ?? string.Empty,
                     IdLocation = entity.IdCompany,
 
+                    // =================================================================
+                    // CORREÇÃO CRÍTICA: MAPEAMENTO DOS IDs PARA FILTROS
+                    // (Sem isto, os Dropdowns não funcionam!)
+                    // =================================================================
+                    IdLookupBusinessUnit = entity.IdLookupBusinessUnit, // <--- ADICIONAR ISTO
+                    IdLookupOrigin = entity.IdLookupOrigin,             // <--- ADICIONAR ISTO
+                    IdDepartment = entity.IdDepartment,                 // <--- Já tinhas, mas confirma
+
+                    // --- AGREGADOS PARA FILTRO RÁPIDO ---
                     ThemeAggregates = entity.ThemeAggregates,
                     StatusAggregates = entity.StatusAggregates,
-                    // --- CONTAGENS (Vêm do SQL/C#) ---
-                    TasksCount = entity.TotalActionItems, // Total de itens (não a contagem da lista, que pode vir vazia)
-                    TotalActionItems = entity.TotalActionItems,
-                    TotalOpenItems = entity.TotalOpenItems,
-                    TotalClosedItems = entity.TotalClosedItems,
-                    Percentage = entity.Percentage,
 
                     // --- ESTATÍSTICAS NOVAS ---
                     Stat_Overdue15 = entity.Stat_Overdue15,
                     Stat_HighPriorityOverdue = entity.Stat_HighPriorityOverdue,
                     Stat_MaxDueDays = entity.Stat_MaxDueDays,
 
+                    // --- CONTAGENS ---
+                    TasksCount = entity.TotalActionItems,
+                    TotalActionItems = entity.TotalActionItems,
+                    TotalOpenItems = entity.TotalOpenItems,
+                    TotalClosedItems = entity.TotalClosedItems,
+                    Percentage = entity.Percentage,
+
                     // --- COR ---
                     TotalClosedColor = ConvertColor(entity.TotalClosedColor),
 
-                    // Restantes campos
-                    Status = entity.BusinessUnit ?? string.Empty,
-                    BusinessUnit = entity.BusinessUnit ?? string.Empty,
-                    BusinessUnitHTMLColor = entity.BusinessUnitHTMLColor, // Mapear cor da BU se existir
+                    // --- TEXTOS ---
+                    // Action Plans não têm Status/Priority (são das tasks)
+                    Status = string.Empty, 
 
-                    Priority = entity.Origin ?? string.Empty,
+                    BusinessUnit = entity.BusinessUnit ?? string.Empty,
+                    BusinessUnitHTMLColor = entity.BusinessUnitHTMLColor,
+
+                    Priority = string.Empty, 
                     Origin = entity.Origin ?? string.Empty,
 
                     IdSite = entity.IdSite,
                     Site = entity.Site ?? string.Empty,
                     GroupName = entity.GroupName ?? string.Empty,
-
-                    IdDepartment = entity.IdDepartment,
                     Department = entity.Department ?? string.Empty,
 
-                    // Country (assumindo que mapeaste as propriedades "Country..." na classe Modern)
+                    
+
                     CountryIconUrl = entity.CountryIconUrl ?? string.Empty
                 };
 
-                // --- CARREGAMENTO DE TAREFAS (Se já vierem preenchidas) ---
+                // --- CARREGAMENTO DE TAREFAS (Lazy Loading) ---
+                // Não inicializar Tasks como vazio! Deixar NULL para que LoadTasksForActionPlanAsync funcione
+                // quando o utilizador clicar no botão de expandir (+)
                 if (entity.TaskList != null && entity.TaskList.Count > 0)
                 {
                     var taskDtos = entity.TaskList.Select(MapTaskToDto).Where(t => t != null).ToList();
                     dto.Tasks = new ObservableCollection<ActionPlanTaskModernDto>(taskDtos);
                 }
-                else
-                {
-                    dto.Tasks = new ObservableCollection<ActionPlanTaskModernDto>();
-                }
+                // Se TaskList estiver vazio/null, deixar dto.Tasks = null (não inicializar)
+                // para permitir lazy-loading quando o utilizador expandir
 
                 return dto;
             }
@@ -1253,6 +1490,7 @@ namespace Emdep.Geos.Modules.APM.ViewModels
                 return null;
             }
         }
+
         private ActionPlanTaskModernDto MapTaskToDto(APMActionPlanTask entity)
         {
             System.Drawing.Color ConvertColor(string colorStr)
@@ -1269,6 +1507,7 @@ namespace Emdep.Geos.Modules.APM.ViewModels
             {
                 // APMActionPlanTask usa IdActionPlanTask (não IdTask)
                 IdTask = entity.IdActionPlanTask,
+                IdLookupStatus = entity.IdLookupStatus,
 
                 IdActionPlan = entity.IdActionPlan,
                 TaskNumber = entity.TaskNumber,
@@ -1320,6 +1559,7 @@ namespace Emdep.Geos.Modules.APM.ViewModels
 
                 // APMActionPlanTask usa StatusHTMLColor (não StatusColor)
                 StatusColor = ConvertColor(entity.StatusHTMLColor)
+
             };
         }
 
@@ -2167,165 +2407,89 @@ namespace Emdep.Geos.Modules.APM.ViewModels
         {
             try
             {
-                if (_allActionPlansUnfiltered == null || _allActionPlansUnfiltered.Count == 0)
+                if (_allActionPlansUnfiltered == null || !_allActionPlansUnfiltered.Any())
                 {
+                    if (ActionPlans == null) ActionPlans = new ObservableCollection<ActionPlanModernDto>();
                     return;
                 }
 
-                // Verificar se há algum filtro ativo
-                bool hasLocationFilter = SelectedLocation != null && SelectedLocation.Count > 0;
-                bool hasResponsibleFilter = SelectedPerson != null && SelectedPerson.Count > 0;
-                bool hasBusinessUnitFilter = SelectedBusinessUnit != null && SelectedBusinessUnit.Count > 0;
-                bool hasOriginFilter = SelectedOrigin != null && SelectedOrigin.Count > 0;
-                bool hasDepartmentFilter = SelectedDepartment != null && SelectedDepartment.Count > 0;
-                bool hasCustomerFilter = SelectedCustomer != null && SelectedCustomer.Count > 0;
+                IEnumerable<ActionPlanModernDto> query = _allActionPlansUnfiltered;
 
-                if (!hasLocationFilter && !hasResponsibleFilter && !hasBusinessUnitFilter &&
-                    !hasOriginFilter && !hasDepartmentFilter && !hasCustomerFilter)
+                // 1. LOCALIZAÇÃO (Cast para Company)
+                if (SelectedLocation != null && SelectedLocation.Count > 0)
                 {
-                    // Sem filtros - mostrar tudo
-                    ActionPlans = new ObservableCollection<ActionPlanModernDto>(_allActionPlansUnfiltered);
-                    return;
+                    // Usamos Company direto (assumindo que o using está lá)
+                    var ids = SelectedLocation.Cast<Company>()
+                                              .Select(x => x.IdCompany).ToList();
+                    query = query.Where(x => ids.Contains(x.IdLocation));
                 }
 
-                // Preparar listas de filtro
-                var locations = hasLocationFilter ? SelectedLocation.Cast<Company>().ToList() : null;
-                var responsibles = hasResponsibleFilter ? SelectedPerson.Cast<Responsible>().Where(r => !string.IsNullOrEmpty(r.FullName)).ToList() : null;
-                var businessUnits = hasBusinessUnitFilter ? SelectedBusinessUnit.Cast<LookupValue>().Where(bu => !string.IsNullOrEmpty(bu.Value)).ToList() : null;
-                var origins = hasOriginFilter ? SelectedOrigin.Cast<LookupValue>().Where(o => !string.IsNullOrEmpty(o.Value)).ToList() : null;
-                var departments = hasDepartmentFilter ? SelectedDepartment.Cast<Department>().ToList() : null;
-                var customers = hasCustomerFilter ? SelectedCustomer.Cast<APMCustomer>().ToList() : null;
-
-                var filtered = new List<ActionPlanModernDto>();
-
-                foreach (var apDto in _allActionPlansUnfiltered)
+                // 2. RESPONSÁVEL
+                if (SelectedPerson != null && SelectedPerson.Count > 0)
                 {
-                    // Verificar se o Action Plan corresponde aos filtros
-                    bool apMatches = CheckItemMatchesFilters(
-                        apDto.IdLocation, apDto.Responsible, apDto.BusinessUnit, apDto.Origin, apDto.IdDepartment, apDto.IdSite,
-                        locations, responsibles, businessUnits, origins, departments, customers,
-                        hasLocationFilter, hasResponsibleFilter, hasBusinessUnitFilter, hasOriginFilter, hasDepartmentFilter, hasCustomerFilter);
-
-                    if (apMatches)
-                    {
-                        // Action Plan corresponde - incluir com todas as Tasks/SubTasks
-                        filtered.Add(apDto);
-                    }
-                    else if (_allDataCache != null)
-                    {
-                        // Action Plan não corresponde - verificar Tasks e SubTasks
-                        var sourceAP = _allDataCache.FirstOrDefault(ap => ap.IdActionPlan == apDto.IdActionPlan);
-                        if (sourceAP?.TaskList != null && sourceAP.TaskList.Any())
-                        {
-                            var filteredTasks = new List<ActionPlanTaskModernDto>();
-
-                            foreach (var task in sourceAP.TaskList)
-                            {
-                                bool taskMatches = CheckItemMatchesFilters(
-                                    task.IdCompany, task.Responsible, task.BusinessUnit, task.Origin, null, task.IdSite,
-                                    locations, responsibles, businessUnits, origins, departments, customers,
-                                    hasLocationFilter, hasResponsibleFilter, hasBusinessUnitFilter, hasOriginFilter, hasDepartmentFilter, hasCustomerFilter);
-
-                                if (taskMatches)
-                                {
-                                    // Task corresponde - incluir com todas as SubTasks
-                                    var taskDto = MapTaskToDto(task);
-                                    if (taskDto != null)
-                                    {
-                                        filteredTasks.Add(taskDto);
-                                    }
-                                }
-                                else if (task.SubTaskList != null && task.SubTaskList.Any())
-                                {
-                                    // Task não corresponde - verificar SubTasks
-                                    var filteredSubTasks = new List<SubTaskModernDto>();
-
-                                    foreach (var subTask in task.SubTaskList)
-                                    {
-                                        bool subTaskMatches = CheckItemMatchesFilters(
-                                            subTask.IdCompany, subTask.Responsible, subTask.BusinessUnit, subTask.Origin, null, subTask.IdSite,
-                                            locations, responsibles, businessUnits, origins, departments, customers,
-                                            hasLocationFilter, hasResponsibleFilter, hasBusinessUnitFilter, hasOriginFilter, hasDepartmentFilter, hasCustomerFilter);
-
-                                        if (subTaskMatches)
-                                        {
-                                            var subTaskDto = MapSubTaskToDto(subTask);
-                                            if (subTaskDto != null)
-                                            {
-                                                filteredSubTasks.Add(subTaskDto);
-                                            }
-                                        }
-                                    }
-
-                                    // Se alguma SubTask corresponder, incluir a Task só com essas SubTasks
-                                    if (filteredSubTasks.Any())
-                                    {
-                                        var taskDto = MapTaskToDto(task);
-                                        if (taskDto != null)
-                                        {
-                                            taskDto.SubTasks = new ObservableCollection<SubTaskModernDto>(filteredSubTasks);
-                                            filteredTasks.Add(taskDto);
-                                        }
-                                    }
-                                }
-                            }
-
-                            // Se alguma Task corresponder (ou SubTask), incluir o Action Plan só com essas Tasks
-                            if (filteredTasks.Any())
-                            {
-                                var filteredAP = new ActionPlanModernDto
-                                {
-                                    IdActionPlan = apDto.IdActionPlan,
-                                    Code = apDto.Code,
-                                    Title = apDto.Title,
-                                    IdLocation = apDto.IdLocation,
-                                    Location = apDto.Location,
-                                    CountryIconUrl = apDto.CountryIconUrl,
-                                    Responsible = apDto.Responsible,
-                                    BusinessUnit = apDto.BusinessUnit,
-                                    Origin = apDto.Origin,
-                                    IdDepartment = apDto.IdDepartment,
-                                    Department = apDto.Department,
-                                    IdSite = apDto.IdSite,
-                                    Site = apDto.Site,
-                                    Status = apDto.Status,
-                                    EmployeeCode = apDto.EmployeeCode,
-                                    IdGender = apDto.IdGender,
-                                    IdEmployee = apDto.IdEmployee,
-                                    IsExpanded = apDto.IsExpanded,
-                                    TasksCount = apDto.TasksCount,
-                                    TotalActionItems = apDto.TotalActionItems,
-                                    TotalOpenItems = apDto.TotalOpenItems,
-                                    TotalClosedItems = apDto.TotalClosedItems,
-                                    Percentage = apDto.Percentage,
-                                    DueDateDisplay = apDto.DueDateDisplay,
-                                    Priority = apDto.Priority,
-                                    Tasks = new ObservableCollection<ActionPlanTaskModernDto>(filteredTasks)
-                                };
-                                filtered.Add(filteredAP);
-                            }
-                        }
-                    }
+                    // Cast para Responsible
+                    var names = SelectedPerson.Cast<Emdep.Geos.Data.Common.APM.Responsible>()
+                                              .Select(x => x.FullName).ToList();
+                    query = query.Where(x => names.Contains(x.Responsible));
                 }
 
-                // Apply the filter - create new collection
-                ActionPlans = new ObservableCollection<ActionPlanModernDto>(filtered);
+                // 3. BUSINESS UNIT (Correção do Erro CS0234 e CS1503)
+                if (SelectedBusinessUnit != null && SelectedBusinessUnit.Count > 0)
+                {
+                    // REMOVI O NAMESPACE LONGO. Usa apenas 'LookupValue'.
+                    // ADICIONEI '(int)' para garantir que comparamos int com int.
+                    var ids = SelectedBusinessUnit.Cast<LookupValue>()
+                                                  .Select(x => (int)x.IdLookupValue).ToList();
 
-                // Update alert button counts based on filtered data
-                UpdateAlertButtonCounts();
+                    query = query.Where(x => ids.Contains(x.IdLookupBusinessUnit));
+                }
 
-                // Update side tile counts based on filtered data
-                UpdateSideTileCounts();
+                // 4. ORIGEM (Correção do Erro)
+                if (SelectedOrigin != null && SelectedOrigin.Count > 0)
+                {
+                    // REMOVI O NAMESPACE LONGO.
+                    var ids = SelectedOrigin.Cast<LookupValue>()
+                                            .Select(x => (int)x.IdLookupValue).ToList();
 
-                GeosApplication.Instance.Logger?.Log(
-                    $"Local filter applied (hierarchical): {ActionPlans.Count} Action Plans, filtered Tasks/SubTasks shown",
-                    Category.Info, Priority.Low);
+                    query = query.Where(x => ids.Contains(x.IdLookupOrigin));
+                }
+
+                // 5. DEPARTAMENTO
+                if (SelectedDepartment != null && SelectedDepartment.Count > 0)
+                {
+                    // Força a conversão para int, pois IdDepartment as vezes é long ou short
+                    var ids = SelectedDepartment.Cast<Emdep.Geos.Data.Common.Hrm.Department>()
+                                                .Select(x => (int)x.IdDepartment).ToList();
+                    query = query.Where(x => ids.Contains(x.IdDepartment));
+                }
+
+                // 7. SIDE TILES (Temas)
+                if (_lastAppliedSideTileFilter != null && !IsAllCaption(_lastAppliedSideTileFilter.Caption))
+                {
+                    string temaAlvo = _lastAppliedSideTileFilter.Caption;
+                    query = query.Where(ap => !string.IsNullOrEmpty(ap.ThemeAggregates) &&
+                                              ap.ThemeAggregates.IndexOf(temaAlvo, StringComparison.OrdinalIgnoreCase) >= 0);
+                }
+
+                // 8. ALERTAS
+                if (!string.IsNullOrWhiteSpace(_lastAppliedAlertCaption))
+                {
+                    string alert = _lastAppliedAlertCaption;
+                    if (alert.Contains("Overdue")) query = query.Where(ap => ap.Stat_Overdue15 > 0);
+                    else if (alert.Contains("High Priority")) query = query.Where(ap => ap.Stat_HighPriorityOverdue > 0);
+                    else if (alert.Contains("Open")) query = query.Where(ap => ap.TotalOpenItems > 0);
+                    else if (alert.Contains("Done") || alert.Contains("Closed")) query = query.Where(ap => ap.TotalOpenItems == 0);
+                }
+
+                // Atualizar Grid
+                ActionPlans = new ObservableCollection<ActionPlanModernDto>(query.ToList());
             }
             catch (Exception ex)
             {
-                GeosApplication.Instance.Logger?.Log($"Error in ApplyFilters: {ex.Message}", Category.Exception, Priority.High);
+                GeosApplication.Instance.Logger?.Log($"Error ApplyFilters: {ex.Message}", Prism.Logging.Category.Exception, Prism.Logging.Priority.High);
             }
         }
+
 
         /// <summary>
         /// Verifica se um item (Action Plan, Task ou SubTask) corresponde aos filtros ativos
@@ -2628,7 +2792,7 @@ namespace Emdep.Geos.Modules.APM.ViewModels
                     Id = 0,
                     BackColor = ColorByDays(longestOverdueDays),
                     EntitiesCount = longestOverdueDays.ToString(),
-                    EntitiesCountVisibility = Visibility.Visible,
+                    EntitiesCountVisibility = Visibility.Collapsed,  // REMOVIDO LABEL
                     Height = 50,
                     width = 150,
                     Type = "LongestOverdue",
@@ -2642,7 +2806,7 @@ namespace Emdep.Geos.Modules.APM.ViewModels
                     Id = 1,
                     BackColor = ColorByCount(overdue15Count),
                     EntitiesCount = overdue15Count.ToString(),
-                    EntitiesCountVisibility = Visibility.Visible,
+                    EntitiesCountVisibility = Visibility.Collapsed,  // REMOVIDO LABEL
                     Height = 50,
                     width = 150,
                     Type = "Overdue15",
@@ -2656,7 +2820,7 @@ namespace Emdep.Geos.Modules.APM.ViewModels
                     Id = 2,
                     BackColor = ColorByCount(highPriorityCount),
                     EntitiesCount = highPriorityCount.ToString(),
-                    EntitiesCountVisibility = Visibility.Visible,
+                    EntitiesCountVisibility = Visibility.Collapsed,  // REMOVIDO LABEL
                     Height = 50,
                     width = 150,
                     Type = "HighPriorityOverdue",
@@ -2664,14 +2828,14 @@ namespace Emdep.Geos.Modules.APM.ViewModels
                 });
 
                 // Botões 4 e 5 (Most Overdue) - Opcionais, deixamos com placeholders
-                AlertListOfFilterTile.Add(new APMAlertTileBarFilters() { Caption = "Most Overdue Theme", Id = 3, BackColor = "Green", EntitiesCount = mostTheme, EntitiesCountVisibility = Visibility.Visible, Height = 50, width = 150, Type = "MostOverdueTheme" });
-                AlertListOfFilterTile.Add(new APMAlertTileBarFilters() { Caption = "Most Overdue Responsible", Id = 4, BackColor = "Green", EntitiesCount = mostResp, EntitiesCountVisibility = Visibility.Visible, Height = 50, width = 150, Type = "MostOverdueResponsible" });
+                AlertListOfFilterTile.Add(new APMAlertTileBarFilters() { Caption = "Most Overdue Theme", Id = 3, BackColor = "Green", EntitiesCount = mostTheme, EntitiesCountVisibility = Visibility.Collapsed, Height = 50, width = 150, Type = "MostOverdueTheme" });
+                AlertListOfFilterTile.Add(new APMAlertTileBarFilters() { Caption = "Most Overdue Responsible", Id = 4, BackColor = "Green", EntitiesCount = mostResp, EntitiesCountVisibility = Visibility.Collapsed, Height = 50, width = 150, Type = "MostOverdueResponsible" });
 
                 // Botões de Status (To do, In progress, Blocked, Closed)
-                AlertListOfFilterTile.Add(new APMAlertTileBarFilters() { Caption = "To do", Id = 0, BackColor = "Green", EntitiesCount = todoCount.ToString(), EntitiesCountVisibility = Visibility.Visible, Height = 50, width = 150, Type = "StatusToDo" });
-                AlertListOfFilterTile.Add(new APMAlertTileBarFilters() { Caption = "In progress", Id = 0, BackColor = "Green", EntitiesCount = inProgressCount.ToString(), EntitiesCountVisibility = Visibility.Visible, Height = 50, width = 150, Type = "StatusInProgress" });
-                AlertListOfFilterTile.Add(new APMAlertTileBarFilters() { Caption = "Blocked", Id = 0, BackColor = "Green", EntitiesCount = blockedCount.ToString(), EntitiesCountVisibility = Visibility.Visible, Height = 50, width = 150, Type = "StatusBlocked" });
-                AlertListOfFilterTile.Add(new APMAlertTileBarFilters() { Caption = "Closed", Id = 0, BackColor = "Green", EntitiesCount = doneCount.ToString(), EntitiesCountVisibility = Visibility.Visible, Height = 50, width = 150, Type = "StatusClosed" });
+                AlertListOfFilterTile.Add(new APMAlertTileBarFilters() { Caption = "To do", Id = 0, BackColor = "Green", EntitiesCount = todoCount.ToString(), EntitiesCountVisibility = Visibility.Collapsed, Height = 50, width = 150, Type = "StatusToDo" });
+                AlertListOfFilterTile.Add(new APMAlertTileBarFilters() { Caption = "In progress", Id = 0, BackColor = "Green", EntitiesCount = inProgressCount.ToString(), EntitiesCountVisibility = Visibility.Collapsed, Height = 50, width = 150, Type = "StatusInProgress" });
+                AlertListOfFilterTile.Add(new APMAlertTileBarFilters() { Caption = "Blocked", Id = 0, BackColor = "Green", EntitiesCount = blockedCount.ToString(), EntitiesCountVisibility = Visibility.Collapsed, Height = 50, width = 150, Type = "StatusBlocked" });
+                AlertListOfFilterTile.Add(new APMAlertTileBarFilters() { Caption = "Closed", Id = 0, BackColor = "Green", EntitiesCount = doneCount.ToString(), EntitiesCountVisibility = Visibility.Collapsed, Height = 50, width = 150, Type = "StatusClosed" });
 
                 GeosApplication.Instance.Logger?.Log("Alert buttons populated (Optimized)", Category.Info, Priority.Low);
             }
@@ -2794,10 +2958,12 @@ namespace Emdep.Geos.Modules.APM.ViewModels
         }
         private void PopulateDropdownFilters(List<APMActionPlanModern> data)
         {
-            if (data == null || data.Count == 0) return;
-
+            _isRefreshing = true; // PREVENIR LOOP INFINITO!
+            
             try
             {
+                if (data == null || data.Count == 0) return;
+
                 // 1. Atualizar Filtro de Departamentos
                 var uniqueDepts = data
                     .Where(x => !string.IsNullOrEmpty(x.Department))
@@ -2812,6 +2978,10 @@ namespace Emdep.Geos.Modules.APM.ViewModels
             {
                 // Category.Exception existe no teu Logger
                 GeosApplication.Instance.Logger?.Log($"Error populating dropdowns: {ex.Message}", Category.Exception, Priority.Low);
+            }
+            finally
+            {
+                _isRefreshing = false; // DESATIVAR flag
             }
         }
 
@@ -2939,13 +3109,13 @@ namespace Emdep.Geos.Modules.APM.ViewModels
                     BackColor = "#FFFFFF",
                     FilterCriteria = "",
                     EntitiesCount = 0,
-                    EntitiesCountVisibility = Visibility.Visible,
+                    EntitiesCountVisibility = Visibility.Collapsed,  // REMOVIDO LABEL
                     Height = 60,
                     width = 230
                 });
 
                 // 2. Adicionar tiles por Theme
-                foreach (var theme in themes.OrderBy(x => x.Position))
+                foreach (var theme in themes.OrderBy(x => x.Value))
                 {
                     // --- LÓGICA NOVA (RÁPIDA) ---
                     // Conta quantos Planos têm este tema na string "Stat_ThemesList"
@@ -2959,7 +3129,7 @@ namespace Emdep.Geos.Modules.APM.ViewModels
                         ForeColor = null,
                         FilterCriteria = $"[Theme] IN ('{theme.Value}')",
                         EntitiesCount = 0,
-                        EntitiesCountVisibility = Visibility.Visible,
+                        EntitiesCountVisibility = Visibility.Collapsed,  // REMOVIDO LABEL
                         Height = 60,
                         width = 230
                     });
@@ -2968,7 +3138,7 @@ namespace Emdep.Geos.Modules.APM.ViewModels
                 ListOfFilterTile = sideTiles;
 
                 // Atualiza contagens com a heurística correta (tasks + subtasks, sem Done)
-                UpdateSideTileCountsRespectingRules();
+                UpdateSideTileCounts();
 
                 GeosApplication.Instance.Logger?.Log($"PopulateSideTiles completed with {sideTiles.Count} tiles", Category.Info, Priority.Low);
             }
@@ -3144,6 +3314,223 @@ namespace Emdep.Geos.Modules.APM.ViewModels
         {
             // Delegate to internal method from Filters partial class
             OnSideTileClickedInternal(parameter);
+        }
+
+        #endregion
+
+        #region Filter Parameter Builders (ModernUI - SQL Filter Support)
+
+        /// <summary>
+        /// Constrói string CSV de IDs de Location a partir de SelectedLocation
+        /// Formato: "1,2,3" ou null se vazio
+        /// </summary>
+        private string BuildLocationFilter()
+        {
+            if (SelectedLocation == null || SelectedLocation.Count == 0)
+                return null;
+
+            try
+            {
+                var ids = SelectedLocation
+                    .OfType<Company>()
+                    .Select(c => c.IdCompany)
+                    .Where(id => id > 0)
+                    .Distinct()
+                    .OrderBy(id => id);
+
+                return ids.Any() ? string.Join(",", ids) : null;
+            }
+            catch (Exception ex)
+            {
+                GeosApplication.Instance.Logger?.Log($"Error building Location filter: {ex.Message}", Category.Exception, Priority.Low);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Constrói string CSV de IDs de Responsible (IdEmployee) a partir de SelectedPerson
+        /// Formato: "10,20,30" ou null se vazio
+        /// </summary>
+        private string BuildResponsibleFilter()
+        {
+            if (SelectedPerson == null || SelectedPerson.Count == 0)
+                return null;
+
+            try
+            {
+                var ids = SelectedPerson
+                    .OfType<Emdep.Geos.Data.Common.APM.Responsible>()
+                    .Select(r => r.IdEmployee)
+                    .Where(id => id > 0)
+                    .Distinct()
+                    .OrderBy(id => id);
+
+                return ids.Any() ? string.Join(",", ids) : null;
+            }
+            catch (Exception ex)
+            {
+                GeosApplication.Instance.Logger?.Log($"Error building Responsible filter: {ex.Message}", Category.Exception, Priority.Low);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Constrói string CSV de IDs de Business Unit a partir de SelectedBusinessUnit
+        /// </summary>
+        private string BuildBusinessUnitFilter()
+        {
+            if (SelectedBusinessUnit == null || SelectedBusinessUnit.Count == 0)
+                return null;
+
+            try
+            {
+                var ids = SelectedBusinessUnit
+                    .OfType<LookupValue>()
+                    .Select(bu => bu.IdLookupValue)
+                    .Where(id => id > 0)
+                    .Distinct()
+                    .OrderBy(id => id);
+
+                return ids.Any() ? string.Join(",", ids) : null;
+            }
+            catch (Exception ex)
+            {
+                GeosApplication.Instance.Logger?.Log($"Error building BusinessUnit filter: {ex.Message}", Category.Exception, Priority.Low);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Constrói string CSV de IDs de Origin a partir de SelectedOrigin
+        /// </summary>
+        private string BuildOriginFilter()
+        {
+            if (SelectedOrigin == null || SelectedOrigin.Count == 0)
+                return null;
+
+            try
+            {
+                var ids = SelectedOrigin
+                    .OfType<LookupValue>()
+                    .Select(o => o.IdLookupValue)
+                    .Where(id => id > 0)
+                    .Distinct()
+                    .OrderBy(id => id);
+
+                return ids.Any() ? string.Join(",", ids) : null;
+            }
+            catch (Exception ex)
+            {
+                GeosApplication.Instance.Logger?.Log($"Error building Origin filter: {ex.Message}", Category.Exception, Priority.Low);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Constrói string CSV de IDs de Department a partir de SelectedDepartment
+        /// </summary>
+        private string BuildDepartmentFilter()
+        {
+            if (SelectedDepartment == null || SelectedDepartment.Count == 0)
+                return null;
+
+            try
+            {
+                var ids = SelectedDepartment
+                    .OfType<Department>()
+                    .Select(d => d.IdDepartment)
+                    .Where(id => id > 0)
+                    .Distinct()
+                    .OrderBy(id => id);
+
+                return ids.Any() ? string.Join(",", ids) : null;
+            }
+            catch (Exception ex)
+            {
+                GeosApplication.Instance.Logger?.Log($"Error building Department filter: {ex.Message}", Category.Exception, Priority.Low);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Constrói string CSV de IDs de Customer (IdSite) a partir de SelectedCustomer
+        /// </summary>
+        private string BuildCustomerFilter()
+        {
+            if (SelectedCustomer == null || SelectedCustomer.Count == 0)
+                return null;
+
+            try
+            {
+                var ids = SelectedCustomer
+                    .OfType<APMCustomer>()
+                    .Select(c => c.IdSite)
+                    .Where(id => id > 0)
+                    .Distinct()
+                    .OrderBy(id => id);
+
+                return ids.Any() ? string.Join(",", ids) : null;
+            }
+            catch (Exception ex)
+            {
+                GeosApplication.Instance.Logger?.Log($"Error building Customer filter: {ex.Message}", Category.Exception, Priority.Low);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Obtém o filtro de Alert atual baseado no botão ativo
+        /// Retorna: 'ToDo', 'InProgress', 'Blocked', 'Closed', 'Overdue15', 'HighPriorityOverdue', etc.
+        /// </summary>
+        private string GetCurrentAlertFilter()
+        {
+            // A lógica de AlertButtons está no ActionPlansModernViewModel.Filters.cs
+            // Precisamos identificar qual botão está ativo
+
+            if (AlertListOfFilterTile == null || !AlertListOfFilterTile.Any())
+                return null;
+
+            var activeButton = AlertListOfFilterTile.FirstOrDefault(b => b.IsSelected);
+            if (activeButton == null)
+                return null;
+
+            // MODERNUI FIX: Usar Caption EXATAMENTE como aparece nos botões (linha 2782-2831)
+            var caption = activeButton.Caption ?? "";
+            
+            GeosApplication.Instance.Logger?.Log($"[GetCurrentAlertFilter] Active button Caption: '{caption}'", Category.Info, Priority.Low);
+
+            // Mapear Caption para valor SQL que a SP espera
+            if (caption == "Longest Overdue Days")
+                return "LongestOverdue";
+            if (caption == "High Priority Overdue")
+                return "HighPriorityOverdue";
+            if (caption == "Overdue > 15 Days")
+                return "Overdue15";
+            if (caption == "Most Overdue Theme")
+                return "MostOverdueTheme";
+            if (caption == "To do")
+                return "ToDo";
+            if (caption == "In progress")
+                return "InProgress";
+            if (caption == "Blocked")
+                return "Blocked";
+            if (caption == "Closed")
+                return "Closed";
+
+            GeosApplication.Instance.Logger?.Log($"[GetCurrentAlertFilter] Unknown caption '{caption}' - returning null", Category.Info, Priority.Low);
+            return null;
+        }
+
+        /// <summary>
+        /// Obtém o Theme Filter atual baseado no Side Tile selecionado
+        /// </summary>
+        private string GetCurrentThemeFilter()
+        {
+            // [MODERNUI FIX] Usar _lastAppliedSideTileFilter do partial class Filters.cs
+            if (_lastAppliedSideTileFilter == null || IsAllCaption(_lastAppliedSideTileFilter.Caption))
+                return null;
+
+            return _lastAppliedSideTileFilter.Caption; // Ex: "Safety", "Quality"
         }
 
         #endregion

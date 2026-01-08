@@ -7,6 +7,7 @@
              xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
              xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
              xmlns:dxb="http://schemas.devexpress.com/winfx/2008/xaml/bars"
+             xmlns:local="clr-namespace:Emdep.Geos.Modules.APM.Views"
              xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
              xmlns:viewModel="clr-namespace:Emdep.Geos.Modules.APM.ViewModels"
              xmlns:Converters="clr-namespace:Emdep.Geos.UI.Converters;assembly=Emdep.Geos.UI.Converters"
@@ -676,8 +677,28 @@
                              AutoExpandAllGroups="False">
 
             <!-- Table View com Virtualização ATIVADA -->
+            <!-- DetailDescriptor: binds child collection 'Tasks' on ActionPlan DTO -->
+            <dxg:GridControl.DetailDescriptor>
+                <dxg:DataControlDetailDescriptor ItemsSourcePath="Tasks">
+                    <dxg:GridControl>
+                        <dxg:GridControl.View>
+                            <dxg:TableView DetailHeaderContent="Tarefas" ShowGroupPanel="False" ShowSearchPanelMode="Never" AutoWidth="True"/>
+                        </dxg:GridControl.View>
+                        <dxg:GridControl.Columns>
+                            <dxg:GridColumn FieldName="TaskNumber" Header="#" Width="50"/>
+                            <dxg:GridColumn FieldName="Title" Header="Tarefa"/>
+                            <dxg:GridColumn FieldName="Responsible" Header="Responsável"/>
+                            <dxg:GridColumn FieldName="Status" Header="Estado"/>
+                            <dxg:GridColumn FieldName="DueDateDisplay" Header="Prazo"/>
+                        </dxg:GridControl.Columns>
+                    </dxg:GridControl>
+                </dxg:DataControlDetailDescriptor>
+            </dxg:GridControl.DetailDescriptor>
+
             <dxg:GridControl.View>
                 <dxg:TableView x:Name="tableView"
+                               AllowCascadeUpdate="True" 
+                               VirtualizingStackPanel.VirtualizationMode="Recycling"
                                ShowGroupPanel="False"
                                AllowEditing="False"
                                AllowGrouping="False"
@@ -689,17 +710,18 @@
                                AllowScrollAnimation="True"
                                AllowPerPixelScrolling="True"
                                ShowDetailButtons="False"
-                               RowDetailsVisibilityMode="Visible">
-                    
-                    <!-- VIRTUALIZAÇÃO: Critical for performance -->
-                    <dxg:TableView.RowStyle>
-                        <Style TargetType="{x:Type dxg:RowControl}">
-                            <Setter Property="VirtualizingStackPanel.IsVirtualizing" Value="True"/>
-                            <Setter Property="VirtualizingStackPanel.VirtualizationMode" Value="Recycling"/>
-                        </Style>
-                    </dxg:TableView.RowStyle>
+                               RowDetailsVisibilityMode="Visible"
+                               AllowMasterDetail="True">
 
-                    <!-- Detail View: Tasks (Master/Detail com Lazy-Load) -->
+                        <dxg:TableView.RowStyle>
+                            <Style TargetType="{x:Type dxg:RowControl}">
+                                <Setter Property="VirtualizingStackPanel.IsVirtualizing" Value="True"/>
+                                <Setter Property="VirtualizingStackPanel.VirtualizationMode" Value="Recycling"/>
+                                <Setter Property="local:ExpansionHelper.IsExpanded" Value="{Binding Row.IsExpanded, Mode=OneWay}"/>
+                            </Style>
+                        </dxg:TableView.RowStyle>
+
+                        <!-- Detail View: Tasks (Master/Detail com Lazy-Load) -->
                     <dxg:TableView.RowDetailsTemplate>
                         <DataTemplate>
                             <Border Background="#F5F5F5" 
@@ -707,8 +729,17 @@
                                     BorderThickness="1" 
                                     Margin="5" 
                                     Padding="10"
-                                    Visibility="{Binding Row.IsExpanded, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                    Visibility="Collapsed"
                                     Loaded="RowDetails_Loaded">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Row.IsExpanded}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
                                 <Grid>
                                     <!-- Loading Indicator -->
                                     <StackPanel Orientation="Horizontal" 
@@ -750,7 +781,16 @@
                                                                 BorderThickness="1" 
                                                                 Margin="20,5,5,5" 
                                                                 Padding="10"
-                                                                Visibility="{Binding Row.IsExpanded, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                                Visibility="Collapsed">
+                                                            <Border.Style>
+                                                                <Style TargetType="Border">
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding Row.IsExpanded}" Value="True">
+                                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </Border.Style>
                                                             <Grid>
                                                                 <!-- Loading Sub-Tasks Indicator -->
                                                                 <StackPanel Orientation="Horizontal" 
@@ -1018,17 +1058,23 @@
                 </dxg:GridColumn.CellTemplate>
             </dxg:GridColumn>
 
-            <dxg:GridColumn FieldName="Status" 
-                            Header="Status" 
+            <!-- Status removido - Action Plans n\u00e3o t\u00eam status (s\u00e3o as tasks que t\u00eam) -->
+
+            <dxg:GridColumn FieldName="BusinessUnit" 
+                            Header="Business Unit" 
+                            Width="140"/>
+
+            <dxg:GridColumn FieldName="Origin" 
+                            Header="Origin" 
                             Width="120"/>
 
-            <dxg:GridColumn FieldName="Priority" 
-                            Header="Priority" 
-                            Width="100"/>
+            <dxg:GridColumn FieldName="Department" 
+                            Header="Department" 
+                            Width="140"/>
 
-            <dxg:GridColumn FieldName="DueDateDisplay" 
-                            Header="Due Date" 
-                            Width="110"/>
+            <!-- Priority removido - Action Plans n\u00e3o t\u00eam priority (s\u00e3o as tasks que t\u00eam) -->
+
+            <!-- Due Date removido - Action Plans n\u00e3o t\u00eam due date (s\u00e3o as tasks que t\u00eam) -->
 
             <!-- Progress Column com ProgressBar visual -->
             <dxg:GridColumn FieldName="Percentage" 
@@ -1075,7 +1121,7 @@
             </dxg:GridColumn>
 
             <dxg:GridColumn FieldName="TotalActionItems" 
-                            Header="Items" 
+                            Header="Sub Tasks" 
                             Width="80"/>
 
             <dxg:GridColumn FieldName="TotalOpenItems" 

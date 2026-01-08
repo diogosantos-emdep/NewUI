@@ -99,6 +99,7 @@ namespace Emdep.Geos.Modules.APM.ViewModels
         private bool _pendingAllWhileAlert;
         private bool _lastClickedWasAll;
         private Dictionary<string, int> _sideTileCountsSnapshot;
+        private List<APMActionPlanModern> _dropdownFilteredCache;
 
         // Top filter selections (missing in Modern partial)
         private TileBarFilters _lastAppliedTopFilter;
@@ -143,55 +144,35 @@ namespace Emdep.Geos.Modules.APM.ViewModels
                 TileBarFilters clickedItem = arg as TileBarFilters;
                 if (clickedItem == null) return;
 
-                GeosApplication.Instance.Logger?.Log($"Side tile clicked (internal): {clickedItem.Caption}", Category.Info, Priority.Low);
+                GeosApplication.Instance.Logger?.Log($"Side tile clicked: {clickedItem.Caption}", Category.Info, Priority.Low);
 
-                // Check if clicking "All"
-                bool isAll = IsAllCaption(clickedItem.Caption);
-                bool wasPreviouslyAll = _lastClickedWasAll;
-                _lastClickedWasAll = isAll;
+                // [MODERNUI FIX] Side filters (Theme) devem RECARREGAR do SQL, n\u00e3o filtrar in-memory
+                // Motivo: O novo SP n\u00e3o retorna ThemeAggregates, por isso filtros in-memory n\u00e3o funcionam
 
-                // Toggle logic: if same item clicked, clear filter
-                if (_lastAppliedSideTileFilter != null && 
-                    _lastAppliedSideTileFilter.Caption == clickedItem.Caption)
+                if (_lastAppliedSideTileFilter != null &&
+                    string.Equals(_lastAppliedSideTileFilter.Caption, clickedItem.Caption, StringComparison.OrdinalIgnoreCase))
                 {
-                    // Clear side filter
+                    // Desmarca o filtro
                     _lastAppliedSideTileFilter = null;
-                    _lastAppliedSideCaption = null;
                     SelectedTileBarItem = null;
 
-                    // Restore data
-                    if (_dataBeforeSideTileFilter != null)
-                    {
-                        SetActionPlanList(_dataBeforeSideTileFilter);
-                        _dataBeforeSideTileFilter = null;
-                    }
-
-                    // Recalculate all counts (updates both side tiles and alert buttons)
-                    RecalculateAllCounts();
-                    return;
-                }
-
-                // Apply new side filter (clear previous if any)
-                _lastAppliedSideTileFilter = clickedItem;
-                _lastAppliedSideCaption = clickedItem.Caption;
-                SelectedTileBarItem = clickedItem;
-
-                // Get effective base for filtering
-                List<APMActionPlanModern> effectiveBase = BuildBaselineForSideFilter();
-
-                if (isAll)
-                {
-                    // Just restore to baseline (without side filter)
-                    SetActionPlanList(effectiveBase);
+                    // Volta para "All"
+                    SelectedTileBarItem = ListOfFilterTile.FirstOrDefault(x => IsAllCaption(x.Caption));
                 }
                 else
                 {
-                    // Apply side filter criteria
-                    ApplySideTileFilter(clickedItem.FilterCriteria, clickedItem.Caption, effectiveBase);
+                    // Marca o novo filtro
+                    _lastAppliedSideTileFilter = clickedItem;
+                    SelectedTileBarItem = clickedItem;
                 }
 
-                // Recalculate all counts (updates both side tiles and alert buttons)
-                RecalculateAllCounts();
+                _lastAppliedSideCaption = _lastAppliedSideTileFilter?.Caption;
+
+                // RECARREGA do SQL com o filtro Theme
+                GeosApplication.Instance.Logger?.Log($"Reloading Action Plans from SQL with Theme filter: {_lastAppliedSideCaption ?? "null (All)"}", Category.Info, Priority.Low);
+                
+                // Trigger reload (chama RefreshDataAsync que reinicia tudo e usa GetCurrentThemeFilter())
+                _ = RefreshDataAsync();
             }
             catch (Exception ex)
             {
@@ -266,26 +247,10 @@ namespace Emdep.Geos.Modules.APM.ViewModels
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(criteria) || effectiveBase == null || !effectiveBase.Any())
-                {
-                    SetActionPlanList(effectiveBase ?? new List<APMActionPlanModern>());
-                    return;
-                }
 
-                // Parse criteria
-                var expressions = ParseCriteria(criteria);
-                if (expressions == null || !expressions.Any())
-                {
-                    SetActionPlanList(effectiveBase);
-                    return;
-                }
+                RecalculateAllCounts();
 
-                // Filter action plans based on criteria
-                var filtered = ApplySideFilterToData(effectiveBase, _lastAppliedSideTileFilter);
-                
-                SetActionPlanList(filtered);
-
-                GeosApplication.Instance.Logger?.Log($"Applied side tile filter '{caption}': {filtered.Count} plans", Category.Info, Priority.Low);
+                GeosApplication.Instance.Logger?.Log($"Side filter changed to '{caption}'. Global recalculation triggered.", Category.Info, Priority.Low);
             }
             catch (Exception ex)
             {
@@ -293,64 +258,7 @@ namespace Emdep.Geos.Modules.APM.ViewModels
             }
         }
 
-        private List<APMActionPlanModern> ApplySideFilterToData(List<APMActionPlanModern> source, TileBarFilters sideFilter)
-        {
-            if (source == null || source.Count == 0) return new List<APMActionPlanModern>();
-            if (sideFilter == null || IsAllCaption(sideFilter.Caption)) return source.ToList();
 
-            var expressions = ParseCriteria(sideFilter.FilterCriteria);
-            if (expressions == null || expressions.Count == 0)
-                return source.ToList();
-
-            bool TaskMatchesAll(APMActionPlanModern ap, APMActionPlanTask t) =>
-                expressions.All(expr => PropertyMatches(t, expr.Field, expr.Values) || PropertyMatches(ap, expr.Field, expr.Values));
-
-            var result = new List<APMActionPlanModern>();
-            foreach (var ap in source)
-            {
-                if (ap.TaskList == null || !ap.TaskList.Any()) continue;
-
-                var matchingTasks = ap.TaskList.Where(t => TaskMatchesAll(ap, t)).ToList();
-                if (matchingTasks.Any())
-                {
-                    var clone = ClonePlan(ap);
-                    clone.TaskList = matchingTasks;
-                    result.Add(clone);
-                }
-            }
-            return result;
-        }
-
-        private List<APMActionPlanModern> ApplyCustomFilterToPlans(List<APMActionPlanModern> source, string criteria)
-        {
-            if (string.IsNullOrWhiteSpace(criteria)) return source;
-            var result = new List<APMActionPlanModern>();
-
-            foreach (var ap in source)
-            {
-                bool matchPlan = MatchCustomCriteria(ap, criteria);
-
-                var matchingTasks = new List<APMActionPlanTask>();
-                if (ap.TaskList != null)
-                {
-                    foreach (var t in ap.TaskList)
-                    {
-                        if (MatchCustomCriteria(t, criteria) || matchPlan)
-                        {
-                            matchingTasks.Add(t);
-                        }
-                    }
-                }
-
-                if (matchingTasks.Count > 0 || (matchPlan && (ap.TaskList == null || ap.TaskList.Count == 0)))
-                {
-                    var clone = (APMActionPlanModern)ap.Clone();
-                    clone.TaskList = matchingTasks.Select(t => (APMActionPlanTask)t.Clone()).ToList();
-                    result.Add(clone);
-                }
-            }
-            return result;
-        }
 
         private List<APMActionPlanTask> ApplyCustomFilterToTasks(List<APMActionPlanTask> source, string criteria)
         {
@@ -438,81 +346,9 @@ namespace Emdep.Geos.Modules.APM.ViewModels
             return val?.ToString();
         }
 
-        private void UpdateTopTileCounts(List<APMActionPlanModern> source, bool isTaskView)
-        {
-            try
-            {
-                var tilesCollection = isTaskView ? TopTaskListOfFilterTile : TopListOfFilterTile;
-                if (tilesCollection == null || tilesCollection.Count == 0) return;
 
-                var baseForCounts = source ?? new List<APMActionPlanModern>();
 
-                foreach (var tile in tilesCollection)
-                {
-                    if (tile == null) continue;
-                    int count = 0;
-
-                    if (IsAllCaption(tile.Caption))
-                    {
-                        if (baseForCounts.Count > 0)
-                        {
-                            count = baseForCounts.Sum(ap => ap.TaskList?.Sum(t => 1 + (t.SubTaskList?.Count ?? 0)) ?? 0);
-                        }
-                    }
-                    else
-                    {
-                        if (isTaskView)
-                        {
-                            var allTasks = baseForCounts.Where(ap => ap.TaskList != null).SelectMany(ap => ap.TaskList).ToList();
-                            var filteredTasks = ApplyCustomFilterToTasks(allTasks, tile.FilterCriteria);
-                            count = filteredTasks.Sum(t => 1 + (t.SubTaskList?.Count ?? 0));
-                        }
-                        else
-                        {
-                            var filteredPlans = ApplyCustomFilterToPlans(baseForCounts, tile.FilterCriteria);
-                            count = filteredPlans.Sum(ap => ap.TaskList?.Sum(t => 1 + (t.SubTaskList?.Count ?? 0)) ?? 0);
-                        }
-                    }
-
-                    tile.EntitiesCount = count;
-                    tile.EntitiesCountVisibility = Visibility.Visible;
-                }
-            }
-            catch (Exception ex)
-            {
-                GeosApplication.Instance.Logger?.Log($"Error in UpdateTopTileCounts: {ex.Message}", Category.Exception, Priority.High);
-            }
-        }
-
-        private List<APMActionPlanModern> ApplyCustomFilterToData(List<APMActionPlanModern> source, TileBarFilters customFilter)
-        {
-            if (source == null || source.Count == 0) return new List<APMActionPlanModern>();
-            if (customFilter == null || IsAllCaption(customFilter.Caption))
-                return source.Select(ap => (APMActionPlanModern)ap.Clone()).ToList();
-
-            return ApplyCustomFilterToPlans(source, customFilter.FilterCriteria);
-        }
-
-        private List<APMActionPlanModern> ApplyAlertFilterToData(List<APMActionPlanModern> source, string alertCaption)
-        {
-            if (source == null || source.Count == 0) return new List<APMActionPlanModern>();
-            if (string.IsNullOrWhiteSpace(alertCaption))
-                return source.Select(ap => (APMActionPlanModern)ap.Clone()).ToList();
-
-            return ApplyAlertToPlans(source, alertCaption);
-        }
-
-        private List<APMActionPlanModern> BuildBaselineForSideFilter()
-        {
-            // If alert is active, use alert-filtered data
-            if (IsAlertActive())
-            {
-                return _alertFilteredBase ?? _allDataCache ?? new List<APMActionPlanModern>();
-            }
-
-            // Otherwise use all data or current filtered base
-            return _currentFilteredBase ?? _allDataCache ?? new List<APMActionPlanModern>();
-        }
+        
 
         private void UpdateSideTileCountsRespectingRules()
         {
@@ -592,66 +428,49 @@ namespace Emdep.Geos.Modules.APM.ViewModels
         {
             try
             {
-                // Follow OLD ViewModel orchestration to keep counts independent
-                var baseData = BuildBaselineForAlertTiles();
+                // 1. A BASE deve ser SÓ os Dropdowns/Search (NUNCA deve ter o SideFilter aplicado aqui)
+                var baseData = _currentFilteredBase ?? _allDataCache;
 
                 if (baseData == null || baseData.Count == 0)
                 {
-                    baseData = _currentFilteredBase?.Select(ap => (APMActionPlanModern)ap.Clone()).ToList()
-                               ?? new List<APMActionPlanModern>();
+                    ResetAllCountsToZero();
+                    // Limpa a grid
+                    SetActionPlanList(new List<APMActionPlanModern>());
+                    return;
                 }
 
-                bool isTaskView = IsTaskGridVisibility;
+                // 2. Identificar Filtros Ativos
+                var activeSideFilter = _lastAppliedSideTileFilter; // O objeto do filtro lateral
+                var activeAlertCaption = _lastAppliedAlertCaption; // O texto do alerta (ex: "Overdue")
 
-                var activeSideFilter = _lastAppliedSideTileFilter;
-                var activeAlertCaption = _lastAppliedAlertCaption;
-                var activeCustomFilter = isTaskView ? _lastAppliedTaskTopFilter : _lastAppliedTopFilter;
+                // 3. Atualizar Botões de Alerta
+                // REGRA: Usa Base + Side Filter (Ignora o próprio Alerta para mostrar o que está "disponível")
+                UpdateAlertButtonCounts(baseData, activeSideFilter);
 
-                // data for side counts: base + custom top filters -> then alert
-                var dataForSideCounts = ApplyAlertFilterToData(
-                                            ApplyCustomFilterToData(baseData, activeCustomFilter),
-                                            activeAlertCaption);
+                // 4. Atualizar Side Tiles (AQUI ESTAVA O ERRO PROVAVELMENTE)
+                // REGRA: Usa Base + Alerta (Ignora o próprio Side Filter para que os outros tiles não vão a zero)
+                UpdateSideTileCounts(baseData, activeAlertCaption);
 
-                // data for top/custom counts: base + side filter -> then alert
-                var dataForCustomCounts = ApplyAlertFilterToData(
-                                            ApplySideFilterToData(baseData, activeSideFilter),
-                                            activeAlertCaption);
+                // 5. Grid Final (O único sítio que aplica AMBOS)
+                var finalDataForGrid = ApplyFinalFilters(baseData, activeSideFilter, activeAlertCaption);
 
-                // data for alert counts: base + side + custom (sem alert)
-                var dataForAlertCounts = ApplyCustomFilterToData(
-                                            ApplySideFilterToData(baseData, activeSideFilter),
-                                            activeCustomFilter);
-
-                // Update UI counts
-                UpdateSideTileCounts(dataForSideCounts);
-                UpdateTopTileCounts(dataForCustomCounts, isTaskView);
-                UpdateAlertButtonCounts(dataForAlertCounts);
-
-                // Final grid: apply side + custom + alert
-                var finalDataForGrid = ApplyAlertFilterToData(
-                                            ApplyCustomFilterToData(
-                                                ApplySideFilterToData(baseData, activeSideFilter),
-                                                activeCustomFilter),
-                                            activeAlertCaption);
-
-                // Normalize due days and set list
+                // Normalização de DueDays para visualização correta
                 foreach (var ap in finalDataForGrid)
                 {
-                    if (ap.TaskList == null) continue;
-                    foreach (var task in ap.TaskList)
+                    // (Otimização) Só calcula se tiver tasks, senão confia nos Stats do Header
+                    if (ap.TaskList != null)
                     {
-                        task.DueDays = task.DueDate < DateTime.Now ? CalculateDueDays(task.DueDate) : 0;
-                        if (task.SubTaskList == null) continue;
-                        foreach (var st in task.SubTaskList)
+                        foreach (var task in ap.TaskList)
                         {
-                            st.DueDays = st.DueDate < DateTime.Now ? CalculateDueDays(st.DueDate) : 0;
+                            task.DueDays = task.DueDate < DateTime.Now ? CalculateDueDays(task.DueDate) : 0;
+                            if (task.SubTaskList != null)
+                                foreach (var s in task.SubTaskList) s.DueDays = s.DueDate < DateTime.Now ? CalculateDueDays(s.DueDate) : 0;
                         }
                     }
                 }
 
+                // Atualiza a Grid
                 SetActionPlanList(finalDataForGrid);
-
-                GeosApplication.Instance.Logger?.Log("RecalculateAllCounts completed (modern-aligned)", Category.Info, Priority.Low);
             }
             catch (Exception ex)
             {
@@ -659,10 +478,459 @@ namespace Emdep.Geos.Modules.APM.ViewModels
             }
         }
 
+        private void UpdateAlertButtonCounts(List<APMActionPlanModern> baseData, TileBarFilters activeSideFilter)
+        {
+            // Zera contadores locais
+            int countOverdue15 = 0;
+            int countHighPrioOverdue = 0;
+            int countLongest = 0;
+            int countTodo = 0;
+            int countInProgress = 0;
+            int countBlocked = 0;
+            int countDone = 0;
+
+            // Prepara filtro lateral para execução rápida
+            bool hasSideFilter = activeSideFilter != null && !IsAllCaption(activeSideFilter.Caption);
+            string sideTheme = hasSideFilter ? activeSideFilter.Caption : null;
+
+            foreach (var plan in baseData)
+            {
+                // Otimização: Se o plano não tem o tema do filtro lateral (nos agregados), pula o plano todo
+                if (hasSideFilter && !string.IsNullOrEmpty(plan.ThemeAggregates) &&
+                    plan.ThemeAggregates.IndexOf(sideTheme, StringComparison.OrdinalIgnoreCase) < 0)
+                {
+                    continue;
+                }
+
+                if (plan.TaskList == null) continue;
+
+                foreach (var task in plan.TaskList)
+                {
+                    // Aplica filtro lateral na Task
+                    if (hasSideFilter && !string.Equals(task.Theme, sideTheme, StringComparison.OrdinalIgnoreCase))
+                        continue;
+
+                    // Acumula estatísticas da Task
+                    AccumulateStats(task, ref countOverdue15, ref countHighPrioOverdue, ref countLongest,
+                                    ref countTodo, ref countInProgress, ref countBlocked, ref countDone);
+
+                    // Verifica SubTasks
+                    if (task.SubTaskList != null)
+                    {
+                        foreach (var sub in task.SubTaskList)
+                        {
+                            // Subtasks geralmente herdam o tema ou têm o seu próprio. 
+                            // Assumimos que se a task passou, a subtask é relevante, ou verificamos o tema dela.
+                            // Se a subtask tiver tema explicitamente diferente:
+                            if (hasSideFilter && !string.IsNullOrWhiteSpace(sub.Theme) &&
+                                !string.Equals(sub.Theme, sideTheme, StringComparison.OrdinalIgnoreCase))
+                                continue;
+
+                            AccumulateStats(sub, ref countOverdue15, ref countHighPrioOverdue, ref countLongest,
+                                            ref countTodo, ref countInProgress, ref countBlocked, ref countDone);
+                        }
+                    }
+                }
+            }
+
+            // Atualiza a UI (AlertListOfFilterTile) sem quebrar o Binding
+            UpdateAlertTileUI("Longest Overdue Days", countLongest, true); // True = é dias, não quantidade
+            UpdateAlertTileUI("Overdue >= 15 days", countOverdue15);
+            UpdateAlertTileUI("High Priority Overdue", countHighPrioOverdue);
+            UpdateAlertTileUI("To do", countTodo);
+            UpdateAlertTileUI("In progress", countInProgress);
+            UpdateAlertTileUI("Blocked", countBlocked);
+            UpdateAlertTileUI("Closed", countDone);
+            // Adicione outros mapeamentos conforme necessário (Most Overdue Theme, etc.)
+        }
+
+        private void UpdateSideTileCounts(List<APMActionPlanModern> baseData, string activeAlertCaption)
+        {
+            // Dicionário para contar: Chave = Nome do Tema, Valor = Quantidade
+            var themeCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            int totalCount = 0;
+
+            foreach (var plan in baseData)
+            {
+                // 1. Verificar se o plano passa no filtro de ALERTA (activeAlertCaption)
+                // Passamos 'null' como sideFilter para garantir que o filtro de tema atual NÃO afeta a contagem dos outros temas.
+                // Assim, se selecionares "Safety", continuas a ver quantos planos existem de "Quality".
+                if (!PlanMatchesAlertOrSideFilter(plan, null, activeAlertCaption))
+                {
+                    continue; // Se não cumpre o alerta (ex: não é Overdue), não conta.
+                }
+
+                // 2. Contar os Temas deste plano
+                // Usamos a string 'ThemeAggregates' que vem do SQL para ser rápido e não depender das Tasks carregadas.
+                if (!string.IsNullOrEmpty(plan.ThemeAggregates))
+                {
+                    // Formato esperado do SP: "T|Safety:2;T|Quality:1" ou "Safety:2;Quality:1"
+                    var parts = plan.ThemeAggregates.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+
+                    bool planHasAnyTheme = false;
+
+                    foreach (var part in parts)
+                    {
+                        // Remove prefixo "T|" se existir (dependendo da versão do teu SP)
+                        string cleanPart = part.Trim();
+                        if (cleanPart.StartsWith("T|", StringComparison.OrdinalIgnoreCase))
+                        {
+                            cleanPart = cleanPart.Substring(2);
+                        }
+
+                        // Separa Nome do Tema e Contagem (Ex: "Safety:2")
+                        var splitIndex = cleanPart.LastIndexOf(':');
+                        if (splitIndex > 0)
+                        {
+                            string themeName = cleanPart.Substring(0, splitIndex).Trim();
+
+                            // Se quiseres somar o nº de tasks: int qty = int.Parse(cleanPart.Substring(splitIndex + 1));
+                            // Se a regra for "Nº de Planos com este tema":
+
+                            if (!string.IsNullOrEmpty(themeName))
+                            {
+                                if (!themeCounts.ContainsKey(themeName)) themeCounts[themeName] = 0;
+                                themeCounts[themeName]++; // Incrementa 1 plano para este tema
+                                planHasAnyTheme = true;
+                            }
+                        }
+                    }
+
+                    if (planHasAnyTheme) totalCount++;
+                }
+            }
+
+            // 3. Atualizar a UI (Tiles)
+            if (ListOfFilterTile != null)
+            {
+                foreach (var tile in ListOfFilterTile)
+                {
+                    // Tile "All" mostra o total de planos filtrados pelo Alerta
+                    if (IsAllCaption(tile.Caption))
+                    {
+                        tile.EntitiesCount = totalCount;
+                        tile.EntitiesCountVisibility = Visibility.Visible;
+                    }
+                    // Tiles específicos
+                    else if (!string.IsNullOrEmpty(tile.Caption) && themeCounts.TryGetValue(tile.Caption, out int count))
+                    {
+                        tile.EntitiesCount = count;
+                        tile.EntitiesCountVisibility = Visibility.Visible;
+                    }
+                    else
+                    {
+                        tile.EntitiesCount = 0;
+                        // Opcional: Esconder tiles com 0 ou manter visível
+                        tile.EntitiesCountVisibility = Visibility.Visible;
+                    }
+                }
+            }
+        }
+
+
+        // ActionPlansModernViewModel.Filters.cs
+
+        private List<APMActionPlanModern> ApplyFinalFilters(List<APMActionPlanModern> baseData, TileBarFilters sideFilter, string alertCaption)
+        {
+            var result = new List<APMActionPlanModern>();
+
+            // Prepara filtros
+            bool hasSide = sideFilter != null && !IsAllCaption(sideFilter.Caption);
+            string sideTheme = hasSide ? sideFilter.Caption : null;
+
+            // Obtém predicados para Tasks (quando estão carregadas)
+            var alertTaskPredicate = GetAlertPredicate(alertCaption); // Filtra Tasks
+            var alertSubTaskPredicate = GetSubTaskPredicate(alertCaption); // Filtra SubTasks
+
+            foreach (var plan in baseData)
+            {
+                // =================================================================================
+                // 1. VERIFICAÇÃO RÁPIDA (Ao Nível do Plano - Para Lazy Loading)
+                // =================================================================================
+                // Se as tasks não estão carregadas, temos de confiar nas Estatísticas do SP (Stat_Overdue, Aggregates)
+                // Se o plano não cumpre os critérios estatísticos, é descartado imediatamente.
+                if (!PlanMatchesAlertOrSideFilter(plan, sideFilter, alertCaption))
+                {
+                    continue;
+                }
+
+                // =================================================================================
+                // 2. FILTRAGEM DETALHADA (Se as tasks estiverem carregadas)
+                // =================================================================================
+                if (plan.TaskList != null && plan.TaskList.Count > 0)
+                {
+                    var matchingTasks = new List<APMActionPlanTask>();
+
+                    foreach (var task in plan.TaskList)
+                    {
+                        // Verifica Side Filter na Task (Tema)
+                        bool taskSideMatch = !hasSide || string.Equals(task.Theme, sideTheme, StringComparison.OrdinalIgnoreCase);
+
+                        // Verifica Alert Filter na Task
+                        bool taskAlertMatch = alertTaskPredicate == null || alertTaskPredicate(task);
+
+                        // Verifica SubTasks
+                        var matchingSubTasks = new List<APMActionPlanSubTask>();
+                        if (task.SubTaskList != null)
+                        {
+                            foreach (var sub in task.SubTaskList)
+                            {
+                                // Side Filter na SubTask
+                                bool subSideMatch = !hasSide || string.Equals(sub.Theme ?? task.Theme, sideTheme, StringComparison.OrdinalIgnoreCase);
+
+                                // Alert Filter na SubTask
+                                bool subAlertMatch = alertSubTaskPredicate == null || alertSubTaskPredicate(sub);
+
+                                if (subSideMatch && subAlertMatch)
+                                {
+                                    matchingSubTasks.Add(sub);
+                                }
+                            }
+                        }
+
+                        // LÓGICA DE INCLUSÃO:
+                        // Incluímos a task se ela bater no filtro OU se tiver subtasks que batem.
+                        if ((taskSideMatch && taskAlertMatch) || matchingSubTasks.Count > 0)
+                        {
+                            var taskClone = (APMActionPlanTask)task.Clone();
+
+                            // Se o filtro for restritivo (não for "To Do" ou "All"), limpamos subtasks que não batem
+                            // Ex: Se filtro for "High Priority", mostramos a Task High Prio e apenas as subtasks High Prio
+                            if (IsRestrictiveFilter(alertCaption))
+                            {
+                                taskClone.SubTaskList = matchingSubTasks;
+                            }
+                            // Se não for restritivo (ex: "To Do"), e a task pai entrou, mantemos as subtasks originais 
+                            // ou mantemos a lógica de mostrar tudo. A lógica acima força matchingSubTasks, o que é seguro.
+                            else
+                            {
+                                taskClone.SubTaskList = matchingSubTasks;
+                            }
+
+                            matchingTasks.Add(taskClone);
+                        }
+                    }
+
+                    // Se, após filtrar as tasks, sobrar alguma coisa, adicionamos o plano
+                    if (matchingTasks.Count > 0)
+                    {
+                        var planClone = (APMActionPlanModern)plan.Clone();
+                        planClone.TaskList = matchingTasks;
+
+                        // Recalcula totais visuais baseados no filtro
+                        planClone.TotalActionItems = matchingTasks.Sum(t => 1 + (t.SubTaskList?.Count ?? 0));
+
+                        result.Add(planClone);
+                    }
+                }
+                else
+                {
+                    // =================================================================================
+                    // 3. PLANO SEM TASKS (Lazy Load)
+                    // =================================================================================
+                    // Como passou na verificação "PlanMatchesAlertOrSideFilter" acima, adicionamo-lo.
+                    // Quando o utilizador expandir, o LoadTasksForActionPlanAsync carrega as tasks
+                    // e devemos aplicar o filtro visual nessa altura (na UI ou ViewModel).
+
+                    result.Add((APMActionPlanModern)plan.Clone());
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Verifica se o Plano (com base nas estatísticas do SP) é candidato a ser mostrado.
+        /// Essencial para performance e para funcionar com Lazy Loading.
+        /// </summary>
+        private bool PlanMatchesAlertOrSideFilter(APMActionPlanModern plan, TileBarFilters sideFilter, string alertCaption)
+        {
+            // 1. Verifica Side Filter (Tema) usando ThemeAggregates
+            if (sideFilter != null && !IsAllCaption(sideFilter.Caption))
+            {
+                // Se o plano não tem ThemeAggregates (veio null do SP), assumimos false a menos que seja um plano novo
+                if (string.IsNullOrEmpty(plan.ThemeAggregates)) return false;
+
+                // Procura o tema na string agregada (Ex: "T|Safety:2;T|Quality:1")
+                if (plan.ThemeAggregates.IndexOf(sideFilter.Caption, StringComparison.OrdinalIgnoreCase) < 0)
+                    return false;
+            }
+
+            // 2. Verifica Alert Filter usando Stats e Aggregates
+            if (!string.IsNullOrWhiteSpace(alertCaption))
+            {
+                string cap = alertCaption.ToLowerInvariant();
+
+                // Filtros de Atraso (usando colunas Stat_ do SP)
+                if (cap.Contains("overdue") && cap.Contains("15"))
+                {
+                    return plan.Stat_Overdue15 > 0;
+                }
+                if (cap.Contains("high priority") && cap.Contains("overdue"))
+                {
+                    return plan.Stat_HighPriorityOverdue > 0;
+                }
+                if (cap.Contains("longest"))
+                {
+                    // Para "Longest", mostramos apenas se tiver algum atraso, 
+                    // a filtragem exata de "quem é o longest" é feita visualmente ou requereria saber o max global aqui.
+                    // Por segurança, mostramos planos com atraso.
+                    return plan.Stat_MaxDueDays > 0;
+                }
+
+                // Filtros de Status (usando StatusAggregates)
+                // Ex: "S|To do:5;S|In progress:2"
+                if (!string.IsNullOrEmpty(plan.StatusAggregates))
+                {
+                    if (cap.Contains("to do"))
+                        return plan.StatusAggregates.IndexOf("To do", StringComparison.OrdinalIgnoreCase) >= 0 || plan.TotalOpenItems > 0;
+
+                    if (cap.Contains("in progress"))
+                        return plan.StatusAggregates.IndexOf("In progress", StringComparison.OrdinalIgnoreCase) >= 0;
+
+                    if (cap.Contains("blocked"))
+                        return plan.StatusAggregates.IndexOf("Blocked", StringComparison.OrdinalIgnoreCase) >= 0;
+
+                    if (cap.Contains("done") || cap.Contains("closed"))
+                        return plan.StatusAggregates.IndexOf("Closed", StringComparison.OrdinalIgnoreCase) >= 0 || plan.TotalClosedItems > 0;
+                }
+                else
+                {
+                    // Fallback se Aggregates vier vazio (versões antigas do SP)
+                    if (cap.Contains("done") || cap.Contains("closed")) return plan.TotalClosedItems > 0;
+                    // Para Open/Todo/Blocked sem detalhe, assumimos que se tem OpenItems, pode ter o que procuramos
+                    return plan.TotalOpenItems > 0;
+                }
+            }
+
+            return true;
+        }
+
+        private bool IsRestrictiveFilter(string caption)
+        {
+            if (string.IsNullOrWhiteSpace(caption)) return false;
+            string c = caption.ToLowerInvariant();
+            // Filtros que devem esconder subtasks que não batem certo
+            return c.Contains("high priority") || c.Contains("overdue") || c.Contains("blocked");
+        }
+
+        private void AccumulateStats(dynamic item, ref int ov15, ref int hpOv, ref int maxDays,
+                             ref int todo, ref int inProg, ref int blk, ref int done)
+        {
+            // Verifica Status
+            string status = item.Status ?? "";
+            int statusId = item.IdLookupStatus;
+            bool isClosed = IsClosedExact(status, statusId);
+
+            if (isClosed)
+            {
+                done++;
+                return; // Itens fechados não contam para overdue
+            }
+
+            // Contagem de Status Abertos
+            if (status.IndexOf("to do", StringComparison.OrdinalIgnoreCase) >= 0) todo++;
+            else if (status.IndexOf("progress", StringComparison.OrdinalIgnoreCase) >= 0) inProg++;
+            else if (status.IndexOf("blocked", StringComparison.OrdinalIgnoreCase) >= 0) blk++;
+            else todo++; // Default para aberto desconhecido
+
+            // Cálculo de Datas
+            DateTime dueDate = item.DueDate;
+            if (dueDate != DateTime.MinValue && dueDate < DateTime.Now)
+            {
+                int days = (DateTime.Now - dueDate).Days;
+
+                // Mantém o maior dia de atraso
+                if (days > maxDays) maxDays = days;
+
+                // Overdue >= 15
+                if (days >= 15) ov15++;
+
+                // High Priority Overdue (Regra: >= 5 dias e High/Critical)
+                string prio = item.Priority ?? "";
+                if (days >= 5 && (prio.Equals("High", StringComparison.OrdinalIgnoreCase) || prio.Equals("Critical", StringComparison.OrdinalIgnoreCase)))
+                {
+                    hpOv++;
+                }
+            }
+        }
+
+        private Func<dynamic, bool> GetAlertPredicate(string caption)
+        {
+            if (string.IsNullOrWhiteSpace(caption)) return null;
+            string capLower = caption.ToLowerInvariant();
+
+            // Helper interno para reuso
+            bool IsClosed(dynamic t) => IsClosedExact(t.Status, t.IdLookupStatus);
+            int GetDays(dynamic t) => (t.DueDate != DateTime.MinValue && t.DueDate < DateTime.Now) ? (DateTime.Now - t.DueDate).Days : 0;
+
+            if (capLower.Contains("overdue") && capLower.Contains("15"))
+                return t => !IsClosed(t) && GetDays(t) >= 15;
+
+            if (capLower.Contains("high priority"))
+                return t => !IsClosed(t) && GetDays(t) >= 5 &&
+                            (string.Equals(t.Priority, "High", StringComparison.OrdinalIgnoreCase) ||
+                             string.Equals(t.Priority, "Critical", StringComparison.OrdinalIgnoreCase));
+
+            // Filtros de Status
+            if (capLower.Contains("to do"))
+                return t => !IsClosed(t) && ((t.Status ?? "").IndexOf("to do", StringComparison.OrdinalIgnoreCase) >= 0);
+
+            if (capLower.Contains("progress"))
+                return t => !IsClosed(t) && ((t.Status ?? "").IndexOf("progress", StringComparison.OrdinalIgnoreCase) >= 0);
+
+            if (capLower.Contains("blocked"))
+                return t => !IsClosed(t) && ((t.Status ?? "").IndexOf("blocked", StringComparison.OrdinalIgnoreCase) >= 0);
+
+            if (capLower.Contains("done") || capLower.Contains("closed"))
+                return t => IsClosed(t);
+
+            return null; // Nenhum filtro ativo ou não reconhecido
+        }
+
+        private void UpdateAlertTileUI(string captionPart, int value, bool isDays = false)
+        {
+            if (AlertListOfFilterTile == null) return;
+
+            var tile = AlertListOfFilterTile.FirstOrDefault(x => x.Caption != null && x.Caption.IndexOf(captionPart, StringComparison.OrdinalIgnoreCase) >= 0);
+            if (tile != null)
+            {
+                tile.EntitiesCount = value.ToString();
+
+                // Atualiza cor dinamicamente se necessário
+                if (!isDays) // Se for contagem de itens
+                {
+                    // Verde se 0, Amarelo < 5, Vermelho >= 5 (exemplo)
+                    // Ajuste conforme sua regra de negócio original
+                    if (value == 0) tile.BackColor = "Green";
+                    else if (value < 5) tile.BackColor = "Orange";
+                    else tile.BackColor = "Red";
+                }
+                else // Se for Dias (Longest Overdue)
+                {
+                    // Exemplo para dias
+                    if (value == 0) tile.BackColor = "Green";
+                    else if (value < 15) tile.BackColor = "Orange";
+                    else tile.BackColor = "Red";
+                }
+            }
+        }
+
+        private void ResetAllCountsToZero()
+        {
+            if (AlertListOfFilterTile != null)
+            {
+                foreach (var t in AlertListOfFilterTile) t.EntitiesCount = "0";
+            }
+            if (ListOfFilterTile != null)
+            {
+                foreach (var t in ListOfFilterTile) t.EntitiesCount = 0;
+            }
+        }
         #endregion
 
         #region Alert Buttons Logic (from Old ViewModel)
-        
+
         private bool _alertCommandsRewired;
         private string _lastAppliedAlertCaption;
         private List<APMActionPlanModern> _dataBeforeAlertFilter;

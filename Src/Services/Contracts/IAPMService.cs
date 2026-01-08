@@ -671,7 +671,20 @@ namespace Emdep.Geos.Services.Contracts
 
         [OperationContract]
         [FaultContract(typeof(ServiceException))]
-        List<APMActionPlanModern> GetActionPlanDetails_WithCounts(string selectedPeriod, int idUser, string filterAlert = null, string filterTheme = null);
+        List<APMActionPlanModern> GetActionPlanDetails_WithCounts(
+            string selectedPeriod, 
+            int idUser, 
+            string filterLocation = null,
+            string filterResponsible = null,
+            string filterBusinessUnit = null,
+            string filterOrigin = null,
+            string filterDepartment = null,
+            string filterCustomer = null,
+            string alertFilter = null,
+            string filterTheme = null);
+
+
+
 
         //[rdixit][GEOS2-9354][01.09.2025]
         [OperationContract]
@@ -836,5 +849,30 @@ namespace Emdep.Geos.Services.Contracts
         [OperationContract]
         [FaultContract(typeof(ServiceException))]
         List<Company> GetUnAuthorizedLocationListByIdCompany_V2690(string idCompanies);
+        [OperationContract]
+        [FaultContract(typeof(ServiceException))]
+        ActionPlanDetailsData GetActionPlanDetails(int idActionPlan);
+        [OperationContract]
+        List<APMActionPlanTask> GetTaskListByIdActionPlan_V2680PT(
+            long idActionPlan, 
+            string period, 
+            int userId,
+            string filterLocation = null,
+            string filterResponsible = null,
+            string filterBusinessUnit = null,
+            string filterOrigin = null,
+            string filterDepartment = null,
+            string filterCustomer = null,
+            string alertFilter = null,
+            string filterTheme = null);
+    }
+    [DataContract]
+    public class ActionPlanDetailsData
+    {
+        [DataMember]
+        public List<Emdep.Geos.Data.Common.APM.APMActionPlanTask> Tasks { get; set; }
+
+        [DataMember]
+        public List<Emdep.Geos.Data.Common.APM.APMActionPlanSubTask> SubTasks { get; set; }
     }
 }

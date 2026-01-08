@@ -1,0 +1,744 @@
+BEGIN
+        /*
+       [Pallavi.Kale][27/10/2025][GEOS2-8995]
+       CALL emdep_geos.APM_GetActionPlanDetails_V2680(2025,859); -- Location Manager 
+       CALL emdep_geos.APM_GetActionPlanDetails_V2680(2025,4); Department Manager 
+       CALL emdep_geos.APM_GetActionPlanDetails_V2680(2025,2680); Base User :9881
+        */
+        DECLARE _CompanyList1        TEXT;
+        DECLARE _DepartmentList1     TEXT;
+        DECLARE _EmployeeList1       TEXT;
+        DECLARE _IdActionPlanList1   TEXT;
+        DECLARE _IdActionPlanList2   TEXT;
+        DECLARE __CompanyList2       TEXT;
+        DECLARE _DepartmentList2     TEXT;
+        DECLARE _EmployeeList2       TEXT;
+        DECLARE _UserEmployeeId      INT;
+        DECLARE _IdActionPlanTaskList1   TEXT;
+        DECLARE _IdActionPlanTaskList2   TEXT;
+		SET SESSION group_concat_max_len = 1000000; 
+        SELECT IdEmployee
+          INTO _UserEmployeeId
+          FROM employees
+         WHERE IdUser = _Iduser;
+  
+        DROP TEMPORARY TABLE IF EXISTS ActionPlantemp;
+  
+        CREATE TEMPORARY TABLE ActionPlantemp
+  
+        AS
+           SELECT DISTINCT
+                  ap.IdActionPlan,
+                  ap.Code,
+                  ap.Description,
+                  com.IdCompany,
+                  com.Alias AS Location,
+                  co.Name AS Country,
+                  co.Iso AS CountryIso,
+                  emp.EmployeeCode,
+                  emp.IdUser,
+                  emp.IdEmployee,
+                  emp.FirstName,
+                  emp.LastName,
+                  emp.IdGender,
+                  lv.IdLookupValue,
+                  lv.Value AS Origin,
+                  lvap.IdLookupValue AS IdBusinessUnit,
+                  lvap.Value AS BusinessUnit,
+                  lvap.HtmlColor AS BusinessUnitHtmlColor,
+                  (SELECT COUNT(*)
+                     FROM emdep_geos.action_plan_task apt
+                    WHERE apt.IdActionPlan = ap.IdActionPlan AND apt.InUse=1 AND apt.IdParent IS NULL)
+                     AS TotalActionItems,
+                  (SELECT COUNT(*)
+                     FROM emdep_geos.action_plan_task apt
+                    WHERE     apt.IdActionPlan = ap.IdActionPlan
+                          AND apt.CloseDate IS NULL AND apt.InUse=1 AND apt.IdParent IS NULL)
+                     AS TotalOpenItems,
+                  (SELECT COUNT(*)
+                     FROM emdep_geos.action_plan_task apt
+                    WHERE     apt.IdActionPlan = ap.IdActionPlan
+                          AND apt.CloseDate IS NOT NULL AND apt.InUse=1 AND apt.IdParent IS NULL)
+                     AS TotalClosedItems,
+                  ap.CreatedBy,
+                  CONCAT(usr.FirstName, ' ', usr.LastName) AS CreatedByName,
+                  ap.CreatedIn,
+                  ap.IdDepartment,
+                  lvDep.DepartmentName AS Department,
+                  ap.OriginDescription,
+                  COALESCE(emp.DisplayName,
+                           CONCAT(emp.FirstName, ' ', emp.LastName))
+                     AS ActionPlanResponsibleDisplayName,
+                  si.IdSite,
+                  si.Name AS SiteName,
+                  cus.IdCustomer,
+                  cus.Name AS CustomerName,
+                  lvz.IdLookupValue AS IdZone,
+                  lvz.Value AS Region
+             FROM emdep_geos.action_plans ap
+                  INNER JOIN emdep_geos.companies com
+                     ON com.IdCompany = ap.IdLocation
+                  INNER JOIN countries co ON co.idCountry = com.IdCountry
+                  INNER JOIN emdep_geos.employees emp
+                     ON emp.IdEmployee = ap.IdResponsibleEmployee
+                  INNER JOIN emdep_geos.lookup_values lv
+                     ON lv.IdLookupValue = ap.IdOrigin
+                  LEFT JOIN emdep_geos.lookup_values lvap
+                     ON lvap.IdLookupValue = ap.IdBusinessUnit
+                  LEFT JOIN emdep_geos.users usr ON usr.IdUser = ap.CreatedBy
+                  INNER JOIN departments lvDep
+                     ON lvDep.IdDepartment = ap.IdDepartment
+                  LEFT JOIN geos.sites si ON si.IdSite = ap.IdSite
+                  LEFT JOIN geos.customers cus
+                     ON cus.IdCustomer = si.IdCustomer
+                  LEFT JOIN geos.countries cor ON cor.IdCountry = si.IdCountry
+                  LEFT JOIN lookup_values lvz
+                     ON cor.IdRegion = lvz.IdLookupValue
+            WHERE     FIND_IN_SET(YEAR(ap.CreatedIn), _SelectedPeriod) > 0
+                  AND ap.InUse = 1      ;
+  
+  
+  
+        DROP TEMPORARY TABLE IF EXISTS ActionPlanTasktemp;
+  
+        CREATE TEMPORARY TABLE ActionPlanTasktemp
+  
+        AS
+           SELECT DISTINCT
+                  apt.IdTask,
+                  apt.IdParent ,
+                  apt.TaskNumber,
+                  apt.Title,
+                  emp.EmployeeCode,
+                  emp.IdEmployee,
+                  emp.FirstName,
+                  CONCAT(emp.FirstName, ' ', emp.LastName) AS Responsible,
+                  emp.IdGender,
+                  lvStatus.IdLookupValue AS IdLookupStatus,
+                  lvStatus.Value AS Status,
+                  lvStatus.HtmlColor AS StatusHTMLColor,
+                  lvPriority.IdLookupValue AS IdLookupPriority,
+                  lvPriority.Value AS Priority,
+                  lvTheme.IdLookupValue AS IdLookupTheme,
+                  lvTheme.Value AS Theme,
+                  lvTheme.HtmlColor AS ThemeHTMLColor,
+                  apt.DueDate,
+                  CASE
+                     WHEN lvStatus.Value = 'Done'
+                     THEN
+                        DATEDIFF(apt.CloseDate, apt.DueDate)
+                     ELSE
+                        DATEDIFF(CURDATE(), apt.DueDate)
+                  END
+                     AS DueDays,
+                  CASE
+                     WHEN     CURRENT_DATE > apt.DueDate
+                          AND CURRENT_DATE <=
+                                 DATE_ADD(apt.DueDate, INTERVAL 2 DAY)
+                     THEN
+                        '#008000'
+                     WHEN     CURRENT_DATE >
+                                 DATE_ADD(apt.DueDate, INTERVAL 2 DAY)
+                          AND CURRENT_DATE <=
+                                 DATE_ADD(apt.DueDate, INTERVAL 7 DAY)
+                     THEN
+                        '#FFFF00'
+                     WHEN CURRENT_DATE > DATE_ADD(apt.DueDate, INTERVAL 7 DAY)
+                     THEN
+                        '#FF0000'
+                     ELSE
+                        ''
+                  END
+                     AS DueColor,
+                  empDelegated.IdEmployee AS IdDelegated,
+                  CONCAT(empDelegated.FirstName, ' ', empDelegated.LastName)
+                     AS DelegatedTo,
+                  (SELECT COUNT(*)
+                     FROM action_plan_task_comments aptc
+                    WHERE aptc.IdTask = apt.IdTask AND aptc.IsDeleted != 1)
+                     AS Comments,
+                  (SELECT aptcc.Comment
+                     FROM action_plan_task_comments aptcc
+                    WHERE aptcc.IdTask = apt.IdTask AND aptcc.IsDeleted != 1
+                   ORDER BY aptcc.CreatedIn DESC
+                    LIMIT 1)
+                     AS TaskLastComments,
+                  (SELECT COUNT(*)
+                     FROM action_plan_task_attachments apta
+                    WHERE apta.IdTask = apt.IdTask AND apta.IsDeleted != 1)
+                     AS Files,
+                  apt.Progress,
+                  apt.IdLocation,
+                  apt.IdActionPlan,
+                  apt.CreatedIn AS OpenDate,
+                  apt.CloseDate,
+                  apt.OriginalDueDate,
+                  apt.ModifiedIn AS LastUpdated,
+                  CASE
+                     WHEN lvStatus.Value = 'Done'
+                     THEN
+                        DATEDIFF(apt.CloseDate, apt.CreatedIn)
+                     ELSE
+                        DATEDIFF(CURDATE(), apt.CreatedIn)
+                  END
+                     AS Duration,
+                  apt.DueDateChangeCount AS ChangeCount,
+                  com.IdCompany,
+                  com.Alias AS Location,
+                  apt.Description,
+                  apt.ClosedBy,
+                  CONCAT(usrcl.FirstName, ' ', usrcl.LastName) AS ClosedByName,
+                  apt.CreatedIn,
+                  apt.CreatedBy,
+                  CONCAT(usrcr.FirstName, ' ', usrcr.LastName) AS CreatedByName,
+                  ap.IdDepartment,
+                  co.Name AS Country,
+                  co.Iso AS CountryIso,
+                  COALESCE(emp.DisplayName,
+                           CONCAT(emp.FirstName, ' ', emp.LastName))
+                     AS TaskResponsibleDisplayName,
+                  COALESCE(
+                     empDelegated.DisplayName,
+                     CONCAT(empDelegated.FirstName, ' ', empDelegated.LastName))
+                     AS DelegatedDisplayName,
+                  apt.IdOTItem,
+                  ri.NumItem,
+                  ots.Code,
+                  ots.IdOT,
+                   CONCAT(ots.Code, ' – ', ots.NumOt,' - ',ri.NumItem) AS OTCodeAndItemNumber,
+                  apt.RequestParticipants AS Participant,
+                  apt.OriginWeek
+
+             FROM emdep_geos.action_plan_task apt
+                  INNER JOIN emdep_geos.action_plans ap
+                     ON ap.IdActionPlan = apt.IdActionPlan
+                  INNER JOIN emdep_geos.employees emp
+                     ON emp.IdEmployee = apt.IdResponsibleEmployee
+                  INNER JOIN emdep_geos.lookup_values lvStatus
+                     ON lvStatus.IdLookupValue = apt.IdStatus
+                  INNER JOIN emdep_geos.lookup_values lvPriority
+                     ON lvPriority.IdLookupValue = apt.IdPriority
+                  INNER JOIN emdep_geos.lookup_values lvTheme
+                     ON lvTheme.IdLookupValue = apt.IdTheme
+                  LEFT JOIN emdep_geos.employees empDelegated
+                     ON empDelegated.IdEmployee = apt.DelegatedTo
+                  INNER JOIN emdep_geos.companies com
+                     ON com.IdCompany = apt.IdLocation
+                  LEFT JOIN emdep_geos.users usrcr
+                     ON usrcr.IdUser = apt.CreatedBy
+                  LEFT JOIN emdep_geos.users usrcl
+                     ON usrcl.IdUser = apt.ClosedBy
+                  INNER JOIN countries co ON co.idCountry = com.IdCountry
+                  LEFT JOIN geos.otitems ot ON ot.IdOTItem = apt.IdOTItem
+                  LEFT JOIN geos.revisionitems ri
+                     ON ot.idrevisionitem = ri.idrevisionitem
+                  LEFT JOIN geos.ots ots ON ots.IdOT = ot.IdOT
+            WHERE     FIND_IN_SET(YEAR(ap.CreatedIn), _SelectedPeriod) > 0
+                  AND apt.InUse = 1 AND ap.InUse = 1
+                  AND (   CloseDate >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)
+                       OR CloseDate IS NULL)
+                       AND apt.IdParent IS NULL
+           ORDER BY lvTheme.Position      ;
+  
+        DROP TEMPORARY TABLE IF EXISTS ActionPlanSubTasktemp;
+  
+        CREATE TEMPORARY TABLE ActionPlanSubTasktemp
+  
+        AS
+  
+           SELECT DISTINCT
+                  apt.IdTask,
+                  apt.TaskNumber,
+                  apt.IdParent ,
+                  parent.TaskNumber AS ParentTaskNumber,
+                  apt.Title,
+                  emp.EmployeeCode,
+                  emp.IdEmployee,
+                  CONCAT(emp.FirstName, ' ', emp.LastName) AS Responsible,
+                  emp.IdGender,
+                  lvStatus.IdLookupValue AS IdLookupStatus,
+                  lvStatus.Value AS Status,
+                  lvStatus.HtmlColor AS StatusHTMLColor,
+                  lvPriority.IdLookupValue AS IdLookupPriority,
+                  lvPriority.Value AS Priority,
+                  lvTheme.IdLookupValue AS IdLookupTheme,
+                  lvTheme.Value AS Theme,
+                  lvTheme.HtmlColor AS ThemeHTMLColor,
+                  apt.DueDate,
+                  CASE
+                     WHEN lvStatus.Value = 'Done'
+                     THEN
+                        DATEDIFF(apt.CloseDate, apt.DueDate)
+                     ELSE
+                        DATEDIFF(CURDATE(), apt.DueDate)
+                  END
+                     AS DueDays,
+                  CASE
+                     WHEN     CURRENT_DATE > apt.DueDate
+                          AND CURRENT_DATE <=
+                                 DATE_ADD(apt.DueDate, INTERVAL 2 DAY)
+                     THEN
+                        '#008000'
+                     WHEN     CURRENT_DATE >
+                                 DATE_ADD(apt.DueDate, INTERVAL 2 DAY)
+                          AND CURRENT_DATE <=
+                                 DATE_ADD(apt.DueDate, INTERVAL 7 DAY)
+                     THEN
+                        '#FFFF00'
+                     WHEN CURRENT_DATE > DATE_ADD(apt.DueDate, INTERVAL 7 DAY)
+                     THEN
+                        '#FF0000'
+                     ELSE
+                        ''
+                  END
+                     AS DueColor,
+                  empDelegated.IdEmployee AS IdDelegated,
+                  CONCAT(empDelegated.FirstName, ' ', empDelegated.LastName)
+                     AS DelegatedTo,
+                  (SELECT COUNT(*)
+                     FROM action_plan_task_comments aptc
+                    WHERE aptc.IdTask = apt.IdTask AND aptc.IsDeleted != 1)
+                     AS Comments,
+                  (SELECT aptcc.Comment
+                     FROM action_plan_task_comments aptcc
+                    WHERE aptcc.IdTask = apt.IdTask AND aptcc.IsDeleted != 1
+                   ORDER BY aptcc.CreatedIn DESC
+                    LIMIT 1)
+                     AS TaskLastComments,
+                  (SELECT COUNT(*)
+                     FROM action_plan_task_attachments apta
+                    WHERE apta.IdTask = apt.IdTask AND apta.IsDeleted != 1)
+                     AS Files,
+                  apt.Progress,
+                  apt.IdLocation,
+                  apt.IdActionPlan,
+                  apt.CreatedIn AS OpenDate,
+                  apt.CloseDate,
+                  apt.OriginalDueDate,
+                  apt.ModifiedIn AS LastUpdated,
+                  CASE
+                     WHEN lvStatus.Value = 'Done'
+                     THEN
+                        DATEDIFF(apt.CloseDate, apt.CreatedIn)
+                     ELSE
+                        DATEDIFF(CURDATE(), apt.CreatedIn)
+                  END
+                     AS Duration,
+                  apt.DueDateChangeCount AS ChangeCount,
+                  com.IdCompany,
+                  com.Alias AS Location,
+                  apt.Description,
+                  apt.ClosedBy,
+                  CONCAT(usrcl.FirstName, ' ', usrcl.LastName) AS ClosedByName,
+                  apt.CreatedIn,
+                  apt.CreatedBy,
+                  CONCAT(usrcr.FirstName, ' ', usrcr.LastName) AS CreatedByName,
+                  ap.IdDepartment,
+                  co.Name AS Country,
+                  co.Iso AS CountryIso,
+                  COALESCE(emp.DisplayName,
+                           CONCAT(emp.FirstName, ' ', emp.LastName))
+                     AS TaskResponsibleDisplayName,
+                  COALESCE(
+                     empDelegated.DisplayName,
+                     CONCAT(empDelegated.FirstName, ' ', empDelegated.LastName))
+                     AS DelegatedDisplayName,
+                  apt.IdOTItem,
+                  ri.NumItem,
+                  ots.Code,
+                  ots.IdOT,
+                   CONCAT(ots.Code, ' – ', ots.NumOt,' - ',ri.NumItem) AS OTCodeAndItemNumber,
+                  apt.RequestParticipants AS Participant,
+                  apt.OriginWeek
+
+             FROM emdep_geos.action_plan_task apt
+                  INNER JOIN emdep_geos.action_plans ap
+                     ON ap.IdActionPlan = apt.IdActionPlan
+                  INNER JOIN emdep_geos.employees emp
+                     ON emp.IdEmployee = apt.IdResponsibleEmployee
+                  INNER JOIN emdep_geos.lookup_values lvStatus
+                     ON lvStatus.IdLookupValue = apt.IdStatus
+                  INNER JOIN emdep_geos.lookup_values lvPriority
+                     ON lvPriority.IdLookupValue = apt.IdPriority
+                  INNER JOIN emdep_geos.lookup_values lvTheme
+                     ON lvTheme.IdLookupValue = apt.IdTheme
+                  LEFT JOIN emdep_geos.employees empDelegated
+                     ON empDelegated.IdEmployee = apt.DelegatedTo
+                  INNER JOIN emdep_geos.companies com
+                     ON com.IdCompany = apt.IdLocation
+                  LEFT JOIN emdep_geos.users usrcr
+                     ON usrcr.IdUser = apt.CreatedBy
+                  LEFT JOIN emdep_geos.users usrcl
+                     ON usrcl.IdUser = apt.ClosedBy
+                  INNER JOIN countries co ON co.idCountry = com.IdCountry
+                  LEFT JOIN geos.otitems ot ON ot.IdOTItem = apt.IdOTItem
+                  LEFT JOIN geos.revisionitems ri
+                     ON ot.idrevisionitem = ri.idrevisionitem
+                  LEFT JOIN geos.ots ots ON ots.IdOT = ot.IdOT
+                  LEFT JOIN emdep_geos.action_plan_task parent ON parent.IdTask = apt.IdParent
+            WHERE apt.IdParent IS NOT NULL AND   FIND_IN_SET(YEAR(ap.CreatedIn), _SelectedPeriod) > 0
+                  AND apt.InUse = 1 AND ap.InUse = 1 AND apt.IdParent IN (SELECT IdTask FROM ActionPlanTasktemp)
+                  AND (apt.CloseDate >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)
+                       OR apt.CloseDate IS NULL)
+           ORDER BY lvTheme.Position      ;
+  
+  
+        IF EXISTS
+              (SELECT 1
+                 FROM permissions p
+                      INNER JOIN user_permissions up
+                         ON p.IdPermission = up.IdPermission
+                WHERE up.IdUser = _Iduser AND p.IdPermission = 122)     -- Admin
+        THEN
+           SELECT * FROM ActionPlantemp;
+  
+           SELECT * FROM ActionPlanTasktemp;
+           
+           SELECT * FROM ActionPlanSubTasktemp;
+        ELSEIF EXISTS
+                  (SELECT 1
+                     FROM user_permissions
+                    WHERE IdUser = _Iduser AND IdPermission = 134) -- Location Manager
+        THEN
+           SELECT group_concat(e.IdCompany)
+             INTO _CompanyList1
+             FROM (SELECT sup.IdCompany
+                     FROM site_user_permission sup
+                      INNER JOIN emdep_geos.site_user_module_geos_permission gp 
+							ON sup.Id = gp.IdSiteUserPermission And gp.IdGeosModule=15 
+                          INNER JOIN companies comp
+                             ON sup.IdCompany = comp.IdCompany
+                          INNER JOIN countries co
+                             ON co.idCountry = comp.IdCountry
+                          INNER JOIN currencies cu
+                             ON cu.IdCurrency = co.IdOfficialCurrency
+                    WHERE sup.IdUser = _Iduser
+                   GROUP BY sup.IdCompany
+                   ORDER BY comp.IdCountry) AS e;
+  
+  
+           SELECT GROUP_CONCAT(DISTINCT emp.IdEmployee)
+             INTO _EmployeeList1
+             FROM employees emp
+            WHERE IdUser = _Iduser;
+  
+  
+           SELECT GROUP_CONCAT(DISTINCT temp1.IdActionPlan)
+             INTO _IdActionPlanList1
+             FROM ActionPlantemp temp1
+            WHERE    FIND_IN_SET(temp1.IdEmployee, _EmployeeList1)
+                  OR temp1.CreatedBy = _Iduser;
+  
+           SELECT GROUP_CONCAT(DISTINCT temp2.IdTask)
+    INTO _IdActionPlanTaskList1
+    FROM ActionPlanTasktemp temp2
+   WHERE    FIND_IN_SET(temp2.IdEmployee, _EmployeeList1)
+         OR FIND_IN_SET(temp2.IdDelegated, _EmployeeList1)
+         OR FIND_IN_SET(_UserEmployeeId,temp2.Participant)
+         OR temp2.CreatedBy = _Iduser
+         OR FIND_IN_SET(temp2.IdCompany, _CompanyList1);
+                  
+  
+  SELECT GROUP_CONCAT(DISTINCT temp2.IdParent)
+    INTO _IdActionPlanTaskList2
+    FROM actionplansubtasktemp temp2
+   WHERE    FIND_IN_SET(temp2.IdEmployee, _EmployeeList1)
+         OR FIND_IN_SET(temp2.IdDelegated, _EmployeeList1)
+         OR FIND_IN_SET(_UserEmployeeId,temp2.Participant)
+         OR temp2.CreatedBy = _Iduser
+         OR FIND_IN_SET(temp2.IdCompany, _CompanyList1);
+  
+  
+  SELECT GROUP_CONCAT(DISTINCT temp2.IdActionPlan)
+    INTO _IdActionPlanList2
+    FROM ActionPlanTasktemp temp2
+   WHERE    FIND_IN_SET(temp2.IdTask, _IdActionPlanTaskList2)
+         OR FIND_IN_SET(temp2.IdTask, _IdActionPlanTaskList1);
+  
+  
+           SELECT group_concat(e.IdCompany)
+             INTO __CompanyList2
+             FROM (SELECT sup.IdCompany
+                     FROM site_user_permission sup
+						 INNER JOIN emdep_geos.site_user_module_geos_permission gp 
+							ON sup.Id = gp.IdSiteUserPermission And gp.IdGeosModule=15
+                          INNER JOIN companies comp
+                             ON sup.IdCompany = comp.IdCompany
+                          INNER JOIN countries co
+                             ON co.idCountry = comp.IdCountry
+                          INNER JOIN currencies cu
+                             ON cu.IdCurrency = co.IdOfficialCurrency
+                    WHERE sup.IdUser = _Iduser
+                   GROUP BY sup.IdCompany
+                   ORDER BY comp.IdCountry) AS e;
+  
+  
+  
+           SELECT *
+             FROM ActionPlantemp
+            WHERE    (   ((FIND_IN_SET(IdCompany, _CompanyList1)))
+                      OR (IdActionPlan IN (SELECT IdActionPlan
+                                             FROM ActionPlanTasktemp
+                                            WHERE FIND_IN_SET(
+                                                     ActionPlanTasktemp.IdCompany,
+                                                     _CompanyList1)))
+                      OR CreatedBy = _Iduser)
+                  OR FIND_IN_SET(ActionPlantemp.IdActionPlan,
+                                 _IdActionPlanList1)
+                  OR FIND_IN_SET(ActionPlantemp.IdActionPlan,
+                                 _IdActionPlanList2);
+  
+  
+  
+          SELECT *
+               FROM ActionPlanTasktemp
+               WHERE    FIND_IN_SET(IdCompany, __CompanyList2)
+         OR FIND_IN_SET(_UserEmployeeId, ActionPlanTasktemp.Participant)
+         OR CreatedBy = _Iduser
+         OR FIND_IN_SET(ActionPlanTasktemp.IdActionPlan, _IdActionPlanList1)
+         OR FIND_IN_SET(ActionPlanTasktemp.IdTask, _IdActionPlanTaskList1)
+         OR FIND_IN_SET(ActionPlanTasktemp.IdTask, _IdActionPlanTaskList2)
+         OR (       FIND_IN_SET(ActionPlanTasktemp.IdActionPlan,
+                                _IdActionPlanList2)
+                AND FIND_IN_SET(ActionPlanTasktemp.IdEmployee, _EmployeeList1)
+             OR FIND_IN_SET(ActionPlanTasktemp.IdDelegated, _EmployeeList1));
+                                     
+              SELECT *
+    FROM ActionPlanSubTasktemp ast
+   WHERE    FIND_IN_SET(ast.IdCompany, __CompanyList2)
+         OR FIND_IN_SET(_UserEmployeeId,ast.Participant)
+         OR ast.CreatedBy = _Iduser
+         OR FIND_IN_SET(ast.IdActionPlan, _IdActionPlanList1)
+         OR FIND_IN_SET(ast.IdParent, _IdActionPlanTaskList1)
+         OR FIND_IN_SET(ast.IdParent, _IdActionPlanTaskList2)
+         OR (       FIND_IN_SET(ast.IdActionPlan, _IdActionPlanList2)
+                AND FIND_IN_SET(ast.IdEmployee, _EmployeeList1)
+             OR FIND_IN_SET(ast.IdDelegated, _EmployeeList1));
+                      
+                      
+        ELSEIF EXISTS
+                  (SELECT 1
+                     FROM user_permissions
+                    WHERE IdUser = _Iduser AND IdPermission = 135) -- Department Manager
+        THEN
+           SELECT GROUP_CONCAT(DISTINCT jd.IdDepartment)
+             INTO _DepartmentList1
+             FROM emdep_geos.employee_job_descriptions ejd
+                  INNER JOIN emdep_geos.job_descriptions jd
+                     ON jd.IdJobDescription = ejd.IdJobDescription
+                  INNER JOIN emdep_geos.employees emp
+                     ON ejd.IdEmployee = emp.IdEmployee
+            WHERE emp.IdUser = _Iduser;
+  
+           SELECT group_concat(e.IdCompany)
+             INTO _CompanyList1
+             FROM (SELECT sup.IdCompany
+                     FROM site_user_permission sup
+                     INNER JOIN emdep_geos.site_user_module_geos_permission gp 
+							ON sup.Id = gp.IdSiteUserPermission And gp.IdGeosModule=15 
+                          INNER JOIN companies comp
+                             ON sup.IdCompany = comp.IdCompany
+                          INNER JOIN countries co
+                             ON co.idCountry = comp.IdCountry
+                          INNER JOIN currencies cu
+                             ON cu.IdCurrency = co.IdOfficialCurrency
+                    WHERE sup.IdUser = _Iduser
+                   GROUP BY sup.IdCompany
+                   ORDER BY comp.IdCountry) AS e;
+  
+           SELECT GROUP_CONCAT(DISTINCT emp.IdEmployee)
+             INTO _EmployeeList1
+             FROM employees emp
+            WHERE IdUser = _Iduser;
+  
+           SELECT GROUP_CONCAT(DISTINCT jd.IdDepartment)
+             INTO _DepartmentList2
+             FROM emdep_geos.employee_job_descriptions ejd
+                  INNER JOIN emdep_geos.job_descriptions jd
+                     ON jd.IdJobDescription = ejd.IdJobDescription
+                  INNER JOIN emdep_geos.employees emp
+                     ON ejd.IdEmployee = emp.IdEmployee
+            WHERE emp.IdUser = _Iduser;
+  
+           SELECT group_concat(e.IdCompany)
+             INTO __CompanyList2
+             FROM (SELECT sup.IdCompany
+                     FROM site_user_permission sup
+						 INNER JOIN emdep_geos.site_user_module_geos_permission gp 
+							ON sup.Id = gp.IdSiteUserPermission And gp.IdGeosModule=15
+                          INNER JOIN companies comp
+                             ON sup.IdCompany = comp.IdCompany
+                          INNER JOIN countries co
+                             ON co.idCountry = comp.IdCountry
+                          INNER JOIN currencies cu
+                             ON cu.IdCurrency = co.IdOfficialCurrency
+                    WHERE sup.IdUser = _Iduser
+                   GROUP BY sup.IdCompany
+                   ORDER BY comp.IdCountry) AS e;
+  
+           SELECT GROUP_CONCAT(DISTINCT temp1.IdActionPlan)
+             INTO _IdActionPlanList1
+             FROM ActionPlantemp temp1
+            WHERE    FIND_IN_SET(temp1.IdEmployee, _EmployeeList1)
+                  OR temp1.CreatedBy = _Iduser;
+  
+  
+           SELECT GROUP_CONCAT(DISTINCT temp2.IdActionPlan)
+             INTO _IdActionPlanList2
+             FROM ActionPlanTasktemp temp2
+            WHERE    FIND_IN_SET(temp2.IdEmployee, _EmployeeList1)
+                  OR FIND_IN_SET(temp2.IdDelegated, _EmployeeList1)
+                  OR FIND_IN_SET(_UserEmployeeId, temp2.Participant)
+                  OR temp2.CreatedBy = _Iduser;
+  
+  SELECT GROUP_CONCAT(DISTINCT temp2.IdTask)
+    INTO _IdActionPlanTaskList1
+    FROM ActionPlanTasktemp temp2
+   WHERE    FIND_IN_SET(temp2.IdEmployee, _EmployeeList1)
+         OR temp2.CreatedBy = _Iduser;
+  
+  
+  
+  SELECT GROUP_CONCAT(DISTINCT temp2.IdParent)
+    INTO _IdActionPlanTaskList2
+    FROM actionplansubtasktemp temp2
+   WHERE    FIND_IN_SET(temp2.IdEmployee, _EmployeeList1)
+         OR FIND_IN_SET(temp2.IdDelegated, _EmployeeList1)
+         OR FIND_IN_SET(_UserEmployeeId,temp2.Participant)
+         OR FIND_IN_SET(temp2.IdDepartment, _DepartmentList2)
+         OR temp2.CreatedBy = _Iduser;
+         
+         
+  
+           SELECT *
+             FROM ActionPlantemp
+            WHERE        FIND_IN_SET(ActionPlantemp.IdDepartment,
+                                     _DepartmentList1)
+                     AND (FIND_IN_SET(IdCompany, _CompanyList1))
+                  OR CreatedBy = _Iduser
+                  OR FIND_IN_SET(ActionPlantemp.IdActionPlan,
+                                 _IdActionPlanList1)
+                  OR FIND_IN_SET(ActionPlantemp.IdActionPlan,
+                                 _IdActionPlanList2);
+  
+  
+  
+       SELECT *
+    FROM ActionPlanTasktemp
+   WHERE        FIND_IN_SET(ActionPlanTasktemp.IdDepartment, _DepartmentList2)
+            AND FIND_IN_SET(IdCompany, __CompanyList2)
+         OR FIND_IN_SET(_UserEmployeeId, ActionPlanTasktemp.Participant)
+         OR CreatedBy = _Iduser
+         OR FIND_IN_SET(ActionPlanTasktemp.IdActionPlan, _IdActionPlanList1)
+         OR FIND_IN_SET(ActionPlanTasktemp.idTask, _IdActionPlanTaskList1)
+         OR FIND_IN_SET(ActionPlanTasktemp.idTask, _IdActionPlanTaskList2)
+         OR (       FIND_IN_SET(ActionPlanTasktemp.IdActionPlan,
+                                _IdActionPlanList2)
+                AND FIND_IN_SET(ActionPlanTasktemp.IdEmployee, _EmployeeList1)
+             OR FIND_IN_SET(ActionPlanTasktemp.IdDelegated, _EmployeeList1));
+                                     
+                                     
+   SELECT *
+    FROM ActionPlanSubTasktemp ast
+   WHERE        FIND_IN_SET(ast.IdDepartment, _DepartmentList2)
+            AND FIND_IN_SET(ast.IdCompany, __CompanyList2)
+         OR FIND_IN_SET(_UserEmployeeId,ast.Participant)
+         OR ast.CreatedBy = _Iduser
+         OR FIND_IN_SET(ast.IdActionPlan, _IdActionPlanList1)
+         OR FIND_IN_SET(ast.IdParent, _IdActionPlanTaskList1)
+         OR FIND_IN_SET(ast.IdParent, _IdActionPlanTaskList2)
+         OR (       FIND_IN_SET(ast.IdActionPlan, _IdActionPlanList2)
+                AND FIND_IN_SET(ast.IdEmployee, _EmployeeList1)
+             OR FIND_IN_SET(ast.IdDelegated, _EmployeeList1));
+                      
+                      
+        ELSEIF EXISTS
+                  (SELECT 1
+                     FROM user_permissions
+                    WHERE IdUser = _Iduser AND IdPermission = 136)  -- Base User
+        THEN
+           SELECT GROUP_CONCAT(DISTINCT emp.IdEmployee)
+             INTO _EmployeeList1
+             FROM employees emp
+            WHERE IdUser = _Iduser;
+  
+           SELECT GROUP_CONCAT(DISTINCT temp1.IdActionPlan)
+             INTO _IdActionPlanList1
+             FROM ActionPlantemp temp1
+            WHERE    FIND_IN_SET(temp1.IdEmployee, _EmployeeList1)
+                  OR temp1.CreatedBy = _Iduser;
+            
+            SELECT GROUP_CONCAT(DISTINCT temp2.IdTask)
+    INTO _IdActionPlanTaskList1
+    FROM ActionPlanTasktemp temp2
+   WHERE    FIND_IN_SET(temp2.IdEmployee, _EmployeeList1)
+            OR FIND_IN_SET(temp2.IdDelegated, _EmployeeList1)
+            OR FIND_IN_SET(_UserEmployeeId,temp2.Participant)
+            OR temp2.CreatedBy = _Iduser;
+  
+  
+  
+  SELECT GROUP_CONCAT(DISTINCT temp2.IdParent)
+    INTO _IdActionPlanTaskList2
+    FROM actionplansubtasktemp temp2
+   WHERE    FIND_IN_SET(temp2.IdEmployee, _EmployeeList1)
+         OR FIND_IN_SET(temp2.IdDelegated, _EmployeeList1)
+         OR FIND_IN_SET(_UserEmployeeId,temp2.Participant)
+         OR FIND_IN_SET(temp2.IdDepartment, _DepartmentList2)
+         OR temp2.CreatedBy = _Iduser;
+                  
+  
+           SELECT GROUP_CONCAT(DISTINCT temp2.IdActionPlan)
+             INTO _IdActionPlanList2
+             FROM ActionPlanTasktemp temp2
+            WHERE    FIND_IN_SET(temp2.IdTask, _IdActionPlanTaskList2)
+                  OR FIND_IN_SET(temp2.IdTask, _IdActionPlanTaskList1);
+  
+           SELECT *
+             FROM ActionPlantemp
+            WHERE    FIND_IN_SET(ActionPlantemp.IdActionPlan,
+                                 _IdActionPlanList1)
+                  OR FIND_IN_SET(ActionPlantemp.IdActionPlan,
+                                 _IdActionPlanList2)
+                  OR CreatedBy = _Iduser;
+                  
+  
+         SELECT *
+    FROM ActionPlanTasktemp
+   WHERE    FIND_IN_SET(ActionPlanTasktemp.IdActionPlan, _IdActionPlanList1)
+         OR (       FIND_IN_SET(ActionPlanTasktemp.IdActionPlan,
+                                _IdActionPlanList2)
+                AND FIND_IN_SET(ActionPlanTasktemp.IdEmployee, _EmployeeList1)
+             OR FIND_IN_SET(ActionPlanTasktemp.IdDelegated, _EmployeeList1))
+         OR CreatedBy = _Iduser
+         OR FIND_IN_SET(_UserEmployeeId,ActionPlanTasktemp.Participant)
+         OR FIND_IN_SET(ActionPlanTasktemp.idTask, _IdActionPlanTaskList1)
+         OR FIND_IN_SET(ActionPlanTasktemp.idTask, _IdActionPlanTaskList2);
+         
+         
+             SELECT *
+    FROM ActionPlanSubTasktemp ast
+   WHERE    FIND_IN_SET(ast.IdActionPlan, _IdActionPlanList1)
+         OR (       FIND_IN_SET(ast.IdActionPlan, _IdActionPlanList2)
+                AND FIND_IN_SET(ast.IdEmployee, _EmployeeList1)
+             OR FIND_IN_SET(ast.IdDelegated, _EmployeeList1))
+         OR ast.CreatedBy = _Iduser
+         OR FIND_IN_SET(_UserEmployeeId,ast.Participant)
+         OR FIND_IN_SET(ast.IdParent, _IdActionPlanTaskList1)
+         OR FIND_IN_SET(ast.IdParent, _IdActionPlanTaskList2);
+        ELSEIF EXISTS
+                  (SELECT 1
+                     FROM permissions p
+                          INNER JOIN user_permissions up
+                             ON p.IdPermission = up.IdPermission
+                    WHERE up.IdUser = _Iduser AND p.IdPermission = 121)  -- View
+        THEN
+           SELECT * FROM ActionPlantemp;
+  
+           SELECT * FROM ActionPlanTasktemp;
+           
+            SELECT * FROM ActionPlanSubTasktemp;
+        ELSE
+           SELECT NULL AS NoPermission;
+        END IF;
+     END

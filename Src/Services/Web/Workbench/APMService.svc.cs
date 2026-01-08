@@ -8,11 +8,17 @@ using Emdep.Geos.Services.Contracts;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Data;
+using System.Data.Common;
+using System.Data.Entity;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.ServiceModel;
 using System.Text;
+using System.Diagnostics;
+using System.Data.SqlClient;
+using MySql.Data.MySqlClient;
 
 namespace Emdep.Geos.Services.Web.Workbench
 {
@@ -2916,15 +2922,36 @@ namespace Emdep.Geos.Services.Web.Workbench
             }
         }
 
-        public List<APMActionPlanModern> GetActionPlanDetails_WithCounts(string selectedPeriod, int idUser, string filterAlert = null, string filterTheme = null)
+        public List<APMActionPlanModern> GetActionPlanDetails_WithCounts(
+            string selectedPeriod, 
+            int idUser, 
+            string filterLocation = null,
+            string filterResponsible = null,
+            string filterBusinessUnit = null,
+            string filterOrigin = null,
+            string filterDepartment = null,
+            string filterCustomer = null,
+            string alertFilter = null,
+            string filterTheme = null)
         {
             try
             {
                 string connString = GetConnectionString();
-
                 string iconPath = GetCountryIconPath();
 
-                return new APMManager().GetActionPlanDetails_WithCounts(connString, selectedPeriod, idUser, iconPath, filterAlert, filterTheme);
+                return new APMManager().GetActionPlanDetails_WithCounts(
+                    connString, 
+                    selectedPeriod, 
+                    idUser, 
+                    iconPath, 
+                    filterLocation, 
+                    filterResponsible, 
+                    filterBusinessUnit, 
+                    filterOrigin, 
+                    filterDepartment, 
+                    filterCustomer, 
+                    alertFilter, 
+                    filterTheme);
             }
             catch (Exception ex)
             {
@@ -2960,7 +2987,478 @@ namespace Emdep.Geos.Services.Web.Workbench
                 throw new FaultException<ServiceException>(exp, ex.ToString());
             }
         }
-        
+        public ActionPlanDetailsData GetActionPlanDetails(int idActionPlan)
+        {
+            try
+            {
+                APMManager mgr = new APMManager();
+                // Obtém a connection string como nos outros métodos
+                string connectionString = ConfigurationManager.ConnectionStrings["WorkbenchContext"].ConnectionString;
+
+                // Chama o Manager (que vamos criar a seguir)
+                return mgr.GetActionPlanDetails(connectionString, idActionPlan);
+            }
+            catch (Exception ex)
+
+            {
+                ServiceException exp = new ServiceException();
+                exp.ErrorMessage = ex.Message;
+                exp.ErrorDetails = ex.ToString();
+                throw new FaultException<ServiceException>(exp, ex.ToString());
+            }
+        }
+
+        public List<APMActionPlanTask> GetTaskListByIdActionPlan_V2680PT(
+            long idActionPlan, 
+            string period, 
+            int userId,
+            string filterLocation = null,
+            string filterResponsible = null,
+            string filterBusinessUnit = null,
+            string filterOrigin = null,
+            string filterDepartment = null,
+            string filterCustomer = null,
+            string alertFilter = null,
+            string filterTheme = null)
+        {
+            var result = new List<APMActionPlanTask>();
+
+            // LOGGING TEMP: parâmetros recebidos
+            try
+            {
+                string logMsg = $"[V2680PT] Called with: idActionPlan={idActionPlan}, period={period}, userId={userId}, " +
+                                $"filterLocation={filterLocation ?? "NULL"}, filterResponsible={filterResponsible ?? "NULL"}, " +
+                                $"filterBusinessUnit={filterBusinessUnit ?? "NULL"}, filterOrigin={filterOrigin ?? "NULL"}, " +
+                                $"filterDepartment={filterDepartment ?? "NULL"}, filterCustomer={filterCustomer ?? "NULL"}, " +
+                                $"alertFilter={alertFilter ?? "NULL"}, filterTheme={filterTheme ?? "NULL"}";
+                Trace.WriteLine(logMsg);
+            }
+            catch { /* ignore logging errors */ }
+
+            // 1. Obter Connection String
+            string connectionString = ConfigurationManager.ConnectionStrings["WorkbenchContext"].ConnectionString;
+
+            // LOGGING TEMP: connection string
+            try { Trace.WriteLine($"[V2680PT] ConnectionString: {connectionString}"); } catch { }
+
+            using (MySqlConnection conn = new MySqlConnection(connectionString))
+            {
+                using (MySqlCommand cmd = new MySqlCommand("APM_GetTaskListByIdActionPlan_V2680PT", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    // 2. Adicionar Parâmetros Obrigatórios
+                    cmd.Parameters.AddWithValue("_SelectedPeriod", period);
+                    cmd.Parameters.AddWithValue("_IdActionPlan", idActionPlan);
+                    cmd.Parameters.AddWithValue("_Iduser", userId);
+
+                    // 3. Adicionar Parâmetros de Filtro (Opcionais)
+                    cmd.Parameters.AddWithValue("_FilterLocation", string.IsNullOrEmpty(filterLocation) ? (object)DBNull.Value : filterLocation);
+                    cmd.Parameters.AddWithValue("_FilterResponsible", string.IsNullOrEmpty(filterResponsible) ? (object)DBNull.Value : filterResponsible);
+                    cmd.Parameters.AddWithValue("_FilterBusinessUnit", string.IsNullOrEmpty(filterBusinessUnit) ? (object)DBNull.Value : filterBusinessUnit);
+                    cmd.Parameters.AddWithValue("_FilterOrigin", string.IsNullOrEmpty(filterOrigin) ? (object)DBNull.Value : filterOrigin);
+                    cmd.Parameters.AddWithValue("_FilterDepartment", string.IsNullOrEmpty(filterDepartment) ? (object)DBNull.Value : filterDepartment);
+                    cmd.Parameters.AddWithValue("_FilterCustomer", string.IsNullOrEmpty(filterCustomer) ? (object)DBNull.Value : filterCustomer);
+                    cmd.Parameters.AddWithValue("_AlertFilter", string.IsNullOrEmpty(alertFilter) ? (object)DBNull.Value : alertFilter);
+                    cmd.Parameters.AddWithValue("_FilterTheme", string.IsNullOrEmpty(filterTheme) ? (object)DBNull.Value : filterTheme);
+
+                    try
+                    {
+                        conn.Open();
+                        // LOGGING TEMP: before ExecuteReader
+                        try { Trace.WriteLine($"[V2680PT] Executing SP..."); } catch { }
+
+                        using (MySqlDataReader dr = cmd.ExecuteReader())
+                        {
+                            int parentCount = 0;
+                            // 3. Ler o primeiro Result Set: TASKS (Pais)
+                            while (dr.Read())
+                            {
+                                parentCount++;
+                                var task = MapDataReaderToTask(dr);
+                                if (task != null)
+                                {
+                                    // Inicializa a lista com o tipo correto
+                                    task.SubTaskList = new List<APMActionPlanSubTask>();
+                                    result.Add(task);
+                                }
+                            }
+
+                            // LOGGING TEMP: parent rows
+                            try { Trace.WriteLine($"[V2680PT] Parent rows read: {parentCount}, added to result: {result.Count}"); } catch { }
+
+                            // 4. Ler o segundo Result Set: SUBTASKS (Filhos)
+                            int childCount = 0;
+                            bool hasNextResultSet = dr.NextResult();
+                            try { Trace.WriteLine($"[V2680PT] NextResult() returned: {hasNextResultSet}"); } catch { }
+                            
+                            if (hasNextResultSet)
+                            {
+                                while (dr.Read())
+                                {
+                                    childCount++;
+                                    try { Trace.WriteLine($"[V2680PT] Reading child row #{childCount}..."); } catch { }
+                                    
+                                    try
+                                    {
+                                        // Usa o método específico para SubTask
+                                        var subTask = MapDataReaderToSubTask(dr);
+
+                                        if (subTask == null)
+                                        {
+                                            try { Trace.WriteLine($"[V2680PT] Child row #{childCount} - MapDataReaderToSubTask returned NULL"); } catch { }
+                                        }
+                                        else if (subTask.IdParent <= 0)
+                                        {
+                                            try { Trace.WriteLine($"[V2680PT] Child row #{childCount} - IdParent={subTask.IdParent} (invalid, skipping)"); } catch { }
+                                        }
+                                        else
+                                        {
+                                            // Encontrar o Pai na lista em memória
+                                            var parent = result.FirstOrDefault(t => t.IdActionPlanTask == subTask.IdParent);
+                                            if (parent != null)
+                                            {
+                                                parent.SubTaskList.Add(subTask);
+                                                try { Trace.WriteLine($"[V2680PT] Child row #{childCount} - Added to parent IdActionPlanTask={parent.IdActionPlanTask}"); } catch { }
+                                            }
+                                            else
+                                            {
+                                                try { Trace.WriteLine($"[V2680PT] Child row #{childCount} - Parent with IdActionPlanTask={subTask.IdParent} NOT FOUND"); } catch { }
+                                            }
+                                        }
+                                    }
+                                    catch (Exception exChild)
+                                    {
+                                        try { Trace.WriteLine($"[V2680PT] Exception mapping child row #{childCount}: {exChild.Message}"); } catch { }
+                                    }
+                                }
+                            }
+
+                            // LOGGING TEMP: child rows
+                            try { Trace.WriteLine($"[V2680PT] Child rows read: {childCount}"); } catch { }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // LOGGING TEMP: exception
+                        try { Trace.WriteLine($"[V2680PT] Exception: {ex.Message}\n{ex.StackTrace}"); } catch { }
+
+                        throw new FaultException<ServiceException>(new ServiceException
+                        {
+                            ErrorMessage = "Error executing V2680PT: " + ex.Message,
+                            ErrorDetails = ex.ToString()
+                        });
+                    }
+                }
+            }
+
+            // LOGGING TEMP: final result count
+            try { Trace.WriteLine($"[V2680PT] Returning {result.Count} parent tasks."); } catch { }
+
+            return result;
+        }
+
+        // HELPER 1: Mapear TASKS (Pais)
+        private APMActionPlanTask MapDataReaderToTask(MySqlDataReader dr)
+        {
+            if (dr == null) return null;
+
+            // Local helper to check if a column exists in the reader
+            bool HasColumn(MySqlDataReader reader, string columnName)
+            {
+                try
+                {
+                    for (int i = 0; i < reader.FieldCount; i++)
+                    {
+                        if (string.Equals(reader.GetName(i), columnName, StringComparison.OrdinalIgnoreCase))
+                            return true;
+                    }
+                }
+                catch { }
+                return false;
+            }
+
+            // Local safe getters to avoid throwing when column is missing or null
+            string SafeGetString(string name)
+            {
+                try { return HasColumn(dr, name) && dr[name] != DBNull.Value ? dr[name].ToString() : string.Empty; } catch { return string.Empty; }
+            }
+
+            int SafeGetInt(string name)
+            {
+                try { return HasColumn(dr, name) && dr[name] != DBNull.Value ? Convert.ToInt32(dr[name]) : 0; } catch { return 0; }
+            }
+
+            long SafeGetLong(string name)
+            {
+                try { return HasColumn(dr, name) && dr[name] != DBNull.Value ? Convert.ToInt64(dr[name]) : 0L; } catch { return 0L; }
+            }
+
+            uint SafeGetUInt(string name)
+            {
+                try { return HasColumn(dr, name) && dr[name] != DBNull.Value ? (uint)Convert.ToInt32(dr[name]) : 0u; } catch { return 0u; }
+            }
+
+            DateTime SafeGetDateTime(string name)
+            {
+                try { return HasColumn(dr, name) && dr[name] != DBNull.Value ? Convert.ToDateTime(dr[name]) : DateTime.MinValue; } catch { return DateTime.MinValue; }
+            }
+
+            DateTime? SafeGetNullableDateTime(string name)
+            {
+                try { return HasColumn(dr, name) && dr[name] != DBNull.Value ? (DateTime?)Convert.ToDateTime(dr[name]) : (DateTime?)null; } catch { return (DateTime?)null; }
+            }
+
+            double SafeGetDouble(string name)
+            {
+                try { return HasColumn(dr, name) && dr[name] != DBNull.Value ? Convert.ToDouble(dr[name]) : 0.0; } catch { return 0.0; }
+            }
+
+            try
+            {
+                var t = new APMActionPlanTask();
+
+                // --- IDs ---
+                t.IdActionPlanTask = SafeGetLong("IdTask");
+                t.IdActionPlan = SafeGetLong("IdActionPlan");
+
+                // IdParent: Tratamento para nullable na BD convertendo para long (0 se null)
+                t.IdParent = SafeGetLong("IdParent");
+
+                // --- Dados Básicos ---
+                t.TaskNumber = SafeGetInt("TaskNumber");
+                t.Title = SafeGetString("Title");
+                t.Description = SafeGetString("Description");
+
+                // --- Pessoas ---
+                t.Responsible = SafeGetString("Responsible");
+                t.EmployeeCode = SafeGetString("EmployeeCode");
+                t.IdGender = SafeGetInt("IdGender");
+
+                // Se IdResponsibleEmployee não existe, tenta usar IdResponsible ou comenta se não for necessário
+                // t.IdResponsibleEmployee = ... (Comentado pois deu erro CS1061)
+
+                // --- Lookups ---
+                t.IdLookupStatus = SafeGetInt("IdLookupStatus");
+                t.Status = SafeGetString("Status");
+                t.StatusHTMLColor = SafeGetString("StatusHTMLColor");
+
+                // Propriedades que deram erro CS1061 (Comentadas para compilar)
+                // t.IdPriority = ...
+                // t.IdTheme = ...
+
+                t.Priority = SafeGetString("Priority");
+                t.Theme = SafeGetString("Theme");
+                t.ThemeHTMLColor = SafeGetString("ThemeHTMLColor");
+
+                // --- Datas ---
+                t.DueDate = SafeGetDateTime("DueDate");
+                t.OriginalDueDate = SafeGetNullableDateTime("OriginalDueDate");
+                // Some SPs may return CreatedIn or OpenDate depending on version; use fallback when missing
+                if (HasColumn(dr, "CreatedIn"))
+                {
+                    t.CreatedIn = SafeGetDateTime("CreatedIn");
+                }
+                else if (HasColumn(dr, "OpenDate"))
+                {
+                    t.CreatedIn = SafeGetDateTime("OpenDate");
+                }
+                else
+                {
+                    t.CreatedIn = DateTime.MinValue;
+                }
+                t.CloseDate = SafeGetNullableDateTime("CloseDate");
+                t.OpenDate = SafeGetNullableDateTime("OpenDate");
+
+                // Erro CS1061: ModifiedIn não existe
+                // t.ModifiedIn = ... 
+
+                // --- Cálculos ---
+                t.DueDays = SafeGetInt("DueDays");
+                t.CardDueColor = SafeGetString("DueColor");
+                t.Duration = SafeGetInt("Duration");
+
+                t.CommentsCount = SafeGetInt("Comments");
+
+                // Progress may come as double or int
+                t.Progress = (int)Math.Round(SafeGetDouble("Progress"));
+
+                // --- Outros Campos ---
+                t.DelegatedTo = SafeGetString("IdDelegated");
+
+                t.IdLocation = SafeGetInt("IdLocation");
+                t.Location = SafeGetString("Location");
+                t.OriginWeek = SafeGetString("OriginWeek");
+
+                // Propriedades removidas por erro CS1061
+                // t.TaskLastComments = ...
+                // t.RequestParticipants = ...
+                // t.FilesCount = ...
+                // t.DueDateChangeCount = ...
+
+                // --- Criação/Fecho (Erro CS0266 Int para UInt) ---
+                t.CreatedBy = SafeGetUInt("CreatedBy");
+                t.CreatedByName = SafeGetString("CreatedByName");
+                t.ClosedBy = SafeGetInt("ClosedBy");
+                t.ClosedByName = SafeGetString("ClosedByName");
+
+                // Garantir que SubTaskList nunca é null
+                if (t.SubTaskList == null)
+                    t.SubTaskList = new List<APMActionPlanSubTask>();
+
+                return t;
+            }
+            catch (Exception ex)
+            {
+                try
+                {
+                    var sb = new System.Text.StringBuilder();
+                    try
+                    {
+                        for (int i = 0; i < dr.FieldCount; i++)
+                        {
+                            var name = dr.GetName(i);
+                            object val = DBNull.Value.Equals(dr[i]) ? "NULL" : dr[i];
+                            sb.AppendFormat("{0}={1};", name, val);
+                        }
+                    }
+                    catch { /* ignore field extraction errors */ }
+
+                    Trace.WriteLine($"[V2680PT] Error mapping Task: {ex.Message}\n{ex.StackTrace}\nRowData: {sb}");
+                }
+                catch { }
+
+                return null;
+            }
+        }
+
+        // HELPER 2: Mapear SUBTASKS (Filhos - Tipo Diferente)
+        // HELPER 2: Mapear SUBTASKS (Filhos) - CORRIGIDO
+        private APMActionPlanSubTask MapDataReaderToSubTask(MySqlDataReader dr)
+        {
+            if (dr == null) return null;
+
+            try
+            {
+                var st = new APMActionPlanSubTask();
+
+                // --- IDs ---
+                    // Local helpers (mirror MapDataReaderToTask) - define inline to keep method self-contained
+                    bool HasColumn(MySqlDataReader reader, string columnName)
+                    {
+                        try
+                        {
+                            for (int i = 0; i < reader.FieldCount; i++)
+                            {
+                                if (string.Equals(reader.GetName(i), columnName, StringComparison.OrdinalIgnoreCase))
+                                    return true;
+                            }
+                        }
+                        catch { }
+                        return false;
+                    }
+
+                    long SafeGetLong(string name)
+                    {
+                        try { return HasColumn(dr, name) && dr[name] != DBNull.Value ? Convert.ToInt64(dr[name]) : 0L; } catch { return 0L; }
+                    }
+
+                    int SafeGetInt(string name)
+                    {
+                        try { return HasColumn(dr, name) && dr[name] != DBNull.Value ? Convert.ToInt32(dr[name]) : 0; } catch { return 0; }
+                    }
+
+                    string SafeGetString(string name)
+                    {
+                        try { return HasColumn(dr, name) && dr[name] != DBNull.Value ? dr[name].ToString() : string.Empty; } catch { return string.Empty; }
+                    }
+
+                    DateTime SafeGetDateTime(string name)
+                    {
+                        try { return HasColumn(dr, name) && dr[name] != DBNull.Value ? Convert.ToDateTime(dr[name]) : DateTime.MinValue; } catch { return DateTime.MinValue; }
+                    }
+
+                    DateTime? SafeGetNullableDateTime(string name)
+                    {
+                        try { return HasColumn(dr, name) && dr[name] != DBNull.Value ? (DateTime?)Convert.ToDateTime(dr[name]) : (DateTime?)null; } catch { return (DateTime?)null; }
+                    }
+
+                    double SafeGetDouble(string name)
+                    {
+                        try { return HasColumn(dr, name) && dr[name] != DBNull.Value ? Convert.ToDouble(dr[name]) : 0.0; } catch { return 0.0; }
+                    }
+
+                    uint SafeGetUInt(string name)
+                    {
+                        try { return HasColumn(dr, name) && dr[name] != DBNull.Value ? (uint)Convert.ToInt32(dr[name]) : 0u; } catch { return 0u; }
+                    }
+
+                    st.IdActionPlanTask = SafeGetLong("IdTask");
+                    st.IdActionPlan = SafeGetLong("IdActionPlan");
+                    st.IdParent = SafeGetLong("IdParent");
+
+                // --- Dados Básicos ---
+                st.TaskNumber = SafeGetInt("TaskNumber");
+                st.Title = SafeGetString("Title");
+                st.Description = SafeGetString("Description");
+
+                // --- Pessoas ---
+                st.Responsible = SafeGetString("Responsible");
+                st.EmployeeCode = SafeGetString("EmployeeCode");
+                // IdEmployee from SP (IdGender is also returned but may not be on SubTask class)
+                
+                // --- Lookups ---
+                st.IdLookupStatus = SafeGetInt("IdLookupStatus");
+                st.Status = SafeGetString("Status");
+                st.StatusHTMLColor = SafeGetString("StatusHTMLColor");
+
+                st.Priority = SafeGetString("Priority");
+                st.Theme = SafeGetString("Theme");
+                st.ThemeHTMLColor = SafeGetString("ThemeHTMLColor");
+
+                // --- Datas ---
+                st.DueDate = dr["DueDate"] != DBNull.Value ? Convert.ToDateTime(dr["DueDate"]) : DateTime.MinValue;
+                st.CreatedIn = dr["OpenDate"] != DBNull.Value ? Convert.ToDateTime(dr["OpenDate"]) : DateTime.MinValue;
+                st.CloseDate = dr["CloseDate"] != DBNull.Value ? Convert.ToDateTime(dr["CloseDate"]) : (DateTime?)null;
+                st.OriginalDueDate = dr["OriginalDueDate"] != DBNull.Value ? Convert.ToDateTime(dr["OriginalDueDate"]) : (DateTime?)null;
+
+                // --- Cálculos ---
+                st.DueDays = dr["DueDays"] != DBNull.Value ? Convert.ToInt32(dr["DueDays"]) : 0;
+                st.Duration = dr["Duration"] != DBNull.Value ? Convert.ToInt32(dr["Duration"]) : 0;
+                st.CardDueColor = dr["DueColor"] != DBNull.Value ? dr["DueColor"].ToString() : "";
+                st.Progress = dr["Progress"] != DBNull.Value ? Convert.ToInt32(Convert.ToDouble(dr["Progress"])) : 0;
+                st.CommentsCount = dr["Comments"] != DBNull.Value ? Convert.ToInt32(dr["Comments"]) : 0;
+
+                // --- Outros ---
+                st.DelegatedTo = dr["IdDelegated"] != DBNull.Value ? dr["IdDelegated"].ToString() : "";
+                st.IdCompany = dr["IdLocation"] != DBNull.Value ? Convert.ToInt32(dr["IdLocation"]) : 0;
+                st.Location = dr["Location"] != DBNull.Value ? dr["Location"].ToString() : "";
+                st.OriginWeek = dr["OriginWeek"] != DBNull.Value ? dr["OriginWeek"].ToString() : "";
+                
+                st.CreatedBy = dr["CreatedBy"] != DBNull.Value ? (uint)Convert.ToInt32(dr["CreatedBy"]) : 0;
+                st.CreatedByName = dr["CreatedByName"] != DBNull.Value ? dr["CreatedByName"].ToString() : "";
+                st.ClosedBy = dr["ClosedBy"] != DBNull.Value ? Convert.ToInt32(dr["ClosedBy"]) : 0;
+                st.ClosedByName = dr["ClosedByName"] != DBNull.Value ? dr["ClosedByName"].ToString() : "";
+
+                return st;
+            }
+            catch (Exception ex)
+            {
+                // Log the error to help debug mapping issues
+                try
+                {
+                    string logMessage = $"Error mapping SubTask at {DateTime.Now:yyyy-MM-dd HH:mm:ss}: {ex.Message}\nStack: {ex.StackTrace}";
+                    System.Diagnostics.Debug.WriteLine(logMessage);
+                    
+                    // Also write to event log if possible
+                    System.Diagnostics.EventLog.WriteEntry("GeosWorkbench", logMessage, System.Diagnostics.EventLogEntryType.Error);
+                }
+                catch { /* Ignore logging errors */ }
+                
+                return null;
+            }
+        }
+
         //[pallavi.kale][GEOS2-8997][28.10.2025]
         public List<APMActionPlanTask> GetTaskListByIdActionPlan_V2680(Int64 IdActionPlan, string selectedPeriod, Int32 idUser)
         {

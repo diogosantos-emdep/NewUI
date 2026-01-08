@@ -1,0 +1,297 @@
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS APM_GetTaskListByIdActionPlan_V2680PT$$
+
+CREATE PROCEDURE APM_GetTaskListByIdActionPlan_V2680PT(
+    IN _SelectedPeriod VARCHAR(255),
+    IN _IdActionPlan INT,
+    IN _Iduser INT,
+    -- Dropdown Filters (múltipla seleção - CSV: '1,2,3')
+    IN _FilterLocation VARCHAR(500),
+    IN _FilterResponsible VARCHAR(500),
+    IN _FilterBusinessUnit VARCHAR(500),
+    IN _FilterOrigin VARCHAR(500),
+    IN _FilterDepartment VARCHAR(500),
+    IN _FilterCustomer VARCHAR(500),
+    -- Alert Filters (apenas um ativo)
+    IN _AlertFilter VARCHAR(50),
+    -- Side Filters (Theme)
+    IN _FilterTheme VARCHAR(50)
+)
+BEGIN
+    DECLARE _UserEmployeeId INT;
+    DECLARE _CanViewAll BIT DEFAULT 0;
+    DECLARE _IdBusinessUnit INT;
+    DECLARE _IdOrigin INT;
+    DECLARE _IdDepartment INT;
+    DECLARE _IdCustomer INT;
+
+    SELECT IdEmployee INTO _UserEmployeeId FROM employees WHERE IdUser = _Iduser LIMIT 1;
+    
+    -- Obter metadados do Action Plan para filtros
+    SELECT ap.IdBusinessUnit, ap.IdOrigin, ap.IdDepartment, si.IdCustomer
+    INTO _IdBusinessUnit, _IdOrigin, _IdDepartment, _IdCustomer
+    FROM emdep_geos.action_plans ap
+    LEFT JOIN geos.sites si ON si.IdSite = ap.IdSite
+    WHERE ap.IdActionPlan = _IdActionPlan
+    LIMIT 1;
+
+    -- Permissões
+    IF EXISTS (SELECT 1 FROM user_permissions WHERE IdUser = _Iduser AND IdPermission = 122) THEN
+        SET _CanViewAll = 1; -- Admin
+    ELSEIF EXISTS (SELECT 1 FROM emdep_geos.action_plans WHERE IdActionPlan = _IdActionPlan AND (IdResponsibleEmployee = _UserEmployeeId OR CreatedBy = _Iduser)) THEN
+        SET _CanViewAll = 1; -- Owner/Responsible
+    -- (Adicionar aqui a lógica de LocationManager/DeptManager se necessário, simplificado para performance)
+    END IF;
+
+    -- =================================================================================
+    -- RESULT SET 1: TASKS (Parents)
+    -- =================================================================================
+    SELECT DISTINCT
+        apt.IdTask, -- CORRIGIDO: Deve ser IdTask e não IdActionPlanTask
+        apt.IdParent,
+        apt.TaskNumber,
+        apt.Title,
+        apt.Description,
+        
+        emp.EmployeeCode,
+        emp.IdEmployee,
+        CONCAT(emp.FirstName, ' ', emp.LastName) AS Responsible,
+        emp.IdGender,
+
+        lvStatus.IdLookupValue AS IdLookupStatus,
+        lvStatus.Value AS Status,
+        lvStatus.HtmlColor AS StatusHTMLColor,
+
+        lvPriority.IdLookupValue AS IdLookupPriority,
+        lvPriority.Value AS Priority,
+
+        lvTheme.IdLookupValue AS IdLookupTheme,
+        lvTheme.Value AS Theme,
+        lvTheme.HtmlColor AS ThemeHTMLColor,
+
+        apt.DueDate,
+        -- DueDays: Se Done usa CloseDate, senão usa data atual
+        CASE
+            WHEN lvStatus.Value LIKE '%Done%' OR lvStatus.Value LIKE '%Closed%' THEN DATEDIFF(apt.CloseDate, apt.DueDate)
+            ELSE DATEDIFF(CURDATE(), apt.DueDate)
+        END AS DueDays,
+        
+        -- DueColor: Verde (0-2 dias), Amarelo (3-7 dias), Vermelho (>7 dias)
+        CASE
+            WHEN apt.DueDate >= CURDATE() THEN '' -- Não atrasado
+            WHEN DATEDIFF(CURDATE(), apt.DueDate) BETWEEN 0 AND 2 THEN '#008000' -- Verde
+            WHEN DATEDIFF(CURDATE(), apt.DueDate) BETWEEN 3 AND 7 THEN '#FFFF00' -- Amarelo
+            WHEN DATEDIFF(CURDATE(), apt.DueDate) > 7 THEN '#FF0000' -- Vermelho
+            ELSE ''
+        END AS DueColor,
+
+        empDelegated.IdEmployee AS IdDelegated,
+        CONCAT(empDelegated.FirstName, ' ', empDelegated.LastName) AS DelegatedTo,
+
+        -- OTIMIZAÇÃO: Usar COALESCE do JOIN em vez de subquery
+        COALESCE(cmt.CommentCount, 0) AS Comments,
+        -- Nota: TaskLastComments mantido como subquery pois é texto e LIMIT 1 é complexo em JOIN sem CTEs modernas
+        (SELECT Comment FROM action_plan_task_comments c WHERE c.IdTask = apt.IdTask AND c.IsDeleted != 1 ORDER BY c.CreatedIn DESC LIMIT 1) AS TaskLastComments,
+        COALESCE(att.FileCount, 0) AS Files,
+
+        apt.Progress,
+        apt.IdLocation,
+        apt.IdActionPlan,
+        apt.CreatedIn AS OpenDate,
+        apt.CloseDate,
+        apt.OriginalDueDate,
+        apt.ModifiedIn AS LastUpdated,
+        
+        CASE WHEN lvStatus.Value = 'Done' THEN DATEDIFF(apt.CloseDate, apt.CreatedIn) ELSE DATEDIFF(CURDATE(), apt.CreatedIn) END AS Duration,
+        
+        apt.DueDateChangeCount AS ChangeCount,
+        com.IdCompany,
+        com.Alias AS Location,
+        apt.ClosedBy,
+        CONCAT(usrcl.FirstName, ' ', usrcl.LastName) AS ClosedByName,
+        apt.CreatedBy,
+        CONCAT(usrcr.FirstName, ' ', usrcr.LastName) AS CreatedByName,
+        ap.IdDepartment,
+        apt.IdOTItem,
+        ots.IdOT,
+        ots.Code,
+        CONCAT(ots.Code, ' – ', ots.NumOt, ' - ', ri.NumItem) AS OTCodeAndItemNumber,
+        apt.RequestParticipants AS Participant,
+        NULL AS ParentTaskNumber,
+        apt.OriginWeek
+
+    FROM emdep_geos.action_plan_task apt
+    INNER JOIN emdep_geos.action_plans ap ON ap.IdActionPlan = apt.IdActionPlan
+    LEFT JOIN emdep_geos.employees emp ON emp.IdEmployee = apt.IdResponsibleEmployee
+    LEFT JOIN emdep_geos.lookup_values lvStatus ON lvStatus.IdLookupValue = apt.IdStatus
+    LEFT JOIN emdep_geos.lookup_values lvPriority ON lvPriority.IdLookupValue = apt.IdPriority
+    LEFT JOIN emdep_geos.lookup_values lvTheme ON lvTheme.IdLookupValue = apt.IdTheme
+    LEFT JOIN emdep_geos.companies com ON com.IdCompany = apt.IdLocation
+    LEFT JOIN emdep_geos.employees empDelegated ON empDelegated.IdEmployee = apt.DelegatedTo
+    LEFT JOIN emdep_geos.users usrcr ON usrcr.IdUser = apt.CreatedBy
+    LEFT JOIN emdep_geos.users usrcl ON usrcl.IdUser = apt.ClosedBy
+    LEFT JOIN geos.otitems ot ON ot.IdOTItem = apt.IdOTItem
+    LEFT JOIN geos.revisionitems ri ON ot.idrevisionitem = ri.idrevisionitem
+    LEFT JOIN geos.ots ots ON ots.IdOT = ot.IdOT
+    
+    -- JOINs Otimizados para Contagens
+    LEFT JOIN (SELECT IdTask, COUNT(*) as CommentCount FROM action_plan_task_comments WHERE IsDeleted != 1 GROUP BY IdTask) cmt ON cmt.IdTask = apt.IdTask
+    LEFT JOIN (SELECT IdTask, COUNT(*) as FileCount FROM action_plan_task_attachments WHERE IsDeleted != 1 GROUP BY IdTask) att ON att.IdTask = apt.IdTask
+    
+        WHERE apt.IdActionPlan = _IdActionPlan
+            AND apt.InUse = 1
+            AND apt.IdParent IS NULL
+            AND (
+                -- Caso 1: A própria task corresponde aos filtros
+                (
+                    (_FilterLocation IS NULL OR _FilterLocation = '' OR FIND_IN_SET(apt.IdLocation, _FilterLocation) > 0)
+                    AND (_FilterResponsible IS NULL OR _FilterResponsible = '' OR FIND_IN_SET(apt.IdResponsibleEmployee, _FilterResponsible) > 0)
+                    AND (_FilterBusinessUnit IS NULL OR _FilterBusinessUnit = '' OR FIND_IN_SET(_IdBusinessUnit, _FilterBusinessUnit) > 0)
+                    AND (_FilterOrigin IS NULL OR _FilterOrigin = '' OR FIND_IN_SET(_IdOrigin, _FilterOrigin) > 0)
+                    AND (_FilterDepartment IS NULL OR _FilterDepartment = '' OR FIND_IN_SET(_IdDepartment, _FilterDepartment) > 0)
+                    AND (_FilterCustomer IS NULL OR _FilterCustomer = '' OR FIND_IN_SET(_IdCustomer, _FilterCustomer) > 0)
+                    AND (_FilterTheme IS NULL OR _FilterTheme = '' OR lvTheme.Value = _FilterTheme)
+                    AND (
+                        _AlertFilter IS NULL OR _AlertFilter = '' OR
+                        (_AlertFilter = 'ToDo' AND (lvStatus.Value LIKE '%To do%' OR lvStatus.Value LIKE '%To Do%')) OR
+                        (_AlertFilter = 'InProgress' AND lvStatus.Value LIKE '%In Progress%') OR
+                        (_AlertFilter = 'Blocked' AND lvStatus.Value LIKE '%Blocked%') OR
+                        (_AlertFilter = 'Closed' AND (lvStatus.Value LIKE '%Done%' OR lvStatus.Value LIKE '%Closed%')) OR
+                        (_AlertFilter = 'Overdue15' AND apt.CloseDate IS NULL AND DATEDIFF(CURDATE(), apt.DueDate) >= 15) OR
+                        (_AlertFilter = 'HighPriorityOverdue' AND apt.CloseDate IS NULL AND apt.DueDate < CURDATE() AND lvPriority.Value LIKE '%High%') OR
+                        (_AlertFilter = 'LongestOverdue' AND apt.CloseDate IS NULL AND apt.DueDate < CURDATE()) OR
+                        (_AlertFilter = 'MostOverdueTheme' AND apt.CloseDate IS NULL AND apt.DueDate < CURDATE())
+                    )
+                )
+                OR
+                -- Caso 2: Tem ≥1 subtask que corresponde aos filtros
+                EXISTS (
+                    SELECT 1 FROM emdep_geos.action_plan_task sub
+                    LEFT JOIN emdep_geos.lookup_values subStatus ON sub.IdStatus = subStatus.IdLookupValue
+                    LEFT JOIN emdep_geos.lookup_values subTheme ON sub.IdTheme = subTheme.IdLookupValue
+                    LEFT JOIN emdep_geos.lookup_values subPriority ON sub.IdPriority = subPriority.IdLookupValue
+                    WHERE sub.IdParent = apt.IdTask AND sub.InUse = 1
+                      AND (_FilterLocation IS NULL OR _FilterLocation = '' OR FIND_IN_SET(sub.IdLocation, _FilterLocation) > 0)
+                      AND (_FilterResponsible IS NULL OR _FilterResponsible = '' OR FIND_IN_SET(sub.IdResponsibleEmployee, _FilterResponsible) > 0)
+                      AND (_FilterBusinessUnit IS NULL OR _FilterBusinessUnit = '' OR FIND_IN_SET(_IdBusinessUnit, _FilterBusinessUnit) > 0)
+                      AND (_FilterOrigin IS NULL OR _FilterOrigin = '' OR FIND_IN_SET(_IdOrigin, _FilterOrigin) > 0)
+                      AND (_FilterDepartment IS NULL OR _FilterDepartment = '' OR FIND_IN_SET(_IdDepartment, _FilterDepartment) > 0)
+                      AND (_FilterCustomer IS NULL OR _FilterCustomer = '' OR FIND_IN_SET(_IdCustomer, _FilterCustomer) > 0)
+                      AND (_FilterTheme IS NULL OR _FilterTheme = '' OR subTheme.Value = _FilterTheme)
+                      AND (
+                          _AlertFilter IS NULL OR _AlertFilter = '' OR
+                          (_AlertFilter = 'ToDo' AND (subStatus.Value LIKE '%To do%' OR subStatus.Value LIKE '%To Do%')) OR
+                          (_AlertFilter = 'InProgress' AND subStatus.Value LIKE '%In Progress%') OR
+                          (_AlertFilter = 'Blocked' AND subStatus.Value LIKE '%Blocked%') OR
+                          (_AlertFilter = 'Closed' AND (subStatus.Value LIKE '%Done%' OR subStatus.Value LIKE '%Closed%')) OR
+                          (_AlertFilter = 'Overdue15' AND sub.CloseDate IS NULL AND DATEDIFF(CURDATE(), sub.DueDate) >= 15) OR
+                          (_AlertFilter = 'HighPriorityOverdue' AND sub.CloseDate IS NULL AND sub.DueDate < CURDATE() AND subPriority.Value LIKE '%High%') OR
+                          (_AlertFilter = 'LongestOverdue' AND sub.CloseDate IS NULL AND sub.DueDate < CURDATE()) OR
+                          (_AlertFilter = 'MostOverdueTheme' AND sub.CloseDate IS NULL AND sub.DueDate < CURDATE())
+                      )
+                )
+            )
+    
+    ORDER BY lvTheme.Position;
+
+    -- =================================================================================
+    -- RESULT SET 2: SUBTASKS (Children)
+    -- =================================================================================
+    SELECT DISTINCT
+        apt.IdTask, -- CORRIGIDO
+        apt.IdParent,
+        apt.TaskNumber,
+        apt.Title,
+        apt.Description,        
+        emp.EmployeeCode,
+        emp.IdEmployee,
+        CONCAT(emp.FirstName, ' ', emp.LastName) AS Responsible,
+        emp.IdGender,
+        lvStatus.IdLookupValue AS IdLookupStatus,
+        lvStatus.Value AS Status,
+        lvStatus.HtmlColor AS StatusHTMLColor,
+        lvPriority.IdLookupValue AS IdLookupPriority,
+        lvPriority.Value AS Priority,
+        lvTheme.IdLookupValue AS IdLookupTheme,
+        lvTheme.Value AS Theme,
+        lvTheme.HtmlColor AS ThemeHTMLColor,
+        apt.DueDate,
+        -- DueDays: Se Done usa CloseDate, senão usa data atual
+        CASE 
+            WHEN lvStatus.Value LIKE '%Done%' OR lvStatus.Value LIKE '%Closed%' THEN DATEDIFF(apt.CloseDate, apt.DueDate)
+            ELSE DATEDIFF(CURDATE(), apt.DueDate)
+        END AS DueDays,
+        
+        -- DueColor: Verde (0-2 dias), Amarelo (3-7 dias), Vermelho (>7 dias)
+        CASE
+            WHEN apt.DueDate >= CURDATE() THEN '' -- Não atrasado
+            WHEN DATEDIFF(CURDATE(), apt.DueDate) BETWEEN 0 AND 2 THEN '#008000' -- Verde
+            WHEN DATEDIFF(CURDATE(), apt.DueDate) BETWEEN 3 AND 7 THEN '#FFFF00' -- Amarelo
+            WHEN DATEDIFF(CURDATE(), apt.DueDate) > 7 THEN '#FF0000' -- Vermelho
+            ELSE ''
+        END AS DueColor,
+        empDelegated.IdEmployee AS IdDelegated,
+        CONCAT(empDelegated.FirstName, ' ', empDelegated.LastName) AS DelegatedTo,
+        
+        COALESCE(cmt.CommentCount, 0) AS Comments,
+        (SELECT Comment FROM action_plan_task_comments c WHERE c.IdTask = apt.IdTask AND c.IsDeleted != 1 ORDER BY c.CreatedIn DESC LIMIT 1) AS TaskLastComments,
+        COALESCE(att.FileCount, 0) AS Files,
+        
+        apt.Progress, apt.IdLocation, apt.IdActionPlan, apt.CreatedIn AS OpenDate, apt.CloseDate, apt.OriginalDueDate, apt.ModifiedIn AS LastUpdated,
+        CASE WHEN lvStatus.Value = 'Done' THEN DATEDIFF(apt.CloseDate, apt.CreatedIn) ELSE DATEDIFF(CURDATE(), apt.CreatedIn) END AS Duration,
+        apt.DueDateChangeCount AS ChangeCount,
+        com.IdCompany, com.Alias AS Location,
+        apt.ClosedBy, CONCAT(usrcl.FirstName, ' ', usrcl.LastName) AS ClosedByName,
+        apt.CreatedBy, CONCAT(usrcr.FirstName, ' ', usrcr.LastName) AS CreatedByName,
+        ap.IdDepartment,
+        apt.IdOTItem, ots.IdOT, ots.Code, CONCAT(ots.Code, ' – ', ots.NumOt, ' - ', ri.NumItem) AS OTCodeAndItemNumber,
+        apt.RequestParticipants AS Participant,
+        parent.TaskNumber AS ParentTaskNumber,
+        apt.OriginWeek
+
+    FROM emdep_geos.action_plan_task apt
+    INNER JOIN emdep_geos.action_plans ap ON ap.IdActionPlan = apt.IdActionPlan
+    LEFT JOIN emdep_geos.action_plan_task parent ON parent.IdTask = apt.IdParent
+    LEFT JOIN emdep_geos.employees emp ON emp.IdEmployee = apt.IdResponsibleEmployee
+    LEFT JOIN emdep_geos.lookup_values lvStatus ON lvStatus.IdLookupValue = apt.IdStatus
+    LEFT JOIN emdep_geos.lookup_values lvPriority ON lvPriority.IdLookupValue = apt.IdPriority
+    LEFT JOIN emdep_geos.lookup_values lvTheme ON lvTheme.IdLookupValue = apt.IdTheme
+    LEFT JOIN emdep_geos.companies com ON com.IdCompany = apt.IdLocation
+    LEFT JOIN emdep_geos.employees empDelegated ON empDelegated.IdEmployee = apt.DelegatedTo
+    LEFT JOIN emdep_geos.users usrcr ON usrcr.IdUser = apt.CreatedBy
+    LEFT JOIN emdep_geos.users usrcl ON usrcl.IdUser = apt.ClosedBy
+    LEFT JOIN geos.otitems ot ON ot.IdOTItem = apt.IdOTItem
+    LEFT JOIN geos.revisionitems ri ON ot.idrevisionitem = ri.idrevisionitem
+    LEFT JOIN geos.ots ots ON ots.IdOT = ot.IdOT
+    
+    LEFT JOIN (SELECT IdTask, COUNT(*) as CommentCount FROM action_plan_task_comments WHERE IsDeleted != 1 GROUP BY IdTask) cmt ON cmt.IdTask = apt.IdTask
+    LEFT JOIN (SELECT IdTask, COUNT(*) as FileCount FROM action_plan_task_attachments WHERE IsDeleted != 1 GROUP BY IdTask) att ON att.IdTask = apt.IdTask
+
+        WHERE apt.IdActionPlan = _IdActionPlan
+            AND apt.InUse = 1
+            AND apt.IdParent IS NOT NULL
+            -- Filtros aplicados às subtasks
+            AND (_FilterLocation IS NULL OR _FilterLocation = '' OR FIND_IN_SET(apt.IdLocation, _FilterLocation) > 0)
+            AND (_FilterResponsible IS NULL OR _FilterResponsible = '' OR FIND_IN_SET(apt.IdResponsibleEmployee, _FilterResponsible) > 0)
+            AND (_FilterBusinessUnit IS NULL OR _FilterBusinessUnit = '' OR FIND_IN_SET(_IdBusinessUnit, _FilterBusinessUnit) > 0)
+            AND (_FilterOrigin IS NULL OR _FilterOrigin = '' OR FIND_IN_SET(_IdOrigin, _FilterOrigin) > 0)
+            AND (_FilterDepartment IS NULL OR _FilterDepartment = '' OR FIND_IN_SET(_IdDepartment, _FilterDepartment) > 0)
+            AND (_FilterCustomer IS NULL OR _FilterCustomer = '' OR FIND_IN_SET(_IdCustomer, _FilterCustomer) > 0)
+            AND (_FilterTheme IS NULL OR _FilterTheme = '' OR lvTheme.Value = _FilterTheme)
+            AND (
+                _AlertFilter IS NULL OR _AlertFilter = '' OR
+                (_AlertFilter = 'ToDo' AND (lvStatus.Value LIKE '%To do%' OR lvStatus.Value LIKE '%To Do%')) OR
+                (_AlertFilter = 'InProgress' AND lvStatus.Value LIKE '%In Progress%') OR
+                (_AlertFilter = 'Blocked' AND lvStatus.Value LIKE '%Blocked%') OR
+                (_AlertFilter = 'Closed' AND (lvStatus.Value LIKE '%Done%' OR lvStatus.Value LIKE '%Closed%')) OR
+                (_AlertFilter = 'Overdue15' AND apt.CloseDate IS NULL AND DATEDIFF(CURDATE(), apt.DueDate) >= 15) OR
+                (_AlertFilter = 'HighPriorityOverdue' AND apt.CloseDate IS NULL AND apt.DueDate < CURDATE() AND lvPriority.Value LIKE '%High%') OR
+                (_AlertFilter = 'LongestOverdue' AND apt.CloseDate IS NULL AND apt.DueDate < CURDATE()) OR
+                (_AlertFilter = 'MostOverdueTheme' AND apt.CloseDate IS NULL AND apt.DueDate < CURDATE())
+            )
+
+    ORDER BY lvTheme.Position;
+
+END$$
+DELIMITER ;
